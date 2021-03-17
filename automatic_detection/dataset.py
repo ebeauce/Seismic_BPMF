@@ -184,6 +184,8 @@ class Template(object):
         with h5.File(self.where + 'meta.h5', 'r') as f:
             for key in f.keys():
                 self.__setattr__(key, f[key][()])
+        # alias for template_idx:
+        self.tid = self.template_idx
         self.stations = self.stations.astype('U')
         self.channels = self.channels.astype('U')
         # keep copies of the original network-wide attributes
@@ -280,6 +282,9 @@ class Template(object):
         Determine the maximum horizontal and vertical location
         uncertainties, in km, and the azimuth of maximum
         horizontal uncertainty.
+        Note: hmax + vmax does not have to be equal to the
+        max_loc, the latter simply being the length of the
+        longest semi-axis of the uncertainty ellipsoid.
         """
         w, v = np.linalg.eigh(self.cov_mat)
         # go from covariance units to kilometers
@@ -357,7 +362,8 @@ class TemplateGroup(object):
         return fig
 
     def template_similarity(self, distance_threshold=5.,
-                            n_stations=10, max_lag=10):
+                            n_stations=10, max_lag=10,
+                            device='cpu'):
         """
         Parameters
         -----------
@@ -415,7 +421,8 @@ class TemplateGroup(object):
                         continue
                     cc = fmf.matched_filter(
                             tp_array[slice_][keep, ...], moveouts[slice_[:-1]][keep, ...],
-                            weights[slice_[:-1]][keep, ...], data[(t,)+slice_[1:]], 1)
+                            weights[slice_[:-1]][keep, ...], data[(t,)+slice_[1:]],
+                            1, arch=device)
                     # add best contribution from this channel to
                     # the average inter-template CC
                     intertp_cc[t, keep] += np.max(cc, axis=-1)
@@ -555,7 +562,7 @@ class Catalog(object):
             Each entry contains an array of size n_events.
         """
         if not hasattr(self, 'origin_times'):
-            print('Catalog needs to have the origin_times attribute'
+            print('Catalog needs to have the origin_times attribute '
                   'to return a flat catalog.')
             return
         n_events = len(self.origin_times)
@@ -587,58 +594,6 @@ class Catalog(object):
             for attr in flat_catalog.keys():
                 flat_catalog[attr] = flat_catalog[attr][selection]
         return flat_catalog
-
-    #def flatten_catalog(self, attributes=[], unique_events=False):
-    #    """
-    #    Outputs a catalog with one row for each requested attribute.
-
-    #    Parameters
-    #    -----------
-    #    attributes: list of strings, default to an empty list
-    #        List of all the attributes, in addition to origin_times
-    #        and tids, that will be included in the flat catalog.
-    #    unique_events: boolean, default to False
-    #        If True, only returns the events flagged as unique.
-
-    #    Returns
-    #    ------------
-    #    flat_catalog: dictionary
-    #        Dictionary with one entry for each requested attribute.
-    #        Each entry contains an array of size n_events.
-    #    """
-    #    if not hasattr(self, 'origin_times'):
-    #        print('Catalog needs to have the origin_times attribute'
-    #              'to return a flat catalog.')
-    #        return
-    #    if unique_events:
-    #        selection = self.unique_events
-    #    else:
-    #        selection = np.ones(len(self.origin_times), dtype=np.bool)
-    #    n_events = len(self.origin_times[selection])
-    #    flat_catalog = {}
-    #    flat_catalog['origin_times'] = np.asarray(self.origin_times[selection])
-    #    flat_catalog['tids'] = np.ones(n_events, dtype=np.int32)*self.tid
-    #    for attr in attributes:
-    #        if not hasattr(self, attr):
-    #            print(f'Catalog does not have {attr}')
-    #            continue
-    #        attr_ = getattr(self, attr)
-    #        if not isinstance(attr_, list)\
-    #                and not isinstance(attr_, np.ndarray):
-    #            flat_catalog[attr] = \
-    #                    np.ones(n_events, dtype=np.dtype(type(attr_)))*attr_
-    #        else:
-    #            #flat_catalog[attr] = np.asarray(attr_)[selection]
-    #            flat_catalog[attr] = np.asarray(attr_)
-    #            if flat_catalog[attr].shape[0] != n_events:
-    #                # this condition should work for spotting
-    #                # list-like attributes that are not of the
-    #                # shape (n_events, n_attr)
-    #                flat_catalog[attr] = np.repeat(flat_catalog[attr], n_events).\
-    #                        reshape((n_events,)+flat_catalog[attr].shape)
-    #            else:
-    #                flat_catalog[attr] = flat_catalog[attr][selection]
-    #    return flat_catalog
 
     def return_as_dic(self, attributes=[]):
         catalog = {}
@@ -861,6 +816,9 @@ class EventFamily(object):
         """
         # self.event_ids tell us in which order the events were read,
         # which depends on the kwargs given to fetch_detection_waveforms
+        # force ordering to be chronological
+        kwargs['ordering'] = 'origin_times'
+        kwargs['flip_order'] = True
         self.detection_waveforms, _, self.event_ids = \
                 utils.fetch_detection_waveforms(
                         self.tid, self.db_path_T, self.db_path_M,
@@ -903,83 +861,7 @@ class EventFamily(object):
                 self.trimmed_waveforms[:, s, :2, :S_end-S_start] = \
                         self.detection_waveforms[:, s, :2, S_start:S_end]
 
-    #def cross_correlate(self, n_stations=40, max_lag=10, paired=None):
-    #    """
-    #    Parameters
-    #    -----------
-    #    n_stations: integer, default to 40
-    #        The number of stations closest to each template used in
-    #        the computation of the average CC.
-    #    max_lag: integer, default to 10
-    #        Maximum lag, in samples, allowed when searching for the
-    #        maximum CC on each channel. This is to account for small
-    #        discrepancies in windowing that could occur for two templates
-    #        highly similar but associated to slightly different locations.
-    #    paired: (n_events, n_events) boolean array, default to None
-    #        If not None, this array is used to determine for which
-    #        events the CC should be computed. This is mostly useful
-    #        when cross correlating large data sets, with potentially
-    #        many redundant events.
-    #    """
-    #    import fast_matched_filter as fmf
-    #    if not hasattr(self, 'trimmed_waveforms'):
-    #        print('The EventFamily instance needs the trimmed_waveforms '
-    #              'attribute, see trim_waveforms.')
-    #        return
-    #    self.max_lag = max_lag
-    #    self.find_closest_stations(n_stations)
-    #    print('Finding the best inter-event CCs...')
-    #    # format arrays for FMF
-    #    slice_ = np.index_exp[:, self.map_to_subnet, :, :]
-    #    data_arr = self.trimmed_waveforms.copy()[slice_]
-    #    norm_data = np.std(data_arr, axis=-1)[..., np.newaxis]
-    #    norm_data[norm_data == 0.] = 1.
-    #    data_arr /= norm_data
-    #    template_arr = data_arr[..., max_lag:-max_lag]
-    #    n_stations, n_components = data_arr.shape[1:-1]
-    #    # initialize ouputs
-    #    output_shape = (self.n_events, self.n_events, n_stations)
-    #    CCs_S = np.zeros(output_shape, dtype=np.float32)
-    #    lags_S = np.zeros(output_shape, dtype=np.int32)
-    #    CCs_P = np.zeros(output_shape, dtype=np.float32)
-    #    lags_P = np.zeros(output_shape, dtype=np.int32)
-    #    # re-arrange input arrays to pass pieces of array
-    #    data_arr_P = np.ascontiguousarray(data_arr[:, :, 2:3, :])
-    #    template_arr_P = np.ascontiguousarray(template_arr[:, :, 2:3, :])
-    #    moveouts_arr_P = np.zeros((self.n_events, 1, 1), dtype=np.int32)
-    #    weights_arr_P = np.ones((self.n_events, 1, 1), dtype=np.float32)
-    #    data_arr_S = np.ascontiguousarray(data_arr[:, :, :2, :])
-    #    template_arr_S = np.ascontiguousarray(template_arr[:, :, :2, :])
-    #    moveouts_arr_S = np.zeros((self.n_events, 1, 2), dtype=np.int32)
-    #    weights_arr_S = 0.5*np.ones((self.n_events, 1, 2), dtype=np.float32)
-    #    # free some space
-    #    del data_arr, template_arr
-    #    for n in range(self.n_events):
-    #        print(f'------ {n}/{self.n_events} -------')
-    #        if paired is not None:
-    #            selection = paired[n, :]
-    #        else:
-    #            selection = np.ones(self.n_events, dtype=np.bool)
-    #        for s in range(n_stations):
-    #            # use trick to keep station and component dim
-    #            slice_ = np.index_exp[selection, s:s+1, :, :]
-    #            cc_S = fmf.matched_filter(
-    #                    template_arr_S[slice_], moveouts_arr_S[selection, ...],
-    #                    weights_arr_S[selection, ...], data_arr_S[(n,)+slice_[1:]], 1)
-    #            cc_P = fmf.matched_filter(
-    #                    template_arr_P[slice_], moveouts_arr_P[selection, ...],
-    #                    weights_arr_P[selection, ...], data_arr_P[(n,)+slice_[1:]], 1)
-    #            # get best CC and its lag
-    #            CCs_S[n, selection, s] = np.max(cc_S, axis=-1)
-    #            lags_S[n, selection, s] = np.argmax(cc_S, axis=-1) - max_lag
-    #            CCs_P[n, selection, s] = np.max(cc_P, axis=-1)
-    #            lags_P[n, selection, s] = np.argmax(cc_P, axis=-1) - max_lag
-    #            # N.B: lags[n1, n2] is the ev1-ev2 time
-    #    self.CCs_S = CCs_S
-    #    self.lags_S = lags_S
-    #    self.CCs_P = CCs_P
-    #    self.lags_P = lags_P
-    def cross_correlate(self, n_stations=40, max_lag=10, paired=None):
+    def cross_correlate(self, n_stations=40, max_lag=10, paired=None, device='cpu'):
         """
         Parameters
         -----------
@@ -1042,10 +924,12 @@ class EventFamily(object):
                 slice_ = np.index_exp[selection, s:s+1, :, :]
                 cc_S = fmf.matched_filter(
                         template_arr_S[slice_], moveouts_arr_S[selection, ...],
-                        weights_arr_S[selection, ...], data_arr_S[(n,)+slice_[1:]], 1)
+                        weights_arr_S[selection, ...], data_arr_S[(n,)+slice_[1:]],
+                        1, verbose=0, arch=device)
                 cc_P = fmf.matched_filter(
                         template_arr_P[slice_], moveouts_arr_P[selection, ...],
-                        weights_arr_P[selection, ...], data_arr_P[(n,)+slice_[1:]], 1)
+                        weights_arr_P[selection, ...], data_arr_P[(n,)+slice_[1:]],
+                        1, verbose=0, arch=device)
                 # get best CC and its lag
                 CCs_S[counter:counter+counter_inc, s] = np.max(cc_S, axis=-1)
                 lags_S[counter:counter+counter_inc, s] = np.argmax(cc_S, axis=-1) - max_lag
@@ -1127,11 +1011,21 @@ class EventFamily(object):
             for n in range(self.n_events):
                 nn = self.event_ids[n]
                 ot = udt(self.catalog.origin_times[nn])
-                f.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t0.\t0.\t0.\t{}\n'.
-                        format(ot.year, ot.month, ot.day, ot.hour, ot.minute,
-                               ot.second, self.template.latitude,
-                               self.template.longitude, self.template.depth,
-                               self.catalog.magnitudes[nn], self.event_ids[n]))
+                if hasattr(self.catalog, relocated_catalog):
+                    # start from the relocated catalog
+                    f.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t0.\t0.\t0.\t{}\n'.
+                            format(ot.year, ot.month, ot.day, ot.hour, ot.minute,
+                                   ot.second, self.catalog.relocated_latitude[nn],
+                                   self.catalog.relocated_longitude[nn],
+                                   self.catalog.relocated_depth[nn],
+                                   self.catalog.magnitudes[nn], self.event_ids[n]))
+                else:
+                    # all events are given the template location
+                    f.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t0.\t0.\t0.\t{}\n'.
+                            format(ot.year, ot.month, ot.day, ot.hour, ot.minute,
+                                   ot.second, self.template.latitude,
+                                   self.template.longitude, self.template.depth,
+                                   self.catalog.magnitudes[nn], self.event_ids[n]))
 
     def write_GrowClust_CC(self, filename, path, CC_threshold=0.):
         if not hasattr(self, 'CCs_S'):
@@ -1159,33 +1053,6 @@ class EventFamily(object):
                                        self.lags_P[n, s]/self.sr,
                                        self.CCs_P[n, s]))
 
-    #def write_GrowClust_CC(self, filename, path, CC_threshold=0.):
-    #    if not hasattr(self, 'CCs_S'):
-    #        print('Need to compute the inter-event CCs first.')
-    #        return
-    #    with open(os.path.join(path, filename), 'w') as f:
-    #        for n1 in range(self.n_events):
-    #            for n2 in range(self.n_events):
-    #                if n1 == n2:
-    #                    continue
-    #                if hasattr(self, 'paired') and\
-    #                        np.sum(self.paired[n1, n2]) == 0:
-    #                    continue
-    #                f.write('#\t{}\t{}\t0.0\n'.
-    #                        format(self.event_ids[n1], self.event_ids[n2]))
-    #                for s in range(len(self.stations)):
-    #                    # CCs that are zero are pairs that have to be skipped
-    #                    if self.CCs_S[n1, n2, s] > CC_threshold:
-    #                        f.write('  {:>5} {} {:.4f} S\n'.
-    #                                format(self.stations[s],
-    #                                       self.lags_S[n1, n2, s]/self.sr,
-    #                                       self.CCs_S[n1, n2, s]))
-    #                    if self.CCs_P[n1, n2, s] > CC_threshold:
-    #                        f.write('  {:>5} {} {:.4f} P\n'.
-    #                                format(self.stations[s],
-    #                                       self.lags_P[n1, n2, s]/self.sr,
-    #                                       self.CCs_P[n1, n2, s]))
-
 class EventFamilyGroup(EventFamily):
 
     def __init__(self, tids, db_path_T, db_path_M, db_path=cfg.dbpath):
@@ -1199,13 +1066,18 @@ class EventFamilyGroup(EventFamily):
         self.sr = self.families[self.tids[0]].sr
 
     def attach_catalog(self, dt_criterion=3., distance_criterion=5.,
-                       similarity_criterion=0.33, n_closest_stations=10):
+                       similarity_criterion=0.33, n_closest_stations=10,
+                       items_in=[]):
         """
         Creates an AggregatedCatalogs instance and
-        call AggregatedCatalogs.read_data()
+        call AggregatedCatalogs.read_data(), as well as
+        AggregatedCatalogs.remove_multiples(). This is crucial to note
+        that remove_multiples returns a catalog that is ordered in time.
+        When reading data from the single-template catalogs, these are
+        not ordered in time after concatenation.
         """
         # force 'origin_times' and 'magnitudes' to be among the items
-        items_in = ['origin_times', 'magnitudes',
+        items_in = items_in + ['origin_times', 'magnitudes',
                     'correlation_coefficients', 'unique_events']
         filenames = [f'multiplets{tid}catalog.h5' for tid in self.tids]
         self.aggcat = AggregatedCatalogs(
@@ -1216,8 +1088,10 @@ class EventFamilyGroup(EventFamily):
                 distance_criterion=distance_criterion,
                 similarity_criterion=similarity_criterion,
                 n_closest_stations=n_closest_stations, return_catalog=True)
-        self.catalog['magnitudes'] = self.aggcat.flatten_catalog(
-                attributes=['magnitudes'])['magnitudes']
+        # load the rest of the requested attributes
+        rest = [item for item in items_in if item not in self.catalog.keys()]
+        self.catalog.update(self.aggcat.flatten_catalog(
+            attributes=rest, chronological_order=True))
 
     def find_closest_stations(self, n_stations):
         # overriden method from parent class
@@ -1232,19 +1106,25 @@ class EventFamilyGroup(EventFamily):
         self.map_to_subnet = np.int32([np.where(network_stations == sta)[0]
                                        for sta in self.stations]).squeeze()
 
-    def pair_events(self, random_pairing_frac=0., random_max=10):
+    def pair_events(self, random_pairing_frac=0., random_max=2):
         if not hasattr(self, 'catalog'):
-            print('Need to call attach_catalog first.')
-            return
+            # call attach_catalog() for calling remove_multiples()
+            # !!! the catalog that is returned like that takes all
+            # single-template catalogs and order them in time, so
+            # it is ESSENTIAL to make sure that the data are ordered
+            # the same way
+            self.attach_catalog()
         # all valid events are the unique events and also
         # the events with highest CC from each family, to make
         # sure all families will end up being paired by at least one event
         valid_events = self.catalog['unique_events'].copy()
+        highest_CC_events_idx = {}
         for tid in self.tids:
             selection = self.catalog['tids'] == tid
-            valid_events[np.where(
+            highest_CC_events_idx[tid] = np.where(
                 self.catalog['correlation_coefficients']
-                == self.catalog['correlation_coefficients'][selection].max())] = True
+                == self.catalog['correlation_coefficients'][selection].max())[0][0]
+            valid_events[highest_CC_events_idx[tid]] = True
         self.paired = np.zeros((self.n_events, self.n_events), dtype=np.bool)
         for n in range(self.n_events):
             if valid_events[n]:
@@ -1254,13 +1134,18 @@ class EventFamilyGroup(EventFamily):
             # in all cases, pair the events with all other
             # events of the same family
             tid = self.catalog['tids'][n]
-            self.paired[n, self.catalog['tids'] == tid] = True
-            if random_pairing_frac > 0.:
+            #self.paired[n, self.catalog['tids'] == tid] = True
+            # --------------------
+            # link non-unique events only to their best CC event
+            self.paired[n, highest_CC_events_idx[tid]] = True
+            # and add a few randomly selected connections
+            n_random = min(random_max, int(random_pairing_frac*self.n_events))
+            if n_random > 0:
                 unpaired = np.where(~self.paired[n, :])[0]
-                n_random = min(random_max, int(random_pairing_frac*len(unpaired)))
-                random_choice = np.random.choice(
-                        unpaired, size=n_random, replace=False)
-                self.paired[n, random_choice] = True
+                if len(unpaired) > 0:
+                    random_choice = np.random.choice(
+                            unpaired, size=n_random, replace=False)
+                    self.paired[n, random_choice] = True
         np.fill_diagonal(self.paired, False)
 
     def read_data(self, **kwargs):
@@ -1286,12 +1171,24 @@ class EventFamilyGroup(EventFamily):
                 [self.families[tid].trimmed_waveforms for tid in self.tids],
                 axis=0)
         # reorder in chronological order
-        self.attach_catalog()
-        sorted_ind = np.argsort(self.catalog['origin_times'])
+        #self.attach_catalog()
+        # no this is wrong!!! attach_catalog() call remove_multiples()
+        # which already merges single-template catalogs and order them
+        # in time.... so to get the actual origin times that correspond
+        # to the data that were loaded, we need to read from the single-
+        # template catalog!!!
+        #sorted_ind = np.argsort(self.catalog['origin_times'])
+        OT = []
+        for tid in self.tids:
+            self.families[tid].attach_catalog(items_in=['origin_times'])
+            OT.extend(self.families[tid].catalog
+                        .origin_times[self.families[tid].event_ids])
+        OT = np.float64(OT) # and now these are the correct origin times
+        sorted_ind = np.argsort(OT)
         self.trimmed_waveforms = self.trimmed_waveforms[sorted_ind, ...]
         self.event_ids_str = self.event_ids_str[sorted_ind]
-        for attr in self.catalog.keys():
-            self.catalog[attr] = self.catalog[attr][sorted_ind]
+        #for attr in self.catalog.keys():
+        #    self.catalog[attr] = self.catalog[attr][sorted_ind]
         self.event_ids = np.arange(self.n_events)
 
     # -------------------------------------------
@@ -1366,20 +1263,37 @@ class EventFamilyGroup(EventFamily):
         cat['tids'] = event_ids_map.index
         self.relocated_catalog =\
                 pd.DataFrame(data=cat)
+        self.n_events = len(self.relocated_catalog)
+        self.event_ids = np.arange(self.n_events, dtype=np.int32)
 
-    def write_GrowClust_eventlist(self, filename, path):
+    def write_GrowClust_eventlist(self, filename, path, fresh_start=True):
+        """
+        Note: The different with its single family counterpart is that
+        here the catalog is already in the same order as self.event_ids
+        (cf. trim_waveforms)
+        """
         from obspy.core import UTCDateTime as udt
         if not hasattr(self, 'catalog'):
             self.attach_catalog()
+        if hasattr(self, 'relocated_catalog') and not fresh_start:
+            print('Give locations from relocated catalog')
         with open(os.path.join(path, filename), 'w') as f:
             for n in range(self.n_events):
-                nn = self.event_ids[n]
-                ot = udt(self.catalog['origin_times'][nn])
-                f.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t0.\t0.\t0.\t{}\n'.
-                        format(ot.year, ot.month, ot.day, ot.hour, ot.minute,
-                               ot.second, self.catalog['latitude'][nn],
-                               self.catalog['longitude'][nn], self.catalog['depth'][nn],
-                               self.catalog['magnitudes'][nn], self.event_ids[n]))
+                ot = udt(self.catalog['origin_times'][n])
+                if hasattr(self, 'relocated_catalog') and not fresh_start:
+                    # start from the relocated catalog
+                    f.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t0.\t0.\t0.\t{}\n'.
+                            format(ot.year, ot.month, ot.day, ot.hour, ot.minute,
+                                   ot.second, self.relocated_catalog['latitude'].iloc[n],
+                                   self.relocated_catalog['longitude'].iloc[n],
+                                   self.relocated_catalog['depth'].iloc[n],
+                                   self.catalog['magnitudes'][n], self.event_ids[n]))
+                else:
+                    f.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t0.\t0.\t0.\t{}\n'.
+                            format(ot.year, ot.month, ot.day, ot.hour, ot.minute,
+                                   ot.second, self.catalog['latitude'][n],
+                                   self.catalog['longitude'][n], self.catalog['depth'][n],
+                                   self.catalog['magnitudes'][n], self.event_ids[n]))
 
     def write_GrowClust_eventids(self, filename, path):
         """

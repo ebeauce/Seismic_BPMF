@@ -3,7 +3,7 @@ Complete framework for earthquake detection and location: Backprojection and mat
 
 This repository is not ready for wide public usage as I don't have time to polish all the modules.
 
-#List of things to implement:
+# List of things to implement:
 - Clean docstrings for each function, and an online documentation.
 - Add PhaseNet and NLLoc wrappers.
 - Data downloading/preprocessing ObspyDMT routines in a separate sub-package.
