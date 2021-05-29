@@ -130,10 +130,14 @@ def plot_match(catalog,
     font = {'family' : 'sans-serif', 'weight' : 'normal', 'size' : 14}
     plt.rc('font', **font)
     plt.rcParams.update({'ytick.labelsize'  :  14})
-    plt.rcParams['pdf.fonttype'] = 42 #TrueType
+    plt.rcParams['svg.fonttype'] = 'none'
     # read the template and event data
     filename = catalog['filenames'][event_index].decode('utf-8')
-    tid = catalog['template_idx'][0]
+    if (isinstance(catalog['template_idx'], list) or
+            isinstance(catalog['template_idx'], np.array)):
+        tid = catalog['template_idx'][0]
+    else:
+        tid = catalog['template_idx']
     index = catalog['indices'][event_index]
     M, T = db_h5py.read_multiplet_new_version(filename, index, tid,
                                               return_tp=True,
@@ -218,8 +222,14 @@ def plot_match(catalog,
 
 def plot_detection_matrix(X, datetimes=None, stack=None,
                           title=None, ax=None, show=True,
-                          time_min=None, time_max=None,
-                          text_offset=0.1):
+                          **kwargs):
+
+    kwargs['time_min'] = kwargs.get('time_min', None)
+    kwargs['time_max'] = kwargs.get('time_max', None)
+    kwargs['text_offset'] = kwargs.get('text_offset', 0.1)
+    kwargs['text_size'] = kwargs.get('text_size', plt.rcParams['font.size'])
+    kwargs['datetime_format'] = kwargs.get('datetime_format', '%Y,%m,%d--%H:%M:%S')
+
     if datetimes is not None:
         # reorder X
         new_order = np.argsort(datetimes)
@@ -233,8 +243,8 @@ def plot_detection_matrix(X, datetimes=None, stack=None,
         fig = ax.get_figure()
     ax.set_title(title)
     time = np.linspace(0., X.shape[-1]/cfg.sampling_rate, X.shape[-1])
-    time_min = time_min if time_min is not None else time.min()
-    time_max = time_max if time_max is not None else time.max()
+    time_min = kwargs['time_min'] if kwargs['time_min'] is not None else time.min()
+    time_max = kwargs['time_max'] if kwargs['time_max'] is not None else time.max()
     time -= time_min
     if stack is not None:
         offset = 2.
@@ -246,9 +256,10 @@ def plot_detection_matrix(X, datetimes=None, stack=None,
         ax.plot(time, utils.max_norm(X[i, :]) + offset,
                 lw=0.75, color='k', label=label)
         if datetimes is not None:
-            plt.text(0.50,offset+text_offset,
-                     udt(datetimes[i]).strftime('%Y,%m,%d--%H:%M:%S'),
-                     bbox={'facecolor': 'white', 'alpha': 0.75})
+            plt.text(0.50, offset+kwargs['text_offset'],
+                     udt(datetimes[i]).strftime(kwargs['datetime_format']),
+                     bbox={'facecolor': 'white', 'alpha': 0.75},
+                     fontsize=kwargs['text_size'])
         offset += 2.
     ax.set_ylabel('Offset normalized amplitude')
     ax.set_xlabel('Time (s)')
@@ -267,12 +278,15 @@ def plot_recurrence_times(catalogs=None, tids=None,
                           start_date='2012,05,01', end_date='2013,10,01',
                           ax=None, matplotlib_kwargs={}, scat_kwargs={},
                           mag_kwargs={}):
-
     # ------------------------------------------------
     #        Scattering plot kwargs
     scat_kwargs['edgecolor'] = scat_kwargs.get('edgecolor', 'k')
     scat_kwargs['linewidths'] = scat_kwargs.get('linewidths', 0.5)
     scat_kwargs['s'] = scat_kwargs.get('s', 25)
+    # ------------------------------------------------
+    #       Magnitude plot kwargs
+    mag_kwargs['clb_size'] = mag_kwargs.get('clb_size', '2%')
+    mag_kwargs['tick_space'] = mag_kwargs.get('tick_space', 1)
     # ------------------------------------------------
     start_date = np.datetime64(str(udt(start_date)))
     end_date = np.datetime64(str(udt(end_date)))
@@ -322,7 +336,6 @@ def plot_recurrence_times(catalogs=None, tids=None,
         M.extend(mag_)
         WT.extend(waiting_times)
     # python list version: convert to numpy arrays
-    #OT = np.asarray(OT)
     OT = np.array([udt(ot) for ot in OT]).astype('datetime64[ms]')
     if len(OT) < 2:
         return
@@ -332,18 +345,14 @@ def plot_recurrence_times(catalogs=None, tids=None,
     WT /= (3600.*24.) # conversion to days
     #--------------------------------
     if magnitudes:
-        vmin = mag_kwargs.get('vmin', np.percentile(M[~mask_mag], 2.))
-        vmax = mag_kwargs.get('vmax', np.percentile(M[~mask_mag], 99.5))
         # exclude the edges of the color map to avoid 
         # having dots that are too dark
-        #cmap = plt.cm.RdBu_r(np.linspace(0.1, 0.9, 256))
-        #cmap = mcolors.LinearSegmentedColormap.from_list('mag_cmap', cmap)
         if np.sum(~mask_mag) > 0:
+            vmin = mag_kwargs.get('vmin', np.percentile(M[~mask_mag], 2.))
+            vmax = mag_kwargs.get('vmax', np.percentile(M[~mask_mag], 99.5))
             cNorm = Normalize(vmin=vmin, vmax=vmax)
         else:
             cNorm = Normalize(vmin=-10., vmax=0.)
-        #scalar_map = ScalarMappable(norm=cNorm, cmap=cmap)
-        #scalar_map = ScalarMappable(norm=cNorm, cmap=cc.cm.bgy)
         scalar_map = ScalarMappable(norm=cNorm, cmap='magma')
         colors = scalar_map.to_rgba(M[~mask_mag])
     #--------------------------------
@@ -358,7 +367,7 @@ def plot_recurrence_times(catalogs=None, tids=None,
     #------------------------------
     #-------- plot events without mag -----
     sc2 = ax.scatter(OT[mask_mag], WT[mask_mag], marker='v',
-                     zorder=-1, **scat_kwargs, **matplotlib_kwargs)
+                     zorder=1, **scat_kwargs, **matplotlib_kwargs)
     if plot_identity:
         time_0 = OT[mask_mag].min() - np.timedelta64(int(1000.*WT[mask_mag][0]*3600.*24.), 'ms')
         time = np.arange(time_0, end_date,
@@ -373,7 +382,7 @@ def plot_recurrence_times(catalogs=None, tids=None,
         scat_kwargs_mag = scat_kwargs.copy()
         scat_kwargs_mag['s'] *= 2
         I = np.argsort(M[~mask_mag])
-        sc = ax.scatter(OT[~mask_mag][I], WT[~mask_mag][I],
+        sc = ax.scatter(OT[~mask_mag][I], WT[~mask_mag][I], zorder=2,
                         color=colors[I], marker='o', **scat_kwargs_mag)
     #--------------------------
     ax.set_xlim(start_date, end_date)
@@ -384,22 +393,20 @@ def plot_recurrence_times(catalogs=None, tids=None,
     ax.set_ylabel('Recurrence Times (days)')
     if magnitudes:
         # plot the colorbar
+        clb_ticks = np.arange(cNorm.vmin, cNorm.vmax, mag_kwargs['tick_space'])
         divider = make_axes_locatable(ax)
-        cax = divider.append_axes('right', size='2%', pad=0.08, axes_class=plt.Axes)
-        plt.colorbar(scalar_map, cax=cax, label=r'$M_{L}$',
-                     orientation='vertical')
+        cax = divider.append_axes('right', size=mag_kwargs['clb_size'], pad=0.08, axes_class=plt.Axes)
+        clb = plt.colorbar(scalar_map, cax=cax, label=r'$M_{L}$',
+                           orientation='vertical', ticks=clb_ticks)
     plt.subplots_adjust(bottom=0.4,
                         top=0.8,
                         left=0.06,
                         right=0.99)
     return fig
 
-def plot_catalog(tids, db_path_T, db_path_M,
+def plot_catalog(tids=None, db_path_T=None, db_path_M=None, catalog=None,
                  ax=None, remove_multiples=True, scat_kwargs={},
                  cmap=None, db_path=cfg.dbpath):
-    import seaborn as sns
-    sns.set()
-    sns.set_style('ticks')
 
     if cmap is None:
         try:
@@ -417,15 +424,19 @@ def plot_catalog(tids, db_path_T, db_path_M,
     scat_kwargs['zorder'] = scat_kwargs.get('zorder', 0)
     # ------------------------------------------------
 
-    # compile detections from these templates in a single
-    # earthquake catalog
-    catalog_filenames = [f'multiplets{tid}catalog.h5' for tid in tids]
-    AggCat = dataset.AggregatedCatalogs(
-            filenames=catalog_filenames, db_path_M=db_path_M, db_path=db_path)
-    AggCat.read_data(items_in=['origin_times', 'location', 'unique_events'])
-    catalog = AggCat.flatten_catalog(
-            attributes=['origin_times', 'latitude', 'longitude', 'depth'],
-            unique_events=True)
+    if catalog is None:
+        # if catalog is None, tids, db_path_T and db_path_M
+        # should be given
+        # ------------------
+        # compile detections from these templates in a single
+        # earthquake catalog
+        catalog_filenames = [f'multiplets{tid}catalog.h5' for tid in tids]
+        AggCat = dataset.AggregatedCatalogs(
+                filenames=catalog_filenames, db_path_M=db_path_M, db_path=db_path)
+        AggCat.read_data(items_in=['origin_times', 'location', 'unique_events'])
+        catalog = AggCat.flatten_catalog(
+                attributes=['origin_times', 'latitude', 'longitude', 'depth'],
+                unique_events=True)
     cNorm = Normalize(vmin=catalog['latitude'].min(),
                       vmax=catalog['latitude'].max())
     scalar_map = ScalarMappable(norm=cNorm, cmap=cmap)
@@ -438,18 +449,18 @@ def plot_catalog(tids, db_path_T, db_path_M,
     else:
         # use the user-provided axis
         fig = ax.get_figure()
-    ax.set_rasterization_zorder(1)
     ax.set_title('{:d} events'.format(len(catalog['origin_times'])))
+    ax.set_xlabel('Calendar Time')
+    ax.set_ylabel('Longitude')
     times = np.array([str(udt(time)) for time in catalog['origin_times']],
                      dtype='datetime64')
     ax.scatter(times, catalog['longitude'],
                color=scalar_map.to_rgba(catalog['latitude']),
-               **scat_kwargs)
-    ax.set_xlabel('Calendar Time')
-    ax.set_ylabel('Longitude')
+               rasterized=True, **scat_kwargs)
     ax.set_xlim(times.min(), times.max())
     
     ax_divider = make_axes_locatable(ax)
-    cax = ax_divider.append_axes("right", size="2%", pad="2%")
+    cax = ax_divider.append_axes("right", size="2%", pad=0.08)
     plt.colorbar(scalar_map, cax, orientation='vertical', label='Latitude')
     return fig
+

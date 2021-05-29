@@ -13,9 +13,4 @@ from . import utils
 from . import plotting_utils
 from . import catalog_utils
 
-#from .automatic_detection import (
-#        db_h5py, data, dataset, moveouts, template_search, multiplet_search, clib)
-#
-#del automatic_detection
-#
-#__all__
+__version__ = '1.0.0'

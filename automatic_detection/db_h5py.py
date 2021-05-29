@@ -286,8 +286,9 @@ def write_template_metadata(database_index,
                                  db_path=db_path,
                                  db_path_T=db_path_T)
 
-    fields = ['latitude', 'longitude', 'depth',\
-              'lon_unc', 'lat_unc', 'dep_unc', 'max_unc',\
+    fields = ['latitude', 'longitude', 'depth',
+              #'lon_unc', 'lat_unc', 'dep_unc', 'max_unc',\
+              'hmax_unc', 'vmax_unc', 'max_unc',
               'tid']
     metadata = {}
     for field in fields:
@@ -295,16 +296,25 @@ def write_template_metadata(database_index,
     if db_path_M is not None:
         n_detections = []
     for tid in tids:
-        with h5.File(os.path.join(db_path, db_path_T,
-                     'template{:d}meta.h5'.format(tid)), 'r') as f:
-            metadata['tid'].append(tid)
-            metadata['latitude'].append(f['latitude'][()])
-            metadata['longitude'].append(f['longitude'][()])
-            metadata['depth'].append(f['depth'][()])
-            metadata['lon_unc'].append(np.sqrt(f['cov_mat'][0, 0]))
-            metadata['lat_unc'].append(np.sqrt(f['cov_mat'][1, 1]))
-            metadata['dep_unc'].append(np.sqrt(f['cov_mat'][2, 2]))
-            metadata['max_unc'].append(f['max_location_uncertainty'][()])
+        T = dataset.Template(f'template{tid}', db_path_T, db_path=db_path)
+        T.hor_ver_uncertainties()
+        metadata['tid'].append(T.tid)
+        metadata['latitude'].append(T.latitude)
+        metadata['longitude'].append(T.longitude)
+        metadata['depth'].append(T.depth)
+        metadata['hmax_unc'].append(T.hmax_unc)
+        metadata['vmax_unc'].append(T.vmax_unc)
+        metadata['max_unc'].append(T.max_location_uncertainty)
+        #with h5.File(os.path.join(db_path, db_path_T,
+        #             'template{:d}meta.h5'.format(tid)), 'r') as f:
+        #    metadata['tid'].append(tid)
+        #    metadata['latitude'].append(f['latitude'][()])
+        #    metadata['longitude'].append(f['longitude'][()])
+        #    metadata['depth'].append(f['depth'][()])
+        #    metadata['lon_unc'].append(np.sqrt(f['cov_mat'][0, 0]))
+        #    metadata['lat_unc'].append(np.sqrt(f['cov_mat'][1, 1]))
+        #    metadata['dep_unc'].append(np.sqrt(f['cov_mat'][2, 2]))
+        #    metadata['max_unc'].append(f['max_location_uncertainty'][()])
         if db_path_M is not None:
             ot = read_catalog_multiplets('multiplets{:d}'.format(tid),
                                          db_path_M=db_path_M, db_path=db_path,
@@ -543,6 +553,11 @@ def select_for_cross_section(tids, lon1, lat1, lon2, lat2,
     corner_4 = np.array([lon1, lat1]) - max_orthogonal_dist*S_orth*dist_to_degrees\
                - max_parallel_dist*S*dist_to_degrees
     CS_geometry['corners'] = np.vstack((corner_1, corner_2, corner_3, corner_4))
+    # CS_geometry inherit from CS attributes
+    CS_geometry['lon_1'] = lon1
+    CS_geometry['lat_1'] = lat1
+    CS_geometry['lon_2'] = lon2
+    CS_geometry['lat_2'] = lat2
     if return_metadata:
         return tids[selection], CS_geometry, meta_db[selection]
     else:

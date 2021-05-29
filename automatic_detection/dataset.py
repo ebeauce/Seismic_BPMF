@@ -470,6 +470,30 @@ class Stack(object):
                 tr.stats.sampling_rate = self.sampling_rate
                 self.traces += tr
 
+    def SVDWF_stack(self, detection_waveforms, freqmin, freqmax,
+                    expl_var=0.4, max_singular_values=5,
+                    wiener_filter_colsize=None):
+        filtered_data = np.zeros_like(detection_waveforms)
+        for s in range(len(self.stations)):
+            for c in range(len(self.components)):
+                filtered_data[:, s, c, :] = utils.SVDWF(
+                        detection_waveforms[:, s, c, :],
+                        max_singular_values=max_singular_values,
+                        expl_var=expl_var,
+                        freqmin=freqmin,
+                        freqmax=freqmax,
+                        sampling_rate=self.sampling_rate,
+                        wiener_filter_colsize=wiener_filter_colsize)
+                if np.sum(filtered_data[:, s, c, :]) == 0:
+                    print('Problem with station {} ({:d}), component {} ({:d})'.
+                            format(self.stations[s], s, self.components[c], c))
+        stacked_waveforms = np.mean(filtered_data, axis=0)
+        norm = np.max(stacked_waveforms, axis=-1)[..., np.newaxis]
+        norm[norm == 0.] = 1.
+        stacked_waveforms /= norm
+        self.add_data(stacked_waveforms)
+        self.data = filtered_data
+
     def read_data(self,
                   filename,
                   db_path_S,
@@ -626,6 +650,11 @@ class AggregatedCatalogs(object):
             self.db_path = db_path
             self.db_path_M = db_path_M
             self.filenames = filenames
+
+    def add_recurrence_times(self):
+        for tid in self.tids:
+            self.catalogs[tid].recurrence_times =\
+                    np.hstack(([np.nan], np.diff(self.catalogs[tid].origin_times)))
 
     def read_data(self, items_in=[], items_out=[]):
         """

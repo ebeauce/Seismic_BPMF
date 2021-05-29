@@ -679,7 +679,8 @@ def fetch_detection_waveforms(tid, db_path_T, db_path_M,
 def fetch_detection_waveforms_refilter(
         tid, db_path_T, db_path_M, net, db_path=cfg.dbpath, best_CC=False,
         max_n_events=0, norm_rms=True, freqmin=0.5, freqmax=12.0, target_SR=50.,
-        integrate=False, ordering='correlation_coefficients', flip_order=True):
+        integrate=False, t0='detection_time',
+        ordering='correlation_coefficients', flip_order=True):
 
     #sys.path.append(os.path.join(cfg.base, 'earthquake_location_eb'))
     #import relocation_utils
@@ -690,7 +691,12 @@ def fetch_detection_waveforms_refilter(
     CC = np.sort(cat.correlation_coefficients.copy())
 
     T = dataset.Template(f'template{tid}', db_path_T)
-    correction_time = T.reference_absolute_time - cfg.buffer_extracted_events
+    if t0 == 'detection_time':
+        correction_time = T.reference_absolute_time - cfg.buffer_extracted_events
+    elif t0 == 'origin_time':
+        correction_time = 0.
+    else:
+        print('t0 should either be detection_time or origin_time')
     # ------------------------------
     CC = np.sort(CC)
     if max_n_events > 0:
@@ -717,6 +723,7 @@ def fetch_detection_waveforms_refilter(
         # the OT in the h5 files correspond to the
         # beginning of the windows that were extracted
         # during the matched-filter search
+        print('Extracting event from {}'.format(udt(ot)))
         event = event_extraction.extract_event_parallel(
                                        ot+correction_time,
                                        net, duration=cfg.multiplet_len,
@@ -727,9 +734,14 @@ def fetch_detection_waveforms_refilter(
                                                         freqmin=freqmin,
                                                         freqmax=freqmax,
                                                         target_SR=target_SR)
-        detection_waveforms.append(get_np_array(
-                              filtered_ev, net,
-                              verbose=False))
+        if len(filtered_ev) > 0:
+            detection_waveforms.append(get_np_array(
+                                  filtered_ev, net,
+                                  verbose=False))
+        else:
+            detection_waveforms.append(np.zeros(
+                (len(net.stations), len(net.components),
+                sec_to_samp(cfg.multiplet_len+1, sr=target_SR)+1), dtype=np.float32))
     detection_waveforms = np.stack(detection_waveforms, axis=0)
     if norm_rms:
         # one normalization factor for each 3-comp seismogram
