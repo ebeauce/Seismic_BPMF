@@ -48,72 +48,12 @@ def fill_incomplete_trace(trace, target_starttime, target_endtime):
     S.merge(fill_value='interpolate')
     return S[0]
 
-
-def ReadData(date, net, folder='processed'):
-    """
-    ReadData(date, net)
-    """
-    date = udt(date)
-    # ----------------------------
-    # load the table
-    table = {}
-    with h5.File(cfg.input_path + 'table.h5', mode='r') as f:
-        for key in f.keys():
-            table[key] = f[key][()]
-    # ----------------------------
-    n_stations = len(net.stations)
-    n_components = len(net.components)
-    n_samples = int(3600. * 24. * cfg.sampling_rate)
-    waveforms = np.zeros((n_stations, n_components, n_samples), dtype=np.float32)
-    # -------------------------
-    time_looking_for_file = 0.
-    time_loading_data = 0.
-    time_adjusting_data = 0.
-    for s in range(n_stations):
-        for c in range(n_components):
-            filename = cfg.input_path\
-                       + table[date.strftime('%Y,%m,%d')]\
-                       + '/{}/*{}*{}*'.format(folder, net.stations[s], net.components[c])
-            t1 = give_time()
-            file = glob.glob(filename)
-            t2 = give_time()
-            time_looking_for_file += (t2-t1)
-            if len(file) == 0:
-                # no data
-                continue
-            t1 = give_time()
-            trace = obs.read(file[0])[0]
-            t2 = give_time()
-            time_loading_data += (t2-t1)
-            target_endtime = date + 3600.*24. + trace.stats.delta
-            trace = trace.slice(starttime=date, endtime=target_endtime)
-            if trace.stats.starttime.timestamp != date.timestamp or\
-               trace.data.size < n_samples:
-                t1 = give_time()
-                trace = fill_incomplete_trace(trace, date, target_endtime)
-                t2 = give_time()
-                time_adjusting_data += (t2-t1)
-            waveforms[s, c, :] = trace.data[:n_samples]
-    # --------------------------
-    data = {}
-    data['waveforms'] = waveforms
-    data['metadata'] = {}
-    data['metadata']['sampling_rate'] = cfg.sampling_rate
-    data['metadata']['networks'] = net.networks
-    data['metadata']['stations'] = net.stations
-    data['metadata']['components'] = net.components
-    data['metadata']['date'] = date
-    #print('{:.2f} s to look for data files'.format(time_looking_for_file))
-    #print('{:.2f} s to load data'.format(time_loading_data))
-    #print('{:.2f} s to reslice the data traces'.format(time_adjusting_data))
-    return data
-
-def ReadData_parallel(date, net, priority='HH', duration=24.*3600.,
-                      replace_zeros=False, return_traces=False,
-                      folder='processed_2_12', verbose=True,
-                      remove_response=False, remove_sensitivity=False,
-                      check_compression=False, headonly=False,
-                      check_sampling_rate=True):
+def ReadData(date, net, priority='HH', duration=24.*3600.,
+             replace_zeros=False, return_traces=False,
+             folder='processed_2_12', verbose=True,
+             remove_response=False, remove_sensitivity=False,
+             check_compression=False, headonly=False,
+             check_sampling_rate=True, parallel=True):
     """
     Parallelize reading operations with ThreadPoolExecutor
     from the concurrent package.
@@ -155,6 +95,9 @@ def ReadData_parallel(date, net, priority='HH', duration=24.*3600.,
         expected sampling rate from the parameter file.
         This should be set to False when reading raw data with
         several possible sampling rates.
+    parallel: boolean, default to True
+        If True, use threading from the concurrent library
+        to load data in parallel.
 
     Returns
     ----------
@@ -188,13 +131,18 @@ def ReadData_parallel(date, net, priority='HH', duration=24.*3600.,
     t1 = give_time()
     # get all names
     files = generate_file_list(data_path, net)
-    # read all traces in parallel
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(load_data, f, target_starttime,
-                                   target_endtime, **loading_kwargs)\
-                     for f in iter(files)]
-        results = [fut.result() for fut in futures]
-        traces = obs.Stream([tr for tr in results if tr is not None])
+    if parallel:
+        # read all traces in parallel
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = [executor.submit(load_data, f, target_starttime,
+                                       target_endtime, **loading_kwargs)\
+                         for f in iter(files)]
+            results = [fut.result() for fut in futures]
+            traces = obs.Stream([tr for tr in results if tr is not None])
+    else:
+        # sequential method
+        traces = obs.Stream([load_data(f, target_starttime, target_endtime,
+                                       **loading_kwargs) for f in files])
     t2 = give_time()
     #print('{:.2f}s to load the traces.'.format(t2-t1))
     # initialize output dictionary
@@ -206,11 +154,17 @@ def ReadData_parallel(date, net, priority='HH', duration=24.*3600.,
         for c in range(n_components):
             trace = traces.select(station=net.stations[s],
                                   component=net.components[c])
-            if len(trace) == 0:
+            if len(trace) > 0:
+                # there are either gaps in stream or several channels
+                # for one station (e.g. BH and HH)
+                cp = net.components[c]
+                if len(trace.select(channel=f'{priority}{cp}')) > 0:
+                    trace = trace.select(channel=f'{priority}{cp}')
+            else:
                 # no data
                 data_availability[s, c] = False
                 continue
-            elif len(trace) > 1:
+            if len(trace) > 1:
                 if verbose:
                     print('More than one trace were found:')
                     print(trace)
@@ -235,30 +189,6 @@ def ReadData_parallel(date, net, priority='HH', duration=24.*3600.,
     data['metadata']['date'] = date
     data['metadata']['availability'] = data_availability
     return data
-
-#def load_data(filename,
-#              target_starttime,
-#              target_endtime,
-#              replace_zeros=False):
-#    trace = obs.read(filename, format='mseed', check_compression=False)
-#    if len(trace) == 0:
-#        return
-#    trace = trace[0]
-#    if trace.stats.sampling_rate != cfg.sampling_rate:
-#        print('Warning! The trace has not the expected sampling rate:')
-#        print(trace)
-#        return
-#    # if necessary: fill trace with zeros at
-#    # the beginning and at the end
-#    trace = trace.trim(starttime=target_starttime,
-#                       endtime=target_endtime,
-#                       fill_value=0,
-#                       pad=True)
-#    if replace_zeros:
-#        #print('Before {}: {:d} zeros'.format(trace.id, np.sum(trace.data == 0.)))
-#        trace.data = replace_zeros_with_white_noise(trace.data) 
-#        #print('After {}: {:d} zeros'.format(trace.id, np.sum(trace.data == 0.)))
-#    return trace
 
 def load_data(filename, target_starttime, target_endtime,
               remove_response=False, remove_sensitivity=False,
@@ -309,14 +239,23 @@ def load_data(filename, target_starttime, target_endtime,
             print('Error when trying to read {}'.format(filename))
         return
 
-def generate_file_list(data_path,
-                       net):
+def generate_file_list(data_path, net):
+    """
+    Parameters
+    -----------
+    data_path: string
+        Path to the root folder.
+    net: Network instance
+
+    Returns
+    ----------
+    files: list of strings
+        List of all data file names matching the
+        stations and components given by net.
+    """
     files = []
     for s in range(len(net.stations)):
         for c in range(len(net.components)):
-            #target_files = '{}*{}*{}*'.format(net.networks[s],
-            #                                  net.stations[s],
-            #                                  net.components[c])
             target_files = '*{}*{}*'.format(net.stations[s],
                                             net.components[c])
             files.extend(glob.glob(os.path.join(data_path,

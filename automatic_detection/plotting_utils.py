@@ -134,7 +134,7 @@ def plot_match(catalog,
     # read the template and event data
     filename = catalog['filenames'][event_index].decode('utf-8')
     if (isinstance(catalog['template_idx'], list) or
-            isinstance(catalog['template_idx'], np.array)):
+            isinstance(catalog['template_idx'], np.ndarray)):
         tid = catalog['template_idx'][0]
     else:
         tid = catalog['template_idx']

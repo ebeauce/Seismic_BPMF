@@ -139,7 +139,7 @@ def find_multiplets(templates_mat, moveouts_mat, data,
     list_waveforms = []
     for i in range(nt):
         if np.sum(weights_mat[i, :, :] != 0.) < min_channels:
-            # less than 6 stations were working, not enough
+            # less than min_channels channels were working, not enough
             cc_sums[i, :] = 0.
         cc_sum = cc_sums[i, :]
         mask = cc_sum != 0.
