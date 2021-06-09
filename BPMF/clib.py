@@ -1,30 +1,29 @@
+import os
+
 import ctypes as C
 import numpy as np
 import datetime as dt
 from .config import package
 
-from IPython.core.debugger import Tracer
-debug_here = Tracer()
-
 cpu_loaded = False
 gpu_loaded = False
 
+libpath = os.path.join(package, 'lib')
+
 try:
-    _libc = C.cdll.LoadLibrary(package + 'libc.so')
+    _libc = C.cdll.LoadLibrary(os.path.join(libpath, 'libc.so'))
     cpu_loaded = True
 except:
     print('Missing libc.so! You won''t be able to run multiplet/template searches on the CPU')
-    print('Should be at {}libc.so'.format(package))
+    print('Should be at {}libc.so'.format(os.path.join(libpath, '')))
 
 
-#try:
-#    _libcu = C.cdll.LoadLibrary(package + 'libcu.so')
-#    gpu_loaded = True
-#except:
-#    print('Missing libcu.so! You won''t be able to run multiplet/template searches on the GPU')
-#    print('Should be at {}libcu.so'.format(package))
-_libcu = C.cdll.LoadLibrary(package + 'libcu.so')
-gpu_loaded = True
+try:
+    _libcu = C.cdll.LoadLibrary(os.path.join(libpath, 'libcu.so'))
+    gpu_loaded = True
+except:
+    print('Missing libcu.so! You won''t be able to run multiplet/template searches on the GPU')
+    print('Should be at {}libcu.so'.format(os.path.join(libpath, '')))
 
 
 if cpu_loaded:
@@ -127,14 +126,10 @@ if gpu_loaded:
                                                       C.c_int,               # n_stations_used
                                                       C.c_int]               # n_sources
 
-def network_response(data_N,
-                     data_E,
-                     cosine_azimuths,
-                     sine_azimuths,
-                     moveouts,
-                     smooth_win,
-                     device='gpu',
-                     closest_stations=None,
+def network_response(data_N, data_E,
+                     cosine_azimuths, sine_azimuths,
+                     moveouts, smooth_win,
+                     device='gpu', closest_stations=None,
                      test_points=None):
 
     n_stations = np.int32(data_N.shape[0])
@@ -164,11 +159,15 @@ def network_response(data_N,
     biggest_idx = np.zeros(n_samples, np.int32)
     smoothed = np.zeros(n_samples, np.float32)
     half_smooth = np.int32(smooth_win / 2)
-    print('nb of samples per trace = {:d}, nb of stations = {:d}, nb of stations used with each grid point = {:d}'.format(n_samples, n_stations, n_stations_used))
+    print('nb of samples per trace = {:d}, '
+          'nb of stations = {:d}, '
+          'nb of stations used with each grid point = {:d}'.\
+                  format(n_samples, n_stations, n_stations_used))
 
     if device == 'gpu':
-        print('Memory required on the GPU: {:d}Mb'.format((test_points.nbytes + moveouts.nbytes + data_N.nbytes + data_E.nbytes + stations_idx.nbytes + \
-                                                          ntwkrsp.nbytes + biggest_idx.nbytes + smoothed.nbytes)/1024.e3))
+        print('Memory required on the GPU: {:d}Mb'.\
+                format((test_points.nbytes + moveouts.nbytes + data_N.nbytes + data_E.nbytes + stations_idx.nbytes + \
+                        ntwkrsp.nbytes + biggest_idx.nbytes + smoothed.nbytes)/1024.e3))
         _libcu.network_response(
             test_points.ctypes.data_as(C.POINTER(C.c_int)),
             data_N.ctypes.data_as(C.POINTER(C.c_float)),
@@ -225,7 +224,9 @@ def network_response_SP_prestacked(prestacked_traces,
         print('Number of stations used: {:d}'.format(n_stations_used))
     else:
         n_stations_used = n_stations
-        closest_stations = np.repeat(np.arange(n_stations, dtype=np.int32), n_sources).reshape(n_sources, n_stations, order='F').flatten()
+        closest_stations = np.repeat(
+                np.arange(n_stations, dtype=np.int32), n_sources).\
+                        reshape(n_sources, n_stations, order='F').flatten()
     #--------------------------------------------------------------------------
     #-------- reshape the S moveouts array to get the number of sources -------
     if test_points is None:
@@ -244,8 +245,10 @@ def network_response_SP_prestacked(prestacked_traces,
     moveouts_S  = np.int32(moveouts_S.flatten())
     ntwkrsp     = np.zeros(n_samples, np.float32)
     biggest_idx = np.zeros(n_samples, np.int32)
-    print('{:d} stations are used per test source, {:d} samples on each'.format(n_stations_used, n_samples))
-    print('{:d} sources in the grid, {:d} test sources'.format(n_sources, n_test))
+    print('{:d} stations are used per test source, {:d} samples on each'.\
+            format(n_stations_used, n_samples))
+    print('{:d} sources in the grid, {:d} test sources'.\
+            format(n_sources, n_test))
     if device == 'gpu':
         _libcu.network_response_SP_prestacked(
             test_points.ctypes.data_as(C.POINTER(C.c_int)),
@@ -298,7 +301,9 @@ def network_response_SP(traces_H,
     else:
         n_stations_used = n_stations
         #closest_stations = np.arange(n_sources * n_stations, dtype=np.int32)
-        closest_stations = np.repeat(np.arange(n_stations, dtype=np.int32), n_sources).reshape(n_sources, n_stations, order='F').flatten()
+        closest_stations = np.repeat(
+                np.arange(n_stations, dtype=np.int32), n_sources).\
+                        reshape(n_sources, n_stations, order='F').flatten()
     #--------------------------------------------------------------------------
     #-------- reshape the S moveouts array to get the number of sources -------
     #moveouts_P = moveouts_P.reshape([moveouts_P.size // n_stations,
@@ -348,7 +353,6 @@ def network_response_SP(traces_H,
             n_stations,
             n_stations_used,
             n_sources)
-
     elif device == 'cpu':
         _libc.network_response_SP(
             test_points.ctypes.data_as(C.POINTER(C.c_int)),
