@@ -201,10 +201,12 @@ def preprocess_event(event, freqmin=None, freqmax=None,
     if len(event) == 0:
         print('Input data is empty!')
         return preprocessed_event
-    t1 = udt(min([tr.stats.starttime.timestamp for tr in event]))
-    t2 = udt(max([tr.stats.endtime.timestamp for tr in event]))
     # start by cleaning the gaps if there are any
     for tr in event:
+        # split will lose information about start and end times
+        # if the start or the end is masked
+        t1 = udt(tr.stats.starttime.timestamp)
+        t2 = udt(tr.stats.endtime.timestamp)
         tr = tr.split()
         tr.detrend('constant')
         tr.detrend('linear')
@@ -252,7 +254,7 @@ def preprocess_event(event, freqmin=None, freqmax=None,
             T_min = tr.stats.delta
             f_min = 1./T_max
             f_max = 1./(2.*T_min)
-            pre_filt = [f_min, 3.*f_min, 0.95*f_max, f_max]
+            pre_filt = [f_min, 3.*f_min, 0.90*f_max, 0.97*f_max]
             tr.remove_response(pre_filt=pre_filt, output='VEL', plot=plot_resp)
     elif remove_sensitivity:
         for tr in preprocessed_event:

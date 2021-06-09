@@ -6,14 +6,12 @@ import numpy as np
 class Config():
     def __init__(self, parameters):
         self.__dict__ = parameters
-        self.base = self.chk_trailing(os.getcwd())
-        self.data             = self.base + self.chk_trailing(self.__dict__['input_path'])
-        self.network_path     = self.base + self.chk_trailing(self.__dict__['network_path'])
-        self.moveouts_path    = self.base + self.chk_trailing(self.__dict__['moveouts_path'])
-        #self.dbpath           = self.base + self.chk_trailing(self.__dict__['output_path'])
-        self.dbpath           = self.chk_trailing(self.__dict__['output_path'])
+        self.base = os.getcwd()
+        self.data = os.path.join(self.base, self.__dict__['input_path'])
+        self.network_path = os.path.join(self.base, self.__dict__['network_path'])
+        self.moveouts_path = os.path.join(self.base, self.__dict__['moveouts_path'])
+        self.dbpath = self.chk_trailing(self.__dict__['output_path'])
         self.package = os.path.dirname(inspect.getfile(inspect.currentframe()))
-        self.package = self.chk_trailing(self.package)
 
     def chk_folder(self, path):
         if not os.path.isdir(path):
@@ -27,7 +25,7 @@ class Config():
 
 package = os.path.dirname(inspect.getfile(inspect.currentframe())) + '/'
 # read in study parameters
-parameters_path = './parameters.cfg'
+parameters_path = os.path.join(os.getcwd(), 'parameters.cfg')
 with open(parameters_path) as file:
     param_dict = {}
     for line in file:

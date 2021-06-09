@@ -13,11 +13,6 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from obspy.core import UTCDateTime as udt
 
-# --------------------------------------------------------------
-# --------------------------------------------------------------
-# --------------------------------------------------------------
-#                 PLOTTING UTILS
-
 def plot_template(idx,
                   db_path_T='template_db_2/',
                   db_path=cfg.dbpath,
@@ -100,10 +95,11 @@ def plot_template(idx,
 
 def plot_match(catalog,
                event_index,
-               db_path_T='template_db_1/',
-               db_path_M='matched_filter_1/',
+               db_path_T='template_db_1',
+               db_path_M='matched_filter_1',
                db_path=cfg.dbpath,
                n_stations=10,
+               stations=None,
                show=True):
     """
     Plot the template waveforms (in red) on top of the continuous data (in blue)
@@ -113,17 +109,24 @@ def plot_match(catalog,
 
     Parameters
     ------------
-    catalog: Python dictionary with metadata such as the template matching
+    catalog: dictionary
+        Dictionary with metadata such as the template matching
         output filenames, the event indexes within each day and the 
         template index.
-    event_index: scalar integer. Index of the event to plot.
-    db_path_T: string, optional. Database name of the template waveform
-        and metadata files.
-    db_path_M: string, optional. Database name of the template matching 
-        output files.
-    db_path: string, optional. Root directory where db_path_T and
-        db_path_M are located.
-    show: boolean, optional. If True, plt.show() is called at the end.
+    event_index: scalar integer
+        Index of the event to plot.
+    db_path_T: string, default to 'template_db_1'
+        Database name of the template waveform and metadata files.
+    db_path_M: string, default to 'matched_filter_1'
+        Database name of the template matching output files.
+    db_path: string, default to cfg.dbpath
+        Root directory where db_path_T and db_path_M are located.
+    n_stations: integer, default to 10
+        Number of stations to plot.
+    stations: list of strings or None, default to None
+        If not None, only plot the stations provided in the list.
+    show: boolean, optional.
+        If True, plt.show() is called at the end.
     """
     # plotting parameters: font sizes can be tuned to display well
     # on the monitor
@@ -145,7 +148,12 @@ def plot_match(catalog,
                                               db_path_T=db_path_T,
                                               db_path_M=db_path_M)
     n_stations = min(n_stations, len(T.stations))
-    T.n_closest_stations(n_stations)
+    if stations is not None:
+        T.subnetwork(stations)
+        n_stations = len(stations)
+    else:
+        # select the n_stations closest stations
+        T.n_closest_stations(n_stations)
     st_sorted = np.asarray(T.stations)
     st_sorted = np.sort(st_sorted)
     I_s = np.argsort(np.asarray(T.stations))
@@ -179,6 +187,7 @@ def plot_match(catalog,
     time -= time.min()
     #-----------------------------------------
     for s in range(ns):
+        print(st_sorted[s])
         for c in range(nc):
             plt.subplot(ns, nc, s*nc+c+1)
             plt.plot(time,
