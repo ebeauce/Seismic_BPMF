@@ -730,10 +730,10 @@ def fetch_detection_waveforms_refilter(
                                        offset_start=0., folder='raw')
         if integrate:
             event.integrate()
-        filtered_ev = event_extraction.preprocess_event(event,
-                                                        freqmin=freqmin,
-                                                        freqmax=freqmax,
-                                                        target_SR=target_SR)
+        filtered_ev = event_extraction.preprocess_event(
+                event,
+                freqmin=freqmin, freqmax=freqmax,
+                target_SR=target_SR, target_duration=cfg.multiplet_len)
         if len(filtered_ev) > 0:
             detection_waveforms.append(get_np_array(
                                   filtered_ev, net,
@@ -741,7 +741,7 @@ def fetch_detection_waveforms_refilter(
         else:
             detection_waveforms.append(np.zeros(
                 (len(net.stations), len(net.components),
-                sec_to_samp(cfg.multiplet_len+1, sr=target_SR)+1), dtype=np.float32))
+                sec_to_samp(cfg.multiplet_len, sr=target_SR)), dtype=np.float32))
     detection_waveforms = np.stack(detection_waveforms, axis=0)
     if norm_rms:
         # one normalization factor for each 3-comp seismogram
@@ -1085,9 +1085,8 @@ def weighted_linear_regression(X, Y, W=None):
 #             Others
 # -------------------------------------------------
 
-def get_np_array(stream,
-                 net,
-                 verbose=True):
+def get_np_array(stream, net,
+                 priority='HH', verbose=True):
     n_stations = len(net.stations)
     n_components = len(net.components)
     if len(stream) == 0:
@@ -1098,13 +1097,23 @@ def get_np_array(stream,
                     dtype=np.float32)
     for s, sta in enumerate(net.stations):
         for c, cp in enumerate(net.components):
-            try:
-                data[s, c, :] = stream.select(station=sta, component=cp)[0].data
-            except Exception as e:
-                if verbose:
-                    print(e)
-                    print('Leave blank in the data')
-                continue
+            channel = stream.select(station=sta, component=cp)
+            if len(channel) > 0:
+                # there are either gaps in stream or several channels
+                # for one station (e.g. BH and HH)
+                if len(channel.select(channel=f'{priority}{cp}')) > 0:
+                    channel = channel.select(channel=f'{priority}{cp}')
+                # enforce taking only n_samples samples, as there might
+                # be time series of length n_samples+1 due to time slicing
+                # when extracting mseed or sac data
+                data[s, c, :] = channel[0].data[:n_samples]
+            #try:
+            #    data[s, c, :] = stream.select(station=sta, component=cp)[0].data
+            #except Exception as e:
+            #    if verbose:
+            #        print(e)
+            #        print('Leave blank in the data')
+            #    continue
     return data
 
 def max_norm(X):

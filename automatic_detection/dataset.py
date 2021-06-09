@@ -198,14 +198,14 @@ class Template(object):
                 copy.copy(self.reference_absolute_time)
         if type(self.network_s_moveouts.flat[0]) is np.float32:
             self.network_s_moveouts = utils.sec_to_samp(
-                    self.network_s_moveouts, sr=cfg.sampling_rate)
+                    self.network_s_moveouts, sr=self.sampling_rate)
             self.s_moveouts = utils.sec_to_samp(
-                    self.s_moveouts, sr=cfg.sampling_rate)
+                    self.s_moveouts, sr=self.sampling_rate)
         if type(self.network_p_moveouts.flat[0]) is np.float32:
             self.network_p_moveouts = utils.sec_to_samp(
-                    self.network_p_moveouts, sr=cfg.sampling_rate)
+                    self.network_p_moveouts, sr=self.sampling_rate)
             self.p_moveouts = utils.sec_to_samp(
-                    self.p_moveouts, sr=cfg.sampling_rate)
+                    self.p_moveouts, sr=self.sampling_rate)
         if attach_waveforms:
             self.read_waveforms()
             self.traces = obs.Stream()
@@ -232,8 +232,6 @@ class Template(object):
         self.stations = subnet_stations
         # get the index map from the whole network to
         # the subnetwork
-        #self.map_to_subnet = np.searchsorted(np.sort(self.network_stations),
-        #                                     np.sort(self.stations))
         self.map_to_subnet = np.int32([np.where(self.network_stations == sta)[0]
                                        for sta in self.stations]).squeeze()
         # attach the waveforms
@@ -243,12 +241,31 @@ class Template(object):
         self.s_moveouts = self.network_s_moveouts[self.map_to_subnet]
         # update travel times
         self.travel_times = self.network_travel_times[self.map_to_subnet]
-        # doing the following messes up the alignement of the extracted waveforms!!!
-        #new_ref_mv = min(self.p_moveouts.min(), self.s_moveouts.min())
-        #self.p_moveouts -= new_ref_mv
-        #self.s_moveouts -= new_ref_mv
-        # update absolute reference time
-        #self.reference_absolute_time = self.network_reference_absolute_time + new_ref_mv
+
+    def subtemplate(self, subnet_stations):
+        """
+        Same as subnetwork but overwrite network_* attributes.
+        """
+        if type(subnet_stations) != np.ndarray:
+            subnet_stations = np.asarray(subnet_stations).astype('U')
+        else:
+            subnet_stations = subnet_stations.astype('U')
+        # get the index map from the whole network to the subnetwork
+        self.map_to_subnet = np.int32([np.where(self.network_stations == sta)[0]
+                                       for sta in subnet_stations]).squeeze()
+        # attach the waveforms
+        self.network_waveforms = self.network_waveforms[self.map_to_subnet, :, :]
+        # update moveouts
+        self.network_p_moveouts = self.network_p_moveouts[self.map_to_subnet]
+        self.network_s_moveouts = self.network_s_moveouts[self.map_to_subnet]
+        # update travel times
+        self.network_travel_times = self.network_travel_times[self.map_to_subnet]
+        # update stations
+        self.network_stations = copy.copy(subnet_stations)
+        self.stations = copy.copy(subnet_stations)
+        # update data availability
+        self.template_data_availability = \
+                self.template_data_availability[self.map_to_subnet]
 
     def n_closest_stations(self,
                            n,

@@ -195,12 +195,16 @@ def generate_file_list(data_path, net, travel_times=None):
 
 def preprocess_event(event, freqmin=None, freqmax=None,
                      target_SR=None, remove_response=False,
-                     remove_sensitivity=False, plot_resp=False):
+                     remove_sensitivity=False, plot_resp=False,
+                     target_duration=None, verbose=True):
     preprocessed_event = obs.Stream()
+    if len(event) == 0:
+        print('Input data is empty!')
+        return preprocessed_event
+    t1 = udt(min([tr.stats.starttime.timestamp for tr in event]))
+    t2 = udt(max([tr.stats.endtime.timestamp for tr in event]))
     # start by cleaning the gaps if there are any
     for tr in event:
-        t1 = tr.stats.starttime
-        t2 = tr.stats.endtime
         tr = tr.split()
         tr.detrend('constant')
         tr.detrend('linear')
@@ -228,11 +232,17 @@ def preprocess_event(event, freqmin=None, freqmax=None,
             else:
                 tr.resample(target_SR, no_filter=True)
         elif sr_ratio < 1:
-            print('Sampling rate is too high!')
-            print(tr)
+            if verbose:
+                print('Sampling rate is too high!')
+                print(tr)
+            preprocessed_event.remove(tr)
             continue
         else:
             pass
+    if target_duration is not None:
+        n_samples = autodet.utils.sec_to_samp(target_duration, sr=target_SR)
+        for i in range(len(preprocessed_event)):
+            preprocessed_event[i].data = preprocessed_event[i].data[:n_samples]
     # remove response if requested
     if remove_response:
         for tr in preprocessed_event:
