@@ -10,7 +10,7 @@ from . import catalog_utils
 import obspy as obs
 import pandas as pd
 import copy
-import datetime as dt
+import datetime
 from obspy.core import UTCDateTime as udt
 
 from time import time as give_time
@@ -75,7 +75,7 @@ class Network():
         date = self.start_date
         while date <= self.end_date:
             dates.append(date)
-            date += dt.timedelta(days=1)
+            date += datetime.timedelta(days=1)
 
         return dates
 
@@ -359,6 +359,16 @@ class TemplateGroup(object):
                 columns=[tid for tid in self.tids],
                 index=[tid for tid in self.tids],
                 data=ellipsoid_distances)
+    
+    def read_stacks(self, **SVDWF_kwargs):
+        self.db_path_M = SVDWF_kwargs.get('db_path_M', 'none')
+        self.stacks = []
+        for t, tid in enumerate(self.tids):
+            stack = utils.SVDWF_multiplets(
+                    tid, db_path=self.db_path,
+                    db_path_T=self.db_path_T,
+                    **SVDWF_kwargs)
+            self.stacks.append(stack)
 
     def read_waveforms(self):
         for template in self.templates:
@@ -450,6 +460,141 @@ class TemplateGroup(object):
                 columns=[tid for tid in self.tids],
                 index=[tid for tid in self.tids],
                 data=intertp_cc)
+
+    # -------------------------------------------
+    #       GrowClust related methods
+    # -------------------------------------------
+    def cross_correlate(self, duration, offset_start_S, offset_start_P,
+                        max_lag=20, n_stations=30):
+        """
+        Create an EventFamily instance to access its methods.
+         --- Should be rewritten properly ---
+        """
+        family = EventFamily(
+                self.tids[0], self.db_path_T, self.db_path_M, db_path=self.db_path)
+        family.detection_waveforms = \
+                np.float32([np.mean(stack.data, axis=0) for stack in self.stacks])
+        family.n_events = len(self.tids)
+        # trim waveforms
+        family.trim_waveforms(duration, offset_start_S, offset_start_P)
+        # cross-correlate trimmed waveforms
+        family.cross_correlate(
+                n_stations=n_stations, max_lag=max_lag, device='precise')
+        self.CCs_stations = family.stations
+        new_shape = (self.n_templates, self.n_templates, -1)
+        self.CCs_P = family.CCs_P.reshape(new_shape)
+        self.CCs_S = family.CCs_S.reshape(new_shape)
+        self.lags_P = family.lags_P.reshape(new_shape)
+        self.lags_S = family.lags_S.reshape(new_shape)
+        del family
+
+    def read_GrowClust_output(self, filename, path, add_results_to_db=False):
+        print('Reading GrowClust output from {}'.
+                format(os.path.join(path, filename)))
+        ot_, lon_, lat_, dep_, err_h_, err_v_, err_t_, tids_ = \
+                [], [], [], [], [], [], [], []
+        with open(os.path.join(path, filename), 'r') as f:
+            for line in f.readlines():
+                line = line.split()
+                year, month, day, hour, minu, sec = line[:6]
+                # correct date if necessary
+                if int(day) == 0:
+                    date_ = udt(f'{year}-{month}-01')
+                    date_ -= datetime.timedelta(days=1)
+                    year, month, day = date_.year, date_.month, date_.day
+                # correct seconds if necessary
+                sec = float(sec)
+                if sec == 60.:
+                    sec -= 0.001
+                ot_.append(udt(f'{year}-{month}-{day}T{hour}:{minu}:{sec}').timestamp)
+                tid = int(line[6])
+                latitude, longitude, depth = list(map(float, line[7:10]))
+                lon_.append(longitude)
+                lat_.append(latitude)
+                dep_.append(depth)
+                mag = float(line[10])
+                q_id, cl_id, cluster_pop = list(map(int, line[11:14]))
+                n_pairs, n_P_dt, n_S_dt = list(map(int, line[14:17]))
+                rms_P, rms_S = list(map(float, line[17:19]))
+                err_h, err_v, err_t = list(map(float, line[19:22])) # errors in km and sec
+                err_h_.append(err_h)
+                err_v_.append(err_v)
+                err_t_.append(err_t)
+                latitude_init, longitude_init, depth_init =\
+                        list(map(float, line[22:25]))
+                tids_.append(tid)
+        for t, tid in enumerate(tids_):
+            tt = self.tids_map[tid]
+            self.templates[tt].relocated_latitude = lat_[t]
+            self.templates[tt].relocated_longitude = lon_[t]
+            self.templates[tt].relocated_depth = dep_[t]
+            self.templates[tt].reloc_err_h = err_h_[t]
+            self.templates[tt].reloc_err_v = err_v_[t]
+            if add_results_to_db:
+                keys = ['relocated_longitude', 'relocated_latitude',
+                        'relocated_depth', 'reloc_err_h', 'reloc_err_v']
+                with h5.File(os.path.join(
+                    self.db_path, self.db_path_T, f'template{tid}meta.h5'), 'a') as f:
+                    for key in keys:
+                        if key in f.keys():
+                            del f[key]
+                        f.create_dataset(key, data=getattr(self.templates[tt], key))
+
+    def write_GrowClust_stationlist(self, filename, path,
+                                    network_filename='all_stations.in'):
+        """
+        This routine assumes that cross_correlate was called
+        shortly before and that self.template still has the same
+        set of stations as the ones used for the inter-event CCs.
+        """
+        net = Network(network_filename)
+        net.read()
+        subnet = net.subset(
+                self.CCs_stations, net.components, method='keep')
+        with open(os.path.join(path, filename), 'w') as f:
+            for s in range(len(subnet.stations)):
+                f.write('{:<5}\t{:.6f}\t{:.6f}\t{:.3f}\n'.
+                        format(subnet.stations[s], subnet.latitude[s], 
+                               subnet.longitude[s], -1000.*subnet.depth[s]))
+
+    def write_GrowClust_eventlist(self, filename, path):
+        from obspy.core import UTCDateTime as udt
+        # fake date
+        ot = udt('2000-01-01')
+        # fake mag
+        mag = 1.
+        with open(os.path.join(path, filename), 'w') as f:
+            for t, tid in enumerate(self.tids):
+                # all events are given the template location
+                f.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t0.\t0.\t0.\t{}\n'.
+                        format(ot.year, ot.month, ot.day, ot.hour, ot.minute,
+                               ot.second, self.templates[t].latitude,
+                               self.templates[t].longitude, self.templates[t].depth,
+                               mag, tid))
+
+    def write_GrowClust_CC(self, filename, path, CC_threshold=0.):
+        if not hasattr(self, 'CCs_S'):
+            print('Need to cross_correlate first.')
+            return
+        sr = self.templates[0].sampling_rate
+        with open(os.path.join(path, filename), 'w') as f:
+            for t1, tid1 in enumerate(self.tids):
+                for t2, tid2 in enumerate(self.tids):
+                    if t2 == t1:
+                        continue
+                    f.write('#\t{}\t{}\t0.0\n'.format(tid1, tid2))
+                    for s in range(len(self.CCs_stations)):
+                        # CCs that are zero are pairs that have to be skipped
+                        if self.CCs_S[t1, t2, s] > CC_threshold:
+                            f.write('  {:>5} {} {:.4f} S\n'.
+                                    format(self.CCs_stations[s],
+                                           self.lags_S[t1, t2, s]/sr,
+                                           self.CCs_S[t1, t2, s]))
+                        if self.CCs_P[t1, t2, s] > CC_threshold:
+                            f.write('  {:>5} {} {:.4f} P\n'.
+                                    format(self.CCs_stations[s],
+                                           self.lags_P[t1, t2, s]/sr,
+                                           self.CCs_P[t1, t2, s]))
 
 class Stack(object):
 
@@ -846,6 +991,15 @@ class EventFamily(object):
         self.catalog = Catalog(filename, self.db_path_M, db_path=self.db_path)
         self.catalog.read_data(items_in=items_in, items_out=items_out)
 
+    def check_template_reloc(self):
+        """
+        If templates were relocated, overwrite the catalog's location
+        with the template's relocated hypocenter
+        """
+        for attr in ['longitude', 'latitude', 'depth']:
+            if hasattr(self.template, 'relocated_'+attr):
+                setattr(self.catalog, attr, getattr(self.template, 'relocated_'+attr))
+
     def find_closest_stations(self, n_stations):
         """
         Here for consistency with EventFamilyGroup and write the
@@ -885,8 +1039,8 @@ class EventFamily(object):
         duration = utils.sec_to_samp(duration, sr=sr)
         offset_start_S = utils.sec_to_samp(offset_start_S, sr=sr)
         offset_start_P = utils.sec_to_samp(offset_start_P, sr=sr)
-        S_window_time = utils.sec_to_samp(S_window_time)
-        P_window_time = utils.sec_to_samp(P_window_time)
+        S_window_time = utils.sec_to_samp(S_window_time, sr=sr)
+        P_window_time = utils.sec_to_samp(P_window_time, sr=sr)
         t0 = utils.sec_to_samp(t0)
         new_shape = self.detection_waveforms.shape[:-1] + (duration,)
         self.trimmed_waveforms = np.zeros(new_shape, dtype=np.float32)
@@ -944,6 +1098,7 @@ class EventFamily(object):
         # initialize ouputs
         if paired is None:
             paired = np.ones((self.n_events, self.n_events), dtype=np.bool)
+            self.paired = paired
         output_shape = (np.sum(paired), n_stations)
         CCs_S = np.zeros(output_shape, dtype=np.float32)
         lags_S = np.zeros(output_shape, dtype=np.int32)
@@ -962,7 +1117,7 @@ class EventFamily(object):
         del data_arr, template_arr
         counter = 0
         for n in range(self.n_events):
-            print(f'------ {n}/{self.n_events} -------')
+            print(f'------ {n+1}/{self.n_events} -------')
             selection = paired[n, :]
             counter_inc = np.sum(selection)
             for s in range(n_stations):
@@ -971,11 +1126,11 @@ class EventFamily(object):
                 cc_S = fmf.matched_filter(
                         template_arr_S[slice_], moveouts_arr_S[selection, ...],
                         weights_arr_S[selection, ...], data_arr_S[(n,)+slice_[1:]],
-                        1, verbose=0, arch=device)
+                        1, check_zeros=False, arch=device)
                 cc_P = fmf.matched_filter(
                         template_arr_P[slice_], moveouts_arr_P[selection, ...],
                         weights_arr_P[selection, ...], data_arr_P[(n,)+slice_[1:]],
-                        1, verbose=0, arch=device)
+                        1, check_zeros=False, arch=device)
                 # get best CC and its lag
                 CCs_S[counter:counter+counter_inc, s] = np.max(cc_S, axis=-1)
                 lags_S[counter:counter+counter_inc, s] = np.argmax(cc_S, axis=-1) - max_lag
@@ -989,6 +1144,49 @@ class EventFamily(object):
         self.lags_P = lags_P
         self.paired = paired
 
+    def plot_alignment(self, pair_id, s,
+                       max_lag=10, components = ['N', 'E', 'Z']):
+        """
+        Check visually what the max correlation alignment is worth.
+        This also demonstrates that we use the following convention:
+        Argmax(CC(pair[i, j])) == tt_j - tt_i
+        i.e. tt_2 - tt_1 in GrowClust
+        """
+        import matplotlib.pyplot as plt
+        if not hasattr(self, 'CCs_S'):
+            print('Need to run self.cross_correlate first!')
+            return
+        pairs = np.column_stack(np.where(self.paired))
+        evid1, evid2 = pairs[pair_id]
+        ss = self.map_to_subnet[s]
+        fig, axes = plt.subplots(
+                num=f'ev{evid1}_ev{evid2}_station_{s}',
+                nrows=3, ncols=1, figsize=(18, 9))
+        time = np.arange(self.trimmed_waveforms.shape[-1], dtype=np.float32)
+        for c in range(len(components)):
+            phase = 'S' if c < 2 else 'P'
+            axes[c].plot(
+                    time, utils.max_norm(self.trimmed_waveforms[evid1, ss, c, :]),
+                    color='k', label=f'Ev. {evid1}: {components[c]} cp. - {phase} wave')
+            if phase == 'S':
+                mv = max_lag + self.lags_S[pair_id, s]
+                CC = self.CCs_S[pair_id, s]
+            else:
+                mv = max_lag + self.lags_P[pair_id, s]
+                CC = self.CCs_P[pair_id, s]
+            axes[c].plot(
+                    time[:-2*max_lag] + mv,
+                    utils.max_norm(self.trimmed_waveforms[evid2, ss, c, max_lag:-max_lag]),
+                    color='C3', label=f'Ev. {evid2}: {components[c]} cp. - {phase} wave'
+                    f'\nCC={CC:.2f}\nLag: {mv-max_lag}sp')
+            axes[c].axvline(max_lag, color='k')
+            axes[c].legend(loc='upper left')
+            axes[c].set_ylabel('Normalized Amp.')
+            axes[c].set_xlabel('Time (samples)')
+        plt.subplots_adjust(hspace=0.3)
+        return fig
+
+
     # -------------------------------------------
     #       GrowClust related methods
     # -------------------------------------------
@@ -1001,6 +1199,11 @@ class EventFamily(object):
             for line in f.readlines():
                 line = line.split()
                 year, month, day, hour, minu, sec = line[:6]
+                # correct date if necessary
+                if int(day) == 0:
+                    date_ = udt(f'{year}-{month}-01')
+                    date_ -= datetime.timedelta(days=1)
+                    year, month, day = date_.year, date_.month, date_.day
                 # correct seconds if necessary
                 sec = float(sec)
                 if sec == 60.:
@@ -1111,6 +1314,21 @@ class EventFamilyGroup(EventFamily):
                          for tid in tids}
         self.sr = self.families[self.tids[0]].sr
 
+    def check_template_reloc(self):
+        """
+        If templates were relocated, overwrite the catalog's location
+        with the template's relocated hypocenter
+        """
+        if not hasattr(self, 'aggcat'):
+            print('This EventFamilyGroup instance has no AggregatedCatalogs. '
+                  'Do nothing.')
+        else:
+            for tid in self.tids:
+                template = self.families[tid].template
+                for attr in ['longitude', 'latitude', 'depth']:
+                    if hasattr(template, 'relocated_'+attr):
+                        setattr(self.aggcat.catalogs[tid], attr, getattr(template, 'relocated_'+attr))
+
     def attach_catalog(self, dt_criterion=3., distance_criterion=5.,
                        similarity_criterion=0.33, n_closest_stations=10,
                        items_in=[]):
@@ -1129,6 +1347,7 @@ class EventFamilyGroup(EventFamily):
         self.aggcat = AggregatedCatalogs(
                 filenames=filenames, db_path_M=self.db_path_M, db_path=self.db_path)
         self.aggcat.read_data(items_in=items_in + ['location'])
+        self.check_template_reloc()
         self.catalog = self.aggcat.remove_multiples(
                 self.db_path_T, dt_criterion=dt_criterion,
                 distance_criterion=distance_criterion,
@@ -1180,14 +1399,15 @@ class EventFamilyGroup(EventFamily):
             # in all cases, pair the events with all other
             # events of the same family
             tid = self.catalog['tids'][n]
-            #self.paired[n, self.catalog['tids'] == tid] = True
-            # --------------------
+            self.paired[n, self.catalog['tids'] == tid] = True
+            # OR --------------------
             # link non-unique events only to their best CC event
-            self.paired[n, highest_CC_events_idx[tid]] = True
+            #self.paired[n, highest_CC_events_idx[tid]] = True
+            # -------------------
             # and add a few randomly selected connections
-            n_random = min(random_max, int(random_pairing_frac*self.n_events))
+            unpaired = np.where(~self.paired[n, :])[0]
+            n_random = min(random_max, int(random_pairing_frac*len(unpaired)))
             if n_random > 0:
-                unpaired = np.where(~self.paired[n, :])[0]
                 if len(unpaired) > 0:
                     random_choice = np.random.choice(
                             unpaired, size=n_random, replace=False)
@@ -1254,6 +1474,11 @@ class EventFamilyGroup(EventFamily):
             for line in f.readlines():
                 line = line.split()
                 year, month, day, hour, minu, sec = line[:6]
+                # correct date if necessary
+                if int(day) == 0:
+                    date_ = udt(f'{year}-{month}-01')
+                    date_ -= datetime.timedelta(days=1)
+                    year, month, day = date_.year, date_.month, date_.day
                 # correct seconds if necessary
                 sec = float(sec)
                 if sec == 60.:
