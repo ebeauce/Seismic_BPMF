@@ -61,8 +61,6 @@ setup(
         "Operating System :: OS Independent",
     ],
     license="GPL",
-    #package_dir={"": "."},
-    #packages=find_packages(),
     packages=['BPMF'],
     install_requires=[
         "numpy",
@@ -72,6 +70,7 @@ setup(
     zip_safe=False,
     cmdclass={
         'build_ext': BPMFBuild},
+    include_package_data=True,
     ext_modules=[BPMFExtension('BPMF.lib.libc'),
                  BPMFExtension('BPMF.lib.libcu')]
 )
