@@ -637,7 +637,7 @@ def fetch_detection_waveforms(tid, db_path_T, db_path_M,
     else:
         CC_thres = -1.
     if selection is None:
-        selection = cat.correlation_coefficients > CC_thres
+        selection = cat.correlation_coefficients >= CC_thres
     filenames = cat.filenames[selection].astype('U')
     indices = cat.indices[selection]
     CCs = cat.correlation_coefficients[selection]
@@ -714,7 +714,7 @@ def fetch_detection_waveforms_refilter(
             CC_thres = 0.
     else:
         CC_thres = -1.
-    selection = cat.correlation_coefficients > CC_thres
+    selection = cat.correlation_coefficients >= CC_thres
     CCs = cat.correlation_coefficients[selection]
     OTs = cat.origin_times[selection]
     detection_waveforms  = []
@@ -959,6 +959,11 @@ def find_template_clusters(TpGroup, method='single', metric='correlation',
     # first, transform the CC matrix into a condensed matrix
     np.fill_diagonal(TpGroup.intertp_cc.values, 1.)
     corr_dist = squareform(1.-TpGroup.intertp_cc.values)
+    if corr_dist.min() < -1.e-6:
+        print('Prob with FMF')
+    else:
+        # avoid tiny negative values because of numerical imprecision
+        corr_dist[corr_dist < 0.] = 0.
     # link the events
     Z = hierarchy.linkage(
             corr_dist, method=method, metric=metric, optimal_ordering=True)
