@@ -242,8 +242,9 @@ def preprocess_event(event, freqmin=None, freqmax=None,
         else:
             pass
     if target_duration is not None:
-        n_samples = autodet.utils.sec_to_samp(target_duration, sr=target_SR)
         for i in range(len(preprocessed_event)):
+            n_samples = autodet.utils.sec_to_samp(
+                    target_duration, sr=preprocessed_event[i].stats.sampling_rate)
             preprocessed_event[i].data = preprocessed_event[i].data[:n_samples]
     # remove response if requested
     if remove_response:
