@@ -45,7 +45,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="BPMF",
-    version="1.0.0",
+    version="1.0.1",
     author="Eric Beaucé",
     author_email="ebeauce@mit.edu",
     description="Package for automated earthquake detection and location",

@@ -13,4 +13,4 @@ from . import utils
 from . import plotting_utils
 from . import catalog_utils
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
