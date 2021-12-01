@@ -1186,25 +1186,27 @@ def running_mad(time_series,
 
 def two_point_distance(lat_1, long_1, depth_1,
                        lat_2, long_2, depth_2):
-    """
+    """Compute the distance between two points.  
+
+
     Parameters
     -----------
-    lat_1: float,
+    lat_1: scalar, float
         Latitude of Point 1.
-    lon_1: float,
+    lon_1: scalar, float
         Longitude of Point 1.
-    depth_1: float,
+    depth_1: scalar, float
         Depth of Point 1 (in km).
-    lat_2: float,
+    lat_2: scalar, float
         Latitude of Point 2.
-    lon_2: float,
+    lon_2: scalar, float
         Longitude of Point 2.
-    depth_2: float,
+    depth_2: scalar, float
         Depth of Point 2 (in km).
 
     Returns
     ---------
-    dist: float,
+    dist: scalar, float
         Distance between Point 1 and Point 2 in kilometers.
     """
 
