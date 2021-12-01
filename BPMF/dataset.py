@@ -16,21 +16,34 @@ from obspy.core import UTCDateTime as udt
 from time import time as give_time
 
 class Network():
-    """Station data:
-    Contains stations and geographical coordinates.
+    """Station metadata.
 
-    network_file = station ascii file name.
+    Contains station metadata.
     """
     def __init__(self, network_file):
+        """
+        Parameters
+        -----------
+        network_file: string
+            Name of the station metadata file.
+        """
         self.where = os.path.join(cfg.network_path, network_file)
-
+    
+    @property
     def n_stations(self):
         return np.int32(len(self.stations))
 
+    @property
     def n_components(self):
         return np.int32(len(self.components))
 
     def read(self):
+        """
+        Reads the metadata from the file at self.where
+
+        Note: This function can be modified to match the user's
+        data convention.
+        """
         networks = []
         stations = []
         components = []
@@ -148,33 +161,60 @@ class Network():
             return
         return subnetwork
 
-    def interstation_distances_(self):
-        from cartopy.geodesic import Geodesic
 
-        G = Geodesic()
+    @property
+    def interstation_distances(self):
+        """Compute the distance between all station pairs.
 
-        intersta_dist = np.zeros((len(self.stations), len(self.stations)),
-                                 dtype=np.float64)
-        for s in range(len(self.stations)):
-            d = G.inverse(np.array([[self.longitude[s], self.latitude[s]]]),
-                          np.hstack((self.longitude.reshape(-1, 1),
-                                     self.latitude.reshape(-1, 1))))
-            # d is in m, convert it to km
-            d = np.asarray(d)[:, 0]/1000.
-            intersta_dist[s, :] = np.sqrt(d.squeeze()**2 + (self.depth[s] - self.depth))
+        """
+        if (hasattr(self, '_interstation_distances') and
+                self._interstation_distances.shape[0] == self.n_stations):
+            # was already computed and the size of the network was unchanged
+            return self._interstation_distances
+        else:
+            from cartopy.geodesic import Geodesic
 
-        # return distance in km
-        self.interstation_distances = intersta_dist
+            G = Geodesic()
+
+            intersta_dist = np.zeros((len(self.stations), len(self.stations)),
+                                     dtype=np.float64)
+            for s in range(len(self.stations)):
+                d = G.inverse(np.array([[self.longitude[s], self.latitude[s]]]),
+                              np.hstack((self.longitude.reshape(-1, 1),
+                                         self.latitude.reshape(-1, 1))))
+                # d is in m, convert it to km
+                d = np.asarray(d)[:, 0]/1000.
+                intersta_dist[s, :] = np.sqrt(d.squeeze()**2 + (self.depth[s] - self.depth))
+
+            # return distance in km
+            self._interstation_distances = intersta_dist
+            return self._interstation_distances
 
 
 class Template(object):
+    """A Template class to handle template data and metadata.  
 
-    def __init__(self,
-                 template_filename,
-                 db_path_T,
-                 db_path=cfg.dbpath,
-                 attach_waveforms=False):
 
+    """
+
+    def __init__(self, template_filename, db_path_T,
+                 db_path=cfg.dbpath, attach_waveforms=False):
+        """Read the template metadata and data.
+
+        Parameters
+        ------------
+        template_filename: string
+            Base name of the template data and metadata files.  
+            The metadata file is assumed to be {template_filename}meta.h5  
+            The data file is assumed to be {template_filename}wav.h5  
+        db_path_T: string
+            Name of the folder where template files are stored.
+        db_path: string, default to cfg.dbpath
+            Name of the root folder where output files are stored.
+        attach_waveforms: boolean, default to False
+            If True, read the waveforms from {template_filename}wav.h5
+            *AND* builds an obspy stream attribute.
+        """
         self.db_path = db_path
         self.db_path_T = db_path_T
         self.filename = template_filename
@@ -185,7 +225,10 @@ class Template(object):
             for key in f.keys():
                 self.__setattr__(key, f[key][()])
         # alias for template_idx:
-        self.tid = self.template_idx
+        if hasattr(self, 'template_idx'):
+            self.tid = self.template_idx
+        else:
+            self.template_idx = self.tid
         self.stations = self.stations.astype('U')
         self.channels = self.channels.astype('U')
         # keep copies of the original network-wide attributes
@@ -219,12 +262,24 @@ class Template(object):
                     self.traces += tr
 
     def read_waveforms(self):
+        """Read template data.  
+
+
+        Read the template waveforms from the template data file
+        defined when instanciating the Template class.
+        """
         # load waveforms
         with h5.File(self.where + 'wav.h5', 'r') as f:
             self.network_waveforms = f['waveforms'][()]
 
-    def subnetwork(self,
-                   subnet_stations):
+    def subnetwork(self, subnet_stations):
+        """Adjust the template attributes to the requested subnetwork.  
+
+        Parameters
+        -------------
+        subnet_stations: list of strings
+            List of the station names to keep.
+        """
         if type(subnet_stations) != np.array:
             subnet_stations = np.asarray(subnet_stations).astype('U')
         else:
@@ -243,8 +298,12 @@ class Template(object):
         self.travel_times = self.network_travel_times[self.map_to_subnet]
 
     def subtemplate(self, subnet_stations):
-        """
-        Same as subnetwork but overwrite network_* attributes.
+        """Restrict the template to the requested subnetwork.  
+
+        Parameters
+        -------------
+        subnet_stations: list of strings
+            List of the station names to keep.
         """
         if type(subnet_stations) != np.ndarray:
             subnet_stations = np.asarray(subnet_stations).astype('U')
@@ -267,9 +326,22 @@ class Template(object):
         self.template_data_availability = \
                 self.template_data_availability[self.map_to_subnet]
 
-    def n_closest_stations(self,
-                           n,
-                           available_stations=None):
+    def n_closest_stations(self, n, available_stations=None):
+        """Adjust the template attributes to the `n` closest stations.  
+
+
+        Find the `n` closest stations and call `subnetwork` to adjust the
+        template attributes to these stations.
+
+        Parameters
+        ----------------
+        n: scalar, int
+            The `n` closest stations.
+        available_stations: list of strings, default to None
+            The list of stations from which we search the closest stations.
+            If some stations are known to not have available data, the user
+            may choose to not include these in the closest stations.
+        """
         index_pool = np.arange(len(self.network_stations))
         # limit the index pool to available stations
         if available_stations is not None:
@@ -289,37 +361,185 @@ class Template(object):
                                                 remaining_indexes[:missing]) )
         self.subnetwork(self.network_stations[self.closest_stations[:n]])
 
+    def n_best_SNR_stations(self, n, available_stations=None):
+        """Adjust the template attributes to the `n` best SNR stations.  
+
+
+        Find the `n` best SNR stations and call `subnetwork` to adjust the
+        template attributes to these stations.
+
+        Parameters
+        ----------------
+        n: scalar, int
+            The `n` closest stations.
+        available_stations: list of strings, default to None
+            The list of stations from which we search the closest stations.
+            If some stations are known to not have available data, the user
+            may choose to not include these in the closest stations.
+        """
+
+        index_pool = np.arange(len(self.network_stations))
+        # limit the index pool to available stations
+        if available_stations is not None:
+            availability = np.in1d(self.network_stations, available_stations.astype('U'))
+            valid = availability & self.template_data_availability
+        else:
+            valid = self.template_data_availability
+        index_pool = index_pool[valid]
+        self.best_SNR_stations = \
+                index_pool[np.argsort(self.SNR[index_pool])[::-1]]
+        # make sure we return a n-vector
+        if self.best_SNR_stations.size < n:
+            missing = n - self.best_SNR_stations.size
+            remaining_indexes = np.setdiff1d(np.argsort(self.SNR)[::-1],
+                                             self.best_SNR_stations)
+            self.best_SNR_stations = np.hstack( (self.best_SNR_stations,
+                                                remaining_indexes[:missing]) )
+        self.subnetwork(self.network_stations[self.best_SNR_stations[:n]])
+
     def distance(self, latitude, longitude, depth):
+        """Compute distance between template and a given location.  
+
+        Parameters
+        -----------
+        latitude: scalar, float
+            Latitude of the target location.
+        longitude: scalar, float
+            Longitude of the target location.
+        depth: scalar, float
+            Depth of the target location, in km.
+        """
         from .utils import two_point_distance
         return two_point_distance(self.latitude, self.longitude, self.depth,
                                   latitude, longitude, depth)
 
+    @property
+    def hmax_unc(self):
+        if hasattr(self, '_hmax_unc'):
+            return self._hmax_unc
+        else:
+            self.hor_ver_uncertainties()
+            return self._hmax_unc
+
+    @property
+    def vmax_unc(self):
+        if hasattr(self, '_vmax_unc'):
+            return self._vmax_unc
+        else:
+            self.hor_ver_uncertainties()
+            return self._vmax_unc
+
+    @property
+    def az_hmax_unc(self):
+        if hasattr(self, '_az_hmax_unc'):
+            return self._az_hmax_unc
+        else:
+            self.hor_ver_uncertainties()
+            return self._az_hmax_unc
+
     def hor_ver_uncertainties(self):
-        """
-        Determine the maximum horizontal and vertical location
-        uncertainties, in km, and the azimuth of maximum
-        horizontal uncertainty.
+        """Compute the horizontal and vertical uncertainties on location.  
+
+        The vertical uncertainty is taken as the maximum vertical range
+        covered by the uncertainty ellipsoid.  
+        The horizontal uncertainty is taken as the maximum horizontal range
+        covered by the uncertainty ellipsoid.
+        
+        New Attributes
+        ----------------
+        hmax_unc: scalar, float
+            The maximum horizontal uncertainty, taken as the maximum
+            horizontal range covered by the uncertainty ellipsoid.
+        vmax_unc: scalar, float
+            The maximum vertical uncertainty, taken as the maximum
+            vertical range covered by the uncertainty ellipsoid.
+        az_hmax_unc: scalar, float
+            The azimuth (angle from north) of the maximum horizontal
+            uncertainty.
+
         Note: hmax + vmax does not have to be equal to the
         max_loc, the latter simply being the length of the
         longest semi-axis of the uncertainty ellipsoid.
         """
         w, v = np.linalg.eigh(self.cov_mat)
-        # go from covariance units to kilometers
-        w = np.sqrt(w)
-        vertical_unc = np.sqrt((w*v[2, :])**2)
+        # the eigenvalues are the variances (units of [distance**2])
+        # in the eigendirections, we need the standard deviations
+        # (units of [distance])
+        std = np.sqrt(w)
+        # check the vertical components of all semi-axes:
+        vertical_unc = np.abs(std*v[2, :])
+        # keep the maximum for the vertical uncertainty
         max_vertical = vertical_unc.max()
-        horizontal_unc = np.sqrt(np.sum((w[np.newaxis, :]*v[:2, :])**2, axis=0))
+        # check the horizontal components of all semi-axes:
+        horizontal_unc = np.sqrt(np.sum((std[np.newaxis, :]*v[:2, :])**2, axis=0))
+        # keep the maximum as the horizontal uncertainty
         max_horizontal = horizontal_unc.max()
         direction_hmax = v[:, horizontal_unc.argmax()]
         azimuth_hmax = np.arctan2(direction_hmax[0], direction_hmax[1])
         azimuth_hmax = (azimuth_hmax*180./np.pi)%180.
-        self.hmax_unc = max_horizontal
-        self.vmax_unc = max_vertical
-        self.az_hmax_unc = azimuth_hmax
+        # these private attributes should be called via their property names
+        self._hmax_unc = max_horizontal
+        self._vmax_unc = max_vertical
+        self._az_hmax_unc = azimuth_hmax
+
+    def write(self, path, filename=None, fields={}):
+        """Write template data and metadata files.  
+
+        Parameters
+        -----------
+        path: string
+            Path to the folder where to write the files.
+        filename: string, default to None
+            Base name of the data and metadata files. The data filename
+            is {filename}wav.h5 and the metadata filename is {filename}meta.h5.
+            If None, the template id is used to define the filename.
+        fields: dictionary, default to empty dictionary 
+            Map between the template attributes and the hdf5 field names.
+            Example: `fields['stations'] = 'network_stations'` means that the
+            template attribute `self.network_stations` will be stored as the
+            `'stations'` field of the hdf5 file.
+        """
+        if filename is None:
+            filename = f'template{self.tid}'
+        # the key-word arguments map the attribute names to the dataset entries
+        for attr in ['longitude', 'latitude', 'depth', 'tid', 'channels',
+                'cov_mat', 'max_location_uncertainty', 'duration',
+                'sampling_rate', 'SNR', 'source_receiver_distances',
+                'template_data_availability', 'origin_time']:
+            kwargs.setdefault(attr, attr)
+        for attr in ['stations', 'p_moveouts', 's_moveouts',
+                'reference_absolute_time', 'travel_times']:
+            kwargs.setdefault(attr, 'network_'+attr)
+        full_fn = os.path.join(path, filename)
+        with h5.File(full_fn+'meta.h5', mode='w') as f:
+            for attr in kwargs.keys():
+                attr_ = getattr(self, kwargs[attr])
+                if (isinstance(attr_, np.ndarray)
+                        and (attr_.dtype.kind == np.dtype('U').kind)):
+                    attr_ = attr_.astype('S')
+                f.create_dataset(attr, data=attr_)
+        with h5.File(full_fn+'wav.h5', mode='w') as f:
+            f.create_dataset('waveforms', data=self.waveforms)
+
 
 class TemplateGroup(object):
+    """A TemplateGroup class to handle groups of templates.  
+
+
+    """
 
     def __init__(self, tids, db_path_T, db_path=cfg.dbpath):
+        """Read the templates' data and metadata.  
+
+        Parameters
+        -----------
+        tids: list or nd.array
+            List of template ids in the group.
+        db_path_T: string
+            Name of the folder with template files.
+        db_path: string, default to cfg.dbpath
+            Name of the folder with output files.
+        """
         self.templates = []
         self.tids = tids
         self.n_templates = len(tids)
@@ -332,16 +552,62 @@ class TemplateGroup(object):
             self.tids_map[tid] = t
 
     def attach_intertp_distances(self):
+        """Compute distance between all template pairs.  
+
+        """
         print('Computing the inter-template distances...')
         self.intertp_distances = intertp_distances_(
                 templates=self.templates, return_as_pd=True)
 
     def attach_directional_errors(self):
-        print('Computing the inter-template directional errors...')
-        self.directional_errors = directional_errors_(
-                templates=self.templates, return_as_pd=True)
+        """Compute the length of the uncertainty ellipsoid
+        inter-template direction.  
 
-    def attach_ellipsoid_distances(self):
+        New Attributes 
+        ----------
+        directional_errors: (n_templates, n_templates) pandas DataFrame
+            The length, in kilometers, of the uncertainty ellipsoid in the
+            inter-template direction.  
+            Example: self.directional_errors.loc[tid1, tid2] is the width of
+            template tid1's uncertainty ellipsoid in the direction of
+            template tid2.
+        """
+        print('Computing the inter-template directional errors...')
+        from cartopy import crs
+        # ----------------------------------------------
+        #      Define the projection used to
+        #      work in a cartesian space
+        # ----------------------------------------------
+        data_coords = crs.PlateCarree()
+        longitudes = np.float32([self.templates[i].longitude for i in range(self.n_templates)])
+        latitudes = np.float32([self.templates[i].latitude for i in range(self.n_templates)])
+        depths = np.float32([self.templates[i].depth for i in range(self.n_templates)])
+        projection = crs.Mercator(central_longitude=np.mean(longitudes),
+                                  min_latitude=latitudes.min(),
+                                  max_latitude=latitudes.max())
+        XY = projection.transform_points(data_coords, longitudes, latitudes)
+        cartesian_coords = np.stack([XY[:, 0], XY[:, 1], depths], axis=1)
+        # compute the directional errors
+        dir_errors = np.zeros((self.n_templates, self.n_templates), dtype=np.float32)
+        for t in range(self.n_templates):
+            unit_direction = cartesian_coords - cartesian_coords[t, :]
+            unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[:, np.newaxis]
+            # this operation produced NaNs for i=t
+            unit_direction[np.isnan(unit_direction)] = 0.
+            # compute the length of the covariance ellipsoid
+            # in the direction that links the two earthquakes
+            cov_dir = np.abs(np.sum(
+                self.templates[t].cov_mat.dot(unit_direction.T)*unit_direction.T, axis=0))
+            # covariance is unit of [distance**2], therefore we need the sqrt:
+            dir_errors[t, :] = np.sqrt(cov_dir)
+        # format it in a pandas DataFrame
+        dir_errors = pd.DataFrame(columns=[tid for tid in self.tids],
+                                  index=[tid for tid in self.tids],
+                                  data=dir_errors)
+        self.directional_errors = dir_errors
+
+
+    def attach_ellipsoid_distances(self, substract_errors=True):
         """
         Combine inter-template distances and directional errors
         to compute the minimum inter-uncertainty ellipsoid distances.
@@ -352,9 +618,12 @@ class TemplateGroup(object):
             self.attach_intertp_distances()
         if not hasattr(self, 'directional_errors'):
             self.attach_directional_errors()
-        ellipsoid_distances = self.intertp_distances.values\
-                            - self.directional_errors.values\
-                            - self.directional_errors.values.T
+        if substract_errors:
+            ellipsoid_distances = self.intertp_distances.values\
+                                - self.directional_errors.values\
+                                - self.directional_errors.values.T
+        else:
+            ellipsoid_distances = self.intertp_distances.values
         self.ellipsoid_distances = pd.DataFrame(
                 columns=[tid for tid in self.tids],
                 index=[tid for tid in self.tids],
@@ -902,7 +1171,7 @@ class AggregatedCatalogs(object):
         # define an alias for tids
         catalog['template_ids'] = catalog['tids']
         self.TpGroup = TemplateGroup(self.tids, db_path_T)
-        self.TpGroup.attach_ellipsoid_distances()
+        self.TpGroup.attach_ellipsoid_distances(substract_errors=True)
         if similarity_criterion > -1.:
             self.TpGroup.template_similarity(distance_threshold=distance_criterion,
                                              n_stations=n_closest_stations)
