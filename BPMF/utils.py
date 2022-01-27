@@ -531,83 +531,6 @@ def SVDWF(matrix,
                                     f_Nyq=sampling_rate/2.)
     return filtered_data
 
-#def fetch_detection_waveforms_old(tid,
-#                              db_path_T,
-#                              db_path_M,
-#                              db_path=cfg.dbpath,
-#                              best_CC=False,
-#                              max_n_events=0,
-#                              norm_rms=True):
-#
-#    files_all = glob.glob(os.path.join(db_path,
-#                                       db_path_M,
-#                                       '*multiplets_*meta.h5'))
-#    files     = []
-#    #------------------------------
-#    CC = []
-#    valid = []
-#    tid_str = str(tid)
-#    t1 = give_time()
-#    for file_ in files_all:
-#        with h5.File(file_, mode='r') as f:
-#            if tid_str in f.keys():
-#                files.append(file_[:-len('meta.h5')])
-#                CC.extend(f[tid_str]['correlation_coefficients'][()].tolist())
-#    CC = np.float32(CC)
-#    t2 = give_time()
-#    print('{:.2f} s to retrieve the correlation coefficients.'.format(t2-t1))
-#    if len(files) == 0:
-#        print("None multiplet for template {:d} !! Return None".format(tid))
-#        return None
-#    #------------------------------
-#    #----------------------------------------------
-#    CC = np.sort(CC)
-#    if max_n_events > 0:
-#        CC_thres = CC[-max_n_events]
-#    elif best_CC:
-#        if len(CC) > 300:
-#            CC_thres = CC[-100] 
-#        elif len(CC) > 70:
-#            CC_thres = CC[int(7./10.*len(CC))] # the best 30%
-#        elif len(CC) > 30:
-#            CC_thres = np.median(CC) # the best 50%
-#        elif len(CC) > 10:
-#            CC_thres = np.percentile(CC, 33.) # the best 66% detections 
-#        else:
-#            CC_thres = 0.
-#    else:
-#        CC_thres = -1.
-#    detection_waveforms  = []
-#    CCs = []
-#    t1 = give_time()
-#    for file_ in files:
-#        with h5.File(file_ + 'meta.h5', mode='r') as fm:
-#            if tid_str not in fm.keys():
-#                continue
-#            selection = np.where(fm[tid_str]['correlation_coefficients'][:] >= CC_thres)[0]
-#            if selection.size == 0:
-#                continue
-#            else:
-#                CCs.extend(fm[tid_str]['correlation_coefficients'][selection])
-#        with h5.File(file_ + 'wav.h5', mode='r') as fw:
-#            if tid_str not in fw.keys():
-#                continue
-#            detection_waveforms.append(fw[tid_str]['waveforms'][selection, :, :, :])
-#    detection_waveforms = np.vstack(detection_waveforms)
-#    if norm_rms:
-#        norm = np.std(detection_waveforms, axis=(2, 3))[..., np.newaxis, np.newaxis]
-#        norm[norm == 0.] = 1.
-#        detection_waveforms /= norm
-#    n_detections = detection_waveforms.shape[0]
-#    t2 = give_time()
-#    print('{:.2f} s to retrieve the waveforms.'.format(t2-t1))
-#    # reorder waveforms
-#    CCs = np.float32(CCs)
-#    new_order = np.argsort(CCs)[::-1]
-#    detection_waveforms = detection_waveforms[new_order, ...]
-#    CCs = CCs[new_order]
-#    return detection_waveforms, CCs
-
 def fetch_detection_waveforms(tid, db_path_T, db_path_M,
                               db_path=cfg.dbpath, best_CC=False,
                               max_n_events=0, norm_rms=True,
@@ -626,6 +549,7 @@ def fetch_detection_waveforms(tid, db_path_T, db_path_M,
         cat = catalog
     CC = np.sort(cat.correlation_coefficients.copy())
     if max_n_events > 0:
+        max_n_events = min(max_n_events, len(CC))
         CC_thres = CC[-max_n_events]
     elif best_CC:
         if len(CC) > 300:
@@ -645,9 +569,9 @@ def fetch_detection_waveforms(tid, db_path_T, db_path_M,
         if unique_events:
             selection = selection & cat.unique_events
     if (np.sum(selection) == 0) and return_event_ids:
-        return np.empty(), np.empty(), np.empty()
+        return np.empty(0), np.empty(0), np.empty(0)
     elif (np.sum(selection) == 0):
-        return np.empty(), np.empty()
+        return np.empty(0), np.empty(0)
     else:
         pass
     filenames = cat.filenames[selection].astype('U')
@@ -692,7 +616,8 @@ def fetch_detection_waveforms_refilter(
         tid, db_path_T, db_path_M, net, db_path=cfg.dbpath, best_CC=False,
         max_n_events=0, norm_rms=True, freqmin=0.5, freqmax=12.0, target_SR=50.,
         integrate=False, t0='detection_time',
-        ordering='correlation_coefficients', flip_order=True):
+        ordering='correlation_coefficients', flip_order=True,
+        **preprocess_kwargs):
 
     #sys.path.append(os.path.join(cfg.base, 'earthquake_location_eb'))
     #import relocation_utils
@@ -712,6 +637,7 @@ def fetch_detection_waveforms_refilter(
     # ------------------------------
     CC = np.sort(CC)
     if max_n_events > 0:
+        max_n_events = min(max_n_events, len(CC))
         CC_thres = CC[-max_n_events]
     elif best_CC:
         if len(CC) > 300:
@@ -737,15 +663,17 @@ def fetch_detection_waveforms_refilter(
         # during the matched-filter search
         print('Extracting event from {}'.format(udt(ot)))
         event = event_extraction.extract_event_parallel(
-                                       ot+correction_time,
-                                       net, duration=cfg.multiplet_len,
-                                       offset_start=0., folder='raw')
+                ot+correction_time,
+                net, duration=cfg.multiplet_len,
+                offset_start=0., folder='raw',
+                attach_response=preprocess_kwargs.get('attach_response', False))
         if integrate:
             event.integrate()
         filtered_ev = event_extraction.preprocess_event(
                 event,
                 freqmin=freqmin, freqmax=freqmax,
-                target_SR=target_SR, target_duration=cfg.multiplet_len)
+                target_SR=target_SR, target_duration=cfg.multiplet_len,
+                **preprocess_kwargs)
         if len(filtered_ev) > 0:
             detection_waveforms.append(get_np_array(
                                   filtered_ev, net,

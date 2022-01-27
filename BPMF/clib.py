@@ -126,22 +126,22 @@ if gpu_loaded:
                                                       C.c_int,               # n_stations_used
                                                       C.c_int]               # n_sources
 
-def network_response(data_N, data_E,
-                     cosine_azimuths, sine_azimuths,
-                     moveouts, smooth_win,
-                     device='gpu', closest_stations=None,
-                     test_points=None):
+def network_response(data_N, data_E, cosine_azimuths, sine_azimuths,
+                     moveouts, smooth_win, device='gpu',
+                     closest_stations=None, test_points=None):
+    """Test function.  
 
+    """
     n_stations = np.int32(data_N.shape[0])
     n_sources = np.int32(moveouts.shape[0])
     if closest_stations is not None:
         n_stations_used = np.int32(closest_stations.shape[-1])
-        print('Number of stations used: {0}'.format(n_stations_used))
+        print(f'Number of stations used: {n_stations_used}')
     else:
         n_stations_used = n_stations
-        closest_stations = np.arange(n_sources * n_stations, dtype=np.int32)
-    moveouts = moveouts.reshape([moveouts.size // n_stations,
-                                 n_stations])
+        closest_stations = np.arange(n_sources*n_stations, dtype=np.int32)
+    moveouts = moveouts.reshape(
+            moveouts.size//n_stations, n_stations)
     if test_points is None:
         test_points = np.arange(n_sources, dtype=np.int32)
     else:
@@ -153,21 +153,21 @@ def network_response(data_N, data_E,
     data_N = np.float32(data_N.flatten())
     data_E = np.float32(data_E.flatten())
     cosine_azimuths = np.float32(cosine_azimuths.flatten())
-    sine_azimuths   = np.float32(sine_azimuths.flatten())
+    sine_azimuths = np.float32(sine_azimuths.flatten())
     #--------------------------------------
     ntwkrsp = np.zeros(n_samples, np.float32)
     biggest_idx = np.zeros(n_samples, np.int32)
     smoothed = np.zeros(n_samples, np.float32)
     half_smooth = np.int32(smooth_win / 2)
-    print('nb of samples per trace = {:d}, '
-          'nb of stations = {:d}, '
-          'nb of stations used with each grid point = {:d}'.\
-                  format(n_samples, n_stations, n_stations_used))
+    print(f'nb of samples per trace = {n_samples}, '
+          f'nb of stations = {n_stations}, '
+          f'nb of stations used with each grid point = {n_stations_used}')
 
     if device == 'gpu':
         print('Memory required on the GPU: {:d}Mb'.\
-                format((test_points.nbytes + moveouts.nbytes + data_N.nbytes + data_E.nbytes + stations_idx.nbytes + \
-                        ntwkrsp.nbytes + biggest_idx.nbytes + smoothed.nbytes)/1024.e3))
+                format((test_points.nbytes + moveouts.nbytes + data_N.nbytes\
+                     + data_E.nbytes + stations_idx.nbytes + ntwkrsp.nbytes\
+                     + biggest_idx.nbytes + smoothed.nbytes)/1024.e3))
         _libcu.network_response(
             test_points.ctypes.data_as(C.POINTER(C.c_int)),
             data_N.ctypes.data_as(C.POINTER(C.c_float)),
@@ -206,22 +206,44 @@ def network_response(data_N, data_E,
 
     return ntwkrsp, biggest_idx, smoothed
 
-def network_response_SP_prestacked(prestacked_traces,
-                                   moveouts_P,
-                                   moveouts_S,
-                                   smooth_win,
-                                   test_points=None,
-                                   closest_stations=None,
-                                   device='gpu'):
-    """
-    In this version, the different channels have already been stacked.
+def network_response_SP_prestacked(
+        prestacked_traces, moveouts_P, moveouts_S, smooth_win,
+        test_points=None, closest_stations=None, device='cpu'):
+    """Backproject the seismic wavefield onto a grid of test seismic sources.  
+
+    The 3-component detection traces are already stacked to speed-up the
+    computation.
+
+    Parameters
+    -------------
+    prestacked_traces: (n_stations, n_samples) array
+        Numpy array with the characteristic functions already stacked
+        along the component axis.
+    moveouts_P: (n_sources, n_stations) int array
+        P-wave moveouts, in samples, from each of the `n_sources` grid points
+        to each of the `n_stations` seismometers.
+    moveouts_S: (n_sources, n_stations) int array
+        S-wave moveouts, in samples, from each of the `n_sources` grid points
+        to each of the `n_stations` seismometers.
+    smooth_win: remove?
+    test_points: (n_sources,) int array, default to None
+        Indexes of the test sources to use in the backprojection.
+        If None, all sources are used.
+    closest_stations: (n_sources, n_cl_stations) int array, default to None
+        If not None, then only the closest `n_cl_stations` seismometers to a
+        given grid point contribute to the stacking. This is particularly
+        useful for large networks where remote stations cannot record
+        earthquakes with good SNR.
+    device: string, default to 'cpu'
+        If `device` is 'cpu', use the C code. If `device` is 'gpu',
+        use the CUDA-C code. 
     """
     n_stations = np.int32(prestacked_traces.shape[0])
     n_sources = np.int32(moveouts_S.shape[0]) # number of sources in the moveouts array
     if closest_stations is not None:
         n_stations_used = np.int32(closest_stations.shape[-1])
         closest_stations = np.int32(closest_stations.flatten())
-        print('Number of stations used: {:d}'.format(n_stations_used))
+        print(f'Number of stations used: {n_stations_used}')
     else:
         n_stations_used = n_stations
         closest_stations = np.repeat(
@@ -245,10 +267,9 @@ def network_response_SP_prestacked(prestacked_traces,
     moveouts_S  = np.int32(moveouts_S.flatten())
     ntwkrsp     = np.zeros(n_samples, np.float32)
     biggest_idx = np.zeros(n_samples, np.int32)
-    print('{:d} stations are used per test source, {:d} samples on each'.\
-            format(n_stations_used, n_samples))
-    print('{:d} sources in the grid, {:d} test sources'.\
-            format(n_sources, n_test))
+    print(f'{n_stations_used} stations are used per test source, '
+          f'{n_samples} samples on each')
+    print(f'{n_sources} sources in the grid, {n_test} test sources')
     if device == 'gpu':
         _libcu.network_response_SP_prestacked(
             test_points.ctypes.data_as(C.POINTER(C.c_int)),
@@ -281,17 +302,40 @@ def network_response_SP_prestacked(prestacked_traces,
 
     return ntwkrsp, biggest_idx
 
-def network_response_SP(traces_H,
-                        traces_Z,
-                        moveouts_P,
-                        moveouts_S,
-                        smooth_win,
-                        test_points=None,
-                        closest_stations=None,
+def network_response_SP(traces_H, traces_Z, moveouts_P, moveouts_S,
+                        smooth_win, test_points=None, closest_stations=None,
                         device='gpu'):
+    """Backproject the seismic wavefield onto a grid of test seismic sources.  
+
+    The 3-component characteristic functions are already stacked to speed-up the
+    computation.
+
+    Parameters
+    -------------
+    traces_H: (n_stations, n_samples) array
+        Numpy array with the horizontal component characteristic function.
+    traces_Z: (n_stations, n_samples) array
+        Numpy array with the vertical component characteristic function.
+    moveouts_P: (n_sources, n_stations) int array
+        P-wave moveouts, in samples, from each of the `n_sources` grid points
+        to each of the `n_stations` seismometers.
+    moveouts_S: (n_sources, n_stations) int array
+        S-wave moveouts, in samples, from each of the `n_sources` grid points
+        to each of the `n_stations` seismometers.
+    smooth_win: remove?
+    test_points: (n_sources,) int array, default to None
+        Indexes of the test sources to use in the backprojection.
+        If None, all sources are used.
+    closest_stations: (n_sources, n_cl_stations) int array, default to None
+        If not None, then only the closest `n_cl_stations` seismometers to a
+        given grid point contribute to the stacking. This is particularly
+        useful for large networks where remote stations cannot record
+        earthquakes with good SNR.
+    device: string, default to 'cpu'
+        If `device` is 'cpu', use the C code. If `device` is 'gpu',
+        use the CUDA-C code. 
     """
-    In this version, the different channels have already been stacked.
-    """
+
     n_stations = np.int32(traces_H.shape[0])
     n_sources = np.int32(moveouts_S.shape[0]) # number of sources in the moveouts array
     if closest_stations is not None:
