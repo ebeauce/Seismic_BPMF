@@ -1252,6 +1252,7 @@ class EventFamily(object):
         self.template = Template(f'template{tid}', db_path_T, db_path=db_path)
         self.template.read_waveforms()
         self.sr = self.template.sampling_rate
+        self.stations = self.template.network_stations
 
     def attach_catalog(self, items_in=[], items_out=[]):
         """
@@ -1281,6 +1282,78 @@ class EventFamily(object):
         self.stations = self.template.stations
         self.map_to_subnet = self.template.map_to_subnet
 
+    @property
+    def dtt_P(self, max_corr=1000.):
+        """ Travel-time corrections to individual events.  
+
+        Parameters
+        -----------
+        max_corr: float, default to 1000.
+            Maximum correction time, in seconds, below which
+            a correction time is considered to be valid.
+        """
+        if hasattr(self, '_dtt_P'):
+            _dtt_P = self._dtt_P
+        else:
+            print('Call `get_tt_corrections` first!')
+            return None
+        if hasattr(self, 'event_ids'):
+            _dtt_P = _dtt_P[self.event_ids, :]
+        #if hasattr(self, 'map_to_subnet'):
+        #    _dtt_P = _dtt_P[:, self.map_to_subnet]
+        return _dtt_P
+
+    @property
+    def dtt_S(self, max_corr=1000.):
+        """ Travel-time corrections to individual events.  
+
+        Parameters
+        -----------
+        max_corr: float, default to 1000.
+            Maximum correction time, in seconds, below which
+            a correction time is considered to be valid.
+        """
+        if hasattr(self, '_dtt_S'):
+            _dtt_S = self._dtt_S
+        else:
+            print('Call `get_tt_corrections` first!')
+            return None
+        if hasattr(self, 'event_ids'):
+            _dtt_S = _dtt_S[self.event_ids, :]
+        #if hasattr(self, 'map_to_subnet'):
+        #    _dtt_S = _dtt_S[:, self.map_to_subnet]
+        return _dtt_S
+
+    def get_tt_corrections(self, max_corr=1000.):
+        """ Read travel-time corrections to individual events.  
+
+        Parameters
+        -----------
+        max_corr: float, default to 1000.
+            Maximum correction time, in seconds, below which
+            a correction time is considered to be valid.
+        """
+        cat_file = os.path.join(
+                            self.db_path, self.db_path_M,
+                            f'multiplets{self.tid}catalog.h5')
+        with h5.File(cat_file, mode='r') as f:
+            if 'dtt_P' in f:
+                self._dtt_P = f['dtt_P'][()]
+                self._dtt_P[self._dtt_P > max_corr] = 0.
+            else:
+                print(f'No P-wave travel-time corrections found in {cat_file}.')
+                self._dtt_P = np.zeros(
+                        (len(self.event_ids), len(self.template.network_stations)),
+                        dtype=np.float32)
+            if 'dtt_S' in f:
+                self._dtt_S = f['dtt_S'][()]
+                self._dtt_S[self._dtt_S > max_corr] = 0.
+            else:
+                print(f'No S-wave travel-time corrections found in {cat_file}.')
+                self._dtt_S = np.zeros(
+                        (len(self.event_ids), len(self.template.network_stations)),
+                        dtype=np.float32)
+
     def read_data(self, **kwargs):
         """
         Call fetch_detection_waveforms from utils.
@@ -1291,7 +1364,7 @@ class EventFamily(object):
         # which depends on the kwargs given to fetch_detection_waveforms
         # force ordering to be chronological
         kwargs['ordering'] = 'origin_times'
-        kwargs['flip_order'] = True # why did I do that?? This seems totally unnecessary
+        #kwargs['flip_order'] = True # why did I do that?? This seems totally unnecessary
         if (kwargs.get('unique_events', False)\
                 and np.sum(self.catalog.unique_events) == 0):
             self.detection_waveforms = []
@@ -1307,7 +1380,7 @@ class EventFamily(object):
 
     def trim_waveforms(self, duration, offset_start_S, offset_start_P,
                        t0=cfg.buffer_extracted_events,
-                       S_window_time=4., P_window_time=1.):
+                       S_window_time=4., P_window_time=1., correct_tt=False):
         """
         Trim the waveforms using the P- and S-wave moveouts from the template.
 
@@ -1330,6 +1403,9 @@ class EventFamily(object):
         P_window_time: scalar, float
             Time between the beginning of the P-wave template
             widow and the predicted P-wave arrival time.
+        correct_tt: boolean, default to False
+            If True, use the individual phase picks -- if available -- to
+            adjust the template's travel times to individual events.
         """
         if not hasattr(self, 'detection_waveforms'):
             print('Need to call read_data first.')
@@ -1348,28 +1424,76 @@ class EventFamily(object):
         new_shape = self.detection_waveforms.shape[:-1] + (duration,)
         self.trimmed_waveforms = np.zeros(new_shape, dtype=np.float32)
         _, n_stations, _, n_samples = self.detection_waveforms.shape
+        if correct_tt:
+            self.get_tt_corrections(max_corr=5.)
         for s in range(n_stations):
-            # P-wave window on vertical components
-            P_start = t0 + self.template.network_p_moveouts[s] + P_window_time - offset_start_P
-            P_end = P_start + duration
-            if P_start < n_samples:
-                P_end = min(n_samples, P_end)
-                self.trimmed_waveforms[:, s, 2, :P_end-P_start] = \
-                        self.detection_waveforms[:, s, 2, P_start:P_end]
-            # S-wave window on horizontal components
-            S_start = t0 + self.template.network_s_moveouts[s] + S_window_time - offset_start_S
-            S_end = S_start + duration
-            if S_start < n_samples:
-                S_end = min(n_samples, S_end)
-                self.trimmed_waveforms[:, s, :2, :S_end-S_start] = \
-                        self.detection_waveforms[:, s, :2, S_start:S_end]
+            if not correct_tt:
+                # P-wave window on vertical components
+                P_start = t0 + self.template.network_p_moveouts[s] + P_window_time - offset_start_P
+                P_end = P_start + duration
+                if P_start < n_samples:
+                    P_end = min(n_samples, P_end)
+                    self.trimmed_waveforms[:, s, 2, :P_end-P_start] = \
+                            self.detection_waveforms[:, s, 2, P_start:P_end]
+                # S-wave window on horizontal components
+                S_start = t0 + self.template.network_s_moveouts[s] + S_window_time - offset_start_S
+                S_end = S_start + duration
+                if S_start < n_samples:
+                    S_end = min(n_samples, S_end)
+                    self.trimmed_waveforms[:, s, :2, :S_end-S_start] = \
+                            self.detection_waveforms[:, s, :2, S_start:S_end]
+            else:
+                for n in range(self.n_events):
+                    # P-wave window on vertical components
+                    P_start = t0 + self.template.network_p_moveouts[s]\
+                            + P_window_time - offset_start_P\
+                            + utils.sec_to_samp(self.dtt_P[n, s], sr=self.sr)
+                    P_end = P_start + duration
+                    if P_start < n_samples:
+                        P_end = min(n_samples, P_end)
+                        self.trimmed_waveforms[n, s, 2, :P_end-P_start] = \
+                                self.detection_waveforms[n, s, 2, P_start:P_end]
+                    # S-wave window on horizontal components
+                    S_start = t0 + self.template.network_s_moveouts[s]\
+                            + S_window_time - offset_start_S\
+                            + utils.sec_to_samp(self.dtt_S[n, s], sr=self.sr)
+                    S_end = S_start + duration
+                    if S_start < n_samples:
+                        S_end = min(n_samples, S_end)
+                        self.trimmed_waveforms[n, s, :2, :S_end-S_start] = \
+                                self.detection_waveforms[n, s, :2, S_start:S_end]
 
     def read_trimmed_waveforms(self, duration, offset_start, net, target_SR,
                                tt_phases=['S', 'S', 'P'], norm_rms=True,
-                               buffer=2., unique_events=False, **preprocess_kwargs):
+                               buffer=2., unique_events=False, correct_tt=False,
+                               selection=None, **preprocess_kwargs):
         """
         Read waveforms from raw data and refilter/resample. Extra key-word
         arguments will be passed to the preprocessing routine.
+
+        Parameters
+        ------------
+        duration: float
+            Duration, in seconds, of the extracted time windows.
+        offset_start: float
+            Time, in seconds, added to the requested time to define
+            the beginning of the time window. It should be negative if
+            the goal is to make the window start before the target phase.
+        net: `Network` object
+            `Network` instance.
+        tt_phases: list of strings, default to ['S', 'S', 'P']
+            Determine which phase is targetted on each component.
+        buffer: float, default to 2
+            Time, in seconds, taken at the beginning and end of the window.
+            It is used to make sure the preprocessing does not alter the
+            actual window.
+        unique_events: boolean, default to False
+            If True, only loads the unique detections.
+        correct_tt: boolean, default to False
+            If True, use the individual phase picks -- if available -- to
+            adjust the template's travel times to individual events.
+        selection: numpy array, default to None
+            Indexes of the events to use.
         """
         from . import event_extraction
         if not hasattr(self, 'catalog'):
@@ -1384,14 +1508,24 @@ class EventFamily(object):
         tts = np.stack([self.template.network_travel_times\
                 [station_indexes, phase_index[tt_phases[c]]]
             for c in range(len(tt_phases))], axis=1)
-        if unique_events:
-            selection = self.catalog.unique_events
-        else:
-            selection = np.ones(len(self.catalog.origin_times), dtype=np.bool)
+        if selection is None:
+            if unique_events:
+                selection = self.catalog.unique_events
+            else:
+                selection = np.ones(len(self.catalog.origin_times), dtype=np.bool)
+        self.event_ids = np.arange(len(selection), dtype=np.int32)[selection]
+        if correct_tt:
+            self.get_tt_corrections(max_corr=5.)
         print(f'Reading {np.sum(selection)} events...')
-        for ot in self.catalog.origin_times[selection]:
+        for n, evidx in enumerate(self.event_ids):
+            ot = self.catalog.origin_times[evidx]
+            if correct_tt:
+                tt_corrections = np.stack(
+                        [getattr(self, f'dtt_{ph}')[n, station_indexes] for ph in tt_phases], axis=1)
+            else:
+                tt_corrections = np.zeros_like(tts, dtype=np.float32)
             event = event_extraction.extract_event_realigned(
-                    ot, net, tts, duration=duration+2.*buffer,
+                    ot, net, tts+tt_corrections, duration=duration+2.*buffer,
                     offset_start=offset_start-buffer, folder='raw')
             event = event_extraction.preprocess_event(
                     event, target_duration=duration+2.*buffer,
@@ -1417,19 +1551,42 @@ class EventFamily(object):
         self.sr = target_SR
         # add metadata
         self.n_events = self.trimmed_waveforms.shape[0]
-        self.event_ids = np.arange(len(self.catalog.origin_times), dtype=np.int32)
-        self.event_ids = self.event_ids[selection]
         self.event_ids_str = [f'{self.tid},{event_id}' for event_id in self.event_ids]
 
     def read_trimmed_waveforms_raw(
             self, duration, offset_start, net,
             tt_phases=['S', 'S', 'P'],
-            buffer=2., unique_events=False, **preprocess_kwargs):
+            buffer=2., unique_events=False, correct_tt=False,
+            selection=None, **preprocess_kwargs):
         """
         Read waveforms from raw data and remove instrument response if requested.
         Extra key-word arguments will be passed to the preprocessing routine.
         This should not be used to resample all traces to the same sampling
-        rate, instead use read_trimmed_waveforms.
+        rate, instead use `read_trimmed_waveforms`.
+
+        Parameters
+        ------------
+        duration: float
+            Duration, in seconds, of the extracted time windows.
+        offset_start: float
+            Time, in seconds, added to the requested time to define
+            the beginning of the time window. It should be negative if
+            the goal is to make the window start before the target phase.
+        net: `Network` object
+            `Network` instance.
+        tt_phases: list of strings, default to ['S', 'S', 'P']
+            Determine which phase is targetted on each component.
+        buffer: float, default to 2
+            Time, in seconds, taken at the beginning and end of the window.
+            It is used to make sure the preprocessing does not alter the
+            actual window.
+        unique_events: boolean, default to False
+            If True, only loads the unique detections.
+        correct_tt: boolean, default to False
+            If True, use the individual phase picks -- if available -- to
+            adjust the template's travel times to individual events.
+        selection: numpy array, default to None
+            Indexes of the events to use.
         """
         from . import event_extraction
         if not hasattr(self, 'catalog'):
@@ -1443,14 +1600,24 @@ class EventFamily(object):
         tts = np.stack([self.template.network_travel_times\
                 [station_indexes, phase_index[tt_phases[c]]]
             for c in range(len(tt_phases))], axis=1)
-        if unique_events:
-            selection = self.catalog.unique_events
-        else:
-            selection = np.ones(len(self.catalog.origin_times), dtype=np.bool)
+        if selection is None:
+            if unique_events:
+                selection = self.catalog.unique_events
+            else:
+                selection = np.ones(len(self.catalog.origin_times), dtype=np.bool)
+        self.event_ids = np.arange(len(selection), dtype=np.int32)[selection]
+        if correct_tt:
+            self.get_tt_corrections(max_corr=5.)
         events = []
-        for ot in self.catalog.origin_times[selection]:
+        for n, evidx in enumerate(self.event_ids):
+            ot = self.catalog.origin_times[evidx]
+            if correct_tt:
+                tt_corrections = np.stack(
+                        [getattr(self, f'dtt_{ph}')[n, station_indexes] for ph in tt_phases], axis=1)
+            else:
+                tt_corrections = np.zeros_like(tts, dtype=np.float32)
             event = event_extraction.extract_event_realigned(
-                    ot, net, tts, duration=duration+2.*buffer,
+                    ot, net, tts+tt_corrections, duration=duration+2.*buffer,
                     offset_start=offset_start-buffer, folder='raw',
                     attach_response=True)
             event = event_extraction.preprocess_event(
@@ -1464,8 +1631,6 @@ class EventFamily(object):
         self.trimmed_events = events
         # add metadata
         self.n_events = len(events)
-        self.event_ids = np.arange(len(self.catalog.origin_times), dtype=np.int32)
-        self.event_ids = self.event_ids[selection]
         self.event_ids_str = [f'{self.tid},{event_id}' for event_id in self.event_ids]
         if self.n_events != np.sum(selection):
             print('Number of extracted events does not match '
@@ -1784,6 +1949,10 @@ class EventFamilyGroup(EventFamily):
         network_stations = self.families[self.tids[0]].template.network_stations
         self.map_to_subnet = np.int32([np.where(network_stations == sta)[0]
                                        for sta in self.stations]).squeeze()
+        # update all subfamilies
+        for tid in self.tids:
+            self.families[tid].stations = self.stations
+            self.families[tid].map_to_subnet = self.map_to_subnet
 
     def pair_events(self, random_pairing_frac=0., random_max=2):
         if not hasattr(self, 'catalog'):

@@ -96,8 +96,6 @@ def plot_template(idx,
 def plot_match(catalog,
                event_index,
                db_path_T='template_db_1',
-               db_path_M='matched_filter_1',
-               db_path=cfg.dbpath,
                n_stations=10,
                stations=None,
                show=True):
@@ -117,10 +115,6 @@ def plot_match(catalog,
         Index of the event to plot.
     db_path_T: string, default to 'template_db_1'
         Database name of the template waveform and metadata files.
-    db_path_M: string, default to 'matched_filter_1'
-        Database name of the template matching output files.
-    db_path: string, default to cfg.dbpath
-        Root directory where db_path_T and db_path_M are located.
     n_stations: integer, default to 10
         Number of stations to plot.
     stations: list of strings or None, default to None
@@ -130,23 +124,20 @@ def plot_match(catalog,
     """
     # plotting parameters: font sizes can be tuned to display well
     # on the monitor
+    old_params = plt.rcParams.copy()
     font = {'family' : 'sans-serif', 'weight' : 'normal', 'size' : 14}
     plt.rc('font', **font)
     plt.rcParams.update({'ytick.labelsize'  :  14})
     plt.rcParams['svg.fonttype'] = 'none'
     # read the template and event data
-    filename = catalog['filenames'][event_index].decode('utf-8')
-    if (isinstance(catalog['template_idx'], list) or
-            isinstance(catalog['template_idx'], np.ndarray)):
-        tid = catalog['template_idx'][0]
-    else:
-        tid = catalog['template_idx']
-    index = catalog['indices'][event_index]
+    filename = catalog.filenames[event_index].decode('utf-8')
+    tid = catalog.tid
+    index = catalog.indices[event_index]
     M, T = db_h5py.read_multiplet_new_version(filename, index, tid,
                                               return_tp=True,
-                                              db_path=db_path,
+                                              db_path=catalog.db_path,
                                               db_path_T=db_path_T,
-                                              db_path_M=db_path_M)
+                                              db_path_M=catalog.db_path_M)
     n_stations = min(n_stations, len(T.stations))
     if stations is not None:
         T.subnetwork(stations)
@@ -159,21 +150,15 @@ def plot_match(catalog,
     I_s = np.argsort(np.asarray(T.stations))
     ns = len(T.stations)
     nc = len(M.components)
-    plt.figure('multiplet{:d}_{}_tp{:d}'.\
-                format(index,
-                       M[0].stats.starttime.strftime('%Y-%m-%d'),
-                       M.template_ID),
-                figsize=(18, 9))
-    plt.suptitle('Template {:d} ({:.2f}/{:.2f}/{:.2f}km): Detection on {}'.
-                     format(M.template_ID,\
-                            M.latitude,\
-                            M.longitude,\
-                            M.depth,\
-                            M[0].stats.starttime.strftime('%Y,%m,%d -- %H:%M:%S')))
+    strdate = M[0].stats.starttime.strftime('%Y-%m-%d')
+    strtime = M[0].stats.starttime.strftime('%Y,%m,%d -- %H:%M:%S')
+    fig, axes = plt.subplots(
+            num=f'event{index}_{strdate}_tp{tid}',
+            nrows=ns, ncols=nc, figsize=(18, 9))
+    fig.suptitle(f'Template {tid} ({M.latitude:.2f}/{M.longitude:.2f}/{M.depth:.2f}km):'
+                 f' Detection on {strtime}')
     # create a moveout array (n_stations x n_components)
-    mv = np.column_stack((T.s_moveouts,
-                          T.s_moveouts,
-                          T.p_moveouts))
+    mv = np.stack([T.s_moveouts, T.s_moveouts, T.p_moveouts], axis=1)
     # event waveforms were extracted from detection_time - cfg.buffer_extracted_events
     # for plotting the sequence of interest, we fix t_min somewhere around 0 + cfg.buffer_extracted_events
     # i.e. t_min is somewhere around the detection time
@@ -189,12 +174,9 @@ def plot_match(catalog,
     for s in range(ns):
         print(st_sorted[s])
         for c in range(nc):
-            plt.subplot(ns, nc, s*nc+c+1)
-            plt.plot(time,
-                     M.select(station=st_sorted[s])[c].data[idx_min:idx_max],
-                     color='C0',
-                     label='{}.{}'.format(st_sorted[s], M.components[c]),
-                     lw=0.75)
+            axes[s, c].plot(
+                    time, M.select(station=st_sorted[s])[c].data[idx_min:idx_max],
+                    color='C0', label=f'{st_sorted[s]}.{M.components[c]}', lw=0.75)
             idx1 = utils.sec_to_samp(min(cfg.buffer_extracted_events, cfg.multiplet_len/4.),
                                      sr=cfg.sampling_rate)\
                    + mv[I_s[s], c]
@@ -207,27 +189,28 @@ def plot_match(catalog,
             data_template = T.traces.select(station=st_sorted[s])[c].data[:idx2-idx1]
             # scale the template data such that it matches the data amplitudes
             data_toplot   = data_template/data_template.max() * Max
-            plt.plot(time[idx1-idx_min:idx2-idx_min],
-                     data_toplot,
-                     color='C3',
-                     lw=0.8)
+            axes[s, c].plot(
+                    time[idx1-idx_min:idx2-idx_min], data_toplot,
+                    color='C3', lw=0.8)
             plt.xlim(time.min(), time.max())
             if s == ns-1: 
-                plt.xlabel('Time (s)')
+                axes[s, c].set_xlabel('Time (s)')
             else:
-                plt.xticks([])
+                axes[s, c].set_xticks([])
             if c < 2:
-                plt.legend(loc='upper left', framealpha=0.5, handlelength=0.1, borderpad=0.2)
+                axes[s, c].legend(
+                        loc='upper left', framealpha=0.5,
+                        handlelength=0.1, borderpad=0.2)
             else:
-                plt.legend(loc='upper right', framealpha=0.5, handlelength=0.1, borderpad=0.2)
-    plt.subplots_adjust(top=0.95,
-                        bottom=0.04,
-                        left=0.07,
-                        right=0.95,
-                        hspace=0.2,
-                        wspace=0.2)
+                axes[s, c].legend(
+                        loc='upper right', framealpha=0.5,
+                        handlelength=0.1, borderpad=0.2)
+    plt.subplots_adjust(top=0.95, bottom=0.04, left=0.07,
+                        right=0.95, hspace=0.2, wspace=0.2)
     if show:
         plt.show()
+    plt.rcParams = old_params
+    return fig
 
 def plot_detection_matrix(X, datetimes=None, stack=None,
                           title=None, ax=None, show=True,

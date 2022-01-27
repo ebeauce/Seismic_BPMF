@@ -196,13 +196,17 @@ def generate_file_list(data_path, net, travel_times=None):
 def preprocess_event(event, freqmin=None, freqmax=None,
                      target_SR=None, remove_response=False,
                      remove_sensitivity=False, plot_resp=False,
-                     target_duration=None, verbose=True):
+                     target_duration=None, verbose=True, unit='VEL',
+                     **kwargs):
     preprocessed_event = obs.Stream()
     if len(event) == 0:
         print('Input data is empty!')
         return preprocessed_event
     # start by cleaning the gaps if there are any
     for tr in event:
+        if np.isnan(tr.data.max()):
+            print(f'Problem with {tr.id} (detected NaNs)!')
+            continue
         # split will lose information about start and end times
         # if the start or the end is masked
         t1 = udt(tr.stats.starttime.timestamp)
@@ -256,7 +260,7 @@ def preprocess_event(event, freqmin=None, freqmax=None,
             f_min = 1./T_max
             f_max = 1./(2.*T_min)
             pre_filt = [f_min, 3.*f_min, 0.90*f_max, 0.97*f_max]
-            tr.remove_response(pre_filt=pre_filt, output='VEL', plot=plot_resp)
+            tr.remove_response(pre_filt=pre_filt, output=unit, plot=plot_resp)
     elif remove_sensitivity:
         for tr in preprocessed_event:
             tr.remove_sensitivity()

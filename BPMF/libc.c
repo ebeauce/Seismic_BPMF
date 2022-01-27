@@ -46,16 +46,19 @@ void find_moveouts(const int* moveouts, int *moveouts_minmax,
   }
 }
 
-void stack_S(float* tracesN,  float* tracesE,     // inputs
-             int* moveouts, int* moveouts_minmax, 
-             int* station_indexes, int* test_sources,
-             float* cosine_azimuths, float* sine_azimuths,
-	         size_t n_samples, size_t n_test, 
-             size_t n_stations_whole_array,
-             size_t n_stations_restricted_array,
-	         float* nw_response, int* biggest_idx // outputs
-             ) {
-    /* Stack and align the traces, i.e. compute the Beamformed Network Response. */
+void stack_one_phase(
+        float* tracesN,  float* tracesE,     // inputs
+        int* moveouts, int* moveouts_minmax, 
+        int* station_indexes, int* test_sources,
+        float* cosine_azimuths, float* sine_azimuths,
+	    size_t n_samples, size_t n_test, 
+        size_t n_stations_whole_array,
+        size_t n_stations_restricted_array,
+	    float* nw_response, int* biggest_idx // outputs
+        ) {
+    /* Shift and stack the horizontal and vertical characteristic
+     * functions based on the moveouts of a single phase. Use the
+     * source-receiver azimuths to rotate the traces. */
 
     int i; // time counter
     int j; // source counter
@@ -82,7 +85,8 @@ void stack_S(float* tracesN,  float* tracesE,     // inputs
           source_idx_restricted_array = test_sources[j] * n_stations_restricted_array; // position in the station indexes vector
           idx_shift = i - moveouts_minmax[j * 2 + 0]; // position on the time axis
         
-          if (idx_shift < 0) continue; // don't do anything before 0 time
+          if (idx_shift < 0) continue; // don't do anything before time 0
+
           // ---------------------------------
           // define the local pointers
           tracesN_ = tracesN + idx_shift;
@@ -121,6 +125,9 @@ void stack_SP(float* traces_H, float* traces_Z,
 	          size_t n_samples, size_t n_test, 
               size_t n_stations_whole_array,
               size_t n_stations_restricted_array) {
+  /* Shift and stack the horizontal and vertical characteristic
+   * functions based on the moveouts of both the first S- and P-wave
+   * arrivals. */
 
   int i; // time counter
   int j; // source counter
@@ -156,8 +163,10 @@ void stack_SP(float* traces_H, float* traces_Z,
         moveout_P = moveouts_P[source_idx_whole_array + ss];
         moveout_S = moveouts_S[source_idx_whole_array + ss];
         if ((idx_shift + moveout_S) < n_samples && (idx_shift + moveout_P) < n_samples) {
-          sum_beamform_S +=    traces_H[ss * n_samples + idx_shift + moveout_S];
-          sum_beamform_P +=    traces_Z[ss * n_samples + idx_shift + moveout_P];
+          // give equal weight to horizontal and vertical components.
+          sum_beamform_S += traces_H[ss * n_samples + idx_shift + moveout_S];
+          sum_beamform_P += traces_Z[ss * n_samples + idx_shift + moveout_P];
+          // give more weight to horizontal components
           //sum_beamform_S += 2.*traces_H[ss * n_samples + idx_shift + moveout_S] \
           //                  + traces_Z[ss * n_samples + idx_shift + moveout_S];
           //sum_beamform_P += 2.*traces_H[ss * n_samples + idx_shift + moveout_P] \
@@ -179,8 +188,74 @@ void stack_SP(float* traces_H, float* traces_Z,
   }
 }
 
+void stack_SP_prestacked(float* traces, 
+                         int* moveouts_P,
+                         int* moveouts_S,
+                         int* station_indexes,
+	                     int* moveouts_minmax,
+                         int* test_sources,
+	                     float* nw_response,                      // output pointer
+                         int* biggest_idx,                        // output pointer
+	                     size_t n_samples,
+                         size_t n_test, 
+                         size_t n_stations_whole_array,
+                         size_t n_stations_restricted_array) {
+  /* Shift and stack the composite characteristic functions based
+   * on the moveouts of both the first S- and P-wave arrivals. The
+   * horizontal and vertical characteristic functions were stacked
+   * before calling the C routine to optimize the computation time. */
+
+  int i; // time counter
+  int j; // source counter
+  int s; // station counter
+  
+  printf("Number of available threads : %d \n", omp_get_max_threads());
+
+  #pragma omp parallel for \
+  private(i, j, s) \
+  shared(traces, test_sources, \
+         moveouts_P, moveouts_S, station_indexes, \
+         moveouts_minmax, nw_response, biggest_idx)
+  for (i = 0; i < n_samples; i++) {
+    float network_response_max = -10000.;
+    int network_resp_idx_max = 0;
+    float sum_beamform_SP;
+    int source_idx_whole_array, source_idx_restricted_array, ss, moveout_P, moveout_S, idx_shift;
+
+    for (j = 0; j < n_test; j++) {
+      sum_beamform_SP = 0.0;
+
+      source_idx_whole_array      = test_sources[j] * n_stations_whole_array; // position in the moveouts vector
+      source_idx_restricted_array = test_sources[j] * n_stations_restricted_array; // position in the station indexes vector
+      idx_shift = i - moveouts_minmax[j * 2 + 0];
+
+      if (idx_shift < 0) continue; // don't do anything before 0 time
+      
+      for (s = 0; s < n_stations_restricted_array; s++) {
+        // map from the closest stations to the whole array of stations
+        ss        = station_indexes[source_idx_restricted_array + s]; 
+        moveout_P = moveouts_P[source_idx_whole_array + ss];
+        moveout_S = moveouts_S[source_idx_whole_array + ss];
+        if ((idx_shift + moveout_S) < n_samples && (idx_shift + moveout_P) < n_samples) {
+          sum_beamform_SP +=    traces[ss * n_samples + idx_shift + moveout_S]\
+                              + traces[ss * n_samples + idx_shift + moveout_P];
+        }
+      }
+
+      if (sum_beamform_SP > network_response_max) {
+        network_response_max = sum_beamform_SP;
+        network_resp_idx_max = test_sources[j];
+      }
+    }
+    nw_response[i] = network_response_max;
+    biggest_idx[i] = network_resp_idx_max;
+  }
+}
+
+
 void network_response(int*  test_points, float*  tracesN, float* tracesE, 
-                      float* cosine_azimuths, float* sine_azimuths, int*  moveouts, int* station_indexes,
+                      float* cosine_azimuths, float* sine_azimuths,
+                      int*  moveouts, int* station_indexes,
                       int n_test, int n_samples,
                       float*  network_response, int*  biggest_idx,
                       int n_stations_whole_array, 
@@ -204,7 +279,7 @@ void network_response(int*  test_points, float*  tracesN, float* tracesE,
                   n_stations_whole_array,
                   n_stations_restricted_array);
     
-    stack_S(tracesN,
+    stack_one_phase(tracesN,
             tracesE,
             moveouts,
             moveouts_minmax,
@@ -258,76 +333,6 @@ void network_response_SP(int*  test_points, float*  traces_H, float* traces_Z,
   free(moveouts_minmax);
 }
 
-// ------------------------------------------------------------------------
-// ------------------------------------------------------------------------
-//          calculate network response on prestacked traces
-void stack_SP_prestacked(float* traces, 
-                         int* moveouts_P,
-                         int* moveouts_S,
-                         int* station_indexes,
-	                     int* moveouts_minmax,
-                         int* test_sources,
-	                     float* nw_response,                      // output pointer
-                         int* biggest_idx,                        // output pointer
-	                     size_t n_samples,
-                         size_t n_test, 
-                         size_t n_stations_whole_array,
-                         size_t n_stations_restricted_array) {
-
-   /* This function handles single-channel detection traces. When the user
-   uses positive-valued detection traces, stacking the three components
-   ahead of computing the network response optimizes the computation, without
-   any loss of precision. However, we loose the possibility of using the P moveouts
-   only on the vertical components and the S moveouts on the horizontal components,
-   as it could be useful for relocation purposes. */
-
-  int i; // time counter
-  int j; // source counter
-  int s; // station counter
-  
-  printf("Number of available threads : %d \n", omp_get_max_threads());
-
-  #pragma omp parallel for \
-  private(i, j, s) \
-  shared(traces, test_sources, \
-         moveouts_P, moveouts_S, station_indexes, \
-         moveouts_minmax, nw_response, biggest_idx)
-  for (i = 0; i < n_samples; i++) {
-    float network_response_max = -10000.;
-    int network_resp_idx_max = 0;
-    float sum_beamform_SP;
-    int source_idx_whole_array, source_idx_restricted_array, ss, moveout_P, moveout_S, idx_shift;
-
-    for (j = 0; j < n_test; j++) {
-      sum_beamform_SP = 0.0;
-
-      source_idx_whole_array      = test_sources[j] * n_stations_whole_array; // position in the moveouts vector
-      source_idx_restricted_array = test_sources[j] * n_stations_restricted_array; // position in the station indexes vector
-      idx_shift = i - moveouts_minmax[j * 2 + 0];
-
-      if (idx_shift < 0) continue; // don't do anything before 0 time
-      
-      for (s = 0; s < n_stations_restricted_array; s++) {
-        // map from the closest stations to the whole array of stations
-        ss        = station_indexes[source_idx_restricted_array + s]; 
-        moveout_P = moveouts_P[source_idx_whole_array + ss];
-        moveout_S = moveouts_S[source_idx_whole_array + ss];
-        if ((idx_shift + moveout_S) < n_samples && (idx_shift + moveout_P) < n_samples) {
-          sum_beamform_SP +=    traces[ss * n_samples + idx_shift + moveout_S]\
-                              + traces[ss * n_samples + idx_shift + moveout_P];
-        }
-      }
-
-      if (sum_beamform_SP > network_response_max) {
-        network_response_max = sum_beamform_SP;
-        network_resp_idx_max = test_sources[j];
-      }
-    }
-    nw_response[i] = network_response_max;
-    biggest_idx[i] = network_resp_idx_max;
-  }
-}
-
 void network_response_SP_prestacked(int* test_points,
                                     float* traces, 
                                     int* moveouts_P,
@@ -378,6 +383,8 @@ void kurtosis(float *signal,
               int n_components,
               int length,
               float *kurto){
+    /* Naive running kurtosis. This might benefit from implementing
+     * an enhanced running kurtosis algorithm. */
 
     int s,c,n,i,nn; // counter
 

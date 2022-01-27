@@ -305,16 +305,6 @@ def write_template_metadata(database_index,
         metadata['hmax_unc'].append(T.hmax_unc)
         metadata['vmax_unc'].append(T.vmax_unc)
         metadata['max_unc'].append(T.max_location_uncertainty)
-        #with h5.File(os.path.join(db_path, db_path_T,
-        #             'template{:d}meta.h5'.format(tid)), 'r') as f:
-        #    metadata['tid'].append(tid)
-        #    metadata['latitude'].append(f['latitude'][()])
-        #    metadata['longitude'].append(f['longitude'][()])
-        #    metadata['depth'].append(f['depth'][()])
-        #    metadata['lon_unc'].append(np.sqrt(f['cov_mat'][0, 0]))
-        #    metadata['lat_unc'].append(np.sqrt(f['cov_mat'][1, 1]))
-        #    metadata['dep_unc'].append(np.sqrt(f['cov_mat'][2, 2]))
-        #    metadata['max_unc'].append(f['max_location_uncertainty'][()])
         if db_path_M is not None:
             ot = read_catalog_multiplets('multiplets{:d}'.format(tid),
                                          db_path_M=db_path_M, db_path=db_path,
