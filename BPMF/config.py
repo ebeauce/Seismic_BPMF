@@ -6,12 +6,19 @@ import numpy as np
 
 class Config():
     def __init__(self, parameters):
+        for attr in ['min_freq', 'max_freq', 'sampling_rate', 'template_len',
+                'multiplet_len', 'search_win', 'CNR_threshold',
+                'matched_filter_step', 'matched_filter_threshold',
+                'data_buffer', 'buffer_extracted_events']:
+            # allow meaningless default values in case BPMF is used for
+            # very specific usage
+            parameters.setdefault(attr, -10)
         self.__dict__ = parameters
         self.base = os.getcwd()
-        self.data = os.path.join(self.base, self.__dict__['input_path'])
-        self.network_path = os.path.join(self.base, self.__dict__['network_path'])
-        self.moveouts_path = os.path.join(self.base, self.__dict__['moveouts_path'])
-        self.dbpath = self.chk_trailing(self.__dict__['output_path'])
+        self.data = os.path.join(self.base, self.__dict__.get('input_path', ''))
+        self.network_path = os.path.join(self.base, self.__dict__.get('network_path', ''))
+        self.moveouts_path = os.path.join(self.base, self.__dict__.get('moveouts_path', ''))
+        self.dbpath = self.chk_trailing(self.__dict__.get('output_path', ''))
         self.package = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
     def chk_folder(self, path):
@@ -46,7 +53,7 @@ else:
     print(f'Couldn\'t find the parameter file at {parameters_path}.')
     print('See https://github.com/ebeauce/Seismic_BPMF/ for an example'
           ' of a parameters.cfg file.')
-    sys.exit()
+    cfg = Config({})
 
 ## specific parameter config
 ## frequency bands

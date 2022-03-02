@@ -13,37 +13,37 @@ void find_moveouts(const int* moveouts, int *moveouts_minmax,
                    const size_t n_sources, 
                    const size_t n_stations_whole_array,
                    const size_t n_stations_restricted_array) {
-  /* Find the minimum and maximum moveouts for point of the grid.
-   * Even indexes correspond to minimum moveouts,
-   * odd indexes correspond to maximum moveouts. */
+    /* Find the minimum and maximum moveouts for point of the grid.
+     * Even indexes correspond to minimum moveouts,
+     * odd indexes correspond to maximum moveouts. */
 
-  int i; // source counter
-  int s; // station counter
+    int i; // source counter
+    int s; // station counter
 
-  #pragma omp parallel for \
-  private(i, s) \
-  shared(moveouts, moveouts_minmax, \
-         test_sources, station_indexes)
-  for (i = 0; i < n_sources; i++) {
-    int max_moveout = 0;
-    int min_moveout = INT_MAX;
-    int moveout, ss;
+#pragma omp parallel for \
+    private(i, s) \
+    shared(moveouts, moveouts_minmax, \
+           test_sources, station_indexes)
+    for (i = 0; i < n_sources; i++) {
+        int max_moveout = 0;
+        int min_moveout = INT_MAX;
+        int moveout, ss;
 
-    for (s = 0; s < n_stations_restricted_array; s++) {
-        // map from the whole stations array to the restricted array
-        ss =  station_indexes[test_sources[i] * n_stations_restricted_array + s];
-        moveout = moveouts[test_sources[i] * n_stations_whole_array + s];
+        for (s = 0; s < n_stations_restricted_array; s++) {
+            // map from the whole stations array to the restricted array
+            ss =  station_indexes[test_sources[i]*n_stations_restricted_array + s];
+            moveout = moveouts[test_sources[i]*n_stations_whole_array + s];
 
-        if (moveout > max_moveout) {
-             max_moveout = moveout;
+            if (moveout > max_moveout) {
+                 max_moveout = moveout;
+            }
+            if (moveout < min_moveout) {
+                 min_moveout = moveout;
+            }
         }
-        if (moveout < min_moveout) {
-             min_moveout = moveout;
-        }
+        moveouts_minmax[i * 2 + 0] = min_moveout;
+        moveouts_minmax[i * 2 + 1] = max_moveout;
     }
-    moveouts_minmax[i * 2 + 0] = min_moveout;
-    moveouts_minmax[i * 2 + 1] = max_moveout;
-  }
 }
 
 void stack_one_phase(
@@ -79,38 +79,38 @@ void stack_one_phase(
         int source_idx_whole_array, source_idx_restricted_array, ss, moveout, idx_shift;
         
         for (j = 0; j < n_test; j++) {
-          sum_beamform = 0.0;
-        
-          source_idx_whole_array      = test_sources[j] * n_stations_whole_array; // position in the moveouts vector
-          source_idx_restricted_array = test_sources[j] * n_stations_restricted_array; // position in the station indexes vector
-          idx_shift = i - moveouts_minmax[j * 2 + 0]; // position on the time axis
-        
-          if (idx_shift < 0) continue; // don't do anything before time 0
+            sum_beamform = 0.0;
+            
+            source_idx_whole_array = test_sources[j]*n_stations_whole_array; // position in the moveouts vector
+            source_idx_restricted_array = test_sources[j]*n_stations_restricted_array; // position in the station indexes vector
+            idx_shift = i - moveouts_minmax[j * 2 + 0]; // position on the time axis
+            
+            if (idx_shift < 0) continue; // don't do anything before time 0
 
-          // ---------------------------------
-          // define the local pointers
-          tracesN_ = tracesN + idx_shift;
-          tracesE_ = tracesE + idx_shift;
-          cos_az_  = cosine_azimuths + source_idx_whole_array;
-          sin_az_  = sine_azimuths   + source_idx_whole_array;
-          // ---------------------------------
-          
-          for (s = 0; s < n_stations_restricted_array; s++) {
-            // map from the closest stations to the whole array of stations
-            ss        = station_indexes[source_idx_restricted_array + s];
-            moveout   = moveouts[source_idx_whole_array + ss];
-            if ((idx_shift + moveout) < n_samples) {
-                // Rotate the seismograms to get the transverse component.
-                transverse_component =  pow(tracesN_[ss * n_samples + moveout] * cos_az_[ss] +\
-                                            tracesE_[ss * n_samples + moveout] * sin_az_[ss], 2);
-                sum_beamform += transverse_component;
+            // ---------------------------------
+            // define the local pointers
+            tracesN_ = tracesN + idx_shift;
+            tracesE_ = tracesE + idx_shift;
+            cos_az_  = cosine_azimuths + source_idx_whole_array;
+            sin_az_  = sine_azimuths   + source_idx_whole_array;
+            // ---------------------------------
+            
+            for (s = 0; s < n_stations_restricted_array; s++) {
+                // map from the closest stations to the whole array of stations
+                ss = station_indexes[source_idx_restricted_array + s];
+                moveout = moveouts[source_idx_whole_array + ss];
+                if ((idx_shift + moveout) < n_samples) {
+                    // Rotate the seismograms to get the transverse component.
+                    transverse_component = pow(tracesN_[ss*n_samples + moveout] * cos_az_[ss] +\
+                                               tracesE_[ss*n_samples + moveout] * sin_az_[ss], 2);
+                    sum_beamform += transverse_component;
+                }
             }
-          }
-        
-          if (sum_beamform > network_response_max) {
-            network_response_max = sum_beamform; 
-            network_resp_idx_max = test_sources[j];
-          }
+            
+            if (sum_beamform > network_response_max) {
+                network_response_max = sum_beamform; 
+                network_resp_idx_max = test_sources[j];
+            }
         }
         nw_response[i] = network_response_max;
         biggest_idx[i] = network_resp_idx_max;
@@ -304,33 +304,38 @@ void network_response_SP(int*  test_points, float*  traces_H, float* traces_Z,
                          int n_stations_whole_array,
                          int n_stations_restricted_array,
                          int n_sources) {
-  int *moveouts_minmax;
-  moveouts_minmax = (int *)malloc(2 * n_test * sizeof(int));
+    /*
+     * Stack the P- and S-wave beams for all sources in test_points
+     * and all time steps.
+     */
 
-  find_moveouts(moveouts_P,
-                moveouts_minmax,
-                test_points,
-                station_indexes,
-                n_test,
-                n_stations_whole_array,
-                n_stations_restricted_array);
+    int *moveouts_minmax;
+    moveouts_minmax = (int *)malloc(2 * n_test * sizeof(int));
 
-  stack_SP(traces_H,
-           traces_Z,
-           moveouts_P,
-           moveouts_S,
-           station_indexes,
-           moveouts_minmax,
-           test_points,
-           network_response,
-           biggest_idx,
-           n_samples,
-           n_test,
-           n_stations_whole_array,
-           n_stations_restricted_array);
+    find_moveouts(moveouts_P,
+                  moveouts_minmax,
+                  test_points,
+                  station_indexes,
+                  n_test,
+                  n_stations_whole_array,
+                  n_stations_restricted_array);
+
+    stack_SP(traces_H,
+             traces_Z,
+             moveouts_P,
+             moveouts_S,
+             station_indexes,
+             moveouts_minmax,
+             test_points,
+             network_response,
+             biggest_idx,
+             n_samples,
+             n_test,
+             n_stations_whole_array,
+             n_stations_restricted_array);
 
 
-  free(moveouts_minmax);
+    free(moveouts_minmax);
 }
 
 void network_response_SP_prestacked(int* test_points,
@@ -345,32 +350,38 @@ void network_response_SP_prestacked(int* test_points,
                                     int n_stations_whole_array,
                                     int n_stations_restricted_array,
                                     int n_sources) {
-  int *moveouts_minmax;
-  moveouts_minmax = (int *)malloc(2 * n_test * sizeof(int));
+    /*
+     * Stack the P- and S-wave beams for all sources in test_points
+     * and all time steps. The horizontal and vertical detection traces
+     * are already stacked before calling this function.
+     */
 
-  find_moveouts(moveouts_P,
-                moveouts_minmax,
-                test_points,
-                station_indexes,
-                n_test,
-                n_stations_whole_array,
-                n_stations_restricted_array);
+    int *moveouts_minmax;
+    moveouts_minmax = (int *)malloc(2 * n_test * sizeof(int));
 
-  stack_SP_prestacked(traces,
-                      moveouts_P,
-                      moveouts_S,
-                      station_indexes,
-                      moveouts_minmax,
-                      test_points,
-                      network_response,
-                      biggest_idx,
-                      n_samples,
-                      n_test,
-                      n_stations_whole_array,
-                      n_stations_restricted_array);
+    find_moveouts(moveouts_P,
+                  moveouts_minmax,
+                  test_points,
+                  station_indexes,
+                  n_test,
+                  n_stations_whole_array,
+                  n_stations_restricted_array);
+
+    stack_SP_prestacked(traces,
+                        moveouts_P,
+                        moveouts_S,
+                        station_indexes,
+                        moveouts_minmax,
+                        test_points,
+                        network_response,
+                        biggest_idx,
+                        n_samples,
+                        n_test,
+                        n_stations_whole_array,
+                        n_stations_restricted_array);
 
 
-  free(moveouts_minmax);
+    free(moveouts_minmax);
 }
 
 
