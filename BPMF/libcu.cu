@@ -9,6 +9,8 @@ extern "C" {
 
 #include "libcu.h"
 
+/* Hard-coded variables that might benefit from machine-dependend tuning */
+
 #define BLOCKSIZE 512
 #define WARPSIZE 32
 #define NCHUNKS 20

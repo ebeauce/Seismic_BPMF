@@ -661,8 +661,8 @@ def _plot_peaks(x, mph, mpd, threshold, edge, valley, ax, ind):
         plt.show()
 
 def envelope_parallel(traces):
-    """
-    envelope_parallel(traces)\n
+    """Compute the envelope of traces.  
+
     Compute the traces' envelopes using a simple
     parallelization of the envelope function.
     """
@@ -677,8 +677,8 @@ def envelope_parallel(traces):
     return tr_analytic
 
 def envelope(trace):
-    """
-    envelope(trace)\n
+    """Compute the envelope of trace.  
+
     Returns the trace's envelope using the hilbert transform from Scipy.
     """
     return np.float32(np.abs(hilbert(trace)))
