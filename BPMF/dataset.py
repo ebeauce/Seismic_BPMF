@@ -198,7 +198,8 @@ class Template(object):
     """
 
     def __init__(self, template_filename, db_path_T,
-                 db_path=cfg.dbpath, attach_waveforms=False):
+                 db_path=cfg.dbpath, attach_waveforms=False,
+                 metadata=None):
         """Read the template metadata and data.
 
         Parameters
@@ -214,16 +215,24 @@ class Template(object):
         attach_waveforms: boolean, default to False
             If True, read the waveforms from {template_filename}wav.h5
             *AND* builds an obspy stream attribute.
+        metadata: dictionary, default to None
+            If not None, use this dictionary to define the template's
+            attributes. This is typically used for a initializing a new
+            Template instance.
         """
         self.db_path = db_path
         self.db_path_T = db_path_T
         self.filename = template_filename
         self.where = os.path.join(
                 db_path, db_path_T, template_filename)
-        # load metadata
-        with h5.File(self.where + 'meta.h5', 'r') as f:
-            for key in f.keys():
-                self.__setattr__(key, f[key][()])
+        if metadata is not None:
+            for key in metadata.keys():
+                setattr(self, key, metadata[key])
+        else:
+            # load metadata
+            with h5.File(self.where + 'meta.h5', 'r') as f:
+                for key in f.keys():
+                    self.__setattr__(key, f[key][()])
         # alias for template_idx:
         if hasattr(self, 'template_idx'):
             self.tid = self.template_idx
@@ -482,7 +491,7 @@ class Template(object):
         self._vmax_unc = max_vertical
         self._az_hmax_unc = azimuth_hmax
 
-    def write(self, path, filename=None, fields={}):
+    def write(self, path, filename=None, attr_map={}):
         """Write template data and metadata files.  
 
         Parameters
@@ -493,9 +502,9 @@ class Template(object):
             Base name of the data and metadata files. The data filename
             is {filename}wav.h5 and the metadata filename is {filename}meta.h5.
             If None, the template id is used to define the filename.
-        fields: dictionary, default to empty dictionary 
+        attr_map: dictionary, default to empty dictionary 
             Map between the template attributes and the hdf5 field names.
-            Example: `fields['stations'] = 'network_stations'` means that the
+            Example: `attr_map['stations'] = 'network_stations'` means that the
             template attribute `self.network_stations` will be stored as the
             `'stations'` field of the hdf5 file.
         """
@@ -506,14 +515,14 @@ class Template(object):
                 'cov_mat', 'max_location_uncertainty', 'duration',
                 'sampling_rate', 'SNR', 'source_receiver_distances',
                 'template_data_availability', 'origin_time']:
-            kwargs.setdefault(attr, attr)
+            attr_map.setdefault(attr, attr)
         for attr in ['stations', 'p_moveouts', 's_moveouts',
                 'reference_absolute_time', 'travel_times']:
-            kwargs.setdefault(attr, 'network_'+attr)
+            attr_map.setdefault(attr, 'network_'+attr)
         full_fn = os.path.join(path, filename)
         with h5.File(full_fn+'meta.h5', mode='w') as f:
-            for attr in kwargs.keys():
-                attr_ = getattr(self, kwargs[attr])
+            for attr in attr_map.keys():
+                attr_ = getattr(self, attr_map[attr])
                 if (isinstance(attr_, np.ndarray)
                         and (attr_.dtype.kind == np.dtype('U').kind)):
                     attr_ = attr_.astype('S')
