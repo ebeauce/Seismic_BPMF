@@ -28,11 +28,13 @@ I suggest creating a new environment with `conda`.
   conda install compilers
   conda install numpy, scipy, h5py, pandas, matplotlib, obspy
 ```
-and then install `fast_matched_filter` [code and instructions
-here](https://github.com/beridel/fast_matched_filter). I also recommend
+and then install `fast_matched_filter` ([code and instructions
+here](https://github.com/beridel/fast_matched_filter)). I also recommend
 installing my customized version of PhaseNet
-[https://github.com/ebeauce/PhaseNet](https://github.com/ebeauce/PhaseNet) that
-has a wrapper module to call it from a python script.
+([https://github.com/ebeauce/PhaseNet](https://github.com/ebeauce/PhaseNet)) that
+has a wrapper module to call it from a python script. Note: installing
+the `compilers` package allows you to have recent C/Fortran compilers locally
+installed in the BPMF environment.
 
 ## Reference
 Please, cite:
