@@ -11,11 +11,11 @@ import obspy as obs
 import pandas as pd
 import copy
 import datetime
-from obspy.core import UTCDateTime as udt
+from obspy import UTCDateTime as udt
 
 from time import time as give_time
 
-class Network():
+class Network(object):
     """Station metadata.
 
     Contains station metadata.
@@ -37,51 +37,30 @@ class Network():
     def n_components(self):
         return np.int32(len(self.components))
 
-    def read(self):
+    def box(self, lat_min, lat_max, lon_min, lon_max):
+        """Geographical selection of sub-network.  
+
+        Parameters
+        ------------
+        lat_min: scalar, float
+            Minimum latitude of the box.
+        lat_max: scalar, float
+            Maximum latitude of the box.
+        lon_min: scalar, float
+            Minimum longitude of the box.
+        lon_max: scalar, float
+            Maximum longitude of the box.
+
+        Returns
+        ---------------
+        subnet: Network instance
+            The Network instance restricted to the relevant stations.
         """
-        Reads the metadata from the file at self.where
-
-        Note: This function can be modified to match the user's
-        data convention.
-        """
-        networks = []
-        stations = []
-        components = []
-        with open(self.where, 'r') as file:
-            # read in start and end dates
-            columns = file.readline().strip().split()
-            self.start_date = udt(columns[0])
-            self.end_date = udt(columns[1])
-
-            # read in component names
-            columns = file.readline().strip().split()
-            for component in columns[1:]:
-                components.append(component)
-            self.components = components
-            
-            data_centers = []
-            networks     = []
-            locations    = []
-
-            # read in station names and coordinates
-            latitude, longitude, depth = [], [], []
-            for line in file:
-                columns = line.strip().split()
-                data_centers.append(columns[0])
-                networks.append(columns[1])
-                stations.append(columns[2])
-                locations.append(columns[3])
-                latitude.append(np.float32(columns[4]))
-                longitude.append(np.float32(columns[5]))
-                depth.append(-1.*np.float32(columns[6]) / 1000.)  # convert m to km
-
-            self.data_centers = data_centers
-            self.networks     = networks
-            self.stations     = stations
-            self.locations    = locations
-            self.latitude     = np.asarray(latitude, dtype=np.float32)
-            self.longitude    = np.asarray(longitude, dtype=np.float32)
-            self.depth        = np.asarray(depth, dtype=np.float32)
+        selection = (self.latitude > lat_min) & (self.latitude < lat_max)\
+                & (self.longitude > lon_min) & (self.longitude < lon_max)
+        new_stations = (np.asarray(self.stations)[selection]).tolist()
+        subnet = self.subset(new_stations, self.components, method='keep')
+        return subnet
 
     def datelist(self):
         dates = []
@@ -91,6 +70,28 @@ class Network():
             date += datetime.timedelta(days=1)
 
         return dates
+
+    def read(self):
+        """
+        Reads the metadata from the file at self.where
+
+        Note: This function can be modified to match the user's
+        data convention.
+        """
+        with open(self.where, 'r') as fin:
+            line1 = fin.readline()[:-1].split()
+            self.start_date = udt(line1[0])
+            self.end_date = udt(line1[1])
+            line2 = fin.readline()[:-1].split()
+            self.components = line2
+        metadata = pd.read_csv(self.where, sep='\t', skiprows=2)
+        metadata.rename(columns={'station_code': 'stations',
+                                 'network_code': 'networks'},
+                        inplace=True)
+        for field in metadata.keys():
+            setattr(self, field, metadata[field].values)
+        self.depth = -1.*self.elevation_m/1000. # depth in km
+        self.stations = self.stations.tolist()
 
     def stations_idx(self, stations):
         if not isinstance(stations, list) and not isinstance(stations, np.ndarray):
@@ -106,7 +107,7 @@ class Network():
         -----------
         stations: list or array of strings
             Stations to keep or discard, depending on the method.
-        components: list of array of strings
+        components: list or array of strings
             Components to keep or discard, depending on the method.
         method: string, default to 'keep'
             Should be 'keep' or 'discard'.
@@ -189,6 +190,538 @@ class Network():
             # return distance in km
             self._interstation_distances = intersta_dist
             return self._interstation_distances
+
+class Data(object):
+    """A Data class to manipulate waveforms and metadata.  
+
+
+    """
+
+    def __init__(self, date, db_path=cfg.input_path, filename=None,
+            duration=24.*3600., sampling_rate=None):
+        """
+        Parameters
+        -----------
+        date: string
+            Date of the requested day. Example: '2016-01-23'.
+        db_path: string, default to `cfg.dbpath`
+            Path to the data root directory. Data are then organized by year
+            such as: db_path/year/data_file1...
+        filename: string, default to None
+            File name. If None, it assumes a standard format: data_YYYYmmdd.h5
+        duration: float, default to 24*3600
+            Target duration, in seconds, of the waveform time series. Waveforms
+            will be trimmed and zero-padded to match this duration.
+        sampling_rate: float or int, default to None
+            Sampling rate of the data. This variable should be left to None if
+            this Data instance aims at dealing with raw data and multiple
+            sampling rates.
+        """
+        self.date = udt(date)
+        if filename is None:
+            self.filename = f'data_{self.date.strftime("%Y%m%d")}.h5'
+        else:
+            self.filename = filename
+        # full path:
+        self.where = os.path.join(db_path, str(self.date.year), self.filename)
+        self.duration = duration
+        # fetch metadata
+        self._read_metadata()
+        if sampling_rate is not None:
+            self.sampling_rate = sampling_rate
+            self.n_samples = utils.sec_to_samp(duration, sr=self.sampling_rate)
+
+    @property
+    def sr(self):
+        return self.sampling_rate
+
+    @property
+    def time(self):
+        if not hasattr(self, 'sampling_rate'):
+            print('You need to define the instance\'s sampling rate first.')
+            return
+        if not hasattr(self, '_time'):
+            self._time = utils.time_range(
+                    self.date, self.date + self.duration, 1./self.sr, unit='ms')
+        return self._time
+
+    def get_np_array(self, stations, components=['N', 'E', 'Z'],
+                     component_aliases={'N': ['N', '1'],
+                                        'E': ['E', '2'],
+                                        'Z': ['Z']},
+                     priority='HH', verbose=True):
+        if not hasattr(self, 'traces'):
+            print('You should call read_waveforms first.')
+            return None
+        return utils.get_np_array(self.traces, stations, components=components,
+                priority=priority, component_aliases=component_aliases,
+                n_samples=self.n_samples, verbose=verbose)
+
+    def _read_metadata(self):
+        from pyasdf import ASDFDataSet
+        with ASDFDataSet(self.where, mode='r') as ds:
+            metadata = pd.DataFrame(ds.get_all_coordinates()).transpose()
+            net_sta = [code.split(sep='.') for code in metadata.index]
+            networks, stations = [[net for net, sta in net_sta],
+                    [sta for net, sta in net_sta]]
+            metadata['network_code'] = networks
+            metadata['station_code'] = stations
+            metadata.rename(columns={'elevation_in_m': 'elevation'},
+                    inplace=True)
+        self.metadata = metadata
+
+    def read_waveforms(self, tag, trim_traces=True):
+        """Read the waveform time series.  
+
+        Parameters
+        -----------
+        tag: string
+            Tag name of the waveforms in the the ASDF data set. Example: "raw"
+            or "preprocessed_1_12"
+        trim_traces: boolean, default to True
+            If True, call `trim_waveforms` to make sure all traces have the same
+            start time.
+        """
+        from pyasdf import ASDFDataSet
+        traces = obs.Stream()
+        with ASDFDataSet(self.where, mode='r') as ds:
+            for station in ds.ifilter(ds.q.tag == tag):
+                traces += getattr(station, tag)
+        self.traces = traces
+        if trim_traces:
+            self.trim_waveforms()
+
+    def trim_waveforms(self, starttime=None, endtime=None):
+        """Trim waveforms.  
+
+        Start times might differ of one sample on different traces. Use this
+        method to make sure all traces have the same start time.
+
+        Parameters
+        -----------
+        starttime: string or datetime, default to None
+            If None, use `self.date` as the start time.
+        endtime: string or datetime, default to None
+            If None, use `self.date` + `self.duration` as the end time.
+        """
+        if not hasattr(self, 'traces'):
+            print('You should call `read_waveforms` first.')
+            return
+        if starttime is None:
+            starttime = self.date
+        if endtime is None:
+            endtime = self.date + self.duration
+        for tr in self.traces:
+            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=0.)
+
+class Event(object):
+    """An Event class to describe *any* collection of waveforms.  
+
+    """
+
+    def __init__(self, origin_time, moveouts, stations, phases,
+            data_filename, data_path, latitude=None, longitude=None, depth=None,
+            sampling_rate=None, components=['N', 'E', 'Z'], id=None):
+        """Initialize an Event instance with basic attributes.  
+
+        Parameters
+        -----------
+        origin_time: string
+            Origin time, or detection time, of the event. Phase picks are
+            defined by origin_time + moveout.
+        moveouts: (n_stations, n_phases) float numpy.ndarray
+            Moveouts, in seconds, for each station and each phase.
+        stations: List of strings
+            List of station names corresponding to `moveouts`.
+        phases: List of strings
+            List of phase names corresponding to `moveouts`.
+        data_filename: string
+            Name of the data file.
+        data_path: string
+            Path to the data directory.
+        latitude: scalar float, default to None
+            Event latitude.
+        longitude: scalar float, default to None
+            Event longitude.
+        depth: scalar float, default to None
+            Event depth.
+        sampling_rate: scalar float, default to None
+            Sampling rate (Hz) of the waveforms. It should be different from
+            None only if you plan on reading preprocessed data with a fixed
+            sampling rate.
+        components: List of strings, default to ['N','E','Z']
+            List of the components to use in reading and plotting methods.
+        """
+        self.origin_time = udt(origin_time)
+        self.date = self.origin_time # for compatibility with Data class
+        self.where = os.path.join(data_path, data_filename)
+        self.stations = np.asarray(stations).astype('U')
+        self.components = np.asarray(components).astype('U')
+        self.phases = np.asarray(phases).astype('U')
+        self.latitude = latitude
+        self.longitude = longitude
+        self.depth = depth
+        self.sampling_rate = sampling_rate
+        if moveouts.dtype in (np.int32, np.int64):
+            print('Integer data type detected for moveouts. Are you sure these'
+                  ' are in seconds?')
+        # format moveouts in a Pandas data frame
+        mv_table = {'stations': self.stations}
+        for p, ph in enumerate(self.phases):
+            mv_table[f'moveouts_{ph.upper()}'] = moveouts[:, p]
+        self.moveouts = pd.DataFrame(mv_table)
+        self.moveouts.set_index('stations', inplace=True)
+        if id is None:
+            self.id = self.origin_time.strftime('%Y%m%d_%H%M%S')
+        else:
+            self.id = id
+
+    @classmethod
+    def read_from_file(cls, filename, db_path=cfg.dbpath, gid=None):
+        """Initialize an Event instance from `filename`.  
+
+        Parameters
+        ------------
+        filename: string
+            Name of the hdf5 file with the event's data.
+        db_path: string, default to `cfg.dbpath`
+            Name of the directory where `filename` is located.
+        gid: string, default to None
+            If not None, this string is the hdf5's group name of the event.
+
+        Returns
+        ----------
+        event: `Event` instance
+            The `Event` instance defined by the data in `filename`.
+        """
+        attributes = ['origin_time', 'moveouts', 'stations', 'phases']
+        optional_attr = ['latitude', 'longitude', 'depth', 'sampling_rate',
+                'compoments', 'id']
+        args = []
+        kwargs = {}
+        with h5.File(os.path.join(db_path, filename), mode='r') as f:
+            if gid is not None:
+                # go to specified group
+                f = f[gid]
+            for attr in attributes:
+                args.append(f[attr][()])
+            data_path, data_filename = os.path.split(f['where'][()])
+            args.extend([data_filename, data_path])
+            for opt_attr in optional_attr:
+                if opt_attr in f:
+                    kwargs[opt_attr] = f[opt_attr][()]
+            if 'aux_data' in f:
+                aux_data = {}
+                for key in f['aux_data'].keys():
+                    aux_data[key] = f['aux_data'][key][()]
+            if 'picks' in f:
+                picks = {}
+                for key in f['picks'].keys():
+                    picks[key] = f['picks'][key][()]
+                    if picks[key].dtype.kind == 'S':
+                        picks[key] = picks[key].astype('U')
+                        if key != 'stations':
+                            picks[key] = pd.to_datetime(picks[key])
+                picks = pd.DataFrame(picks)
+                picks.set_index('stations', inplace=True)
+        # ! the order of args is important !
+        event = cls(*args, **kwargs)
+        event.set_aux_data(aux_data)
+        event.picks = picks
+        return event
+
+    @property
+    def sr(self):
+        return self.sampling_rate
+
+    def get_np_array(self, stations, components=None,
+                     component_aliases={'N': ['N', '1'],
+                                        'E': ['E', '2'],
+                                        'Z': ['Z']},
+                     priority='HH', verbose=True):
+        if not hasattr(self, 'traces'):
+            print('You should call read_waveforms first.')
+            return None
+        if components is None:
+            components = self.components
+        return utils.get_np_array(self.traces, stations, components=components,
+                priority=priority, component_aliases=component_aliases,
+                n_samples=self.n_samples, verbose=verbose)
+
+    def pick_PS_phases(self, duration, tag, threshold_P=0.60, threshold_S=0.60,
+                       offset_ot=cfg.buffer_extracted_events,
+                       mini_batch_size=126, component_phase={'N': 'S', '1': 'S',
+                       'E': 'S', '2': 'S', 'Z': 'P'}):
+        """Use PhaseNet (Zhu et al., 2018) to pick P and S waves.  
+
+        Note: PhaseNet must be used with 3-comp data.
+
+        Parameters
+        -----------
+        duration: scalar float
+            Duration, in seconds, of the time window to process to search for P
+            and S wave arrivals.
+        tag: string
+            Tag name of the target data. For example: 'preprocessed_1_12'.
+        threshold_P: scalar float, default to 0.60
+            Threshold on PhaseNet's probabilities to trigger the identification
+            of a P-wave arrival.
+        threshold_S: scalar float, default to 0.60
+            Threshold on PhaseNet's probabilities to trigger the identification
+            of a S-wave arrival.
+        mini_batch_size: scalar int, default to 126
+            Number of traces processed in a single batch by PhaseNet. This
+            shouldn't have to be tuned.
+        component_phase: dictionary, optional
+            Dictionary defining which seismic phase is extracted on each
+            component. For example, component_phase['N'] gives the phase that is
+            extracted on the north component.
+
+        """
+        from phasenet import wrapper as PN
+        # read waveforms in picking mode, i.e. with `time_shifted`=False
+        self.read_waveforms(duration, tag, offset_ot=offset_ot,
+                component_phase=component_phase, time_shifted=False)
+        data_arr = self.get_np_array(self.stations, components=['N', 'E', 'Z'])
+        # call PhaseNet
+        PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
+                data_arr[np.newaxis, ...], self.stations, '.',
+                f'detection_{str(self.origin_time)}',
+                mini_batch_size=mini_batch_size,
+                threshold_P=threshold_P, threshold_S=threshold_S)
+        # keep best P- and S-wave pick on each 3-comp seismogram
+        PhaseNet_picks = PN.get_best_picks(PhaseNet_picks)
+        # add picks to auxiliary data
+        #self.set_aux_data(PhaseNet_picks)
+        # format picks in pandas DataFrame
+        pandas_picks = {'stations': self.stations}
+        for ph in ['P', 'S']:
+            rel_picks_sec = np.zeros(len(self.stations), dtype=np.float32)
+            proba_picks = np.zeros(len(self.stations), dtype=np.float32)
+            abs_picks = np.zeros(len(self.stations), dtype=object)
+            for s, sta in enumerate(self.stations):
+                if sta in PhaseNet_picks[f'{ph}_picks'].keys():
+                    rel_picks_sec[s] = PhaseNet_picks[f'{ph}_picks'][sta][0]/self.sr
+                    proba_picks[s] = PhaseNet_picks[f'{ph}_proba'][sta][0]
+                    if proba_picks[s] > 0.:
+                        abs_picks[s] = self.traces.select(station=sta)[0].stats.starttime \
+                                + rel_picks_sec[s]
+            pandas_picks[f'{ph}_picks_sec'] = rel_picks_sec
+            pandas_picks[f'{ph}_probas'] = proba_picks
+            pandas_picks[f'{ph}_abs_picks'] = abs_picks
+        self.picks = pd.DataFrame(pandas_picks)
+        self.picks.set_index('stations', inplace=True)
+        self.picks.replace(0., np.nan, inplace=True)
+
+
+
+    def read_waveforms(self, duration, tag, component_phase={'N': 'S', '1': 'S',
+                  'E': 'S', '2': 'S', 'Z': 'P'}, offset_phase={'P': 1., 'S': 4.},
+                  time_shifted=True, offset_ot=cfg.buffer_extracted_events):
+        """Read waveform data.  
+
+        Parameters
+        -----------
+        duration: scalar float
+            Duration, in seconds, of the extracted time windows.
+        tag: string
+            Tag name of the target data. For example: 'preprocessed_1_12'.
+        component_phase: dictionary, optional
+            Dictionary defining which seismic phase is extracted on each
+            component. For example, component_phase['N'] gives the phase that is
+            extracted on the north component.
+        offset_phase: dictionary, optional
+            Dictionary defining when the time window starts with respect to the
+            pick. A positive offset means the window starts before the pick. Not
+            used if `time_shifted` is False.
+        time_shifted: boolean, default to True
+            If True, the moveouts are used to extract time windows from specific
+            seismic phases. If False, windows are simply extracted with respect to
+            the origin time.
+        offset_ot: scalar float, default to `cfg.buffer_extracted_events`
+            Only used if `time_shifted` is False. Time, in seconds, taken before
+            `origin_time`.
+        """
+        from pyasdf import ASDFDataSet
+        from obspy import Stream
+        self.traces = Stream()
+        self.duration = duration
+        self.n_samples = utils.sec_to_samp(self.duration, sr=self.sr)
+        with ASDFDataSet(self.where, mode='r') as ds:
+            for station in ds.ifilter(ds.q.tag == tag,
+                    ds.q.station == self.stations):
+                for trid in station.channel_coordinates.keys():
+                    net, sta, loc, cha = trid.split(sep='.')
+                    comp = cha[-1]
+                    ph = component_phase[comp]
+                    if time_shifted:
+                        pick = self.origin_time \
+                                + self.moveouts[f'moveouts_{ph.upper()}'].loc[sta] \
+                                - offset_phase[ph.upper()]
+                    else:
+                        pick = self.origin_time - offset_ot
+                    # query the exact data
+                    self.traces += ds.get_waveforms(
+                            network=net, station=sta, location=loc, channel=cha,
+                            starttime=pick, endtime=pick+duration, tag=tag)
+                    #self.traces[-1].data = self.traces[-1].data[:self.n_samples]
+        for ph in offset_phase.keys():
+            self.set_aux_data({f'offset_{ph.upper()}': offset_phase[ph]})
+        for comp in component_phase.keys():
+            self.set_aux_data({f'phase_on_comp{comp}': component_phase[comp]})
+        if not time_shifted:
+            self.trim_waveforms(starttime=self.origin_time-offset_ot,
+                    endtime=self.origin_time-offset_ot+self.duration)
+
+    def set_aux_data(self, aux_data):
+        """Adds any extra data to the Event instance.  
+
+        Parameters
+        ------------
+        aux_data: dictionary
+            Dictionary with any auxiliary data.
+        """
+        if not hasattr(self, 'aux_data'):
+            self.aux_data = {}
+        for field in aux_data:
+            self.aux_data[field] = aux_data[field]
+
+    def trim_waveforms(self, starttime=None, endtime=None):
+        """Trim waveforms.  
+
+        Start times might differ of one sample on different traces. Use this
+        method to make sure all traces have the same start time.
+
+        Parameters
+        -----------
+        starttime: string or datetime, default to None
+            If None, use `self.date` as the start time.
+        endtime: string or datetime, default to None
+            If None, use `self.date` + `self.duration` as the end time.
+        """
+        if not hasattr(self, 'traces'):
+            print('You should call `read_waveforms` first.')
+            return
+        if starttime is None:
+            starttime = self.date
+        if endtime is None:
+            endtime = self.date + self.duration
+        for tr in self.traces:
+            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=0.)
+
+    def write(self, db_filename, db_path=cfg.dbpath, save_waveforms=False):
+        """Write to hdf5 file.  
+
+        Parameters
+        ------------
+        db_filename: string
+            Name of the hdf5 file storing the event information.
+        db_path: string, default to `cfg.dbpath`
+            Name of the directory with `db_filename`.
+        save_waveforms: boolean, default to False
+            If True, save the waveforms.
+        """
+        output_where = os.path.join(db_path, db_filename)
+        attributes = ['origin_time', 'latitude', 'longitude', 'depth',
+                'moveouts', 'stations', 'components', 'phases', 'where',
+                'sampling_rate']
+        with h5.File(output_where, mode='a') as f:
+            if self.id in f:
+                # overwrite existing detection with same id
+                print(f'Found existing event {self.id}. Overwrite it.')
+                del f[self.id]
+            f.create_group(self.id)
+            for attr in attributes:
+                if not hasattr(self, attr):
+                    continue
+                attr_ = getattr(self, attr)
+                if attr == 'origin_time':
+                    attr_ = str(attr_)
+                if isinstance(attr_, list):
+                    attr_ = np.asarray(attr_)
+                if (isinstance(attr_, np.ndarray)
+                        and (attr_.dtype.kind == np.dtype('U').kind)):
+                    attr_ = attr_.astype('S')
+                f[self.id].create_dataset(attr, data=attr_)
+            if hasattr(self, 'aux_data'):
+                f[self.id].create_group('aux_data')
+                for key in self.aux_data.keys():
+                    f[self.id]['aux_data'].create_dataset(key,
+                            data=self.aux_data[key])
+            if hasattr(self, 'picks'):
+                f[self.id].create_group('picks')
+                f[self.id]['picks'].create_dataset(
+                        'stations', data=np.asarray(self.picks.index).astype('S'))
+                for column in self.picks.columns:
+                    data = self.picks[column]
+                    if data.dtype == np.dtype('O'):
+                        data = data.astype('S')
+                    f[self.id]['picks'].create_dataset(
+                            column, data=data)
+
+
+
+    # -----------------------------------------------------------
+    #            plotting method(s)
+    # -----------------------------------------------------------
+
+    def plot(self, figsize=(20, 15), gain=1.e6, ylabel=r'Velocity ($\mu$m/s)',
+             component_aliases={'N': ['N', '1'], 'E': ['E', '2'], 'Z': ['Z']}):
+        """Plot the waveforms of the Event instance.  
+
+        Parameters
+        ------------
+
+        Returns
+        ----------
+        fig: plt.Figure
+            Figure instance produced by this method.
+        """
+        import matplotlib.pyplot as plt
+        import matplotlib.dates as mdates
+
+        start_times, end_times = [], []
+        fig, axes = plt.subplots(num=f'event_{str(self.origin_time)}',
+                figsize=figsize, nrows=len(self.stations),
+                ncols=len(self.components))
+        fig.suptitle(f'Event at {self.origin_time.strftime("%Y-%m-%d %H:%M:%S")}')
+        for s, sta in enumerate(self.stations):
+            for c, cp in enumerate(self.components):
+                for cp_alias in component_aliases[cp]:
+                    tr = self.traces.select(station=sta, component=cp_alias)
+                    if len(tr) > 0:
+                        # succesfully retrieved data
+                        break
+                if len(tr) == 0:
+                    continue
+                else:
+                    tr = tr[0]
+                time = utils.time_range(tr.stats.starttime,
+                        tr.stats.endtime, tr.stats.delta, unit='ms')
+                start_times.append(time[0])
+                end_times.append(time[-1])
+                axes[s, c].plot(
+                        time[:self.n_samples], tr.data[:self.n_samples]*gain,
+                        color='k')
+                # plot the theoretical pick
+                if (hasattr(self, 'picks') and (sta in self.picks.index) and
+                        (self.picks.loc[sta]['P_probas'] > 0.)):
+                    P_pick = np.datetime64(self.picks.loc[sta]['P_abs_picks'])
+                    axes[s, c].axvline(P_pick, color='C0', lw=0.75)
+                if (hasattr(self, 'picks') and (sta in self.picks.index) and
+                        (self.picks.loc[sta]['S_probas'] > 0.)):
+                    S_pick = np.datetime64(self.picks.loc[sta]['S_abs_picks'])
+                    axes[s, c].axvline(S_pick, color='C3', lw=0.75)
+                axes[s, c].text(0.05, 0.05, f'{sta}.{cp_alias}',
+                        transform=axes[s, c].transAxes)
+        for ax in axes.flatten():
+            ax.set_xlim(min(start_times), max(end_times))
+            ax.xaxis.set_major_formatter(
+                mdates.ConciseDateFormatter(ax.xaxis.get_major_locator()))
+        plt.subplots_adjust(top=0.95, bottom=0.06, right=0.98, left=0.06)
+        fig.text(0.03, 0.40, ylabel, rotation='vertical')
+        return fig
+        
 
 
 class Template(object):
@@ -1541,7 +2074,7 @@ class EventFamily(object):
                     **preprocess_kwargs)
             if len(event) > 0:
                 detection_waveforms.append(utils.get_np_array(
-                    event, net, verbose=False))
+                    event, net.stations, components=net.components, verbose=False))
             else:
                 detection_waveforms.append(np.zeros(
                     len(net.stations), len(net.components),
