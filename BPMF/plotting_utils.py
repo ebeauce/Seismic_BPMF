@@ -456,3 +456,258 @@ def plot_catalog(tids=None, db_path_T=None, db_path_M=None, catalog=None,
     plt.colorbar(scalar_map, cax, orientation='vertical', label='Latitude')
     return fig
 
+# ---------------------------------------------------------------
+#                Utils for maps
+# ---------------------------------------------------------------
+
+def initialize_map(map_longitudes, map_latitudes,
+                   map_axis=None, seismic_stations=None,
+                   GPS_stations=None, text_size=14, markersize=10,
+                   topography_file=None, path_topo='',
+                   fault_file=None,
+                   right_labels=False, left_labels=True,
+                   bottom_labels=True, top_labels=False,
+                   **kwargs):
+    """Initialize map instance with Cartopy. 
+
+    """
+    import cartopy as ctp
+
+    kwargs['topo_alpha'] = kwargs.get('topo_alpha', 0.30)
+    kwargs['downsample_faults'] = kwargs.get('downsample_faults', True)
+    kwargs['shaded_topo'] = kwargs.get('shaded_topo', True)
+    kwargs['topo_cmap'] = kwargs.get('topo_cmap', 'gray')
+    kwargs['topo_cnorm'] = kwargs.get('topo_cnorm', None)
+    kwargs['fault_zorder'] = kwargs.get('fault_zorder', 1.01)
+    figsize = kwargs.get('figsize', (15, 15))
+
+    map_corners = [map_longitudes[0],
+                   map_latitudes[0],
+                   map_longitudes[1],
+                   map_latitudes[1]]
+    
+    data_coords = ctp.crs.PlateCarree()
+    if map_axis is None:
+        #projection = ctp.crs.PlateCarree()
+        projection = ctp.crs.Mercator(central_longitude=sum(map_longitudes)/2.,
+                                      min_latitude=map_latitudes[0],
+                                      max_latitude=map_latitudes[1])
+        fig = plt.figure(kwargs.get('figname', 'map'), figsize=figsize)
+        map_axis = fig.add_subplot(111, projection=projection)
+        map_axis.set_rasterization_zorder(1)
+        map_axis.set_extent([map_longitudes[0], 
+                             map_longitudes[1],
+                             map_latitudes[0],
+                             map_latitudes[1]],
+                            crs=data_coords)
+
+    RES = '10m'
+
+    if topography_file is not None:
+        # -----------------------
+        # get topography
+        import netCDF4
+        with netCDF4.Dataset(os.path.join(path_topo,
+                             topography_file), 'r') as f:
+            if 'z' in f.variables:
+                topo = f.variables['z'][:].data
+            elif 'Band1' in f.variables:
+                topo = f.variables['Band1'][:].data
+            if 'lon' in f.variables:
+                lon_topo = f.variables['lon'][:].data
+            elif 'x' in f.variables:
+                lon_topo = f.variables['x'][:].data
+            if 'lat' in f.variables:
+                lat_topo = f.variables['lat'][:].data
+            elif 'y' in f.variables:
+                lat_topo = f.variables['y'][:].data
+        # select relevant area
+        selected_lon = np.where((lon_topo >= map_longitudes[0]) &
+                                (lon_topo <= map_longitudes[1]))[0]
+        selected_lat = np.where((lat_topo >= map_latitudes[0]) &
+                                (lat_topo <= map_latitudes[1]))[0]
+        lon_topo = lon_topo[selected_lon]
+        lat_topo = lat_topo[selected_lat]
+        topo = topo[selected_lat, :]
+        topo = topo[:, selected_lon]
+        # make sure to take these arrays in ascending lons and lats
+        ascending_lon = np.argsort(lon_topo)
+        ascending_lat = np.argsort(lat_topo)
+        lon_topo, lat_topo = lon_topo[ascending_lon], lat_topo[ascending_lat]
+        topo = topo[ascending_lat, :]
+        topo = topo[:, ascending_lon]
+        if kwargs['shaded_topo']:
+            # get topography gradient
+            grad_x, grad_y = np.gradient(topo)
+            slope = np.pi/2. - np.arctan(np.sqrt(grad_x**2 + grad_y**2))
+            aspect = np.arctan2(grad_x, grad_y)
+            altitude = np.pi/4. # sun angle
+            azimuth = np.pi/2. # sun direction
+            topo = np.sin(altitude) * np.sin(slope)\
+                    + np.cos(altitude) * np.cos(slope)\
+                    * np.cos((azimuth - np.pi/2.) - aspect)
+        #levels_topo = np.linspace(-500., topo.max(), 20)
+        #print('Plot the topography.')
+        # transform data
+        # fast version
+        t1 = give_time()
+        lon_g, lat_g = np.meshgrid(lon_topo, lat_topo, indexing='xy')
+        trans_data = map_axis.projection.transform_points(
+                data_coords, lon_g, lat_g, topo)
+        X = trans_data[..., 0]
+        Y = trans_data[..., 1]
+        Z = trans_data[..., 2]
+        map_axis.imshow(Z,
+                        extent=[X.min(), X.max(), Y.min(), Y.max()],
+                        cmap=kwargs['topo_cmap'],
+                        norm=kwargs['topo_cnorm'],
+                        origin='lower',
+                        alpha=kwargs['topo_alpha'],
+                        interpolation='bilinear',
+                        zorder=-1)
+        t2 = give_time()
+        #print('Topography plotted in {:.2f}s'.format(t2-t1))
+
+    #------------ DRAW MERIDIANS AND PARALLELS --------------
+    LON0 = (int(map_longitudes[0]/0.5) + 1.) * 0.5
+    LON1 = (int(map_longitudes[1]/0.5) + 1.) * 0.5
+    #lon_ticks = np.arange(map_longitudes[0], map_longitudes[1]+0.5, 0.5)
+    lon_ticks = np.arange(LON0-0.5, LON1+0.5, 0.5)
+    LAT0 = (int(map_latitudes[0]/0.5) + 1.) * 0.5
+    LAT1 = (int(map_latitudes[1]/0.5) + 1.) * 0.5
+    #lat_ticks = np.arange(map_latitudes[0], map_latitudes[1]+0.5, 0.5)
+    lat_ticks = np.arange(LAT0-0.5, LAT1+0.5, 0.5)
+    #--------------------------------------------------------
+    
+    #----------- DRAW BORDERS -------------
+    brds = ctp.feature.BORDERS
+    #--------------------------------------
+    
+    gl = map_axis.gridlines(draw_labels=True,
+                            linewidth=1,
+                            alpha=0.5,
+                            color='k',
+                            linestyle='--')
+    gl.right_labels = right_labels
+    gl.left_labels = left_labels
+    gl.top_labels = top_labels
+    gl.bottom_labels = bottom_labels
+    
+    if kwargs.get('coastlines', True):
+        #print('Add coast lines.')
+        map_axis.add_feature(ctp.feature.GSHHSFeature(
+            scale='full', levels=kwargs.get('coastline_levels', [1, 2]),
+            zorder=0.49))#, rasterized=True))
+    # comment this to save time on plotting high-resolution oceans
+    if kwargs.get('oceans', False):
+        oceans = ctp.feature.OCEAN
+        map_axis.add_feature(ctp.feature.NaturalEarthFeature(
+            category=oceans.category,
+            name=oceans.name,
+            scale='10m',
+            facecolor='#0076b482'))
+
+    #print('Add faults.')
+    if fault_file is not None:
+        faults = read_fault_file(os.path.join(path_topo, fault_file),
+                                 bounds=list(map_longitudes)+list(map_latitudes))
+        lines = LineCollection(faults, linewidths=0.5, colors='k', zorder=0.5,
+                               transform=data_coords)#, rasterized=True)
+        map_axis.add_collection(lines)
+    # plot optional elements
+    props = dict(boxstyle='round', facecolor='white',
+                 edgecolor=None, alpha=0.6, pad=0.2)
+
+    # plot seismic stations
+    if seismic_stations is not None:
+        #print('Add seismic stations.')
+        for s in range(len(seismic_stations['stations'])):
+            if (seismic_stations['longitude'][s] > map_longitudes[1]) or\
+               (seismic_stations['longitude'][s] < map_longitudes[0]) or\
+               (seismic_stations['latitude'][s] > map_latitudes[1]) or\
+               (seismic_stations['latitude'][s] < map_latitudes[0]):
+                continue
+            map_axis.plot(seismic_stations['longitude'][s],
+                          seismic_stations['latitude'][s],
+                          marker='v',
+                          color='k',
+                          markersize=markersize,
+                          transform=data_coords,
+                          zorder=1)
+            if seismic_stations['stations'][s] != '':
+                map_axis.text(seismic_stations['longitude'][s]+0.02,
+                              seismic_stations['latitude'][s],
+                              seismic_stations['stations'][s],
+                              fontsize=text_size,
+                              transform=data_coords,
+                              zorder=2,
+                              bbox=props)
+    if GPS_stations is not None:
+        #print('Add GPS stations.')
+        for s in range(len(GPS_stations['stations'])):
+            if (GPS_stations['longitude'][s] > map_longitudes[1]) or\
+               (GPS_stations['longitude'][s] < map_longitudes[0]) or\
+               (GPS_stations['latitude'][s] > map_latitudes[1]) or\
+               (GPS_stations['latitude'][s] < map_latitudes[0]):
+                continue
+            map_axis.plot(GPS_stations['longitude'][s],
+                          GPS_stations['latitude'][s],
+                          marker='s',
+                          color='C4',
+                          markersize=markersize,
+                          transform=data_coords,
+                          zorder=1)
+            if GPS_stations['stations'][s] != '':
+                map_axis.text(GPS_stations['longitude'][s]+0.01,
+                              GPS_stations['latitude'][s],
+                              GPS_stations['stations'][s],
+                              fontsize=text_size,
+                              transform=data_coords,
+                              zorder=2,
+                              bbox=props)
+
+    return map_axis
+
+def add_scale_bar(ax, x_start, y_start, distance, source_crs,
+                  azimuth=90., **kwargs):
+    """
+    Parameters
+    -----------
+    ax: GeoAxes instance
+        The axis on which we want to add a scale bar.
+    x_start: float
+        The x coordinate of the left end of the scale bar,
+        given in the axis coordinate system, i.e. from 0 to 1.
+    y_start: float
+        The y coordinate of the left end of the scale bar,
+        given in the axis coordinate system, i.e. from 0 to 1.
+    distance: float
+        The distance covered by the scale bar, in km.
+    source_crs: cartopy.crs
+        The coordinate system in which the data are written.
+    """
+    from cartopy.geodesic import Geodesic
+    G = Geodesic()
+ 
+    # default values
+    kwargs['lw'] = kwargs.get('lw', 2)
+    kwargs['color'] = kwargs.get('color', 'k')
+
+    data_coords = ctp.crs.PlateCarree()
+    # transform the axis coordinates into display coordinates
+    display = ax.transAxes.transform([x_start, y_start])
+    # take display coordinates into data coordinates
+    data = ax.transData.inverted().transform(display)
+    # take data coordinates into lon/lat
+    lon_start, lat_start = data_coords.transform_point(
+            data[0], data[1], source_crs)
+    # get the coordinates of the end of the scale bar
+    lon_end, lat_end, _ = np.asarray(G.direct(
+            [lon_start, lat_start], azimuth, 1000.*distance))[0]
+    ax.plot([lon_start, lon_end], [lat_start, lat_end],
+            transform=data_coords, **kwargs)
+    ax.text((lon_start+lon_end)/2., (lat_start+lat_end)/2.-0.001,
+            '{:.0f}km'.format(distance), transform=data_coords,
+            ha='center', va='top')
+    return
+

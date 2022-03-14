@@ -453,7 +453,7 @@ class NetworkResponse(object):
                         tr.stats.endtime, 1./sr, unit='ms')
                 start_times.append(time[0])
                 end_times.append(time[-1])
-                ax.plot(time, tr.data[:detection.n_samples], color='k')
+                ax.plot(time[:detection.n_samples], tr.data[:detection.n_samples], color='k')
                 # plot the theoretical pick
                 phase = detection.aux_data[f'phase_on_comp{cp_alias}'].upper()
                 offset_ph = detection.aux_data[f'offset_{phase}']
