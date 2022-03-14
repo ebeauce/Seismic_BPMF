@@ -1,13 +1,15 @@
-import os.path
+import os
 import sys
 
 from .config import cfg
 from . import common as cmn
-from . import data, clib, db_h5py, utils
+from . import data, clib, db_h5py, utils, dataset
 
 import numpy as np
 import pandas as pd
 import matplotlib.pylab as plt
+
+import beamnetresponse as bnr
 
 try:
     from scipy.stats import median_abs_deviation as scimad
@@ -18,59 +20,319 @@ from scipy.ndimage.filters import gaussian_filter1d
 from scipy.interpolate import interp1d
 from scipy.signal import hilbert
 
-import pickle
-
 from time import time as give_time
 
 from math import isnan
 
 from obspy.core import UTCDateTime as udt
 
-class NetworkResponse():
-    """Result from calc_network_response.
+class NetworkResponse(object):
+    """Class for computing and post-processing the network response.  
+
     """
     
-    def __init__(self,
-                 stations,
-                 components,
-                 sampling_rate,
-                 date):
+    def __init__(self, data, network, tt_filename='tts.h5',
+            path_tts=cfg.moveouts_path, phases=['P', 'S'],
+            starttime=None):
+        """Initialize the essential attributes.  
 
-        self.stations = stations
-        self.components = components
-        self.sampling_rate = sampling_rate
-        self.date = date
+        Parameters
+        -----------
+        data: dataset.Data instance
+            The Data instance with the waveform time series and metadata
+            required for the computation of the (composite) network response.
+        network: dataset.Network instance
+            The Network instance with the station network information.
+            `network` can force the network response to be computed only on
+            a subset of the data stored in `data`.
+        tt_filename: string, default to 'tts.h5'
+            Name of the hdf5 file with travel-times.
+        path_tts: string, default to `cfg.moveouts_path`
+            Path to the directory with the travel-time files.
+        phases: list, default to ['P', 'S']
+            List of seismic phases used in the computation of the network
+            response.
+        starttime: string or Datetime, default to None
+            Start time of the network response time series. If None, takes
+            `self.data.date` as the start time.
+        """
+        self.data = data
+        self.network = network
+        self.path_tts = os.path.join(path_tts, tt_filename)
+        self.phases = phases
+        if starttime is None:
+            self.starttime = self.data.date
+        else:
+            self.starttime = udt(starttime)
 
-    def remove_baseline(self,
-                        window,
-                        attribute='composite'):
+    @property
+    def n_sources(self):
+        if hasattr(self, 'moveouts'):
+            return self.moveouts.shape[0]
+        else:
+            print('You should attribute moveouts to the class instance first.')
+            return
+
+    @property
+    def n_stations(self):
+        return self.network.n_stations
+
+    @property
+    def moveouts(self):
+        if not hasattr(self, '_moveouts'):
+            print('You need to call `load_moveouts` or `set_moveouts` first.')
+            return
+        else:
+            return self._moveouts
+
+    @property
+    def source_coordinates(self):
+        if not hasattr(self, '_source_coordinates'):
+            print('You need to call `load_moveouts` or `set_source_coords`'
+                  ' first.')
+            return
+        else:
+            return self._source_coordinates
+
+    def compute_network_response(self, detection_traces,
+            composite=True, device='cpu'):
+        """Compute the network response.  
+
+        Parameters
+        --------------
+        detection_traces: (n_stations, n_components, n_samples) numpy.ndarray
+            Some characteristic function of the waveform time series to
+            backproject onto the grid of theoretical sources.
+        device: string, default to 'cpu'
+            Either 'cpu' or 'gpu', depending on the available hardware and
+            user's preferences.
+        composite: boolean, default to True
+            If True, compute the composite network response. That is, search
+            for the one source that produces the largest network response at
+            each time step.
+        """
+        if not hasattr(self, 'weights_phases'):
+            print('You need to set self.weights_phases first.')
+            return
+        if not hasattr(self, 'weights_sources'):
+            print('You need to set self.weights_sources first.')
+            return
+        if not hasattr(self, '_moveouts'):
+            print('You need to call `load_moveouts` or `set_moveouts` first.')
+            return
+        elif self.moveouts.dtype not in (np.int32, np.int64):
+            print('Moveouts should be integer typed and in unit of samples.')
+            return
+        if composite:
+            self.cnr, self.cnr_sources = \
+                    bnr.beamformed_nr.composite_network_response(
+                            detection_traces, self.moveouts, self.weights_phases,
+                            self.weights_sources, device=device)
+        else:
+            self.nr = \
+                    bnr.beamformed_nr.network_response(
+                            detection_traces, self.moveouts, self.weights_phases,
+                            self.weights_sources, device=device)
+
+    def find_detections(self, detection_threshold,
+                        minimum_interevent_time, n_max_stations=None):
+        """Analyze the composite network response to find detections.
+
+        Parameters
+        -----------
+        detection_threshold: scalar or (n_samples,) numpy.ndarray, float
+            The number of running MADs taken above the running median
+            to define detections.
+        minimum_interevent_time: scalar, float
+            The shortest duration, in seconds, allowed between two
+            consecutive detections.
+        n_max_stations: integer, default to None
+            If not None and if smaller than the total number of stations in the
+            network, only extract the `n_max_stations` closest stations for
+            each theoretical source.
+            
+        Returns
+        -----------
+        detections: dictionary,
+            Dictionary with data and metadata of the detected earthquakes.
+        """
+        from obspy import Stream
+        self.detection_threshold = detection_threshold
+        self.minimum_interevent_time = minimum_interevent_time
+        sr = self.data.sr
+        minimum_interevent_time = utils.sec_to_samp(minimum_interevent_time, sr=sr)
+
+        # select peaks
+        peak_indexes = _detect_peaks(self.cnr, mpd=minimum_interevent_time)
+        # only keep peaks above detection threshold
+        peak_indexes = peak_indexes[self.cnr[peak_indexes] > detection_threshold[peak_indexes]]
+
+        # keep the largest peak for grouped detection
+        for i in range(len(peak_indexes)):
+            idx = np.int32(np.arange(max(0, peak_indexes[i] - minimum_interevent_time/2),
+                                     min(peak_indexes[i] +
+                                         minimum_interevent_time/2, len(self.cnr))))
+            idx_to_update = np.where(peak_indexes == peak_indexes[i])[0]
+            peak_indexes[idx_to_update] = np.argmax(self.cnr[idx]) + idx[0]
+
+        peak_indexes = np.unique(peak_indexes)
+
+        peak_indexes = np.asarray(peak_indexes)
+        source_indexes = self.cnr_sources[peak_indexes]
+
+        # extract waveforms
+        detections = []
+        data_path, data_filename = os.path.split(self.data.where)
+        for i in range(len(peak_indexes)):
+            src_idx = source_indexes[i]
+            event = Stream()
+            ot_i = self.data.date + peak_indexes[i]/sr
+            mv = self.moveouts[src_idx, ...]/sr
+            if n_max_stations is not None:
+                # use moveouts as a proxy for distance
+                # keep only the n_max_stations closest stations
+                mv_max = np.sort(mv[:, 0])[n_max_stations-1]
+            else:
+                mv_max = np.finfo(np.float32).max
+            stations_in = np.asarray(self.network.stations)[mv[:, 0] < mv_max]
+            latitude = self.source_coordinates['latitude'][src_idx]
+            longitude = self.source_coordinates['longitude'][src_idx]
+            depth = self.source_coordinates['depth'][src_idx]
+            event = dataset.Event(ot_i, mv, stations_in, self.phases,
+                    data_filename, data_path, latitude=latitude,
+                    longitude=longitude, depth=depth, sampling_rate=sr)
+            aux_data = {}
+            aux_data['cnr'] = self.cnr[peak_indexes[i]]
+            aux_data['source_index'] = src_idx
+            event.set_aux_data(aux_data)
+            detections.append(event)
         
+        print(f'Extracted {len(detections):d} events.')
+
+        self.peak_indexes = peak_indexes
+        self.source_indexes = source_indexes
+        return detections, peak_indexes, source_indexes
+
+    def load_moveouts(self, source_indexes=None, remove_min=True):
+        """Load the moveouts, in units of samples.  
+
+        Call `utils.load_travel_times` and `utils.get_moveout_array` using the
+        instance's attributes and the optional parameters given here. Add the
+        attribute `self.moveouts` to the instance. The moveouts are converted
+        to samples using the sampling rate `self.data.sampling_rate`.
+
+        Parameters
+        ------------
+        source_indexes: (n_sources,) int numpy.ndarray, default to None
+            If not None, this is used to select a subset of sources from the
+            grid.
+        remove_min: boolean, default to True
+            If True, remove the smallest travel time from the collection of
+            travel times for each source of the grid. The network response only
+            depends on the relative travel times -- the moveouts -- and
+            therefore it is unnecessary to carry potentially very large travel
+            times.
+        """
+        tts, self._source_coordinates = utils.load_travel_times(
+                self.path_tts, phases, source_indexes=source_indexes,
+                return_coords=True)
+        self._moveouts = utils.get_moveout_array(tts, self.networks.stations,
+                self.phases)
+        del tts
+        if remove_min:
+            self._moveouts -= np.min(self._moveouts, axis=(1, 2), keepdims=True)
+        self._moveouts = utils.sec_to_samp(self._moveouts, sr=self.data.sr)
+
+    def remove_baseline(self, window, attribute='composite'):
+        """Remove baseline from network response.  
+
+        """
         # convert window from seconds to samples
         window = int(window*self.sampling_rate)
-        attr_baseline = self._baseline(getattr(self, attribute),
-                                       window)
+        attr_baseline = self._baseline(getattr(self, attribute), window)
         setattr(self, attribute, getattr(self, attribute)-attr_baseline)
 
-    def return_pd_series(self, attribute='composite'):
+    def return_pd_series(self, attribute='cnr'):
+        """Return the network response as a Pandas.Series.  
+
+        """
         import pandas as pd
-        data = getattr(self, attribute)
-        indexes = pd.date_range(start=str(self.date),
-                                freq='{}S'.format(1./self.sampling_rate),
-                                periods=len(data))
-        pd_attr = pd.Series(data=data,
-                            index=indexes)
+        time_series = getattr(self, attribute)
+        indexes = pd.date_range(start=str(self.starttime),
+                                freq='{}S'.format(1./self.data.sr),
+                                periods=len(time_series))
+        pd_attr = pd.Series(data=time_series, index=indexes)
         return pd_attr
 
-    def smooth_cnr(self,
-                   window):
+    def smooth_cnr(self, window):
+        """Smooth the network response with a gaussian kernel.  
 
+        """
         from scipy.ndimage.filters import gaussian_filter1d
         # convert window from seconds to samples
         window = int(window*self.sampling_rate)
         self.smoothed = gaussian_filter1d(self.composite, window)
 
+    def set_moveouts(self, moveouts):
+        """Attribute `_moveouts` to the class instance.  
+
+        Parameters
+        -----------
+        moveouts: (n_sources, n_stations, n_phases) numpy.ndarray
+            The moveouts to use for backprojection.
+        """
+        self._moveouts = moveouts
+
+    def set_source_coordinates(self, source_coords):
+        """Attribute `_source_coordinates` to the class instance.  
+
+        Parameters
+        ------------
+        source_coords: dictionary
+            Dictionary with 3 fields: 'latitude', 'longitude' and 'depth'
+        """
+        self._source_coordinates = source_coords
+
+    def set_weights(self, weights_phases=None, weights_sources=None):
+        """Set the weights required by `beamnetresponse`.  
+
+        weights_phases: (n_stations, n_channels, n_phases) np.ndarray, default
+        to None
+            Weight given to each station and channel for a given phase. For
+            example, horizontal components might be given a small or zero
+            weight for the P-wave stacking.
+        weights_sources: (n_sources, n_stations) np.ndarray, default to None
+            Source-receiver-specific weights. For example, based on the
+            source-receiver distance.
+        """
+        if weights_phases is not None:
+            self.weights_phases = weights_phases
+        if weights_sources is not None:
+            self.weights_sources = weights_sources
+
+    def set_weights_sources(self, n_max_stations):
+        """Set network-geometry-based weights of each source-receiver pair.  
+
+        Parameters
+        ------------
+        n_max_stations: scalar, int
+            Maximum number of stations used at each theoretical source. Only
+            the `n_max_stations` stations will be set a weight > 0.
+        """
+        weights_sources = np.ones((self.n_sources, self.n_stations),
+                dtype=np.float32)
+        if n_max_stations < self.n_stations:
+            cutoff_mv = np.partition(self.moveouts[:, :, 0], n_max_stations)[:,
+                    n_max_stations-1][:, np.newaxis] 
+            weights_sources[self.moveouts[:, :, 0] > cutoff_mv] = 0.
+        self.weights_sources = weights_sources
 
     def _baseline(self, X, window):
+        """Compute a baseline.  
+
+        The baseline is a curve connecting the local minima. Removing the
+        baseline is equivalent to some kind of low-pass filtering.
+        """
         n_windows = np.int32(np.ceil(X.size/window))
         minima      = np.zeros(n_windows, dtype=X.dtype)
         minima_args = np.zeros(n_windows, dtype=np.int32)
@@ -86,406 +348,125 @@ class NetworkResponse():
         bline = interpolator(np.arange(X.size))
         return bline
 
+    # -------------------------------------------
+    #       Plotting methods
+    # -------------------------------------------
+    def plot_cnr(self, ax=None, detection=None, figsize=(20, 7)):
+        """Plot the composite network response.  
 
-def calc_network_response(data,
-                          moveouts,
-                          phase='SP',
-                          device='gpu', 
-                          n_closest_stations=None, 
-                          envelopes=True, 
-                          test_points=None,
-                          saturation=False):
-    """
-    Calculate the composite network response from Frank et al. 2014
-    and Beauce et al. 2019. This systematic backprojection of seismic
-    energy detect earthquakes and get an approximative
-    idea of where there are located. Seismic energy is not a good
-    enough feature for earthquake location, and the location uncertainties
-    might be very large.
+        Parameters
+        -----------
+        ax: plt.Axes, default to None
+            If not None, plot in this axis.
+        detection: dataset.Event, default to None
+            A dataset.Event instance of a given detection.
+        figsize: tuple, default to (20, 7)
+            Width and height of the figure, in inches.
 
-    Parameters
-    -----------
-    data: dictionary,
-        Dictionary with two fields: 'waveforms', which is an
-        (n_stations x n_components x n_samples) numpy array, and
-        'metadata', which is a dictionary containing important metadata
-        such as the station list, the component list, and the sampling rate.
-    moveouts: object,
-        Moveout object from automatic_detection.moveouts.
-    phase: string, default to 'SP'
-        Should be left to 'SP' for now. It means both the P and S
-        times will be used to backproject the seismic energy.
-    device: string, default to 'gpu'
-        Can be 'gpu' or 'cpu'. Determine whether the composite
-        network response is computed on CPUs or GPUs.
-    n_closest_stations: None or integer, default to None
-        If not None, is the number of stations closest to
-        each point of the test source grid that are used
-        for backprojected the seismic energy.
-    envelopes: boolean, default to True
-        Whether or not the envelope of the traces is given
-        for computing the composite network response.
-        The envelope is the modulus of the analytical signal.
-    test_points: None or numpy array of integers, default to None
-        If not None, the test points are the test sources that are
-        used to backproject the seismic energy. This is useful for
-        limiting the computation to a subset of the grid.
-    saturation: boolean, default to False
-        Whether or not the traces are clipped.
-
-    Returns
-    --------
-    network_response: object,
-        A composite network response object with multiple attributes
-        calculated by the backprojection of seismic energy.
-    """
-
-    ANOMALY_THRESHOLD = 1.e-5 # threshold used to determine if a trace is garbage or not
-    MAX_DYNAMIC_RANGE = 5 # if saturation is True, traces are clipped above MADx10^MAX_DYNAMIC_RANGE
-    # depends on which unit the trace is
-    stations   = data['metadata']['stations']
-    components = data['metadata']['components']
-    if isinstance(stations, str):
-        stations = [stations]
-    if isinstance(components, str):
-        components = [components]
-
-    traces = np.array(data['waveforms'], copy=True)
-    #-----------------------------
-    n_stations   = traces.shape[0]
-    n_components = traces.shape[1]
-    n_samples    = traces.shape[2]
-    #-----------------------------
-
-    # Initialize the network response object
-    network_response = NetworkResponse(stations,
-                                       components,
-                                       cfg.sampling_rate,
-                                       data['metadata']['date'])
-
-    if phase in ('p', 'P'):
-        print('Use the P-wave moveouts to compute the Composite Network Response')
-        moveout = moveouts.p_relative_samp
-    elif phase in ('s', 'S'):
-        print('Use the S-wave moveouts to compute the Composite Network Response')
-        moveout = moveouts.s_relative_samp
-    elif phase in ('sp', 'SP'):
-        print('Use the P- and S-wave moveouts to compute the Composite Network Response')
-        moveoutS = moveouts.s_relative_p_samp
-        moveoutP = moveouts.p_relative_samp
-    
-    smooth_win = cmn.to_samples(cfg.smooth, data['metadata']['sampling_rate']) 
-    data_availability = np.zeros(n_stations, dtype=np.int32)
-
-    if envelopes:
-        window_length = utils.sec_to_samp(cfg.template_len)
-        start = give_time()
-        detection_traces = envelope_parallel(traces) # take the upper envelope of the traces
-        end = give_time()
-        print('Computed the envelopes in {:.2f}sec.'.format(end-start))
-        #start = give_time()
-        #ANOMALY_THRESHOLD = cmn.mad(detection_traces[detection_traces != 0.]) / 1.e5
-        #end = give_time()
-        #print('{:.2f}s to compute empirically the anomaly threshold (={:.2e})'.format(end-start, ANOMALY_THRESHOLD))
-        for s in range(n_stations):
-            for c in range(n_components):
-                missing_samples = detection_traces[s, c, :] == 0.
-                if np.sum(missing_samples) > detection_traces.shape[-1]/2:
-                    continue
-                median = np.median(detection_traces[s, c, ~missing_samples])
-                mad = scimad(detection_traces[s, c, ~missing_samples])
-                if mad < ANOMALY_THRESHOLD:
-                    detection_traces[s, c, :] = 0.
-                    continue
-                detection_traces[s, c, :] = (detection_traces[s, c, :] - median) / mad
-                detection_traces[s, c, missing_samples] = 0.
-                data_availability[s] += 1
-    else:
-        # compute the daily MADs (Median Absolute Deviation) to normalize the traces
-        # this is an empirical way of correcting for instrument's sensitivity
-        MADs = np.zeros( (n_stations, n_components), dtype=np.float32)
-        for s in range(n_stations):
-            for c in range(n_components):
-                traces[s, c, :] -= np.median(traces[s, c, :])
-                mask = traces[s, c, :] != 0.
-                if np.sum(mask) == 0:
-                    continue
-                mad = scimad(traces[s, c, mask])
-                MADs[s, c] = np.float32(mad)
-                if MADs[s, c] != 0.:
-                    traces[s, c, :] /= MADs[s, c]
-                    data_availability[s] += 1
-        detection_traces = np.square(traces)
-
-    # we consider data to be available if more than 1 channel were operational
-    data_availability = data_availability > 1
-    network_response.data_availability = data_availability
-    print('{:d} / {:d} available stations'.format(data_availability.sum(), data_availability.size))
-    if data_availability.sum() < data_availability.size//2:
-        print('Less than half the stations are available, pass!')
-        network_response.success = False
-        return network_response
-    else:
-        network_response.success = True
-    if n_closest_stations is not None:
-        moveouts.get_closest_stations(data_availability, n_closest_stations)
-        print('Compute the beamformed network response only with the closest stations to each test seismic source')
-    else:
-        moveouts.closest_stations_indexes = None
-
-    if saturation:
-        print('Clip the traces above 1e{} times the MAD'.format(MAX_DYNAMIC_RANGE))
-        for s in range(n_stations):
-            for c in range(n_components):
-                # clip the traes
-                scale = scimad(detection_traces[s, c, :])
-                detection_traces[s, c, :] = np.clip(detection_traces[s, c, :],
-                                                    detection_traces[s, c, :].min(),
-                                                    pow(10, MAX_DYNAMIC_RANGE)*scale)
-    #return detection_traces
-    #fig = plt.figure('detection_trace')
-    #for s in range(n_stations):
-    #    for c in range(n_components):
-    #        plt.subplot(n_stations, n_components, s*n_components+c+1)
-    #        plt.plot(detection_traces[s, c, :])
-    #plt.show(block=True)
-    #traces = traces.squeeze()
-    if phase in ('sp','SP'):
-        composite, where = clib.network_response_SP_prestacked(np.sum(detection_traces, axis=1),
-                                                               moveoutP,
-                                                               moveoutS,
-                                                               smooth_win,
-                                                               device=device,
-                                                               closest_stations=moveouts.closest_stations_indexes,
-                                                               test_points=test_points)
-
-        #composite, where = clib.network_response_SP(np.sum(detection_traces[:,:-1,:], axis=1),
-        #                                                   detection_traces[:,-1,:],
-        #                                                   moveoutP,
-        #                                                   moveoutS,
-        #                                                   smooth_win,
-        #                                                   device=device,
-        #                                                   closest_stations=moveouts.closest_stations_indexes,
-        #                                                   test_points=test_points)
-        network_response.sp = True
-    else:
-        composite, where = clib.network_response(traces[:, 0, :], # North component
-                                                 traces[:, 1, :], # East component
-                                                 moveouts.cosine_azimuths,
-                                                 moveouts.sine_azimuths,
-                                                 moveout,
-                                                 smooth_win,
-                                                 device=device,
-                                                 closest_stations=moveouts.closest_stations_indexes,
-                                                 test_points=test_points)
-        network_response.sp = False
-
-    # attach results from backprojection to network_response
-    #network_response.raw_composite = np.array(composite, copy=True)
-    network_response.composite = composite
-    network_response.where = where
-    # remove the baseline
-    baseline_window = 120. # in seconds
-    #network_response.remove_baseline(baseline_window, attribute='composite')
-    # smooth cnr for easier peak detection
-    smoothing_kernel = 5. # in seconds
-    #network_response.smooth_cnr(smoothing_kernel)
-    return network_response
-
-
-def find_templates(data,
-                   network_response,
-                   moveouts,
-                   closest=False,
-                   detection_threshold=None,
-                   search_win=30.):
-    """
-    Analyze the composite network response to get candidate earthquakes
-    from the data.
-
-    Parameters
-    -----------
-    data: dictionary,
-        Dictionary with two fields: 'waveforms', which is an
-        (n_stations x n_components x n_samples) numpy array, and
-        'metadata', which is a dictionary containing important metadata
-        such as the station list, the component list, and the sampling rate.
-    network_response: object,
-        A composite network response object with multiple attributes
-        calculated by the backprojection of seismic energy.
-    moveouts: object,
-        Moveout object from automatic_detection.moveouts.
-    closest: boolean, default to False
-        Whether or not seismic energy is backprojected to the grid
-        point only using the closest stations.
-    detection_threshold: scalar or 1d-array of same length as CNR,
-                         default to None
-    search_win: scalar, default to 30
-        Length of the sliding search window, in seconds,
-        for selecting the best detection within these windows.
-        
-    Returns
-    -----------
-    detections: dictionary,
-        Dictionary with data and metadata of the detected earthquakes.
-    """
-
-    search_win = utils.sec_to_samp(search_win)
-
-    #detection_trace = network_response.smoothed
-    detection_trace = network_response.composite
-    if detection_threshold is None:
-        #detection_threshold = np.median(detection_trace) + cfg.CNR_threshold * cmn.mad(detection_trace)
-        detection_threshold = time_dependent_threshold(detection_trace,
-                                                       min(np.int32(detection_trace.size/4),
-                                                           np.int32(0.5 * 3600. * cfg.sampling_rate)),
-                                                       overlap=0.75) # sliding mad on 0.5h-long windows
-    peaks = _detect_peaks(detection_trace, mpd=search_win)
-    peaks = peaks[detection_trace[peaks] > detection_threshold[peaks]]
-    #-------------------------------------------------------------------
-
-    # remove peaks from buffer sections + 1/2 template length
-    limit = utils.sec_to_samp(cfg.data_buffer + cfg.template_len/2.)
-    peaks = peaks[peaks >= limit]
-    limit = utils.sec_to_samp(86400 + cfg.data_buffer - cfg.template_len/2.)
-    peaks = peaks[peaks < limit]
-
-    # keep the largest peak for grouped detection
-    for i in range(peaks.size):
-        idx = np.int32(np.arange(max(0, peaks[i] - search_win/2),
-                                 min(peaks[i] + search_win/2, network_response.composite.size)))
-        idx_to_update = np.where(peaks == peaks[i])[0]
-        peaks[idx_to_update] = np.argmax(network_response.composite[idx]) + idx[0]
-
-    peaks, idx = np.unique(peaks, return_index=True)
-
-    peaks   = np.asarray(peaks)
-    sources = network_response.where[peaks]
-    CNR     = detection_trace[peaks]
-    #----------------------------------------------
-    if network_response.sp:
-        method = 'SP'
-    else:
-        method = 'S'
-    print(peaks.size)
-    detections = extract_detections(data, peaks, sources, moveouts, CNR, method=method)
-
-    print("------------------------")
-    print("{:d} templates".format(peaks.size))   
-
-    return detections
-
-def extract_detections(data,
-                       peaks,
-                       test_sources,
-                       moveouts,
-                       CNR,
-                       method='S'):
-    """
-    Extract the events identified by the composite network response.
-    Returns the output in a dictionnary, which can easily be converted into
-    a h5 databse.
-
-    Parameters
-    -----------
-    data: dictionary,
-        Dictionary with two fields: 'waveforms', which is an
-        (n_stations x n_components x n_samples) numpy array, and
-        'metadata', which is a dictionary containing important metadata
-        such as the station list, the component list, and the sampling rate.
-    peaks: numpy array of integers,
-        Array of peak positions, in samples, where candidate earthquakes
-        should be extracted.
-    test_sources: numpy array of integers,
-        Source indexes where the candidate earthquakes were backprojected.
-    moveouts: object,
-        Moveout object from automatic_detection.moveouts.
-    CNR: numpy array,
-        Array of the composite network response values associated
-        with the peak indexes.
-    method: string, default to 'S'
-        'S' or 'SP'. This string should be prescribed according
-        to the method that was due when backprojecting the energy.
-
-    Returns
-    --------
-    detections: dictionary,
-        A dictionary with the data and metadata of the candidate
-        earthquakes.
-    """
-    detections = {}
-    if moveouts.closest_stations_indexes is not None:
-        n_stations = moveouts.closest_stations_indexes.shape[-1]
-    else:
-        n_stations = data['waveforms'].shape[0]
-    n_components  = data['waveforms'].shape[1]
-    n_samples     = np.int32(cfg.template_len * cfg.sampling_rate)
-    n_detections  = peaks.size
-    #--------------------------------------------------
-    waveforms                   =  np.zeros((n_detections, n_stations, n_components, n_samples), dtype=np.float32)
-    origin_times                =  np.zeros( n_detections,                                       dtype=np.float64)
-    test_source_indexes         =  np.zeros( n_detections,                                       dtype=np.int32)
-    relative_travel_times       =  np.zeros((n_detections, n_stations, n_components),            dtype=np.float32)
-    kurtosis                    =  np.zeros((n_detections, n_stations, n_components),            dtype=np.float32)
-    composite_network_response  =  np.zeros(n_detections,                                        dtype=np.float32)
-    locations                   =  np.zeros((n_detections, 3),                                   dtype=np.float32)
-    stations                    =  []
-    for i in range(n_detections):
-        if moveouts.closest_stations_indexes is not None:
-            indexes_stations = moveouts.closest_stations_indexes[test_sources[i], :]
-            #stations.append(np.asarray(data['metadata']['stations'])[moveouts.closest_stations_indexes[test_sources[i], :]])
-            stations.append(np.asarray(data['metadata']['stations'])[indexes_stations])
+        Returns
+        --------
+        fig: plt.Figure
+            The Figure instance produced by this method.
+        """
+        import matplotlib.pyplot as plt
+        import matplotlib.dates as mdates
+        if ax is None:
+            # plot the composite network response
+            fig = plt.figure('composite_network_response', figsize=figsize)
+            ax = fig.add_subplot(111)
         else:
-            indexes_stations = np.arange(n_stations)
-            stations.append(data['metadata']['stations'])
-        if method.upper() == 'S':
-            mvs = moveouts.s_relative_samp[test_sources[i], indexes_stations]
-            # make sure the moveouts are the relative travel times
-            mvs -= mvs.min() # relative to the shortest S-wave travel time
-            # reshape mvs to get a (n_stations x n_components) matrix
-            mvs = np.repeat(mvs, n_components).reshape(n_stations, n_components)
-        elif method.upper() == 'SP':
-            #mvs = np.hstack( (moveouts.s_relative_p_samp[test_sources[i], indexes_stations].reshape(-1, 1), \
-            #                  moveouts.s_relative_p_samp[test_sources[i], indexes_stations].reshape(-1, 1), \
-            #                  moveouts.p_relative_samp[test_sources[i],   indexes_stations].reshape(-1, 1)) )
-            mvs = np.stack([moveouts.s_relative_p_samp[test_sources[i], indexes_stations], 
-                            moveouts.s_relative_p_samp[test_sources[i], indexes_stations], 
-                            moveouts.p_relative_samp[test_sources[i],   indexes_stations]], axis=1)
+            fig = ax.get_figure()
 
-            # make sure the moveouts are the relative travel times
-            # to be coherent with the NR computation routine
-            mvs -= mvs[:, -1].min() # relative to the shortest P-wave travel time
-        for s in range(n_stations):
-            #ss = moveouts.closest_stations_indexes[test_sources[i], s]
-            ss = indexes_stations[s]
-            for c in range(n_components):
-                # extract the waveforms between t1 and t2
-                t1 = np.int32(peaks[i] + mvs[s, c] - n_samples//2)
-                t2 = t1 + n_samples
-                if (t2 < data['waveforms'].shape[-1]) and (t1 > 0):
-                    waveforms[i, s, c, :] = data['waveforms'][ss, c, t1:t2]
-        #--------------------------------
-        timing = data['metadata']['date'] + peaks[i]/cfg.sampling_rate - cfg.data_buffer
-        origin_times[i]                 = timing.timestamp
-        #--------------------------------
-        test_source_indexes[i]          = test_sources[i]
-        #--------------------------------
-        relative_travel_times[i, :, :]  = np.float32(mvs / cfg.sampling_rate)
-        #--------------------------------
-        composite_network_response[i]   = CNR[i]
-        #--------------------------------
-        locations[i,:] = np.array([moveouts.longitude[test_sources[i]],\
-                                   moveouts.latitude[test_sources[i]],\
-                                   moveouts.depth[test_sources[i]]])
-    detections.update({'waveforms'                    :   waveforms})
-    detections.update({'origin_times'                 :   origin_times})
-    detections.update({'test_source_indexes'          :   test_source_indexes})
-    detections.update({'moveouts'                     :   relative_travel_times})
-    detections.update({'composite_network_response'   :   composite_network_response})
-    detections.update({'stations'                     :   np.asarray(stations).astype('S')})
-    detections.update({'components'                   :   np.asarray(data['metadata']['components']).astype('S')})
-    detections.update({'locations'                    :   locations})
-    return detections
+        ax.plot(self.data.time, self.cnr)
+        ax.plot(self.data.time, self.detection_threshold, color='C3', ls='--',
+                label='Detection Threshold')
+        ax.plot(self.data.time[self.peak_indexes], self.cnr[self.peak_indexes],
+                marker='o', ls='', color='C3')
+        ax.legend(loc='upper right')
+        ax.set_xlabel('Time of the day')
+        ax.set_ylabel('Composite Network Response')
+
+        ax.set_xlim(self.data.time.min(), self.data.time.max())
+        #ax.set_ylim(-0.1*(detection_threshold.max() - cnr.min()), 1.2*detection_threshold.max())
+        #ax.set_ylim(-0.1*(detection_threshold.max() - cnr.min()), 1.2*detection_threshold.max())
+        
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+        
+        ax.legend(loc='upper right')
+        
+        if detection is not None:
+            ot = np.datetime64(detection.origin_time)
+            ax.annotate('detection', (ot, detection.aux_data['cnr']),
+                        (ot + np.timedelta64(15, 'm'), min(ax.get_ylim()[1],
+                            2.*detection.aux_data['cnr'])),
+                        arrowprops={'width': 2, 'headwidth': 5, 'color': 'k'})
+        return fig
+
+    def plot_detection(self, detection, figsize=(20, 20),
+            component_aliases={'N': ['N', '1'], 'E': ['E', '2'], 'Z': ['Z']}):
+        """Plot a detection and the composite network response.  
+
+        Parameters
+        -----------
+        detection: dataset.Event
+            A dataset.Event instance of a given detection.
+        figsize: tuple, default to (20, 20)
+            Widht and height of the figure, in inches.
+        component_aliases: Dictionary, optional
+            Sometimes, components might be named differently than N, E, Z. This
+            dictionary tells the function which alternative component names can be
+            associated with each "canonical" component. For example,  
+            `component_aliases['N'] = ['N', '1']` means that the function will also
+            check the '1' component in case the 'N' component doesn't exist.
+
+        Returns
+        -------
+        fig: plt.Figure
+            The Figure instance produced by this method.
+        """
+        import matplotlib.pyplot as plt
+        import matplotlib.dates as mdates
+    
+        sr = self.data.sr
+        fig = plt.figure(f'detection_{detection.origin_time}', figsize=figsize)
+        grid = fig.add_gridspec(nrows=len(self.network.stations)+2,
+                ncols=len(self.network.components), hspace=0.35)
+        start_times, end_times = [], []
+        wav_axes = []
+        ax_cnr = fig.add_subplot(grid[:2, :])
+        self.plot_cnr(ax=ax_cnr, detection=detection)
+        ax_cnr.set_ylim(-0.5, 2.*detection.aux_data['cnr'])
+        beam = 0.
+        for s, sta in enumerate(self.network.stations):
+            for c, cp in enumerate(self.network.components):
+                ax = fig.add_subplot(grid[2+s, c])
+                for cp_alias in component_aliases[cp]:
+                    tr = detection.traces.select(station=sta, component=cp_alias)
+                    if len(tr) > 0:
+                        # succesfully retrieved data
+                        break
+                if len(tr) == 0:
+                    continue
+                else:
+                    tr = tr[0]
+                time = utils.time_range(tr.stats.starttime,
+                        tr.stats.endtime, 1./sr, unit='ms')
+                start_times.append(time[0])
+                end_times.append(time[-1])
+                ax.plot(time[:detection.n_samples], tr.data[:detection.n_samples], color='k')
+                # plot the theoretical pick
+                phase = detection.aux_data[f'phase_on_comp{cp_alias}'].upper()
+                offset_ph = detection.aux_data[f'offset_{phase}']
+                ax.axvline(time[0] + np.timedelta64(int(1000.*offset_ph), 'ms'), color='C3')
+                ax.text(0.05, 0.05, f'{sta}.{cp_alias}', transform=ax.transAxes)
+                wav_axes.append(ax)
+        for ax in wav_axes:
+            ax.set_xlim(min(start_times), max(end_times))
+            ax.xaxis.set_major_formatter(
+                mdates.ConciseDateFormatter(ax.xaxis.get_major_locator()))
+        plt.subplots_adjust(top=0.95, bottom=0.06, right=0.98, left=0.06)
+        return fig
+
 
 
 def _detect_peaks(x, mph=None, mpd=1, threshold=0, edge='rising',
@@ -660,36 +641,6 @@ def _plot_peaks(x, mph, mpd, threshold, edge, valley, ax, ind):
         # plt.grid()
         plt.show()
 
-def envelope_parallel(traces):
-    """Compute the envelope of traces.  
-
-    Compute the traces' envelopes using a simple
-    parallelization of the envelope function.
-    """
-    from multiprocessing import cpu_count, Pool
-    traces_reshape = traces.reshape(-1, traces.shape[-1])
-    p = Pool(cpu_count())
-    iterable = (traces_reshape[i,:] for i in range(traces_reshape.shape[0]))
-    tr_analytic = np.asarray(p.map(envelope, iterable, chunksize=1), dtype=np.float32)\
-                            .reshape(traces.shape)
-    p.close()
-    p.join()
-    return tr_analytic
-
-def envelope(trace):
-    """Compute the envelope of trace.  
-
-    Returns the trace's envelope using the hilbert transform from Scipy.
-    """
-    return np.float32(np.abs(hilbert(trace)))
-
-def compute_envelopes(traces):
-        start = give_time()
-        traces = envelope_parallel(traces) # take the upper envelope of the traces
-        end = give_time()
-        print('Computed the envelopes in {:.2f}sec.'.format(end-start))
-        return traces
-
 def baseline(X, w):
     n_windows = np.int32(np.ceil(X.size/w))
     minima      = np.zeros(n_windows, dtype=X.dtype)
@@ -703,9 +654,35 @@ def baseline(X, w):
     bline = interpolator(np.arange(X.size))
     return bline
 
-def time_dependent_threshold(network_response,
-                             window,
-                             overlap=0.75):
+def time_dependent_threshold(network_response, window,
+                             overlap=0.75, CNR_threshold=cfg.CNR_threshold):
+    """Compute a time-dependent detection threshold.  
+
+
+    Parameters
+    -----------
+    network_response: (n_samples,) numpy.ndarray, float
+        Composite network response on which we calculate
+        the detection threshold.
+    window: scalar, integer
+        Length of the sliding window, in samples, over
+        which we calculate the running statistics used
+        in the detection threshold.
+    overlap: scalar, float, default to 0.75
+        Ratio of overlap between two contiguous windows.
+    CNR_threshold: scalar, float, default to 10
+        Number of running MADs above running median that
+        defines the detection threshold.
+    Returns
+    --------
+    detection_threshold: (n_samples,) numpy.ndarray
+        Detection threshold on the network response.
+    """
+    try:
+        from scipy.stats import median_abs_deviation as scimad
+    except ImportError:
+        from scipy.stats import median_absolute_deviation as scimad
+    from scipy.interpolate import interp1d
 
     # calculate n_windows given window
     # and overlap
@@ -732,16 +709,15 @@ def time_dependent_threshold(network_response,
     time[0] = 0.
     mad_[0] = mad_[1]
     med_[0] = med_[1]
-    time[-1] = network_response.size
+    time[-1] = len(network_response)
     mad_[-1] = mad_[-2]
     med_[-1] = med_[-2]
-    threshold = med_ + cfg.CNR_threshold * mad_
-    interpolator = interp1d(time,
-                            threshold,
-                            kind='slinear',
-                            fill_value=(threshold[0], threshold[-1]),
-                            bounds_error=False)
-    full_time = np.arange(0, network_response.size)
+    threshold = med_ + CNR_threshold * mad_
+    interpolator = interp1d(
+            time, threshold, kind='slinear',
+            fill_value=(threshold[0], threshold[-1]),
+            bounds_error=False)
+    full_time = np.arange(0, len(network_response))
     threshold = interpolator(full_time)
     return threshold
 
@@ -774,4 +750,96 @@ def time_dependent_threshold_pd(network_response,
     # combine these into a detection threshold
     detection_threshold = run_med + cfg.CNR_threshold*run_mad
     return detection_threshold.values
+
+
+# ---------------------------------------------------------------
+#                      Detection traces
+# ---------------------------------------------------------------
+
+def saturated_envelopes(traces, anomaly_threshold=1.e-11, max_dynamic_range=1.e5):
+    """Compute the saturated envelopes.  
+
+    Parameters
+    ------------
+    traces: (n_stations, n_components, n_samples) numpy.ndarray
+        Input waveform time series.
+    anomaly_threshold: scalar, float, default to 1e-11
+        Scalar threshold below which the MAD is suspicious. It should be a very
+        small number if you are working on physical unit seismograms.
+    max_dynamic_range: scalar, float, default to 1e5
+        Higher cutoff on the standardized envelopes. This mitigates the
+        contamination of the network response by transient, undesired high
+        energy signals such as spikes.
+    """
+    n_stations, n_components, n_samples = traces.shape
+    tstart = give_time()
+    detection_traces = envelope_parallel(traces) # take the upper envelope of the traces
+    tend = give_time()
+    print(f'Computed the envelopes in {tend-tstart:.2f}sec.')
+    data_availability = np.zeros(n_stations, dtype=np.int32)
+    for s in range(n_stations):
+        for c in range(n_components):
+            missing_samples = detection_traces[s, c, :] == 0.
+            if np.sum(missing_samples) > detection_traces.shape[-1]/2:
+                # too many samples are missing, don't use this trace
+                # do not increment data_availability
+                detection_traces[s, c, :] = 0.
+                continue
+            median = np.median(detection_traces[s, c, ~missing_samples])
+            mad = scimad(detection_traces[s, c, ~missing_samples])
+            if mad < anomaly_threshold:
+                detection_traces[s, c, :] = 0.
+                continue
+            detection_traces[s, c, :] = (detection_traces[s, c, :] - median) / mad
+            detection_traces[s, c, missing_samples] = 0.
+            # saturate traces
+            detection_traces[s, c, :] = np.clip(
+                    detection_traces[s, c, :], detection_traces[s, c, :],
+                    max_dynamic_range)
+            data_availability[s] += 1
+    return detection_traces, data_availability
+
+def envelope_parallel(traces):
+    """Compute the envelope of traces.  
+
+    The envelope is defined as the modulus of the complex
+    analytical signal (a signal whose Fourier transform only has
+    energy in positive frequencies).
+
+    Parameters
+    -------------
+    traces: (n_stations, n_channels, n_samples) numpy.ndarray, float
+        The input time series.
+
+    Returns
+    -------------
+    envelopes: (n_stations, n_channels, n_samples) numpy.ndarray, float
+        The moduli of the analytical signal of the input traces.
+    """
+    import concurrent.futures
+    traces_reshaped = traces.reshape(-1, traces.shape[-1])
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        envelopes = np.float32(list(executor.map(
+           envelope, traces_reshaped)))
+    return envelopes.reshape(traces.shape)
+
+def envelope(trace):
+    """Compute the envelope of trace.  
+
+    The envelope is defined as the modulus of the complex
+    analytical signal (a signal whose Fourier transform only has
+    energy in positive frequencies).
+
+    Parameters
+    -------------
+    trace: (n_samples) numpy.ndarray, float
+        The input time series.
+
+    Returns
+    -------------
+    envelope: (n_samples) numpy.ndarray, float
+        The modulus of the analytical signal of the input traces.
+    """
+    from scipy.signal import hilbert
+    return np.float32(np.abs(hilbert(trace)))
 

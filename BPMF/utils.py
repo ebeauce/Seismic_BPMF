@@ -127,237 +127,318 @@ def lowpass_chebyshev_II(X, freqmax, sampling_rate,
         X = sosfilt(sos, X[::-1])[::-1]
     return X
 
-
 # -------------------------------------------------
-#      Earthquake catalog routines
+#       Loading travel-time data
 # -------------------------------------------------
 
-def load_earthquake_catalog(tids, 
-                            db_path_T='template_db_1',
-                            db_path_M='matched_filter_1',
-                            db_path=cfg.dbpath,
-                            remove_multiples=True):
+def get_moveout_array(tts, stations, phases):
+    """Format the travel times into a numpy.ndarray.  
 
-    # python list version
-    OT = []
-    OT_string = []
-    latitudes         = []
-    longitudes        = []
-    depths            = []
-    dLongitude        = []
-    dLatitude         = []
-    dDepth            = []
-    mining_activity   = []
-    stations          = []
-    S_travel_times    = []
-    P_travel_times    = []
-    cat_tids          = []
-    Ntot = 0
-    for tid in tids:
-        try:
-            origin_times  = db_h5py.read_catalog_multiplets('multiplets{:d}'.format(tid),
-                                                            db_path=db_path,
-                                                            db_path_M=db_path_M,
-                                                            object_from_cat='origin_times')
-        except OSError:
-            print('Couldn\'t find the catalog file for template {:d}'.format(tid))
-            continue
-        unique_events = db_h5py.read_catalog_multiplets('multiplets{:d}'.format(tid),
-                                                        db_path=db_path,
-                                                        db_path_M=db_path_M,
-                                                        object_from_cat='unique_events')
-        network_stations = db_h5py.read_catalog_multiplets('multiplets{:d}'.format(tid),
-                                                           db_path=db_path,
-                                                           db_path_M=db_path_M,
-                                                           object_from_cat='stations')
-        template = db_h5py.read_template('template{:d}'.format(tid),
-                                         db_path=db_path,
-                                         db_path_T=db_path_T)
-        if remove_multiples:
-            mask = unique_events
-        else:
-            mask = np.ones(origin_times.size, dtype=np.bool)
-        print('Template {:d}: {:d}/{:d} events'.format(tid, mask.sum(), mask.size))
-        n_events = mask.sum()
-        origin_times = origin_times[mask]
-        OT.extend(origin_times.tolist())
-        OT_string.extend([str(udt(origin_times[k])) for k in range(len(origin_times))])
-        latitudes.extend([template.metadata['latitude']] * n_events)
-        longitudes.extend([template.metadata['longitude']] * n_events)
-        depths.extend([template.metadata['depth']] * n_events)
-        dLongitude.extend([template.metadata['cov_mat'][0, 0]] * n_events)
-        dLatitude.extend([template.metadata['cov_mat'][1, 1]] * n_events)
-        dDepth.extend([template.metadata['cov_mat'][2, 2]] * n_events)
-        cat_tids.extend([template.metadata['template_idx']] * n_events)
-        st_list = template.metadata['stations'].tolist()
-        for i in range(n_events):
-            stations.append(st_list)
-        # convert network stations to list
-        network_stations = network_stations.astype('U').tolist()
-        station_indexes = np.int32([network_stations.index(st) for st in st_list])
-        p_travel_times = template.metadata['travel_times'][station_indexes, 0]
-        p_travel_times = np.repeat(p_travel_times, n_events).reshape( (n_events, p_travel_times.size), order='F' )
-        s_travel_times = template.metadata['travel_times'][station_indexes, 1]
-        s_travel_times = np.repeat(s_travel_times, n_events).reshape( (n_events, s_travel_times.size), order='F' )
-        P_travel_times.extend(p_travel_times)
-        S_travel_times.extend(s_travel_times)
+    Parameters
+    -----------
+    tts: dictionary
+        Output of `load_travel_times`.
+    stations: list of strings
+        List of station names. Determine the order in which travel times are
+        written in the output array.
+    phases: list of strings
+        List of seismic phases. Determine the order in which travel times are
+        writtem in the output array.
 
-    if len(OT) == 0:
-        print('No events were found, return None.')
-        return None
-    
-    # python list version: convert to numpy arrays
-    OT                = np.asarray(OT).astype(np.float64)
-    OT_string         = np.asarray(OT_string).astype('S')
-    latitudes         = np.asarray(latitudes).astype(np.float32)
-    longitudes        = np.asarray(longitudes).astype(np.float32)
-    depths            = np.asarray(depths).astype(np.float32)
-    dLongitude        = np.asarray(dLongitude).astype(np.float32)
-    dLatitude         = np.asarray(dLatitude).astype(np.float32)
-    dDepth            = np.asarray(dDepth).astype(np.float32)
-    mining_activity   = np.asarray(mining_activity).astype('bool')
-    stations          = np.asarray(stations).astype('|S8')
-    S_travel_times    = np.asarray(S_travel_times).astype(np.float32)
-    P_travel_times    = np.asarray(P_travel_times).astype(np.float32)
-    cat_tids          = np.asarray(cat_tids).astype(np.int32)
-    
-    # sort by chronological order
-    I                 = np.argsort(OT)
-    OT                = OT[I]
-    OT_string         = OT_string[I]
-    latitudes         = latitudes[I]
-    longitudes        = longitudes[I]
-    depths            = depths[I]
-    dLongitude        = dLongitude[I]
-    dLatitude         = dLatitude[I]
-    dDepth            = dDepth[I]
-    stations          = stations[I]
-    P_travel_times    = P_travel_times[I, :]
-    S_travel_times    = S_travel_times[I, :]
-    cat_tids          = cat_tids[I]
-    
-    catalog = {}
-    catalog['origin_times']           = OT
-    catalog['origin_times_strings']   = OT_string
-    catalog['latitudes']              = latitudes 
-    catalog['longitudes']             = longitudes
-    catalog['depths']                 = depths
-    catalog['latitude_uncertainty']   = dLatitude
-    catalog['longitude_uncertainty']  = dLongitude
-    catalog['depth_uncertainty']      = dDepth
-    catalog['p_travel_times']         = P_travel_times 
-    catalog['s_travel_times']         = S_travel_times
-    catalog['stations']               = stations
-    catalog['template_ids']           = cat_tids
+    Returns
+    ---------
+    moveout_arr: (n_sources, n_stations, n_phases) numpy.ndarray
+        Numpy array of travel times, in the order specified by `stations` and
+        `phases`. At this stage, moveout_arr should still be in units of
+        seconds.
+    """
+    n_stations = len(stations)
+    n_phases = len(phases)
+    moveout_arr = np.array([tts[ph][sta] for sta in stations for ph in phases]).T
+    return moveout_arr.reshape(-1, n_stations, n_phases)
 
-    return catalog
+def load_travel_times(path, phases, source_indexes=None, return_coords=False):
+    """Load the travel times from `path`.  
 
-def load_light_earthquake_catalog(tids, 
-                                  db_path_T='template_db_1',
-                                  db_path_M='matched_filter_1',
-                                  db_path=cfg.dbpath,
-                                  read_CCs=False,
-                                  remove_multiples=True):
+    Parameters
+    ------------
+    path: string
+        Path to the file with the travel times.
+    phases: list of strings
+        List of the seismic phases to load.
+    source_indexes: (n_sources,) int numpy.ndarray, default to None
+        If not None, this is used to select a subset of sources from the grid.
+    return_coords: boolean, default to False
+        If True, also return the source coordinates.
 
-    # python list version
-    OT = []
-    OT_string = []
-    latitudes         = []
-    longitudes        = []
-    depths            = []
-    dLongitude        = []
-    dLatitude         = []
-    dDepth            = []
-    cat_tids          = []
-    if read_CCs:
-        CCs = []
-    Ntot = 0
-    for tid in tids:
-        try:
-            origin_times  = db_h5py.read_catalog_multiplets(
-                    'multiplets{:d}'.format(tid),
-                     db_path=db_path,
-                     db_path_M=db_path_M,
-                     object_from_cat='origin_times')
-            if read_CCs:
-                correlation_coefficients = db_h5py.read_catalog_multiplets(
-                        'multiplets{:d}'.format(tid),
-                        db_path=db_path,
-                        db_path_M=db_path_M,
-                        object_from_cat='correlation_coefficients')
-        except OSError:
-            print('Couldn\'t find the catalog file for template {:d}'.format(tid))
-            continue
-        if remove_multiples:
-            unique_events = db_h5py.read_catalog_multiplets('multiplets{:d}'.format(tid),
-                                                            db_path=db_path,
-                                                            db_path_M=db_path_M,
-                                                            object_from_cat='unique_events')
-        template = dataset.Template('template{:d}'.format(tid),
-                                    db_path_T, db_path=db_path)
-        if remove_multiples:
-            mask = unique_events
-        else:
-            mask = np.ones(origin_times.size, dtype=np.bool)
-        print('Template {:d}: {:d}/{:d} events'.format(tid, mask.sum(), mask.size))
-        n_events = mask.sum()
-        origin_times = origin_times[mask]
-        if read_CCs:
-            correlation_coefficients[mask]
-            CCs.extend(correlation_coefficients.tolist())
-        OT.extend(origin_times.tolist())
-        OT_string.extend([str(udt(origin_times[k])) for k in range(len(origin_times))])
-        latitudes.extend([template.latitude] * n_events)
-        longitudes.extend([template.longitude] * n_events)
-        depths.extend([template.depth] * n_events)
-        dLongitude.extend([np.sqrt(template.cov_mat[0, 0])] * n_events)
-        dLatitude.extend([np.sqrt(template.cov_mat[1, 1])] * n_events)
-        dDepth.extend([np.sqrt(template.cov_mat[2, 2])] * n_events)
-        cat_tids.extend([template.template_idx] * n_events)
+    Returns
+    ---------
+    tts: dictionary
+        Dictionary with one field per phase. `tts[phase_n]` is itself
+        a dictionary with one field per station.
+    source_coords: dictionary, optional
+        Returned only if `return_coords` is True. This is a dictionary with
+        three (n_sources,) numpy.ndarray: `source_coords['latitude']`,
+        `source_coords['longitude']`, `source_coords['depth']`.
+    """
+    tts = {}
+    if return_coords:
+        source_coords = {}
+    with h5.File(path, mode='r') as f:
+        for ph in phases:
+            tts[ph] = {}
+            for sta in f[f'tt_{ph}'].keys():
+                # flatten the lon/lat/dep grid as we work with 
+                # flat source indexes
+                if source_indexes is not None:
+                    # select a subset of the source grid
+                    tts[ph][sta] = \
+                            f[f'tt_{ph}'][sta][()].flatten()[source_indexes]
+                else:
+                    tts[ph][sta] = f[f'tt_{ph}'][sta][()].flatten()
+        if return_coords:
+            for coord in f['source_coordinates'].keys():
+                if source_indexes is not None:
+                    source_coords[coord] = \
+                            f['source_coordinates'][coord][()].flatten()[source_indexes]
+                else:
+                    source_coords[coord] = \
+                            f['source_coordinates'][coord][()].flatten()
+    if return_coords:
+        return tts, source_coords
+    else:
+        return tts
 
-    if len(OT) == 0:
-        print('No events were found, return None.')
-        return None
-    
-    # python list version: convert to numpy arrays
-    OT                = np.asarray(OT).astype(np.float64)
-    OT_string         = np.asarray(OT_string).astype('S')
-    latitudes         = np.asarray(latitudes).astype(np.float32)
-    longitudes        = np.asarray(longitudes).astype(np.float32)
-    depths            = np.asarray(depths).astype(np.float32)
-    dLongitude        = np.asarray(dLongitude).astype(np.float32)
-    dLatitude         = np.asarray(dLatitude).astype(np.float32)
-    dDepth            = np.asarray(dDepth).astype(np.float32)
-    cat_tids          = np.asarray(cat_tids).astype(np.int32)
-    
-    # sort by chronological order
-    I                 = np.argsort(OT)
-    OT                = OT[I]
-    OT_string         = OT_string[I]
-    latitudes         = latitudes[I]
-    longitudes        = longitudes[I]
-    depths            = depths[I]
-    dLongitude        = dLongitude[I]
-    dLatitude         = dLatitude[I]
-    dDepth            = dDepth[I]
-    cat_tids          = cat_tids[I]
-    if read_CCs:
-        CCs = np.asarray(CCs).astype(np.float32)
-        CCs = CCs[I]
-   
-    catalog = {}
-    catalog['origin_times']           = OT
-    catalog['origin_times_strings']   = OT_string
-    catalog['latitudes']              = latitudes 
-    catalog['longitudes']             = longitudes
-    catalog['depths']                 = depths
-    catalog['latitude_uncertainty']   = dLatitude
-    catalog['longitude_uncertainty']  = dLongitude
-    catalog['depth_uncertainty']      = dDepth
-    catalog['template_ids']           = cat_tids
-    if read_CCs:
-        catalog['correlation_coefficients'] = CCs
-    return catalog
+## -------------------------------------------------
+##      Earthquake catalog routines
+## -------------------------------------------------
+#
+#def load_earthquake_catalog(tids, 
+#                            db_path_T='template_db_1',
+#                            db_path_M='matched_filter_1',
+#                            db_path=cfg.dbpath,
+#                            remove_multiples=True):
+#
+#    # python list version
+#    OT = []
+#    OT_string = []
+#    latitudes         = []
+#    longitudes        = []
+#    depths            = []
+#    dLongitude        = []
+#    dLatitude         = []
+#    dDepth            = []
+#    mining_activity   = []
+#    stations          = []
+#    S_travel_times    = []
+#    P_travel_times    = []
+#    cat_tids          = []
+#    Ntot = 0
+#    for tid in tids:
+#        try:
+#            origin_times  = db_h5py.read_catalog_multiplets('multiplets{:d}'.format(tid),
+#                                                            db_path=db_path,
+#                                                            db_path_M=db_path_M,
+#                                                            object_from_cat='origin_times')
+#        except OSError:
+#            print('Couldn\'t find the catalog file for template {:d}'.format(tid))
+#            continue
+#        unique_events = db_h5py.read_catalog_multiplets('multiplets{:d}'.format(tid),
+#                                                        db_path=db_path,
+#                                                        db_path_M=db_path_M,
+#                                                        object_from_cat='unique_events')
+#        network_stations = db_h5py.read_catalog_multiplets('multiplets{:d}'.format(tid),
+#                                                           db_path=db_path,
+#                                                           db_path_M=db_path_M,
+#                                                           object_from_cat='stations')
+#        template = db_h5py.read_template('template{:d}'.format(tid),
+#                                         db_path=db_path,
+#                                         db_path_T=db_path_T)
+#        if remove_multiples:
+#            mask = unique_events
+#        else:
+#            mask = np.ones(origin_times.size, dtype=np.bool)
+#        print('Template {:d}: {:d}/{:d} events'.format(tid, mask.sum(), mask.size))
+#        n_events = mask.sum()
+#        origin_times = origin_times[mask]
+#        OT.extend(origin_times.tolist())
+#        OT_string.extend([str(udt(origin_times[k])) for k in range(len(origin_times))])
+#        latitudes.extend([template.metadata['latitude']] * n_events)
+#        longitudes.extend([template.metadata['longitude']] * n_events)
+#        depths.extend([template.metadata['depth']] * n_events)
+#        dLongitude.extend([template.metadata['cov_mat'][0, 0]] * n_events)
+#        dLatitude.extend([template.metadata['cov_mat'][1, 1]] * n_events)
+#        dDepth.extend([template.metadata['cov_mat'][2, 2]] * n_events)
+#        cat_tids.extend([template.metadata['template_idx']] * n_events)
+#        st_list = template.metadata['stations'].tolist()
+#        for i in range(n_events):
+#            stations.append(st_list)
+#        # convert network stations to list
+#        network_stations = network_stations.astype('U').tolist()
+#        station_indexes = np.int32([network_stations.index(st) for st in st_list])
+#        p_travel_times = template.metadata['travel_times'][station_indexes, 0]
+#        p_travel_times = np.repeat(p_travel_times, n_events).reshape( (n_events, p_travel_times.size), order='F' )
+#        s_travel_times = template.metadata['travel_times'][station_indexes, 1]
+#        s_travel_times = np.repeat(s_travel_times, n_events).reshape( (n_events, s_travel_times.size), order='F' )
+#        P_travel_times.extend(p_travel_times)
+#        S_travel_times.extend(s_travel_times)
+#
+#    if len(OT) == 0:
+#        print('No events were found, return None.')
+#        return None
+#    
+#    # python list version: convert to numpy arrays
+#    OT                = np.asarray(OT).astype(np.float64)
+#    OT_string         = np.asarray(OT_string).astype('S')
+#    latitudes         = np.asarray(latitudes).astype(np.float32)
+#    longitudes        = np.asarray(longitudes).astype(np.float32)
+#    depths            = np.asarray(depths).astype(np.float32)
+#    dLongitude        = np.asarray(dLongitude).astype(np.float32)
+#    dLatitude         = np.asarray(dLatitude).astype(np.float32)
+#    dDepth            = np.asarray(dDepth).astype(np.float32)
+#    mining_activity   = np.asarray(mining_activity).astype('bool')
+#    stations          = np.asarray(stations).astype('|S8')
+#    S_travel_times    = np.asarray(S_travel_times).astype(np.float32)
+#    P_travel_times    = np.asarray(P_travel_times).astype(np.float32)
+#    cat_tids          = np.asarray(cat_tids).astype(np.int32)
+#    
+#    # sort by chronological order
+#    I                 = np.argsort(OT)
+#    OT                = OT[I]
+#    OT_string         = OT_string[I]
+#    latitudes         = latitudes[I]
+#    longitudes        = longitudes[I]
+#    depths            = depths[I]
+#    dLongitude        = dLongitude[I]
+#    dLatitude         = dLatitude[I]
+#    dDepth            = dDepth[I]
+#    stations          = stations[I]
+#    P_travel_times    = P_travel_times[I, :]
+#    S_travel_times    = S_travel_times[I, :]
+#    cat_tids          = cat_tids[I]
+#    
+#    catalog = {}
+#    catalog['origin_times']           = OT
+#    catalog['origin_times_strings']   = OT_string
+#    catalog['latitudes']              = latitudes 
+#    catalog['longitudes']             = longitudes
+#    catalog['depths']                 = depths
+#    catalog['latitude_uncertainty']   = dLatitude
+#    catalog['longitude_uncertainty']  = dLongitude
+#    catalog['depth_uncertainty']      = dDepth
+#    catalog['p_travel_times']         = P_travel_times 
+#    catalog['s_travel_times']         = S_travel_times
+#    catalog['stations']               = stations
+#    catalog['template_ids']           = cat_tids
+#
+#    return catalog
+#
+#def load_light_earthquake_catalog(tids, 
+#                                  db_path_T='template_db_1',
+#                                  db_path_M='matched_filter_1',
+#                                  db_path=cfg.dbpath,
+#                                  read_CCs=False,
+#                                  remove_multiples=True):
+#
+#    # python list version
+#    OT = []
+#    OT_string = []
+#    latitudes         = []
+#    longitudes        = []
+#    depths            = []
+#    dLongitude        = []
+#    dLatitude         = []
+#    dDepth            = []
+#    cat_tids          = []
+#    if read_CCs:
+#        CCs = []
+#    Ntot = 0
+#    for tid in tids:
+#        try:
+#            origin_times  = db_h5py.read_catalog_multiplets(
+#                    'multiplets{:d}'.format(tid),
+#                     db_path=db_path,
+#                     db_path_M=db_path_M,
+#                     object_from_cat='origin_times')
+#            if read_CCs:
+#                correlation_coefficients = db_h5py.read_catalog_multiplets(
+#                        'multiplets{:d}'.format(tid),
+#                        db_path=db_path,
+#                        db_path_M=db_path_M,
+#                        object_from_cat='correlation_coefficients')
+#        except OSError:
+#            print('Couldn\'t find the catalog file for template {:d}'.format(tid))
+#            continue
+#        if remove_multiples:
+#            unique_events = db_h5py.read_catalog_multiplets('multiplets{:d}'.format(tid),
+#                                                            db_path=db_path,
+#                                                            db_path_M=db_path_M,
+#                                                            object_from_cat='unique_events')
+#        template = dataset.Template('template{:d}'.format(tid),
+#                                    db_path_T, db_path=db_path)
+#        if remove_multiples:
+#            mask = unique_events
+#        else:
+#            mask = np.ones(origin_times.size, dtype=np.bool)
+#        print('Template {:d}: {:d}/{:d} events'.format(tid, mask.sum(), mask.size))
+#        n_events = mask.sum()
+#        origin_times = origin_times[mask]
+#        if read_CCs:
+#            correlation_coefficients[mask]
+#            CCs.extend(correlation_coefficients.tolist())
+#        OT.extend(origin_times.tolist())
+#        OT_string.extend([str(udt(origin_times[k])) for k in range(len(origin_times))])
+#        latitudes.extend([template.latitude] * n_events)
+#        longitudes.extend([template.longitude] * n_events)
+#        depths.extend([template.depth] * n_events)
+#        dLongitude.extend([np.sqrt(template.cov_mat[0, 0])] * n_events)
+#        dLatitude.extend([np.sqrt(template.cov_mat[1, 1])] * n_events)
+#        dDepth.extend([np.sqrt(template.cov_mat[2, 2])] * n_events)
+#        cat_tids.extend([template.template_idx] * n_events)
+#
+#    if len(OT) == 0:
+#        print('No events were found, return None.')
+#        return None
+#    
+#    # python list version: convert to numpy arrays
+#    OT                = np.asarray(OT).astype(np.float64)
+#    OT_string         = np.asarray(OT_string).astype('S')
+#    latitudes         = np.asarray(latitudes).astype(np.float32)
+#    longitudes        = np.asarray(longitudes).astype(np.float32)
+#    depths            = np.asarray(depths).astype(np.float32)
+#    dLongitude        = np.asarray(dLongitude).astype(np.float32)
+#    dLatitude         = np.asarray(dLatitude).astype(np.float32)
+#    dDepth            = np.asarray(dDepth).astype(np.float32)
+#    cat_tids          = np.asarray(cat_tids).astype(np.int32)
+#    
+#    # sort by chronological order
+#    I                 = np.argsort(OT)
+#    OT                = OT[I]
+#    OT_string         = OT_string[I]
+#    latitudes         = latitudes[I]
+#    longitudes        = longitudes[I]
+#    depths            = depths[I]
+#    dLongitude        = dLongitude[I]
+#    dLatitude         = dLatitude[I]
+#    dDepth            = dDepth[I]
+#    cat_tids          = cat_tids[I]
+#    if read_CCs:
+#        CCs = np.asarray(CCs).astype(np.float32)
+#        CCs = CCs[I]
+#   
+#    catalog = {}
+#    catalog['origin_times']           = OT
+#    catalog['origin_times_strings']   = OT_string
+#    catalog['latitudes']              = latitudes 
+#    catalog['longitudes']             = longitudes
+#    catalog['depths']                 = depths
+#    catalog['latitude_uncertainty']   = dLatitude
+#    catalog['longitude_uncertainty']  = dLongitude
+#    catalog['depth_uncertainty']      = dDepth
+#    catalog['template_ids']           = cat_tids
+#    if read_CCs:
+#        catalog['correlation_coefficients'] = CCs
+#    return catalog
 
 def event_count(event_timings_str,
                 start_date,
@@ -955,8 +1036,12 @@ def round_time(t, sr=cfg.sampling_rate):
     t = np.float32(t_samp)/sr
     return t
 
-def sec_to_samp(t, sr=cfg.sampling_rate,
-                epsilon=0.2):
+def sec_to_samp(t, sr=cfg.sampling_rate, epsilon=0.2):
+    """Convert seconds to samples taking into account rounding errors.  
+
+    Parameters
+    -----------
+    """
     # we add epsilon so that we fall onto the right
     # integer number even if there is a small precision
     # error in the floating point number
@@ -966,6 +1051,32 @@ def sec_to_samp(t, sr=cfg.sampling_rate,
     t_samp_int = np.int32(sign*np.int32(t_samp_float))
     return t_samp_int
 
+def time_range(start_time, end_time, dt_sec, unit='ms',
+               unit_value={'ms': 1.e3, 'us': 1.e6, 'ns': 1.e9}):
+    """Compute a range of datetime64.  
+
+    Parameters
+    ------------
+    start_time: string or datetime
+        Start of the time range.
+    end_time: string or datetime
+        End of the time range.
+    dt_sec: scalar float
+        Time step, in seconds, of the time range.
+    unit: string, default to 'ms'
+        Unit in which dt_sec is converted in order to reach an integer number.
+    unit_value: dictionary, optional
+        Dictionary with the value of 1 second in different units.
+
+    Returns
+    ---------
+    time_range: (n_samples,) numpy.ndarray of numpy.datetime64
+        The time range computed from the input parameters.
+    """
+    start_time = np.datetime64(start_time)
+    end_time = np.datetime64(end_time)
+    dt = np.timedelta64(int(dt_sec*unit_value[unit]), unit)
+    return np.arange(start_time, end_time, dt)
 
 # -------------------------------------------------
 #                    Regression
@@ -1030,24 +1141,64 @@ def weighted_linear_regression(X, Y, W=None):
 #             Others
 # -------------------------------------------------
 
-def get_np_array(stream, net,
-                 priority='HH', verbose=True):
-    n_stations = len(net.stations)
-    n_components = len(net.components)
+def get_np_array(stream, stations, components=['N', 'E', 'Z'],
+                 priority='HH', n_samples=None,
+                 component_aliases={'N': ['N', '1'],
+                                    'E': ['E', '2'],
+                                    'Z': ['Z']},
+                 verbose=True):
+    """Fetch data from Obspy Stream and returns an ndarray.  
+
+    Parameters
+    -----------
+    stream: Obspy Stream instance
+        The Obspy Stream instance with the waveform time series.
+    stations: List of strings
+        Names of the stations to include in the output array. Define the order
+        of the station axis.
+    components: List of strings, default to ['N','E','Z']
+        Names of the components to include in the output array. Define the order
+        of the component axis.
+    component_aliases: Dictionary, optional
+        Sometimes, components might be named differently than N, E, Z. This
+        dictionary tells the function which alternative component names can be
+        associated with each "canonical" component. For example,  
+        `component_aliases['N'] = ['N', '1']` means that the function will also
+        check the '1' component in case the 'N' component doesn't exist.
+    priority: string, default to 'HH'
+        When a station has multiple instruments, this string tells which
+        channel to use in priority.
+    n_samples: scalar int, default to None
+        Duration, in samples, of the output numpy.ndarray. Select the
+        `n_samples` first samples of each trace. If None, take `n_samples` as
+        the length of the first trace.
+    verbose: boolean, default to True
+        If True, print extra output in case the target data cannot be fetched.
+
+    Returns
+    ---------
+    data: (n_stations, n_components, n_samples) numpy.ndarray
+        The waveform time series formatted as an numpy.ndarray.
+    """
     if len(stream) == 0:
         print('The input data stream is empty!')
         return
-    n_samples = stream[0].data.size
-    data = np.zeros((n_stations, n_components, n_samples),
+    if n_samples is None:
+        n_samples = stream[0].data.size
+    data = np.zeros((len(stations), len(components), n_samples),
                     dtype=np.float32)
-    for s, sta in enumerate(net.stations):
-        for c, cp in enumerate(net.components):
-            channel = stream.select(station=sta, component=cp)
+    for s, sta in enumerate(stations):
+        for c, cp in enumerate(components):
+            for cp_alias in component_aliases[cp]:
+                channel = stream.select(station=sta, component=cp_alias)
+                if len(channel) > 0:
+                    # succesfully retrieved data
+                    break
             if len(channel) > 0:
-                # there are either gaps in stream or several channels
-                # for one station (e.g. BH and HH)
-                if len(channel.select(channel=f'{priority}{cp}')) > 0:
-                    channel = channel.select(channel=f'{priority}{cp}')
+                if len(channel) > 1:
+                    # there are either gaps in stream or several channels
+                    # for one station (e.g. BH and HH)
+                    channel = channel.select(channel=f'{priority}{cp_alias}')
                 # enforce taking only n_samples samples, as there might
                 # be time series of length n_samples+1 due to time slicing
                 # when extracting mseed or sac data

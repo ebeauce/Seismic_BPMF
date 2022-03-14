@@ -13,6 +13,10 @@ class Config():
             # allow meaningless default values in case BPMF is used for
             # very specific usage
             parameters.setdefault(attr, -10)
+        for attr in ['input_path', 'network_path', 'moveouts_path',
+                'output_path', 'NLLoc_input_path', 'NLLoc_output_path',
+                'NLLoc_basename']:
+            parameters.setdefault(attr, '')
         self.__dict__ = parameters
         self.base = os.getcwd()
         self.data = os.path.join(self.base, self.__dict__.get('input_path', ''))

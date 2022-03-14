@@ -11,11 +11,11 @@ import obspy as obs
 import pandas as pd
 import copy
 import datetime
-from obspy.core import UTCDateTime as udt
+from obspy import UTCDateTime as udt
 
 from time import time as give_time
 
-class Network():
+class Network(object):
     """Station metadata.
 
     Contains station metadata.
@@ -37,51 +37,30 @@ class Network():
     def n_components(self):
         return np.int32(len(self.components))
 
-    def read(self):
+    def box(self, lat_min, lat_max, lon_min, lon_max):
+        """Geographical selection of sub-network.  
+
+        Parameters
+        ------------
+        lat_min: scalar, float
+            Minimum latitude of the box.
+        lat_max: scalar, float
+            Maximum latitude of the box.
+        lon_min: scalar, float
+            Minimum longitude of the box.
+        lon_max: scalar, float
+            Maximum longitude of the box.
+
+        Returns
+        ---------------
+        subnet: Network instance
+            The Network instance restricted to the relevant stations.
         """
-        Reads the metadata from the file at self.where
-
-        Note: This function can be modified to match the user's
-        data convention.
-        """
-        networks = []
-        stations = []
-        components = []
-        with open(self.where, 'r') as file:
-            # read in start and end dates
-            columns = file.readline().strip().split()
-            self.start_date = udt(columns[0])
-            self.end_date = udt(columns[1])
-
-            # read in component names
-            columns = file.readline().strip().split()
-            for component in columns[1:]:
-                components.append(component)
-            self.components = components
-            
-            data_centers = []
-            networks     = []
-            locations    = []
-
-            # read in station names and coordinates
-            latitude, longitude, depth = [], [], []
-            for line in file:
-                columns = line.strip().split()
-                data_centers.append(columns[0])
-                networks.append(columns[1])
-                stations.append(columns[2])
-                locations.append(columns[3])
-                latitude.append(np.float32(columns[4]))
-                longitude.append(np.float32(columns[5]))
-                depth.append(-1.*np.float32(columns[6]) / 1000.)  # convert m to km
-
-            self.data_centers = data_centers
-            self.networks     = networks
-            self.stations     = stations
-            self.locations    = locations
-            self.latitude     = np.asarray(latitude, dtype=np.float32)
-            self.longitude    = np.asarray(longitude, dtype=np.float32)
-            self.depth        = np.asarray(depth, dtype=np.float32)
+        selection = (self.latitude > lat_min) & (self.latitude < lat_max)\
+                & (self.longitude > lon_min) & (self.longitude < lon_max)
+        new_stations = (np.asarray(self.stations)[selection]).tolist()
+        subnet = self.subset(new_stations, self.components, method='keep')
+        return subnet
 
     def datelist(self):
         dates = []
@@ -91,6 +70,28 @@ class Network():
             date += datetime.timedelta(days=1)
 
         return dates
+
+    def read(self):
+        """
+        Reads the metadata from the file at self.where
+
+        Note: This function can be modified to match the user's
+        data convention.
+        """
+        with open(self.where, 'r') as fin:
+            line1 = fin.readline()[:-1].split()
+            self.start_date = udt(line1[0])
+            self.end_date = udt(line1[1])
+            line2 = fin.readline()[:-1].split()
+            self.components = line2
+        metadata = pd.read_csv(self.where, sep='\t', skiprows=2)
+        metadata.rename(columns={'station_code': 'stations',
+                                 'network_code': 'networks'},
+                        inplace=True)
+        for field in metadata.keys():
+            setattr(self, field, metadata[field].values)
+        self.depth = -1.*self.elevation_m/1000. # depth in km
+        self.stations = self.stations.tolist()
 
     def stations_idx(self, stations):
         if not isinstance(stations, list) and not isinstance(stations, np.ndarray):
@@ -106,7 +107,7 @@ class Network():
         -----------
         stations: list or array of strings
             Stations to keep or discard, depending on the method.
-        components: list of array of strings
+        components: list or array of strings
             Components to keep or discard, depending on the method.
         method: string, default to 'keep'
             Should be 'keep' or 'discard'.
@@ -189,346 +190,1216 @@ class Network():
             # return distance in km
             self._interstation_distances = intersta_dist
             return self._interstation_distances
+ 
+class Catalog(object):
+    """A class for catalog data, and basic plotting.  
+
+    """
+    def __init__(self, longitudes, latitudes, depths, origin_times,
+            event_ids=None, **kwargs):
+        """Initialize a catalog attribute as a pandas.DataFrame.  
+
+        Parameters
+        -----------
+        longitudes: List or numpy.ndarray of floats
+            Event longitudes.
+        latitudes: List or numpy.ndarray of floats
+            Event latitudes.
+        depths: List or numpy.ndarray of floats
+            Event depths.
+        origin_times: List or numpy.ndarray of strings or datetimes
+            Event origin times.
+        event_ids: List or numpy.ndarray, default to None
+            If not None, is used to define named indexes of the rows.
+        """
+        catalog = {}
+        catalog['longitude'] = longitudes
+        catalog['latitude'] = latitudes
+        catalog['depth'] = depths
+        catalog['origin_time'] = pd.to_datetime(origin_times)
+        catalog.update(kwargs)
+        if event_ids is not None:
+            catalog['event_id'] = event_ids
+        self.catalog = pd.DataFrame(catalog)
+        if event_ids is not None:
+            self.catalog.set_index('event_id', inplace=True)
+
+    @property
+    def latitude(self):
+        return self.catalog.latitude
+
+    @property
+    def longitude(self):
+        return self.catalog.longitude
+
+    @property
+    def depth(self):
+        return self.catalog.depth
+
+    @property
+    def origin_time(self):
+        return self.catalog.origin_time
+
+    @classmethod
+    def read_from_events(cls, events, extra_attributes=[], fill_value=np.nan):
+        longitudes, latitudes, depths, origin_times = [], [], [], []
+        extra_attr = {}
+        # initialize empty lists for extra requested attributes
+        for attr in extra_attributes:
+            extra_attr[attr] = []
+        for event in events:
+            longitudes.append(event.longitude)
+            latitudes.append(event.latitude)
+            depths.append(event.depth)
+            origin_times.append(str(event.origin_time))
+            for attr in extra_attributes:
+                if hasattr(event, attr):
+                    extra_attr[attr].append(getattr(event, attr))
+                elif hasattr(event, 'aux_data') and attr in event.aux_data:
+                    # check if attribute is in aux_data
+                    extra_attr[attr].append(event.aux_data[attr])
+                else:
+                    # attribute was not found, fill with default value
+                    extra_attr[attr].append(fill_value)
+        return cls(longitudes, latitudes, depths, origin_times, **extra_attr)
+
+    # ---------------------------------------------------------
+    #                  Plotting methods
+    # ---------------------------------------------------------
+    def plot_space_time(self, ax=None, figsize=(20, 10), **kwargs):
+        """Plot the space-time event distribution.  
 
 
-class Template(object):
-    """A Template class to handle template data and metadata.  
+        """
+        import matplotlib.pyplot as plt
+        from matplotlib.colors import Normalize
+        from matplotlib.cm import ScalarMappable
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        cmap = kwargs.get('cmap', None)
+        if cmap is None:
+            try:
+                import colorcet as cc
+                cmap = cc.cm.bjy
+            except Exception as e:
+                print(e)
+                cmap = 'viridis'
+        # ------------------------------------------------
+        #           Scattering plot kwargs
+        scatter_kwargs = {}
+        scatter_kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
+        scatter_kwargs['linewidths'] = kwargs.get('linewidths', 0.5)
+        scatter_kwargs['s'] = kwargs.get('s', 10)
+        scatter_kwargs['zorder'] = kwargs.get('zorder', 0)
+        # ------------------------------------------------
+        if ax is None:
+            fig = plt.figure(kwargs.get('figname', ''), figsize=figsize)
+            ax = fig.add_subplot(111)
+        else:
+            fig = ax.get_figure()
+        cNorm = Normalize(vmin=self.catalog['latitude'].min(),
+                          vmax=self.catalog['latitude'].max())
+        scalar_map = ScalarMappable(norm=cNorm, cmap=cmap)
+        scalar_map.set_array([])
+
+        ax.set_title(f'{len(self.catalog):d} events')
+        ax.set_xlabel('Calendar Time')
+        ax.set_ylabel('Longitude')
+        ax.scatter(self.catalog['origin_time'], self.catalog['longitude'],
+                   color=scalar_map.to_rgba(self.catalog['latitude']),
+                   rasterized=True, **scatter_kwargs)
+        ax.set_xlim(min(self.catalog['origin_time']),
+                    max(self.catalog['origin_time']))
+        
+        ax_divider = make_axes_locatable(ax)
+        cax = ax_divider.append_axes("right", size="2%", pad=0.08)
+        plt.colorbar(scalar_map, cax, orientation='vertical', label='Latitude')
+
+        return fig
+
+    def plot_map(self, ax=None, figsize=(20, 10), depth_min=0.,
+            depth_max=20., **kwargs):
+        """Plot epicenters on map. 
+
+        """
+        from . import plotting_utils
+        import matplotlib.pyplot as plt
+        from matplotlib.colors import Normalize
+        from matplotlib.cm import ScalarMappable
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        from cartopy.crs import PlateCarree
+        cmap = kwargs.get('cmap', None)
+        if cmap is None:
+            try:
+                import colorcet as cc
+                cmap = cc.cm.fire_r
+            except Exception as e:
+                print(e)
+                cmap = 'hot_r'
+        data_coords = PlateCarree()
+        lat_margin = kwargs.get('lat_margin', 0.1)
+        lon_margin = kwargs.get('lon_margin', 0.1)
+        # ------------------------------------------------
+        #           Scattering plot kwargs
+        scatter_kwargs = {}
+        scatter_kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
+        scatter_kwargs['linewidths'] = kwargs.get('linewidths', 0.5)
+        scatter_kwargs['s'] = kwargs.get('s', 10)
+        scatter_kwargs['zorder'] = kwargs.get('zorder', 0)
+        # ------------------------------------------------
+        map_longitudes = [min(self.longitude) - lon_margin,
+                          max(self.longitude) + lon_margin]
+        map_latitudes = [min(self.latitude) - lat_margin,
+                         max(self.latitude) + lat_margin]
+        ax = plotting_utils.initialize_map(map_longitudes, map_latitudes,
+                figsize=figsize, map_axis=ax, **kwargs)
+        # plot epicenters
+        cNorm = Normalize(vmin=depth_min, vmax=depth_max)
+        scalar_map = ScalarMappable(norm=cNorm, cmap=cmap)
+
+        ax.scatter(self.longitude, self.latitude,
+                c=scalar_map.to_rgba(self.depth),
+                **scatter_kwargs, transform=data_coords)
+
+        ax_divider = make_axes_locatable(ax)
+        cax = ax_divider.append_axes("right", size="2%", pad=0.08,
+                axes_class=plt.Axes)
+        plt.colorbar(scalar_map, cax, orientation='vertical', label='Depth (km)')
+        return ax.get_figure()
+
+class Data(object):
+    """A Data class to manipulate waveforms and metadata.  
 
 
     """
 
-    def __init__(self, template_filename, db_path_T,
-                 db_path=cfg.dbpath, attach_waveforms=False,
-                 metadata=None):
-        """Read the template metadata and data.
+    def __init__(self, date, db_path=cfg.input_path, filename=None,
+            duration=24.*3600., sampling_rate=None):
+        """
+        Parameters
+        -----------
+        date: string
+            Date of the requested day. Example: '2016-01-23'.
+        db_path: string, default to `cfg.dbpath`
+            Path to the data root directory. Data are then organized by year
+            such as: db_path/year/data_file1...
+        filename: string, default to None
+            File name. If None, it assumes a standard format: data_YYYYmmdd.h5
+        duration: float, default to 24*3600
+            Target duration, in seconds, of the waveform time series. Waveforms
+            will be trimmed and zero-padded to match this duration.
+        sampling_rate: float or int, default to None
+            Sampling rate of the data. This variable should be left to None if
+            this Data instance aims at dealing with raw data and multiple
+            sampling rates.
+        """
+        self.date = udt(date)
+        if filename is None:
+            self.filename = f'data_{self.date.strftime("%Y%m%d")}.h5'
+        else:
+            self.filename = filename
+        # full path:
+        self.where = os.path.join(db_path, str(self.date.year), self.filename)
+        self.duration = duration
+        # fetch metadata
+        self._read_metadata()
+        if sampling_rate is not None:
+            self.sampling_rate = sampling_rate
+            self.n_samples = utils.sec_to_samp(duration, sr=self.sampling_rate)
+
+    @property
+    def sr(self):
+        return self.sampling_rate
+
+    @property
+    def time(self):
+        if not hasattr(self, 'sampling_rate'):
+            print('You need to define the instance\'s sampling rate first.')
+            return
+        if not hasattr(self, '_time'):
+            self._time = utils.time_range(
+                    self.date, self.date + self.duration, 1./self.sr, unit='ms')
+        return self._time
+
+    def get_np_array(self, stations, components=['N', 'E', 'Z'],
+                     component_aliases={'N': ['N', '1'],
+                                        'E': ['E', '2'],
+                                        'Z': ['Z']},
+                     priority='HH', verbose=True):
+        if not hasattr(self, 'traces'):
+            print('You should call read_waveforms first.')
+            return None
+        return utils.get_np_array(self.traces, stations, components=components,
+                priority=priority, component_aliases=component_aliases,
+                n_samples=self.n_samples, verbose=verbose)
+
+    def _read_metadata(self):
+        from pyasdf import ASDFDataSet
+        with ASDFDataSet(self.where, mode='r') as ds:
+            metadata = pd.DataFrame(ds.get_all_coordinates()).transpose()
+            net_sta = [code.split(sep='.') for code in metadata.index]
+            networks, stations = [[net for net, sta in net_sta],
+                    [sta for net, sta in net_sta]]
+            metadata['network_code'] = networks
+            metadata['station_code'] = stations
+            metadata.rename(columns={'elevation_in_m': 'elevation'},
+                    inplace=True)
+        self.metadata = metadata
+
+    def read_waveforms(self, tag, trim_traces=True):
+        """Read the waveform time series.  
+
+        Parameters
+        -----------
+        tag: string
+            Tag name of the waveforms in the the ASDF data set. Example: "raw"
+            or "preprocessed_1_12"
+        trim_traces: boolean, default to True
+            If True, call `trim_waveforms` to make sure all traces have the same
+            start time.
+        """
+        from pyasdf import ASDFDataSet
+        traces = obs.Stream()
+        with ASDFDataSet(self.where, mode='r') as ds:
+            for station in ds.ifilter(ds.q.tag == tag):
+                traces += getattr(station, tag)
+        self.traces = traces
+        if trim_traces:
+            self.trim_waveforms()
+
+    def trim_waveforms(self, starttime=None, endtime=None):
+        """Trim waveforms.  
+
+        Start times might differ of one sample on different traces. Use this
+        method to make sure all traces have the same start time.
+
+        Parameters
+        -----------
+        starttime: string or datetime, default to None
+            If None, use `self.date` as the start time.
+        endtime: string or datetime, default to None
+            If None, use `self.date` + `self.duration` as the end time.
+        """
+        if not hasattr(self, 'traces'):
+            print('You should call `read_waveforms` first.')
+            return
+        if starttime is None:
+            starttime = self.date
+        if endtime is None:
+            endtime = self.date + self.duration
+        for tr in self.traces:
+            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=0.)
+
+class Event(object):
+    """An Event class to describe *any* collection of waveforms.  
+
+    """
+
+    def __init__(self, origin_time, moveouts, stations, phases,
+            data_filename, data_path, latitude=None, longitude=None, depth=None,
+            sampling_rate=None, components=['N', 'E', 'Z'], id=None):
+        """Initialize an Event instance with basic attributes.  
+
+        Parameters
+        -----------
+        origin_time: string
+            Origin time, or detection time, of the event. Phase picks are
+            defined by origin_time + moveout.
+        moveouts: (n_stations, n_phases) float numpy.ndarray
+            Moveouts, in seconds, for each station and each phase.
+        stations: List of strings
+            List of station names corresponding to `moveouts`.
+        phases: List of strings
+            List of phase names corresponding to `moveouts`.
+        data_filename: string
+            Name of the data file.
+        data_path: string
+            Path to the data directory.
+        latitude: scalar float, default to None
+            Event latitude.
+        longitude: scalar float, default to None
+            Event longitude.
+        depth: scalar float, default to None
+            Event depth.
+        sampling_rate: scalar float, default to None
+            Sampling rate (Hz) of the waveforms. It should be different from
+            None only if you plan on reading preprocessed data with a fixed
+            sampling rate.
+        components: List of strings, default to ['N','E','Z']
+            List of the components to use in reading and plotting methods.
+        """
+        self.origin_time = udt(origin_time)
+        self.date = self.origin_time # for compatibility with Data class
+        self.where = os.path.join(data_path, data_filename)
+        self.stations = np.asarray(stations).astype('U')
+        self.components = np.asarray(components).astype('U')
+        self.phases = np.asarray(phases).astype('U')
+        self.latitude = latitude
+        self.longitude = longitude
+        self.depth = depth
+        self.sampling_rate = sampling_rate
+        if moveouts.dtype in (np.int32, np.int64):
+            print('Integer data type detected for moveouts. Are you sure these'
+                  ' are in seconds?')
+        # format moveouts in a Pandas data frame
+        mv_table = {'stations': self.stations}
+        for p, ph in enumerate(self.phases):
+            mv_table[f'moveouts_{ph.upper()}'] = moveouts[:, p]
+        self.moveouts = pd.DataFrame(mv_table)
+        self.moveouts.set_index('stations', inplace=True)
+        if id is None:
+            self.id = self.origin_time.strftime('%Y%m%d_%H%M%S')
+        else:
+            self.id = id
+
+    @classmethod
+    def read_from_file(cls, filename, db_path=cfg.dbpath, gid=None):
+        """Initialize an Event instance from `filename`.  
 
         Parameters
         ------------
-        template_filename: string
-            Base name of the template data and metadata files.  
-            The metadata file is assumed to be {template_filename}meta.h5  
-            The data file is assumed to be {template_filename}wav.h5  
-        db_path_T: string
-            Name of the folder where template files are stored.
-        db_path: string, default to cfg.dbpath
-            Name of the root folder where output files are stored.
-        attach_waveforms: boolean, default to False
-            If True, read the waveforms from {template_filename}wav.h5
-            *AND* builds an obspy stream attribute.
-        metadata: dictionary, default to None
-            If not None, use this dictionary to define the template's
-            attributes. This is typically used for a initializing a new
-            Template instance.
+        filename: string
+            Name of the hdf5 file with the event's data.
+        db_path: string, default to `cfg.dbpath`
+            Name of the directory where `filename` is located.
+        gid: string, default to None
+            If not None, this string is the hdf5's group name of the event.
+
+        Returns
+        ----------
+        event: `Event` instance
+            The `Event` instance defined by the data in `filename`.
         """
-        self.db_path = db_path
-        self.db_path_T = db_path_T
-        self.filename = template_filename
-        self.where = os.path.join(
-                db_path, db_path_T, template_filename)
-        if metadata is not None:
-            for key in metadata.keys():
-                setattr(self, key, metadata[key])
-        else:
-            # load metadata
-            with h5.File(self.where + 'meta.h5', 'r') as f:
-                for key in f.keys():
-                    self.__setattr__(key, f[key][()])
-        # alias for template_idx:
-        if hasattr(self, 'template_idx'):
-            self.tid = self.template_idx
-        else:
-            self.template_idx = self.tid
-        self.stations = self.stations.astype('U')
-        self.channels = self.channels.astype('U')
-        # keep copies of the original network-wide attributes
-        # for when we will select subnetworks
-        for attr in ['stations', 'p_moveouts', 's_moveouts', 'travel_times']:
-            self.__setattr__('network_{}'.format(attr),
-                             #self.__getattr__(attr).copy()
-                             getattr(self, attr).copy())
-        self.network_reference_absolute_time =\
-                copy.copy(self.reference_absolute_time)
-        if type(self.network_s_moveouts.flat[0]) is np.float32:
-            self.network_s_moveouts = utils.sec_to_samp(
-                    self.network_s_moveouts, sr=self.sampling_rate)
-            self.s_moveouts = utils.sec_to_samp(
-                    self.s_moveouts, sr=self.sampling_rate)
-        if type(self.network_p_moveouts.flat[0]) is np.float32:
-            self.network_p_moveouts = utils.sec_to_samp(
-                    self.network_p_moveouts, sr=self.sampling_rate)
-            self.p_moveouts = utils.sec_to_samp(
-                    self.p_moveouts, sr=self.sampling_rate)
-        if attach_waveforms:
-            self.read_waveforms()
-            self.traces = obs.Stream()
+        attributes = ['origin_time', 'moveouts', 'stations', 'phases']
+        optional_attr = ['latitude', 'longitude', 'depth', 'sampling_rate',
+                'compoments', 'id']
+        args = []
+        kwargs = {}
+        has_picks = False
+        has_arrivals = False
+        with h5.File(os.path.join(db_path, filename), mode='r') as f:
+            if gid is not None:
+                # go to specified group
+                f = f[gid]
+            for attr in attributes:
+                args.append(f[attr][()])
+            data_path, data_filename = os.path.split(f['where'][()])
+            args.extend([data_filename, data_path])
+            for opt_attr in optional_attr:
+                if opt_attr in f:
+                    kwargs[opt_attr] = f[opt_attr][()]
+            if 'aux_data' in f:
+                aux_data = {}
+                for key in f['aux_data'].keys():
+                    aux_data[key] = f['aux_data'][key][()]
+            if 'picks' in f:
+                picks = {}
+                for key in f['picks'].keys():
+                    picks[key] = f['picks'][key][()]
+                    if picks[key].dtype.kind == 'S':
+                        picks[key] = picks[key].astype('U')
+                        if key != 'stations':
+                            picks[key] = pd.to_datetime(picks[key])
+                picks = pd.DataFrame(picks)
+                picks.set_index('stations', inplace=True)
+                has_picks = True
+            if 'arrival_times' in f:
+                arrival_times = {}
+                for key in f['arrival_times'].keys():
+                    arrival_times[key] = f['arrival_times'][key][()]
+                    if arrival_times[key].dtype.kind == 'S':
+                        arrival_times[key] = arrival_times[key].astype('U')
+                        if key != 'stations':
+                            arrival_times[key] = pd.to_datetime(arrival_times[key])
+                arrival_times = pd.DataFrame(arrival_times)
+                arrival_times.set_index('stations', inplace=True)
+                has_arrivals = True
+        # ! the order of args is important !
+        event = cls(*args, **kwargs)
+        event.set_aux_data(aux_data)
+        if has_picks:
+            event.picks = picks
+        if has_arrivals:
+            event.arrival_times = arrival_times
+        return event
+
+    @property
+    def sr(self):
+        return self.sampling_rate
+
+    def get_np_array(self, stations, components=None,
+                     component_aliases={'N': ['N', '1'],
+                                        'E': ['E', '2'],
+                                        'Z': ['Z']},
+                     priority='HH', verbose=True):
+        if not hasattr(self, 'traces'):
+            print('You should call read_waveforms first.')
+            return None
+        if components is None:
+            components = self.components
+        return utils.get_np_array(self.traces, stations, components=components,
+                priority=priority, component_aliases=component_aliases,
+                n_samples=self.n_samples, verbose=verbose)
+
+    def pick_PS_phases(self, duration, tag, threshold_P=0.60, threshold_S=0.60,
+                       offset_ot=cfg.buffer_extracted_events,
+                       mini_batch_size=126, component_phase={'N': 'S', '1': 'S',
+                       'E': 'S', '2': 'S', 'Z': 'P'}):
+        """Use PhaseNet (Zhu et al., 2018) to pick P and S waves.  
+
+        Note: PhaseNet must be used with 3-comp data.
+
+        Parameters
+        -----------
+        duration: scalar float
+            Duration, in seconds, of the time window to process to search for P
+            and S wave arrivals.
+        tag: string
+            Tag name of the target data. For example: 'preprocessed_1_12'.
+        threshold_P: scalar float, default to 0.60
+            Threshold on PhaseNet's probabilities to trigger the identification
+            of a P-wave arrival.
+        threshold_S: scalar float, default to 0.60
+            Threshold on PhaseNet's probabilities to trigger the identification
+            of a S-wave arrival.
+        mini_batch_size: scalar int, default to 126
+            Number of traces processed in a single batch by PhaseNet. This
+            shouldn't have to be tuned.
+        component_phase: dictionary, optional
+            Dictionary defining which seismic phase is extracted on each
+            component. For example, component_phase['N'] gives the phase that is
+            extracted on the north component.
+
+        """
+        from phasenet import wrapper as PN
+        # read waveforms in picking mode, i.e. with `time_shifted`=False
+        self.read_waveforms(duration, tag, offset_ot=offset_ot,
+                component_phase=component_phase, time_shifted=False)
+        data_arr = self.get_np_array(self.stations, components=['N', 'E', 'Z'])
+        # call PhaseNet
+        PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
+                data_arr[np.newaxis, ...], self.stations,
+                mini_batch_size=mini_batch_size, format='ram',
+                threshold_P=threshold_P, threshold_S=threshold_S)
+        # keep best P- and S-wave pick on each 3-comp seismogram
+        PhaseNet_picks = PN.get_best_picks(PhaseNet_picks)
+        # add picks to auxiliary data
+        #self.set_aux_data(PhaseNet_picks)
+        # format picks in pandas DataFrame
+        pandas_picks = {'stations': self.stations}
+        for ph in ['P', 'S']:
+            rel_picks_sec = np.zeros(len(self.stations), dtype=np.float32)
+            proba_picks = np.zeros(len(self.stations), dtype=np.float32)
+            abs_picks = np.zeros(len(self.stations), dtype=object)
             for s, sta in enumerate(self.stations):
-                for c, cha in enumerate(self.channels):
-                    tr = obs.Trace()
-                    tr.data = self.network_waveforms[s, c, :]
-                    tr.stats.station = sta
-                    tr.stats.channel = cha
-                    tr.stats.sampling_rate = cfg.sampling_rate
-                    self.traces += tr
-
-    def read_waveforms(self):
-        """Read template data.  
-
-
-        Read the template waveforms from the template data file
-        defined when instanciating the Template class.
-        """
-        # load waveforms
-        with h5.File(self.where + 'wav.h5', 'r') as f:
-            self.network_waveforms = f['waveforms'][()]
-
-    def subnetwork(self, subnet_stations):
-        """Adjust the template attributes to the requested subnetwork.  
-
-        Parameters
-        -------------
-        subnet_stations: list of strings
-            List of the station names to keep.
-        """
-        if type(subnet_stations) != np.array:
-            subnet_stations = np.asarray(subnet_stations).astype('U')
-        else:
-            subnet_stations = subnet_stations.astype('U')
-        self.stations = subnet_stations
-        # get the index map from the whole network to
-        # the subnetwork
-        self.map_to_subnet = np.int32([np.where(self.network_stations == sta)[0]
-                                       for sta in self.stations]).squeeze()
-        # attach the waveforms
-        self.waveforms = self.network_waveforms[self.map_to_subnet, :, :]
-        # update moveouts
-        self.p_moveouts = self.network_p_moveouts[self.map_to_subnet]
-        self.s_moveouts = self.network_s_moveouts[self.map_to_subnet]
-        # update travel times
-        self.travel_times = self.network_travel_times[self.map_to_subnet]
-
-    def subtemplate(self, subnet_stations):
-        """Restrict the template to the requested subnetwork.  
-
-        Parameters
-        -------------
-        subnet_stations: list of strings
-            List of the station names to keep.
-        """
-        if type(subnet_stations) != np.ndarray:
-            subnet_stations = np.asarray(subnet_stations).astype('U')
-        else:
-            subnet_stations = subnet_stations.astype('U')
-        # get the index map from the whole network to the subnetwork
-        self.map_to_subnet = np.int32([np.where(self.network_stations == sta)[0]
-                                       for sta in subnet_stations]).squeeze()
-        # attach the waveforms
-        self.network_waveforms = self.network_waveforms[self.map_to_subnet, :, :]
-        # update moveouts
-        self.network_p_moveouts = self.network_p_moveouts[self.map_to_subnet]
-        self.network_s_moveouts = self.network_s_moveouts[self.map_to_subnet]
-        # update travel times
-        self.network_travel_times = self.network_travel_times[self.map_to_subnet]
-        # update stations
-        self.network_stations = copy.copy(subnet_stations)
-        self.stations = copy.copy(subnet_stations)
-        # update data availability
-        self.template_data_availability = \
-                self.template_data_availability[self.map_to_subnet]
-
-    def n_closest_stations(self, n, available_stations=None):
-        """Adjust the template attributes to the `n` closest stations.  
+                if sta in PhaseNet_picks[f'{ph}_picks'].keys():
+                    rel_picks_sec[s] = PhaseNet_picks[f'{ph}_picks'][sta][0]/self.sr
+                    proba_picks[s] = PhaseNet_picks[f'{ph}_proba'][sta][0]
+                    if proba_picks[s] > 0.:
+                        abs_picks[s] = self.traces.select(station=sta)[0].stats.starttime \
+                                + rel_picks_sec[s]
+            pandas_picks[f'{ph}_picks_sec'] = rel_picks_sec
+            pandas_picks[f'{ph}_probas'] = proba_picks
+            pandas_picks[f'{ph}_abs_picks'] = abs_picks
+        self.picks = pd.DataFrame(pandas_picks)
+        self.picks.set_index('stations', inplace=True)
+        self.picks.replace(0., np.nan, inplace=True)
 
 
-        Find the `n` closest stations and call `subnetwork` to adjust the
-        template attributes to these stations.
 
-        Parameters
-        ----------------
-        n: scalar, int
-            The `n` closest stations.
-        available_stations: list of strings, default to None
-            The list of stations from which we search the closest stations.
-            If some stations are known to not have available data, the user
-            may choose to not include these in the closest stations.
-        """
-        index_pool = np.arange(len(self.network_stations))
-        # limit the index pool to available stations
-        if available_stations is not None:
-            availability = np.in1d(self.network_stations, available_stations.astype('U'))
-            valid = availability & self.template_data_availability
-        else:
-            valid = self.template_data_availability
-        index_pool = index_pool[valid]
-        self.closest_stations = \
-                index_pool[np.argsort(self.source_receiver_distances[index_pool])]
-        # make sure we return a n-vector
-        if self.closest_stations.size < n:
-            missing = n - self.closest_stations.size
-            remaining_indexes = np.setdiff1d(np.argsort(self.source_receiver_distances),
-                                             self.closest_stations)
-            self.closest_stations = np.hstack( (self.closest_stations,
-                                                remaining_indexes[:missing]) )
-        self.subnetwork(self.network_stations[self.closest_stations[:n]])
-
-    def n_best_SNR_stations(self, n, available_stations=None):
-        """Adjust the template attributes to the `n` best SNR stations.  
-
-
-        Find the `n` best SNR stations and call `subnetwork` to adjust the
-        template attributes to these stations.
-
-        Parameters
-        ----------------
-        n: scalar, int
-            The `n` closest stations.
-        available_stations: list of strings, default to None
-            The list of stations from which we search the closest stations.
-            If some stations are known to not have available data, the user
-            may choose to not include these in the closest stations.
-        """
-
-        index_pool = np.arange(len(self.network_stations))
-        # limit the index pool to available stations
-        if available_stations is not None:
-            availability = np.in1d(self.network_stations, available_stations.astype('U'))
-            valid = availability & self.template_data_availability
-        else:
-            valid = self.template_data_availability
-        index_pool = index_pool[valid]
-        self.best_SNR_stations = \
-                index_pool[np.argsort(self.SNR[index_pool])[::-1]]
-        # make sure we return a n-vector
-        if self.best_SNR_stations.size < n:
-            missing = n - self.best_SNR_stations.size
-            remaining_indexes = np.setdiff1d(np.argsort(self.SNR)[::-1],
-                                             self.best_SNR_stations)
-            self.best_SNR_stations = np.hstack( (self.best_SNR_stations,
-                                                remaining_indexes[:missing]) )
-        self.subnetwork(self.network_stations[self.best_SNR_stations[:n]])
-
-    def distance(self, latitude, longitude, depth):
-        """Compute distance between template and a given location.  
+    def read_waveforms(self, duration, tag, component_phase={'N': 'S', '1': 'S',
+                  'E': 'S', '2': 'S', 'Z': 'P'}, offset_phase={'P': 1., 'S': 4.},
+                  time_shifted=True, offset_ot=cfg.buffer_extracted_events):
+        """Read waveform data.  
 
         Parameters
         -----------
-        latitude: scalar, float
-            Latitude of the target location.
-        longitude: scalar, float
-            Longitude of the target location.
-        depth: scalar, float
-            Depth of the target location, in km.
+        duration: scalar float
+            Duration, in seconds, of the extracted time windows.
+        tag: string
+            Tag name of the target data. For example: 'preprocessed_1_12'.
+        component_phase: dictionary, optional
+            Dictionary defining which seismic phase is extracted on each
+            component. For example, component_phase['N'] gives the phase that is
+            extracted on the north component.
+        offset_phase: dictionary, optional
+            Dictionary defining when the time window starts with respect to the
+            pick. A positive offset means the window starts before the pick. Not
+            used if `time_shifted` is False.
+        time_shifted: boolean, default to True
+            If True, the moveouts are used to extract time windows from specific
+            seismic phases. If False, windows are simply extracted with respect to
+            the origin time.
+        offset_ot: scalar float, default to `cfg.buffer_extracted_events`
+            Only used if `time_shifted` is False. Time, in seconds, taken before
+            `origin_time`.
         """
-        from .utils import two_point_distance
-        return two_point_distance(self.latitude, self.longitude, self.depth,
-                                  latitude, longitude, depth)
+        from pyasdf import ASDFDataSet
+        from obspy import Stream
+        self.traces = Stream()
+        self.duration = duration
+        self.n_samples = utils.sec_to_samp(self.duration, sr=self.sr)
+        with ASDFDataSet(self.where, mode='r') as ds:
+            for station in ds.ifilter(ds.q.tag == tag,
+                    ds.q.station == self.stations):
+                for trid in station.channel_coordinates.keys():
+                    net, sta, loc, cha = trid.split(sep='.')
+                    comp = cha[-1]
+                    ph = component_phase[comp]
+                    if time_shifted:
+                        pick = self.origin_time \
+                                + self.moveouts[f'moveouts_{ph.upper()}'].loc[sta] \
+                                - offset_phase[ph.upper()]
+                    else:
+                        pick = self.origin_time - offset_ot
+                    # query the exact data
+                    self.traces += ds.get_waveforms(
+                            network=net, station=sta, location=loc, channel=cha,
+                            starttime=pick, endtime=pick+duration, tag=tag)
+                    #self.traces[-1].data = self.traces[-1].data[:self.n_samples]
+        for ph in offset_phase.keys():
+            self.set_aux_data({f'offset_{ph.upper()}': offset_phase[ph]})
+        for comp in component_phase.keys():
+            self.set_aux_data({f'phase_on_comp{comp}': component_phase[comp]})
+        if not time_shifted:
+            self.trim_waveforms(starttime=self.origin_time-offset_ot,
+                    endtime=self.origin_time-offset_ot+self.duration)
 
-    @property
-    def hmax_unc(self):
-        if hasattr(self, '_hmax_unc'):
-            return self._hmax_unc
-        else:
-            self.hor_ver_uncertainties()
-            return self._hmax_unc
 
-    @property
-    def vmax_unc(self):
-        if hasattr(self, '_vmax_unc'):
-            return self._vmax_unc
-        else:
-            self.hor_ver_uncertainties()
-            return self._vmax_unc
-
-    @property
-    def az_hmax_unc(self):
-        if hasattr(self, '_az_hmax_unc'):
-            return self._az_hmax_unc
-        else:
-            self.hor_ver_uncertainties()
-            return self._az_hmax_unc
-
-    def hor_ver_uncertainties(self):
-        """Compute the horizontal and vertical uncertainties on location.  
-
-        The vertical uncertainty is taken as the maximum vertical range
-        covered by the uncertainty ellipsoid.  
-        The horizontal uncertainty is taken as the maximum horizontal range
-        covered by the uncertainty ellipsoid.
-        
-        New Attributes
-        ----------------
-        hmax_unc: scalar, float
-            The maximum horizontal uncertainty, taken as the maximum
-            horizontal range covered by the uncertainty ellipsoid.
-        vmax_unc: scalar, float
-            The maximum vertical uncertainty, taken as the maximum
-            vertical range covered by the uncertainty ellipsoid.
-        az_hmax_unc: scalar, float
-            The azimuth (angle from north) of the maximum horizontal
-            uncertainty.
-
-        Note: hmax + vmax does not have to be equal to the
-        max_loc, the latter simply being the length of the
-        longest semi-axis of the uncertainty ellipsoid.
-        """
-        w, v = np.linalg.eigh(self.cov_mat)
-        # the eigenvalues are the variances (units of [distance**2])
-        # in the eigendirections, we need the standard deviations
-        # (units of [distance])
-        std = np.sqrt(w)
-        # check the vertical components of all semi-axes:
-        vertical_unc = np.abs(std*v[2, :])
-        # keep the maximum for the vertical uncertainty
-        max_vertical = vertical_unc.max()
-        # check the horizontal components of all semi-axes:
-        horizontal_unc = np.sqrt(np.sum((std[np.newaxis, :]*v[:2, :])**2, axis=0))
-        # keep the maximum as the horizontal uncertainty
-        max_horizontal = horizontal_unc.max()
-        direction_hmax = v[:, horizontal_unc.argmax()]
-        azimuth_hmax = np.arctan2(direction_hmax[0], direction_hmax[1])
-        azimuth_hmax = (azimuth_hmax*180./np.pi)%180.
-        # these private attributes should be called via their property names
-        self._hmax_unc = max_horizontal
-        self._vmax_unc = max_vertical
-        self._az_hmax_unc = azimuth_hmax
-
-    def write(self, path, filename=None, attr_map={}):
-        """Write template data and metadata files.  
+    def relocate(self, stations=None):
+        """Relocate with NLLoc using `self.picks`. 
 
         Parameters
         -----------
-        path: string
-            Path to the folder where to write the files.
-        filename: string, default to None
-            Base name of the data and metadata files. The data filename
-            is {filename}wav.h5 and the metadata filename is {filename}meta.h5.
-            If None, the template id is used to define the filename.
-        attr_map: dictionary, default to empty dictionary 
-            Map between the template attributes and the hdf5 field names.
-            Example: `attr_map['stations'] = 'network_stations'` means that the
-            template attribute `self.network_stations` will be stored as the
-            `'stations'` field of the hdf5 file.
+        stations: List of strings, default to None
+            Names of the stations to include in the relocation process. If None,
+            `stations` is set to `self.stations`.
         """
-        if filename is None:
-            filename = f'template{self.tid}'
-        # the key-word arguments map the attribute names to the dataset entries
-        for attr in ['longitude', 'latitude', 'depth', 'tid', 'channels',
-                'cov_mat', 'max_location_uncertainty', 'duration',
-                'sampling_rate', 'SNR', 'source_receiver_distances',
-                'template_data_availability', 'origin_time']:
-            attr_map.setdefault(attr, attr)
-        for attr in ['stations', 'p_moveouts', 's_moveouts',
-                'reference_absolute_time', 'travel_times']:
-            attr_map.setdefault(attr, 'network_'+attr)
-        full_fn = os.path.join(path, filename)
-        with h5.File(full_fn+'meta.h5', mode='w') as f:
-            for attr in attr_map.keys():
-                attr_ = getattr(self, attr_map[attr])
+        import subprocess
+        import glob
+        from . import NLLoc_utils
+        if stations is None:
+            stations = self.stations
+        # file names:
+        ctrl_fn = self.id + '.in'
+        out_basename = self.id + '_out'
+        obs_fn = self.id + '.obs'
+        # write obs file
+        if os.path.isfile(os.path.join(cfg.NLLoc_input_path, obs_fn)):
+            os.remove(os.path.join(cfg.NLLoc_input_path, obs_fn))
+        NLLoc_utils.write_NLLoc_obs(self.origin_time, self.picks, stations,
+                obs_fn)
+        # write control file
+        NLLoc_utils.write_NLLoc_control(ctrl_fn, out_basename, obs_fn)
+        # run NLLoc
+        subprocess.run('NLLoc '+os.path.join(cfg.NLLoc_input_path, ctrl_fn),
+                shell=True)
+        # read results
+        try:
+            out_fn = os.path.basename(glob.glob(os.path.join(cfg.NLLoc_output_path,
+                out_basename+'.[!s]*hyp'))[0])
+        except IndexError:
+            # relocation failed
+            return
+        hypocenter, predicted_times = NLLoc_utils.read_NLLoc_outputs(
+                        out_fn, cfg.NLLoc_output_path)
+        hypocenter['origin_time'] = udt(hypocenter['origin_time'])
+        # update event's attributes
+        for key in hypocenter.keys():
+            setattr(self, key, hypocenter[key])
+        # add absolute arrival times to predicted_times
+        P_abs_arrivals = np.zeros(len(predicted_times), dtype=np.object)
+        S_abs_arrivals = np.zeros(len(predicted_times), dtype=np.object)
+        for s, sta in enumerate(predicted_times.index):
+            P_abs_arrivals[s] = self.origin_time + predicted_times.loc[sta,
+                    'P_tt_sec']
+            S_abs_arrivals[s] = self.origin_time + predicted_times.loc[sta,
+                    'S_tt_sec']
+        predicted_times['P_abs_arrival_times'] = P_abs_arrivals
+        predicted_times['S_abs_arrival_times'] = S_abs_arrivals
+        # attach the theoretical arrival times
+        self.arrival_times = predicted_times
+        self.set_aux_data({'NLLoc_reloc': True})
+
+
+    def set_aux_data(self, aux_data):
+        """Adds any extra data to the Event instance.  
+
+        Parameters
+        ------------
+        aux_data: dictionary
+            Dictionary with any auxiliary data.
+        """
+        if not hasattr(self, 'aux_data'):
+            self.aux_data = {}
+        for field in aux_data:
+            self.aux_data[field] = aux_data[field]
+
+    def set_moveouts_to_empirical_times(self):
+        """Set moveouts equal to picks, if available. 
+
+        """
+        if not hasattr(self, 'picks'):
+            print('Does not have a `picks` attribute.')
+            return
+        # make sure picks are consistent with the current origin time
+        self.update_picks()
+        for station in self.picks.index:
+            for ph in self.phases:
+                if not pd.isnull(self.picks.loc[station,
+                    f'{ph.upper()}_picks_sec']):
+                    self.moveouts.loc[station, f'moveouts_{ph.upper()}'] = \
+                            self.picks.loc[station, f'{ph.upper()}_picks_sec']
+
+    def set_moveouts_to_theoretical_times(self):
+        """Set moveouts equal to theoretical arrival times, if available. 
+
+        """
+        if not hasattr(self, 'arrival_times'):
+            print('Does not have a `arrival_times` attribute.')
+            return
+        # make sure travel times are consistent with the current origin time
+        self.update_travel_times()
+        for station in self.arrival_times.index:
+            for ph in self.phases:
+                if not pd.isnull(self.arrival_times.loc[station,
+                    f'{ph.upper()}_tt_sec']):
+                    self.moveouts.loc[station, f'moveouts_{ph.upper()}'] = \
+                            self.arrival_times.loc[station, f'{ph.upper()}_tt_sec']
+
+    def trim_waveforms(self, starttime=None, endtime=None):
+        """Trim waveforms.  
+
+        Start times might differ of one sample on different traces. Use this
+        method to make sure all traces have the same start time.
+
+        Parameters
+        -----------
+        starttime: string or datetime, default to None
+            If None, use `self.date` as the start time.
+        endtime: string or datetime, default to None
+            If None, use `self.date` + `self.duration` as the end time.
+        """
+        if not hasattr(self, 'traces'):
+            print('You should call `read_waveforms` first.')
+            return
+        if starttime is None:
+            starttime = self.date
+        if endtime is None:
+            endtime = self.date + self.duration
+        for tr in self.traces:
+            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=0.)
+
+    def update_picks(self):
+        """Update the picks w.r.t the current origin time. 
+
+        """
+        if not hasatr(self, 'picks'):
+            print('Does not have a `picks` attribute.')
+            return
+        for station in self.picks.index:
+            for ph in self.phases:
+                self.picks.loc[station, f'{ph.upper()}_picks_sec'] =\
+                        udt(self.picks.loc[station, f'{ph.upper()}_abs_picks'])\
+                        - udt(self.origin_time)
+
+    def update_travel_times(self):
+        """Update travel times w.r.t the current origin time.
+
+        """
+        if not hasattr(self, 'arrival_times'):
+            print('Does not have an `arrival_times` attribute.')
+            return
+        for station in self.arrival_times.index:
+            for ph in self.phases:
+                self.arrival_times.loc[station, f'{ph.upper()}_tt_sec'] =\
+                        udt(self.arrival_times.loc[station,
+                            f'{ph.upper()}_abs_arrival_times'])\
+                        - udt(self.origin_time)
+
+
+    def write(self, db_filename, db_path=cfg.dbpath, save_waveforms=False):
+        """Write to hdf5 file.  
+
+        Parameters
+        ------------
+        db_filename: string
+            Name of the hdf5 file storing the event information.
+        db_path: string, default to `cfg.dbpath`
+            Name of the directory with `db_filename`.
+        save_waveforms: boolean, default to False
+            If True, save the waveforms.
+        """
+        output_where = os.path.join(db_path, db_filename)
+        attributes = ['origin_time', 'latitude', 'longitude', 'depth',
+                'moveouts', 'stations', 'components', 'phases', 'where',
+                'sampling_rate']
+        with h5.File(output_where, mode='a') as f:
+            if self.id in f:
+                # overwrite existing detection with same id
+                print(f'Found existing event {self.id}. Overwrite it.')
+                del f[self.id]
+            f.create_group(self.id)
+            for attr in attributes:
+                if not hasattr(self, attr):
+                    continue
+                attr_ = getattr(self, attr)
+                if attr == 'origin_time':
+                    attr_ = str(attr_)
+                if isinstance(attr_, list):
+                    attr_ = np.asarray(attr_)
                 if (isinstance(attr_, np.ndarray)
                         and (attr_.dtype.kind == np.dtype('U').kind)):
                     attr_ = attr_.astype('S')
-                f.create_dataset(attr, data=attr_)
-        with h5.File(full_fn+'wav.h5', mode='w') as f:
-            f.create_dataset('waveforms', data=self.waveforms)
+                f[self.id].create_dataset(attr, data=attr_)
+            if hasattr(self, 'aux_data'):
+                f[self.id].create_group('aux_data')
+                for key in self.aux_data.keys():
+                    f[self.id]['aux_data'].create_dataset(key,
+                            data=self.aux_data[key])
+            if hasattr(self, 'picks'):
+                f[self.id].create_group('picks')
+                f[self.id]['picks'].create_dataset(
+                        'stations', data=np.asarray(self.picks.index).astype('S'))
+                for column in self.picks.columns:
+                    data = self.picks[column]
+                    if data.dtype == np.dtype('O'):
+                        data = data.astype('S')
+                    f[self.id]['picks'].create_dataset(
+                            column, data=data)
+            if hasattr(self, 'arrival_times'):
+                f[self.id].create_group('arrival_times')
+                f[self.id]['arrival_times'].create_dataset(
+                        'stations', data=np.asarray(self.arrival_times.index).astype('S'))
+                for column in self.arrival_times.columns:
+                    data = self.arrival_times[column]
+                    if data.dtype == np.dtype('O'):
+                        data = data.astype('S')
+                    f[self.id]['arrival_times'].create_dataset(
+                            column, data=data)
+
+
+
+    # -----------------------------------------------------------
+    #            plotting method(s)
+    # -----------------------------------------------------------
+
+    def plot(self, figsize=(20, 15), gain=1.e6, ylabel=r'Velocity ($\mu$m/s)',
+             component_aliases={'N': ['N', '1'], 'E': ['E', '2'], 'Z': ['Z']}):
+        """Plot the waveforms of the Event instance.  
+
+        Parameters
+        ------------
+
+        Returns
+        ----------
+        fig: plt.Figure
+            Figure instance produced by this method.
+        """
+        import matplotlib.pyplot as plt
+        import matplotlib.dates as mdates
+
+        start_times, end_times = [], []
+        fig, axes = plt.subplots(num=f'event_{str(self.origin_time)}',
+                figsize=figsize, nrows=len(self.stations),
+                ncols=len(self.components))
+        fig.suptitle(f'Event at {self.origin_time.strftime("%Y-%m-%d %H:%M:%S")}')
+        for s, sta in enumerate(self.stations):
+            for c, cp in enumerate(self.components):
+                for cp_alias in component_aliases[cp]:
+                    tr = self.traces.select(station=sta, component=cp_alias)
+                    if len(tr) > 0:
+                        # succesfully retrieved data
+                        break
+                if len(tr) == 0:
+                    continue
+                else:
+                    tr = tr[0]
+                time = utils.time_range(tr.stats.starttime,
+                        tr.stats.endtime, tr.stats.delta, unit='ms')
+                start_times.append(time[0])
+                end_times.append(time[-1])
+                axes[s, c].plot(
+                        time[:self.n_samples], tr.data[:self.n_samples]*gain,
+                        color='k')
+                # plot the picks
+                if (hasattr(self, 'picks') and (sta in self.picks.index) and
+                        (self.picks.loc[sta]['P_probas'] > 0.)):
+                    P_pick = np.datetime64(self.picks.loc[sta]['P_abs_picks'])
+                    axes[s, c].axvline(P_pick, color='C0', lw=1.00, ls='--')
+                if (hasattr(self, 'picks') and (sta in self.picks.index) and
+                        (self.picks.loc[sta]['S_probas'] > 0.)):
+                    S_pick = np.datetime64(self.picks.loc[sta]['S_abs_picks'])
+                    axes[s, c].axvline(S_pick, color='C3', lw=1.00, ls='--')
+                # plot the theoretical arrival times
+                if (hasattr(self, 'arrival_times') and (sta in self.arrival_times.index)):
+                    P_pick = np.datetime64(self.arrival_times.loc[sta]['P_abs_arrival_times'])
+                    axes[s, c].axvline(P_pick, color='C4', lw=1.25)
+                if (hasattr(self, 'arrival_times') and (sta in self.arrival_times.index)):
+                    S_pick = np.datetime64(self.arrival_times.loc[sta]['S_abs_arrival_times'])
+                    axes[s, c].axvline(S_pick, color='C1', lw=1.25)
+                axes[s, c].text(0.05, 0.05, f'{sta}.{cp_alias}',
+                        transform=axes[s, c].transAxes)
+        for ax in axes.flatten():
+            ax.set_xlim(min(start_times), max(end_times))
+            ax.xaxis.set_major_formatter(
+                mdates.ConciseDateFormatter(ax.xaxis.get_major_locator()))
+        plt.subplots_adjust(top=0.95, bottom=0.06, right=0.98, left=0.06)
+        fig.text(0.03, 0.40, ylabel, rotation='vertical')
+        return fig
+
+class Template(Event):
+    """A class for template events.
+
+    """
+    def __init__(self, origin_time, moveouts, stations, phases,
+            data_filename, data_path, latitude=None, longitude=None, depth=None,
+            sampling_rate=None, components=['N', 'E', 'Z'], id=None):
+        super().__init__(origin_time, moveouts, stations, phases, data_filename,
+                data_path, latitude=latitude, longitude=longitude, depth=depth,
+                sampling_rate=sampling_rate, components=components, id=id)
+
+    def read_waveforms(self):
+        """Do stuff. Overwrite parent's method.
+        """
+
+
+#class Template(object):
+#    """A Template class to handle template data and metadata.  
+#
+#    """
+#
+#    def __init__(self, template_filename, db_path_T,
+#                 db_path=cfg.dbpath, attach_waveforms=False,
+#                 metadata=None):
+#        """Read the template metadata and data.
+#
+#        Parameters
+#        ------------
+#        template_filename: string
+#            Base name of the template data and metadata files.  
+#            The metadata file is assumed to be {template_filename}meta.h5  
+#            The data file is assumed to be {template_filename}wav.h5  
+#        db_path_T: string
+#            Name of the folder where template files are stored.
+#        db_path: string, default to cfg.dbpath
+#            Name of the root folder where output files are stored.
+#        attach_waveforms: boolean, default to False
+#            If True, read the waveforms from {template_filename}wav.h5
+#            *AND* builds an obspy stream attribute.
+#        metadata: dictionary, default to None
+#            If not None, use this dictionary to define the template's
+#            attributes. This is typically used for a initializing a new
+#            Template instance.
+#        """
+#        self.db_path = db_path
+#        self.db_path_T = db_path_T
+#        self.filename = template_filename
+#        self.where = os.path.join(
+#                db_path, db_path_T, template_filename)
+#        if metadata is not None:
+#            for key in metadata.keys():
+#                setattr(self, key, metadata[key])
+#        else:
+#            # load metadata
+#            with h5.File(self.where + 'meta.h5', 'r') as f:
+#                for key in f.keys():
+#                    self.__setattr__(key, f[key][()])
+#        # alias for template_idx:
+#        if hasattr(self, 'template_idx'):
+#            self.tid = self.template_idx
+#        else:
+#            self.template_idx = self.tid
+#        self.stations = self.stations.astype('U')
+#        self.channels = self.channels.astype('U')
+#        # keep copies of the original network-wide attributes
+#        # for when we will select subnetworks
+#        for attr in ['stations', 'p_moveouts', 's_moveouts', 'travel_times']:
+#            self.__setattr__('network_{}'.format(attr),
+#                             #self.__getattr__(attr).copy()
+#                             getattr(self, attr).copy())
+#        self.network_reference_absolute_time =\
+#                copy.copy(self.reference_absolute_time)
+#        if type(self.network_s_moveouts.flat[0]) is np.float32:
+#            self.network_s_moveouts = utils.sec_to_samp(
+#                    self.network_s_moveouts, sr=self.sampling_rate)
+#            self.s_moveouts = utils.sec_to_samp(
+#                    self.s_moveouts, sr=self.sampling_rate)
+#        if type(self.network_p_moveouts.flat[0]) is np.float32:
+#            self.network_p_moveouts = utils.sec_to_samp(
+#                    self.network_p_moveouts, sr=self.sampling_rate)
+#            self.p_moveouts = utils.sec_to_samp(
+#                    self.p_moveouts, sr=self.sampling_rate)
+#        if attach_waveforms:
+#            self.read_waveforms()
+#            self.traces = obs.Stream()
+#            for s, sta in enumerate(self.stations):
+#                for c, cha in enumerate(self.channels):
+#                    tr = obs.Trace()
+#                    tr.data = self.network_waveforms[s, c, :]
+#                    tr.stats.station = sta
+#                    tr.stats.channel = cha
+#                    tr.stats.sampling_rate = cfg.sampling_rate
+#                    self.traces += tr
+#
+#    def read_waveforms(self):
+#        """Read template data.  
+#
+#
+#        Read the template waveforms from the template data file
+#        defined when instanciating the Template class.
+#        """
+#        # load waveforms
+#        with h5.File(self.where + 'wav.h5', 'r') as f:
+#            self.network_waveforms = f['waveforms'][()]
+#
+#    def subnetwork(self, subnet_stations):
+#        """Adjust the template attributes to the requested subnetwork.  
+#
+#        Parameters
+#        -------------
+#        subnet_stations: list of strings
+#            List of the station names to keep.
+#        """
+#        if type(subnet_stations) != np.array:
+#            subnet_stations = np.asarray(subnet_stations).astype('U')
+#        else:
+#            subnet_stations = subnet_stations.astype('U')
+#        self.stations = subnet_stations
+#        # get the index map from the whole network to
+#        # the subnetwork
+#        self.map_to_subnet = np.int32([np.where(self.network_stations == sta)[0]
+#                                       for sta in self.stations]).squeeze()
+#        # attach the waveforms
+#        self.waveforms = self.network_waveforms[self.map_to_subnet, :, :]
+#        # update moveouts
+#        self.p_moveouts = self.network_p_moveouts[self.map_to_subnet]
+#        self.s_moveouts = self.network_s_moveouts[self.map_to_subnet]
+#        # update travel times
+#        self.travel_times = self.network_travel_times[self.map_to_subnet]
+#
+#    def subtemplate(self, subnet_stations):
+#        """Restrict the template to the requested subnetwork.  
+#
+#        Parameters
+#        -------------
+#        subnet_stations: list of strings
+#            List of the station names to keep.
+#        """
+#        if type(subnet_stations) != np.ndarray:
+#            subnet_stations = np.asarray(subnet_stations).astype('U')
+#        else:
+#            subnet_stations = subnet_stations.astype('U')
+#        # get the index map from the whole network to the subnetwork
+#        self.map_to_subnet = np.int32([np.where(self.network_stations == sta)[0]
+#                                       for sta in subnet_stations]).squeeze()
+#        # attach the waveforms
+#        self.network_waveforms = self.network_waveforms[self.map_to_subnet, :, :]
+#        # update moveouts
+#        self.network_p_moveouts = self.network_p_moveouts[self.map_to_subnet]
+#        self.network_s_moveouts = self.network_s_moveouts[self.map_to_subnet]
+#        # update travel times
+#        self.network_travel_times = self.network_travel_times[self.map_to_subnet]
+#        # update stations
+#        self.network_stations = copy.copy(subnet_stations)
+#        self.stations = copy.copy(subnet_stations)
+#        # update data availability
+#        self.template_data_availability = \
+#                self.template_data_availability[self.map_to_subnet]
+#
+#    def n_closest_stations(self, n, available_stations=None):
+#        """Adjust the template attributes to the `n` closest stations.  
+#
+#
+#        Find the `n` closest stations and call `subnetwork` to adjust the
+#        template attributes to these stations.
+#
+#        Parameters
+#        ----------------
+#        n: scalar, int
+#            The `n` closest stations.
+#        available_stations: list of strings, default to None
+#            The list of stations from which we search the closest stations.
+#            If some stations are known to not have available data, the user
+#            may choose to not include these in the closest stations.
+#        """
+#        index_pool = np.arange(len(self.network_stations))
+#        # limit the index pool to available stations
+#        if available_stations is not None:
+#            availability = np.in1d(self.network_stations, available_stations.astype('U'))
+#            valid = availability & self.template_data_availability
+#        else:
+#            valid = self.template_data_availability
+#        index_pool = index_pool[valid]
+#        self.closest_stations = \
+#                index_pool[np.argsort(self.source_receiver_distances[index_pool])]
+#        # make sure we return a n-vector
+#        if self.closest_stations.size < n:
+#            missing = n - self.closest_stations.size
+#            remaining_indexes = np.setdiff1d(np.argsort(self.source_receiver_distances),
+#                                             self.closest_stations)
+#            self.closest_stations = np.hstack( (self.closest_stations,
+#                                                remaining_indexes[:missing]) )
+#        self.subnetwork(self.network_stations[self.closest_stations[:n]])
+#
+#    def n_best_SNR_stations(self, n, available_stations=None):
+#        """Adjust the template attributes to the `n` best SNR stations.  
+#
+#
+#        Find the `n` best SNR stations and call `subnetwork` to adjust the
+#        template attributes to these stations.
+#
+#        Parameters
+#        ----------------
+#        n: scalar, int
+#            The `n` closest stations.
+#        available_stations: list of strings, default to None
+#            The list of stations from which we search the closest stations.
+#            If some stations are known to not have available data, the user
+#            may choose to not include these in the closest stations.
+#        """
+#
+#        index_pool = np.arange(len(self.network_stations))
+#        # limit the index pool to available stations
+#        if available_stations is not None:
+#            availability = np.in1d(self.network_stations, available_stations.astype('U'))
+#            valid = availability & self.template_data_availability
+#        else:
+#            valid = self.template_data_availability
+#        index_pool = index_pool[valid]
+#        self.best_SNR_stations = \
+#                index_pool[np.argsort(self.SNR[index_pool])[::-1]]
+#        # make sure we return a n-vector
+#        if self.best_SNR_stations.size < n:
+#            missing = n - self.best_SNR_stations.size
+#            remaining_indexes = np.setdiff1d(np.argsort(self.SNR)[::-1],
+#                                             self.best_SNR_stations)
+#            self.best_SNR_stations = np.hstack( (self.best_SNR_stations,
+#                                                remaining_indexes[:missing]) )
+#        self.subnetwork(self.network_stations[self.best_SNR_stations[:n]])
+#
+#    def distance(self, latitude, longitude, depth):
+#        """Compute distance between template and a given location.  
+#
+#        Parameters
+#        -----------
+#        latitude: scalar, float
+#            Latitude of the target location.
+#        longitude: scalar, float
+#            Longitude of the target location.
+#        depth: scalar, float
+#            Depth of the target location, in km.
+#        """
+#        from .utils import two_point_distance
+#        return two_point_distance(self.latitude, self.longitude, self.depth,
+#                                  latitude, longitude, depth)
+#
+#    @property
+#    def hmax_unc(self):
+#        if hasattr(self, '_hmax_unc'):
+#            return self._hmax_unc
+#        else:
+#            self.hor_ver_uncertainties()
+#            return self._hmax_unc
+#
+#    @property
+#    def vmax_unc(self):
+#        if hasattr(self, '_vmax_unc'):
+#            return self._vmax_unc
+#        else:
+#            self.hor_ver_uncertainties()
+#            return self._vmax_unc
+#
+#    @property
+#    def az_hmax_unc(self):
+#        if hasattr(self, '_az_hmax_unc'):
+#            return self._az_hmax_unc
+#        else:
+#            self.hor_ver_uncertainties()
+#            return self._az_hmax_unc
+#
+#    def hor_ver_uncertainties(self):
+#        """Compute the horizontal and vertical uncertainties on location.  
+#
+#        The vertical uncertainty is taken as the maximum vertical range
+#        covered by the uncertainty ellipsoid.  
+#        The horizontal uncertainty is taken as the maximum horizontal range
+#        covered by the uncertainty ellipsoid.
+#        
+#        New Attributes
+#        ----------------
+#        hmax_unc: scalar, float
+#            The maximum horizontal uncertainty, taken as the maximum
+#            horizontal range covered by the uncertainty ellipsoid.
+#        vmax_unc: scalar, float
+#            The maximum vertical uncertainty, taken as the maximum
+#            vertical range covered by the uncertainty ellipsoid.
+#        az_hmax_unc: scalar, float
+#            The azimuth (angle from north) of the maximum horizontal
+#            uncertainty.
+#
+#        Note: hmax + vmax does not have to be equal to the
+#        max_loc, the latter simply being the length of the
+#        longest semi-axis of the uncertainty ellipsoid.
+#        """
+#        w, v = np.linalg.eigh(self.cov_mat)
+#        # the eigenvalues are the variances (units of [distance**2])
+#        # in the eigendirections, we need the standard deviations
+#        # (units of [distance])
+#        std = np.sqrt(w)
+#        # check the vertical components of all semi-axes:
+#        vertical_unc = np.abs(std*v[2, :])
+#        # keep the maximum for the vertical uncertainty
+#        max_vertical = vertical_unc.max()
+#        # check the horizontal components of all semi-axes:
+#        horizontal_unc = np.sqrt(np.sum((std[np.newaxis, :]*v[:2, :])**2, axis=0))
+#        # keep the maximum as the horizontal uncertainty
+#        max_horizontal = horizontal_unc.max()
+#        direction_hmax = v[:, horizontal_unc.argmax()]
+#        azimuth_hmax = np.arctan2(direction_hmax[0], direction_hmax[1])
+#        azimuth_hmax = (azimuth_hmax*180./np.pi)%180.
+#        # these private attributes should be called via their property names
+#        self._hmax_unc = max_horizontal
+#        self._vmax_unc = max_vertical
+#        self._az_hmax_unc = azimuth_hmax
+#
+#    def write(self, path, filename=None, attr_map={}):
+#        """Write template data and metadata files.  
+#
+#        Parameters
+#        -----------
+#        path: string
+#            Path to the folder where to write the files.
+#        filename: string, default to None
+#            Base name of the data and metadata files. The data filename
+#            is {filename}wav.h5 and the metadata filename is {filename}meta.h5.
+#            If None, the template id is used to define the filename.
+#        attr_map: dictionary, default to empty dictionary 
+#            Map between the template attributes and the hdf5 field names.
+#            Example: `attr_map['stations'] = 'network_stations'` means that the
+#            template attribute `self.network_stations` will be stored as the
+#            `'stations'` field of the hdf5 file.
+#        """
+#        if filename is None:
+#            filename = f'template{self.tid}'
+#        # the key-word arguments map the attribute names to the dataset entries
+#        for attr in ['longitude', 'latitude', 'depth', 'tid', 'channels',
+#                'cov_mat', 'max_location_uncertainty', 'duration',
+#                'sampling_rate', 'SNR', 'source_receiver_distances',
+#                'template_data_availability', 'origin_time']:
+#            attr_map.setdefault(attr, attr)
+#        for attr in ['stations', 'p_moveouts', 's_moveouts',
+#                'reference_absolute_time', 'travel_times']:
+#            attr_map.setdefault(attr, 'network_'+attr)
+#        full_fn = os.path.join(path, filename)
+#        with h5.File(full_fn+'meta.h5', mode='w') as f:
+#            for attr in attr_map.keys():
+#                attr_ = getattr(self, attr_map[attr])
+#                if (isinstance(attr_, np.ndarray)
+#                        and (attr_.dtype.kind == np.dtype('U').kind)):
+#                    attr_ = attr_.astype('S')
+#                f.create_dataset(attr, data=attr_)
+#        with h5.File(full_fn+'wav.h5', mode='w') as f:
+#            f.create_dataset('waveforms', data=self.waveforms)
 
 
 class TemplateGroup(object):
@@ -745,10 +1616,10 @@ class TemplateGroup(object):
     def cross_correlate(self, duration, offset_start_S, offset_start_P,
                         max_lag=20, n_stations=30):
         """
-        Create an EventFamily instance to access its methods.
+        Create an FamilyEvents instance to access its methods.
          --- Should be rewritten properly ---
         """
-        family = EventFamily(
+        family = FamilyEvents(
                 self.tids[0], self.db_path_T, self.db_path_M, db_path=self.db_path)
         family.detection_waveforms = \
                 np.float32([np.mean(stack.data, axis=0) for stack in self.stacks])
@@ -876,6 +1747,10 @@ class TemplateGroup(object):
                                            self.CCs_P[t1, t2, s]))
 
 class Stack(object):
+    """A class for stacked waveforms.  
+
+
+    """
 
     def __init__(self,
                  stations,
@@ -967,7 +1842,7 @@ class Stack(object):
                 tr.stats.sampling_rate = self.sampling_rate
                 self.traces += tr
 
-class Catalog(object):
+class FamilyCatalog(object):
 
     def __init__(self, filename, db_path_M, db_path=cfg.dbpath):
         self.filename = filename
@@ -977,8 +1852,7 @@ class Catalog(object):
                 db_path, db_path_M, filename)
 
     def read_data(self, items_in=[], items_out=[]):
-        """
-        Attach the requested attributes to the Catalog instance.
+        """Attach the requested attributes to the FamilyCatalog instance.
 
         Parameters
         -----------
@@ -1009,8 +1883,7 @@ class Catalog(object):
         self.tid = self.template_idx
 
     def flatten_catalog(self, attributes=[], unique_events=False):
-        """
-        Outputs a catalog with one row for each requested attribute.
+        """Output a catalog with one row for each requested attribute.
 
         Parameters
         -----------
@@ -1027,7 +1900,7 @@ class Catalog(object):
             Each entry contains an array of size n_events.
         """
         if not hasattr(self, 'origin_times'):
-            print('Catalog needs to have the origin_times attribute '
+            print('FamilyCatalog needs to have the origin_times attribute '
                   'to return a flat catalog.')
             return
         n_events = len(self.origin_times)
@@ -1036,7 +1909,7 @@ class Catalog(object):
         flat_catalog['tids'] = np.ones(n_events, dtype=np.int32)*self.tid
         for attr in attributes:
             if not hasattr(self, attr):
-                print(f'Catalog does not have {attr}')
+                print(f'FamilyCatalog does not have {attr}')
                 continue
             attr_ = getattr(self, attr)
             if not isinstance(attr_, list)\
@@ -1069,24 +1942,24 @@ class Catalog(object):
                 print(f'Template {self.tid} catalog has no attribute {attr}')
         return catalog
 
-class AggregatedCatalogs(object):
+class FamilyGroupCatalog(object):
 
-    def __init__(self, catalogs=None, filenames=None,
+    def __init__(self, families=None, filenames=None,
                  db_path_M=None, db_path=cfg.dbpath):
         """
-        Must either provide catalogs (list of instances of Catalog),
+        Must either provide families (list of instances of Family),
         or list of filenames.
         """
-        if catalogs is not None:
-            # index the single-template catalogs by their tid
+        if families is not None:
+            # index the single-template families by their tid
             # in a dictionary
             if isinstance(catalog.template_idx, np.ndarray):
-                self.catalogs = {catalog.template_idx[0]: catalog
-                                 for catalog in catalogs}
+                self.families = {catalog.template_idx[0]: catalog
+                                 for catalog in families}
             else:
-                self.catalogs = {catalog.template_idx: catalog
-                                 for catalog in catalogs}
-            self.tids = list(self.catalogs.keys())
+                self.families = {catalog.template_idx: catalog
+                                 for catalog in families}
+            self.tids = list(self.families.keys())
         else:
             self.db_path = db_path
             self.db_path_M = db_path_M
@@ -1094,12 +1967,11 @@ class AggregatedCatalogs(object):
 
     def add_recurrence_times(self):
         for tid in self.tids:
-            self.catalogs[tid].recurrence_times =\
-                    np.hstack(([np.nan], np.diff(self.catalogs[tid].origin_times)))
+            self.families[tid].recurrence_times =\
+                    np.hstack(([np.nan], np.diff(self.families[tid].origin_times)))
 
     def read_data(self, items_in=[], items_out=[]):
-        """
-        Attach the requested attributes to the Catalog instances.
+        """Attach the requested attributes to the Family instances.
 
         Parameters
         -----------
@@ -1114,23 +1986,23 @@ class AggregatedCatalogs(object):
             items_in = [items_in]
         if not isinstance(items_out, list):
             items_out = [items_out]
-        # initialize the dictionary of Catalog instances
-        self.catalogs = {}
+        # initialize the dictionary of Family instances
+        self.families = {}
         for filename in self.filenames:
-            # initialize a Catalog instance
-            catalog = Catalog(filename, self.db_path_M, db_path=self.db_path)
+            # initialize a Family instance
+            catalog = Family(filename, self.db_path_M, db_path=self.db_path)
             # attach the requested attributes
             catalog.read_data(items_in=items_in, items_out=items_out)
             # fill the dictionary
             if isinstance(catalog.template_idx, np.ndarray):
-                self.catalogs[catalog.template_idx[0]] = catalog
+                self.families[catalog.template_idx[0]] = catalog
             else:
-                self.catalogs[catalog.template_idx] = catalog
-        self.tids = list(self.catalogs.keys())
+                self.families[catalog.template_idx] = catalog
+        self.tids = list(self.families.keys())
 
     def flatten_catalog(self, attributes=[], chronological_order=True,
                         unique_events=False):
-        flat_catalogs = [self.catalogs[tid].flatten_catalog(
+        flat_catalogs = [self.families[tid].flatten_catalog(
             attributes=attributes, unique_events=unique_events)
             for tid in self.tids]
         flat_agg_catalog = {}
@@ -1148,8 +2020,7 @@ class AggregatedCatalogs(object):
     def remove_multiples(self, db_path_T, n_closest_stations=10,
                          dt_criterion=3., distance_criterion=1.,
                          similarity_criterion=-1., return_catalog=False):
-        """
-        Search for events detected by multiple templates.
+        """Search for events detected by multiple templates.
 
         Parameters
         -----------
@@ -1242,16 +2113,16 @@ class AggregatedCatalogs(object):
         for tid in self.tids:
             selection = catalog['tids'] == tid
             unique_events_t = catalog['unique_events'][selection]
-            self.catalogs[tid].unique_events = unique_events_t
+            self.families[tid].unique_events = unique_events_t
         if return_catalog:
             return catalog
 
 
-class EventFamily(object):
+class FamilyEvents(object):
 
     def __init__(self, tid, db_path_T, db_path_M, db_path=cfg.dbpath):
         """
-        Initializes an EventFamily instance and attaches the
+        Initializes an FamilyEvents instance and attaches the
         Template instance corresponding to this family.
         """
         self.tid = tid
@@ -1265,10 +2136,10 @@ class EventFamily(object):
 
     def attach_catalog(self, items_in=[], items_out=[]):
         """
-        Creates a Catalog instance and call Catalog.read_data()
+        Creates a Family instance and call Family.read_data()
         """
         filename = f'multiplets{self.tid}catalog.h5'
-        self.catalog = Catalog(filename, self.db_path_M, db_path=self.db_path)
+        self.catalog = Family(filename, self.db_path_M, db_path=self.db_path)
         self.catalog.read_data(items_in=items_in, items_out=items_out)
 
     def check_template_reloc(self):
@@ -1282,8 +2153,8 @@ class EventFamily(object):
 
     def find_closest_stations(self, n_stations, available_stations=None):
         """
-        Here for consistency with EventFamilyGroup and write the
-        cross_correlate method such that EventFamilyGroup can inherit
+        Here for consistency with FamilyGroupEvents and write the
+        cross_correlate method such that FamilyGroupEvents can inherit
         from it.
         """
         self.template.n_closest_stations(
@@ -1364,8 +2235,8 @@ class EventFamily(object):
                         dtype=np.float32)
 
     def read_data(self, **kwargs):
-        """
-        Call fetch_detection_waveforms from utils.
+        """Call 'fetch_detection_waveforms' from utils.  
+
         Read waveforms from the event waveforms that were
         extracted at the time of detection.
         """
@@ -1390,8 +2261,7 @@ class EventFamily(object):
     def trim_waveforms(self, duration, offset_start_S, offset_start_P,
                        t0=cfg.buffer_extracted_events,
                        S_window_time=4., P_window_time=1., correct_tt=False):
-        """
-        Trim the waveforms using the P- and S-wave moveouts from the template.
+        """Trim the waveforms using the P- and S-wave moveouts from the template.
 
         Parameters
         ------------
@@ -1541,7 +2411,7 @@ class EventFamily(object):
                     **preprocess_kwargs)
             if len(event) > 0:
                 detection_waveforms.append(utils.get_np_array(
-                    event, net, verbose=False))
+                    event, net.stations, components=net.components, verbose=False))
             else:
                 detection_waveforms.append(np.zeros(
                     len(net.stations), len(net.components),
@@ -1667,7 +2537,7 @@ class EventFamily(object):
         """
         import fast_matched_filter as fmf
         if not hasattr(self, 'trimmed_waveforms'):
-            print('The EventFamily instance needs the trimmed_waveforms '
+            print('The FamilyEvents instance needs the trimmed_waveforms '
                   'attribute, see trim_waveforms.')
             return
         self.max_lag = max_lag
@@ -1889,7 +2759,7 @@ class EventFamily(object):
                                        self.lags_P[n, s]/self.sr,
                                        self.CCs_P[n, s]))
 
-class EventFamilyGroup(EventFamily):
+class FamilyGroupEvents(FamilyEvents):
 
     def __init__(self, tids, db_path_T, db_path_M, db_path=cfg.dbpath):
         self.tids = tids
@@ -1897,7 +2767,7 @@ class EventFamilyGroup(EventFamily):
         self.db_path_T = db_path_T
         self.db_path_M = db_path_M
         self.db_path = db_path
-        self.families = {tid: EventFamily(tid, db_path_T, db_path_M, db_path=db_path)
+        self.families = {tid: FamilyEvents(tid, db_path_T, db_path_M, db_path=db_path)
                          for tid in tids}
         self.sr = self.families[self.tids[0]].sr
 
@@ -1907,7 +2777,7 @@ class EventFamilyGroup(EventFamily):
         with the template's relocated hypocenter
         """
         if not hasattr(self, 'aggcat'):
-            print('This EventFamilyGroup instance has no AggregatedCatalogs. '
+            print('This FamilyGroupEvents instance has no FamilyGroupCatalog. '
                   'Do nothing.')
         else:
             for tid in self.tids:
@@ -1924,7 +2794,7 @@ class EventFamilyGroup(EventFamily):
         call AggregatedCatalogs.read_data(), as well as
         AggregatedCatalogs.remove_multiples(). This is crucial to note
         that remove_multiples returns a catalog that is ordered in time.
-        When reading data from the single-template catalogs, these are
+        When reading data from the single-template families, these are
         not ordered in time after concatenation.
         """
         # force 'origin_times' and 'magnitudes' to be among the items
@@ -1967,7 +2837,7 @@ class EventFamilyGroup(EventFamily):
         if not hasattr(self, 'catalog'):
             # call attach_catalog() for calling remove_multiples()
             # !!! the catalog that is returned like that takes all
-            # single-template catalogs and order them in time, so
+            # single-template families and order them in time, so
             # it is ESSENTIAL to make sure that the data are ordered
             # the same way
             self.attach_catalog()
@@ -2011,7 +2881,7 @@ class EventFamilyGroup(EventFamily):
         for tid in self.tids:
             if hasattr(self, 'aggcat'):
                 # use the already loaded, and potentially edited, catalog
-                kwargs['catalog'] = self.aggcat.catalogs[tid]
+                kwargs['catalog'] = self.aggcat.families[tid]
             self.families[tid].read_data(**kwargs)
         self.event_ids_str = \
                 np.asarray([event_id for tid in self.tids
@@ -2020,7 +2890,7 @@ class EventFamilyGroup(EventFamily):
 
     def read_trimmed_waveforms(self, *args, **kwargs):
         """
-        See EventFamily.read_trimmed_waveforms
+        See FamilyEvents.read_trimmed_waveforms
         """
         # overriden method from parent class
         for tid in self.tids:
@@ -2050,7 +2920,7 @@ class EventFamilyGroup(EventFamily):
 
     def read_trimmed_waveforms_raw(self, *args, **kwargs):
         """
-        See EventFamily.read_trimmed_waveforms_raw
+        See FamilyEvents.read_trimmed_waveforms_raw
         """
         # overriden method from parent class
         for tid in self.tids:
@@ -2078,7 +2948,7 @@ class EventFamilyGroup(EventFamily):
 
     def trim_waveforms(self, *args, **kwargs):
         """
-        See EventFamily.trim_waveforms
+        See FamilyEvents.trim_waveforms
         """
         # overriden method from parent class
         for tid in self.tids:
@@ -2091,7 +2961,7 @@ class EventFamilyGroup(EventFamily):
         # reorder in chronological order
         #self.attach_catalog()
         # no this is wrong!!! attach_catalog() call remove_multiples()
-        # which already merges single-template catalogs and order them
+        # which already merges single-template families and order them
         # in time.... so to get the actual origin times that correspond
         # to the data that were loaded, we need to read from the single-
         # template catalog!!!
