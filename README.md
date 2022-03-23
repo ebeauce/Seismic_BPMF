@@ -4,14 +4,6 @@ Complete framework for earthquake detection and location: Backprojection and mat
 The last stable release is v1.0.1, but v2.0.0 is coming soon with polished modules, documentations, and a set of tutorials so that you can start your own earthquake detection and location project.  
 
 
-## Examples
-```python
-    import BPMF
-
-    T = BPMF.dataset.Template('template12', 'template_db', db_path='project_root')
-    T.read_waveforms()
-```
-
 ## Upcoming features (in v2.0.0)
 - Tutorials.
 - More docstrings and a documentation website.
@@ -46,6 +38,15 @@ Download the v1.0.1 source code at [https://github.com/ebeauce/Seismic_BPMF/rele
     pip install .
 ```
 The first line, `python setup.py build_ext`, executes the Makefile and compiles the C and CUDA-C librairies. If you don't have an Nvidia GPU and/or the nvcc compiler, you will see a warning message (and every time you will load the BPMF librairy). You can still use BPMF on CPUs. 
+
+
+## Examples (in progress)
+```python
+    import BPMF
+
+    T = BPMF.dataset.Template('template12', 'template_db', db_path='project_root')
+    T.read_waveforms()
+```
 
 ## Reference
 Please, cite:
