@@ -209,316 +209,6 @@ def load_travel_times(path, phases, source_indexes=None, return_coords=False):
     else:
         return tts
 
-## -------------------------------------------------
-##      Earthquake catalog routines
-## -------------------------------------------------
-#
-#def load_earthquake_catalog(tids, 
-#                            db_path_T='template_db_1',
-#                            db_path_M='matched_filter_1',
-#                            db_path=cfg.dbpath,
-#                            remove_multiples=True):
-#
-#    # python list version
-#    OT = []
-#    OT_string = []
-#    latitudes         = []
-#    longitudes        = []
-#    depths            = []
-#    dLongitude        = []
-#    dLatitude         = []
-#    dDepth            = []
-#    mining_activity   = []
-#    stations          = []
-#    S_travel_times    = []
-#    P_travel_times    = []
-#    cat_tids          = []
-#    Ntot = 0
-#    for tid in tids:
-#        try:
-#            origin_times  = db_h5py.read_catalog_multiplets('multiplets{:d}'.format(tid),
-#                                                            db_path=db_path,
-#                                                            db_path_M=db_path_M,
-#                                                            object_from_cat='origin_times')
-#        except OSError:
-#            print('Couldn\'t find the catalog file for template {:d}'.format(tid))
-#            continue
-#        unique_events = db_h5py.read_catalog_multiplets('multiplets{:d}'.format(tid),
-#                                                        db_path=db_path,
-#                                                        db_path_M=db_path_M,
-#                                                        object_from_cat='unique_events')
-#        network_stations = db_h5py.read_catalog_multiplets('multiplets{:d}'.format(tid),
-#                                                           db_path=db_path,
-#                                                           db_path_M=db_path_M,
-#                                                           object_from_cat='stations')
-#        template = db_h5py.read_template('template{:d}'.format(tid),
-#                                         db_path=db_path,
-#                                         db_path_T=db_path_T)
-#        if remove_multiples:
-#            mask = unique_events
-#        else:
-#            mask = np.ones(origin_times.size, dtype=np.bool)
-#        print('Template {:d}: {:d}/{:d} events'.format(tid, mask.sum(), mask.size))
-#        n_events = mask.sum()
-#        origin_times = origin_times[mask]
-#        OT.extend(origin_times.tolist())
-#        OT_string.extend([str(udt(origin_times[k])) for k in range(len(origin_times))])
-#        latitudes.extend([template.metadata['latitude']] * n_events)
-#        longitudes.extend([template.metadata['longitude']] * n_events)
-#        depths.extend([template.metadata['depth']] * n_events)
-#        dLongitude.extend([template.metadata['cov_mat'][0, 0]] * n_events)
-#        dLatitude.extend([template.metadata['cov_mat'][1, 1]] * n_events)
-#        dDepth.extend([template.metadata['cov_mat'][2, 2]] * n_events)
-#        cat_tids.extend([template.metadata['template_idx']] * n_events)
-#        st_list = template.metadata['stations'].tolist()
-#        for i in range(n_events):
-#            stations.append(st_list)
-#        # convert network stations to list
-#        network_stations = network_stations.astype('U').tolist()
-#        station_indexes = np.int32([network_stations.index(st) for st in st_list])
-#        p_travel_times = template.metadata['travel_times'][station_indexes, 0]
-#        p_travel_times = np.repeat(p_travel_times, n_events).reshape( (n_events, p_travel_times.size), order='F' )
-#        s_travel_times = template.metadata['travel_times'][station_indexes, 1]
-#        s_travel_times = np.repeat(s_travel_times, n_events).reshape( (n_events, s_travel_times.size), order='F' )
-#        P_travel_times.extend(p_travel_times)
-#        S_travel_times.extend(s_travel_times)
-#
-#    if len(OT) == 0:
-#        print('No events were found, return None.')
-#        return None
-#    
-#    # python list version: convert to numpy arrays
-#    OT                = np.asarray(OT).astype(np.float64)
-#    OT_string         = np.asarray(OT_string).astype('S')
-#    latitudes         = np.asarray(latitudes).astype(np.float32)
-#    longitudes        = np.asarray(longitudes).astype(np.float32)
-#    depths            = np.asarray(depths).astype(np.float32)
-#    dLongitude        = np.asarray(dLongitude).astype(np.float32)
-#    dLatitude         = np.asarray(dLatitude).astype(np.float32)
-#    dDepth            = np.asarray(dDepth).astype(np.float32)
-#    mining_activity   = np.asarray(mining_activity).astype('bool')
-#    stations          = np.asarray(stations).astype('|S8')
-#    S_travel_times    = np.asarray(S_travel_times).astype(np.float32)
-#    P_travel_times    = np.asarray(P_travel_times).astype(np.float32)
-#    cat_tids          = np.asarray(cat_tids).astype(np.int32)
-#    
-#    # sort by chronological order
-#    I                 = np.argsort(OT)
-#    OT                = OT[I]
-#    OT_string         = OT_string[I]
-#    latitudes         = latitudes[I]
-#    longitudes        = longitudes[I]
-#    depths            = depths[I]
-#    dLongitude        = dLongitude[I]
-#    dLatitude         = dLatitude[I]
-#    dDepth            = dDepth[I]
-#    stations          = stations[I]
-#    P_travel_times    = P_travel_times[I, :]
-#    S_travel_times    = S_travel_times[I, :]
-#    cat_tids          = cat_tids[I]
-#    
-#    catalog = {}
-#    catalog['origin_times']           = OT
-#    catalog['origin_times_strings']   = OT_string
-#    catalog['latitudes']              = latitudes 
-#    catalog['longitudes']             = longitudes
-#    catalog['depths']                 = depths
-#    catalog['latitude_uncertainty']   = dLatitude
-#    catalog['longitude_uncertainty']  = dLongitude
-#    catalog['depth_uncertainty']      = dDepth
-#    catalog['p_travel_times']         = P_travel_times 
-#    catalog['s_travel_times']         = S_travel_times
-#    catalog['stations']               = stations
-#    catalog['template_ids']           = cat_tids
-#
-#    return catalog
-#
-#def load_light_earthquake_catalog(tids, 
-#                                  db_path_T='template_db_1',
-#                                  db_path_M='matched_filter_1',
-#                                  db_path=cfg.dbpath,
-#                                  read_CCs=False,
-#                                  remove_multiples=True):
-#
-#    # python list version
-#    OT = []
-#    OT_string = []
-#    latitudes         = []
-#    longitudes        = []
-#    depths            = []
-#    dLongitude        = []
-#    dLatitude         = []
-#    dDepth            = []
-#    cat_tids          = []
-#    if read_CCs:
-#        CCs = []
-#    Ntot = 0
-#    for tid in tids:
-#        try:
-#            origin_times  = db_h5py.read_catalog_multiplets(
-#                    'multiplets{:d}'.format(tid),
-#                     db_path=db_path,
-#                     db_path_M=db_path_M,
-#                     object_from_cat='origin_times')
-#            if read_CCs:
-#                correlation_coefficients = db_h5py.read_catalog_multiplets(
-#                        'multiplets{:d}'.format(tid),
-#                        db_path=db_path,
-#                        db_path_M=db_path_M,
-#                        object_from_cat='correlation_coefficients')
-#        except OSError:
-#            print('Couldn\'t find the catalog file for template {:d}'.format(tid))
-#            continue
-#        if remove_multiples:
-#            unique_events = db_h5py.read_catalog_multiplets('multiplets{:d}'.format(tid),
-#                                                            db_path=db_path,
-#                                                            db_path_M=db_path_M,
-#                                                            object_from_cat='unique_events')
-#        template = dataset.Template('template{:d}'.format(tid),
-#                                    db_path_T, db_path=db_path)
-#        if remove_multiples:
-#            mask = unique_events
-#        else:
-#            mask = np.ones(origin_times.size, dtype=np.bool)
-#        print('Template {:d}: {:d}/{:d} events'.format(tid, mask.sum(), mask.size))
-#        n_events = mask.sum()
-#        origin_times = origin_times[mask]
-#        if read_CCs:
-#            correlation_coefficients[mask]
-#            CCs.extend(correlation_coefficients.tolist())
-#        OT.extend(origin_times.tolist())
-#        OT_string.extend([str(udt(origin_times[k])) for k in range(len(origin_times))])
-#        latitudes.extend([template.latitude] * n_events)
-#        longitudes.extend([template.longitude] * n_events)
-#        depths.extend([template.depth] * n_events)
-#        dLongitude.extend([np.sqrt(template.cov_mat[0, 0])] * n_events)
-#        dLatitude.extend([np.sqrt(template.cov_mat[1, 1])] * n_events)
-#        dDepth.extend([np.sqrt(template.cov_mat[2, 2])] * n_events)
-#        cat_tids.extend([template.template_idx] * n_events)
-#
-#    if len(OT) == 0:
-#        print('No events were found, return None.')
-#        return None
-#    
-#    # python list version: convert to numpy arrays
-#    OT                = np.asarray(OT).astype(np.float64)
-#    OT_string         = np.asarray(OT_string).astype('S')
-#    latitudes         = np.asarray(latitudes).astype(np.float32)
-#    longitudes        = np.asarray(longitudes).astype(np.float32)
-#    depths            = np.asarray(depths).astype(np.float32)
-#    dLongitude        = np.asarray(dLongitude).astype(np.float32)
-#    dLatitude         = np.asarray(dLatitude).astype(np.float32)
-#    dDepth            = np.asarray(dDepth).astype(np.float32)
-#    cat_tids          = np.asarray(cat_tids).astype(np.int32)
-#    
-#    # sort by chronological order
-#    I                 = np.argsort(OT)
-#    OT                = OT[I]
-#    OT_string         = OT_string[I]
-#    latitudes         = latitudes[I]
-#    longitudes        = longitudes[I]
-#    depths            = depths[I]
-#    dLongitude        = dLongitude[I]
-#    dLatitude         = dLatitude[I]
-#    dDepth            = dDepth[I]
-#    cat_tids          = cat_tids[I]
-#    if read_CCs:
-#        CCs = np.asarray(CCs).astype(np.float32)
-#        CCs = CCs[I]
-#   
-#    catalog = {}
-#    catalog['origin_times']           = OT
-#    catalog['origin_times_strings']   = OT_string
-#    catalog['latitudes']              = latitudes 
-#    catalog['longitudes']             = longitudes
-#    catalog['depths']                 = depths
-#    catalog['latitude_uncertainty']   = dLatitude
-#    catalog['longitude_uncertainty']  = dLongitude
-#    catalog['depth_uncertainty']      = dDepth
-#    catalog['template_ids']           = cat_tids
-#    if read_CCs:
-#        catalog['correlation_coefficients'] = CCs
-#    return catalog
-
-def event_count(event_timings_str,
-                start_date,
-                end_date,
-                freq='1D',
-                offset=0.,
-                trim_start=True,
-                trim_end=False,
-                mode='end'):
-    """
-    Parameters
-    ----------
-    event_timings_str: list of array of str
-        Timings of the events given as strings of characters.
-    start_date: str
-        Starting date of the event count time series.
-    end_date: str
-        End date of the event count time series.
-    freq: str, default to '1D'
-        Desired frequency of the event count time series.
-        Default is one day.
-    offset: float, default to 0.
-        Fraction of the frequency used for defining
-        the beginning of each bin. For example, offset=0.5
-        with freq='1D' will return daily event counts
-        from noon to noon.
-    mode: str, default to 'end'
-        Can be 'end' or 'beginning'. This string defines whether
-        the seismicity counted between time 1 and time 2 is
-        indexed at time 2 ('end') or time 1 ('beginning').
-
-    Returns
-    -------
-    event_count: Pandas Series
-        Pandas Series with temporal indexes defined
-        by freq and base, and values given by the 
-        event count.
-        To get a numpy array from this Pandas Series,
-        use: event_count.values
-    """
-    import pandas as pd
-
-    start_date = pd.to_datetime(start_date.replace(',', '-'))
-    end_date = pd.to_datetime(end_date.replace(',', '-'))
-    offset_str = '{}{}'.format(offset, freq[-1])
-    event_occurrence = pd.Series(data=np.ones(len(event_timings_str), dtype=np.int32),
-                                 index=pd.to_datetime(np.asarray(event_timings_str)
-                                                      .astype('U'))
-                                          .astype('datetime64[ns]'))
-    # trick to force a good match between initial indexes and new indexes
-    event_occurrence[start_date] = 0
-    event_occurrence[end_date] = 0
-    if mode == 'end':
-        # note: we use mode='end' so that the number of events
-        # counted at time t is the event count between t-dt and t
-        # this is consistent with the timing convention of pandas diff()
-        # namely: diff(t) = x(t)-x(t-dt)
-        event_count = event_occurrence.groupby(pd.Grouper(freq=freq, offset=offset_str, label='right')).agg('sum')
-    elif mode == 'beginning':
-        event_count = event_occurrence.groupby(pd.Grouper(freq=freq, offset=offset_str, label='left')).agg('sum')
-    else:
-        print('mode should be end or beginning')
-        return
-    if event_count.index[0] > pd.Timestamp(start_date):
-        event_count[event_count.index[0] - pd.Timedelta(freq)] = 0
-    if event_count.index[-1] < pd.Timestamp(end_date):
-        event_count[event_count.index[-1] + pd.Timedelta(freq)] = 0
-    if trim_start or offset==0.:
-        event_count = event_count[event_count.index >= start_date]
-    if trim_end or offset==0.:
-        if offset > 0.:
-            stop_date = pd.to_datetime(end_date) + pd.Timedelta(freq)
-        else:
-            stop_date = end_date
-        event_count = event_count[event_count.index <= stop_date]
-    # force the manually added items to be well 
-    # located in time
-    event_count.sort_index(inplace=True)
-    return event_count
-
 # -------------------------------------------------
 #             Stacking routines
 # -------------------------------------------------
@@ -1141,6 +831,128 @@ def weighted_linear_regression(X, Y, W=None):
 #             Others
 # -------------------------------------------------
 
+def compute_distances(source_longitudes, source_latitudes, source_depths,
+                      receiver_longitudes, receiver_latitudes, receiver_depths):
+    """Fast distance computation between all source points and all receivers.  
+
+    Use `cartopy.geodesic.Geodesic` to compute pair-wise distances.
+
+    Parameters
+    ------------
+    source_longitudes: (n_sources,) list or numpy.array
+        Longitudes, in decimal degrees, of the source points.
+    source_latitudes: (n_sources,) list or numpy.array
+        Latitudes, in decimal degrees, of the source points.
+    source_depths: (n_sources,) list or numpy.array
+        Depths, in km, of the source points.
+    receiver_longitudes: (n_sources,) list or numpy.array
+        Longitudes, in decimal degrees, of the receivers.
+    receiver_latitudes: (n_sources,) list or numpy.array
+        Latitudes, in decimal degrees, of the receivers.
+    receiver_depths: (n_sources,) list or numpy.array
+        Depths, in km, of the receivers. E.g., depths are negative if receivers
+        are located at the surface.
+    """
+    from cartopy.geodesic import Geodesic
+    # convert types if necessary
+    if isinstance(source_longitudes, list):
+        source_longitudes = np.asarray(source_longitudes)
+    if isinstance(source_latitudes, list):
+        source_latitudes = np.asarray(source_latitudes)
+    if isinstance(source_depths, list):
+        source_depths = np.asarray(source_depths)
+
+    # initialize distance array
+    distances = np.zeros((len(source_latitudes), len(receiver_latitudes)),
+                         dtype=np.float32)
+    # initialize the Geodesic instance
+    G = Geodesic()
+    for s in range(len(receiver_latitudes)):
+        epi_distances = G.inverse(
+                np.array([[receiver_longitudes[s], receiver_latitudes[s]]]),
+                np.hstack((source_longitudes[:, np.newaxis],
+                           source_latitudes[:, np.newaxis])))
+        distances[:, s] = np.asarray(epi_distances)[:, 0].squeeze()/1000.
+        distances[:, s] = np.sqrt(distances[:, s]**2 \
+                + (source_depths - receiver_depths[s])**2)
+    return distances
+
+def event_count(event_timings_str, start_date, end_date,
+                freq='1D', offset=0., trim_start=True,
+                trim_end=False, mode='end'):
+    """
+    Parameters
+    ----------
+    event_timings_str: list of array of str
+        Timings of the events given as strings of characters.
+    start_date: str
+        Starting date of the event count time series.
+    end_date: str
+        End date of the event count time series.
+    freq: str, default to '1D'
+        Desired frequency of the event count time series.
+        Default is one day.
+    offset: float, default to 0.
+        Fraction of the frequency used for defining
+        the beginning of each bin. For example, offset=0.5
+        with freq='1D' will return daily event counts
+        from noon to noon.
+    mode: str, default to 'end'
+        Can be 'end' or 'beginning'. This string defines whether
+        the seismicity counted between time 1 and time 2 is
+        indexed at time 2 ('end') or time 1 ('beginning').
+
+    Returns
+    -------
+    event_count: Pandas Series
+        Pandas Series with temporal indexes defined
+        by freq and base, and values given by the 
+        event count.
+        To get a numpy array from this Pandas Series,
+        use: event_count.values
+    """
+    import pandas as pd
+
+    start_date = pd.to_datetime(start_date.replace(',', '-'))
+    end_date = pd.to_datetime(end_date.replace(',', '-'))
+    offset_str = '{}{}'.format(offset, freq[-1])
+    event_occurrence = pd.Series(data=np.ones(len(event_timings_str), dtype=np.int32),
+                                 index=pd.to_datetime(np.asarray(event_timings_str)
+                                                      .astype('U'))
+                                          .astype('datetime64[ns]'))
+    # trick to force a good match between initial indexes and new indexes
+    event_occurrence[start_date] = 0
+    event_occurrence[end_date] = 0
+    if mode == 'end':
+        # note: we use mode='end' so that the number of events
+        # counted at time t is the event count between t-dt and t
+        # this is consistent with the timing convention of pandas diff()
+        # namely: diff(t) = x(t)-x(t-dt)
+        event_count = event_occurrence.groupby(pd.Grouper(
+            freq=freq, offset=offset_str, label='right')).agg('sum')
+    elif mode == 'beginning':
+        event_count = event_occurrence.groupby(pd.Grouper(
+            freq=freq, offset=offset_str, label='left')).agg('sum')
+    else:
+        print('mode should be end or beginning')
+        return
+    if event_count.index[0] > pd.Timestamp(start_date):
+        event_count[event_count.index[0] - pd.Timedelta(freq)] = 0
+    if event_count.index[-1] < pd.Timestamp(end_date):
+        event_count[event_count.index[-1] + pd.Timedelta(freq)] = 0
+    if trim_start or offset==0.:
+        event_count = event_count[event_count.index >= start_date]
+    if trim_end or offset==0.:
+        if offset > 0.:
+            stop_date = pd.to_datetime(end_date) + pd.Timedelta(freq)
+        else:
+            stop_date = end_date
+        event_count = event_count[event_count.index <= stop_date]
+    # force the manually added items to be well 
+    # located in time
+    event_count.sort_index(inplace=True)
+    return event_count
+
 def get_np_array(stream, stations, components=['N', 'E', 'Z'],
                  priority='HH', n_samples=None,
                  component_aliases={'N': ['N', '1'],
@@ -1263,23 +1075,23 @@ def running_mad(time_series,
     return running_stat
 
 
-def two_point_distance(lat_1, long_1, depth_1,
-                       lat_2, long_2, depth_2):
+def two_point_distance(lon_1, lat_1, depth_1,
+                       lon_2, lat_2, depth_2):
     """Compute the distance between two points.  
 
 
     Parameters
     -----------
-    lat_1: scalar, float
-        Latitude of Point 1.
     lon_1: scalar, float
         Longitude of Point 1.
+    lat_1: scalar, float
+        Latitude of Point 1.
     depth_1: scalar, float
         Depth of Point 1 (in km).
-    lat_2: scalar, float
-        Latitude of Point 2.
     lon_2: scalar, float
         Longitude of Point 2.
+    lat_2: scalar, float
+        Latitude of Point 2.
     depth_2: scalar, float
         Depth of Point 2 (in km).
 
@@ -1291,7 +1103,7 @@ def two_point_distance(lat_1, long_1, depth_1,
 
     from obspy.geodetics.base import calc_vincenty_inverse
 
-    dist, az, baz = calc_vincenty_inverse(lat_1, long_1, lat_2, long_2)
+    dist, az, baz = calc_vincenty_inverse(lat_1, lon_1, lat_2, lon_2)
     dist /= 1000. # from m to km
     dist = np.sqrt(dist**2 + (depth_1 - depth_2)**2)
     return dist
