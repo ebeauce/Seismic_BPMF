@@ -464,7 +464,7 @@ def initialize_map(map_longitudes, map_latitudes,
                    map_axis=None, seismic_stations=None,
                    GPS_stations=None, text_size=14, markersize=10,
                    topography_file=None, path_topo='',
-                   fault_file=None,
+                   faults=None,
                    right_labels=False, left_labels=True,
                    bottom_labels=True, top_labels=False,
                    **kwargs):
@@ -607,13 +607,9 @@ def initialize_map(map_longitudes, map_latitudes,
             scale='10m',
             facecolor='#0076b482'))
 
-    #print('Add faults.')
-    if fault_file is not None:
-        faults = read_fault_file(os.path.join(path_topo, fault_file),
-                                 bounds=list(map_longitudes)+list(map_latitudes))
-        lines = LineCollection(faults, linewidths=0.5, colors='k', zorder=0.5,
-                               transform=data_coords)#, rasterized=True)
-        map_axis.add_collection(lines)
+    if faults is not None:
+        map_axis.add_geometries(faults['geometry'], crs=data_coords, 
+                facecolor='none', edgecolor='k')
     # plot optional elements
     props = dict(boxstyle='round', facecolor='white',
                  edgecolor=None, alpha=0.6, pad=0.2)
