@@ -1007,21 +1007,12 @@ def get_np_array(stream, stations, components=['N', 'E', 'Z'],
                     # succesfully retrieved data
                     break
             if len(channel) > 0:
-                if len(channel) > 1:
-                    # there are either gaps in stream or several channels
-                    # for one station (e.g. BH and HH)
-                    channel = channel.select(channel=f'{priority}{cp_alias}')
-                # enforce taking only n_samples samples, as there might
-                # be time series of length n_samples+1 due to time slicing
-                # when extracting mseed or sac data
-                data[s, c, :] = channel[0].data[:n_samples]
-            #try:
-            #    data[s, c, :] = stream.select(station=sta, component=cp)[0].data
-            #except Exception as e:
-            #    if verbose:
-            #        print(e)
-            #        print('Leave blank in the data')
-            #    continue
+                try:
+                    # try selecting the preferred channel if it exists
+                    data[s, c, :] = channel.select(
+                            channel=f'{priority}{cp_alias}')[0].data[:n_samples]
+                except IndexError:
+                    data[s, c, :] = channel[0].data[:n_samples]
     return data
 
 def max_norm(X):
