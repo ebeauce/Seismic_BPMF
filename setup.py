@@ -65,6 +65,8 @@ setup(
     install_requires=[
         "numpy",
         "scipy",
+        "pandas",
+        "h5py",
         "matplotlib"],
     python_requires=">=3.6",
     zip_safe=False,

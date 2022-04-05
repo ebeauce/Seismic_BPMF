@@ -88,7 +88,7 @@ class Network(object):
         """
         selection = (self.latitude > lat_min) & (self.latitude < lat_max)\
                 & (self.longitude > lon_min) & (self.longitude < lon_max)
-        new_stations = self.stations[selection]
+        new_stations = np.asarray(self.stations[selection]).astype('U')
         subnet = self.subset(new_stations, self.components, method='keep')
         return subnet
 
@@ -240,6 +240,7 @@ class Catalog(object):
         self.catalog = pd.DataFrame(catalog)
         if event_ids is not None:
             self.catalog.set_index('event_id', inplace=True)
+        self.catalog.sort_values('origin_time', inplace=True)
 
     @property
     def latitude(self):
@@ -258,7 +259,24 @@ class Catalog(object):
         return self.catalog.origin_time
 
     @classmethod
+    def concatenate(cls, catalogs):
+        """Build catalog from list of `pandas.DataFrame`.
+
+        Parameters
+        -----------
+        catalogs: list of `pandas.DataFrame`
+            List of `pandas.DataFrame` with consistent columns.
+        """
+        cat = pd.concat(catalogs, ignore_index=True)
+        cat.sort_values('origin_time', inplace=True)
+        base = ['longitude', 'latitude', 'depth', 'origin_time']
+        return cls(cat.longitude, cat.latitude, cat.depth, cat.origin_time,
+                **cat.drop(columns=base))
+
+    @classmethod
     def read_from_events(cls, events, extra_attributes=[], fill_value=np.nan):
+        """Build catalog from list of `Event` instances.  
+        """
         longitudes, latitudes, depths, origin_times = [], [], [], []
         extra_attr = {}
         # initialize empty lists for extra requested attributes
@@ -280,63 +298,82 @@ class Catalog(object):
                     extra_attr[attr].append(fill_value)
         return cls(longitudes, latitudes, depths, origin_times, **extra_attr)
 
+    @classmethod
+    def read_from_detection_file(cls, filename, db_path=cfg.dbpath, gid=None,
+            extra_attributes=[], fill_value=np.nan):
+        """Read all detected events and build catalog.  
+
+        """
+        events = []
+        try:
+            with h5.File(os.path.join(db_path, filename), mode='r') as f:
+                if gid is not None:
+                    f = f[gid]
+                keys = list(f.keys())
+                for key in f.keys():
+                    events.append(Event.read_from_file(hdf5_file=f[key]))
+        except Exception as e:
+            print(e)
+            print('Error while trying to read the detected events '
+                  '(perhaps there are none).')
+            pass
+        return cls.read_from_events(events, extra_attributes=extra_attributes,
+                fill_value=fill_value)
+                
+
     # ---------------------------------------------------------
     #                  Plotting methods
     # ---------------------------------------------------------
-    def plot_space_time(self, ax=None, figsize=(20, 10), **kwargs):
-        """Plot the space-time event distribution.  
+    def plot_time_statistics(self, figsize=(16, 7), **kwargs):
+        """Plot the histograms of time of the day and day of the week.  
 
+        Parameters
+        ------------
+        figsize: tuple of floats, default to (16, 7)
+            Size, in inches, of the figure (width, height).
 
+        Returns
+        ---------
+        fig: `plt.Figure`
         """
         import matplotlib.pyplot as plt
-        from matplotlib.colors import Normalize
-        from matplotlib.cm import ScalarMappable
-        from mpl_toolkits.axes_grid1 import make_axes_locatable
-        cmap = kwargs.get('cmap', None)
-        if cmap is None:
-            try:
-                import colorcet as cc
-                cmap = cc.cm.bjy
-            except Exception as e:
-                print(e)
-                cmap = 'viridis'
-        # ------------------------------------------------
-        #           Scattering plot kwargs
-        scatter_kwargs = {}
-        scatter_kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
-        scatter_kwargs['linewidths'] = kwargs.get('linewidths', 0.5)
-        scatter_kwargs['s'] = kwargs.get('s', 10)
-        scatter_kwargs['zorder'] = kwargs.get('zorder', 0)
-        # ------------------------------------------------
-        if ax is None:
-            fig = plt.figure(kwargs.get('figname', ''), figsize=figsize)
-            ax = fig.add_subplot(111)
-        else:
-            fig = ax.get_figure()
-        cNorm = Normalize(vmin=self.catalog['latitude'].min(),
-                          vmax=self.catalog['latitude'].max())
-        scalar_map = ScalarMappable(norm=cNorm, cmap=cmap)
-        scalar_map.set_array([])
+        fig, axes = plt.subplots(num='time_statistics', ncols=2,
+                                 nrows=1, figsize=figsize)
+        self.catalog['origin_time'].dt.dayofweek.hist(
+                bins=np.arange(8), ax=axes[0])
+        axes[0].set_xticks(0.5 + np.arange(7))
+        axes[0].set_xticklabels(
+                ['Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun'])
+        axes[0].set_xlabel('Day of the Week')
+        axes[0].set_ylabel('Event Count')
 
-        ax.set_title(f'{len(self.catalog):d} events')
-        ax.set_xlabel('Calendar Time')
-        ax.set_ylabel('Longitude')
-        ax.scatter(self.catalog['origin_time'], self.catalog['longitude'],
-                   color=scalar_map.to_rgba(self.catalog['latitude']),
-                   rasterized=True, **scatter_kwargs)
-        ax.set_xlim(min(self.catalog['origin_time']),
-                    max(self.catalog['origin_time']))
-        
-        ax_divider = make_axes_locatable(ax)
-        cax = ax_divider.append_axes("right", size="2%", pad=0.08)
-        plt.colorbar(scalar_map, cax, orientation='vertical', label='Latitude')
-
+        self.catalog['origin_time'].dt.hour.hist(
+                bins=np.arange(25), ax=axes[1])
+        axes[1].set_xlabel('Hour of the Day')
+        axes[1].set_ylabel('Event Count')
         return fig
 
+
     def plot_map(self, ax=None, figsize=(20, 10), depth_min=0.,
-            depth_max=20., **kwargs):
+                 depth_max=20., **kwargs):
         """Plot epicenters on map. 
 
+        Parameters
+        ------------
+        ax: `plt.Axes`, default to None
+            If None, create a new `plt.Figure` and `plt.Axes` instances. If
+            speficied by user, use the provided instance to plot.
+        figsize: tuple of floats, default to (20, 10)
+            Size, in inches, of the figure (width, height).
+        depth_min: scalar float, default to 0
+            Smallest depth, in km, in the depth colormap.
+        depth_max: scalar float, default to 20
+            Largest depth, in km, in the depth colormap.
+
+        Returns
+        ----------
+        fig: `plt.Figure`
+            The figure with depth color-coded epicenters.
         """
         from . import plotting_utils
         import matplotlib.pyplot as plt
@@ -382,6 +419,77 @@ class Catalog(object):
                 axes_class=plt.Axes)
         plt.colorbar(scalar_map, cax, orientation='vertical', label='Depth (km)')
         return ax.get_figure()
+
+    def plot_space_time(self, ax=None, figsize=(20, 10),
+            color_coded='longitude', y_axis='latitude', **kwargs):
+        """Plot the space-time event distribution.  
+
+        Parameters
+        ------------
+        ax: `plt.Axes`, default to None
+            If None, create a new `plt.Figure` and `plt.Axes` instances. If
+            speficied by user, use the provided instance to plot.
+        figsize: tuple of floats, default to (20, 10)
+            Size, in inches, of the figure (width, height).
+        color_coded: string, default to 'longitude'
+            Can be either 'longitude', 'latitude', or 'depth'. This is the
+            attribute used to define the color scale of each dot.
+        y_axis: string, default to 'latitude'
+            Can be either 'longitude', 'latitude', or 'depth'. This is the
+            attribute used to define the y-axis coordinates.
+
+        Returns
+        --------
+        fig: `plt.Figure`
+            The figure with color coded latitudes or longitudes.
+        """
+        import matplotlib.pyplot as plt
+        from matplotlib.colors import Normalize
+        from matplotlib.cm import ScalarMappable
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        cmap = kwargs.get('cmap', None)
+        if cmap is None:
+            try:
+                import colorcet as cc
+                cmap = cc.cm.bjy
+            except Exception as e:
+                print(e)
+                cmap = 'viridis'
+        # ------------------------------------------------
+        #           Scattering plot kwargs
+        scatter_kwargs = {}
+        scatter_kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
+        scatter_kwargs['linewidths'] = kwargs.get('linewidths', 0.5)
+        scatter_kwargs['s'] = kwargs.get('s', 10)
+        scatter_kwargs['zorder'] = kwargs.get('zorder', 0)
+        # ------------------------------------------------
+        if ax is None:
+            fig = plt.figure(kwargs.get('figname', 'space_time'),
+                             figsize=figsize)
+            ax = fig.add_subplot(111)
+        else:
+            fig = ax.get_figure()
+        cNorm = Normalize(vmin=self.catalog[color_coded].min(),
+                          vmax=self.catalog[color_coded].max())
+        scalar_map = ScalarMappable(norm=cNorm, cmap=cmap)
+        scalar_map.set_array([])
+
+        ax.set_title(f'{len(self.catalog):d} events')
+        ax.set_xlabel('Calendar Time')
+        ax.set_ylabel(y_axis.capitalize())
+        ax.scatter(self.catalog['origin_time'], self.catalog[y_axis],
+                   color=scalar_map.to_rgba(self.catalog[color_coded]),
+                   rasterized=True, **scatter_kwargs)
+        ax.set_xlim(min(self.catalog['origin_time']),
+                    max(self.catalog['origin_time']))
+        
+        ax_divider = make_axes_locatable(ax)
+        cax = ax_divider.append_axes("right", size="2%", pad=0.08)
+        plt.colorbar(scalar_map, cax, orientation='vertical',
+                label=color_coded.capitalize())
+
+        return fig
+
 
 class Data(object):
     """A Data class to manipulate waveforms and metadata.  
@@ -579,17 +687,22 @@ class Event(object):
             self.id = id
 
     @classmethod
-    def read_from_file(cls, filename, db_path=cfg.dbpath, gid=None):
+    def read_from_file(cls, filename=None, db_path=cfg.dbpath,
+                       hdf5_file=None, gid=None):
         """Initialize an Event instance from `filename`.  
 
         Parameters
         ------------
-        filename: string
-            Name of the hdf5 file with the event's data.
+        filename: string, default to None
+            Name of the hdf5 file with the event's data. If None, then
+            `hdf5_file` should be specified.
         db_path: string, default to `cfg.dbpath`
             Name of the directory where `filename` is located.
         gid: string, default to None
             If not None, this string is the hdf5's group name of the event.
+        hdf5_file: `h5py.File`, default to None
+            If not None, is an opened file pointing directly at the subfolder of
+            interest.
 
         Returns
         ----------
@@ -603,46 +716,56 @@ class Event(object):
         kwargs = {}
         has_picks = False
         has_arrivals = False
-        with h5.File(os.path.join(db_path, filename), mode='r') as f:
+        close_file = False
+        if filename is not None:
+            parent_file = h5.File(os.path.join(db_path, filename), mode='r')
             if gid is not None:
                 # go to specified group
-                f = f[gid]
-            for attr in attributes:
-                args.append(f[attr][()])
-            data_path, data_filename = os.path.split(
-                    f['where'][()].decode('utf-8'))
-            args.extend([data_filename, data_path])
-            for opt_attr in optional_attr:
-                if opt_attr in f:
-                    kwargs[opt_attr] = f[opt_attr][()]
-            aux_data = {}
-            if 'aux_data' in f:
-                for key in f['aux_data'].keys():
-                    aux_data[key] = f['aux_data'][key][()]
-                    if type(aux_data[key]) == bytes:
-                        aux_data[key] = aux_data[key].decode('utf-8')
-            if 'picks' in f:
-                picks = {}
-                for key in f['picks'].keys():
-                    picks[key] = f['picks'][key][()]
-                    if picks[key].dtype.kind == 'S':
-                        picks[key] = picks[key].astype('U')
-                        if key != 'stations':
-                            picks[key] = pd.to_datetime(picks[key])
-                picks = pd.DataFrame(picks)
-                picks.set_index('stations', inplace=True)
-                has_picks = True
-            if 'arrival_times' in f:
-                arrival_times = {}
-                for key in f['arrival_times'].keys():
-                    arrival_times[key] = f['arrival_times'][key][()]
-                    if arrival_times[key].dtype.kind == 'S':
-                        arrival_times[key] = arrival_times[key].astype('U')
-                        if key != 'stations':
-                            arrival_times[key] = pd.to_datetime(arrival_times[key])
-                arrival_times = pd.DataFrame(arrival_times)
-                arrival_times.set_index('stations', inplace=True)
-                has_arrivals = True
+                f = parent_file[gid]
+            else:
+                f = parent_file
+            close_file = True # remember to close file at the end
+        else:
+            f = hdf5_file
+        for attr in attributes:
+            args.append(f[attr][()])
+        data_path, data_filename = os.path.split(
+                f['where'][()].decode('utf-8'))
+        args.extend([data_filename, data_path])
+        for opt_attr in optional_attr:
+            if opt_attr in f:
+                kwargs[opt_attr] = f[opt_attr][()]
+        aux_data = {}
+        if 'aux_data' in f:
+            for key in f['aux_data'].keys():
+                aux_data[key] = f['aux_data'][key][()]
+                if type(aux_data[key]) == bytes:
+                    aux_data[key] = aux_data[key].decode('utf-8')
+        if 'picks' in f:
+            picks = {}
+            for key in f['picks'].keys():
+                picks[key] = f['picks'][key][()]
+                if picks[key].dtype.kind == 'S':
+                    picks[key] = picks[key].astype('U')
+                    if key != 'stations':
+                        picks[key] = pd.to_datetime(picks[key])
+            picks = pd.DataFrame(picks)
+            picks.set_index('stations', inplace=True)
+            has_picks = True
+        if 'arrival_times' in f:
+            arrival_times = {}
+            for key in f['arrival_times'].keys():
+                arrival_times[key] = f['arrival_times'][key][()]
+                if arrival_times[key].dtype.kind == 'S':
+                    arrival_times[key] = arrival_times[key].astype('U')
+                    if key != 'stations':
+                        arrival_times[key] = pd.to_datetime(arrival_times[key])
+            arrival_times = pd.DataFrame(arrival_times)
+            arrival_times.set_index('stations', inplace=True)
+            has_arrivals = True
+        if close_file:
+            # close the file
+            parent_file.close()
         # ! the order of args is important !
         event = cls(*args, **kwargs)
         if 'cov_mat' in aux_data:
@@ -1556,9 +1679,8 @@ class Template(Event):
                 best_SNR_stations, remaining_indexes[:missing]))
         self.stations = self.network_stations[best_SNR_stations[:n]]
 
-
     def read_waveforms(self, stations=None, components=None):
-        """Do stuff. Overwrite parent's method.
+        """Read the waveforms time series.
 
         """
         if stations is None:
@@ -1606,6 +1728,132 @@ class Template(Event):
                 save_waveforms=save_waveforms, gid=gid)
 
 
+    # ---------------------------------------------
+    #  methods to investigate the detected events
+    def read_catalog(self, filename=None, db_path=None, gid=None,
+            extra_attributes=[], fill_value=np.nan):
+        """Build a `Catalog` instance.  
+
+        Parameters
+        ------------
+        filename: string, default to None
+            Name of the detection file. If None, use the standard file
+            and folder naming convention.
+        db_path: string, default to None
+            Name of the directory where the detection file is located. If None,
+            use the standard file and folder naming convention.
+        gid: string, int, or float, default to None
+            If not None, this is the hdf5 group where to read the data.
+        extra_attributes: list of strings, default to []
+            Attributes to read in addition to the default 'longitude',
+            'latitude', 'depth', and 'origin_time'.
+        fill_value: string, int, or float, default to np.nan
+            Default value if the target attribute does not exist.
+        """
+        db_path_T, filename_T = os.path.split(self.where)
+        if filename is None:
+            # guess from standard convention
+            filename = f'detections_{filename_T}'
+        if db_path is None:
+            # guess from standard convention
+            db_path = db_path_T[::-1].replace('template'[::-1],
+                    'matched_filter'[::-1], 1)[::-1]
+        self.catalog = Catalog.read_from_detection_file(filename,
+                db_path=db_path, gid=gid, extra_attributes=extra_attributes,
+                fill_value=fill_value)
+        self.catalog.catalog['event_ids'] = [f'{self.tid}.{i:d}' for i in
+                range(len(self.catalog.catalog))]
+        self.catalog.catalog['tid'] = [self.tid]*len(self.catalog.catalog)
+
+
+    def plot_detection(self, idx, filename=None, db_path=None, duration=60.,
+            phase_on_comp={'N': 'S', '1': 'S', 'E': 'S', '2': 'S', 'Z': 'P'},
+            tag='preprocessed_1_12', offset_ot=10., **kwargs):
+        """Plot the `idx`-th detection made with this template.  
+
+        Parameters
+        ------------
+        filename: string, default to None
+            Name of the detection file. If None, use the standard file
+            and folder naming convention.
+        db_path: string, default to None
+            Name of the directory where the detection file is located. If None,
+            use the standard file and folder naming convention.
+
+        """
+        if not hasattr(self, 'traces'):
+            print('Call `self.read_waveforms` first.')
+            return
+        db_path_T, filename_T = os.path.split(self.where)
+        if filename is None:
+            # guess from standard convention
+            filename = f'detections_{filename_T}'
+        if db_path is None:
+            # guess from standard convention
+            db_path = db_path_T[::-1].replace('template'[::-1],
+                    'matched_filter'[::-1], 1)[::-1]
+        with h5.File(os.path.join(db_path, filename), mode='r') as f:
+            keys = list(f.keys())
+            event = Event.read_from_file(hdf5_file=f[keys[idx]])
+        event.read_waveforms(duration, tag, offset_ot=offset_ot,
+                phase_on_comp=phase_on_comp, time_shifted=False)
+        fig = event.plot(**kwargs)
+        axes = fig.get_axes()
+        for s, sta in enumerate(event.stations):
+            for c, cp in enumerate(event.components):
+                for cp_alias in event.component_aliases[cp]:
+                    tr = self.traces.select(station=sta, component=cp_alias)
+                    if len(tr) > 0:
+                        # succesfully retrieved data
+                        break
+                if len(tr) == 0:
+                    continue
+                else:
+                    tr = tr[0]
+                try:
+                    max_amp = np.abs(event.traces.select(station=sta,
+                            component=cp_alias)[0].data).max()*kwargs.get('gain',
+                                    1.e6)
+                except IndexError:
+                    # trace not found
+                    max_amp = 0.
+                ph = phase_on_comp[cp_alias]
+                starttime = event.origin_time + self.moveouts_win.loc[sta,
+                        f'moveouts_{ph.upper()}']
+                endtime = starttime + tr.stats.npts*tr.stats.delta
+                time = utils.time_range(starttime, endtime, tr.stats.delta, unit='ms')
+                axes[s*len(event.components)+c].plot(
+                        time[:self.n_samples],
+                        utils.max_norm(tr.data[:self.n_samples])*max_amp,
+                        lw=0.75, color='C3')
+        return fig
+
+    def plot_recurrence_times(self, ax=None, annotate_axes=True, figsize=(20, 10)):
+        """Plot recurrence times vs detection times.  
+
+        Parameters
+        -----------
+        ax: `plt.Axes`, default to None
+            If not None, use this `plt.Axes` instance to plot the data.
+        """
+        import matplotlib.pyplot as plt
+        if ax is not None:
+            fig = ax.get_figure()
+        else:
+            fig = plt.figure(f'recurrence_times_tp{self.tid}', figsize=figsize)
+            ax = fig.add_subplot(111)
+        if not hasattr(self, 'catalog'):
+            print('Call `read_catalog` first.')
+            return
+        rt = (self.catalog.origin_time.values[1:]\
+                - self.catalog.origin_time.values[:-1])/1.e9 # in sec
+        ax.plot(self.catalog.origin_time[1:], rt, marker='v', color='k', ls='')
+        if annotate_axes:
+            ax.set_xlabel('Detection Time')
+            ax.set_ylabel('Recurrence Time (s)')
+            ax.semilogy()
+        return fig
+
 class TemplateGroup(object):
     """A class for a group of templates.
 
@@ -1627,7 +1875,7 @@ class TemplateGroup(object):
         """
         self.templates = templates
         self.network = network
-        self.n_templates = len(self.templates)
+        #self.n_templates = len(self.templates)
         self.tids = np.int32([tp.tid for tp in self.templates])
         # convenient map between template id and the template index in
         # the self.templates list
@@ -1694,6 +1942,10 @@ class TemplateGroup(object):
         return self._moveouts_arr
 
     @property
+    def n_templates(self):
+        return len(self.templates)
+
+    @property
     def waveforms_arr(self):
         if not hasattr(self, '_waveforms_arr'):
             self.get_waveforms_arr()
@@ -1730,6 +1982,61 @@ class TemplateGroup(object):
         return self._network_to_template_map
 
     # methods
+    def box(self, lon_min, lon_max, lat_min, lat_max, inplace=False):
+        """Keep templates inside the requested geographic bounds.  
+
+        Parameters
+        -----------
+        lon_min: scalar float
+            Minimum longitude, in decimal degrees.
+        lon_max: scalar float
+            Maximum longitude, in decimal degrees.
+        lat_min: scalar float
+            Minimum latitude, in decimal degrees.
+        lat_max: scalar float
+            Maximum latitude, in decimal degrees.
+        """
+        templates_inside = []
+        for template in self.templates:
+            if ((template.longitude >= lon_min) & (template.longitude <=
+                lon_max) & (template.latitude >= lat_min) & (template.latitude
+                    <= lat_max)):
+                templates_inside.append(template)
+        if inplace:
+            self.templates = templates_inside
+            self.tids = np.int32([tp.tid for tp in self.templates])
+            self.tindexes = pd.Series(index=self.tids,
+                    data=np.arange(self.n_templates), name='tid_to_tindex')
+            if hasattr(self, '_intertemplate_dist'):
+                self._intertemplate_dist = \
+                        self._intertemplate_dist.loc[self.tids, self.tids]
+            if hasattr(self, '_dir_errors'):
+                self._dir_errors = self._dir_errors.loc[self.tids, self.tids]
+            if hasattr(self, '_ellipsoid_dist'):
+                self._ellipsoid_dist = \
+                        self._ellipsoid_dist.loc[self.tids, self.tids]
+            if hasattr(self, '_intertemplate_cc'):
+                self._intertemplate_cc = \
+                        self._intertemplate_cc.loc[self.tids, self.tids]
+            if hasattr(self, '_waveforms_arr'):
+                self.get_waveforms_arr()
+        else:
+            new_template_group = TemplateGroup(templates_inside, self.network)
+            new_tids = new_template_group.tids
+            if hasattr(self, '_intertemplate_dist'):
+                new_template_group._intertemplate_dist = \
+                        self._intertemplate_dist.loc[new_tids, new_tids]
+            if hasattr(self, '_dir_errors'):
+                new_template_group._dir_errors = \
+                        self._dir_errors.loc[new_tids, new_tids]
+            if hasattr(self, '_ellipsoid_dist'):
+                new_template_group._ellipsoid_dist = \
+                        self._ellipsoid_dist.loc[new_tids, new_tids]
+            if hasattr(self, '_intertemplate_cc'):
+                new_template_group._intertemplate_cc = \
+                        self._intertemplate_cc.loc[new_tids, new_tids]
+            return new_template_group
+
     def compute_intertemplate_dist(self):
         """Compute the template-pairwise distances, in km.  
 
@@ -1951,11 +2258,129 @@ class TemplateGroup(object):
         self._waveforms_arr /= norm
         self._remember('normalize')
 
+    def read_catalog(self, extra_attributes=[], fill_value=np.nan):
+        """Build a catalog from all templates' detections.
+
+        Work only if folder and file names follow the standard convention.
+
+        Parameters
+        ------------
+        extra_attributes: list of strings, default to []
+            Attributes to read in addition to the default 'longitude',
+            'latitude', 'depth', and 'origin_time'.
+        fill_value: string, int, or float, default to np.nan
+            Default value if the target attribute does not exist.
+
+        """
+        for template in self.templates:
+            if not hasattr(template, 'catalog'):
+                template.read_catalog(extra_attributes=extra_attributes,
+                        fill_value=fill_value)
+        # concatenate all catalogs
+        self.catalog = Catalog.concatenate([template.catalog.catalog for
+            template in self.templates])
+
     def read_waveforms(self):
         for tp in self.templates:
             tp.read_waveforms(
                     stations=self.stations, components=self.components)
         self._remember('read_waveforms')
+
+    def remove_multiples(self, n_closest_stations=10, dt_criterion=3.,
+            distance_criterion=1., similarity_criterion=-1., **kwargs):
+        """Search for events detected by multiple templates.
+
+        Parameters
+        -----------
+        n_closest_stations: integer, default to 10
+            In case template similarity is taken into account,
+            this is the number of stations closest to each template
+            that are used in the calculation of the average cc.
+        dt_criterion: float, default to 3
+            Time interval, in seconds, under which two events are
+            examined for redundancy.
+        distance_criterion: float, default to 1
+            Distance threshold, in kilometers, between two uncertainty
+            ellipsoids under which two events are examined for redundancy.
+        similarity_criterion: float, default to -1
+            Template similarity threshold, in terms of average CC, over
+            which two events are examined for redundancy. The default
+            value of -1 is always verified, meaning that similarity is
+            actually not taken into account.
+        """
+        if not hasattr(self, 'catalog'):
+            self.read_catalog(extra_attributes=['cc'])
+        # alias:
+        catalog = self.catalog.catalog
+        if similarity_criterion > -1.:
+            if not hasattr(self, '_intertemplate_cc'):
+                self.compute_intertemplate_cc(
+                        distance_threshold=distance_criterion,
+                        n_stations=n_closest_stations,
+                        max_lag=kwargs.get('max_lag', 10),
+                        device=kwargs.get('device', 'cpu'))
+        # -----------------------------------
+        t1 = give_time()
+        print('Searching for events detected by multiple templates')
+        print('All events occurring within {:.1f} sec, with uncertainty '
+              'ellipsoids closer than {:.1f} km will and '
+              'inter-template CC larger than {:.2f} be considered the same'.
+              format(dt_criterion, distance_criterion, similarity_criterion))
+        n_events = len(self.catalog.catalog)
+        dt_criterion = np.timedelta64(int(1000.*dt_criterion), 'ms')
+        unique_events = np.ones(n_events, dtype=np.bool)
+        for n1 in range(n_events):
+            if not unique_events[n1]:
+                continue
+            tid1 = catalog['tid'].iloc[n1]
+            # apply the time criterion
+            dt_n1 = (catalog['origin_time'] - catalog['origin_time'].iloc[n1])
+            temporal_neighbors = (dt_n1 < dt_criterion) \
+                    & (dt_n1 >= np.timedelta64(0, 's')) \
+                    & unique_events
+            # comment this line if you keep best CC
+            #temporal_neighbors[n1] = False
+            # get indices of where the above selection is True
+            candidates = np.where(temporal_neighbors)[0]
+            if len(candidates) == 0:
+                continue
+            # get template ids of all events that passed the time criterion
+            tids_candidates = np.int32([catalog['tid'].iloc[idx]
+                                       for idx in candidates])
+            # apply the spatial criterion to the distance between
+            # uncertainty ellipsoids
+            ellips_dist = self.ellipsoid_dist[tid1].loc[tids_candidates].values
+            if similarity_criterion > -1.:
+                similarities = self.intertemplate_cc[tid1].\
+                        loc[tids_candidates].values
+                multiples = candidates[np.where(
+                    (ellips_dist < distance_criterion)\
+                   & (similarities >= similarity_criterion))[0]]
+            else:
+                multiples = candidates[np.where(
+                    ellips_dist < distance_criterion)[0]]
+            # comment this line if you keep best CC
+            #if len(multiples) == 0:
+            #    continue
+            # uncomment if you keep best CC
+            if len(multiples) == 1:
+                continue
+            else:
+                unique_events[multiples] = False
+                # find best CC and keep it
+                ccs = catalog['cc'][multiples]
+                best_cc = multiples[ccs.argmax()]
+                unique_events[best_cc] = True
+        t2 = give_time()
+        print(f'{t2-t1:.2f}s to flag the multiples')
+        # -------------------------------------------
+        catalog['unique_events'] = unique_events
+        for tid in self.tids:
+            tt = self.tindexes.loc[tid]
+            selection = catalog['tid'] == tid
+            self.templates[tt].catalog.catalog['unique_events'] = \
+                    catalog['unique_events'][selection]
+
 
     def set_network(self, network):
         """Update `self.network` to the new desired `network`.  
@@ -1990,6 +2415,25 @@ class TemplateGroup(object):
         """
         if action not in self._update_attributes:
             self._update_attributes.append(action)
+
+    # plotting routines
+    def plot_recurrence_times(self, figsize=(20, 10)):
+        """Plot recurrence times vs detection times, template-wise.  
+
+        Parameters
+        -----------
+        figsize: tuple of floats, default to (20, 10)
+            Size in inches of the figure (width, height).
+        """
+        import matplotlib.pyplot as plt
+        fig = plt.figure('recurrence_times', figsize=figsize)
+        ax = fig.add_subplot(111)
+        for template in self.templates:
+            template.plot_recurrence_times(ax=ax, annotate_axes=False)
+        ax.set_xlabel('Detection Time')
+        ax.set_ylabel('Recurrence Time (s)')
+        ax.semilogy()
+        return fig
 
 
 #class TemplateGroup(object):
