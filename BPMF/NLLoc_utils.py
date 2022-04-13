@@ -248,7 +248,7 @@ def write_NLLoc_inputs(longitude, latitude, depth, tts, net,
     print('Done!')
 
 def write_NLLoc_obs(origin_time, picks, stations, filename,
-        path=cfg.NLLoc_input_path):
+        path=cfg.NLLoc_input_path, err_min=0.04):
     """Write the .obs file for NLLoc.  
 
     Parameters
@@ -264,6 +264,8 @@ def write_NLLoc_obs(origin_time, picks, stations, filename,
         Name of the .obs file.
     path: string, default to `cfg.NLLoc_input_path`
         Name of the directory where to save the .obs file.
+    err_min: scalar float, default to 0.04
+        Minimum error, in seconds, on phase picks.
     """
     from obspy import UTCDateTime as udt
 
@@ -274,8 +276,11 @@ def write_NLLoc_obs(origin_time, picks, stations, filename,
     for st in stations:
         #if st not in stations_to_use:
         #    continue
-        if st in picks.index and picks.loc[st]['P_probas'] > 0.:
-            err = 0.04
+        if st in picks['P_abs_picks'].dropna().index:
+            if 'P_err' in picks.columns:
+                err = min(err_min, picks.loc[st, 'P_err'])
+            else:
+                err = err_min
             P_arrival_time = udt(picks.loc[st]['P_abs_picks'])
             NLLoc.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.
                     format(st,   # station name
@@ -315,8 +320,11 @@ def write_NLLoc_obs(origin_time, picks, stations, filename,
                            '-1.0', # period
                            '0'  # prior weight
                            ))
-        if st in picks.index and picks.loc[st]['S_probas'] > 0.:
-            err = 0.04
+        if st in picks['S_abs_picks'].dropna().index:
+            if 'S_err' in picks.columns:
+                err = min(err_min, picks.loc[st, 'S_err'])
+            else:
+                err = err_min
             S_arrival_time = udt(picks.loc[st]['S_abs_picks'])
             NLLoc.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.
                     format(st,   # station name

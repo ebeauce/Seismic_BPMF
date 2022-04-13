@@ -396,7 +396,7 @@ class MatchedFilter(object):
             tids_chunk = self.template_group.tids[tt1:tt2]
             self.compute_cc_time_series(
                     weight_type=weight_type, device=device,
-                    tids=self.template_group.tids[tids_chunk])
+                    tids=tids_chunk)
             detections_chunk = self.find_detections(
                     minimum_interevent_time,
                     threshold_window_dur=threshold_window_dur,
@@ -539,11 +539,13 @@ class MatchedFilter(object):
                         tr.stats.endtime, 1./sr, unit='ms')
                 start_times.append(time[0])
                 end_times.append(time[-1])
-                ax.plot(time[:detection.n_samples], tr.data[:detection.n_samples], color='k')
+                ax.plot(time[:detection.n_samples],
+                        utils.max_norm(tr.data[:detection.n_samples]), color='k')
                 # plot the template waveforms
                 tr_tp = self.template_group.templates[tt].traces.select(
                         station=sta, component=cp_alias)[0]
-                ax.plot(time[:detection.n_samples], tr_tp.data[:detection.n_samples],
+                ax.plot(time[:detection.n_samples],
+                        utils.max_norm(tr_tp.data[:detection.n_samples]),
                         color='C3', lw=0.50)
                 # plot the theoretical pick
                 phase = detection.aux_data[f'phase_on_comp{cp_alias}'].upper()
