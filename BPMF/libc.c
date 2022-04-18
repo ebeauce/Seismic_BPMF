@@ -78,7 +78,7 @@ void find_similar_moveouts(float *moveouts,
 
         // some kind of progress bar
         if (i1+1 >= progress_step){
-            printf("Progress: %.0f%\n", 100.*progress_percent);
+            printf("Progress: %.0f%%\n", 100.*progress_percent);
             progress_percent += 0.1;
             progress_step = (int)(progress_percent*n_sources);
         }
