@@ -683,13 +683,14 @@ def add_scale_bar(ax, x_start, y_start, distance, source_crs,
         The coordinate system in which the data are written.
     """
     from cartopy.geodesic import Geodesic
+    from cartopy.crs import PlateCarree
     G = Geodesic()
  
     # default values
     kwargs['lw'] = kwargs.get('lw', 2)
     kwargs['color'] = kwargs.get('color', 'k')
 
-    data_coords = ctp.crs.PlateCarree()
+    data_coords = PlateCarree()
     # transform the axis coordinates into display coordinates
     display = ax.transAxes.transform([x_start, y_start])
     # take display coordinates into data coordinates
