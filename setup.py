@@ -23,19 +23,19 @@ class BPMFBuild(build_ext_original):
     def run(self):
         # Build the Python libraries via Makefile
         cpu_make = ['make', 'python_cpu']
-        gpu_make = ['make', 'python_gpu']
+        #gpu_make = ['make', 'python_gpu']
 
-        gpu_built = False
+        #gpu_built = False
         cpu_built = False
 
         ret = call(cpu_make)
         if ret == 0:
             cpu_built = True
-        ret = call(gpu_make)
-        if ret == 0:
-            gpu_built = True
-        if gpu_built is False:
-            print("Could not build GPU code")
+        #ret = call(gpu_make)
+        #if ret == 0:
+        #    gpu_built = True
+        #if gpu_built is False:
+        #    print("Could not build GPU code")
         if cpu_built is False:
             raise OSError("Could not build cpu code")
 
@@ -73,6 +73,5 @@ setup(
     cmdclass={
         'build_ext': BPMFBuild},
     include_package_data=True,
-    ext_modules=[BPMFExtension('BPMF.lib.libc'),
-                 BPMFExtension('BPMF.lib.libcu')]
+    ext_modules=[BPMFExtension('BPMF.lib.libc')]
 )

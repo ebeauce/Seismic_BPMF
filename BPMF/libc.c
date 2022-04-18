@@ -8,44 +8,6 @@
 
 #include "libc.h"
 
-void find_moveouts(const int* moveouts, int *moveouts_minmax, 
-                   const int *test_sources, const int *station_indexes,
-                   const size_t n_sources, 
-                   const size_t n_stations_whole_array,
-                   const size_t n_stations_restricted_array) {
-    /* Find the minimum and maximum moveouts for point of the grid.
-     * Even indexes correspond to minimum moveouts,
-     * odd indexes correspond to maximum moveouts. */
-
-    int i; // source counter
-    int s; // station counter
-
-#pragma omp parallel for \
-    private(i, s) \
-    shared(moveouts, moveouts_minmax, \
-           test_sources, station_indexes)
-    for (i = 0; i < n_sources; i++) {
-        int max_moveout = 0;
-        int min_moveout = INT_MAX;
-        int moveout, ss;
-
-        for (s = 0; s < n_stations_restricted_array; s++) {
-            // map from the whole stations array to the restricted array
-            ss =  station_indexes[test_sources[i]*n_stations_restricted_array + s];
-            moveout = moveouts[test_sources[i]*n_stations_whole_array + s];
-
-            if (moveout > max_moveout) {
-                 max_moveout = moveout;
-            }
-            if (moveout < min_moveout) {
-                 min_moveout = moveout;
-            }
-        }
-        moveouts_minmax[i * 2 + 0] = min_moveout;
-        moveouts_minmax[i * 2 + 1] = max_moveout;
-    }
-}
-
 void kurtosis(float *signal,
               int W,
               int n_stations,
