@@ -6,7 +6,6 @@ import datetime as dt
 from .config import package
 
 cpu_loaded = False
-gpu_loaded = False
 
 libpath = os.path.join(package, 'lib')
 
@@ -16,14 +15,6 @@ try:
 except:
     print('Missing libc.so! You won''t be able to run multiplet/template searches on the CPU')
     print('Should be at {}libc.so'.format(os.path.join(libpath, '')))
-
-
-try:
-    _libcu = C.cdll.LoadLibrary(os.path.join(libpath, 'libcu.so'))
-    gpu_loaded = True
-except:
-    print('Missing libcu.so! You won''t be able to run multiplet/template searches on the GPU')
-    print('Should be at {}libcu.so'.format(os.path.join(libpath, '')))
 
 
 if cpu_loaded:
@@ -40,9 +31,6 @@ if cpu_loaded:
                                             C.c_int,              # number of stations
                                             C.POINTER(C.c_int)    # output pointer: redundant sources
                                             ]
-
-if gpu_loaded:
-    pass
 
 def kurtosis(signal, W):
     n_stations = signal.shape[0]
