@@ -1,2 +1,2 @@
 void kurtosis(float*, int, int, int, int, float*);
-void find_similar_moveouts(float*, float, int, int, int*);
+void find_similar_moveouts(float*, float, size_t, size_t, size_t, int*);

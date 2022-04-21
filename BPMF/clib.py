@@ -46,7 +46,7 @@ def kurtosis(signal, W):
                    Kurto.ctypes.data_as(C.POINTER(C.c_float)))
     return Kurto.reshape(n_stations, n_components, length)
 
-def find_similar_sources(moveouts, threshold):
+def find_similar_sources(moveouts, threshold, n_nearest_neighbors=200):
     """
     Find sources with similar moveouts so that users can discard
     some of them during the computation of the network response,
@@ -60,6 +60,11 @@ def find_similar_sources(moveouts, threshold):
     threshold: scalar float
         The station average time difference tolerance to consider
         two sources as being redundant.
+    n_nearest_neighbors: scalar int, default to 200
+        Check redundancy in chunks of `n_nearest_neighbors` contiguous sources
+        before starting the all pair-wise computation. If the moveouts are
+        ordered such that contiguous elements correspond to proximal grid
+        sources, then this can considerably speed up the computation.
 
     Returns
     -------------
@@ -76,10 +81,12 @@ def find_similar_sources(moveouts, threshold):
     moveouts = np.float32(moveouts.flatten())
     # initialize the output pointer
     redundant_sources = np.zeros(n_sources, dtype=np.int32)
+    n_nearest_neighbors = min(n_sources, n_nearest_neigbors)
     # call the C function:
     _libc.find_similar_moveouts(moveouts.ctypes.data_as(C.POINTER(C.c_float)),
                                 np.float32(threshold),
-                                np.int32(n_sources),
-                                np.int32(n_stations),
+                                int(n_sources),
+                                int(n_stations),
+                                int(n_nearest_neighbors),
                                 redundant_sources.ctypes.data_as(C.POINTER(C.c_int)))
     return redundant_sources.astype(np.bool)
