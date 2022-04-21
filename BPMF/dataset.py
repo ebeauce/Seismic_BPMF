@@ -5,7 +5,6 @@ import h5py as h5
 
 from .config import cfg
 from . import utils
-from . import catalog_utils
 
 import obspy as obs
 import pandas as pd

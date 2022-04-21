@@ -1,6 +1,5 @@
 from .config import cfg
 from . import dataset
-from . import db_h5py
 from . import utils
 
 import numpy as np
@@ -12,6 +11,11 @@ import matplotlib.colors as mcolors
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from obspy.core import UTCDateTime as udt
+
+# -------------------------------------------------------
+#       Many functions will disappear soon, replaced
+#       by plotting methods of new classes introduced in dataset.py
+# -------------------------------------------------------
 
 def plot_template(idx,
                   db_path_T='template_db_2/',
@@ -93,124 +97,6 @@ def plot_template(idx,
     if show:
         plt.show()
 
-def plot_match(catalog,
-               event_index,
-               db_path_T='template_db_1',
-               n_stations=10,
-               stations=None,
-               show=True):
-    """
-    Plot the template waveforms (in red) on top of the continuous data (in blue)
-    for detection #event_index from catalog (python dictionary with metadata).
-    Path variables are used to locate where to read the template and the
-    extracted waveforms from the matched filter search.
-
-    Parameters
-    ------------
-    catalog: dictionary
-        Dictionary with metadata such as the template matching
-        output filenames, the event indexes within each day and the 
-        template index.
-    event_index: scalar integer
-        Index of the event to plot.
-    db_path_T: string, default to 'template_db_1'
-        Database name of the template waveform and metadata files.
-    n_stations: integer, default to 10
-        Number of stations to plot.
-    stations: list of strings or None, default to None
-        If not None, only plot the stations provided in the list.
-    show: boolean, optional.
-        If True, plt.show() is called at the end.
-    """
-    # plotting parameters: font sizes can be tuned to display well
-    # on the monitor
-    old_params = plt.rcParams.copy()
-    font = {'family' : 'sans-serif', 'weight' : 'normal', 'size' : 14}
-    plt.rc('font', **font)
-    plt.rcParams.update({'ytick.labelsize'  :  14})
-    plt.rcParams['svg.fonttype'] = 'none'
-    # read the template and event data
-    filename = catalog.filenames[event_index].decode('utf-8')
-    tid = catalog.tid
-    index = catalog.indices[event_index]
-    M, T = db_h5py.read_multiplet_new_version(filename, index, tid,
-                                              return_tp=True,
-                                              db_path=catalog.db_path,
-                                              db_path_T=db_path_T,
-                                              db_path_M=catalog.db_path_M)
-    n_stations = min(n_stations, len(T.stations))
-    if stations is not None:
-        T.subnetwork(stations)
-        n_stations = len(stations)
-    else:
-        # select the n_stations closest stations
-        T.n_closest_stations(n_stations)
-    st_sorted = np.asarray(T.stations)
-    st_sorted = np.sort(st_sorted)
-    I_s = np.argsort(np.asarray(T.stations))
-    ns = len(T.stations)
-    nc = len(M.components)
-    strdate = M[0].stats.starttime.strftime('%Y-%m-%d')
-    strtime = M[0].stats.starttime.strftime('%Y,%m,%d -- %H:%M:%S')
-    fig, axes = plt.subplots(
-            num=f'event{index}_{strdate}_tp{tid}',
-            nrows=ns, ncols=nc, figsize=(18, 9))
-    fig.suptitle(f'Template {tid} ({M.latitude:.2f}/{M.longitude:.2f}/{M.depth:.2f}km):'
-                 f' Detection on {strtime}')
-    # create a moveout array (n_stations x n_components)
-    mv = np.stack([T.s_moveouts, T.s_moveouts, T.p_moveouts], axis=1)
-    # event waveforms were extracted from detection_time - cfg.buffer_extracted_events
-    # for plotting the sequence of interest, we fix t_min somewhere around 0 + cfg.buffer_extracted_events
-    # i.e. t_min is somewhere around the detection time
-    mv_max = max(T.s_moveouts.max(), T.p_moveouts.max())/T.sampling_rate
-    t_min = cfg.buffer_extracted_events - 0.5
-    t_max = t_min + cfg.template_len + mv_max + 0.5
-    idx_min = utils.sec_to_samp(t_min, sr=T.sampling_rate)
-    idx_max = min(M.traces[0].data.size,
-                  utils.sec_to_samp(t_max, sr=T.sampling_rate))
-    time  = np.linspace(t_min, t_max, idx_max-idx_min)
-    time -= time.min()
-    #-----------------------------------------
-    for s in range(ns):
-        print(st_sorted[s])
-        for c in range(nc):
-            axes[s, c].plot(
-                    time, M.select(station=st_sorted[s])[c].data[idx_min:idx_max],
-                    color='C0', label=f'{st_sorted[s]}.{M.components[c]}', lw=0.75)
-            idx1 = utils.sec_to_samp(min(cfg.buffer_extracted_events, cfg.multiplet_len/4.),
-                                     sr=cfg.sampling_rate)\
-                   + mv[I_s[s], c]
-            idx2 = idx1 + T.traces[0].data.size
-            if idx2 > (time.size + idx_min):
-                idx2 = time.size + idx_min
-            Max = M.select(station=st_sorted[s])[c].data[idx1:idx2].max()
-            if Max == 0.:
-                Max = 1.
-            data_template = T.traces.select(station=st_sorted[s])[c].data[:idx2-idx1]
-            # scale the template data such that it matches the data amplitudes
-            data_toplot   = data_template/data_template.max() * Max
-            axes[s, c].plot(
-                    time[idx1-idx_min:idx2-idx_min], data_toplot,
-                    color='C3', lw=0.8)
-            plt.xlim(time.min(), time.max())
-            if s == ns-1: 
-                axes[s, c].set_xlabel('Time (s)')
-            else:
-                axes[s, c].set_xticks([])
-            if c < 2:
-                axes[s, c].legend(
-                        loc='upper left', framealpha=0.5,
-                        handlelength=0.1, borderpad=0.2)
-            else:
-                axes[s, c].legend(
-                        loc='upper right', framealpha=0.5,
-                        handlelength=0.1, borderpad=0.2)
-    plt.subplots_adjust(top=0.95, bottom=0.04, left=0.07,
-                        right=0.95, hspace=0.2, wspace=0.2)
-    if show:
-        plt.show()
-    plt.rcParams = old_params
-    return fig
 
 def plot_detection_matrix(X, datetimes=None, stack=None,
                           title=None, ax=None, show=True,
@@ -260,140 +146,6 @@ def plot_detection_matrix(X, datetimes=None, stack=None,
     plt.subplots_adjust(top=0.96, bottom=0.06)
     if show:
         plt.show()
-    return fig
-
-def plot_recurrence_times(catalogs=None, tids=None,
-                          db_path_M='matched_filter_1',
-                          db_path=cfg.dbpath,
-                          magnitudes=False,
-                          unique=True, plot_identity=True,
-                          start_date='2012,05,01', end_date='2013,10,01',
-                          ax=None, matplotlib_kwargs={}, scat_kwargs={},
-                          mag_kwargs={}):
-    # ------------------------------------------------
-    #        Scattering plot kwargs
-    scat_kwargs['edgecolor'] = scat_kwargs.get('edgecolor', 'k')
-    scat_kwargs['linewidths'] = scat_kwargs.get('linewidths', 0.5)
-    scat_kwargs['s'] = scat_kwargs.get('s', 25)
-    # ------------------------------------------------
-    #       Magnitude plot kwargs
-    mag_kwargs['clb_size'] = mag_kwargs.get('clb_size', '2%')
-    mag_kwargs['tick_space'] = mag_kwargs.get('tick_space', 1)
-    # ------------------------------------------------
-    start_date = np.datetime64(str(udt(start_date)))
-    end_date = np.datetime64(str(udt(end_date)))
-    OT = []
-    WT = []
-    M  = []
-    n_total = 0
-    for tid in tids:
-        if catalogs is None:
-            try:
-                catalog = db_h5py.read_catalog_multiplets(
-                        f'multiplets{tid}', db_path=db_path, db_path_M=db_path_M)
-            except OSError:
-                # no detection for this template, need to update template list
-                continue
-        else:
-            # use the AggregatedCatalogs instance
-            attributes = ['origin_times']
-            if unique:
-                attributes.append('unique_events')
-            if magnitudes:
-                attributes.append('magnitudes')
-            catalog = catalogs.catalogs[tid].return_as_dic(attributes=attributes)
-        if 'unique_events' in catalog.keys() and unique:
-            mask = catalog['unique_events']
-        else:
-            mask = np.ones(catalog['origin_times'].size, dtype=np.bool)
-        # diff[i] = ot[i+1] - ot[i], i in [0, n_events-1]
-        # diff[i] is the waiting time of event i+1
-        # therefore, all arrays/lists will have to start from 1
-        # to match the waiting times
-        mask = mask[1:]
-        n_events = np.sum(mask)
-        if n_events == 0:
-            continue
-        waiting_times = np.diff(catalog['origin_times'])[mask]
-        n_total += n_events
-        OT.extend(catalog['origin_times'][1:][mask])
-        if magnitudes and ('magnitudes' in catalog.keys()):
-            mag_ = catalog['magnitudes'][1:][mask]
-            if mag_.size == 0:
-                continue
-            if mag_.min() < -5.:
-                mag_ = -10. * np.ones(mag_.size, dtype=np.float32)
-        else:
-            mag_ = -10. * np.ones(n_events, dtype=np.float32)
-        M.extend(mag_)
-        WT.extend(waiting_times)
-    # python list version: convert to numpy arrays
-    OT = np.array([udt(ot) for ot in OT]).astype('datetime64[ms]')
-    if len(OT) < 2:
-        return
-    WT = np.asarray(WT)
-    M  = np.asarray(M)
-    mask_mag = M == -10.
-    WT /= (3600.*24.) # conversion to days
-    #--------------------------------
-    if magnitudes:
-        # exclude the edges of the color map to avoid 
-        # having dots that are too dark
-        if np.sum(~mask_mag) > 0:
-            vmin = mag_kwargs.get('vmin', np.percentile(M[~mask_mag], 2.))
-            vmax = mag_kwargs.get('vmax', np.percentile(M[~mask_mag], 99.5))
-            cNorm = Normalize(vmin=vmin, vmax=vmax)
-        else:
-            cNorm = Normalize(vmin=-10., vmax=0.)
-        scalar_map = ScalarMappable(norm=cNorm, cmap='magma')
-        colors = scalar_map.to_rgba(M[~mask_mag])
-    #--------------------------------
-    if ax is None:
-        fig = plt.figure('catalog_recurrence_times', figsize=(18, 9))
-        ax = fig.add_subplot(111)
-        ax.set_rasterization_zorder(1)
-        ax.set_title('Temporal distribution of the detections '
-                     '({:d} detections)'.format(n_total))
-    else:
-        fig = ax.get_figure()
-    #------------------------------
-    #-------- plot events without mag -----
-    sc2 = ax.scatter(OT[mask_mag], WT[mask_mag], marker='v',
-                     zorder=1, **scat_kwargs, **matplotlib_kwargs)
-    if plot_identity:
-        time_0 = OT[mask_mag].min() - np.timedelta64(int(1000.*WT[mask_mag][0]*3600.*24.), 'ms')
-        time = np.arange(time_0, end_date,
-                         (end_date-time_0)/1000.)
-        timestamps = np.array([udt(str(t)).timestamp for t in time])
-        timestamps -= timestamps[0]
-        ax.plot(time, timestamps/(3600.*24.), ls='--', color='C0', lw=4, zorder=2)
-    #------------------------------
-    #------- plot events with mag -------
-    if magnitudes:
-        # make these symbols twice larger than the magnitude-less events
-        scat_kwargs_mag = scat_kwargs.copy()
-        scat_kwargs_mag['s'] *= 2
-        I = np.argsort(M[~mask_mag])
-        sc = ax.scatter(OT[~mask_mag][I], WT[~mask_mag][I], zorder=2,
-                        color=colors[I], marker='o', **scat_kwargs_mag)
-    #--------------------------
-    ax.set_xlim(start_date, end_date)
-    ax.set_ylim(10**np.floor(np.log10(WT.min())),
-                10**(np.ceil(np.log10(WT.max()))))
-    ax.semilogy()
-    ax.grid(axis='x')
-    ax.set_ylabel('Recurrence Times (days)')
-    if magnitudes:
-        # plot the colorbar
-        clb_ticks = np.arange(cNorm.vmin, cNorm.vmax, mag_kwargs['tick_space'])
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes('right', size=mag_kwargs['clb_size'], pad=0.08, axes_class=plt.Axes)
-        clb = plt.colorbar(scalar_map, cax=cax, label=r'$M_{L}$',
-                           orientation='vertical', ticks=clb_ticks)
-    plt.subplots_adjust(bottom=0.4,
-                        top=0.8,
-                        left=0.06,
-                        right=0.99)
     return fig
 
 def plot_catalog(tids=None, db_path_T=None, db_path_M=None, catalog=None,
