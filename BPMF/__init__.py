@@ -1,7 +1,6 @@
 # import local package modules
 from .config import cfg
 # import subpackages
-from . import db_h5py
 from . import dataset
 from . import template_search
 from . import similarity_search

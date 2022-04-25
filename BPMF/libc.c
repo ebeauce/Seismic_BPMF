@@ -54,8 +54,9 @@ void kurtosis(float *signal,
 
 void find_similar_moveouts(float *moveouts,
                            float threshold,
-                           int n_sources,
-                           int n_stations,
+                           size_t n_sources,
+                           size_t n_stations,
+                           size_t n_nn,
                            int *redundant_sources // output pointer
                            ){
 
@@ -64,17 +65,46 @@ void find_similar_moveouts(float *moveouts,
      * in seconds
      * */
 
-    int source1_offset, source2_offset; // pointer offsets
+    size_t source1_offset, source2_offset; // pointer offsets
     float dt2; // cumulative square time difference between two sources
     float progress_percent = 0.;
-    int progress_step = 0;
+    size_t progress_step = 0;
 
-    for (int i1=0; i1<n_sources-1; i1++){
+    // make a first iteration just comparing to nearest neighbors
+    printf("First (parallel) loop\n");
+#pragma omp parallel \
+    private(source1_offset, source2_offset)\
+    firstprivate(n_nn, n_sources, n_stations, threshold)\
+    shared(redundant_sources, moveouts)
+    {
+        for (size_t i1=0; i1<n_sources-n_nn; i1+=n_nn){
+            source1_offset = i1 * n_stations;
+            for (size_t i2=i1+1; i2<i1+n_nn; i2++){
+                source2_offset = i2 * n_stations;
+                // initialize the cumulative time difference
+                dt2 = 0.;
+                for (size_t s=0; s<n_stations; s++){
+                    dt2 += pow(moveouts[source1_offset + s]
+                             - moveouts[source2_offset + s], 2);
+                }
+                if (dt2 < pow((float)n_stations*threshold, 2)){
+                    // if the difference is small enough,
+                    // we consider the two sources to be redundant
+                    redundant_sources[i2] = 1;
+                    //printf("Source %d and source %d are redundant: dt2=%.2f\n", i1, i2, dt2);
+                }
+            }
+        }
+    }
+
+    printf("Second (serial) loop\n");
+    for (size_t i1=0; i1<n_sources-1; i1++){
         if (redundant_sources[i1] == 1){
             // pass to the next source if this source
             // has already been identified as redundant
             continue;
         }
+        printf("Source %zu\n", i1);
 
         // some kind of progress bar
         if (i1+1 >= progress_step){
@@ -84,12 +114,7 @@ void find_similar_moveouts(float *moveouts,
         }
 
         source1_offset = i1 * n_stations;
-        for (int i2=i1+1; i2<n_sources; i2++){
-            //if (i2 == i1){
-            //    // avoid the trivial match between
-            //    // the source and itself
-            //    continue;
-            //}
+        for (size_t i2=i1+1; i2<n_sources; i2++){
             if (redundant_sources[i2] == 1){
                 // this source has already been identified
                 // as redundant with another source, pass
@@ -98,9 +123,9 @@ void find_similar_moveouts(float *moveouts,
             source2_offset = i2 * n_stations;
             // initialize the cumulative time difference
             dt2 = 0.;
-            for (int s=0; s<n_stations; s++){
+            for (size_t s=0; s<n_stations; s++){
                 dt2 += pow(moveouts[source1_offset + s]
-                         - moveouts[source2_offset + s], 2);
+                        - moveouts[source2_offset + s], 2);
             }
             if (dt2 < pow((float)n_stations*threshold, 2)){
                 // if the difference is small enough,

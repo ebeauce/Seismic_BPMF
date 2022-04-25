@@ -10,7 +10,6 @@ from time import time as give_time
 
 from .config import cfg
 from . import dataset
-from . import db_h5py
 
 
 # -------------------------------------------------
