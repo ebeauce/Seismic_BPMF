@@ -209,6 +209,58 @@ class Network(object):
             self._interstation_distances = intersta_dist
             return self._interstation_distances
  
+    # plotting method
+    def plot_map(self, ax=None, figsize=(20, 10), **kwargs):
+        """Plot stations on map. 
+
+        Parameters
+        ------------
+        ax: `plt.Axes`, default to None
+            If None, create a new `plt.Figure` and `plt.Axes` instances. If
+            speficied by user, use the provided instance to plot.
+        figsize: tuple of floats, default to (20, 10)
+            Size, in inches, of the figure (width, height).
+
+        Returns
+        ----------
+        fig: `plt.Figure`
+            The figure with depth color-coded epicenters.
+        """
+        from . import plotting_utils
+        import matplotlib.pyplot as plt
+        from cartopy.crs import PlateCarree
+        cmap = kwargs.get('cmap', None)
+        if cmap is None:
+            try:
+                import colorcet as cc
+                cmap = cc.cm.fire_r
+            except Exception as e:
+                print(e)
+                cmap = 'hot_r'
+        data_coords = PlateCarree()
+        lat_margin = kwargs.get('lat_margin', 0.1)
+        lon_margin = kwargs.get('lon_margin', 0.1)
+        # ------------------------------------------------
+        #           Scattering plot kwargs
+        scatter_kwargs = {}
+        scatter_kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
+        scatter_kwargs['linewidths'] = kwargs.get('linewidths', 0.5)
+        scatter_kwargs['s'] = kwargs.get('s', 10)
+        scatter_kwargs['zorder'] = kwargs.get('zorder', 1)
+        # ------------------------------------------------
+        map_longitudes = [min(self.longitude) - lon_margin,
+                          max(self.longitude) + lon_margin]
+        map_latitudes = [min(self.latitude) - lat_margin,
+                         max(self.latitude) + lat_margin]
+        seismic_stations = {'longitude': self.longitude,
+                            'latitude': self.latitude,
+                            'stations': self.stations}
+        ax = plotting_utils.initialize_map(map_longitudes, map_latitudes,
+                figsize=figsize, map_axis=ax, seismic_stations=seismic_stations,
+                **kwargs)
+        return ax.get_figure()
+
+
 class Catalog(object):
     """A class for catalog data, and basic plotting.  
 
@@ -405,7 +457,7 @@ class Catalog(object):
         scatter_kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
         scatter_kwargs['linewidths'] = kwargs.get('linewidths', 0.5)
         scatter_kwargs['s'] = kwargs.get('s', 10)
-        scatter_kwargs['zorder'] = kwargs.get('zorder', 0)
+        scatter_kwargs['zorder'] = kwargs.get('zorder', 1)
         # ------------------------------------------------
         map_longitudes = [min(self.longitude) - lon_margin,
                           max(self.longitude) + lon_margin]
