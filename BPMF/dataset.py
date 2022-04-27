@@ -209,6 +209,58 @@ class Network(object):
             self._interstation_distances = intersta_dist
             return self._interstation_distances
  
+    # plotting method
+    def plot_map(self, ax=None, figsize=(20, 10), **kwargs):
+        """Plot stations on map. 
+
+        Parameters
+        ------------
+        ax: `plt.Axes`, default to None
+            If None, create a new `plt.Figure` and `plt.Axes` instances. If
+            speficied by user, use the provided instance to plot.
+        figsize: tuple of floats, default to (20, 10)
+            Size, in inches, of the figure (width, height).
+
+        Returns
+        ----------
+        fig: `plt.Figure`
+            The figure with depth color-coded epicenters.
+        """
+        from . import plotting_utils
+        import matplotlib.pyplot as plt
+        from cartopy.crs import PlateCarree
+        cmap = kwargs.get('cmap', None)
+        if cmap is None:
+            try:
+                import colorcet as cc
+                cmap = cc.cm.fire_r
+            except Exception as e:
+                print(e)
+                cmap = 'hot_r'
+        data_coords = PlateCarree()
+        lat_margin = kwargs.get('lat_margin', 0.1)
+        lon_margin = kwargs.get('lon_margin', 0.1)
+        # ------------------------------------------------
+        #           Scattering plot kwargs
+        scatter_kwargs = {}
+        scatter_kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
+        scatter_kwargs['linewidths'] = kwargs.get('linewidths', 0.5)
+        scatter_kwargs['s'] = kwargs.get('s', 10)
+        scatter_kwargs['zorder'] = kwargs.get('zorder', 1)
+        # ------------------------------------------------
+        map_longitudes = [min(self.longitude) - lon_margin,
+                          max(self.longitude) + lon_margin]
+        map_latitudes = [min(self.latitude) - lat_margin,
+                         max(self.latitude) + lat_margin]
+        seismic_stations = {'longitude': self.longitude,
+                            'latitude': self.latitude,
+                            'stations': self.stations}
+        ax = plotting_utils.initialize_map(map_longitudes, map_latitudes,
+                figsize=figsize, map_axis=ax, seismic_stations=seismic_stations,
+                **kwargs)
+        return ax.get_figure()
+
+
 class Catalog(object):
     """A class for catalog data, and basic plotting.  
 
@@ -260,7 +312,7 @@ class Catalog(object):
         return self.catalog.origin_time
 
     @classmethod
-    def concatenate(cls, catalogs):
+    def concatenate(cls, catalogs, ignore_index=True):
         """Build catalog from list of `pandas.DataFrame`.
 
         Parameters
@@ -268,7 +320,7 @@ class Catalog(object):
         catalogs: list of `pandas.DataFrame`
             List of `pandas.DataFrame` with consistent columns.
         """
-        cat = pd.concat(catalogs, ignore_index=True)
+        cat = pd.concat(catalogs, ignore_index=ignore_index)
         cat.sort_values('origin_time', inplace=True)
         base = ['longitude', 'latitude', 'depth', 'origin_time']
         return cls(cat.longitude, cat.latitude, cat.depth, cat.origin_time,
@@ -405,7 +457,7 @@ class Catalog(object):
         scatter_kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
         scatter_kwargs['linewidths'] = kwargs.get('linewidths', 0.5)
         scatter_kwargs['s'] = kwargs.get('s', 10)
-        scatter_kwargs['zorder'] = kwargs.get('zorder', 0)
+        scatter_kwargs['zorder'] = kwargs.get('zorder', 1)
         # ------------------------------------------------
         map_longitudes = [min(self.longitude) - lon_margin,
                           max(self.longitude) + lon_margin]
@@ -1743,7 +1795,8 @@ class Template(Event):
     # ---------------------------------------------
     #  methods to investigate the detected events
     def read_catalog(self, filename=None, db_path=None, gid=None,
-            extra_attributes=[], fill_value=np.nan, return_events=False):
+            extra_attributes=[], fill_value=np.nan, return_events=False,
+            check_summary_file=True):
         """Build a `Catalog` instance.  
 
         Parameters
@@ -1762,30 +1815,107 @@ class Template(Event):
         fill_value: string, int, or float, default to np.nan
             Default value if the target attribute does not exist.
         return_events: boolean, default to False
-            If True, return a list of `dataset.Event` instances.
+            If True, return a list of `dataset.Event` instances. Can only be
+            True if `check_summary_file=False`.
+        check_summary_file: boolean, default to True
+            If True, check if the summary hdf5 file already exists and read from
+            if it does; this uses the standard naming convention. If False,
+            it builds the catalog from the detection output.
         """
         db_path_T, filename_T = os.path.split(self.where)
-        if filename is None:
-            # guess from standard convention
-            filename = f'detections_{filename_T}'
-        if db_path is None:
-            # guess from standard convention
-            db_path = db_path_T[::-1].replace('template'[::-1],
-                    'matched_filter'[::-1], 1)[::-1]
-        output = Catalog.read_from_detection_file(filename,
-                db_path=db_path, gid=gid, extra_attributes=extra_attributes,
-                fill_value=fill_value, return_events=return_events)
-        if not return_events:
-            self.catalog = output
+        if check_summary_file:
+            if filename is None:
+                if os.path.isfile(os.path.join(
+                    db_path_T, f'summary_template{self.tid}.h5')):
+                    # found an existing summary file
+                    filename = f'summary_template{self.tid}.h5'
+                    build_from_scratch = False
+                else:
+                    # no existing summary file
+                    filename = f'detections_{filename_T}'
+                    build_from_scratch = True
+            elif os.path.isfile(os.path.join(db_path_T, filename)):
+                # found an existing summary file
+                build_from_scratch = False
+            else:
+                build_from_scratch = True
         else:
-            self.catalog, events = output
-        self.catalog.catalog['event_ids'] = [f'{self.tid}.{i:d}' for i in
-                range(len(self.catalog.catalog))]
-        self.catalog.catalog['tid'] = [self.tid]*len(self.catalog.catalog)
+            build_from_scratch = True
+        if build_from_scratch:
+            if db_path is None:
+                # guess from standard convention
+                db_path = db_path_T[::-1].replace('template'[::-1],
+                        'matched_filter'[::-1], 1)[::-1]
+            output = Catalog.read_from_detection_file(filename,
+                    db_path=db_path, gid=gid, extra_attributes=extra_attributes,
+                    fill_value=fill_value, return_events=return_events)
+            if not return_events:
+                self.catalog = output
+            else:
+                self.catalog, events = output
+            self.catalog.catalog['tid'] = [self.tid]*len(self.catalog.catalog)
+            self.catalog.catalog['event_id'] = [f'{self.tid}.{i:d}' for i in
+                                    range(len(self.catalog.catalog))]
+            self.catalog.catalog.set_index('event_id', inplace=True)
+        else:
+            catalog = {}
+            with h5.File(os.path.join(db_path_T, filename), mode='r') as f:
+                for key in f['catalog'].keys():
+                    catalog[key] = f['catalog'][key][()]
+                    if catalog[key].dtype.kind == 'S':
+                        catalog[key] = catalog[key].astype('U')
+            extra_attributes = set(catalog.keys()).difference({'longitude', 
+                'latitude', 'depth', 'origin_time'})
+            self.catalog = Catalog(catalog['longitude'], catalog['latitude'],
+                    catalog['depth'], catalog['origin_time'], **{key:
+                        catalog[key] for key in extra_attributes},
+                    event_ids=[f'{self.tid}.{i:d}' for i in 
+                        range(len(catalog['depth']))])
         if return_events:
             return events
 
+    def write_summary(self, attributes, filename=None, db_path=None,
+            overwrite=True):
+        """Write summary of template characteristics.  
 
+        hdf5 does not support storing datasets of strings. Therefore, You need
+        to convert strings to bytes or this method will raise an error.
+
+        Parameters
+        -----------
+        attributes: dictionary
+            Dictionary with scalars, `numpy.ndarray`, dictionary, or
+            `pandas.DataFrame`. The keys of the dictionary are used to name the
+            dataset or group in the hdf5 file.
+        filename: string, default to None
+            Name of the detection file. If None, use the standard file
+            and folder naming convention.
+        db_path: string, default to None
+            Name of the directory where the detection file is located. If None,
+            use the standard file and folder naming convention.
+        overwrite: boolean, default to True
+            If True, overwrite existing datasets or groups.
+        """
+        if db_path is None:
+            db_path, _ = os.path.split(self.where)
+        if filename is None:
+            filename = f'summary_template{self.tid}.h5'
+        with h5.File(os.path.join(db_path, filename), mode='a') as f:
+            for key in attributes.keys():
+                if key in f:
+                    if overwrite:
+                        del f[key]
+                    else:
+                        continue
+                if isinstance(attributes[key], (dict, pd.DataFrame)):
+                    f.create_group(key)
+                    for key2 in attributes[key].keys():
+                        f[key].create_dataset(key2, data=attributes[key][key2])
+                else:
+                    f.create_dataset(key, data=attributes[key])
+
+    # ---------------------------------------------
+    # plotting methods
     def plot_detection(self, idx, filename=None, db_path=None, duration=60.,
             phase_on_comp={'N': 'S', '1': 'S', 'E': 'S', '2': 'S', 'Z': 'P'},
             tag='preprocessed_1_12', offset_ot=10., **kwargs):
@@ -1873,610 +2003,6 @@ class Template(Event):
             ax.set_ylabel('Recurrence Time (s)')
             ax.semilogy()
         return fig
-
-## ---------------------------------------------------------------------
-## back-up version: the new version is based on a parent abstract class
-#class TemplateGroup(object):
-#    """A class for a group of templates.
-#
-#    Each template is represented by a `dataset.Template`instance.
-#    """
-#    def __init__(self, templates, network, source_receiver_dist=True):
-#        """Initialize the TemplateGroup instance with a list of
-#        `dataset.Template` instances.
-#
-#        Parameters
-#        ------------
-#        templates: (n_templates,) list of `dataset.Template` instances
-#            The list of templates constituting the group.
-#        network: `dataset.Network` instance
-#            The `Network` instance used to query consistent data accross all
-#            templates.
-#        source_receiver_dist: boolean, default to True
-#            If True, compute the source-receiver distances on all templates.
-#        """
-#        self.templates = templates
-#        self.network = network
-#        #self.n_templates = len(self.templates)
-#        self.tids = np.int32([tp.tid for tp in self.templates])
-#        # convenient map between template id and the template index in
-#        # the self.templates list
-#        self.tindexes = pd.Series(index=self.tids,
-#                data=np.arange(self.n_templates), name='tid_to_tindex')
-#        # keep track of the attributes that need updating
-#        # when self.network changes
-#        self._update_attributes = []
-#        # compute source-receiver distances if requested
-#        if source_receiver_dist:
-#            self.set_source_receiver_dist()
-#
-#    @classmethod
-#    def read_from_files(cls, filenames, network, gids=None, **kwargs):
-#        """Initialize the TemplateGroup instance given a list of filenames.
-#
-#        Parameters
-#        -----------
-#        filenames: (n_templates,) list of strings
-#            List of full file paths from which we instanciate the list of
-#            `dataset.Template` objects.
-#        network: `dataset.Network` instance
-#            The `Network` instance used to query consistent data accross all
-#            templates.
-#        gids: (n_templates,) list of strings, default to None
-#            If not None, this should be a list of group ids where the template
-#            data are stored in their hdf5 files.
-#
-#        Returns
-#        --------
-#        template_group: TemplateGroup instance
-#            The initialized TemplateGroup instance.
-#        """
-#        templates = []
-#        for i, fn in enumerate(filenames):
-#            if gids is not None:
-#                gid = gids[i]
-#            else:
-#                gid = None
-#            db_path, db_filename = os.path.split(fn)
-#            templates.append(Template.read_from_file(
-#                db_filename, db_path=db_path, gid=gid))
-#        return cls(templates, network)
-#
-#    # properties
-#    @property
-#    def components(self):
-#        if not hasattr(self, 'network'):
-#            print('Call `self.set_network(network)` first.')
-#            return
-#        return self.network.components
-#
-#    @property
-#    def stations(self):
-#        if not hasattr(self, 'network'):
-#            print('Call `self.set_network(network)` first.')
-#            return
-#        return self.network.stations
-#
-#    @property
-#    def moveouts_arr(self):
-#        if not hasattr(self, '_moveouts_arr'):
-#            self.get_moveouts_arr()
-#        return self._moveouts_arr
-#
-#    @property
-#    def n_templates(self):
-#        return len(self.templates)
-#
-#    @property
-#    def waveforms_arr(self):
-#        if not hasattr(self, '_waveforms_arr'):
-#            self.get_waveforms_arr()
-#        return self._waveforms_arr
-#
-#    @property
-#    def dir_errors(self):
-#        if not hasattr(self, '_dir_errors'):
-#            self.compute_dir_errors()
-#        return self._dir_errors
-#
-#    @property
-#    def ellipsoid_dist(self):
-#        if not hasattr(self, '_ellipsoid_dist'):
-#            self.compute_ellipsoid_dist()
-#        return self._ellipsoid_dist
-#
-#    @property
-#    def intertemplate_cc(self):
-#        if not hasattr(self, '_intertemplate_cc'):
-#            self.compute_intertemplate_cc()
-#        return self._intertemplate_cc
-#
-#    @property
-#    def intertemplate_dist(self):
-#        if not hasattr(self, '_intertemplate_dist'):
-#            self.compute_intertemplate_dist()
-#        return self._intertemplate_dist
-#
-#    @property
-#    def network_to_template_map(self):
-#        if not hasattr(self, '_network_to_template_map'):
-#            self.set_network_to_template_map()
-#        return self._network_to_template_map
-#
-#    # methods
-#    def box(self, lon_min, lon_max, lat_min, lat_max, inplace=False):
-#        """Keep templates inside the requested geographic bounds.  
-#
-#        Parameters
-#        -----------
-#        lon_min: scalar float
-#            Minimum longitude, in decimal degrees.
-#        lon_max: scalar float
-#            Maximum longitude, in decimal degrees.
-#        lat_min: scalar float
-#            Minimum latitude, in decimal degrees.
-#        lat_max: scalar float
-#            Maximum latitude, in decimal degrees.
-#        """
-#        templates_inside = []
-#        for template in self.templates:
-#            if ((template.longitude >= lon_min) & (template.longitude <=
-#                lon_max) & (template.latitude >= lat_min) & (template.latitude
-#                    <= lat_max)):
-#                templates_inside.append(template)
-#        if inplace:
-#            self.templates = templates_inside
-#            self.tids = np.int32([tp.tid for tp in self.templates])
-#            self.tindexes = pd.Series(index=self.tids,
-#                    data=np.arange(self.n_templates), name='tid_to_tindex')
-#            if hasattr(self, '_intertemplate_dist'):
-#                self._intertemplate_dist = \
-#                        self._intertemplate_dist.loc[self.tids, self.tids]
-#            if hasattr(self, '_dir_errors'):
-#                self._dir_errors = self._dir_errors.loc[self.tids, self.tids]
-#            if hasattr(self, '_ellipsoid_dist'):
-#                self._ellipsoid_dist = \
-#                        self._ellipsoid_dist.loc[self.tids, self.tids]
-#            if hasattr(self, '_intertemplate_cc'):
-#                self._intertemplate_cc = \
-#                        self._intertemplate_cc.loc[self.tids, self.tids]
-#            if hasattr(self, '_waveforms_arr'):
-#                self.get_waveforms_arr()
-#        else:
-#            new_template_group = TemplateGroup(templates_inside, self.network)
-#            new_tids = new_template_group.tids
-#            if hasattr(self, '_intertemplate_dist'):
-#                new_template_group._intertemplate_dist = \
-#                        self._intertemplate_dist.loc[new_tids, new_tids]
-#            if hasattr(self, '_dir_errors'):
-#                new_template_group._dir_errors = \
-#                        self._dir_errors.loc[new_tids, new_tids]
-#            if hasattr(self, '_ellipsoid_dist'):
-#                new_template_group._ellipsoid_dist = \
-#                        self._ellipsoid_dist.loc[new_tids, new_tids]
-#            if hasattr(self, '_intertemplate_cc'):
-#                new_template_group._intertemplate_cc = \
-#                        self._intertemplate_cc.loc[new_tids, new_tids]
-#            return new_template_group
-#
-#    def compute_intertemplate_dist(self):
-#        """Compute the template-pairwise distances, in km.  
-#
-#        """
-#        longitudes = np.float32([tp.longitude for tp in self.templates])
-#        latitudes = np.float32([tp.latitude for tp in self.templates])
-#        depths = np.float32([tp.depth for tp in self.templates])
-#        _intertemplate_dist = utils.compute_distances(
-#                longitudes, latitudes, depths,
-#                longitudes, latitudes, depths)
-#        self._intertemplate_dist = pd.DataFrame(
-#                index=self.tids, columns=self.tids, data=_intertemplate_dist)
-#
-#    def compute_dir_errors(self):
-#        """Compute length of uncertainty ellipsoid in inter-template direction.  
-#
-#        New Attributes 
-#        ----------
-#        _dir_errors: (n_templates, n_templates) pandas.DataFrame
-#            The length, in kilometers, of the uncertainty ellipsoid in the
-#            inter-template direction.  
-#            Example: self.directional_errors.loc[tid1, tid2] is the width of
-#            template tid1's uncertainty ellipsoid in the direction of
-#            template tid2.
-#        """
-#        from cartopy import crs
-#        # X: west, Y: south, Z: downward
-#        s_68_3df = 3.52
-#        print('Computing the inter-template directional errors...')
-#        longitudes = np.float32([tp.longitude for tp in self.templates])
-#        latitudes = np.float32([tp.latitude for tp in self.templates])
-#        depths = np.float32([tp.depth for tp in self.templates])
-#        # ----------------------------------------------
-#        #      Define the projection used to
-#        #      work in a cartesian space
-#        # ----------------------------------------------
-#        data_coords = crs.PlateCarree()
-#        projection = crs.Mercator(central_longitude=np.mean(longitudes),
-#                                  min_latitude=latitudes.min(),
-#                                  max_latitude=latitudes.max())
-#        XY = projection.transform_points(data_coords, longitudes, latitudes)
-#        cartesian_coords = np.stack([XY[:, 0], XY[:, 1], depths], axis=1)
-#        # compute the directional errors
-#        _dir_errors = np.zeros((self.n_templates, self.n_templates), dtype=np.float32)
-#        for t in range(self.n_templates):
-#            unit_direction = cartesian_coords - cartesian_coords[t, :]
-#            unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[:, np.newaxis]
-#            # this operation produced NaNs for i=t
-#            unit_direction[np.isnan(unit_direction)] = 0.
-#            # compute the length of the covariance ellipsoid
-#            # in the direction that links the two earthquakes
-#            cov_dir = np.abs(np.sum(
-#                self.templates[t].cov_mat.dot(unit_direction.T)*unit_direction.T, axis=0))
-#            # covariance is unit of [distance**2], therefore we need the sqrt:
-#            _dir_errors[t, :] = np.sqrt(s_68_3df*cov_dir)
-#        self._dir_errors = pd.DataFrame(
-#                index=self.tids, columns=self.tids, data=_dir_errors)
-#
-#    def compute_ellipsoid_dist(self):
-#        """Compute separation between unc. ellipsoids in inter-template dir.
-#
-#        Can be negative if the uncertainty ellipsoids overlap.
-#        """
-#        self._ellipsoid_dist = self.intertemplate_dist\
-#                - self.dir_errors - self.dir_errors.T
-#
-#    def compute_intertemplate_cc(self, distance_threshold=5.,
-#                                 n_stations=10, max_lag=10, device='cpu'):
-#        """Compute the pairwise template CCs.  
-#
-#        Parameters
-#        -----------
-#        distance_threshold: float, default to 5
-#            The distance threshold, in kilometers, between two
-#            uncertainty ellipsoids under which similarity is computed.
-#        n_stations: integer, default to 10
-#            The number of stations closest to each template used in
-#            the computation of the average CC.
-#        max_lag: integer, default to 10
-#            Maximum lag, in samples, allowed when searching for the
-#            maximum CC on each channel. This is to account for small
-#            discrepancies in windowing that could occur for two templates
-#            highly similar but associated to slightly different locations.
-#        """
-#        import fast_matched_filter as fmf
-#        self.n_closest_stations(n_stations)
-#        print('Computing the similarity matrix...')
-#        # format arrays for FMF
-#        data_arr = self.waveforms_arr.copy()
-#        template_arr = self.waveforms_arr[..., max_lag:-max_lag]
-#        moveouts_arr = np.zeros(self.waveforms_arr.shape[:-1], dtype=np.int32)
-#        intertp_cc = np.zeros(
-#                (self.n_templates, self.n_templates), dtype=np.float32)
-#        n_stations, n_components = moveouts_arr.shape[1:]
-#        # use FMF on one template at a time against all others
-#        for t, template in enumerate(self.templates):
-#            #print(f'--- {t} / {self.n_templates} ---')
-#            weights = np.zeros(template_arr.shape[:-1], dtype=np.float32)
-#            weights[:, self.network_to_template_map[t, ...]] = 1.
-#            weights /= np.sum(weights, axis=(1, 2), keepdims=True)
-#            above_thrs = self.ellipsoid_dist[self.tids[t]] > distance_threshold
-#            weights[above_thrs, ...] = 0.
-#            for s in range(n_stations):
-#                for c in range(n_components):
-#                    # use trick to keep station and component dim
-#                    slice_ = np.index_exp[:, s:s+1, c:c+1, :]
-#                    data_ = data_arr[(t,)+slice_[1:]]
-#                    # discard all templates that have weights equal to zero
-#                    keep = (weights[:, s, c] != 0.)\
-#                          &  (np.sum(template_arr[slice_], axis=-1).squeeze() != 0.)
-#                    if (np.sum(keep) == 0) or (np.sum(data_) == 0):
-#                        # occurs if this station is not among the 
-#                        # n_stations closest stations
-#                        # or if no data were available
-#                        continue
-#                    cc = fmf.matched_filter(
-#                            template_arr[slice_][keep, ...], moveouts_arr[slice_[:-1]][keep, ...],
-#                            weights[slice_[:-1]][keep, ...], data_, 1, arch=device)
-#                    # add best contribution from this channel to
-#                    # the average inter-template CC
-#                    intertp_cc[t, keep] += np.max(cc, axis=-1)
-#        # make the CC matrix symmetric by averaging the lower
-#        # and upper triangles
-#        _intertemplate_cc = (intertp_cc + intertp_cc.T)/2.
-#        self._intertemplate_cc = pd.DataFrame(
-#                index=self.tids, columns=self.tids, data=_intertemplate_cc)
-#
-#    def get_moveouts_arr(self):
-#        _moveouts_arr = np.zeros(
-#                (self.n_templates, self.network.n_stations,
-#                    self.network.n_components), dtype=np.int32)
-#        for t in range(self.n_templates):
-#            tp_stations = self.templates[t].stations
-#            sta_indexes = self.network.station_indexes.loc[tp_stations]
-#            _moveouts_arr[t, sta_indexes, :] = self.templates[t].moveouts_arr
-#        self._moveouts_arr = _moveouts_arr
-#
-#    def get_waveforms_arr(self):
-#        if 'read_waveforms' not in self._update_attributes:
-#            self.read_waveforms()
-#        # check the templates' duration
-#        n_samples = [tp.n_samples for tp in self.templates]
-#        if min(n_samples) != max(n_samples):
-#            print('Templates have different durations, we cannot return'\
-#                    ' the template data in a single array.')
-#            return
-#        self._waveforms_arr = np.stack(
-#                [tp.get_np_array(stations=self.stations,
-#                    components=self.components) for tp in self.templates],
-#                axis=0)
-#        self._remember('get_waveforms_arr')
-#
-#    def set_network_to_template_map(self):
-#        """Compute the map between network arrays and template data.  
-#
-#        Template data are broadcasted to fit the dimensions of the network
-#        arrays. This method computes the `network_to_template_map` that tells
-#        which stations and channels are used on each template. For example:
-#        `network_to_template_map[t, s, c] = False` means that station s and
-#        channel c are not used on template t.
-#        """
-#        _network_to_template_map = np.zeros(
-#                (self.n_templates, self.network.n_stations,
-#                    self.network.n_components), dtype=np.bool)
-#        _network_to_template_map = ~(np.sum(self.waveforms_arr, axis=-1) == 0.)
-#        self._network_to_template_map = _network_to_template_map
-#
-#    def n_best_SNR_stations(self, n, available_stations=None):
-#        """Adjust `self.stations` on each template to the `n` best SNR stations.  
-#
-#
-#        Find the `n` best stations and modify `self.stations` accordingly.
-#        The instance's properties will also change accordingly.
-#
-#        Parameters
-#        ----------------
-#        n: scalar int
-#            The `n` closest stations.
-#        available_stations: list of strings, default to None
-#            The list of stations from which we search the closest stations.
-#            If some stations are known to lack data, the user
-#            may choose to not include these in the closest stations.
-#        """
-#        for tp in self.templates:
-#            tp.n_best_SNR_stations(n, available_stations=available_stations)
-#
-#    def n_closest_stations(self, n, available_stations=None):
-#        """Adjust `self.stations` on each template to the `n` closest stations.  
-#
-#
-#        Find the `n` closest stations and modify `self.stations` accordingly.
-#        The instance's properties will also change accordingly.
-#
-#        Parameters
-#        ----------------
-#        n: scalar int
-#            The `n` closest stations to fetch.
-#        available_stations: list of strings, default to None
-#            The list of stations from which we search the closest stations.
-#            If some stations are known to lack data, the user
-#            may choose to not include these in the closest stations.
-#        """
-#        for tp in self.templates:
-#            tp.n_closest_stations(n, available_stations=available_stations)
-#
-#    def normalize(self, method='rms'):
-#        """Normalize the template waveforms.  
-#
-#        Parameters
-#        ------------
-#        method: string, default to 'rms'
-#            Either 'rms' (default) or 'max'.
-#        """
-#        if method == 'rms':
-#            norm = np.std(self.waveforms_arr, axis=-1, keepdims=True)
-#        elif method == 'max':
-#            norm = np.max(np.abs(self.waveforms_arr), axis=-1, keepdims=True)
-#        norm[norm == 0.] = 1.
-#        self._waveforms_arr /= norm
-#        self._remember('normalize')
-#
-#    def read_catalog(self, extra_attributes=[], fill_value=np.nan):
-#        """Build a catalog from all templates' detections.
-#
-#        Work only if folder and file names follow the standard convention.
-#
-#        Parameters
-#        ------------
-#        extra_attributes: list of strings, default to []
-#            Attributes to read in addition to the default 'longitude',
-#            'latitude', 'depth', and 'origin_time'.
-#        fill_value: string, int, or float, default to np.nan
-#            Default value if the target attribute does not exist.
-#
-#        """
-#        for template in self.templates:
-#            if not hasattr(template, 'catalog'):
-#                template.read_catalog(extra_attributes=extra_attributes,
-#                        fill_value=fill_value)
-#        # concatenate all catalogs
-#        self.catalog = Catalog.concatenate([template.catalog.catalog for
-#            template in self.templates])
-#
-#    def read_waveforms(self):
-#        for tp in self.templates:
-#            tp.read_waveforms(
-#                    stations=self.stations, components=self.components)
-#        self._remember('read_waveforms')
-#
-#    def remove_multiples(self, n_closest_stations=10, dt_criterion=3.,
-#            distance_criterion=1., similarity_criterion=-1., **kwargs):
-#        """Search for events detected by multiple templates.
-#
-#        Parameters
-#        -----------
-#        n_closest_stations: integer, default to 10
-#            In case template similarity is taken into account,
-#            this is the number of stations closest to each template
-#            that are used in the calculation of the average cc.
-#        dt_criterion: float, default to 3
-#            Time interval, in seconds, under which two events are
-#            examined for redundancy.
-#        distance_criterion: float, default to 1
-#            Distance threshold, in kilometers, between two uncertainty
-#            ellipsoids under which two events are examined for redundancy.
-#        similarity_criterion: float, default to -1
-#            Template similarity threshold, in terms of average CC, over
-#            which two events are examined for redundancy. The default
-#            value of -1 is always verified, meaning that similarity is
-#            actually not taken into account.
-#        """
-#        if not hasattr(self, 'catalog'):
-#            self.read_catalog(extra_attributes=['cc'])
-#        # alias:
-#        catalog = self.catalog.catalog
-#        if similarity_criterion > -1.:
-#            if not hasattr(self, '_intertemplate_cc'):
-#                self.compute_intertemplate_cc(
-#                        distance_threshold=distance_criterion,
-#                        n_stations=n_closest_stations,
-#                        max_lag=kwargs.get('max_lag', 10),
-#                        device=kwargs.get('device', 'cpu'))
-#        # -----------------------------------
-#        t1 = give_time()
-#        print('Searching for events detected by multiple templates')
-#        print('All events occurring within {:.1f} sec, with uncertainty '
-#              'ellipsoids closer than {:.1f} km will and '
-#              'inter-template CC larger than {:.2f} be considered the same'.
-#              format(dt_criterion, distance_criterion, similarity_criterion))
-#        n_events = len(self.catalog.catalog)
-#        dt_criterion = np.timedelta64(int(1000.*dt_criterion), 'ms')
-#        unique_events = np.ones(n_events, dtype=np.bool)
-#        for n1 in range(n_events):
-#            if not unique_events[n1]:
-#                continue
-#            tid1 = catalog['tid'].iloc[n1]
-#            # apply the time criterion
-#            dt_n1 = (catalog['origin_time'] - catalog['origin_time'].iloc[n1])
-#            temporal_neighbors = (dt_n1 < dt_criterion) \
-#                    & (dt_n1 >= np.timedelta64(0, 's')) \
-#                    & unique_events
-#            # comment this line if you keep best CC
-#            #temporal_neighbors[n1] = False
-#            # get indices of where the above selection is True
-#            candidates = np.where(temporal_neighbors)[0]
-#            if len(candidates) == 0:
-#                continue
-#            # get template ids of all events that passed the time criterion
-#            tids_candidates = np.int32([catalog['tid'].iloc[idx]
-#                                       for idx in candidates])
-#            # apply the spatial criterion to the distance between
-#            # uncertainty ellipsoids
-#            ellips_dist = self.ellipsoid_dist[tid1].loc[tids_candidates].values
-#            if similarity_criterion > -1.:
-#                similarities = self.intertemplate_cc[tid1].\
-#                        loc[tids_candidates].values
-#                multiples = candidates[np.where(
-#                    (ellips_dist < distance_criterion)\
-#                   & (similarities >= similarity_criterion))[0]]
-#            else:
-#                multiples = candidates[np.where(
-#                    ellips_dist < distance_criterion)[0]]
-#            # comment this line if you keep best CC
-#            #if len(multiples) == 0:
-#            #    continue
-#            # uncomment if you keep best CC
-#            if len(multiples) == 1:
-#                continue
-#            else:
-#                unique_events[multiples] = False
-#                # find best CC and keep it
-#                ccs = catalog['cc'][multiples]
-#                best_cc = multiples[ccs.argmax()]
-#                unique_events[best_cc] = True
-#        t2 = give_time()
-#        print(f'{t2-t1:.2f}s to flag the multiples')
-#        # -------------------------------------------
-#        catalog['unique_events'] = unique_events
-#        for tid in self.tids:
-#            tt = self.tindexes.loc[tid]
-#            selection = catalog['tid'] == tid
-#            self.templates[tt].catalog.catalog['unique_events'] = \
-#                    catalog['unique_events'][selection]
-#
-#
-#    def set_network(self, network):
-#        """Update `self.network` to the new desired `network`.  
-#
-#        Parameters
-#        -----------
-#        network: `dataset.Network` instance
-#            The `Network` instance used to query consistent data accross all
-#            templates.
-#        """
-#        self.network = network
-#        print('Updating the instance accordingly...')
-#        for action in self._update_attributes:
-#            func = getattr(self, action)
-#            func()
-#
-#    def set_source_receiver_dist(self):
-#        """Compute the source-receiver distances for template.
-#        """
-#        for tp in self.templates:
-#            tp.set_source_receiver_dist(self.network)
-#        self._remember('set_source_receiver_dist')
-#
-#    def _remember(self, action):
-#        """Append `action` to the list of processes to remember.
-#
-#        Parameters
-#        -----------
-#        action: string
-#            Name of the class method that was called once and that has to be
-#            repeated every time `self.network` is updated.
-#        """
-#        if action not in self._update_attributes:
-#            self._update_attributes.append(action)
-#
-#    # plotting routines
-#    def plot_detection(self, idx, **kwargs):
-#        """
-#
-#        Parameters
-#        -----------
-#        idx: scalar int
-#            Event index in `self.catalog.catalog`.
-#
-#        Returns
-#        ---------
-#        fig: `plt.Figure`
-#            The figure showing the detected event.
-#        """
-#        tid, evidx = self.catalog.catalog.index[idx].split('.')
-#        tt = self.tindexes.loc[int(tid)]
-#        print('Plotting:')
-#        print(self.catalog.catalog.iloc[idx])
-#        fig = self.templates[tt].plot_detection(int(evidx), **kwargs)
-#        return fig
-#
-#
-#    def plot_recurrence_times(self, figsize=(20, 10)):
-#        """Plot recurrence times vs detection times, template-wise.  
-#
-#        Parameters
-#        -----------
-#        figsize: tuple of floats, default to (20, 10)
-#            Size in inches of the figure (width, height).
-#        """
-#        import matplotlib.pyplot as plt
-#        fig = plt.figure('recurrence_times', figsize=figsize)
-#        ax = fig.add_subplot(111)
-#        for template in self.templates:
-#            template.plot_recurrence_times(ax=ax, annotate_axes=False)
-#        ax.set_xlabel('Detection Time')
-#        ax.set_ylabel('Recurrence Time (s)')
-#        ax.semilogy()
-#        return fig
 
 class Family(ABC):
     """An abstract class for several subclasses.  
@@ -3058,7 +2584,7 @@ class TemplateGroup(Family):
                         fill_value=fill_value)
         # concatenate all catalogs
         self.catalog = Catalog.concatenate([template.catalog.catalog for
-            template in self.templates])
+            template in self.templates], ignore_index=False)
 
     def remove_multiples(self, n_closest_stations=10, dt_criterion=3.,
             distance_criterion=1., similarity_criterion=-1., **kwargs):
@@ -3142,7 +2668,7 @@ class TemplateGroup(Family):
             else:
                 unique_events[multiples] = False
                 # find best CC and keep it
-                ccs = catalog['cc'][multiples]
+                ccs = catalog['cc'].values[multiples]
                 best_cc = multiples[ccs.argmax()]
                 unique_events[best_cc] = True
         t2 = give_time()
@@ -3151,9 +2677,11 @@ class TemplateGroup(Family):
         catalog['unique_events'] = unique_events
         for tid in self.tids:
             tt = self.tindexes.loc[tid]
-            selection = catalog['tid'] == tid
+            cat_indexes = catalog.index[catalog['tid'] == tid]
             self.templates[tt].catalog.catalog['unique_events'] = \
-                    catalog['unique_events'][selection]
+                    np.zeros(len(self.templates[tt].catalog.catalog), dtype=bool)
+            self.templates[tt].catalog.catalog.loc[cat_indexes, 'unique_events'] = \
+                    catalog.loc[cat_indexes, 'unique_events'].values
 
     # plotting routines
     def plot_detection(self, idx, **kwargs):
