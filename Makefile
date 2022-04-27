@@ -21,7 +21,7 @@ LDFLAGS_GPU=--shared
 
 # CPU FLAGS
 COPTIMFLAGS_CPU=-O3
-CFLAGS_CPU=-fopenmp -fPIC -ftree-vectorize -march=native
+CFLAGS_CPU=-fopenmp -fPIC -ftree-vectorize -march=native -std=c99
 LDFLAGS_CPU=-shared
 
 # build for python
