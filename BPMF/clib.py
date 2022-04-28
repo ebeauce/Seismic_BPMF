@@ -29,6 +29,7 @@ if cpu_loaded:
                                             C.c_float,            # average absolute time difference threshold
                                             C.c_int,              # number of grid points 
                                             C.c_int,              # number of stations
+                                            C.c_int,              # number of nearest neighbors
                                             C.POINTER(C.c_int)    # output pointer: redundant sources
                                             ]
 
@@ -81,7 +82,7 @@ def find_similar_sources(moveouts, threshold, n_nearest_neighbors=200):
     moveouts = np.float32(moveouts.flatten())
     # initialize the output pointer
     redundant_sources = np.zeros(n_sources, dtype=np.int32)
-    n_nearest_neighbors = min(n_sources, n_nearest_neigbors)
+    n_nearest_neighbors = min(n_sources, n_nearest_neighbors)
     # call the C function:
     _libc.find_similar_moveouts(moveouts.ctypes.data_as(C.POINTER(C.c_float)),
                                 np.float32(threshold),
