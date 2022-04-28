@@ -430,7 +430,7 @@ class NetworkResponse(object):
         import matplotlib.pyplot as plt
         import matplotlib.dates as mdates
 
-         if n_stations is None:
+        if n_stations is None:
             stations = self.network.stations
         else:
             stations = detection.moveouts[detection.moveouts.columns[0]]\
