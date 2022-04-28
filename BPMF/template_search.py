@@ -402,7 +402,8 @@ class NetworkResponse(object):
         return fig
 
     def plot_detection(self, detection, figsize=(20, 20),
-            component_aliases={'N': ['N', '1'], 'E': ['E', '2'], 'Z': ['Z']}):
+            component_aliases={'N': ['N', '1'], 'E': ['E', '2'], 'Z': ['Z']},
+            n_stations=None):
         """Plot a detection and the composite network response.  
 
         Parameters
@@ -417,6 +418,9 @@ class NetworkResponse(object):
             associated with each "canonical" component. For example,  
             `component_aliases['N'] = ['N', '1']` means that the function will also
             check the '1' component in case the 'N' component doesn't exist.
+        n_stations: scalar int or None, default to None
+            If not None, is the number of stations to plot. The closest
+            stations will be plotted.
 
         Returns
         -------
@@ -425,10 +429,16 @@ class NetworkResponse(object):
         """
         import matplotlib.pyplot as plt
         import matplotlib.dates as mdates
-    
+
+         if n_stations is None:
+            stations = self.network.stations
+        else:
+            stations = detection.moveouts[detection.moveouts.columns[0]]\
+                    .sort_values()[:n_stations].index
+   
         sr = self.data.sr
         fig = plt.figure(f'detection_{detection.origin_time}', figsize=figsize)
-        grid = fig.add_gridspec(nrows=len(self.network.stations)+2,
+        grid = fig.add_gridspec(nrows=len(stations)+2,
                 ncols=len(self.network.components), hspace=0.35)
         start_times, end_times = [], []
         wav_axes = []
@@ -436,7 +446,7 @@ class NetworkResponse(object):
         self.plot_cnr(ax=ax_cnr, detection=detection)
         ax_cnr.set_ylim(-0.5, 2.*detection.aux_data['cnr'])
         beam = 0.
-        for s, sta in enumerate(self.network.stations):
+        for s, sta in enumerate(stations):
             for c, cp in enumerate(self.network.components):
                 ax = fig.add_subplot(grid[2+s, c])
                 for cp_alias in component_aliases[cp]:
