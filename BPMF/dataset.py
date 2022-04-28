@@ -788,8 +788,14 @@ class Event(object):
             f = hdf5_file
         for attr in attributes:
             args.append(f[attr][()])
-        data_path, data_filename = os.path.split(
-                f['where'][()].decode('utf-8'))
+        if type(f['where'][()]) == bytes:
+            # if h5py.version >= 3
+            data_path, data_filename = os.path.split(
+                    f['where'][()].decode('utf-8'))
+        else:
+            # more recent versions of h5py seems to decode automatically
+            data_path, data_filename = os.path.split(
+                    f['where'][()])
         args.extend([data_filename, data_path])
         for opt_attr in optional_attr:
             if opt_attr in f:
