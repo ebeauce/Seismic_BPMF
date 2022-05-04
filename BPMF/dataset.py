@@ -1117,7 +1117,7 @@ class Event(object):
                     endtime=self.origin_time-offset_ot+self.duration)
 
 
-    def relocate(self, stations=None, method='EDT'):
+    def relocate(self, stations=None, method='EDT', verbose=0):
         """Relocate with NLLoc using `self.picks`. 
 
         Parameters
@@ -1129,6 +1129,8 @@ class Event(object):
             Optimization algorithm used by NonLinLoc. Either 'GAU_ANALYTIC',
             'EDT', 'EDT_OT', 'EDT_OT_WT_ML'. See NonLinLoc's documentation for
             more information.
+        verbose: scalar int, default to 0
+            If more than 0, print NLLoc's outputs to the standard output.
         """
         import subprocess
         import glob
@@ -1147,9 +1149,16 @@ class Event(object):
         # write control file
         NLLoc_utils.write_NLLoc_control(ctrl_fn, out_basename, obs_fn,
                 method=method)
-        # run NLLoc
-        subprocess.run('NLLoc '+os.path.join(cfg.NLLoc_input_path, ctrl_fn),
-                shell=True)
+        if verbose == 0:
+            # run NLLoc
+            subprocess.run(
+                    f'NLLoc {os.path.join(cfg.NLLoc_input_path, ctrl_fn)} '\
+                    f'> {os.devnull}', shell=True)
+        else:
+            # run NLLoc
+            subprocess.run(
+                    'NLLoc '+os.path.join(cfg.NLLoc_input_path, ctrl_fn),
+                    shell=True)
         # read results
         try:
             out_fn = os.path.basename(glob.glob(os.path.join(cfg.NLLoc_output_path,
