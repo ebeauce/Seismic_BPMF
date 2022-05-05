@@ -109,11 +109,11 @@ def read_NLLoc_outputs(filename, path):
             hypocenter_info[5],
             hypocenter_info[6],
             max(0., float(hypocenter_info[7])))
-        hypocenter['origin_time'] = pd.Timestamp(hypocenter['origin_time'])
-        if float(hypocenter_info[7]) < 0.:
-            # it happens that NLLoc returns negative seconds
-            hypocenter['origin_time'] -= \
-            pd.Timedelta(float(hypocenter_info[7]), unit='s')
+    hypocenter['origin_time'] = pd.Timestamp(hypocenter['origin_time'])
+    if float(hypocenter_info[7]) < 0.:
+        # it happens that NLLoc returns negative seconds
+        hypocenter['origin_time'] -= \
+                pd.Timedelta(float(hypocenter_info[7]), unit='s')
 
     hypocenter['latitude'] = float(hypocenter_info[9])
     hypocenter['longitude'] = float(hypocenter_info[11])
