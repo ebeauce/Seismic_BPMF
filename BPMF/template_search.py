@@ -321,8 +321,8 @@ class NetworkResponse(object):
         weights_sources = np.ones((self.n_sources, self.n_stations),
                 dtype=np.float32)
         if n_max_stations < self.n_stations:
-            cutoff_mv = np.partition(self.moveouts[:, :, 0], n_max_stations)[:,
-                    n_max_stations-1][:, np.newaxis] 
+            cutoff_mv = np.max(np.partition(self.moveouts[:, :, 0], n_max_stations)
+                    [:, :n_max_stations], axis=1, keepdims=True) 
             weights_sources[self.moveouts[:, :, 0] > cutoff_mv] = 0.
         self.weights_sources = weights_sources
 
