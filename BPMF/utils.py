@@ -720,9 +720,9 @@ def round_time(t, sr=cfg.sampling_rate):
         Rounded time.
     """
     # convert t to samples
-    t_samp = np.int32(t*sr)
+    t_samp = np.int64(t*sr)
     # get it back to seconds
-    t = np.float32(t_samp)/sr
+    t = np.float64(t_samp)/sr
     return t
 
 def sec_to_samp(t, sr=cfg.sampling_rate, epsilon=0.2):
@@ -737,7 +737,7 @@ def sec_to_samp(t, sr=cfg.sampling_rate, epsilon=0.2):
     sign = np.sign(t)
     t_samp_float = abs(t*sr) + epsilon
     # round and restore sign
-    t_samp_int = np.int32(sign*np.int32(t_samp_float))
+    t_samp_int = np.int64(sign*np.int64(t_samp_float))
     return t_samp_int
 
 def time_range(start_time, end_time, dt_sec, unit='ms',

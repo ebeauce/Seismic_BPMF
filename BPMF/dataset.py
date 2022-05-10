@@ -646,6 +646,11 @@ class Data(object):
         with ASDFDataSet(self.where, mode='r') as ds:
             for station in ds.ifilter(ds.q.tag == tag):
                 traces += getattr(station, tag)
+        #for i in range(len(traces)):
+        #    # round time to proper precision
+        #    sr = traces[i].stats.sampling_rate
+        #    traces[i].stats.starttime = udt(utils.round_time(
+        #        traces[i].stats.starttime.timestamp + 0.5/sr, sr=sr))
         self.traces = traces
         if trim_traces:
             self.trim_waveforms()
@@ -1104,10 +1109,21 @@ class Event(object):
                     else:
                         pick = self.origin_time - offset_ot
                     # query the exact data
+                    #tr = ds.get_waveforms(
+                    #        network=net, station=sta, location=loc, channel=cha,
+                    #        starttime=pick, endtime=pick+duration, tag=tag)
+                    #self.traces += tr
                     self.traces += ds.get_waveforms(
                             network=net, station=sta, location=loc, channel=cha,
                             starttime=pick, endtime=pick+duration, tag=tag)
-                    #self.traces[-1].data = self.traces[-1].data[:self.n_samples]
+                    #if len(tr) > 0:
+                    #    print(f'Requested time: {pick}, resulting time: '\
+                    #            f'{tr[0].stats.starttime}')
+                    #    #if time_shifted:
+                    #    #    corr = pick.timestamp - tr[0].stats.starttime.timestamp
+                    #    #    self.moveouts\
+                    #    #            [f'moveouts_{ph.upper()}'].loc[sta] -= corr
+                    ##self.traces[-1].data = self.traces[-1].data[:self.n_samples]
         for ph in offset_phase.keys():
             self.set_aux_data({f'offset_{ph.upper()}': offset_phase[ph]})
         for comp in phase_on_comp.keys():
@@ -1169,6 +1185,10 @@ class Event(object):
         hypocenter, predicted_times = NLLoc_utils.read_NLLoc_outputs(
                         out_fn, cfg.NLLoc_output_path)
         hypocenter['origin_time'] = udt(hypocenter['origin_time'])
+        # round seconds to reasonable precision to avoid producing
+        # origin times that are in between samples
+        hypocenter['origin_time'] = udt(utils.round_time(
+                hypocenter['origin_time'].timestamp, sr=self.sr))
         # update event's attributes
         for key in hypocenter.keys():
             setattr(self, key, hypocenter[key])
@@ -1270,6 +1290,8 @@ class Event(object):
             return
         # make sure picks are consistent with the current origin time
         self.update_picks()
+        self.origin_time = udt(utils.round_time(self.origin_time.timestamp,
+                sr=self.sr))
         for station in self.picks.index:
             for ph in self.phases:
                 if not pd.isnull(self.picks.loc[station,
@@ -1289,6 +1311,8 @@ class Event(object):
             return
         # make sure travel times are consistent with the current origin time
         self.update_travel_times()
+        self.origin_time = udt(utils.round_time(self.origin_time.timestamp,
+                sr=self.sr))
         for station in self.arrival_times.index:
             for ph in self.phases:
                 if not pd.isnull(self.arrival_times.loc[station,
@@ -1879,6 +1903,7 @@ class Template(Event):
                     catalog[key] = f['catalog'][key][()]
                     if catalog[key].dtype.kind == 'S':
                         catalog[key] = catalog[key].astype('U')
+            print(catalog['origin_time'])
             extra_attributes = set(catalog.keys()).difference({'longitude', 
                 'latitude', 'depth', 'origin_time'})
             self.catalog = Catalog(catalog['longitude'], catalog['latitude'],
@@ -1964,6 +1989,7 @@ class Template(Event):
                 phase_on_comp=phase_on_comp, time_shifted=False)
         fig = event.plot(**kwargs)
         axes = fig.get_axes()
+        cc, n_channels = 0., 0
         for s, sta in enumerate(event.stations):
             for c, cp in enumerate(event.components):
                 for cp_alias in event.component_aliases[cp]:
@@ -1975,22 +2001,34 @@ class Template(Event):
                     continue
                 else:
                     tr = tr[0]
-                try:
-                    max_amp = np.abs(event.traces.select(station=sta,
-                            component=cp_alias)[0].data).max()*kwargs.get('gain',
-                                    1.e6)
-                except IndexError:
-                    # trace not found
-                    max_amp = 0.
                 ph = phase_on_comp[cp_alias]
                 starttime = event.origin_time + self.moveouts_win.loc[sta,
                         f'moveouts_{ph.upper()}']
                 endtime = starttime + tr.stats.npts*tr.stats.delta
                 time = utils.time_range(starttime, endtime, tr.stats.delta, unit='ms')
+                try:
+                    event_tr = event.traces.select(
+                            station=sta, component=cp_alias)[0]
+                    idx1 = utils.sec_to_samp(
+                            self.moveouts_win.loc[sta,
+                                f'moveouts_{ph.upper()}'] + offset_ot,
+                            sr=event_tr.stats.sampling_rate)
+                    idx2 = idx1 + self.n_samples
+                    max_amp = np.abs(event_tr.data[idx1:idx2]).max()*kwargs.get('gain', 1.e6)
+                    cc_ = np.sum(event_tr.data[idx1:idx2]*tr.data[:self.n_samples])\
+                            /np.sqrt(np.sum(event_tr.data[idx1:idx2]**2)*np.sum(tr.data[:self.n_samples]**2))
+                    if not np.isnan(cc_):
+                        cc += cc_
+                        n_channels += 1
+                except IndexError:
+                    # trace not found
+                    max_amp = 0.
                 axes[s*len(event.components)+c].plot(
                         time[:self.n_samples],
                         utils.max_norm(tr.data[:self.n_samples])*max_amp,
                         lw=0.75, color='C3')
+        cc /= float(n_channels)
+        fig.suptitle(fig._suptitle.get_text() + f' CC={cc:.3f}')
         return fig
 
     def plot_recurrence_times(self, ax=None, annotate_axes=True, figsize=(20, 10)):
