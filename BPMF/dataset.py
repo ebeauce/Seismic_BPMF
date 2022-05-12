@@ -199,14 +199,16 @@ class Network(object):
                                      dtype=np.float64)
             for s in range(len(self.stations)):
                 d = G.inverse(np.array([[self.longitude[s], self.latitude[s]]]),
-                              np.hstack((self.longitude.reshape(-1, 1),
-                                         self.latitude.reshape(-1, 1))))
+                              np.hstack((self.longitude.values.reshape(-1, 1),
+                                         self.latitude.values.reshape(-1, 1))))
                 # d is in m, convert it to km
                 d = np.asarray(d)[:, 0]/1000.
                 intersta_dist[s, :] = np.sqrt(d.squeeze()**2 + (self.depth[s] - self.depth))
 
             # return distance in km
-            self._interstation_distances = intersta_dist
+            self._interstation_distances = pd.DataFrame(
+                    index=self.stations, columns=self.stations,
+                    data=intersta_dist)
             return self._interstation_distances
  
     # plotting method
