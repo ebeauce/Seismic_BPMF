@@ -326,6 +326,54 @@ class NetworkResponse(object):
             weights_sources[self.moveouts[:, :, 0] > cutoff_mv] = 0.
         self.weights_sources = weights_sources
 
+    def weights_station_density(self, cutoff_dist=None, lower_percentile=0.,
+            upper_percentile=100.):
+        """Compute station weights to balance station density.
+
+        Areas of high station density produce stronger network responses than
+        areas with sparse coverage, and thus might prevent detecting earthquakes
+        where stations are scarcer.
+
+        Parameters
+        -----------
+        cutoff_dist: scalar float, default to None
+            All station pairs (i,j) are attributed a number from a gaussian
+            distribution with standard deviation `cutoff_dist`, in km. The
+            weight of station i is: `w_i = 1/(sum_j(exp(-D_ij**2/cutoff_dist**2)))`.
+            If None, `cutoff_dist` is set to the median interstation distance.
+        lower_percentile: scalar float, default to 0
+            If `lower_percentile > 0`, the weights are clipped above the
+            `lower_percentile`-th percentile.
+        upper_percentile: scalar float, default to 100
+            If `upper_percentile < 100`, the weights are clipped below the
+            `upper_percentile`-th percentile.
+
+        Returns
+        -------
+        weights_sta_density: (n_stations,) `numpy.ndarray`
+            The station density weights.
+        """
+        if cutoff_dist is None:
+            cutoff_dist = np.median(
+                    self.network.interstation_distances.values
+                    [self.network.interstation_distances.values != 0.])
+        weights_sta_density = np.zeros(self.network.n_stations, dtype=np.float32)
+        for s, sta in enumerate(self.network.stations):
+            dist_sj = self.network.interstation_distances.loc[sta]
+            weights_sta_density[s] = 1./np.sum(np.exp(-dist_sj**2/cutoff_dist**2))
+        if lower_percentile > 0.:
+            weights_sta_density = np.clip(
+                    weights_sta_density,
+                    np.percentile(weights_sta_density, lower_percentile),
+                    weights_sta_density.max())
+        if upper_percentile < 100.:
+            weights_sta_density = np.clip(
+                    weights_sta_density,
+                    weights_sta_density.min(),
+                    np.percentile(weights_sta_density, upper_percentile))
+        return weights_sta_density
+
+
     def _baseline(self, X, window):
         """Compute a baseline.  
 
@@ -459,7 +507,7 @@ class NetworkResponse(object):
                 else:
                     tr = tr[0]
                 time = utils.time_range(tr.stats.starttime,
-                        tr.stats.endtime, 1./sr, unit='ms')
+                        tr.stats.endtime+1./sr, 1./sr, unit='ms')
                 start_times.append(time[0])
                 end_times.append(time[-1])
                 ax.plot(time[:detection.n_samples], tr.data[:detection.n_samples], color='k')
