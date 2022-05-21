@@ -1216,6 +1216,12 @@ class Event(object):
         for fn in glob.glob(os.path.join(
             cfg.NLLoc_output_path, out_basename+'*')):
             os.remove(fn)
+        for fn in glob.glob(os.path.join(
+            cfg.NLLoc_input_path, out_basename+'*.in')):
+            os.remove(fn)
+        for fn in glob.glob(os.path.join(
+            cfg.NLLoc_input_path, out_basename+'*.obs')):
+            os.remove(fn)
 
     def set_aux_data(self, aux_data):
         """Adds any extra data to the Event instance.  
@@ -1905,7 +1911,6 @@ class Template(Event):
                     catalog[key] = f['catalog'][key][()]
                     if catalog[key].dtype.kind == 'S':
                         catalog[key] = catalog[key].astype('U')
-            print(catalog['origin_time'])
             extra_attributes = set(catalog.keys()).difference({'longitude', 
                 'latitude', 'depth', 'origin_time'})
             self.catalog = Catalog(catalog['longitude'], catalog['latitude'],
