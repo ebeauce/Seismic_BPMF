@@ -417,7 +417,7 @@ def initialize_map(map_longitudes, map_latitudes,
     return map_axis
 
 def add_scale_bar(ax, x_start, y_start, distance, source_crs,
-                  azimuth=90., **kwargs):
+                  orientation='longitudinal', **kwargs):
     """
     Parameters
     -----------
@@ -433,6 +433,9 @@ def add_scale_bar(ax, x_start, y_start, distance, source_crs,
         The distance covered by the scale bar, in km.
     source_crs: cartopy.crs
         The coordinate system in which the data are written.
+    orientation: string, default to 'longitudinal'
+        Either 'longitudinal' or 'latitudinal'. Determine the orientation
+        of the scale bar.
     """
     from cartopy.geodesic import Geodesic
     from cartopy.crs import PlateCarree
@@ -451,8 +454,23 @@ def add_scale_bar(ax, x_start, y_start, distance, source_crs,
     lon_start, lat_start = data_coords.transform_point(
             data[0], data[1], source_crs)
     # get the coordinates of the end of the scale bar
-    lon_end, lat_end, _ = np.asarray(G.direct(
-            [lon_start, lat_start], azimuth, 1000.*distance))[0]
+    if orientation == 'latitudinal':
+        lon_end, lat_end, _ = np.asarray(G.direct(
+                [lon_start, lat_start], 0., 1000.*distance))[0]
+    elif orientation == 'longitudinal':
+        # first, compute distance a function of longitude at
+        # the given latitude lat_start
+        dist_per_lon = 0.
+        longitudes = np.linspace(lon_start, lon_start+1., 100)
+        for i in range(1, len(longitudes)):
+            dist_per_lon += utils.two_point_distance(
+                    (longitudes[i-1]+180.)%360.-180., lat_start, 0.,
+                    (longitudes[i]+180.)%360.-180., lat_start, 0.)
+        lon_end = ((lon_start + distance/dist_per_lon)+180.)%360. - 180.
+        lat_end = lat_start
+    else:
+        print('`orientation` should be \'longitudinal\' or \'latitudinal\'.')
+        return
     ax.plot([lon_start, lon_end], [lat_start, lat_end],
             transform=data_coords, **kwargs)
     ax.text((lon_start+lon_end)/2., (lat_start+lat_end)/2.-0.001,
