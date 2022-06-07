@@ -104,7 +104,7 @@ void find_similar_moveouts(float *moveouts,
             // has already been identified as redundant
             continue;
         }
-        printf("Source %zu\n", i1);
+        //printf("Source %zu\n", i1);
 
         // some kind of progress bar
         if (i1+1 >= progress_step){
