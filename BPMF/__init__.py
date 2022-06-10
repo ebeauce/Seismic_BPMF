@@ -8,4 +8,4 @@ from . import clib
 from . import utils
 from . import plotting_utils
 
-__version__ = '2.0.0'
+__version__ = '2.0.0.dev'
