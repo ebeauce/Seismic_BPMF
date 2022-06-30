@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 
 from obspy.core import UTCDateTime as udt
 
+from time import time as give_time
+
 class MatchedFilter(object):
     """Class for running a matched filter search and detecting earthquakes.  
 
@@ -388,20 +390,31 @@ class MatchedFilter(object):
         n_parts = self.template_group.n_templates//n_tp_chunk\
                 + 1*int(self.template_group.n_templates%n_tp_chunk > 0)
         detections = {}
+        duration_fmf = 0.
+        duration_det = 0.
         for n in range(n_parts):
             tt1 = n*n_tp_chunk
             tt2 = (n+1)*n_tp_chunk
             if tt2 > self.template_group.n_templates:
                 tt2 = self.template_group.n_templates
             tids_chunk = self.template_group.tids[tt1:tt2]
+            t1_fmf = give_time()
             self.compute_cc_time_series(
                     weight_type=weight_type, device=device,
                     tids=tids_chunk)
+            t2_fmf = give_time()
+            duration_fmf += t2_fmf-t1_fmf
+            t1_det = give_time()
             detections_chunk = self.find_detections(
                     minimum_interevent_time,
                     threshold_window_dur=threshold_window_dur,
                     verbose=verbose)
             detections.update(detections_chunk)
+            t2_det = give_time()
+            duration_det += t2_det-t1_det
+        if verbose > -1:
+            print(f'Total time spent on computing CCs: {duration_fmf:.2f}sec')
+            print(f'Total time spent on finding detections: {duration_det:.2f}sec')
         return detections
 
     # -------------------------------------------
