@@ -3,12 +3,18 @@ import os
 from .config import cfg
 from . import utils
 from . import dataset
+from . import clib
 
 import numpy as np
 import fast_matched_filter as fmf
 import matplotlib.pyplot as plt
 
 from obspy.core import UTCDateTime as udt
+from obspy import Stream
+
+from functools import partial
+
+from time import time as give_time
 
 class MatchedFilter(object):
     """Class for running a matched filter search and detecting earthquakes.  
@@ -106,6 +112,75 @@ class MatchedFilter(object):
             norm[norm == 0.] = 1.
             self.data_arr /= norm
 
+    #def select_cc_indexes(self, cc_t, threshold, search_win):
+    #    """Select the peaks in the CC time series.  
+
+    #    Parameters
+    #    ------------
+    #    cc_t: (n_corr,) numpy.ndarray
+    #        The CC time series for one template.
+    #    threshold: (n_corr,) numpy.ndarray or scalar
+    #        The detection threshold.
+    #    search_win: scalar int
+    #        The minimum inter-event time, in units of correlation step.
+
+    #    Returns
+    #    --------
+    #    cc_idx: (n_detections,) numpy.ndarray
+    #        The list of all selected CC indexes. They give the timings of the
+    #        detected events.
+    #    """
+    #    sr = self.data.sr
+    #    step = utils.sec_to_samp(self.step_sec, sr=sr)
+    #    cc_idx = np.argwhere(cc_t > threshold)
+    #    ## test: use C implementation
+    #    #selection = clib.select_cc_indexes(
+    #    #        cc_t, threshold, search_win)
+    #    #cc_idx = np.arange(len(cc_t), dtype=np.int32)[selection]
+    #    # go back to regular sampling space
+    #    detection_indexes = cc_idx * step
+    #    if self.remove_edges:
+    #        # remove detections from buffer
+    #        limit = utils.sec_to_samp(cfg.data_buffer, sr=sr)
+    #        idx = detection_indexes >= limit
+    #        cc_idx = cc_idx[idx]
+    #        detection_indexes = detection_indexes[idx]
+
+    #        limit = utils.sec_to_samp(self.data.duration + cfg.data_buffer,
+    #                sr=sr)
+    #        idx = detection_indexes < limit
+    #        cc_idx = cc_idx[idx]
+    #        detection_indexes = detection_indexes[idx]
+    #    # ----------------------------------------------------------
+    #    # only keep highest correlation coefficient for grouped detections
+    #    # --- different phases correlating with one another can typically
+    #    # --- produce high enough CCs to trigger a detection
+    #    # --- therefore, we use the time difference between the earliest
+    #    # --- phase and the latest phase, on each station, as a proxy for
+    #    # --- the allowed inter-event time
+    #    # --- clean up multiple detections
+    #    for j in range(len(cc_idx)):
+    #        idx = np.arange(max(0, cc_idx[j] - search_win//2),
+    #                        min(len(cc_t)-1, cc_idx[j] + search_win//2),
+    #                        dtype=np.int32)
+    #        idx_to_update = np.where(cc_idx == cc_idx[j])[0]
+    #        cc_idx[idx_to_update] = np.argmax(cc_t[idx]) + idx[0]
+
+    #    cc_idx = np.unique(cc_idx)
+    #    # after this step, we can have detections closest than search_win/2
+    #    # the following removes them
+    #    cc_idx = list(cc_idx)
+    #    Nrm = 0
+    #    for j in range(1, len(cc_idx)):
+    #        if (cc_idx[j-Nrm]-cc_idx[j-Nrm-1]) < search_win:
+    #            if cc_t[cc_idx[j-Nrm]] > cc_t[cc_idx[j-Nrm-1]]:
+    #                cc_idx.remove(cc_idx[j-Nrm-1])
+    #            else:
+    #                cc_idx.remove(cc_idx[j-Nrm])
+    #            Nrm += 1
+    #    cc_idx = np.asarray(cc_idx)
+    #    return cc_idx
+
     def select_cc_indexes(self, cc_t, threshold, search_win):
         """Select the peaks in the CC time series.  
 
@@ -126,7 +201,18 @@ class MatchedFilter(object):
         """
         sr = self.data.sr
         step = utils.sec_to_samp(self.step_sec, sr=sr)
-        cc_idx = np.argwhere(cc_t > threshold)
+        cc_detections = cc_t > threshold
+        cc_idx = np.where(cc_detections)[0]
+        for i in range(1, len(cc_idx)):
+            if ((cc_idx[i] - cc_idx[i-1]) < search_win
+                    and cc_detections[cc_idx[i-1]]):
+                if cc_idx[i] > cc_idx[i-1]:
+                    # keep i-th cc_idx
+                    cc_detections[cc_idx[i-1]] = False
+                else:
+                    # keep (i-1)-th cc_idx
+                    cc_detections[cc_idx[i]] = False
+        cc_idx = np.where(cc_detections)[0]
         # go back to regular sampling space
         detection_indexes = cc_idx * step
         if self.remove_edges:
@@ -140,36 +226,8 @@ class MatchedFilter(object):
                     sr=sr)
             idx = detection_indexes < limit
             cc_idx = cc_idx[idx]
-            detection_indexes = detection_indexes[idx]
-        # ----------------------------------------------------------
-        # only keep highest correlation coefficient for grouped detections
-        # --- different phases correlating with one another can typically
-        # --- produce high enough CCs to trigger a detection
-        # --- therefore, we use the time difference between the earliest
-        # --- phase and the latest phase, on each station, as a proxy for
-        # --- the allowed inter-event time
-        # --- clean up multiple detections
-        for j in range(len(cc_idx)):
-            idx = np.arange(max(0, cc_idx[j] - search_win//2),
-                            min(len(cc_t)-1, cc_idx[j] + search_win//2),
-                            dtype=np.int32)
-            idx_to_update = np.where(cc_idx == cc_idx[j])[0]
-            cc_idx[idx_to_update] = np.argmax(cc_t[idx]) + idx[0]
-
-        cc_idx = np.unique(cc_idx)
-        # after this step, we can have detections closest than search_win/2
-        # the following removes them
-        cc_idx = list(cc_idx)
-        Nrm = 0
-        for j in range(1, len(cc_idx)):
-            if (cc_idx[j-Nrm]-cc_idx[j-Nrm-1]) < search_win:
-                if cc_t[cc_idx[j-Nrm]] > cc_t[cc_idx[j-Nrm-1]]:
-                    cc_idx.remove(cc_idx[j-Nrm-1])
-                else:
-                    cc_idx.remove(cc_idx[j-Nrm])
-                Nrm += 1
-        cc_idx = np.asarray(cc_idx)
         return cc_idx
+
 
     def compute_cc_time_series(
             self, weight_type='simple', device='cpu', tids=None):
@@ -245,7 +303,7 @@ class MatchedFilter(object):
             self.cc[tid] = cc_sums[t, ...]
 
     def find_detections(self, minimum_interevent_time,
-            threshold_window_dur=600., verbose=0):
+            threshold_window_dur=600., sanity_check=True, verbose=0):
         """Analyze the composite network response to find detections.
 
         Parameters
@@ -256,6 +314,9 @@ class MatchedFilter(object):
         threshold_window_dur: scalar float, default to 600
             Duration, in seconds, of the sliding window used in the computation
             of the time-dependent detection threshold.
+        sanity_check: boolean, default to True
+            If True, check that the kurtosis of the CC time series is not above
+            `self.max_kurto`. Set to False to speed up the computation.
         verbose: scalar int, default to 0
             If > 0, print some messages.
             
@@ -266,7 +327,6 @@ class MatchedFilter(object):
             all events detected with template `tid`.
         """
         from scipy.stats import kurtosis
-        from obspy import Stream
         self.minimum_interevent_time = minimum_interevent_time
         self.threshold_window_dur = threshold_window_dur
         sr = self.data.sr
@@ -295,15 +355,16 @@ class MatchedFilter(object):
                 # saturate threshold as requested by the user
                 threshold = np.minimum(
                         self.max_CC_threshold*np.sum(weights_t), threshold)
-            # ------------------
-            # sanity check: the cc time series should approximately
-            # be normal, therefore, the kurtosis should be around 0
-            # strong deviations from 0 kurtosis arise when some of the
-            # data are unavailable during the period of time being processed
-            if kurtosis(cc_t) > self.max_kurto:
-                # 20 is already a very conservative threshold
-                print('Kurtosis too large! Set the CCs to zero. ()')
-                cc_t = np.zeros(cc_t.size, dtype=np.float32)
+            if sanity_check:
+                # ------------------
+                # sanity check: the cc time series should approximately
+                # be normal, therefore, the kurtosis should be around 0
+                # strong deviations from 0 kurtosis arise when some of the
+                # data are unavailable during the period of time being processed
+                if kurtosis(cc_t) > self.max_kurto:
+                    # 20 is already a very conservative threshold
+                    print('Kurtosis too large! Set the CCs to zero. ()')
+                    cc_t = np.zeros(cc_t.size, dtype=np.float32)
             # select the peaks in the CC time series
             # ----------------------------------------------------------
             # only keep highest correlation coefficient for grouped detections
@@ -318,7 +379,7 @@ class MatchedFilter(object):
             d_mv = np.median(d_mv)
             search_win = min(10*minimum_interevent_time, max(d_mv,
                 minimum_interevent_time))
-            search_win /= step # time in cc_idx units
+            search_win /= step # time in correlation steps units
             cc_idx = self.select_cc_indexes(cc_t, threshold, search_win)
             detection_indexes = cc_idx * step
             # ----------------------------------------------------------
@@ -354,7 +415,8 @@ class MatchedFilter(object):
 
     def run_matched_filter_search(
             self, minimum_interevent_time, weight_type='simple',
-            device='cpu', threshold_window_dur=600., verbose=0):
+            device='cpu', threshold_window_dur=600.,
+            sanity_check=True, verbose=0):
         """Run the matched-filter search.
 
         If `self.max_memory` is specified, divide the task into chunks so that
@@ -372,6 +434,9 @@ class MatchedFilter(object):
         threshold_window_dur: scalar float, default to 600
             Duration, in seconds, of the sliding window used in the computation
             of the time-dependent detection threshold.
+        sanity_check: boolean, default to True
+            If True, check that the kurtosis of the CC time series is not above
+            `self.max_kurto`. Set to False to speed up the computation.
         verbose: scalar int, default to 0
             If > 0, print some messages.
 
@@ -388,21 +453,54 @@ class MatchedFilter(object):
         n_parts = self.template_group.n_templates//n_tp_chunk\
                 + 1*int(self.template_group.n_templates%n_tp_chunk > 0)
         detections = {}
+        duration_fmf = 0.
+        duration_det = 0.
         for n in range(n_parts):
             tt1 = n*n_tp_chunk
             tt2 = (n+1)*n_tp_chunk
             if tt2 > self.template_group.n_templates:
                 tt2 = self.template_group.n_templates
             tids_chunk = self.template_group.tids[tt1:tt2]
+            t1_fmf = give_time()
             self.compute_cc_time_series(
                     weight_type=weight_type, device=device,
                     tids=tids_chunk)
+            t2_fmf = give_time()
+            duration_fmf += t2_fmf-t1_fmf
+            t1_det = give_time()
             detections_chunk = self.find_detections(
                     minimum_interevent_time,
                     threshold_window_dur=threshold_window_dur,
-                    verbose=verbose)
+                    sanity_check=sanity_check, verbose=verbose)
             detections.update(detections_chunk)
+            t2_det = give_time()
+            duration_det += t2_det-t1_det
+        if verbose > -1:
+            print(f'Total time spent on computing CCs: {duration_fmf:.2f}sec')
+            print(f'Total time spent on finding detections: {duration_det:.2f}sec')
         return detections
+
+    def _return_Event(self, i, template, cc_t, cc_idx,
+            threshold, detection_indexes, sr):
+        data_path, data_filename = os.path.split(self.data.where)
+        event = Stream()
+        ot_i = self.data.date + detection_indexes[i]/sr
+        # give template's attributes to each detection
+        stations = template.stations
+        latitude = template.latitude
+        longitude = template.longitude
+        depth = template.depth
+        mv = template.moveouts.values
+        phases = template.phases
+        event = dataset.Event(ot_i, mv, stations, phases,
+                data_filename, data_path, latitude=latitude,
+                longitude=longitude, depth=depth, sampling_rate=sr)
+        aux_data = {}
+        aux_data['cc'] = cc_t[cc_idx[i]]
+        aux_data['n_threshold'] = cc_t[cc_idx[i]]/threshold[cc_idx[i]]
+        aux_data['tid'] = template.tid
+        event.set_aux_data(aux_data)
+        return event
 
     # -------------------------------------------
     #       Plotting methods
@@ -560,7 +658,6 @@ class MatchedFilter(object):
         plt.subplots_adjust(top=0.95, bottom=0.06, right=0.98, left=0.06)
         return fig
 
-
 def time_dependent_threshold(time_series,
                              sliding_window,
                              overlap=0.66,
@@ -588,7 +685,6 @@ def time_dependent_threshold(time_series,
         Returns the time dependent threshold, with same
         size as the input time series.
     """
-    from scipy.interpolate import interp1d
 
     threshold_type = threshold_type.lower()
 
@@ -597,45 +693,43 @@ def time_dependent_threshold(time_series,
     center =    np.zeros(n_chunks, dtype=np.float32)
     deviation = np.zeros(n_chunks, dtype=np.float32)
     time =      np.zeros(n_chunks, dtype=np.float32)
-    mask = time_series != 0.
-    # idea: fill all zeros with white noise and then
-    # don't bother with any if statements.
-    # test that on day 2009-01-01
+    zeros = time_series == 0.
     if threshold_type == 'rms':
-        default_center = time_series[mask].mean()
-        default_deviation = np.std(time_series[mask])
+        default_center = time_series[~zeros].mean()
+        default_deviation = np.std(time_series[~zeros])
+        time_series[zeros] = np.random.normal(
+                loc=default_center,
+                scale=default_deviation,
+                size=np.sum(zeros)
+                )
         for i in range(n_chunks):
             i1 = i*shift
             i2 = min(len(time_series), i1+sliding_window)
             chunk = time_series[i1:i2]
-            non_zero = chunk != 0.
-            chunk = chunk[non_zero]
-            if len(chunk) < 3*sliding_window//4:
-                center[i] = default_center
-                deviation[i] = default_deviation
-            else:
-                center[i] = chunk.mean()
-                deviation[i] = np.std(chunk)
+            center[i] = chunk.mean()
+            deviation[i] = np.std(chunk)
             time[i] = (i1+i2)/2.
     elif threshold_type == 'mad':
-        default_center = np.median(time_series[mask])
-        default_deviation = np.median(np.abs(time_series[mask] - default_center))
+        default_center = np.median(time_series[~zeros])
+        default_deviation = np.median(np.abs(time_series[~zeros] - default_center))
+        time_series[zeros] = np.random.normal(
+                loc=default_center,
+                scale=default_deviation,
+                size=np.sum(zeros)
+                )
         for i in range(n_chunks):
             i1 = i*shift
             i2 = min(len(time_series), i1+sliding_window)
             chunk = time_series[i1:i2]
-            non_zero = chunk != 0.
-            chunk = chunk[non_zero]
-            if len(chunk) < 3*sliding_window//4:
-                center[i] = default_center
-                deviation[i] = default_deviation
-            else:
-                center[i] = np.median(chunk)
-                deviation[i] = np.median(np.abs(chunk - center[i]))
+            center[i] = np.median(chunk)
+            deviation[i] = np.median(np.abs(chunk - center[i]))
             time[i] = (i1+i2)/2.
     threshold = center + cfg.matched_filter_threshold*deviation
-    interpolator = interp1d(time, threshold, kind='slinear', fill_value=(threshold[0], threshold[-1]), bounds_error=False)
-    full_time = np.arange(0, len(time_series))
-    threshold = interpolator(full_time)
+    threshold = np.hstack( 
+            (threshold[0], threshold, threshold[-1])
+            )
+    time = np.hstack( (0., time, len(time_series)) )
+    threshold = np.interp(
+            np.arange(len(time_series), dtype=np.int32), time, threshold)
     return threshold
 

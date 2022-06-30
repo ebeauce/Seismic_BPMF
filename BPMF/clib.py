@@ -27,11 +27,18 @@ if cpu_loaded:
 
     _libc.find_similar_moveouts.argtypes = [C.POINTER(C.c_float), # moveouts
                                             C.c_float,            # average absolute time difference threshold
-                                            C.c_int,              # number of grid points 
-                                            C.c_int,              # number of stations
-                                            C.c_int,              # number of nearest neighbors
+                                            C.c_size_t,              # number of grid points 
+                                            C.c_size_t,              # number of stations
+                                            C.c_size_t,              # number of nearest neighbors
                                             C.POINTER(C.c_int)    # output pointer: redundant sources
                                             ]
+
+    _libc.select_cc_indexes.argtypes = [C.POINTER(C.c_float), # CCs
+                                        C.POINTER(C.c_float), # threshold
+                                        C.c_size_t, # search window
+                                        C.c_size_t, # length of CCs
+                                        C.POINTER(C.c_int) # selected corr
+                                        ]
 
 def kurtosis(signal, W):
     n_stations = signal.shape[0]
@@ -90,4 +97,37 @@ def find_similar_sources(moveouts, threshold, n_nearest_neighbors=200):
                                 int(n_stations),
                                 int(n_nearest_neighbors),
                                 redundant_sources.ctypes.data_as(C.POINTER(C.c_int)))
-    return redundant_sources.astype(np.bool)
+    return redundant_sources.astype(bool)
+
+def select_cc_indexes(ccs, threshold, search_win):
+    """Select new event detection's correlation indexes.  
+
+    Parameters
+    -----------
+    ccs: (n_corr,) `numpy.ndarray`
+        Time series of correlation coefficients.
+    threshold (n_corr,) `numpy.ndarray` or `float` scalar
+        Time series or scalar detection threshold.
+    search_win: `int` scalar
+        Size of the time window, in number of consecutive correlations, defining
+        grouped detections.
+
+    Returns
+    --------
+    selection: (n_corr,) bool `numpy.ndarray`
+        Vector of `n_corr` booleans that are true if the corresponding CC index
+        is a new event detection.
+    """
+    n_corr = len(ccs)
+    if isinstance(threshold, float) or isinstance(threshold, int):
+        threshold = threshold*np.ones(n_corr, dtype=np.float32)
+    threshold = np.float32(threshold)
+    selection = np.zeros(n_corr, dtype=np.int32)
+    _libc.select_cc_indexes(
+            ccs.ctypes.data_as(C.POINTER(C.c_float)),
+            threshold.ctypes.data_as(C.POINTER(C.c_float)),
+            int(search_win),
+            int(n_corr),
+            selection.ctypes.data_as(C.POINTER(C.c_int))
+            )
+    return selection.astype(bool)
