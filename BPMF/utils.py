@@ -1008,10 +1008,19 @@ def get_np_array(stream, stations, components=['N', 'E', 'Z'],
             if len(channel) > 0:
                 try:
                     # try selecting the preferred channel if it exists
-                    data[s, c, :] = channel.select(
-                            channel=f'{priority}{cp_alias}')[0].data[:n_samples]
+                    cha = channel.select(
+                            channel=f'{priority}{cp_alias}')[0]
+                    #data[s, c, :] = channel.select(
+                    #        channel=f'{priority}{cp_alias}')[0].data[:n_samples]
                 except IndexError:
-                    data[s, c, :] = channel[0].data[:n_samples]
+                    cha = channel[0]
+                    #data[s, c, :] = channel[0].data[:n_samples]
+                if len(cha.data) < n_samples:
+                    length_diff = n_samples - len(cha.data)
+                    data[s, c, :] = np.hstack((cha.data, np.zeros(length_diff,
+                        dtype=np.float32)))
+                else:
+                    data[s, c, :] = cha.data[:n_samples]
     return data
 
 def max_norm(X):
