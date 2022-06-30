@@ -137,3 +137,49 @@ void find_similar_moveouts(float *moveouts,
     }
 }
 
+void select_cc_indexes(float *cc,
+                       float *threshold,
+                       size_t search_win,
+                       size_t n_corr,
+                       int *selection){
+
+    /* Select indexes of correlation coefficients (CC) that are
+     * above `threshold` and spaced by at least `search_win`.
+     */
+    size_t i_start;
+
+//#pragma omp parallel \
+//    private(i_start) \
+//    firstprivate(search_win, n_corr) \
+//    shared(cc, threshold, selection)
+    for (size_t i=0; i<n_corr; i++){
+        // first test: is it above detection threshold?
+        if (cc[i] > threshold[i]){
+            selection[i] = 1;
+        }
+        else{
+            selection[i] = 0;
+        }
+        // second test: was there another detection within the preceding
+        // `search_win`-correlation window?
+        // if yes, keep highest cc's index
+        if (i <= search_win){
+            i_start = 0;
+        }
+        else{
+            i_start = i-search_win;
+        }
+        for (size_t j=i_start; j<i; j++){
+            if (cc[j] > cc[i]){
+                // i-th correlation is not a new event detection
+                selection[i] = 0;
+                break;
+            }
+            else{
+                // the i-th correlation is a better detection
+                // than the j-th
+                selection[j] = 0;
+            }
+        }
+    }
+}
