@@ -206,7 +206,7 @@ class MatchedFilter(object):
         for i in range(1, len(cc_idx)):
             if ((cc_idx[i] - cc_idx[i-1]) < search_win
                     and cc_detections[cc_idx[i-1]]):
-                if cc_idx[i] > cc_idx[i-1]:
+                if cc_t[cc_idx[i]] > cc_t[cc_idx[i-1]]:
                     # keep i-th cc_idx
                     cc_detections[cc_idx[i-1]] = False
                 else:
@@ -329,6 +329,8 @@ class MatchedFilter(object):
         from scipy.stats import kurtosis
         self.minimum_interevent_time = minimum_interevent_time
         self.threshold_window_dur = threshold_window_dur
+        self.white_noise = np.random.normal(
+                size=self.data.n_samples).astype('float32')
         sr = self.data.sr
         step = utils.sec_to_samp(self.step_sec, sr=sr)
         minimum_interevent_time = utils.sec_to_samp(minimum_interevent_time, sr=sr)
@@ -351,7 +353,8 @@ class MatchedFilter(object):
                 threshold = time_dependent_threshold(
                         cc_t, utils.sec_to_samp(self.threshold_window_dur,
                             sr=sr),
-                        threshold_type=self.threshold_type)
+                        threshold_type=self.threshold_type,
+                        white_noise=self.white_noise)
                 # saturate threshold as requested by the user
                 threshold = np.minimum(
                         self.max_CC_threshold*np.sum(weights_t), threshold)
@@ -479,28 +482,6 @@ class MatchedFilter(object):
             print(f'Total time spent on computing CCs: {duration_fmf:.2f}sec')
             print(f'Total time spent on finding detections: {duration_det:.2f}sec')
         return detections
-
-    def _return_Event(self, i, template, cc_t, cc_idx,
-            threshold, detection_indexes, sr):
-        data_path, data_filename = os.path.split(self.data.where)
-        event = Stream()
-        ot_i = self.data.date + detection_indexes[i]/sr
-        # give template's attributes to each detection
-        stations = template.stations
-        latitude = template.latitude
-        longitude = template.longitude
-        depth = template.depth
-        mv = template.moveouts.values
-        phases = template.phases
-        event = dataset.Event(ot_i, mv, stations, phases,
-                data_filename, data_path, latitude=latitude,
-                longitude=longitude, depth=depth, sampling_rate=sr)
-        aux_data = {}
-        aux_data['cc'] = cc_t[cc_idx[i]]
-        aux_data['n_threshold'] = cc_t[cc_idx[i]]/threshold[cc_idx[i]]
-        aux_data['tid'] = template.tid
-        event.set_aux_data(aux_data)
-        return event
 
     # -------------------------------------------
     #       Plotting methods
@@ -661,7 +642,8 @@ class MatchedFilter(object):
 def time_dependent_threshold(time_series,
                              sliding_window,
                              overlap=0.66,
-                             threshold_type='rms'):
+                             threshold_type='rms',
+                             white_noise=None):
     """
     Time dependent detection threshold.
 
@@ -678,6 +660,10 @@ def time_dependent_threshold(time_series,
     threshold_type: string, default to 'rms'
         Either rms or mad, depending on which measure
         of deviation you want to use.
+    white_noise: `numpy.ndarray` or None, default to None
+        If not None, `white_noise` is a vector of random values sampled from the
+        standard normal distribution. It is used to fill zeros in the CC time
+        series. If None, a random vector is generated from scratch.
 
     Returns
     ----------
@@ -685,51 +671,52 @@ def time_dependent_threshold(time_series,
         Returns the time dependent threshold, with same
         size as the input time series.
     """
-
     threshold_type = threshold_type.lower()
-
+    n_samples = len(time_series)
     shift = int((1.-overlap)*sliding_window)
-    n_chunks = int((len(time_series)-sliding_window)//shift)+2
-    center =    np.zeros(n_chunks, dtype=np.float32)
-    deviation = np.zeros(n_chunks, dtype=np.float32)
-    time =      np.zeros(n_chunks, dtype=np.float32)
+    last_valid_win = n_samples - sliding_window + 1
+    time = np.hstack( 
+            (np.arange(n_samples, dtype=np.int32)[0:last_valid_win:shift],
+             last_valid_win)
+            )
     zeros = time_series == 0.
+    if white_noise is None:
+        white_noise = np.random.normal(size=np.sum(zeros)).astype('float32')
     if threshold_type == 'rms':
         default_center = time_series[~zeros].mean()
         default_deviation = np.std(time_series[~zeros])
-        time_series[zeros] = np.random.normal(
-                loc=default_center,
-                scale=default_deviation,
-                size=np.sum(zeros)
+        time_series[zeros] = white_noise[:np.sum(zeros)]*default_deviation\
+                + default_center
+        time_series_win = np.lib.stride_tricks.sliding_window_view(
+                time_series, sliding_window)[::shift, :]
+        last_win = time_series[time[-1]:]
+        center = np.hstack(
+                (np.mean(time_series_win, axis=-1), np.mean(last_win))
                 )
-        for i in range(n_chunks):
-            i1 = i*shift
-            i2 = min(len(time_series), i1+sliding_window)
-            chunk = time_series[i1:i2]
-            center[i] = chunk.mean()
-            deviation[i] = np.std(chunk)
-            time[i] = (i1+i2)/2.
+        deviation = np.hstack(
+                (np.std(time_series_win, axis=-1), np.std(last_win))
+                )
     elif threshold_type == 'mad':
         default_center = np.median(time_series[~zeros])
         default_deviation = np.median(np.abs(time_series[~zeros] - default_center))
-        time_series[zeros] = np.random.normal(
-                loc=default_center,
-                scale=default_deviation,
-                size=np.sum(zeros)
+        time_series[zeros] = white_noise[:np.sum(zeros)]*default_deviation\
+                + default_center
+        time_series_win = np.lib.stride_tricks.sliding_window_view(
+                time_series, sliding_window)[::shift, :]
+        last_win = time_series[time[-1]:]
+        center = np.hstack(
+                (np.median(time_series_win, axis=-1), np.median(last_win))
                 )
-        for i in range(n_chunks):
-            i1 = i*shift
-            i2 = min(len(time_series), i1+sliding_window)
-            chunk = time_series[i1:i2]
-            center[i] = np.median(chunk)
-            deviation[i] = np.median(np.abs(chunk - center[i]))
-            time[i] = (i1+i2)/2.
+        deviation = np.hstack(
+                (np.median(np.abs(time_series_win - center[:-1, np.newaxis])),
+                 np.median(np.abs(last_win - center[-1])))
+                )
     threshold = center + cfg.matched_filter_threshold*deviation
     threshold = np.hstack( 
             (threshold[0], threshold, threshold[-1])
             )
     time = np.hstack( (0., time, len(time_series)) )
     threshold = np.interp(
-            np.arange(len(time_series), dtype=np.int32), time, threshold)
+            np.arange(n_samples, dtype=np.int32), time, threshold)
     return threshold
 
