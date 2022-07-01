@@ -13,6 +13,7 @@ from obspy.core import UTCDateTime as udt
 from obspy import Stream
 
 from functools import partial
+import concurrent.futures
 
 from time import time as give_time
 
@@ -25,7 +26,7 @@ class MatchedFilter(object):
                  remove_edges=True, normalize=True,
                  max_CC_threshold=0.80, n_network_chunks=1,
                  threshold_type='rms', step=cfg.matched_filter_step,
-                 max_memory=None):
+                 max_memory=None, max_workers=None):
         """Instanciate a MatchedFilter object.  
 
         Parameters
@@ -63,6 +64,10 @@ class MatchedFilter(object):
             exceed during the matched-filter search. The MatchedFilter
             instance will compute the maximum number of templates to use in one
             run to not exceed this memory threshold.
+        max_workers: scalar int or None, default to None
+            Controls the maximum number of threads created when finding
+            detections of new events in the CC time series. If None, use all
+            visible CPUs.
         """
         self.template_group = template_group
         self.min_channels = min_channels
@@ -74,6 +79,7 @@ class MatchedFilter(object):
         self.threshold_type = threshold_type.lower()
         self.step_sec = step
         self.max_memory = max_memory
+        self.max_workers = max_workers
 
     # properties
     @property
@@ -302,6 +308,120 @@ class MatchedFilter(object):
         for t, tid in enumerate(self.template_group.tids[select_tts]):
             self.cc[tid] = cc_sums[t, ...]
 
+    #def find_detections(self, minimum_interevent_time,
+    #        threshold_window_dur=600., sanity_check=True, verbose=0):
+    #    """Analyze the composite network response to find detections.
+
+    #    Parameters
+    #    -----------
+    #    minimum_interevent_time: scalar, float
+    #        The shortest duration, in seconds, allowed between two
+    #        consecutive detections.
+    #    threshold_window_dur: scalar float, default to 600
+    #        Duration, in seconds, of the sliding window used in the computation
+    #        of the time-dependent detection threshold.
+    #    sanity_check: boolean, default to True
+    #        If True, check that the kurtosis of the CC time series is not above
+    #        `self.max_kurto`. Set to False to speed up the computation.
+    #    verbose: scalar int, default to 0
+    #        If > 0, print some messages.
+    #        
+    #    Returns
+    #    -----------
+    #    detections: dictionary,
+    #        Dictionary where `detections[tid]` is a list of `dataset.Event` for
+    #        all events detected with template `tid`.
+    #    """
+    #    from scipy.stats import kurtosis
+    #    self.minimum_interevent_time = minimum_interevent_time
+    #    self.threshold_window_dur = threshold_window_dur
+    #    self.white_noise = np.random.normal(
+    #            size=self.data.n_samples).astype('float32')
+    #    sr = self.data.sr
+    #    step = utils.sec_to_samp(self.step_sec, sr=sr)
+    #    minimum_interevent_time = utils.sec_to_samp(minimum_interevent_time, sr=sr)
+    #    detections = {}
+    #    tids = list(self.cc.keys())
+    #    for t, tid in enumerate(tids):
+    #        # t: index in this run's loop
+    #        # tt: index in the self.template_group.templates list
+    #        # tid: template id
+    #        tt = self.template_group.tindexes.loc[tid]
+
+    #        cc_t = self.cc[tid]
+    #        weights_t = self.weights_arr[t, ...]
+    #        valid = cc_t != 0.
+    #        if np.sum(valid) == 0:
+    #            # fix the threshold to some value so
+    #            # that there won't be any detections
+    #            threshold = 10.
+    #        else:
+    #            threshold = time_dependent_threshold(
+    #                    cc_t, utils.sec_to_samp(self.threshold_window_dur,
+    #                        sr=sr),
+    #                    threshold_type=self.threshold_type,
+    #                    white_noise=self.white_noise)
+    #            # saturate threshold as requested by the user
+    #            threshold = np.minimum(
+    #                    self.max_CC_threshold*np.sum(weights_t), threshold)
+    #        if sanity_check:
+    #            # ------------------
+    #            # sanity check: the cc time series should approximately
+    #            # be normal, therefore, the kurtosis should be around 0
+    #            # strong deviations from 0 kurtosis arise when some of the
+    #            # data are unavailable during the period of time being processed
+    #            if kurtosis(cc_t) > self.max_kurto:
+    #                # 20 is already a very conservative threshold
+    #                print('Kurtosis too large! Set the CCs to zero. ()')
+    #                cc_t = np.zeros(cc_t.size, dtype=np.float32)
+    #        # select the peaks in the CC time series
+    #        # ----------------------------------------------------------
+    #        # only keep highest correlation coefficient for grouped detections
+    #        # --- different phases correlating with one another can typically
+    #        # --- produce high enough CCs to trigger a detection
+    #        # --- therefore, we use the time difference between the earliest
+    #        # --- phase and the latest phase, on each station, as a proxy for
+    #        # --- the allowed inter-event time
+    #        d_mv = np.max(self.template_group.moveouts_arr[tt, ...], axis=-1) \
+    #                - np.min(self.template_group.moveouts_arr[tt, ...], axis=-1)
+    #        # take the median across stations
+    #        d_mv = np.median(d_mv)
+    #        search_win = min(10*minimum_interevent_time, max(d_mv,
+    #            minimum_interevent_time))
+    #        search_win /= step # time in correlation steps units
+    #        cc_idx = self.select_cc_indexes(cc_t, threshold, search_win)
+    #        detection_indexes = cc_idx * step
+    #        # ----------------------------------------------------------
+    #        n_detections = len(detection_indexes)
+
+    #        # extract waveforms
+    #        detections_t = []
+    #        data_path, data_filename = os.path.split(self.data.where)
+    #        for i in range(len(detection_indexes)):
+    #            event = Stream()
+    #            ot_i = self.data.date + detection_indexes[i]/sr
+    #            # give template's attributes to each detection
+    #            template = self.template_group.templates[tt]
+    #            stations = template.stations
+    #            latitude = template.latitude
+    #            longitude = template.longitude
+    #            depth = template.depth
+    #            mv = template.moveouts.values
+    #            phases = template.phases
+    #            event = dataset.Event(ot_i, mv, stations, phases,
+    #                    data_filename, data_path, latitude=latitude,
+    #                    longitude=longitude, depth=depth, sampling_rate=sr)
+    #            aux_data = {}
+    #            aux_data['cc'] = cc_t[cc_idx[i]]
+    #            aux_data['n_threshold'] = cc_t[cc_idx[i]]/threshold[cc_idx[i]]
+    #            aux_data['tid'] = tid
+    #            event.set_aux_data(aux_data)
+    #            detections_t.append(event)
+    #        if verbose > 0:
+    #            print(f'Template {tid} detected {len(detections_t):d} events.')
+    #        detections[tid] = detections_t
+    #    return detections
+
     def find_detections(self, minimum_interevent_time,
             threshold_window_dur=600., sanity_check=True, verbose=0):
         """Analyze the composite network response to find detections.
@@ -329,92 +449,113 @@ class MatchedFilter(object):
         from scipy.stats import kurtosis
         self.minimum_interevent_time = minimum_interevent_time
         self.threshold_window_dur = threshold_window_dur
+        self.sanity_check = sanity_check
         self.white_noise = np.random.normal(
                 size=self.data.n_samples).astype('float32')
         sr = self.data.sr
-        step = utils.sec_to_samp(self.step_sec, sr=sr)
-        minimum_interevent_time = utils.sec_to_samp(minimum_interevent_time, sr=sr)
         detections = {}
         tids = list(self.cc.keys())
-        for t, tid in enumerate(tids):
-            # t: index in this run's loop
-            # tt: index in the self.template_group.templates list
-            # tid: template id
-            tt = self.template_group.tindexes.loc[tid]
-
-            cc_t = self.cc[tid]
-            weights_t = self.weights_arr[t, ...]
-            valid = cc_t != 0.
-            if np.sum(valid) == 0:
-                # fix the threshold to some value so
-                # that there won't be any detections
-                threshold = 10.
-            else:
-                threshold = time_dependent_threshold(
-                        cc_t, utils.sec_to_samp(self.threshold_window_dur,
-                            sr=sr),
-                        threshold_type=self.threshold_type,
-                        white_noise=self.white_noise)
-                # saturate threshold as requested by the user
-                threshold = np.minimum(
-                        self.max_CC_threshold*np.sum(weights_t), threshold)
-            if sanity_check:
-                # ------------------
-                # sanity check: the cc time series should approximately
-                # be normal, therefore, the kurtosis should be around 0
-                # strong deviations from 0 kurtosis arise when some of the
-                # data are unavailable during the period of time being processed
-                if kurtosis(cc_t) > self.max_kurto:
-                    # 20 is already a very conservative threshold
-                    print('Kurtosis too large! Set the CCs to zero. ()')
-                    cc_t = np.zeros(cc_t.size, dtype=np.float32)
-            # select the peaks in the CC time series
-            # ----------------------------------------------------------
-            # only keep highest correlation coefficient for grouped detections
-            # --- different phases correlating with one another can typically
-            # --- produce high enough CCs to trigger a detection
-            # --- therefore, we use the time difference between the earliest
-            # --- phase and the latest phase, on each station, as a proxy for
-            # --- the allowed inter-event time
-            d_mv = np.max(self.template_group.moveouts_arr[tt, ...], axis=-1) \
-                    - np.min(self.template_group.moveouts_arr[tt, ...], axis=-1)
-            # take the median across stations
-            d_mv = np.median(d_mv)
-            search_win = min(10*minimum_interevent_time, max(d_mv,
-                minimum_interevent_time))
-            search_win /= step # time in correlation steps units
-            cc_idx = self.select_cc_indexes(cc_t, threshold, search_win)
-            detection_indexes = cc_idx * step
-            # ----------------------------------------------------------
-            n_detections = len(detection_indexes)
-
-            # extract waveforms
-            detections_t = []
-            data_path, data_filename = os.path.split(self.data.where)
-            for i in range(len(detection_indexes)):
-                event = Stream()
-                ot_i = self.data.date + detection_indexes[i]/sr
-                # give template's attributes to each detection
-                template = self.template_group.templates[tt]
-                stations = template.stations
-                latitude = template.latitude
-                longitude = template.longitude
-                depth = template.depth
-                mv = template.moveouts.values
-                phases = template.phases
-                event = dataset.Event(ot_i, mv, stations, phases,
-                        data_filename, data_path, latitude=latitude,
-                        longitude=longitude, depth=depth, sampling_rate=sr)
-                aux_data = {}
-                aux_data['cc'] = cc_t[cc_idx[i]]
-                aux_data['n_threshold'] = cc_t[cc_idx[i]]/threshold[cc_idx[i]]
-                aux_data['tid'] = tid
-                event.set_aux_data(aux_data)
-                detections_t.append(event)
-            if verbose > 0:
-                print(f'Template {tid} detected {len(detections_t):d} events.')
-            detections[tid] = detections_t
+        #for t, tid in enumerate(tids):
+        #    # t: index in this run's loop
+        #    # tt: index in the self.template_group.templates list
+        #    # tid: template id
+        #    detections_t, tid = self._find_detections_t(t, tid)
+        #detections[tid] = detections_t
+        with concurrent.futures.ThreadPoolExecutor(
+                max_workers=min(len(tids), self.max_workers)) as executor:
+            output = list(executor.map(
+                self._find_detections_t, range(len(tids)), tids))
+        detections.update(
+                {output[i][1]: output[i][0] for i in range(len(output))})
+        if verbose > 0:
+            for tid in tids:
+                print(f'Template {tid} detected {len(detections[tid]):d} events.')
         return detections
+
+
+    def _find_detections_t(self, t, tid):
+        """
+        """
+        # t: index in this run's loop
+        # tt: index in the self.template_group.templates list
+        # tid: template id
+        tt = self.template_group.tindexes.loc[tid]
+
+        step = utils.sec_to_samp(self.step_sec, sr=self.data.sr)
+        minimum_interevent_time = utils.sec_to_samp(
+                self.minimum_interevent_time, sr=self.data.sr)
+
+        cc_t = self.cc[tid]
+        weights_t = self.weights_arr[t, ...]
+        valid = cc_t != 0.
+        if np.sum(valid) == 0:
+            # fix the threshold to some value so
+            # that there won't be any detections
+            threshold = 10.
+        else:
+            threshold = time_dependent_threshold(
+                    cc_t, utils.sec_to_samp(self.threshold_window_dur,
+                        sr=self.data.sr),
+                    threshold_type=self.threshold_type,
+                    white_noise=self.white_noise)
+            # saturate threshold as requested by the user
+            threshold = np.minimum(
+                    self.max_CC_threshold*np.sum(weights_t), threshold)
+        if self.sanity_check:
+            # ------------------
+            # sanity check: the cc time series should approximately
+            # be normal, therefore, the kurtosis should be around 0
+            # strong deviations from 0 kurtosis arise when some of the
+            # data are unavailable during the period of time being processed
+            if kurtosis(cc_t) > self.max_kurto:
+                # 20 is already a very conservative threshold
+                print('Kurtosis too large! Set the CCs to zero. ()')
+                cc_t = np.zeros(cc_t.size, dtype=np.float32)
+        # select the peaks in the CC time series
+        # ----------------------------------------------------------
+        # only keep highest correlation coefficient for grouped detections
+        # --- different phases correlating with one another can typically
+        # --- produce high enough CCs to trigger a detection
+        # --- therefore, we use the time difference between the earliest
+        # --- phase and the latest phase, on each station, as a proxy for
+        # --- the allowed inter-event time
+        d_mv = np.max(self.template_group.moveouts_arr[tt, ...], axis=-1) \
+                - np.min(self.template_group.moveouts_arr[tt, ...], axis=-1)
+        # take the median across stations
+        d_mv = np.median(d_mv)
+        search_win = min(10*self.minimum_interevent_time, max(d_mv,
+            self.minimum_interevent_time))
+        search_win /= step # time in correlation steps units
+        cc_idx = self.select_cc_indexes(cc_t, threshold, search_win)
+        detection_indexes = cc_idx * step
+        # ----------------------------------------------------------
+        n_detections = len(detection_indexes)
+
+        # extract waveforms
+        detections_t = []
+        data_path, data_filename = os.path.split(self.data.where)
+        for i in range(len(detection_indexes)):
+            event = Stream()
+            ot_i = self.data.date + detection_indexes[i]/self.data.sr
+            # give template's attributes to each detection
+            template = self.template_group.templates[tt]
+            stations = template.stations
+            latitude = template.latitude
+            longitude = template.longitude
+            depth = template.depth
+            mv = template.moveouts.values
+            phases = template.phases
+            event = dataset.Event(ot_i, mv, stations, phases,
+                    data_filename, data_path, latitude=latitude,
+                    longitude=longitude, depth=depth, sampling_rate=self.data.sr)
+            aux_data = {}
+            aux_data['cc'] = cc_t[cc_idx[i]]
+            aux_data['n_threshold'] = cc_t[cc_idx[i]]/threshold[cc_idx[i]]
+            aux_data['tid'] = tid
+            event.set_aux_data(aux_data)
+            detections_t.append(event)
+        return detections_t, tid
+
 
     def run_matched_filter_search(
             self, minimum_interevent_time, weight_type='simple',
