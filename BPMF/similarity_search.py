@@ -209,16 +209,32 @@ class MatchedFilter(object):
         step = utils.sec_to_samp(self.step_sec, sr=sr)
         cc_detections = cc_t > threshold
         cc_idx = np.where(cc_detections)[0]
+        #print(cc_idx)
+        #for i in range(1, len(cc_idx)):
+        #    if ((cc_idx[i] - cc_idx[i-1]) < search_win
+        #            and cc_detections[cc_idx[i-1]]):
+        #        if cc_t[cc_idx[i]] > cc_t[cc_idx[i-1]]:
+        #            # keep i-th cc_idx
+        #            cc_detections[cc_idx[i-1]] = False
+        #        else:
+        #            # keep (i-1)-th cc_idx
+        #            cc_detections[cc_idx[i]] = False
+        #cc_idx = np.where(cc_detections)[0]
+
+        cc_idx = list(cc_idx)
+        n_rm = 0
         for i in range(1, len(cc_idx)):
-            if ((cc_idx[i] - cc_idx[i-1]) < search_win
-                    and cc_detections[cc_idx[i-1]]):
-                if cc_t[cc_idx[i]] > cc_t[cc_idx[i-1]]:
-                    # keep i-th cc_idx
-                    cc_detections[cc_idx[i-1]] = False
+            if (cc_idx[i-n_rm] - cc_idx[i-n_rm-1]) < search_win:
+                if cc_t[cc_idx[i-n_rm]] > cc_t[cc_idx[i-n_rm-1]]:
+                    # keep (i-n_rm)-th detection
+                    cc_idx.remove(cc_idx[i-n_rm-1])
                 else:
-                    # keep (i-1)-th cc_idx
-                    cc_detections[cc_idx[i]] = False
-        cc_idx = np.where(cc_detections)[0]
+                    # keep (i-n_rm-1)-th detection
+                    cc_idx.remove(cc_idx[i-n_rm])
+                n_rm += 1
+        cc_idx = np.asarray(cc_idx)
+
+
         # go back to regular sampling space
         detection_indexes = cc_idx * step
         if self.remove_edges:
@@ -483,7 +499,8 @@ class MatchedFilter(object):
 
         step = utils.sec_to_samp(self.step_sec, sr=self.data.sr)
         minimum_interevent_time = utils.sec_to_samp(
-                self.minimum_interevent_time, sr=self.data.sr)
+                self.minimum_interevent_time, sr=self.data.sr
+                )
 
         cc_t = self.cc[tid]
         weights_t = self.weights_arr[t, ...]
@@ -522,9 +539,9 @@ class MatchedFilter(object):
         d_mv = np.max(self.template_group.moveouts_arr[tt, ...], axis=-1) \
                 - np.min(self.template_group.moveouts_arr[tt, ...], axis=-1)
         # take the median across stations
-        d_mv = np.median(d_mv)
-        search_win = min(10*self.minimum_interevent_time, max(d_mv,
-            self.minimum_interevent_time))
+        d_mv = int(np.median(d_mv))+1
+        search_win = min(10*minimum_interevent_time, max(d_mv,
+            minimum_interevent_time))
         search_win /= step # time in correlation steps units
         cc_idx = self.select_cc_indexes(cc_t, threshold, search_win)
         detection_indexes = cc_idx * step
@@ -763,10 +780,12 @@ class MatchedFilter(object):
                         utils.max_norm(tr.data[:detection.n_samples]), color='k')
                 # plot the template waveforms
                 tr_tp = self.template_group.templates[tt].traces.select(
-                        station=sta, component=cp_alias)[0]
-                ax.plot(time[:detection.n_samples],
-                        utils.max_norm(tr_tp.data[:detection.n_samples]),
-                        color='C3', lw=0.50)
+                        station=sta, component=cp_alias)
+                if len(tr_tp) > 0:
+                    tr_tp = tr_tp[0]
+                    ax.plot(time[:detection.n_samples],
+                            utils.max_norm(tr_tp.data[:detection.n_samples]),
+                            color='C3', lw=0.50)
                 # plot the theoretical pick
                 phase = detection.aux_data[f'phase_on_comp{cp_alias}'].upper()
                 offset_ph = detection.aux_data[f'offset_{phase}']
@@ -849,8 +868,13 @@ def time_dependent_threshold(time_series,
                 (np.median(time_series_win, axis=-1), np.median(last_win))
                 )
         deviation = np.hstack(
-                (np.median(np.abs(time_series_win - center[:-1, np.newaxis])),
-                 np.median(np.abs(last_win - center[-1])))
+                (np.median(
+                    np.abs(time_series_win - center[:-1, np.newaxis]), axis=-1
+                    ),
+                 np.median(
+                     np.abs(last_win - center[-1]), axis=-1
+                     )
+                 )
                 )
     threshold = center + cfg.matched_filter_threshold*deviation
     threshold = np.hstack( 
