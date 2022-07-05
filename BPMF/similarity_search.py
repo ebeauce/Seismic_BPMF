@@ -780,10 +780,12 @@ class MatchedFilter(object):
                         utils.max_norm(tr.data[:detection.n_samples]), color='k')
                 # plot the template waveforms
                 tr_tp = self.template_group.templates[tt].traces.select(
-                        station=sta, component=cp_alias)[0]
-                ax.plot(time[:detection.n_samples],
-                        utils.max_norm(tr_tp.data[:detection.n_samples]),
-                        color='C3', lw=0.50)
+                        station=sta, component=cp_alias)
+                if len(tr_tp) > 0:
+                    tr_tp = tr_tp[0]
+                    ax.plot(time[:detection.n_samples],
+                            utils.max_norm(tr_tp.data[:detection.n_samples]),
+                            color='C3', lw=0.50)
                 # plot the theoretical pick
                 phase = detection.aux_data[f'phase_on_comp{cp_alias}'].upper()
                 offset_ph = detection.aux_data[f'offset_{phase}']
