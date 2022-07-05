@@ -1438,7 +1438,7 @@ class Event(object):
                 if gid is not None:
                     if gid in f:
                         # overwrite existing detection with same id
-                        print(f'Found existing event {gid}. Overwrite it.')
+                        print(f'Found existing event {gid} in {output_where}. Overwrite it.')
                         del f[gid]
                     f.create_group(gid)
                     f = f[gid]
