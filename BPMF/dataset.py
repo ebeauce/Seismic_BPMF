@@ -1870,8 +1870,13 @@ class Template(Event):
             it builds the catalog from the detection output.
         """
         db_path_T, filename_T = os.path.split(self.where)
+        if return_events and check_summary_file:
+            print('If `return_events` is True, `check_summary_file` has'
+                    ' to be False. Change arguments.')
+            return
         if check_summary_file:
             if filename is None:
+                # try standard names
                 if os.path.isfile(os.path.join(
                     db_path_T, f'summary_template{self.tid}.h5')):
                     # found an existing summary file
@@ -1882,7 +1887,7 @@ class Template(Event):
                     filename = f'detections_{filename_T}'
                     build_from_scratch = True
             elif os.path.isfile(os.path.join(db_path_T, filename)):
-                # found an existing summary file
+                # use provided file
                 build_from_scratch = False
             else:
                 build_from_scratch = True
