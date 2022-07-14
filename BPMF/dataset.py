@@ -1892,6 +1892,9 @@ class Template(Event):
             else:
                 build_from_scratch = True
         else:
+            if filename is None:
+                # try standard name
+                filename = f'detections_{filename_T}'
             build_from_scratch = True
         if build_from_scratch:
             if db_path is None:
@@ -2510,7 +2513,9 @@ class TemplateGroup(Family):
                 - self.dir_errors - self.dir_errors.T
 
     def compute_intertemplate_cc(self, distance_threshold=5.,
-                                 n_stations=10, max_lag=10, device='cpu'):
+                                 n_stations=10, max_lag=10,
+                                 save_cc=False, compute_from_scratch=False,
+                                 device='cpu'):
         """Compute the pairwise template CCs.  
 
         Parameters
@@ -2526,49 +2531,109 @@ class TemplateGroup(Family):
             maximum CC on each channel. This is to account for small
             discrepancies in windowing that could occur for two templates
             highly similar but associated to slightly different locations.
+        save_cc: boolean, default to False
+            If True, save the inter-template CCs in the same folder as
+            `self.templates[0]` and with filename 'intertp_cc.h5'.
+        compute_from_scratch: boolean, default to False
+            If True, force to compute the inter-template CCs from scratch.
+            Useful if user knows the computation is faster than reading a
+            potentially large file.
+        device: string, default to 'cpu'
+            Either 'cpu' or 'gpu'.
         """
-        import fast_matched_filter as fmf
-        self.n_closest_stations(n_stations)
-        print('Computing the similarity matrix...')
-        # format arrays for FMF
-        data_arr = self.waveforms_arr.copy()
-        template_arr = self.waveforms_arr[..., max_lag:-max_lag]
-        moveouts_arr = np.zeros(self.waveforms_arr.shape[:-1], dtype=np.int32)
-        intertp_cc = np.zeros(
-                (self.n_templates, self.n_templates), dtype=np.float32)
-        n_stations, n_components = moveouts_arr.shape[1:]
-        # use FMF on one template at a time against all others
-        for t, template in enumerate(self.templates):
-            #print(f'--- {t} / {self.n_templates} ---')
-            weights = np.zeros(template_arr.shape[:-1], dtype=np.float32)
-            weights[:, self.network_to_template_map[t, ...]] = 1.
-            weights /= np.sum(weights, axis=(1, 2), keepdims=True)
-            above_thrs = self.ellipsoid_dist[self.tids[t]] > distance_threshold
-            weights[above_thrs, ...] = 0.
-            for s in range(n_stations):
-                for c in range(n_components):
-                    # use trick to keep station and component dim
-                    slice_ = np.index_exp[:, s:s+1, c:c+1, :]
-                    data_ = data_arr[(t,)+slice_[1:]]
-                    # discard all templates that have weights equal to zero
-                    keep = (weights[:, s, c] != 0.)\
-                          &  (np.sum(template_arr[slice_], axis=-1).squeeze() != 0.)
-                    if (np.sum(keep) == 0) or (np.sum(data_) == 0):
-                        # occurs if this station is not among the 
-                        # n_stations closest stations
-                        # or if no data were available
-                        continue
-                    cc = fmf.matched_filter(
-                            template_arr[slice_][keep, ...], moveouts_arr[slice_[:-1]][keep, ...],
-                            weights[slice_[:-1]][keep, ...], data_, 1, arch=device)
-                    # add best contribution from this channel to
-                    # the average inter-template CC
-                    intertp_cc[t, keep] += np.max(cc, axis=-1)
-        # make the CC matrix symmetric by averaging the lower
-        # and upper triangles
-        _intertemplate_cc = (intertp_cc + intertp_cc.T)/2.
-        self._intertemplate_cc = pd.DataFrame(
-                index=self.tids, columns=self.tids, data=_intertemplate_cc)
+        import fast_matched_filter as fmf # clearly need some optimization
+        # try reading the inter-template CC from db
+        db_path, db_filename = os.path.split(self.templates[0].where)
+        cc_fn = os.path.join(db_path, 'intertp_cc.h5')
+        if os.path.isfile(cc_fn):
+            _intertemplate_cc = self._read_intertp_cc(cc_fn)
+            if (len(np.intersect1d(self.tids, np.int32(_intertemplate_cc.index)))
+                    == self.n_templates):
+                # all current templates are contained in intertp_cc
+                self._intertemplate_cc = _intertemplate_cc.loc[self.tids, self.tids]
+                print(f'Read inter-template CCs from {cc_fn}.')
+            else:
+                compute_from_scratch = True
+        if compute_from_scratch:
+            # compute from scratch
+            self.n_closest_stations(n_stations)
+            print('Computing the similarity matrix...')
+            # format arrays for FMF
+            data_arr = self.waveforms_arr.copy()
+            template_arr = self.waveforms_arr[..., max_lag:-max_lag]
+            moveouts_arr = np.zeros(self.waveforms_arr.shape[:-1], dtype=np.int32)
+            intertp_cc = np.zeros(
+                    (self.n_templates, self.n_templates), dtype=np.float32)
+            n_stations, n_components = moveouts_arr.shape[1:]
+            # use FMF on one template at a time against all others
+            for t, template in enumerate(self.templates):
+                #print(f'--- {t} / {self.n_templates} ---')
+                weights = np.zeros(template_arr.shape[:-1], dtype=np.float32)
+                weights[:, self.network_to_template_map[t, ...]] = 1.
+                weights /= np.sum(weights, axis=(1, 2), keepdims=True)
+                above_thrs = self.ellipsoid_dist[self.tids[t]] > distance_threshold
+                weights[above_thrs, ...] = 0.
+                for s in range(n_stations):
+                    for c in range(n_components):
+                        # use trick to keep station and component dim
+                        slice_ = np.index_exp[:, s:s+1, c:c+1, :]
+                        data_ = data_arr[(t,)+slice_[1:]]
+                        # discard all templates that have weights equal to zero
+                        keep = (weights[:, s, c] != 0.)\
+                              &  (np.sum(template_arr[slice_], axis=-1).squeeze() != 0.)
+                        if (np.sum(keep) == 0) or (np.sum(data_) == 0):
+                            # occurs if this station is not among the 
+                            # n_stations closest stations
+                            # or if no data were available
+                            continue
+                        cc = fmf.matched_filter(
+                                template_arr[slice_][keep, ...], moveouts_arr[slice_[:-1]][keep, ...],
+                                weights[slice_[:-1]][keep, ...], data_, 1, arch=device)
+                        # add best contribution from this channel to
+                        # the average inter-template CC
+                        intertp_cc[t, keep] += np.max(cc, axis=-1)
+            # make the CC matrix symmetric by averaging the lower
+            # and upper triangles
+            _intertemplate_cc = (intertp_cc + intertp_cc.T)/2.
+            self._intertemplate_cc = pd.DataFrame(
+                    index=self.tids, columns=self.tids, data=_intertemplate_cc)
+        if compute_from_scratch and save_cc:
+            self._save_intertp_cc(self._intertemplate_cc, cc_fn)
+
+    @staticmethod
+    def _save_intertp_cc(intertp_cc, fullpath):
+        """Save inter-template correlation coefficients.
+
+        Parameters
+        -----------
+        intertp_cc: `pd.DataFrame`
+            The inter-template CC computed by `compute_intertemplate_cc`.
+        fullpath: string
+            Full path to output file.
+        """
+        with h5.File(fullpath, mode='w') as f:
+            f.create_dataset('tids', data=np.int32(intertp_cc.columns))
+            f.create_dataset('intertp_cc', data=np.float32(intertp_cc.values))
+
+    @staticmethod
+    def _read_intertp_cc(fullpath):
+        """Read inter-template correlation coefficients from file. 
+
+        Parameters
+        -----------
+        fullpath: string
+            Full path to output file.
+
+        Returns
+        --------
+        intertp_cc: `pd.DataFrame`
+            The inter-template CC in a `pd.DataFrame`.
+        """
+        with h5.File(fullpath, mode='r') as f:
+            tids = f['tids'][()]
+            intertp_cc = f['intertp_cc'][()]
+        return pd.DataFrame(
+                index=tids, columns=tids, data=intertp_cc)
 
     def read_waveforms(self):
         for tp in self.templates:
