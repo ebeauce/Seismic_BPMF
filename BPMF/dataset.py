@@ -1402,7 +1402,7 @@ class Event(object):
 
 
     def write(self, db_filename, db_path=cfg.dbpath,
-              save_waveforms=False, gid=None):
+              save_waveforms=False, gid=None, hdf5_file=None):
         """Write to hdf5 file.  
 
         Parameters
@@ -1416,6 +1416,9 @@ class Event(object):
         gid: string, default to None
             Name of the hdf5 group where Event will be stored. If `gid=None`
             then Event is directly stored at the root.
+        hdf5_file: `h5py.File`, default to None
+            If not None, is an opened file pointing directly at the subfolder of
+            interest.
         """
         output_where = os.path.join(db_path, db_filename)
         attributes = ['origin_time', 'latitude', 'longitude', 'depth',
@@ -1434,70 +1437,86 @@ class Event(object):
         # create empty lock file
         open(lock_file, 'w').close()
         try:
-            with h5.File(output_where, mode='a') as f:
-                if gid is not None:
-                    if gid in f:
-                        # overwrite existing detection with same id
-                        print(f'Found existing event {gid} in {output_where}. Overwrite it.')
-                        del f[gid]
-                    f.create_group(gid)
-                    f = f[gid]
-                for attr in attributes:
-                    if not hasattr(self, attr):
-                        continue
-                    attr_ = getattr(self, attr)
-                    if attr == 'origin_time':
-                        attr_ = str(attr_)
-                    if isinstance(attr_, list):
-                        attr_ = np.asarray(attr_)
-                    if (isinstance(attr_, np.ndarray)
-                            and (attr_.dtype.kind == np.dtype('U').kind)):
-                        attr_ = attr_.astype('S')
-                    f.create_dataset(attr, data=attr_)
-                if hasattr(self, 'aux_data'):
-                    f.create_group('aux_data')
-                    for key in self.aux_data.keys():
-                        f['aux_data'].create_dataset(key,
-                                data=self.aux_data[key])
-                if hasattr(self, 'picks'):
-                    f.create_group('picks')
+            if hdf5_file is None:
+                hdf5_file = h5.File(output_where, mode='a')
+                close_file = True
+            else:
+                close_file = False
+            if gid is not None:
+                if gid in hdf5_file:
+                    # overwrite existing detection with same id
+                    print(f'Found existing event {gid} in {output_where}. Overwrite it.')
+                    del hdf5_file[gid]
+                hdf5_file.create_group(gid)
+                f = hdf5_file[gid]
+            else:
+                f = hdf5_file
+            #with h5.File(output_where, mode='a') as f:
+            #    if gid is not None:
+            #        if gid in f:
+            #            # overwrite existing detection with same id
+            #            print(f'Found existing event {gid} in {output_where}. Overwrite it.')
+            #            del f[gid]
+            #        f.create_group(gid)
+            #        f = f[gid]
+            for attr in attributes:
+                if not hasattr(self, attr):
+                    continue
+                attr_ = getattr(self, attr)
+                if attr == 'origin_time':
+                    attr_ = str(attr_)
+                if isinstance(attr_, list):
+                    attr_ = np.asarray(attr_)
+                if (isinstance(attr_, np.ndarray)
+                        and (attr_.dtype.kind == np.dtype('U').kind)):
+                    attr_ = attr_.astype('S')
+                f.create_dataset(attr, data=attr_)
+            if hasattr(self, 'aux_data'):
+                f.create_group('aux_data')
+                for key in self.aux_data.keys():
+                    f['aux_data'].create_dataset(key,
+                            data=self.aux_data[key])
+            if hasattr(self, 'picks'):
+                f.create_group('picks')
+                f['picks'].create_dataset(
+                        'stations', data=np.asarray(self.picks.index).astype('S'))
+                for column in self.picks.columns:
+                    data = self.picks[column]
+                    if data.dtype.kind == 'M':
+                        # pandas datetime format
+                        data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
+                    if data.dtype == np.dtype('O'):
+                        data = data.astype('S')
                     f['picks'].create_dataset(
-                            'stations', data=np.asarray(self.picks.index).astype('S'))
-                    for column in self.picks.columns:
-                        data = self.picks[column]
-                        if data.dtype.kind == 'M':
-                            # pandas datetime format
-                            data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
-                        if data.dtype == np.dtype('O'):
-                            data = data.astype('S')
-                        f['picks'].create_dataset(
-                                column, data=data)
-                if hasattr(self, 'arrival_times'):
-                    f.create_group('arrival_times')
+                            column, data=data)
+            if hasattr(self, 'arrival_times'):
+                f.create_group('arrival_times')
+                f['arrival_times'].create_dataset(
+                        'stations', data=np.asarray(self.arrival_times.index).astype('S'))
+                for column in self.arrival_times.columns:
+                    data = self.arrival_times[column]
+                    if data.dtype.kind == 'M':
+                        # pandas datetime format
+                        data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
+                    if data.dtype == np.dtype('O'):
+                        data = data.astype('S')
                     f['arrival_times'].create_dataset(
-                            'stations', data=np.asarray(self.arrival_times.index).astype('S'))
-                    for column in self.arrival_times.columns:
-                        data = self.arrival_times[column]
-                        if data.dtype.kind == 'M':
-                            # pandas datetime format
-                            data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
-                        if data.dtype == np.dtype('O'):
-                            data = data.astype('S')
-                        f['arrival_times'].create_dataset(
-                                column, data=data)
-                if save_waveforms:
-                    if hasattr(self, 'traces'):
-                        f.create_group('waveforms')
-                        for tr in self.traces:
-                            sta = tr.stats.station
-                            cha = tr.stats.channel
-                            if sta not in f['waveforms']:
-                                f['waveforms'].create_group(sta)
-                            f['waveforms'][sta].create_dataset(
-                                    cha, data=tr.data)
-                    else:
-                        print('You are trying to save the waveforms whereas you did'
-                              ' not read them!')
+                            column, data=data)
+            if save_waveforms:
+                if hasattr(self, 'traces'):
+                    f.create_group('waveforms')
+                    for tr in self.traces:
+                        sta = tr.stats.station
+                        cha = tr.stats.channel
+                        if sta not in f['waveforms']:
+                            f['waveforms'].create_group(sta)
+                        f['waveforms'][sta].create_dataset(
+                                cha, data=tr.data)
+                else:
+                    print('You are trying to save the waveforms whereas you did'
+                          ' not read them!')
+            if close_file:
+                hdf5_file.close()
         except Exception as e:
             os.remove(lock_file)
             raise(e)
@@ -2512,6 +2531,96 @@ class TemplateGroup(Family):
         self._ellipsoid_dist = self.intertemplate_dist\
                 - self.dir_errors - self.dir_errors.T
 
+    #def compute_intertemplate_cc(self, distance_threshold=5.,
+    #                             n_stations=10, max_lag=10,
+    #                             save_cc=False, compute_from_scratch=False,
+    #                             device='cpu'):
+    #    """Compute the pairwise template CCs.  
+
+    #    Parameters
+    #    -----------
+    #    distance_threshold: float, default to 5
+    #        The distance threshold, in kilometers, between two
+    #        uncertainty ellipsoids under which similarity is computed.
+    #    n_stations: integer, default to 10
+    #        The number of stations closest to each template used in
+    #        the computation of the average CC.
+    #    max_lag: integer, default to 10
+    #        Maximum lag, in samples, allowed when searching for the
+    #        maximum CC on each channel. This is to account for small
+    #        discrepancies in windowing that could occur for two templates
+    #        highly similar but associated to slightly different locations.
+    #    save_cc: boolean, default to False
+    #        If True, save the inter-template CCs in the same folder as
+    #        `self.templates[0]` and with filename 'intertp_cc.h5'.
+    #    compute_from_scratch: boolean, default to False
+    #        If True, force to compute the inter-template CCs from scratch.
+    #        Useful if user knows the computation is faster than reading a
+    #        potentially large file.
+    #    device: string, default to 'cpu'
+    #        Either 'cpu' or 'gpu'.
+    #    """
+    #    import fast_matched_filter as fmf # clearly need some optimization
+    #    # try reading the inter-template CC from db
+    #    db_path, db_filename = os.path.split(self.templates[0].where)
+    #    cc_fn = os.path.join(db_path, 'intertp_cc.h5')
+    #    if os.path.isfile(cc_fn):
+    #        _intertemplate_cc = self._read_intertp_cc(cc_fn)
+    #        if (len(np.intersect1d(self.tids, np.int32(_intertemplate_cc.index)))
+    #                == self.n_templates):
+    #            # all current templates are contained in intertp_cc
+    #            self._intertemplate_cc = _intertemplate_cc.loc[self.tids, self.tids]
+    #            print(f'Read inter-template CCs from {cc_fn}.')
+    #        else:
+    #            compute_from_scratch = True
+    #    else:
+    #        compute_from_scratch = True
+    #    if compute_from_scratch:
+    #        # compute from scratch
+    #        self.n_closest_stations(n_stations)
+    #        print('Computing the similarity matrix...')
+    #        # format arrays for FMF
+    #        data_arr = self.waveforms_arr.copy()
+    #        template_arr = self.waveforms_arr[..., max_lag:-max_lag]
+    #        moveouts_arr = np.zeros(self.waveforms_arr.shape[:-1], dtype=np.int32)
+    #        intertp_cc = np.zeros(
+    #                (self.n_templates, self.n_templates), dtype=np.float32)
+    #        n_stations, n_components = moveouts_arr.shape[1:]
+    #        # use FMF on one template at a time against all others
+    #        for t, template in enumerate(self.templates):
+    #            #print(f'--- {t} / {self.n_templates} ---')
+    #            weights = np.zeros(template_arr.shape[:-1], dtype=np.float32)
+    #            weights[:, self.network_to_template_map[t, ...]] = 1.
+    #            weights /= np.sum(weights, axis=(1, 2), keepdims=True)
+    #            above_thrs = self.ellipsoid_dist[self.tids[t]] > distance_threshold
+    #            weights[above_thrs, ...] = 0.
+    #            for s in range(n_stations):
+    #                for c in range(n_components):
+    #                    # use trick to keep station and component dim
+    #                    slice_ = np.index_exp[:, s:s+1, c:c+1, :]
+    #                    data_ = data_arr[(t,)+slice_[1:]]
+    #                    # discard all templates that have weights equal to zero
+    #                    keep = (weights[:, s, c] != 0.)\
+    #                          &  (np.sum(template_arr[slice_], axis=-1).squeeze() != 0.)
+    #                    if (np.sum(keep) == 0) or (np.sum(data_) == 0):
+    #                        # occurs if this station is not among the 
+    #                        # n_stations closest stations
+    #                        # or if no data were available
+    #                        continue
+    #                    cc = fmf.matched_filter(
+    #                            template_arr[slice_][keep, ...], moveouts_arr[slice_[:-1]][keep, ...],
+    #                            weights[slice_[:-1]][keep, ...], data_, 1, arch=device)
+    #                    # add best contribution from this channel to
+    #                    # the average inter-template CC
+    #                    intertp_cc[t, keep] += np.max(cc, axis=-1)
+    #        # make the CC matrix symmetric by averaging the lower
+    #        # and upper triangles
+    #        _intertemplate_cc = (intertp_cc + intertp_cc.T)/2.
+    #        self._intertemplate_cc = pd.DataFrame(
+    #                index=self.tids, columns=self.tids, data=_intertemplate_cc)
+    #    if compute_from_scratch and save_cc:
+    #        self._save_intertp_cc(self._intertemplate_cc, cc_fn)
+
     def compute_intertemplate_cc(self, distance_threshold=5.,
                                  n_stations=10, max_lag=10,
                                  save_cc=False, compute_from_scratch=False,
@@ -2554,6 +2663,8 @@ class TemplateGroup(Family):
                 print(f'Read inter-template CCs from {cc_fn}.')
             else:
                 compute_from_scratch = True
+        else:
+            compute_from_scratch = True
         if compute_from_scratch:
             # compute from scratch
             self.n_closest_stations(n_stations)
@@ -2573,25 +2684,20 @@ class TemplateGroup(Family):
                 weights /= np.sum(weights, axis=(1, 2), keepdims=True)
                 above_thrs = self.ellipsoid_dist[self.tids[t]] > distance_threshold
                 weights[above_thrs, ...] = 0.
-                for s in range(n_stations):
-                    for c in range(n_components):
-                        # use trick to keep station and component dim
-                        slice_ = np.index_exp[:, s:s+1, c:c+1, :]
-                        data_ = data_arr[(t,)+slice_[1:]]
-                        # discard all templates that have weights equal to zero
-                        keep = (weights[:, s, c] != 0.)\
-                              &  (np.sum(template_arr[slice_], axis=-1).squeeze() != 0.)
-                        if (np.sum(keep) == 0) or (np.sum(data_) == 0):
-                            # occurs if this station is not among the 
-                            # n_stations closest stations
-                            # or if no data were available
-                            continue
-                        cc = fmf.matched_filter(
-                                template_arr[slice_][keep, ...], moveouts_arr[slice_[:-1]][keep, ...],
-                                weights[slice_[:-1]][keep, ...], data_, 1, arch=device)
-                        # add best contribution from this channel to
-                        # the average inter-template CC
-                        intertp_cc[t, keep] += np.max(cc, axis=-1)
+                keep = (np.sum(weights != 0., axis=(1, 2)) > 0)
+                cc = fmf.matched_filter(
+                        template_arr[keep, ...],
+                        moveouts_arr[keep, ...],
+                        weights[keep, ...],
+                        data_arr[t, ...],
+                        1,
+                        arch=device,
+                        network_sum=False
+                        )
+                intertp_cc[t, keep] = np.sum(
+                        weights[keep, ...]*np.max(cc, axis=1),
+                        axis=(-1, -2)
+                        )
             # make the CC matrix symmetric by averaging the lower
             # and upper triangles
             _intertemplate_cc = (intertp_cc + intertp_cc.T)/2.
@@ -2599,6 +2705,7 @@ class TemplateGroup(Family):
                     index=self.tids, columns=self.tids, data=_intertemplate_cc)
         if compute_from_scratch and save_cc:
             self._save_intertp_cc(self._intertemplate_cc, cc_fn)
+
 
     @staticmethod
     def _save_intertp_cc(intertp_cc, fullpath):
@@ -2653,7 +2760,18 @@ class TemplateGroup(Family):
         _network_to_template_map = np.zeros(
                 (self.n_templates, self.network.n_stations,
                     self.network.n_components), dtype=np.bool)
+        # 1) find the non-zero channels
         _network_to_template_map = ~(np.sum(self.waveforms_arr, axis=-1) == 0.)
+        # 2) only keep the stations that were selected on each template
+        selected_stations = np.zeros(
+                _network_to_template_map.shape, dtype=bool
+                )
+        for t, tp in enumerate(self.templates):
+            valid_sta = self.network.station_indexes\
+                    .loc[tp.stations]
+            selected_stations[t, valid_sta, :] = True
+        _network_to_template_map = _network_to_template_map\
+                & selected_stations
         self._network_to_template_map = _network_to_template_map
 
     def n_best_SNR_stations(self, n, available_stations=None):
@@ -2674,6 +2792,8 @@ class TemplateGroup(Family):
         """
         for tp in self.templates:
             tp.n_best_SNR_stations(n, available_stations=available_stations)
+        if hasattr(self, '_network_to_template_map'):
+            del self._network_to_template_map
 
     def n_closest_stations(self, n, available_stations=None):
         """Adjust `self.stations` on each template to the `n` closest stations.  
@@ -2693,6 +2813,8 @@ class TemplateGroup(Family):
         """
         for tp in self.templates:
             tp.n_closest_stations(n, available_stations=available_stations)
+        if hasattr(self, '_network_to_template_map'):
+            del self._network_to_template_map
 
     def read_catalog(self, extra_attributes=[], fill_value=np.nan):
         """Build a catalog from all templates' detections.
