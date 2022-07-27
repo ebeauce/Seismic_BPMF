@@ -1474,8 +1474,8 @@ class Event(object):
             if hasattr(self, 'aux_data'):
                 f.create_group('aux_data')
                 for key in self.aux_data.keys():
-                    f['aux_data'].create_dataset(key,
-                            data=self.aux_data[key])
+                    f['aux_data'].create_dataset(
+                            key, data=self.aux_data[key])
             if hasattr(self, 'picks'):
                 f.create_group('picks')
                 f['picks'].create_dataset(
