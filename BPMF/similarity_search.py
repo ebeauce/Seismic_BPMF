@@ -359,18 +359,18 @@ class MatchedFilter(object):
         # extract waveforms
         detections_t = []
         data_path, data_filename = os.path.split(self.data.where)
+        # give template's attributes to each detection
+        template = self.template_group.templates[tt]
+        # make sure stations and mv are consistent
+        stations = template.moveouts.index.values.astype('U')
+        latitude = template.latitude
+        longitude = template.longitude
+        depth = template.depth
+        mv = template.moveouts.values
+        phases = template.phases
         for i in range(len(detection_indexes)):
             event = Stream()
             ot_i = self.data.date + detection_indexes[i]/self.data.sr
-            # give template's attributes to each detection
-            template = self.template_group.templates[tt]
-            # make sure stations and mv are consistent
-            stations = template.moveouts.index.values.astype('U')
-            latitude = template.latitude
-            longitude = template.longitude
-            depth = template.depth
-            mv = template.moveouts.values
-            phases = template.phases
             event = dataset.Event(ot_i, mv, stations, phases,
                     data_filename, data_path, latitude=latitude,
                     longitude=longitude, depth=depth, sampling_rate=self.data.sr)
