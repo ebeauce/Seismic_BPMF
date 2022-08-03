@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pylab as plt
 
-import beamnetresponse as bnr
+import beampower as bp
 
 try:
     from scipy.stats import median_abs_deviation as scimad
@@ -94,7 +94,7 @@ class NetworkResponse(object):
             return self._source_coordinates
 
     def compute_network_response(self, detection_traces,
-            composite=True, device='cpu'):
+            reduce='max', device='cpu'):
         """Compute the network response.  
 
         Parameters
@@ -105,10 +105,9 @@ class NetworkResponse(object):
         device: string, default to 'cpu'
             Either 'cpu' or 'gpu', depending on the available hardware and
             user's preferences.
-        composite: boolean, default to True
-            If True, compute the composite network response. That is, search
-            for the one source that produces the largest network response at
-            each time step.
+        reduce: string, default to 'max'
+            Either 'max' or 'none'. If 'max', returns the maximum beam at every
+            time. If 'none', returns the full space-time beam.
         """
         if not hasattr(self, 'weights_phases'):
             print('You need to set self.weights_phases first.')
@@ -122,16 +121,19 @@ class NetworkResponse(object):
         elif self.moveouts.dtype not in (np.int32, np.int64):
             print('Moveouts should be integer typed and in unit of samples.')
             return
-        if composite:
+        if reduce == 'max':
             self.cnr, self.cnr_sources = \
-                    bnr.beamformed_nr.composite_network_response(
+                    bp.beampower.beamform_max(
+                            detection_traces, self.moveouts, self.weights_phases,
+                            self.weights_sources, device=device)
+        elif reduce == 'none':
+            self.nr = \
+                    bp.beampower.beamform(
                             detection_traces, self.moveouts, self.weights_phases,
                             self.weights_sources, device=device)
         else:
-            self.nr = \
-                    bnr.beamformed_nr.network_response(
-                            detection_traces, self.moveouts, self.weights_phases,
-                            self.weights_sources, device=device)
+            print(f"'reduce' should be 'max' or 'none' but {reduce} was given.")
+            self.nr = None
 
     def find_detections(self, detection_threshold,
                         minimum_interevent_time, n_max_stations=None):
@@ -293,7 +295,7 @@ class NetworkResponse(object):
         self._source_coordinates = source_coords
 
     def set_weights(self, weights_phases=None, weights_sources=None):
-        """Set the weights required by `beamnetresponse`.  
+        """Set the weights required by `beampower`.  
 
         weights_phases: (n_stations, n_channels, n_phases) np.ndarray, default
         to None
