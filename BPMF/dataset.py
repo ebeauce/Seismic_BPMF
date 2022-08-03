@@ -1100,9 +1100,13 @@ class Event(object):
         with ASDFDataSet(self.where, mode='r') as ds:
             for station in ds.ifilter(ds.q.tag == tag,
                     ds.q.station == self.stations):
-                for trid in station.channel_coordinates.keys():
-                    net, sta, loc, cha = trid.split(sep='.')
+                net = station.StationXML.networks[0].code
+                sta = station.StationXML.networks[0]\
+                                        .stations[0].code
+                for channel in station.StationXML.networks[0].stations[0]:
+                    cha = channel.code
                     comp = cha[-1]
+                    loc = channel.location_code
                     ph = phase_on_comp[comp]
                     if time_shifted:
                         pick = self.origin_time \
@@ -1111,21 +1115,9 @@ class Event(object):
                     else:
                         pick = self.origin_time - offset_ot
                     # query the exact data
-                    #tr = ds.get_waveforms(
-                    #        network=net, station=sta, location=loc, channel=cha,
-                    #        starttime=pick, endtime=pick+duration, tag=tag)
-                    #self.traces += tr
                     self.traces += ds.get_waveforms(
                             network=net, station=sta, location=loc, channel=cha,
                             starttime=pick, endtime=pick+duration, tag=tag)
-                    #if len(tr) > 0:
-                    #    print(f'Requested time: {pick}, resulting time: '\
-                    #            f'{tr[0].stats.starttime}')
-                    #    #if time_shifted:
-                    #    #    corr = pick.timestamp - tr[0].stats.starttime.timestamp
-                    #    #    self.moveouts\
-                    #    #            [f'moveouts_{ph.upper()}'].loc[sta] -= corr
-                    ##self.traces[-1].data = self.traces[-1].data[:self.n_samples]
         for ph in offset_phase.keys():
             self.set_aux_data({f'offset_{ph.upper()}': offset_phase[ph]})
         for comp in phase_on_comp.keys():
