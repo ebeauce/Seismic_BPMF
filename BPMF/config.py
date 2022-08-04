@@ -4,25 +4,44 @@ import inspect
 import numpy as np
 
 
-class Config():
+class Config:
     def __init__(self, parameters):
-        for attr in ['min_freq', 'max_freq', 'sampling_rate', 'template_len',
-                'multiplet_len', 'search_win', 'CNR_threshold',
-                'matched_filter_step', 'matched_filter_threshold',
-                'data_buffer', 'buffer_extracted_events']:
+        for attr in [
+            "min_freq",
+            "max_freq",
+            "sampling_rate",
+            "template_len",
+            "multiplet_len",
+            "search_win",
+            "CNR_threshold",
+            "matched_filter_step",
+            "matched_filter_threshold",
+            "data_buffer",
+            "buffer_extracted_events",
+        ]:
             # allow meaningless default values in case BPMF is used for
             # very specific usage
             parameters.setdefault(attr, -10)
-        for attr in ['input_path', 'network_path', 'moveouts_path',
-                'output_path', 'NLLoc_input_path', 'NLLoc_output_path',
-                'NLLoc_basename']:
-            parameters.setdefault(attr, '')
+        for attr in [
+            "input_path",
+            "network_path",
+            "moveouts_path",
+            "output_path",
+            "NLLoc_input_path",
+            "NLLoc_output_path",
+            "NLLoc_basename",
+        ]:
+            parameters.setdefault(attr, "")
         self.__dict__ = parameters
         self.base = os.getcwd()
-        self.data = os.path.join(self.base, self.__dict__.get('input_path', ''))
-        self.network_path = os.path.join(self.base, self.__dict__.get('network_path', ''))
-        self.moveouts_path = os.path.join(self.base, self.__dict__.get('moveouts_path', ''))
-        self.dbpath = self.chk_trailing(self.__dict__.get('output_path', ''))
+        self.data = os.path.join(self.base, self.__dict__.get("input_path", ""))
+        self.network_path = os.path.join(
+            self.base, self.__dict__.get("network_path", "")
+        )
+        self.moveouts_path = os.path.join(
+            self.base, self.__dict__.get("moveouts_path", "")
+        )
+        self.dbpath = self.chk_trailing(self.__dict__.get("output_path", ""))
         self.package = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
     def chk_folder(self, path):
@@ -30,38 +49,41 @@ class Config():
             os.makedirs(path)
 
     def chk_trailing(self, to_test):
-        if to_test.endswith('/'):
+        if to_test.endswith("/"):
             return to_test
         else:
-            return to_test + '/'
+            return to_test + "/"
 
-package = os.path.dirname(inspect.getfile(inspect.currentframe())) + '/'
+
+package = os.path.dirname(inspect.getfile(inspect.currentframe())) + "/"
 # read in study parameters
-parameters_path = os.path.join(os.getcwd(), 'parameters.cfg')
+parameters_path = os.path.join(os.getcwd(), "parameters.cfg")
 if os.path.isfile(parameters_path):
     with open(parameters_path) as file:
         param_dict = {}
         for line in file:
-            key, value = line.split('=')
+            key, value = line.split("=")
             key = key.strip()
             value = value.strip()
             try:
                 value = np.float32(value)
             except Exception:
                 pass
-            if isinstance(value, str) and len(value.split(',')) > 1:
-                value = [np.float32(freq) for freq in value.split(',')]
+            if isinstance(value, str) and len(value.split(",")) > 1:
+                value = [np.float32(freq) for freq in value.split(",")]
             param_dict[key] = value
     cfg = Config(param_dict)
 else:
-    print(f'Couldn\'t find the parameter file at {parameters_path}.')
-    print('See https://github.com/ebeauce/Seismic_BPMF/ for an example'
-          ' of a parameters.cfg file.')
+    print(f"Couldn't find the parameter file at {parameters_path}.")
+    print(
+        "See https://github.com/ebeauce/Seismic_BPMF/ for an example"
+        " of a parameters.cfg file."
+    )
     cfg = Config({})
 
 ## specific parameter config
 ## frequency bands
-#if 'min_freq' and 'max_freq' in param_dict:
+# if 'min_freq' and 'max_freq' in param_dict:
 #    param_dict['freq_bands'] = []
 #    if isinstance(param_dict['min_freq'], list):
 #        n_freqs = len(param_dict['min_freq'])
@@ -74,6 +96,5 @@ else:
 #            [param_dict['min_freq'], param_dict['max_freq']])
 #
 ## sampling_rate (needs to be an int)
-#if 'sampling_rate' in param_dict:
+# if 'sampling_rate' in param_dict:
 #    param_dict['sampling_rate'] = np.int32(param_dict['sampling_rate'])
-

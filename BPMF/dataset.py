@@ -17,11 +17,13 @@ from abc import ABC, abstractmethod
 from time import time as give_time
 from time import sleep
 
+
 class Network(object):
     """Station metadata.
 
     Contains station metadata.
     """
+
     def __init__(self, network_file):
         """
         Parameters
@@ -30,7 +32,7 @@ class Network(object):
             Name of the station metadata file.
         """
         self.where = os.path.join(cfg.network_path, network_file)
-    
+
     @property
     def n_stations(self):
         return np.int32(len(self.stations))
@@ -41,35 +43,34 @@ class Network(object):
 
     @property
     def stations(self):
-        return self.metadata['stations']
+        return self.metadata["stations"]
 
     @property
     def station_indexes(self):
-        return pd.Series(
-                index=self.stations, data=np.arange(len(self.stations)))
+        return pd.Series(index=self.stations, data=np.arange(len(self.stations)))
 
     @property
     def networks(self):
-        return self.metadata['networks']
+        return self.metadata["networks"]
 
     @property
     def latitude(self):
-        return self.metadata['latitude']
+        return self.metadata["latitude"]
 
     @property
     def longitude(self):
-        return self.metadata['longitude']
+        return self.metadata["longitude"]
 
     @property
     def depth(self):
-        return self.metadata['depth_km']
+        return self.metadata["depth_km"]
 
     @property
     def elevation(self):
-        return self.metadata['elevation_m']
+        return self.metadata["elevation_m"]
 
     def box(self, lat_min, lat_max, lon_min, lon_max):
-        """Geographical selection of sub-network.  
+        """Geographical selection of sub-network.
 
         Parameters
         ------------
@@ -87,10 +88,14 @@ class Network(object):
         subnet: Network instance
             The Network instance restricted to the relevant stations.
         """
-        selection = (self.latitude > lat_min) & (self.latitude < lat_max)\
-                & (self.longitude > lon_min) & (self.longitude < lon_max)
-        new_stations = np.asarray(self.stations[selection]).astype('U')
-        subnet = self.subset(new_stations, self.components, method='keep')
+        selection = (
+            (self.latitude > lat_min)
+            & (self.latitude < lat_max)
+            & (self.longitude > lon_min)
+            & (self.longitude < lon_max)
+        )
+        new_stations = np.asarray(self.stations[selection]).astype("U")
+        subnet = self.subset(new_stations, self.components, method="keep")
         return subnet
 
     def datelist(self):
@@ -109,30 +114,31 @@ class Network(object):
         Note: This function can be modified to match the user's
         data convention.
         """
-        with open(self.where, 'r') as fin:
+        with open(self.where, "r") as fin:
             line1 = fin.readline()[:-1].split()
             self.start_date = udt(line1[0])
             self.end_date = udt(line1[1])
             line2 = fin.readline()[:-1].split()
             self.components = line2
-        metadata = pd.read_csv(self.where, sep='\t', skiprows=2)
-        metadata.rename(columns={'station_code': 'stations',
-                                 'network_code': 'networks'},
-                        inplace=True)
-        metadata['depth_km'] = -1.*metadata['elevation_m']/1000. # depth in km
+        metadata = pd.read_csv(self.where, sep="\t", skiprows=2)
+        metadata.rename(
+            columns={"station_code": "stations", "network_code": "networks"},
+            inplace=True,
+        )
+        metadata["depth_km"] = -1.0 * metadata["elevation_m"] / 1000.0  # depth in km
         self.metadata = metadata
-        self.metadata.set_index('stations', inplace=True, drop=False)
+        self.metadata.set_index("stations", inplace=True, drop=False)
 
     def stations_idx(self, stations):
-        #if not isinstance(stations, list) and not isinstance(stations, np.ndarray):
+        # if not isinstance(stations, list) and not isinstance(stations, np.ndarray):
         #    stations = [stations]
-        #idx = []
-        #for station in stations:
+        # idx = []
+        # for station in stations:
         #    idx.append(self.stations.index(station))
         self.station_indexes.loc[stations]
         return idx
 
-    def subset(self, stations, components, method='keep'):
+    def subset(self, stations, components, method="keep"):
         """
         Parameters
         -----------
@@ -163,15 +169,15 @@ class Network(object):
         elif not isinstance(components, list):
             components = [components]
 
-        if method == 'discard':
-            subnetwork.metadata.drop(stations, axis='rows', inplace=True)
+        if method == "discard":
+            subnetwork.metadata.drop(stations, axis="rows", inplace=True)
             for component in components:
                 if component in self.components:
                     idx = subnetwork.components.index(component)
                     subnetwork.components.remove(component)
                 else:
-                    print('{} not a network component'.format(station))
-        elif method == 'keep':
+                    print("{} not a network component".format(station))
+        elif method == "keep":
             subnetwork.metadata = subnetwork.metadata.loc[stations]
             subnetwork.components = components
         else:
@@ -179,15 +185,14 @@ class Network(object):
             return
         return subnetwork
 
-
     @property
     def interstation_distances(self):
-        """Compute the distance between all station pairs.
-
-        """
+        """Compute the distance between all station pairs."""
         # should update code to reuse utils.compute_distamces
-        if (hasattr(self, '_interstation_distances') and
-                self._interstation_distances.shape[0] == self.n_stations):
+        if (
+            hasattr(self, "_interstation_distances")
+            and self._interstation_distances.shape[0] == self.n_stations
+        ):
             # was already computed and the size of the network was unchanged
             return self._interstation_distances
         else:
@@ -195,25 +200,34 @@ class Network(object):
 
             G = Geodesic()
 
-            intersta_dist = np.zeros((len(self.stations), len(self.stations)),
-                                     dtype=np.float64)
+            intersta_dist = np.zeros(
+                (len(self.stations), len(self.stations)), dtype=np.float64
+            )
             for s in range(len(self.stations)):
-                d = G.inverse(np.array([[self.longitude[s], self.latitude[s]]]),
-                              np.hstack((self.longitude.values.reshape(-1, 1),
-                                         self.latitude.values.reshape(-1, 1))))
+                d = G.inverse(
+                    np.array([[self.longitude[s], self.latitude[s]]]),
+                    np.hstack(
+                        (
+                            self.longitude.values.reshape(-1, 1),
+                            self.latitude.values.reshape(-1, 1),
+                        )
+                    ),
+                )
                 # d is in m, convert it to km
-                d = np.asarray(d)[:, 0]/1000.
-                intersta_dist[s, :] = np.sqrt(d.squeeze()**2 + (self.depth[s] - self.depth))
+                d = np.asarray(d)[:, 0] / 1000.0
+                intersta_dist[s, :] = np.sqrt(
+                    d.squeeze() ** 2 + (self.depth[s] - self.depth)
+                )
 
             # return distance in km
             self._interstation_distances = pd.DataFrame(
-                    index=self.stations, columns=self.stations,
-                    data=intersta_dist)
+                index=self.stations, columns=self.stations, data=intersta_dist
+            )
             return self._interstation_distances
- 
+
     # plotting method
     def plot_map(self, ax=None, figsize=(20, 10), **kwargs):
-        """Plot stations on map. 
+        """Plot stations on map.
 
         Parameters
         ------------
@@ -231,45 +245,58 @@ class Network(object):
         from . import plotting_utils
         import matplotlib.pyplot as plt
         from cartopy.crs import PlateCarree
-        cmap = kwargs.get('cmap', None)
+
+        cmap = kwargs.get("cmap", None)
         if cmap is None:
             try:
                 import colorcet as cc
+
                 cmap = cc.cm.fire_r
             except Exception as e:
                 print(e)
-                cmap = 'hot_r'
+                cmap = "hot_r"
         data_coords = PlateCarree()
-        lat_margin = kwargs.get('lat_margin', 0.1)
-        lon_margin = kwargs.get('lon_margin', 0.1)
+        lat_margin = kwargs.get("lat_margin", 0.1)
+        lon_margin = kwargs.get("lon_margin", 0.1)
         # ------------------------------------------------
         #           Scattering plot kwargs
         scatter_kwargs = {}
-        scatter_kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
-        scatter_kwargs['linewidths'] = kwargs.get('linewidths', 0.5)
-        scatter_kwargs['s'] = kwargs.get('s', 10)
-        scatter_kwargs['zorder'] = kwargs.get('zorder', 1)
+        scatter_kwargs["edgecolor"] = kwargs.get("edgecolor", "k")
+        scatter_kwargs["linewidths"] = kwargs.get("linewidths", 0.5)
+        scatter_kwargs["s"] = kwargs.get("s", 10)
+        scatter_kwargs["zorder"] = kwargs.get("zorder", 1)
         # ------------------------------------------------
-        map_longitudes = [min(self.longitude) - lon_margin,
-                          max(self.longitude) + lon_margin]
-        map_latitudes = [min(self.latitude) - lat_margin,
-                         max(self.latitude) + lat_margin]
-        seismic_stations = {'longitude': self.longitude,
-                            'latitude': self.latitude,
-                            'stations': self.stations}
-        ax = plotting_utils.initialize_map(map_longitudes, map_latitudes,
-                figsize=figsize, map_axis=ax, seismic_stations=seismic_stations,
-                **kwargs)
+        map_longitudes = [
+            min(self.longitude) - lon_margin,
+            max(self.longitude) + lon_margin,
+        ]
+        map_latitudes = [
+            min(self.latitude) - lat_margin,
+            max(self.latitude) + lat_margin,
+        ]
+        seismic_stations = {
+            "longitude": self.longitude,
+            "latitude": self.latitude,
+            "stations": self.stations,
+        }
+        ax = plotting_utils.initialize_map(
+            map_longitudes,
+            map_latitudes,
+            figsize=figsize,
+            map_axis=ax,
+            seismic_stations=seismic_stations,
+            **kwargs,
+        )
         return ax.get_figure()
 
 
 class Catalog(object):
-    """A class for catalog data, and basic plotting.  
+    """A class for catalog data, and basic plotting."""
 
-    """
-    def __init__(self, longitudes, latitudes, depths, origin_times,
-            event_ids=None, **kwargs):
-        """Initialize a catalog attribute as a pandas.DataFrame.  
+    def __init__(
+        self, longitudes, latitudes, depths, origin_times, event_ids=None, **kwargs
+    ):
+        """Initialize a catalog attribute as a pandas.DataFrame.
 
         Parameters
         -----------
@@ -285,17 +312,17 @@ class Catalog(object):
             If not None, is used to define named indexes of the rows.
         """
         catalog = {}
-        catalog['longitude'] = longitudes
-        catalog['latitude'] = latitudes
-        catalog['depth'] = depths
-        catalog['origin_time'] = pd.to_datetime(origin_times)
+        catalog["longitude"] = longitudes
+        catalog["latitude"] = latitudes
+        catalog["depth"] = depths
+        catalog["origin_time"] = pd.to_datetime(origin_times)
         catalog.update(kwargs)
         if event_ids is not None:
-            catalog['event_id'] = event_ids
+            catalog["event_id"] = event_ids
         self.catalog = pd.DataFrame(catalog)
         if event_ids is not None:
-            self.catalog.set_index('event_id', inplace=True)
-        self.catalog.sort_values('origin_time', inplace=True)
+            self.catalog.set_index("event_id", inplace=True)
+        self.catalog.sort_values("origin_time", inplace=True)
 
     @property
     def latitude(self):
@@ -323,15 +350,19 @@ class Catalog(object):
             List of `pandas.DataFrame` with consistent columns.
         """
         cat = pd.concat(catalogs, ignore_index=ignore_index)
-        cat.sort_values('origin_time', inplace=True)
-        base = ['longitude', 'latitude', 'depth', 'origin_time']
-        return cls(cat.longitude, cat.latitude, cat.depth, cat.origin_time,
-                **cat.drop(columns=base))
+        cat.sort_values("origin_time", inplace=True)
+        base = ["longitude", "latitude", "depth", "origin_time"]
+        return cls(
+            cat.longitude,
+            cat.latitude,
+            cat.depth,
+            cat.origin_time,
+            **cat.drop(columns=base),
+        )
 
     @classmethod
     def read_from_events(cls, events, extra_attributes=[], fill_value=np.nan):
-        """Build catalog from list of `Event` instances.  
-        """
+        """Build catalog from list of `Event` instances."""
         longitudes, latitudes, depths, origin_times = [], [], [], []
         extra_attr = {}
         # initialize empty lists for extra requested attributes
@@ -345,7 +376,7 @@ class Catalog(object):
             for attr in extra_attributes:
                 if hasattr(event, attr):
                     extra_attr[attr].append(getattr(event, attr))
-                elif hasattr(event, 'aux_data') and attr in event.aux_data:
+                elif hasattr(event, "aux_data") and attr in event.aux_data:
                     # check if attribute is in aux_data
                     extra_attr[attr].append(event.aux_data[attr])
                 else:
@@ -354,14 +385,19 @@ class Catalog(object):
         return cls(longitudes, latitudes, depths, origin_times, **extra_attr)
 
     @classmethod
-    def read_from_detection_file(cls, filename, db_path=cfg.dbpath, gid=None,
-            extra_attributes=[], fill_value=np.nan, return_events=False):
-        """Read all detected events and build catalog.  
-
-        """
+    def read_from_detection_file(
+        cls,
+        filename,
+        db_path=cfg.dbpath,
+        gid=None,
+        extra_attributes=[],
+        fill_value=np.nan,
+        return_events=False,
+    ):
+        """Read all detected events and build catalog."""
         events = []
         try:
-            with h5.File(os.path.join(db_path, filename), mode='r') as f:
+            with h5.File(os.path.join(db_path, filename), mode="r") as f:
                 if gid is not None:
                     f = f[gid]
                 keys = list(f.keys())
@@ -369,24 +405,28 @@ class Catalog(object):
                     events.append(Event.read_from_file(hdf5_file=f[key]))
         except Exception as e:
             print(e)
-            print('Error while trying to read the detected events '
-                  '(perhaps there are none).')
+            print(
+                "Error while trying to read the detected events "
+                "(perhaps there are none)."
+            )
             pass
         if return_events:
-            return cls.read_from_events(
-                    events, extra_attributes=extra_attributes,
-                    fill_value=fill_value), events
+            return (
+                cls.read_from_events(
+                    events, extra_attributes=extra_attributes, fill_value=fill_value
+                ),
+                events,
+            )
         else:
             return cls.read_from_events(
-                    events, extra_attributes=extra_attributes,
-                    fill_value=fill_value)
-                
+                events, extra_attributes=extra_attributes, fill_value=fill_value
+            )
 
     # ---------------------------------------------------------
     #                  Plotting methods
     # ---------------------------------------------------------
     def plot_time_statistics(self, figsize=(16, 7), **kwargs):
-        """Plot the histograms of time of the day and day of the week.  
+        """Plot the histograms of time of the day and day of the week.
 
         Parameters
         ------------
@@ -398,26 +438,25 @@ class Catalog(object):
         fig: `plt.Figure`
         """
         import matplotlib.pyplot as plt
-        fig, axes = plt.subplots(num='time_statistics', ncols=2,
-                                 nrows=1, figsize=figsize)
-        self.catalog['origin_time'].dt.dayofweek.hist(
-                bins=np.arange(8), ax=axes[0])
-        axes[0].set_xticks(0.5 + np.arange(7))
-        axes[0].set_xticklabels(
-                ['Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun'])
-        axes[0].set_xlabel('Day of the Week')
-        axes[0].set_ylabel('Event Count')
 
-        self.catalog['origin_time'].dt.hour.hist(
-                bins=np.arange(25), ax=axes[1])
-        axes[1].set_xlabel('Hour of the Day')
-        axes[1].set_ylabel('Event Count')
+        fig, axes = plt.subplots(
+            num="time_statistics", ncols=2, nrows=1, figsize=figsize
+        )
+        self.catalog["origin_time"].dt.dayofweek.hist(bins=np.arange(8), ax=axes[0])
+        axes[0].set_xticks(0.5 + np.arange(7))
+        axes[0].set_xticklabels(["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"])
+        axes[0].set_xlabel("Day of the Week")
+        axes[0].set_ylabel("Event Count")
+
+        self.catalog["origin_time"].dt.hour.hist(bins=np.arange(25), ax=axes[1])
+        axes[1].set_xlabel("Hour of the Day")
+        axes[1].set_ylabel("Event Count")
         return fig
 
-
-    def plot_map(self, ax=None, figsize=(20, 10), depth_min=0.,
-                 depth_max=20., **kwargs):
-        """Plot epicenters on map. 
+    def plot_map(
+        self, ax=None, figsize=(20, 10), depth_min=0.0, depth_max=20.0, **kwargs
+    ):
+        """Plot epicenters on map.
 
         Parameters
         ------------
@@ -442,48 +481,64 @@ class Catalog(object):
         from matplotlib.cm import ScalarMappable
         from mpl_toolkits.axes_grid1 import make_axes_locatable
         from cartopy.crs import PlateCarree
-        cmap = kwargs.get('cmap', None)
+
+        cmap = kwargs.get("cmap", None)
         if cmap is None:
             try:
                 import colorcet as cc
+
                 cmap = cc.cm.fire_r
             except Exception as e:
                 print(e)
-                cmap = 'hot_r'
+                cmap = "hot_r"
         data_coords = PlateCarree()
-        lat_margin = kwargs.get('lat_margin', 0.1)
-        lon_margin = kwargs.get('lon_margin', 0.1)
+        lat_margin = kwargs.get("lat_margin", 0.1)
+        lon_margin = kwargs.get("lon_margin", 0.1)
         # ------------------------------------------------
         #           Scattering plot kwargs
         scatter_kwargs = {}
-        scatter_kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
-        scatter_kwargs['linewidths'] = kwargs.get('linewidths', 0.5)
-        scatter_kwargs['s'] = kwargs.get('s', 10)
-        scatter_kwargs['zorder'] = kwargs.get('zorder', 1)
+        scatter_kwargs["edgecolor"] = kwargs.get("edgecolor", "k")
+        scatter_kwargs["linewidths"] = kwargs.get("linewidths", 0.5)
+        scatter_kwargs["s"] = kwargs.get("s", 10)
+        scatter_kwargs["zorder"] = kwargs.get("zorder", 1)
         # ------------------------------------------------
-        map_longitudes = [min(self.longitude) - lon_margin,
-                          max(self.longitude) + lon_margin]
-        map_latitudes = [min(self.latitude) - lat_margin,
-                         max(self.latitude) + lat_margin]
-        ax = plotting_utils.initialize_map(map_longitudes, map_latitudes,
-                figsize=figsize, map_axis=ax, **kwargs)
+        map_longitudes = [
+            min(self.longitude) - lon_margin,
+            max(self.longitude) + lon_margin,
+        ]
+        map_latitudes = [
+            min(self.latitude) - lat_margin,
+            max(self.latitude) + lat_margin,
+        ]
+        ax = plotting_utils.initialize_map(
+            map_longitudes, map_latitudes, figsize=figsize, map_axis=ax, **kwargs
+        )
         # plot epicenters
         cNorm = Normalize(vmin=depth_min, vmax=depth_max)
         scalar_map = ScalarMappable(norm=cNorm, cmap=cmap)
 
-        ax.scatter(self.longitude, self.latitude,
-                c=scalar_map.to_rgba(self.depth),
-                **scatter_kwargs, transform=data_coords)
+        ax.scatter(
+            self.longitude,
+            self.latitude,
+            c=scalar_map.to_rgba(self.depth),
+            **scatter_kwargs,
+            transform=data_coords,
+        )
 
         ax_divider = make_axes_locatable(ax)
-        cax = ax_divider.append_axes("right", size="2%", pad=0.08,
-                axes_class=plt.Axes)
-        plt.colorbar(scalar_map, cax, orientation='vertical', label='Depth (km)')
+        cax = ax_divider.append_axes("right", size="2%", pad=0.08, axes_class=plt.Axes)
+        plt.colorbar(scalar_map, cax, orientation="vertical", label="Depth (km)")
         return ax.get_figure()
 
-    def plot_space_time(self, ax=None, figsize=(20, 10),
-            color_coded='longitude', y_axis='latitude', **kwargs):
-        """Plot the space-time event distribution.  
+    def plot_space_time(
+        self,
+        ax=None,
+        figsize=(20, 10),
+        color_coded="longitude",
+        y_axis="latitude",
+        **kwargs,
+    ):
+        """Plot the space-time event distribution.
 
         Parameters
         ------------
@@ -508,58 +563,67 @@ class Catalog(object):
         from matplotlib.colors import Normalize
         from matplotlib.cm import ScalarMappable
         from mpl_toolkits.axes_grid1 import make_axes_locatable
-        cmap = kwargs.get('cmap', None)
+
+        cmap = kwargs.get("cmap", None)
         if cmap is None:
             try:
                 import colorcet as cc
+
                 cmap = cc.cm.bjy
             except Exception as e:
                 print(e)
-                cmap = 'viridis'
+                cmap = "viridis"
         # ------------------------------------------------
         #           Scattering plot kwargs
         scatter_kwargs = {}
-        scatter_kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
-        scatter_kwargs['linewidths'] = kwargs.get('linewidths', 0.5)
-        scatter_kwargs['s'] = kwargs.get('s', 10)
-        scatter_kwargs['zorder'] = kwargs.get('zorder', 0)
+        scatter_kwargs["edgecolor"] = kwargs.get("edgecolor", "k")
+        scatter_kwargs["linewidths"] = kwargs.get("linewidths", 0.5)
+        scatter_kwargs["s"] = kwargs.get("s", 10)
+        scatter_kwargs["zorder"] = kwargs.get("zorder", 0)
         # ------------------------------------------------
         if ax is None:
-            fig = plt.figure(kwargs.get('figname', 'space_time'),
-                             figsize=figsize)
+            fig = plt.figure(kwargs.get("figname", "space_time"), figsize=figsize)
             ax = fig.add_subplot(111)
         else:
             fig = ax.get_figure()
-        cNorm = Normalize(vmin=self.catalog[color_coded].min(),
-                          vmax=self.catalog[color_coded].max())
+        cNorm = Normalize(
+            vmin=self.catalog[color_coded].min(), vmax=self.catalog[color_coded].max()
+        )
         scalar_map = ScalarMappable(norm=cNorm, cmap=cmap)
         scalar_map.set_array([])
 
-        ax.set_title(f'{len(self.catalog):d} events')
-        ax.set_xlabel('Calendar Time')
+        ax.set_title(f"{len(self.catalog):d} events")
+        ax.set_xlabel("Calendar Time")
         ax.set_ylabel(y_axis.capitalize())
-        ax.scatter(self.catalog['origin_time'], self.catalog[y_axis],
-                   color=scalar_map.to_rgba(self.catalog[color_coded]),
-                   rasterized=True, **scatter_kwargs)
-        ax.set_xlim(min(self.catalog['origin_time']),
-                    max(self.catalog['origin_time']))
-        
+        ax.scatter(
+            self.catalog["origin_time"],
+            self.catalog[y_axis],
+            color=scalar_map.to_rgba(self.catalog[color_coded]),
+            rasterized=True,
+            **scatter_kwargs,
+        )
+        ax.set_xlim(min(self.catalog["origin_time"]), max(self.catalog["origin_time"]))
+
         ax_divider = make_axes_locatable(ax)
         cax = ax_divider.append_axes("right", size="2%", pad=0.08)
-        plt.colorbar(scalar_map, cax, orientation='vertical',
-                label=color_coded.capitalize())
+        plt.colorbar(
+            scalar_map, cax, orientation="vertical", label=color_coded.capitalize()
+        )
 
         return fig
 
 
 class Data(object):
-    """A Data class to manipulate waveforms and metadata.  
+    """A Data class to manipulate waveforms and metadata."""
 
-
-    """
-
-    def __init__(self, date, db_path=cfg.input_path, filename=None,
-            duration=24.*3600., sampling_rate=None):
+    def __init__(
+        self,
+        date,
+        db_path=cfg.input_path,
+        filename=None,
+        duration=24.0 * 3600.0,
+        sampling_rate=None,
+    ):
         """
         Parameters
         -----------
@@ -598,41 +662,53 @@ class Data(object):
 
     @property
     def time(self):
-        if not hasattr(self, 'sampling_rate'):
-            print('You need to define the instance\'s sampling rate first.')
+        if not hasattr(self, "sampling_rate"):
+            print("You need to define the instance's sampling rate first.")
             return
-        if not hasattr(self, '_time'):
+        if not hasattr(self, "_time"):
             self._time = utils.time_range(
-                    self.date, self.date + self.duration, 1./self.sr, unit='ms')
+                self.date, self.date + self.duration, 1.0 / self.sr, unit="ms"
+            )
         return self._time
 
-    def get_np_array(self, stations, components=['N', 'E', 'Z'],
-                     component_aliases={'N': ['N', '1'],
-                                        'E': ['E', '2'],
-                                        'Z': ['Z']},
-                     priority='HH', verbose=True):
-        if not hasattr(self, 'traces'):
-            print('You should call read_waveforms first.')
+    def get_np_array(
+        self,
+        stations,
+        components=["N", "E", "Z"],
+        component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
+        priority="HH",
+        verbose=True,
+    ):
+        if not hasattr(self, "traces"):
+            print("You should call read_waveforms first.")
             return None
-        return utils.get_np_array(self.traces, stations, components=components,
-                priority=priority, component_aliases=component_aliases,
-                n_samples=self.n_samples, verbose=verbose)
+        return utils.get_np_array(
+            self.traces,
+            stations,
+            components=components,
+            priority=priority,
+            component_aliases=component_aliases,
+            n_samples=self.n_samples,
+            verbose=verbose,
+        )
 
     def _read_metadata(self):
         from pyasdf import ASDFDataSet
-        with ASDFDataSet(self.where, mode='r') as ds:
+
+        with ASDFDataSet(self.where, mode="r") as ds:
             metadata = pd.DataFrame(ds.get_all_coordinates()).transpose()
-            net_sta = [code.split(sep='.') for code in metadata.index]
-            networks, stations = [[net for net, sta in net_sta],
-                    [sta for net, sta in net_sta]]
-            metadata['network_code'] = networks
-            metadata['station_code'] = stations
-            metadata.rename(columns={'elevation_in_m': 'elevation'},
-                    inplace=True)
+            net_sta = [code.split(sep=".") for code in metadata.index]
+            networks, stations = [
+                [net for net, sta in net_sta],
+                [sta for net, sta in net_sta],
+            ]
+            metadata["network_code"] = networks
+            metadata["station_code"] = stations
+            metadata.rename(columns={"elevation_in_m": "elevation"}, inplace=True)
         self.metadata = metadata
 
     def read_waveforms(self, tag, trim_traces=True):
-        """Read the waveform time series.  
+        """Read the waveform time series.
 
         Parameters
         -----------
@@ -644,11 +720,12 @@ class Data(object):
             start time.
         """
         from pyasdf import ASDFDataSet
+
         traces = obs.Stream()
-        with ASDFDataSet(self.where, mode='r') as ds:
+        with ASDFDataSet(self.where, mode="r") as ds:
             for station in ds.ifilter(ds.q.tag == tag):
                 traces += getattr(station, tag)
-        #for i in range(len(traces)):
+        # for i in range(len(traces)):
         #    # round time to proper precision
         #    sr = traces[i].stats.sampling_rate
         #    traces[i].stats.starttime = udt(utils.round_time(
@@ -658,7 +735,7 @@ class Data(object):
             self.trim_waveforms()
 
     def trim_waveforms(self, starttime=None, endtime=None):
-        """Trim waveforms.  
+        """Trim waveforms.
 
         Start times might differ of one sample on different traces. Use this
         method to make sure all traces have the same start time.
@@ -670,26 +747,37 @@ class Data(object):
         endtime: string or datetime, default to None
             If None, use `self.date` + `self.duration` as the end time.
         """
-        if not hasattr(self, 'traces'):
-            print('You should call `read_waveforms` first.')
+        if not hasattr(self, "traces"):
+            print("You should call `read_waveforms` first.")
             return
         if starttime is None:
             starttime = self.date
         if endtime is None:
             endtime = self.date + self.duration
         for tr in self.traces:
-            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=0.)
+            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=0.0)
+
 
 class Event(object):
-    """An Event class to describe *any* collection of waveforms.  
+    """An Event class to describe *any* collection of waveforms."""
 
-    """
-
-    def __init__(self, origin_time, moveouts, stations, phases,
-            data_filename, data_path, latitude=None, longitude=None, depth=None,
-            component_aliases={'N': ['N', '1'], 'E': ['E', '2'], 'Z': ['Z']},
-            sampling_rate=None, components=['N', 'E', 'Z'], id=None):
-        """Initialize an Event instance with basic attributes.  
+    def __init__(
+        self,
+        origin_time,
+        moveouts,
+        stations,
+        phases,
+        data_filename,
+        data_path,
+        latitude=None,
+        longitude=None,
+        depth=None,
+        component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
+        sampling_rate=None,
+        components=["N", "E", "Z"],
+        id=None,
+    ):
+        """Initialize an Event instance with basic attributes.
 
         Parameters
         -----------
@@ -719,7 +807,7 @@ class Event(object):
         components: List of strings, default to ['N','E','Z']
             List of the components to use in reading and plotting methods.
         component_aliases: Dictionary, optional
-            Each entry of the dictionary is a list of strings.  
+            Each entry of the dictionary is a list of strings.
             `component_aliases[comp]` is the list of all aliases used for
             the same component 'comp'. For example, `component_aliases['N'] =
             ['N', '1']` means that both the 'N' and '1' channels will be mapped
@@ -728,34 +816,37 @@ class Event(object):
             Identifying label.
         """
         self.origin_time = udt(origin_time)
-        self.date = self.origin_time # for compatibility with Data class
+        self.date = self.origin_time  # for compatibility with Data class
         self.where = os.path.join(data_path, data_filename)
-        self.stations = np.asarray(stations).astype('U')
-        self.components = np.asarray(components).astype('U')
+        self.stations = np.asarray(stations).astype("U")
+        self.components = np.asarray(components).astype("U")
         self.component_aliases = component_aliases
-        self.phases = np.asarray(phases).astype('U')
+        self.phases = np.asarray(phases).astype("U")
         self.latitude = latitude
         self.longitude = longitude
         self.depth = depth
         self.sampling_rate = sampling_rate
         if moveouts.dtype in (np.int32, np.int64):
-            print('Integer data type detected for moveouts. Are you sure these'
-                  ' are in seconds?')
+            print(
+                "Integer data type detected for moveouts. Are you sure these"
+                " are in seconds?"
+            )
         # format moveouts in a Pandas data frame
-        mv_table = {'stations': self.stations}
+        mv_table = {"stations": self.stations}
         for p, ph in enumerate(self.phases):
-            mv_table[f'moveouts_{ph.upper()}'] = moveouts[:, p]
+            mv_table[f"moveouts_{ph.upper()}"] = moveouts[:, p]
         self.moveouts = pd.DataFrame(mv_table)
-        self.moveouts.set_index('stations', inplace=True)
+        self.moveouts.set_index("stations", inplace=True)
         if id is None:
-            self.id = self.origin_time.strftime('%Y%m%d_%H%M%S')
+            self.id = self.origin_time.strftime("%Y%m%d_%H%M%S")
         else:
             self.id = id
 
     @classmethod
-    def read_from_file(cls, filename=None, db_path=cfg.dbpath,
-                       hdf5_file=None, gid=None):
-        """Initialize an Event instance from `filename`.  
+    def read_from_file(
+        cls, filename=None, db_path=cfg.dbpath, hdf5_file=None, gid=None
+    ):
+        """Initialize an Event instance from `filename`.
 
         Parameters
         ------------
@@ -775,73 +866,77 @@ class Event(object):
         event: `Event` instance
             The `Event` instance defined by the data in `filename`.
         """
-        attributes = ['origin_time', 'moveouts', 'stations', 'phases']
-        optional_attr = ['latitude', 'longitude', 'depth', 'sampling_rate',
-                'compoments', 'id']
+        attributes = ["origin_time", "moveouts", "stations", "phases"]
+        optional_attr = [
+            "latitude",
+            "longitude",
+            "depth",
+            "sampling_rate",
+            "compoments",
+            "id",
+        ]
         args = []
         kwargs = {}
         has_picks = False
         has_arrivals = False
         close_file = False
         if filename is not None:
-            parent_file = h5.File(os.path.join(db_path, filename), mode='r')
+            parent_file = h5.File(os.path.join(db_path, filename), mode="r")
             if gid is not None:
                 # go to specified group
                 f = parent_file[gid]
             else:
                 f = parent_file
-            close_file = True # remember to close file at the end
+            close_file = True  # remember to close file at the end
         else:
             f = hdf5_file
         for attr in attributes:
             args.append(f[attr][()])
-        if type(f['where'][()]) == bytes:
+        if type(f["where"][()]) == bytes:
             # if h5py.version >= 3
-            data_path, data_filename = os.path.split(
-                    f['where'][()].decode('utf-8'))
+            data_path, data_filename = os.path.split(f["where"][()].decode("utf-8"))
         else:
             # more recent versions of h5py seems to decode automatically
-            data_path, data_filename = os.path.split(
-                    f['where'][()])
+            data_path, data_filename = os.path.split(f["where"][()])
         args.extend([data_filename, data_path])
         for opt_attr in optional_attr:
             if opt_attr in f:
                 kwargs[opt_attr] = f[opt_attr][()]
         aux_data = {}
-        if 'aux_data' in f:
-            for key in f['aux_data'].keys():
-                aux_data[key] = f['aux_data'][key][()]
+        if "aux_data" in f:
+            for key in f["aux_data"].keys():
+                aux_data[key] = f["aux_data"][key][()]
                 if type(aux_data[key]) == bytes:
-                    aux_data[key] = aux_data[key].decode('utf-8')
-        if 'picks' in f:
+                    aux_data[key] = aux_data[key].decode("utf-8")
+        if "picks" in f:
             picks = {}
-            for key in f['picks'].keys():
-                picks[key] = f['picks'][key][()]
-                if picks[key].dtype.kind == 'S':
-                    picks[key] = picks[key].astype('U')
-                    if key != 'stations':
+            for key in f["picks"].keys():
+                picks[key] = f["picks"][key][()]
+                if picks[key].dtype.kind == "S":
+                    picks[key] = picks[key].astype("U")
+                    if key != "stations":
                         picks[key] = pd.to_datetime(picks[key])
             picks = pd.DataFrame(picks)
-            picks.set_index('stations', inplace=True)
+            picks.set_index("stations", inplace=True)
             has_picks = True
-        if 'arrival_times' in f:
+        if "arrival_times" in f:
             arrival_times = {}
-            for key in f['arrival_times'].keys():
-                arrival_times[key] = f['arrival_times'][key][()]
-                if arrival_times[key].dtype.kind == 'S':
-                    arrival_times[key] = arrival_times[key].astype('U')
-                    if key != 'stations':
+            for key in f["arrival_times"].keys():
+                arrival_times[key] = f["arrival_times"][key][()]
+                if arrival_times[key].dtype.kind == "S":
+                    arrival_times[key] = arrival_times[key].astype("U")
+                    if key != "stations":
                         arrival_times[key] = pd.to_datetime(arrival_times[key])
             arrival_times = pd.DataFrame(arrival_times)
-            arrival_times.set_index('stations', inplace=True)
+            arrival_times.set_index("stations", inplace=True)
             has_arrivals = True
         if close_file:
             # close the file
             parent_file.close()
         # ! the order of args is important !
         event = cls(*args, **kwargs)
-        if 'cov_mat' in aux_data:
-            event.cov_mat = aux_data['cov_mat']
+        if "cov_mat" in aux_data:
+            event.cov_mat = aux_data["cov_mat"]
         event.set_aux_data(aux_data)
         if has_picks:
             event.picks = picks
@@ -854,15 +949,15 @@ class Event(object):
 
     @property
     def availability(self):
-        if hasattr(self, 'aux_data') and 'availability' in self.aux_data:
-            return self.aux_data['availability'].loc[self.stations]
+        if hasattr(self, "aux_data") and "availability" in self.aux_data:
+            return self.aux_data["availability"].loc[self.stations]
         else:
-            print('Call `self.set_availability` first.')
+            print("Call `self.set_availability` first.")
             return
 
     @property
     def hmax_unc(self):
-        if hasattr(self, '_hmax_unc'):
+        if hasattr(self, "_hmax_unc"):
             return self._hmax_unc
         else:
             self.hor_ver_uncertainties()
@@ -870,7 +965,7 @@ class Event(object):
 
     @property
     def hmin_unc(self):
-        if hasattr(self, '_hmin_unc'):
+        if hasattr(self, "_hmin_unc"):
             return self._hmin_unc
         else:
             self.hor_ver_uncertainties()
@@ -878,7 +973,7 @@ class Event(object):
 
     @property
     def vmax_unc(self):
-        if hasattr(self, '_vmax_unc'):
+        if hasattr(self, "_vmax_unc"):
             return self._vmax_unc
         else:
             self.hor_ver_uncertainties()
@@ -886,7 +981,7 @@ class Event(object):
 
     @property
     def az_hmax_unc(self):
-        if hasattr(self, '_az_hmax_unc'):
+        if hasattr(self, "_az_hmax_unc"):
             return self._az_hmax_unc
         else:
             self.hor_ver_uncertainties()
@@ -894,7 +989,7 @@ class Event(object):
 
     @property
     def az_hmin_unc(self):
-        if hasattr(self, '_az_hmin_unc'):
+        if hasattr(self, "_az_hmin_unc"):
             return self._az_hmin_unc
         else:
             self.hor_ver_uncertainties()
@@ -902,30 +997,37 @@ class Event(object):
 
     @property
     def source_receiver_dist(self):
-        if hasattr(self, '_source_receiver_dist'):
+        if hasattr(self, "_source_receiver_dist"):
             return self._source_receiver_dist
         else:
-            print('You need to set source_receiver_dist before.'\
-                    ' Call self.set_source_receiver_dist(network)')
+            print(
+                "You need to set source_receiver_dist before."
+                " Call self.set_source_receiver_dist(network)"
+            )
             return
 
     @property
     def sr(self):
         return self.sampling_rate
 
-    def get_np_array(self, stations, components=None,
-                     priority='HH', verbose=True):
-        if not hasattr(self, 'traces'):
-            print('You should call read_waveforms first.')
+    def get_np_array(self, stations, components=None, priority="HH", verbose=True):
+        if not hasattr(self, "traces"):
+            print("You should call read_waveforms first.")
             return None
         if components is None:
             components = self.components
-        return utils.get_np_array(self.traces, stations, components=components,
-                priority=priority, component_aliases=self.component_aliases,
-                n_samples=self.n_samples, verbose=verbose)
+        return utils.get_np_array(
+            self.traces,
+            stations,
+            components=components,
+            priority=priority,
+            component_aliases=self.component_aliases,
+            n_samples=self.n_samples,
+            verbose=verbose,
+        )
 
-    def hor_ver_uncertainties(self, mode='intersection'):
-        """Compute the horizontal and vertical uncertainties on location.  
+    def hor_ver_uncertainties(self, mode="intersection"):
+        """Compute the horizontal and vertical uncertainties on location.
 
         Return errors as given by the 68% confidence ellipsoid.
 
@@ -939,7 +1041,7 @@ class Event(object):
             by NLLoc. If mode is 'projection', the horizontal uncertainties are the
             max and min span of the confidence ellipsoid in the horizontal
             directions.
-        
+
         New Attributes
         ----------------
         hmax_unc: scalar, float
@@ -959,51 +1061,59 @@ class Event(object):
         max_loc, the latter simply being the length of the
         longest semi-axis of the uncertainty ellipsoid.
         """
-        if not hasattr(self, 'cov_mat'):
-            print('Class instance does not have a `cov_mat` attribute.')
+        if not hasattr(self, "cov_mat"):
+            print("Class instance does not have a `cov_mat` attribute.")
             return
         # X: west, Y: south, Z: downward
         s_68_3df = 3.52
         s_68_2df = 2.28
         # eigendecomposition of whole matrix
         w, v = np.linalg.eigh(self.cov_mat)
-        semi_axis_length = np.sqrt(s_68_3df*w)
+        semi_axis_length = np.sqrt(s_68_3df * w)
         # check the vertical components of all semi-axes:
-        vertical_unc = np.abs(semi_axis_length*v[2, :])
-        if mode == 'intersection':
+        vertical_unc = np.abs(semi_axis_length * v[2, :])
+        if mode == "intersection":
             # eigendecomposition of cov mat restricted to horizontal components
             wh, vh = np.linalg.eigh(self.cov_mat[:2, :2])
-            semi_axis_length_h = np.sqrt(s_68_2df*wh)
+            semi_axis_length_h = np.sqrt(s_68_2df * wh)
             hmax_unc = np.max(semi_axis_length_h)
             hmin_unc = np.min(semi_axis_length_h)
             hmax_dir = vh[:, wh.argmax()]
             hmin_dir = vh[:, wh.argmin()]
-            az_hmax = np.arctan2(-hmax_dir[0], -hmax_dir[1])*180./np.pi
-            az_hmin = np.arctan2(-hmin_dir[0], -hmin_dir[1])*180./np.pi
-        elif mode == 'projection':
+            az_hmax = np.arctan2(-hmax_dir[0], -hmax_dir[1]) * 180.0 / np.pi
+            az_hmin = np.arctan2(-hmin_dir[0], -hmin_dir[1]) * 180.0 / np.pi
+        elif mode == "projection":
             # check the horizontal components of all semi-axes:
-            horizontal_unc = np.sqrt(np.sum((
-                semi_axis_length[np.newaxis, :]*v[:2, :])**2, axis=0))
+            horizontal_unc = np.sqrt(
+                np.sum((semi_axis_length[np.newaxis, :] * v[:2, :]) ** 2, axis=0)
+            )
             hmax_unc = np.max(horizontal_unc)
             hmin_unc = np.min(horizontal_unc)
             hmax_dir = v[:, horizontal_unc.argmax()]
             hmin_dir = v[:, horizontal_unc.argmin()]
-            az_hmax = np.arctan2(-hmax_dir[0], -hmax_dir[1])*180./np.pi
-            az_hmin = np.arctan2(-hmin_dir[0], -hmin_dir[1])*180./np.pi
+            az_hmax = np.arctan2(-hmax_dir[0], -hmax_dir[1]) * 180.0 / np.pi
+            az_hmin = np.arctan2(-hmin_dir[0], -hmin_dir[1]) * 180.0 / np.pi
         # these private attributes should be called via their property names
-        self._hmax_unc = hmax_unc 
-        self._hmin_unc = hmin_unc 
+        self._hmax_unc = hmax_unc
+        self._hmin_unc = hmin_unc
         self._vmax_unc = np.max(vertical_unc)
         self._az_hmax_unc = az_hmax
         self._az_hmin_unc = az_hmin
 
-    def pick_PS_phases(self, duration, tag, threshold_P=0.60, threshold_S=0.60,
-                       offset_ot=cfg.buffer_extracted_events,
-                       mini_batch_size=126, phase_on_comp={'N': 'S', '1': 'S',
-                       'E': 'S', '2': 'S', 'Z': 'P'}, **kwargs):
-        """Use PhaseNet (Zhu et al., 2019) to pick P and S waves.  
+    def pick_PS_phases(
+        self,
+        duration,
+        tag,
+        threshold_P=0.60,
+        threshold_S=0.60,
+        offset_ot=cfg.buffer_extracted_events,
+        mini_batch_size=126,
+        phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
+        **kwargs,
+    ):
+        """Use PhaseNet (Zhu et al., 2019) to pick P and S waves.
 
-        Note1: PhaseNet must be used with 3-comp data.  
+        Note1: PhaseNet must be used with 3-comp data.
         Note2: Extra kwargs are passed to
         `phasenet.wrapper.automatic_detection`.
 
@@ -1029,46 +1139,63 @@ class Event(object):
             extracted on the north component.
         """
         from phasenet import wrapper as PN
-        if kwargs.get('read_waveforms', True):
+
+        if kwargs.get("read_waveforms", True):
             # read waveforms in picking mode, i.e. with `time_shifted`=False
-            self.read_waveforms(duration, tag, offset_ot=offset_ot,
-                    phase_on_comp=phase_on_comp, time_shifted=False)
-        data_arr = self.get_np_array(self.stations, components=['N', 'E', 'Z'])
+            self.read_waveforms(
+                duration,
+                tag,
+                offset_ot=offset_ot,
+                phase_on_comp=phase_on_comp,
+                time_shifted=False,
+            )
+        data_arr = self.get_np_array(self.stations, components=["N", "E", "Z"])
         # call PhaseNet
         PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
-                data_arr[np.newaxis, ...], self.stations,
-                mini_batch_size=mini_batch_size, format='ram',
-                threshold_P=threshold_P, threshold_S=threshold_S,
-                **kwargs)
+            data_arr[np.newaxis, ...],
+            self.stations,
+            mini_batch_size=mini_batch_size,
+            format="ram",
+            threshold_P=threshold_P,
+            threshold_S=threshold_S,
+            **kwargs,
+        )
         # keep best P- and S-wave pick on each 3-comp seismogram
         PhaseNet_picks = PN.get_best_picks(PhaseNet_picks)
         # add picks to auxiliary data
-        #self.set_aux_data(PhaseNet_picks)
+        # self.set_aux_data(PhaseNet_picks)
         # format picks in pandas DataFrame
-        pandas_picks = {'stations': self.stations}
-        for ph in ['P', 'S']:
+        pandas_picks = {"stations": self.stations}
+        for ph in ["P", "S"]:
             rel_picks_sec = np.zeros(len(self.stations), dtype=np.float32)
             proba_picks = np.zeros(len(self.stations), dtype=np.float32)
             abs_picks = np.zeros(len(self.stations), dtype=object)
             for s, sta in enumerate(self.stations):
-                if sta in PhaseNet_picks[f'{ph}_picks'].keys():
-                    rel_picks_sec[s] = PhaseNet_picks[f'{ph}_picks'][sta][0]/self.sr
-                    proba_picks[s] = PhaseNet_picks[f'{ph}_proba'][sta][0]
-                    if proba_picks[s] > 0.:
-                        abs_picks[s] = self.traces.select(station=sta)[0].stats.starttime \
-                                + rel_picks_sec[s]
-            pandas_picks[f'{ph}_picks_sec'] = rel_picks_sec
-            pandas_picks[f'{ph}_probas'] = proba_picks
-            pandas_picks[f'{ph}_abs_picks'] = abs_picks
+                if sta in PhaseNet_picks[f"{ph}_picks"].keys():
+                    rel_picks_sec[s] = PhaseNet_picks[f"{ph}_picks"][sta][0] / self.sr
+                    proba_picks[s] = PhaseNet_picks[f"{ph}_proba"][sta][0]
+                    if proba_picks[s] > 0.0:
+                        abs_picks[s] = (
+                            self.traces.select(station=sta)[0].stats.starttime
+                            + rel_picks_sec[s]
+                        )
+            pandas_picks[f"{ph}_picks_sec"] = rel_picks_sec
+            pandas_picks[f"{ph}_probas"] = proba_picks
+            pandas_picks[f"{ph}_abs_picks"] = abs_picks
         self.picks = pd.DataFrame(pandas_picks)
-        self.picks.set_index('stations', inplace=True)
-        self.picks.replace(0., np.nan, inplace=True)
+        self.picks.set_index("stations", inplace=True)
+        self.picks.replace(0.0, np.nan, inplace=True)
 
-
-    def read_waveforms(self, duration, tag, phase_on_comp={'N': 'S', '1': 'S',
-                  'E': 'S', '2': 'S', 'Z': 'P'}, offset_phase={'P': 1., 'S': 4.},
-                  time_shifted=True, offset_ot=cfg.buffer_extracted_events):
-        """Read waveform data.  
+    def read_waveforms(
+        self,
+        duration,
+        tag,
+        phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
+        offset_phase={"P": 1.0, "S": 4.0},
+        time_shifted=True,
+        offset_ot=cfg.buffer_extracted_events,
+    ):
+        """Read waveform data.
 
         Parameters
         -----------
@@ -1094,41 +1221,49 @@ class Event(object):
         """
         from pyasdf import ASDFDataSet
         from obspy import Stream
+
         self.traces = Stream()
         self.duration = duration
         self.n_samples = utils.sec_to_samp(self.duration, sr=self.sr)
-        with ASDFDataSet(self.where, mode='r') as ds:
-            for station in ds.ifilter(ds.q.tag == tag,
-                    ds.q.station == self.stations):
+        with ASDFDataSet(self.where, mode="r") as ds:
+            for station in ds.ifilter(ds.q.tag == tag, ds.q.station == self.stations):
                 net = station.StationXML.networks[0].code
-                sta = station.StationXML.networks[0]\
-                                        .stations[0].code
+                sta = station.StationXML.networks[0].stations[0].code
                 for channel in station.StationXML.networks[0].stations[0]:
                     cha = channel.code
                     comp = cha[-1]
                     loc = channel.location_code
                     ph = phase_on_comp[comp]
                     if time_shifted:
-                        pick = self.origin_time \
-                                + self.moveouts[f'moveouts_{ph.upper()}'].loc[sta] \
-                                - offset_phase[ph.upper()]
+                        pick = (
+                            self.origin_time
+                            + self.moveouts[f"moveouts_{ph.upper()}"].loc[sta]
+                            - offset_phase[ph.upper()]
+                        )
                     else:
                         pick = self.origin_time - offset_ot
                     # query the exact data
                     self.traces += ds.get_waveforms(
-                            network=net, station=sta, location=loc, channel=cha,
-                            starttime=pick, endtime=pick+duration, tag=tag)
+                        network=net,
+                        station=sta,
+                        location=loc,
+                        channel=cha,
+                        starttime=pick,
+                        endtime=pick + duration,
+                        tag=tag,
+                    )
         for ph in offset_phase.keys():
-            self.set_aux_data({f'offset_{ph.upper()}': offset_phase[ph]})
+            self.set_aux_data({f"offset_{ph.upper()}": offset_phase[ph]})
         for comp in phase_on_comp.keys():
-            self.set_aux_data({f'phase_on_comp{comp}': phase_on_comp[comp]})
+            self.set_aux_data({f"phase_on_comp{comp}": phase_on_comp[comp]})
         if not time_shifted:
-            self.trim_waveforms(starttime=self.origin_time-offset_ot,
-                    endtime=self.origin_time-offset_ot+self.duration)
+            self.trim_waveforms(
+                starttime=self.origin_time - offset_ot,
+                endtime=self.origin_time - offset_ot + self.duration,
+            )
 
-
-    def relocate(self, stations=None, method='EDT', verbose=0):
-        """Relocate with NLLoc using `self.picks`. 
+    def relocate(self, stations=None, method="EDT", verbose=0):
+        """Relocate with NLLoc using `self.picks`.
 
         Parameters
         -----------
@@ -1145,44 +1280,50 @@ class Event(object):
         import subprocess
         import glob
         from . import NLLoc_utils
+
         if stations is None:
             stations = self.stations
         # file names:
-        ctrl_fn = self.id + '.in'
-        out_basename = self.id + '_out'
-        obs_fn = self.id + '.obs'
+        ctrl_fn = self.id + ".in"
+        out_basename = self.id + "_out"
+        obs_fn = self.id + ".obs"
         # write obs file
         if os.path.isfile(os.path.join(cfg.NLLoc_input_path, obs_fn)):
             os.remove(os.path.join(cfg.NLLoc_input_path, obs_fn))
-        NLLoc_utils.write_NLLoc_obs(self.origin_time, self.picks, stations,
-                obs_fn)
+        NLLoc_utils.write_NLLoc_obs(self.origin_time, self.picks, stations, obs_fn)
         # write control file
-        NLLoc_utils.write_NLLoc_control(ctrl_fn, out_basename, obs_fn,
-                method=method)
+        NLLoc_utils.write_NLLoc_control(ctrl_fn, out_basename, obs_fn, method=method)
         if verbose == 0:
             # run NLLoc
             subprocess.run(
-                    f'NLLoc {os.path.join(cfg.NLLoc_input_path, ctrl_fn)} '\
-                    f'> {os.devnull}', shell=True)
+                f"NLLoc {os.path.join(cfg.NLLoc_input_path, ctrl_fn)} "
+                f"> {os.devnull}",
+                shell=True,
+            )
         else:
             # run NLLoc
             subprocess.run(
-                    'NLLoc '+os.path.join(cfg.NLLoc_input_path, ctrl_fn),
-                    shell=True)
+                "NLLoc " + os.path.join(cfg.NLLoc_input_path, ctrl_fn), shell=True
+            )
         # read results
         try:
-            out_fn = os.path.basename(glob.glob(os.path.join(cfg.NLLoc_output_path,
-                out_basename+'.[!s]*hyp'))[0])
+            out_fn = os.path.basename(
+                glob.glob(
+                    os.path.join(cfg.NLLoc_output_path, out_basename + ".[!s]*hyp")
+                )[0]
+            )
         except IndexError:
             # relocation failed
             return
         hypocenter, predicted_times = NLLoc_utils.read_NLLoc_outputs(
-                        out_fn, cfg.NLLoc_output_path)
-        hypocenter['origin_time'] = udt(hypocenter['origin_time'])
+            out_fn, cfg.NLLoc_output_path
+        )
+        hypocenter["origin_time"] = udt(hypocenter["origin_time"])
         # round seconds to reasonable precision to avoid producing
         # origin times that are in between samples
-        hypocenter['origin_time'] = udt(utils.round_time(
-                hypocenter['origin_time'].timestamp, sr=self.sr))
+        hypocenter["origin_time"] = udt(
+            utils.round_time(hypocenter["origin_time"].timestamp, sr=self.sr)
+        )
         # update event's attributes
         for key in hypocenter.keys():
             setattr(self, key, hypocenter[key])
@@ -1190,46 +1331,41 @@ class Event(object):
         P_abs_arrivals = np.zeros(len(predicted_times), dtype=np.object)
         S_abs_arrivals = np.zeros(len(predicted_times), dtype=np.object)
         for s, sta in enumerate(predicted_times.index):
-            P_abs_arrivals[s] = self.origin_time + predicted_times.loc[sta,
-                    'P_tt_sec']
-            S_abs_arrivals[s] = self.origin_time + predicted_times.loc[sta,
-                    'S_tt_sec']
-        predicted_times['P_abs_arrival_times'] = P_abs_arrivals
-        predicted_times['S_abs_arrival_times'] = S_abs_arrivals
+            P_abs_arrivals[s] = self.origin_time + predicted_times.loc[sta, "P_tt_sec"]
+            S_abs_arrivals[s] = self.origin_time + predicted_times.loc[sta, "S_tt_sec"]
+        predicted_times["P_abs_arrival_times"] = P_abs_arrivals
+        predicted_times["S_abs_arrival_times"] = S_abs_arrivals
         # attach the theoretical arrival times
         self.arrival_times = predicted_times
-        self.set_aux_data({'NLLoc_reloc': True})
-        self.set_aux_data({'cov_mat': self.cov_mat, 'tt_rms': self.tt_rms})
+        self.set_aux_data({"NLLoc_reloc": True})
+        self.set_aux_data({"cov_mat": self.cov_mat, "tt_rms": self.tt_rms})
         # clean the temporary control and pick files
         if os.path.isfile(os.path.join(cfg.NLLoc_input_path, obs_fn)):
             os.remove(os.path.join(cfg.NLLoc_input_path, obs_fn))
         if os.path.isfile(os.path.join(cfg.NLLoc_input_path, ctrl_fn)):
             os.remove(os.path.join(cfg.NLLoc_input_path, ctrl_fn))
-        for fn in glob.glob(os.path.join(
-            cfg.NLLoc_output_path, out_basename+'*')):
+        for fn in glob.glob(os.path.join(cfg.NLLoc_output_path, out_basename + "*")):
             os.remove(fn)
-        for fn in glob.glob(os.path.join(
-            cfg.NLLoc_input_path, out_basename+'*.in')):
+        for fn in glob.glob(os.path.join(cfg.NLLoc_input_path, out_basename + "*.in")):
             os.remove(fn)
-        for fn in glob.glob(os.path.join(
-            cfg.NLLoc_input_path, out_basename+'*.obs')):
+        for fn in glob.glob(os.path.join(cfg.NLLoc_input_path, out_basename + "*.obs")):
             os.remove(fn)
 
     def set_aux_data(self, aux_data):
-        """Adds any extra data to the Event instance.  
+        """Adds any extra data to the Event instance.
 
         Parameters
         ------------
         aux_data: dictionary
             Dictionary with any auxiliary data.
         """
-        if not hasattr(self, 'aux_data'):
+        if not hasattr(self, "aux_data"):
             self.aux_data = {}
         for field in aux_data:
             self.aux_data[field] = aux_data[field]
 
     def set_availability(self, stations=None):
-        """Set the data availability.  
+        """Set the data availability.
 
         A station is available if at least one station has non-zero data. The
         availability is then accessed via the property `self.availability`.
@@ -1243,18 +1379,19 @@ class Event(object):
         if stations is None:
             stations = self.stations
         availability = np.zeros(len(stations), dtype=np.bool)
-        if not hasattr(self, 'traces'):
-            print('Call `self.read_waveforms` first.')
+        if not hasattr(self, "traces"):
+            print("Call `self.read_waveforms` first.")
             return
         for s, sta in enumerate(stations):
             n_valid = 0
             for tr in self.traces.select(station=sta):
-                if np.sum(tr.data != 0.):
+                if np.sum(tr.data != 0.0):
                     n_valid += 1
             if n_valid > 0:
                 availability[s] = True
-        self.set_aux_data({'availability': pd.Series(index=stations,
-            data=availability)})
+        self.set_aux_data(
+            {"availability": pd.Series(index=stations, data=availability)}
+        )
 
     def set_components(self, components):
         """Set the list of components.
@@ -1268,12 +1405,12 @@ class Event(object):
         self.components = components
 
     def set_component_aliases(self, component_aliases):
-        """Set or modify the `component_aliases` attribute.  
+        """Set or modify the `component_aliases` attribute.
 
         Parameters
         -----------
         component_aliases: Dictionary
-            Each entry of the dictionary is a list of strings.  
+            Each entry of the dictionary is a list of strings.
             `component_aliases[comp]` is the list of all aliases used for
             the same component 'comp'. For example, `component_aliases['N'] =
             ['N', '1']` means that both the 'N' and '1' channels will be mapped
@@ -1282,46 +1419,41 @@ class Event(object):
         self.component_aliases = component_aliases
 
     def set_moveouts_to_empirical_times(self):
-        """Set moveouts equal to picks, if available. 
-
-        """
-        if not hasattr(self, 'picks'):
-            print('Does not have a `picks` attribute.')
+        """Set moveouts equal to picks, if available."""
+        if not hasattr(self, "picks"):
+            print("Does not have a `picks` attribute.")
             return
         # make sure picks are consistent with the current origin time
         self.update_picks()
-        self.origin_time = udt(utils.round_time(self.origin_time.timestamp,
-                sr=self.sr))
+        self.origin_time = udt(utils.round_time(self.origin_time.timestamp, sr=self.sr))
         for station in self.picks.index:
             for ph in self.phases:
-                if not pd.isnull(self.picks.loc[station,
-                    f'{ph.upper()}_picks_sec']):
-                    self.moveouts.loc[station, f'moveouts_{ph.upper()}'] = \
-                            utils.round_time(
-                                    self.picks.loc[station,
-                                        f'{ph.upper()}_picks_sec'],
-                                    sr=self.sr)
+                if not pd.isnull(self.picks.loc[station, f"{ph.upper()}_picks_sec"]):
+                    self.moveouts.loc[
+                        station, f"moveouts_{ph.upper()}"
+                    ] = utils.round_time(
+                        self.picks.loc[station, f"{ph.upper()}_picks_sec"], sr=self.sr
+                    )
 
     def set_moveouts_to_theoretical_times(self):
-        """Set moveouts equal to theoretical arrival times, if available. 
-
-        """
-        if not hasattr(self, 'arrival_times'):
-            print('Does not have a `arrival_times` attribute.')
+        """Set moveouts equal to theoretical arrival times, if available."""
+        if not hasattr(self, "arrival_times"):
+            print("Does not have a `arrival_times` attribute.")
             return
         # make sure travel times are consistent with the current origin time
         self.update_travel_times()
-        self.origin_time = udt(utils.round_time(self.origin_time.timestamp,
-                sr=self.sr))
+        self.origin_time = udt(utils.round_time(self.origin_time.timestamp, sr=self.sr))
         for station in self.arrival_times.index:
             for ph in self.phases:
-                if not pd.isnull(self.arrival_times.loc[station,
-                    f'{ph.upper()}_tt_sec']):
-                    self.moveouts.loc[station, f'moveouts_{ph.upper()}'] = \
-                            utils.round_time(
-                                    self.arrival_times.loc[station,
-                                        f'{ph.upper()}_tt_sec'],
-                                    sr=self.sr)
+                if not pd.isnull(
+                    self.arrival_times.loc[station, f"{ph.upper()}_tt_sec"]
+                ):
+                    self.moveouts.loc[
+                        station, f"moveouts_{ph.upper()}"
+                    ] = utils.round_time(
+                        self.arrival_times.loc[station, f"{ph.upper()}_tt_sec"],
+                        sr=self.sr,
+                    )
 
     def set_source_receiver_dist(self, network):
         """Set source-receiver distances, given `network`.
@@ -1333,17 +1465,24 @@ class Event(object):
             in the source-receiver computation.
         """
         distances = utils.compute_distances(
-                [self.longitude], [self.latitude], [self.depth],
-                network.longitude, network.latitude, network.depth)
+            [self.longitude],
+            [self.latitude],
+            [self.depth],
+            network.longitude,
+            network.latitude,
+            network.depth,
+        )
         self._source_receiver_dist = pd.Series(
-                index=network.stations, data=distances.squeeze(),
-                name='source-receiver dist (km)')
-        self._source_receiver_dist = self.source_receiver_dist\
-                .loc[self.network_stations]
-
+            index=network.stations,
+            data=distances.squeeze(),
+            name="source-receiver dist (km)",
+        )
+        self._source_receiver_dist = self.source_receiver_dist.loc[
+            self.network_stations
+        ]
 
     def trim_waveforms(self, starttime=None, endtime=None):
-        """Trim waveforms.  
+        """Trim waveforms.
 
         Start times might differ of one sample on different traces. Use this
         method to make sure all traces have the same start time.
@@ -1355,47 +1494,47 @@ class Event(object):
         endtime: string or datetime, default to None
             If None, use `self.date` + `self.duration` as the end time.
         """
-        if not hasattr(self, 'traces'):
-            print('You should call `read_waveforms` first.')
+        if not hasattr(self, "traces"):
+            print("You should call `read_waveforms` first.")
             return
         if starttime is None:
             starttime = self.date
         if endtime is None:
             endtime = self.date + self.duration
         for tr in self.traces:
-            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=0.)
+            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=0.0)
 
     def update_picks(self):
-        """Update the picks w.r.t the current origin time. 
-
-        """
-        if not hasatr(self, 'picks'):
-            print('Does not have a `picks` attribute.')
+        """Update the picks w.r.t the current origin time."""
+        if not hasatr(self, "picks"):
+            print("Does not have a `picks` attribute.")
             return
         for station in self.picks.index:
             for ph in self.phases:
-                self.picks.loc[station, f'{ph.upper()}_picks_sec'] =\
-                        udt(self.picks.loc[station, f'{ph.upper()}_abs_picks'])\
-                        - udt(self.origin_time)
+                self.picks.loc[station, f"{ph.upper()}_picks_sec"] = udt(
+                    self.picks.loc[station, f"{ph.upper()}_abs_picks"]
+                ) - udt(self.origin_time)
 
     def update_travel_times(self):
-        """Update travel times w.r.t the current origin time.
-
-        """
-        if not hasattr(self, 'arrival_times'):
-            print('Does not have an `arrival_times` attribute.')
+        """Update travel times w.r.t the current origin time."""
+        if not hasattr(self, "arrival_times"):
+            print("Does not have an `arrival_times` attribute.")
             return
         for station in self.arrival_times.index:
             for ph in self.phases:
-                self.arrival_times.loc[station, f'{ph.upper()}_tt_sec'] =\
-                        udt(self.arrival_times.loc[station,
-                            f'{ph.upper()}_abs_arrival_times'])\
-                        - udt(self.origin_time)
+                self.arrival_times.loc[station, f"{ph.upper()}_tt_sec"] = udt(
+                    self.arrival_times.loc[station, f"{ph.upper()}_abs_arrival_times"]
+                ) - udt(self.origin_time)
 
-
-    def write(self, db_filename, db_path=cfg.dbpath,
-              save_waveforms=False, gid=None, hdf5_file=None):
-        """Write to hdf5 file.  
+    def write(
+        self,
+        db_filename,
+        db_path=cfg.dbpath,
+        save_waveforms=False,
+        gid=None,
+        hdf5_file=None,
+    ):
+        """Write to hdf5 file.
 
         Parameters
         ------------
@@ -1413,37 +1552,48 @@ class Event(object):
             interest.
         """
         output_where = os.path.join(db_path, db_filename)
-        attributes = ['origin_time', 'latitude', 'longitude', 'depth',
-                'moveouts', 'stations', 'components', 'phases', 'where',
-                'sampling_rate']
+        attributes = [
+            "origin_time",
+            "latitude",
+            "longitude",
+            "depth",
+            "moveouts",
+            "stations",
+            "components",
+            "phases",
+            "where",
+            "sampling_rate",
+        ]
         # moveouts' indexes may have been re-ordered
         # because writing moveouts as an array will forget about the current
         # row indexes and assume that they are in the same order as
         # self.stations, it is critical to make sure this is true
         self.moveouts = self.moveouts.loc[self.stations]
-        lock_file = output_where + '.lock'
+        lock_file = output_where + ".lock"
         while os.path.isfile(lock_file):
             # another process is already writing in this file
             # wait a bit a check again
-            sleep(1.)
+            sleep(1.0)
         # create empty lock file
-        open(lock_file, 'w').close()
+        open(lock_file, "w").close()
         try:
             if hdf5_file is None:
-                hdf5_file = h5.File(output_where, mode='a')
+                hdf5_file = h5.File(output_where, mode="a")
                 close_file = True
             else:
                 close_file = False
             if gid is not None:
                 if gid in hdf5_file:
                     # overwrite existing detection with same id
-                    print(f'Found existing event {gid} in {output_where}. Overwrite it.')
+                    print(
+                        f"Found existing event {gid} in {output_where}. Overwrite it."
+                    )
                     del hdf5_file[gid]
                 hdf5_file.create_group(gid)
                 f = hdf5_file[gid]
             else:
                 f = hdf5_file
-            #with h5.File(output_where, mode='a') as f:
+            # with h5.File(output_where, mode='a') as f:
             #    if gid is not None:
             #        if gid in f:
             #            # overwrite existing detection with same id
@@ -1455,73 +1605,73 @@ class Event(object):
                 if not hasattr(self, attr):
                     continue
                 attr_ = getattr(self, attr)
-                if attr == 'origin_time':
+                if attr == "origin_time":
                     attr_ = str(attr_)
                 if isinstance(attr_, list):
                     attr_ = np.asarray(attr_)
-                if (isinstance(attr_, np.ndarray)
-                        and (attr_.dtype.kind == np.dtype('U').kind)):
-                    attr_ = attr_.astype('S')
+                if isinstance(attr_, np.ndarray) and (
+                    attr_.dtype.kind == np.dtype("U").kind
+                ):
+                    attr_ = attr_.astype("S")
                 f.create_dataset(attr, data=attr_)
-            if hasattr(self, 'aux_data'):
-                f.create_group('aux_data')
+            if hasattr(self, "aux_data"):
+                f.create_group("aux_data")
                 for key in self.aux_data.keys():
-                    f['aux_data'].create_dataset(
-                            key, data=self.aux_data[key])
-            if hasattr(self, 'picks'):
-                f.create_group('picks')
-                f['picks'].create_dataset(
-                        'stations', data=np.asarray(self.picks.index).astype('S'))
+                    f["aux_data"].create_dataset(key, data=self.aux_data[key])
+            if hasattr(self, "picks"):
+                f.create_group("picks")
+                f["picks"].create_dataset(
+                    "stations", data=np.asarray(self.picks.index).astype("S")
+                )
                 for column in self.picks.columns:
                     data = self.picks[column]
-                    if data.dtype.kind == 'M':
+                    if data.dtype.kind == "M":
                         # pandas datetime format
                         data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
-                    if data.dtype == np.dtype('O'):
-                        data = data.astype('S')
-                    f['picks'].create_dataset(
-                            column, data=data)
-            if hasattr(self, 'arrival_times'):
-                f.create_group('arrival_times')
-                f['arrival_times'].create_dataset(
-                        'stations', data=np.asarray(self.arrival_times.index).astype('S'))
+                    if data.dtype == np.dtype("O"):
+                        data = data.astype("S")
+                    f["picks"].create_dataset(column, data=data)
+            if hasattr(self, "arrival_times"):
+                f.create_group("arrival_times")
+                f["arrival_times"].create_dataset(
+                    "stations", data=np.asarray(self.arrival_times.index).astype("S")
+                )
                 for column in self.arrival_times.columns:
                     data = self.arrival_times[column]
-                    if data.dtype.kind == 'M':
+                    if data.dtype.kind == "M":
                         # pandas datetime format
                         data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
-                    if data.dtype == np.dtype('O'):
-                        data = data.astype('S')
-                    f['arrival_times'].create_dataset(
-                            column, data=data)
+                    if data.dtype == np.dtype("O"):
+                        data = data.astype("S")
+                    f["arrival_times"].create_dataset(column, data=data)
             if save_waveforms:
-                if hasattr(self, 'traces'):
-                    f.create_group('waveforms')
+                if hasattr(self, "traces"):
+                    f.create_group("waveforms")
                     for tr in self.traces:
                         sta = tr.stats.station
                         cha = tr.stats.channel
-                        if sta not in f['waveforms']:
-                            f['waveforms'].create_group(sta)
-                        f['waveforms'][sta].create_dataset(
-                                cha, data=tr.data)
+                        if sta not in f["waveforms"]:
+                            f["waveforms"].create_group(sta)
+                        f["waveforms"][sta].create_dataset(cha, data=tr.data)
                 else:
-                    print('You are trying to save the waveforms whereas you did'
-                          ' not read them!')
+                    print(
+                        "You are trying to save the waveforms whereas you did"
+                        " not read them!"
+                    )
             if close_file:
                 hdf5_file.close()
         except Exception as e:
             os.remove(lock_file)
-            raise(e)
+            raise (e)
         # remove lock file
         os.remove(lock_file)
-
 
     # -----------------------------------------------------------
     #            plotting method(s)
     # -----------------------------------------------------------
 
-    def plot(self, figsize=(20, 15), gain=1.e6, ylabel=r'Velocity ($\mu$m/s)'):
-        """Plot the waveforms of the Event instance.  
+    def plot(self, figsize=(20, 15), gain=1.0e6, ylabel=r"Velocity ($\mu$m/s)"):
+        """Plot the waveforms of the Event instance.
 
         Parameters
         ------------
@@ -1535,9 +1685,12 @@ class Event(object):
         import matplotlib.dates as mdates
 
         start_times, end_times = [], []
-        fig, axes = plt.subplots(num=f'event_{str(self.origin_time)}',
-                figsize=figsize, nrows=len(self.stations),
-                ncols=len(self.components))
+        fig, axes = plt.subplots(
+            num=f"event_{str(self.origin_time)}",
+            figsize=figsize,
+            nrows=len(self.stations),
+            ncols=len(self.components),
+        )
         fig.suptitle(f'Event at {self.origin_time.strftime("%Y-%m-%d %H:%M:%S")}')
         for s, sta in enumerate(self.stations):
             for c, cp in enumerate(self.components):
@@ -1550,59 +1703,92 @@ class Event(object):
                     continue
                 else:
                     tr = tr[0]
-                time = utils.time_range(tr.stats.starttime,
-                        tr.stats.endtime+tr.stats.delta,
-                        tr.stats.delta, unit='ms')
+                time = utils.time_range(
+                    tr.stats.starttime,
+                    tr.stats.endtime + tr.stats.delta,
+                    tr.stats.delta,
+                    unit="ms",
+                )
                 start_times.append(time[0])
                 end_times.append(time[-1])
                 axes[s, c].plot(
-                        time[:self.n_samples], tr.data[:self.n_samples]*gain,
-                        color='k')
+                    time[: self.n_samples], tr.data[: self.n_samples] * gain, color="k"
+                )
                 # plot the picks
-                if (hasattr(self, 'picks') and 
-                        (sta in self.picks['P_abs_picks'].dropna().index)):
-                    P_pick = np.datetime64(self.picks.loc[sta]['P_abs_picks'])
-                    axes[s, c].axvline(P_pick, color='C0', lw=1.00, ls='--')
-                if (hasattr(self, 'picks') and 
-                        (sta in self.picks['S_abs_picks'].dropna().index)):
-                    S_pick = np.datetime64(self.picks.loc[sta]['S_abs_picks'])
-                    axes[s, c].axvline(S_pick, color='C3', lw=1.00, ls='--')
+                if hasattr(self, "picks") and (
+                    sta in self.picks["P_abs_picks"].dropna().index
+                ):
+                    P_pick = np.datetime64(self.picks.loc[sta]["P_abs_picks"])
+                    axes[s, c].axvline(P_pick, color="C0", lw=1.00, ls="--")
+                if hasattr(self, "picks") and (
+                    sta in self.picks["S_abs_picks"].dropna().index
+                ):
+                    S_pick = np.datetime64(self.picks.loc[sta]["S_abs_picks"])
+                    axes[s, c].axvline(S_pick, color="C3", lw=1.00, ls="--")
                 # plot the theoretical arrival times
-                if (hasattr(self, 'arrival_times') and (sta in self.arrival_times.index)):
-                    P_pick = np.datetime64(self.arrival_times.loc[sta]['P_abs_arrival_times'])
-                    axes[s, c].axvline(P_pick, color='C4', lw=1.25)
-                if (hasattr(self, 'arrival_times') and (sta in self.arrival_times.index)):
-                    S_pick = np.datetime64(self.arrival_times.loc[sta]['S_abs_arrival_times'])
-                    axes[s, c].axvline(S_pick, color='C1', lw=1.25)
-                axes[s, c].text(0.05, 0.05, f'{sta}.{cp_alias}',
-                        transform=axes[s, c].transAxes)
+                if hasattr(self, "arrival_times") and (sta in self.arrival_times.index):
+                    P_pick = np.datetime64(
+                        self.arrival_times.loc[sta]["P_abs_arrival_times"]
+                    )
+                    axes[s, c].axvline(P_pick, color="C4", lw=1.25)
+                if hasattr(self, "arrival_times") and (sta in self.arrival_times.index):
+                    S_pick = np.datetime64(
+                        self.arrival_times.loc[sta]["S_abs_arrival_times"]
+                    )
+                    axes[s, c].axvline(S_pick, color="C1", lw=1.25)
+                axes[s, c].text(
+                    0.05, 0.05, f"{sta}.{cp_alias}", transform=axes[s, c].transAxes
+                )
         for ax in axes.flatten():
             ax.set_xlim(min(start_times), max(end_times))
             ax.xaxis.set_major_formatter(
-                mdates.ConciseDateFormatter(ax.xaxis.get_major_locator()))
+                mdates.ConciseDateFormatter(ax.xaxis.get_major_locator())
+            )
         plt.subplots_adjust(top=0.95, bottom=0.06, right=0.98, left=0.06)
-        fig.text(0.03, 0.40, ylabel, rotation='vertical')
+        fig.text(0.03, 0.40, ylabel, rotation="vertical")
         return fig
 
-class Template(Event):
-    """A class for template events.
 
-    """
-    def __init__(self, origin_time, moveouts, stations, phases,
-            template_filename, template_path, latitude=None, longitude=None,
-            depth=None, sampling_rate=None, components=['N', 'E', 'Z'], id=None):
-        super().__init__(origin_time, moveouts, stations, phases, template_filename,
-                template_path, latitude=latitude, longitude=longitude, depth=depth,
-                sampling_rate=sampling_rate, components=components, id=id)
+class Template(Event):
+    """A class for template events."""
+
+    def __init__(
+        self,
+        origin_time,
+        moveouts,
+        stations,
+        phases,
+        template_filename,
+        template_path,
+        latitude=None,
+        longitude=None,
+        depth=None,
+        sampling_rate=None,
+        components=["N", "E", "Z"],
+        id=None,
+    ):
+        super().__init__(
+            origin_time,
+            moveouts,
+            stations,
+            phases,
+            template_filename,
+            template_path,
+            latitude=latitude,
+            longitude=longitude,
+            depth=depth,
+            sampling_rate=sampling_rate,
+            components=components,
+            id=id,
+        )
         # network_stations is a copy of the original list of stations
         # self.stations may change if the user wants to use the template
         # on a subset of stations
         self.network_stations = np.array(stations, copy=True)
 
-
     @classmethod
     def init_from_event(cls, event, attach_waveforms=True):
-        """Instanciate a `Template` object from an `Event` object.  
+        """Instanciate a `Template` object from an `Event` object.
 
         Parameters
         -----------
@@ -1617,51 +1803,66 @@ class Template(Event):
             `Template` instance base on `event`.
         """
         db_path, db_filename = os.path.split(event.where)
-        template = cls(event.origin_time, event.moveouts.values, event.stations,
-                event.phases, db_filename, db_path, latitude=event.latitude,
-                longitude=event.longitude, depth=event.depth,
-                sampling_rate=event.sampling_rate, components=event.components,
-                id=event.id)
-        if hasattr(event, 'picks'):
+        template = cls(
+            event.origin_time,
+            event.moveouts.values,
+            event.stations,
+            event.phases,
+            db_filename,
+            db_path,
+            latitude=event.latitude,
+            longitude=event.longitude,
+            depth=event.depth,
+            sampling_rate=event.sampling_rate,
+            components=event.components,
+            id=event.id,
+        )
+        if hasattr(event, "picks"):
             template.picks = event.picks
-        if hasattr(event, 'arrival_times'):
+        if hasattr(event, "arrival_times"):
             template.arrival_times = event.arrival_times
-        aux_data_to_keep = [f'offset_{ph}' for ph in event.phases] \
-                + ['tt_rms', 'tid', 'cov_mat']
-        select = lambda str: str.startswith('phase_on_comp')
+        aux_data_to_keep = [f"offset_{ph}" for ph in event.phases] + [
+            "tt_rms",
+            "tid",
+            "cov_mat",
+        ]
+        select = lambda str: str.startswith("phase_on_comp")
         aux_data_to_keep += list(filter(select, event.aux_data.keys()))
-        aux_data = {key: event.aux_data[key] for key in aux_data_to_keep if key
-                in event.aux_data}
+        aux_data = {
+            key: event.aux_data[key]
+            for key in aux_data_to_keep
+            if key in event.aux_data
+        }
         if attach_waveforms:
             # ----------------------------------
             # attach traces
-            if not hasattr(event, 'traces'):
-                print('You need to call `event.read_waveforms` before instanciating'
-                        ' a Template object with this Event instance.')
+            if not hasattr(event, "traces"):
+                print(
+                    "You need to call `event.read_waveforms` before instanciating"
+                    " a Template object with this Event instance."
+                )
                 return
             template.traces = event.traces
             template.n_samples = event.n_samples
             template.set_availability()
         else:
-            template.n_samples = event.aux_data['n_samples']
+            template.n_samples = event.aux_data["n_samples"]
         # ----------------------------------
-        aux_data['n_samples'] = template.n_samples
-        if 'cov_mat' in aux_data:
-            template.cov_mat = aux_data['cov_mat']
+        aux_data["n_samples"] = template.n_samples
+        if "cov_mat" in aux_data:
+            template.cov_mat = aux_data["cov_mat"]
         template.set_aux_data(aux_data)
         return template
 
     @classmethod
     def read_from_file(cls, filename, db_path=cfg.dbpath, gid=None):
-        """Initialize a `Template` instance from a file.  
-
-
-        """
+        """Initialize a `Template` instance from a file."""
         template = cls.init_from_event(
-                Event.read_from_file(filename, db_path=db_path, gid=gid),
-                attach_waveforms=False)
-        template.n_samples = template.aux_data['n_samples']
-        template.id = template.aux_data['tid']
+            Event.read_from_file(filename, db_path=db_path, gid=gid),
+            attach_waveforms=False,
+        )
+        template.n_samples = template.aux_data["n_samples"]
+        template.id = template.aux_data["tid"]
         # overwrite any path that was stored in aux_data, because what matters
         # for the template is only the file it was associated with
         template.where = os.path.join(db_path, filename)
@@ -1678,39 +1879,46 @@ class Template(Event):
 
     @property
     def moveouts_arr(self):
-        """Return a moveout array given self.components and phase_on_comp.
-        """
+        """Return a moveout array given self.components and phase_on_comp."""
         return utils.sec_to_samp(
-                self.moveouts_win.loc[self.stations][
-                [f'moveouts_{self.aux_data[f"phase_on_comp{cp}"].upper()}' 
-                    for cp in self.components]].values,
-                sr=self.sr)
+            self.moveouts_win.loc[self.stations][
+                [
+                    f'moveouts_{self.aux_data[f"phase_on_comp{cp}"].upper()}'
+                    for cp in self.components
+                ]
+            ].values,
+            sr=self.sr,
+        )
 
     @property
     def moveouts_win(self):
-        if not hasattr(self, '_moveouts_win'):
+        if not hasattr(self, "_moveouts_win"):
             # this new moveout table store the moveouts of the
             # time windows rather than the phases
             self._moveouts_win = self.moveouts.copy()
             for ph in self.phases:
-                self._moveouts_win[f'moveouts_{ph.upper()}'] =\
-                        self.moveouts[f'moveouts_{ph.upper()}']\
-                        - self.aux_data[f'offset_{ph.upper()}']
+                self._moveouts_win[f"moveouts_{ph.upper()}"] = (
+                    self.moveouts[f"moveouts_{ph.upper()}"]
+                    - self.aux_data[f"offset_{ph.upper()}"]
+                )
         return self._moveouts_win
-   
+
     @property
     def waveforms_arr(self):
-        """Return traces in numpy.ndarray.  
-
-        """
-        return utils.get_np_array(self.traces, self.stations,
-                components=self.components, priority='HH',
-                component_aliases=self.component_aliases,
-                n_samples=self.n_samples, verbose=True)
+        """Return traces in numpy.ndarray."""
+        return utils.get_np_array(
+            self.traces,
+            self.stations,
+            components=self.components,
+            priority="HH",
+            component_aliases=self.component_aliases,
+            n_samples=self.n_samples,
+            verbose=True,
+        )
 
     # methods
     def distance(self, longitude, latitude, depth):
-        """Compute distance between template and a given location.  
+        """Compute distance between template and a given location.
 
         Parameters
         -----------
@@ -1722,12 +1930,13 @@ class Template(Event):
             Depth of the target location, in km.
         """
         from .utils import two_point_distance
-        return two_point_distance(self.longitude, self.latitude, self.depth,
-                                  longitude, latitude, depth)
 
+        return two_point_distance(
+            self.longitude, self.latitude, self.depth, longitude, latitude, depth
+        )
 
     def n_closest_stations(self, n, available_stations=None):
-        """Adjust `self.stations` to the `n` closest stations.  
+        """Adjust `self.stations` to the `n` closest stations.
 
 
         Find the `n` closest stations and modify `self.stations` accordingly.
@@ -1748,24 +1957,30 @@ class Template(Event):
         # limit the index pool to available stations
         if available_stations is not None:
             availability = np.in1d(
-                    self.network_stations, np.asarray(available_stations).astype('U'))
+                self.network_stations, np.asarray(available_stations).astype("U")
+            )
             valid = availability & self.availability
         else:
             valid = self.availability
         station_pool = self.network_stations[valid]
-        closest_stations = self.source_receiver_dist.loc[station_pool]\
-                .sort_values().index[:n]
+        closest_stations = (
+            self.source_receiver_dist.loc[station_pool].sort_values().index[:n]
+        )
         # make sure we return a n-vector
         if len(closest_stations) < n:
             missing = n - len(closest_stations)
-            closest_stations = np.hstack((
-                closest_stations,
-                self.source_receiver_dist.drop(closest_stations,
-                    axis='rows').sort_values().index[:missing]))
-        self.stations = np.asarray(closest_stations).astype('U')
+            closest_stations = np.hstack(
+                (
+                    closest_stations,
+                    self.source_receiver_dist.drop(closest_stations, axis="rows")
+                    .sort_values()
+                    .index[:missing],
+                )
+            )
+        self.stations = np.asarray(closest_stations).astype("U")
 
     def n_best_SNR_stations(self, n, available_stations=None):
-        """Adjust `self.stations` to the `n` best SNR stations.  
+        """Adjust `self.stations` to the `n` best SNR stations.
 
 
         Find the `n` best stations and modify `self.stations` accordingly.
@@ -1785,30 +2000,32 @@ class Template(Event):
         index_pool = np.arange(len(self.network_stations))
         # limit the index pool to available stations
         if available_stations is not None:
-            availability = np.in1d(self.network_stations, available_stations.astype('U'))
+            availability = np.in1d(
+                self.network_stations, available_stations.astype("U")
+            )
             valid = availability & self.availability
         else:
             valid = self.availability
         index_pool = index_pool[valid]
-        best_SNR_stations = \
-                index_pool[np.argsort(self.SNR[index_pool])[::-1]]
+        best_SNR_stations = index_pool[np.argsort(self.SNR[index_pool])[::-1]]
         # make sure we return a n-vector
         if len(best_SNR_stations) < n:
             missing = n - len(best_SNR_stations)
             remaining_indexes = np.setdiff1d(
-                    np.argsort(self.SNR)[::-1], best_SNR_stations)
-            best_SNR_stations = np.hstack((
-                best_SNR_stations, remaining_indexes[:missing]))
+                np.argsort(self.SNR)[::-1], best_SNR_stations
+            )
+            best_SNR_stations = np.hstack(
+                (best_SNR_stations, remaining_indexes[:missing])
+            )
         self.stations = self.network_stations[best_SNR_stations[:n]]
 
     def read_waveforms(self, stations=None, components=None):
-        """Read the waveforms time series.
-
-        """
+        """Read the waveforms time series."""
         if stations is None:
             stations = self.stations
         if components is None:
             components = self.components
+
         def find_channel(keys, cp):
             for cp_alias in self.component_aliases[cp]:
                 channel = list(filter(lambda x: x.endswith(cp_alias), keys))
@@ -1818,44 +2035,58 @@ class Template(Event):
                 return channel[0]
             else:
                 return
+
         self.traces = obs.Stream()
-        with h5.File(self.where, mode='r') as f:
-            if hasattr(self, 'hdf5_gid'):
+        with h5.File(self.where, mode="r") as f:
+            if hasattr(self, "hdf5_gid"):
                 f = f[self.hdf5_gid]
             for sta in stations:
-                if sta not in f['waveforms']:
+                if sta not in f["waveforms"]:
                     # station not available
                     continue
                 for cp in components:
-                    channel = find_channel(f['waveforms'][sta].keys(), cp)
+                    channel = find_channel(f["waveforms"][sta].keys(), cp)
                     if channel is None:
                         continue
                     tr = obs.Trace()
-                    tr.data = f['waveforms'][sta][channel][()]
+                    tr.data = f["waveforms"][sta][channel][()]
                     tr.stats.station = sta
                     tr.stats.channel = channel
                     tr.stats.sampling_rate = self.sampling_rate
                     ph = self.aux_data[f"phase_on_comp{cp}"].upper()
-                    mv = self.moveouts_win.loc[sta, f'moveouts_{ph}']
+                    mv = self.moveouts_win.loc[sta, f"moveouts_{ph}"]
                     tr.stats.starttime = self.origin_time + mv
                     self.traces += tr
         self.set_availability(stations=stations)
 
-    def write(self, db_filename, db_path=cfg.dbpath,
-              save_waveforms=True, gid=None, overwrite=False):
+    def write(
+        self,
+        db_filename,
+        db_path=cfg.dbpath,
+        save_waveforms=True,
+        gid=None,
+        overwrite=False,
+    ):
         self.where = os.path.join(db_path, db_filename)
         if overwrite and os.path.isfile(self.where):
             os.remove(self.where)
-        Event.write(self, db_filename, db_path=db_path,
-                save_waveforms=save_waveforms, gid=gid)
-
+        Event.write(
+            self, db_filename, db_path=db_path, save_waveforms=save_waveforms, gid=gid
+        )
 
     # ---------------------------------------------
     #  methods to investigate the detected events
-    def read_catalog(self, filename=None, db_path=None, gid=None,
-            extra_attributes=[], fill_value=np.nan, return_events=False,
-            check_summary_file=True):
-        """Build a `Catalog` instance.  
+    def read_catalog(
+        self,
+        filename=None,
+        db_path=None,
+        gid=None,
+        extra_attributes=[],
+        fill_value=np.nan,
+        return_events=False,
+        check_summary_file=True,
+    ):
+        """Build a `Catalog` instance.
 
         Parameters
         ------------
@@ -1882,20 +2113,23 @@ class Template(Event):
         """
         db_path_T, filename_T = os.path.split(self.where)
         if return_events and check_summary_file:
-            print('If `return_events` is True, `check_summary_file` has'
-                    ' to be False. Change arguments.')
+            print(
+                "If `return_events` is True, `check_summary_file` has"
+                " to be False. Change arguments."
+            )
             return
         if check_summary_file:
             if filename is None:
                 # try standard names
-                if os.path.isfile(os.path.join(
-                    db_path_T, f'summary_template{self.tid}.h5')):
+                if os.path.isfile(
+                    os.path.join(db_path_T, f"summary_template{self.tid}.h5")
+                ):
                     # found an existing summary file
-                    filename = f'summary_template{self.tid}.h5'
+                    filename = f"summary_template{self.tid}.h5"
                     build_from_scratch = False
                 else:
                     # no existing summary file
-                    filename = f'detections_{filename_T}'
+                    filename = f"detections_{filename_T}"
                     build_from_scratch = True
             elif os.path.isfile(os.path.join(db_path_T, filename)):
                 # use provided file
@@ -1905,44 +2139,54 @@ class Template(Event):
         else:
             if filename is None:
                 # try standard name
-                filename = f'detections_{filename_T}'
+                filename = f"detections_{filename_T}"
             build_from_scratch = True
         if build_from_scratch:
             if db_path is None:
                 # guess from standard convention
-                db_path = db_path_T[::-1].replace('template'[::-1],
-                        'matched_filter'[::-1], 1)[::-1]
-            output = Catalog.read_from_detection_file(filename,
-                    db_path=db_path, gid=gid, extra_attributes=extra_attributes,
-                    fill_value=fill_value, return_events=return_events)
+                db_path = db_path_T[::-1].replace(
+                    "template"[::-1], "matched_filter"[::-1], 1
+                )[::-1]
+            output = Catalog.read_from_detection_file(
+                filename,
+                db_path=db_path,
+                gid=gid,
+                extra_attributes=extra_attributes,
+                fill_value=fill_value,
+                return_events=return_events,
+            )
             if not return_events:
                 self.catalog = output
             else:
                 self.catalog, events = output
-            self.catalog.catalog['tid'] = [self.tid]*len(self.catalog.catalog)
-            self.catalog.catalog['event_id'] = [f'{self.tid}.{i:d}' for i in
-                                    range(len(self.catalog.catalog))]
-            self.catalog.catalog.set_index('event_id', inplace=True)
+            self.catalog.catalog["tid"] = [self.tid] * len(self.catalog.catalog)
+            self.catalog.catalog["event_id"] = [
+                f"{self.tid}.{i:d}" for i in range(len(self.catalog.catalog))
+            ]
+            self.catalog.catalog.set_index("event_id", inplace=True)
         else:
             catalog = {}
-            with h5.File(os.path.join(db_path_T, filename), mode='r') as f:
-                for key in f['catalog'].keys():
-                    catalog[key] = f['catalog'][key][()]
-                    if catalog[key].dtype.kind == 'S':
-                        catalog[key] = catalog[key].astype('U')
-            extra_attributes = set(catalog.keys()).difference({'longitude', 
-                'latitude', 'depth', 'origin_time'})
-            self.catalog = Catalog(catalog['longitude'], catalog['latitude'],
-                    catalog['depth'], catalog['origin_time'], **{key:
-                        catalog[key] for key in extra_attributes},
-                    event_ids=[f'{self.tid}.{i:d}' for i in 
-                        range(len(catalog['depth']))])
+            with h5.File(os.path.join(db_path_T, filename), mode="r") as f:
+                for key in f["catalog"].keys():
+                    catalog[key] = f["catalog"][key][()]
+                    if catalog[key].dtype.kind == "S":
+                        catalog[key] = catalog[key].astype("U")
+            extra_attributes = set(catalog.keys()).difference(
+                {"longitude", "latitude", "depth", "origin_time"}
+            )
+            self.catalog = Catalog(
+                catalog["longitude"],
+                catalog["latitude"],
+                catalog["depth"],
+                catalog["origin_time"],
+                **{key: catalog[key] for key in extra_attributes},
+                event_ids=[f"{self.tid}.{i:d}" for i in range(len(catalog["depth"]))],
+            )
         if return_events:
             return events
 
-    def write_summary(self, attributes, filename=None, db_path=None,
-            overwrite=True):
-        """Write summary of template characteristics.  
+    def write_summary(self, attributes, filename=None, db_path=None, overwrite=True):
+        """Write summary of template characteristics.
 
         hdf5 does not support storing datasets of strings. Therefore, You need
         to convert strings to bytes or this method will raise an error.
@@ -1965,8 +2209,8 @@ class Template(Event):
         if db_path is None:
             db_path, _ = os.path.split(self.where)
         if filename is None:
-            filename = f'summary_template{self.tid}.h5'
-        with h5.File(os.path.join(db_path, filename), mode='a') as f:
+            filename = f"summary_template{self.tid}.h5"
+        with h5.File(os.path.join(db_path, filename), mode="a") as f:
             for key in attributes.keys():
                 if key in f:
                     if overwrite:
@@ -1982,10 +2226,18 @@ class Template(Event):
 
     # ---------------------------------------------
     # plotting methods
-    def plot_detection(self, idx, filename=None, db_path=None, duration=60.,
-            phase_on_comp={'N': 'S', '1': 'S', 'E': 'S', '2': 'S', 'Z': 'P'},
-            tag='preprocessed_1_12', offset_ot=10., **kwargs):
-        """Plot the `idx`-th detection made with this template.  
+    def plot_detection(
+        self,
+        idx,
+        filename=None,
+        db_path=None,
+        duration=60.0,
+        phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
+        tag="preprocessed_1_12",
+        offset_ot=10.0,
+        **kwargs,
+    ):
+        """Plot the `idx`-th detection made with this template.
 
         Parameters
         ------------
@@ -1997,25 +2249,31 @@ class Template(Event):
             use the standard file and folder naming convention.
 
         """
-        if not hasattr(self, 'traces'):
-            print('Call `self.read_waveforms` first.')
+        if not hasattr(self, "traces"):
+            print("Call `self.read_waveforms` first.")
             return
         db_path_T, filename_T = os.path.split(self.where)
         if filename is None:
             # guess from standard convention
-            filename = f'detections_{filename_T}'
+            filename = f"detections_{filename_T}"
         if db_path is None:
             # guess from standard convention
-            db_path = db_path_T[::-1].replace('template'[::-1],
-                    'matched_filter'[::-1], 1)[::-1]
-        with h5.File(os.path.join(db_path, filename), mode='r') as f:
+            db_path = db_path_T[::-1].replace(
+                "template"[::-1], "matched_filter"[::-1], 1
+            )[::-1]
+        with h5.File(os.path.join(db_path, filename), mode="r") as f:
             keys = list(f.keys())
             event = Event.read_from_file(hdf5_file=f[keys[idx]])
-        event.read_waveforms(duration, tag, offset_ot=offset_ot,
-                phase_on_comp=phase_on_comp, time_shifted=False)
+        event.read_waveforms(
+            duration,
+            tag,
+            offset_ot=offset_ot,
+            phase_on_comp=phase_on_comp,
+            time_shifted=False,
+        )
         fig = event.plot(**kwargs)
         axes = fig.get_axes()
-        cc, n_channels = 0., 0
+        cc, n_channels = 0.0, 0
         for s, sta in enumerate(event.stations):
             for c, cp in enumerate(event.components):
                 for cp_alias in event.component_aliases[cp]:
@@ -2028,37 +2286,47 @@ class Template(Event):
                 else:
                     tr = tr[0]
                 ph = phase_on_comp[cp_alias]
-                starttime = event.origin_time + self.moveouts_win.loc[sta,
-                        f'moveouts_{ph.upper()}']
-                endtime = starttime + tr.stats.npts*tr.stats.delta
-                time = utils.time_range(starttime, endtime, tr.stats.delta, unit='ms')
+                starttime = (
+                    event.origin_time
+                    + self.moveouts_win.loc[sta, f"moveouts_{ph.upper()}"]
+                )
+                endtime = starttime + tr.stats.npts * tr.stats.delta
+                time = utils.time_range(starttime, endtime, tr.stats.delta, unit="ms")
                 try:
-                    event_tr = event.traces.select(
-                            station=sta, component=cp_alias)[0]
+                    event_tr = event.traces.select(station=sta, component=cp_alias)[0]
                     idx1 = utils.sec_to_samp(
-                            self.moveouts_win.loc[sta,
-                                f'moveouts_{ph.upper()}'] + offset_ot,
-                            sr=event_tr.stats.sampling_rate)
+                        self.moveouts_win.loc[sta, f"moveouts_{ph.upper()}"]
+                        + offset_ot,
+                        sr=event_tr.stats.sampling_rate,
+                    )
                     idx2 = idx1 + self.n_samples
-                    max_amp = np.abs(event_tr.data[idx1:idx2]).max()*kwargs.get('gain', 1.e6)
-                    cc_ = np.sum(event_tr.data[idx1:idx2]*tr.data[:self.n_samples])\
-                            /np.sqrt(np.sum(event_tr.data[idx1:idx2]**2)*np.sum(tr.data[:self.n_samples]**2))
+                    max_amp = np.abs(event_tr.data[idx1:idx2]).max() * kwargs.get(
+                        "gain", 1.0e6
+                    )
+                    cc_ = np.sum(
+                        event_tr.data[idx1:idx2] * tr.data[: self.n_samples]
+                    ) / np.sqrt(
+                        np.sum(event_tr.data[idx1:idx2] ** 2)
+                        * np.sum(tr.data[: self.n_samples] ** 2)
+                    )
                     if not np.isnan(cc_):
                         cc += cc_
                         n_channels += 1
                 except IndexError:
                     # trace not found
-                    max_amp = 0.
-                axes[s*len(event.components)+c].plot(
-                        time[:self.n_samples],
-                        utils.max_norm(tr.data[:self.n_samples])*max_amp,
-                        lw=0.75, color='C3')
+                    max_amp = 0.0
+                axes[s * len(event.components) + c].plot(
+                    time[: self.n_samples],
+                    utils.max_norm(tr.data[: self.n_samples]) * max_amp,
+                    lw=0.75,
+                    color="C3",
+                )
         cc /= float(n_channels)
-        fig.suptitle(fig._suptitle.get_text() + f' CC={cc:.3f}')
+        fig.suptitle(fig._suptitle.get_text() + f" CC={cc:.3f}")
         return fig
 
     def plot_recurrence_times(self, ax=None, annotate_axes=True, figsize=(20, 10)):
-        """Plot recurrence times vs detection times.  
+        """Plot recurrence times vs detection times.
 
         Parameters
         -----------
@@ -2066,27 +2334,29 @@ class Template(Event):
             If not None, use this `plt.Axes` instance to plot the data.
         """
         import matplotlib.pyplot as plt
+
         if ax is not None:
             fig = ax.get_figure()
         else:
-            fig = plt.figure(f'recurrence_times_tp{self.tid}', figsize=figsize)
+            fig = plt.figure(f"recurrence_times_tp{self.tid}", figsize=figsize)
             ax = fig.add_subplot(111)
-        if not hasattr(self, 'catalog'):
-            print('Call `read_catalog` first.')
+        if not hasattr(self, "catalog"):
+            print("Call `read_catalog` first.")
             return
-        rt = (self.catalog.origin_time.values[1:]\
-                - self.catalog.origin_time.values[:-1])/1.e9 # in sec
-        ax.plot(self.catalog.origin_time[1:], rt, marker='v', color='k', ls='')
+        rt = (
+            self.catalog.origin_time.values[1:] - self.catalog.origin_time.values[:-1]
+        ) / 1.0e9  # in sec
+        ax.plot(self.catalog.origin_time[1:], rt, marker="v", color="k", ls="")
         if annotate_axes:
-            ax.set_xlabel('Detection Time')
-            ax.set_ylabel('Recurrence Time (s)')
+            ax.set_xlabel("Detection Time")
+            ax.set_ylabel("Recurrence Time (s)")
             ax.semilogy()
         return fig
 
-class Family(ABC):
-    """An abstract class for several subclasses.  
 
-    """
+class Family(ABC):
+    """An abstract class for several subclasses."""
+
     def __init__(self):
         self._events = []
         self._update_attributes = []
@@ -2095,27 +2365,27 @@ class Family(ABC):
     # properties
     @property
     def components(self):
-        if not hasattr(self, 'network'):
-            print('Call `self.set_network(network)` first.')
+        if not hasattr(self, "network"):
+            print("Call `self.set_network(network)` first.")
             return
         return self.network.components
 
     @property
     def stations(self):
-        if not hasattr(self, 'network'):
-            print('Call `self.set_network(network)` first.')
+        if not hasattr(self, "network"):
+            print("Call `self.set_network(network)` first.")
             return
         return self.network.stations
 
     @property
     def moveouts_arr(self):
-        if not hasattr(self, '_moveouts_arr'):
+        if not hasattr(self, "_moveouts_arr"):
             self.get_moveouts_arr()
         return self._moveouts_arr
 
     @property
     def waveforms_arr(self):
-        if not hasattr(self, '_waveforms_arr'):
+        if not hasattr(self, "_waveforms_arr"):
             self.get_waveforms_arr()
         return self._waveforms_arr
 
@@ -2125,8 +2395,9 @@ class Family(ABC):
 
     def get_moveouts_arr(self):
         _moveouts_arr = np.zeros(
-                (self._n_events, self.network.n_stations,
-                    self.network.n_components), dtype=np.int32)
+            (self._n_events, self.network.n_stations, self.network.n_components),
+            dtype=np.int32,
+        )
         for t in range(self._n_events):
             ev_stations = self._events[t].stations
             sta_indexes = self.network.station_indexes.loc[ev_stations]
@@ -2134,42 +2405,47 @@ class Family(ABC):
         self._moveouts_arr = _moveouts_arr
 
     def get_waveforms_arr(self):
-        if 'read_waveforms' not in self._update_attributes:
+        if "read_waveforms" not in self._update_attributes:
             self.read_waveforms()
         # check the templates' duration
         n_samples = [ev.n_samples for ev in self._events]
         if min(n_samples) != max(n_samples):
-            print('Templates have different durations, we cannot return'\
-                    ' the template data in a single array.')
+            print(
+                "Templates have different durations, we cannot return"
+                " the template data in a single array."
+            )
             return
         self._waveforms_arr = np.stack(
-                [ev.get_np_array(stations=self.stations,
-                    components=self.components) for ev in self._events],
-                axis=0)
-        self._remember('get_waveforms_arr')
+            [
+                ev.get_np_array(stations=self.stations, components=self.components)
+                for ev in self._events
+            ],
+            axis=0,
+        )
+        self._remember("get_waveforms_arr")
 
-    def normalize(self, method='rms'):
-        """Normalize the template waveforms.  
+    def normalize(self, method="rms"):
+        """Normalize the template waveforms.
 
         Parameters
         ------------
         method: string, default to 'rms'
             Either 'rms' (default) or 'max'.
         """
-        if method == 'rms':
+        if method == "rms":
             norm = np.std(self.waveforms_arr, axis=-1, keepdims=True)
-        elif method == 'max':
+        elif method == "max":
             norm = np.max(np.abs(self.waveforms_arr), axis=-1, keepdims=True)
-        norm[norm == 0.] = 1.
+        norm[norm == 0.0] = 1.0
         self._waveforms_arr /= norm
-        self._remember('normalize')
+        self._remember("normalize")
 
     @abstractmethod
     def read_waveforms(self):
         pass
 
     def set_network(self, network):
-        """Update `self.network` to the new desired `network`.  
+        """Update `self.network` to the new desired `network`.
 
         Parameters
         -----------
@@ -2178,17 +2454,16 @@ class Family(ABC):
             templates.
         """
         self.network = network
-        print('Updating the instance accordingly...')
+        print("Updating the instance accordingly...")
         for action in self._update_attributes:
             func = getattr(self, action)
             func()
 
     def set_source_receiver_dist(self):
-        """Compute the source-receiver distances for template.
-        """
+        """Compute the source-receiver distances for template."""
         for ev in self._events:
             ev.set_source_receiver_dist(self.network)
-        self._remember('set_source_receiver_dist')
+        self._remember("set_source_receiver_dist")
 
     def _remember(self, action):
         """Append `action` to the list of processes to remember.
@@ -2202,17 +2477,19 @@ class Family(ABC):
         if action not in self._update_attributes:
             self._update_attributes.append(action)
 
+
 class EventGroup(Family):
-    """A class for a group of events.  
+    """A class for a group of events.
 
     Each event is represented by a `dataset.Event` instance.
     """
+
     def __init__(self, events, network):
         """Initialize the EventGroup with a list of `dataset.Event` instances.
 
         Parameters
         ----------
-        events: (n_events,) list of `dataset.Event` instances  
+        events: (n_events,) list of `dataset.Event` instances
             The list of events constituting the group.
         network: `dataset.Network` instance
             The `Network` instance used to query consistent data accross all
@@ -2227,41 +2504,49 @@ class EventGroup(Family):
     def _events(self):
         # alias to use the parent class' methods
         return self.events
-    
+
     @property
     def n_events(self):
         return len(self.events)
 
     # methods
     def read_waveforms(self, duration, tag, time_shifted=False, **kwargs):
-        """Call `dataset.Event.read_waveform` with each event.  
-
-        """
+        """Call `dataset.Event.read_waveform` with each event."""
         self.time_shifted = time_shifted
         for ev in self.events:
             ev.read_waveforms(duration, tag, time_shifted=time_shifted, **kwargs)
-        self._remember('read_waveforms')
+        self._remember("read_waveforms")
 
-    def SVDWF_stack(self, freqmin, freqmax, sampling_rate,
-                    expl_var=0.4, max_singular_values=5,
-                    wiener_filter_colsize=None):
+    def SVDWF_stack(
+        self,
+        freqmin,
+        freqmax,
+        sampling_rate,
+        expl_var=0.4,
+        max_singular_values=5,
+        wiener_filter_colsize=None,
+    ):
         filtered_data = np.zeros_like(self.waveforms_arr)
         for s in range(len(self.stations)):
             for c in range(len(self.components)):
                 filtered_data[:, s, c, :] = utils.SVDWF(
-                        self.waveforms_arr[:, s, c, :],
-                        max_singular_values=max_singular_values,
-                        expl_var=expl_var,
-                        freqmin=freqmin,
-                        freqmax=freqmax,
-                        sampling_rate=sampling_rate,
-                        wiener_filter_colsize=wiener_filter_colsize)
+                    self.waveforms_arr[:, s, c, :],
+                    max_singular_values=max_singular_values,
+                    expl_var=expl_var,
+                    freqmin=freqmin,
+                    freqmax=freqmax,
+                    sampling_rate=sampling_rate,
+                    wiener_filter_colsize=wiener_filter_colsize,
+                )
                 if np.sum(filtered_data[:, s, c, :]) == 0:
-                    print('Problem with station {} ({:d}), component {} ({:d})'.
-                            format(self.stations[s], s, self.components[c], c))
+                    print(
+                        "Problem with station {} ({:d}), component {} ({:d})".format(
+                            self.stations[s], s, self.components[c], c
+                        )
+                    )
         stacked_waveforms = np.mean(filtered_data, axis=0)
         norm = np.max(stacked_waveforms, axis=-1)[..., np.newaxis]
-        norm[norm == 0.] = 1.
+        norm[norm == 0.0] = 1.0
         stacked_waveforms /= norm
         self.filtered_data = filtered_data
         # create a stream with a fake origin time to track future
@@ -2276,29 +2561,40 @@ class EventGroup(Family):
                 tr.stats.sampling_rate = sampling_rate
                 tr.data = stacked_waveforms[s, c, :]
                 if self.time_shifted:
-                    ph = self.events[0].aux_data[f'phase_on_comp{cp.upper()}']
-                    tr.stats.starttime = reference_time\
-                            + self.events[0].moveouts.loc[sta, f'moveouts_{ph}']
+                    ph = self.events[0].aux_data[f"phase_on_comp{cp.upper()}"]
+                    tr.stats.starttime = (
+                        reference_time
+                        + self.events[0].moveouts.loc[sta, f"moveouts_{ph}"]
+                    )
                 else:
                     tr.stats.starttime = reference_time
                 stacked_traces += tr
-        self.stack = Stack(stacked_traces, self.events[0].moveouts.values,
-                           self.stations, self.events[0].phases,
-                           components=self.components,
-                           sampling_rate=sampling_rate,
-                           filtered_data=filtered_data)
+        self.stack = Stack(
+            stacked_traces,
+            self.events[0].moveouts.values,
+            self.stations,
+            self.events[0].phases,
+            components=self.components,
+            sampling_rate=sampling_rate,
+            filtered_data=filtered_data,
+        )
         # fetch auxiliary data
-        select = lambda str: str.startswith('phase_on_comp')
+        select = lambda str: str.startswith("phase_on_comp")
         aux_data_to_keep = list(filter(select, self.events[0].aux_data.keys()))
-        aux_data = {key: self.events[0].aux_data[key] for key in aux_data_to_keep if key
-                in self.events[0].aux_data}
+        aux_data = {
+            key: self.events[0].aux_data[key]
+            for key in aux_data_to_keep
+            if key in self.events[0].aux_data
+        }
         self.stack.set_aux_data(aux_data)
+
 
 class TemplateGroup(Family):
     """A class for a group of templates.
 
     Each template is represented by a `dataset.Template` instance.
     """
+
     def __init__(self, templates, network, source_receiver_dist=True):
         """Initialize the TemplateGroup instance with a list of
         `dataset.Template` instances.
@@ -2314,14 +2610,15 @@ class TemplateGroup(Family):
             If True, compute the source-receiver distances on all templates.
         """
         self.templates = templates
-        #self._events = self.templates # alias to use the base class methods
+        # self._events = self.templates # alias to use the base class methods
         self.network = network
-        #self.n_templates = len(self.templates)
+        # self.n_templates = len(self.templates)
         self.tids = np.int32([tp.tid for tp in self.templates])
         # convenient map between template id and the template index in
         # the self.templates list
-        self.tindexes = pd.Series(index=self.tids,
-                data=np.arange(self.n_templates), name='tid_to_tindex')
+        self.tindexes = pd.Series(
+            index=self.tids, data=np.arange(self.n_templates), name="tid_to_tindex"
+        )
         # keep track of the attributes that need updating
         # when self.network changes
         self._update_attributes = []
@@ -2357,8 +2654,9 @@ class TemplateGroup(Family):
             else:
                 gid = None
             db_path, db_filename = os.path.split(fn)
-            templates.append(Template.read_from_file(
-                db_filename, db_path=db_path, gid=gid))
+            templates.append(
+                Template.read_from_file(db_filename, db_path=db_path, gid=gid)
+            )
         return cls(templates, network)
 
     # properties
@@ -2366,44 +2664,44 @@ class TemplateGroup(Family):
     def _events(self):
         # alias to use the parent class' methods
         return self.templates
-    
+
     @property
     def n_templates(self):
         return len(self.templates)
 
     @property
     def dir_errors(self):
-        if not hasattr(self, '_dir_errors'):
+        if not hasattr(self, "_dir_errors"):
             self.compute_dir_errors()
         return self._dir_errors
 
     @property
     def ellipsoid_dist(self):
-        if not hasattr(self, '_ellipsoid_dist'):
+        if not hasattr(self, "_ellipsoid_dist"):
             self.compute_ellipsoid_dist()
         return self._ellipsoid_dist
 
     @property
     def intertemplate_cc(self):
-        if not hasattr(self, '_intertemplate_cc'):
+        if not hasattr(self, "_intertemplate_cc"):
             self.compute_intertemplate_cc()
         return self._intertemplate_cc
 
     @property
     def intertemplate_dist(self):
-        if not hasattr(self, '_intertemplate_dist'):
+        if not hasattr(self, "_intertemplate_dist"):
             self.compute_intertemplate_dist()
         return self._intertemplate_dist
 
     @property
     def network_to_template_map(self):
-        if not hasattr(self, '_network_to_template_map'):
+        if not hasattr(self, "_network_to_template_map"):
             self.set_network_to_template_map()
         return self._network_to_template_map
 
     # methods
     def box(self, lon_min, lon_max, lat_min, lat_max, inplace=False):
-        """Keep templates inside the requested geographic bounds.  
+        """Keep templates inside the requested geographic bounds.
 
         Parameters
         -----------
@@ -2418,74 +2716,83 @@ class TemplateGroup(Family):
         """
         templates_inside = []
         for template in self.templates:
-            if ((template.longitude >= lon_min) & (template.longitude <=
-                lon_max) & (template.latitude >= lat_min) & (template.latitude
-                    <= lat_max)):
+            if (
+                (template.longitude >= lon_min)
+                & (template.longitude <= lon_max)
+                & (template.latitude >= lat_min)
+                & (template.latitude <= lat_max)
+            ):
                 templates_inside.append(template)
         if inplace:
             self.templates = templates_inside
             self.tids = np.int32([tp.tid for tp in self.templates])
-            self.tindexes = pd.Series(index=self.tids,
-                    data=np.arange(self.n_templates), name='tid_to_tindex')
-            if hasattr(self, '_intertemplate_dist'):
-                self._intertemplate_dist = \
-                        self._intertemplate_dist.loc[self.tids, self.tids]
-            if hasattr(self, '_dir_errors'):
+            self.tindexes = pd.Series(
+                index=self.tids, data=np.arange(self.n_templates), name="tid_to_tindex"
+            )
+            if hasattr(self, "_intertemplate_dist"):
+                self._intertemplate_dist = self._intertemplate_dist.loc[
+                    self.tids, self.tids
+                ]
+            if hasattr(self, "_dir_errors"):
                 self._dir_errors = self._dir_errors.loc[self.tids, self.tids]
-            if hasattr(self, '_ellipsoid_dist'):
-                self._ellipsoid_dist = \
-                        self._ellipsoid_dist.loc[self.tids, self.tids]
-            if hasattr(self, '_intertemplate_cc'):
-                self._intertemplate_cc = \
-                        self._intertemplate_cc.loc[self.tids, self.tids]
-            if hasattr(self, '_waveforms_arr'):
+            if hasattr(self, "_ellipsoid_dist"):
+                self._ellipsoid_dist = self._ellipsoid_dist.loc[self.tids, self.tids]
+            if hasattr(self, "_intertemplate_cc"):
+                self._intertemplate_cc = self._intertemplate_cc.loc[
+                    self.tids, self.tids
+                ]
+            if hasattr(self, "_waveforms_arr"):
                 self.get_waveforms_arr()
         else:
             new_template_group = TemplateGroup(templates_inside, self.network)
             new_tids = new_template_group.tids
-            if hasattr(self, '_intertemplate_dist'):
-                new_template_group._intertemplate_dist = \
-                        self._intertemplate_dist.loc[new_tids, new_tids]
-            if hasattr(self, '_dir_errors'):
-                new_template_group._dir_errors = \
-                        self._dir_errors.loc[new_tids, new_tids]
-            if hasattr(self, '_ellipsoid_dist'):
-                new_template_group._ellipsoid_dist = \
-                        self._ellipsoid_dist.loc[new_tids, new_tids]
-            if hasattr(self, '_intertemplate_cc'):
-                new_template_group._intertemplate_cc = \
-                        self._intertemplate_cc.loc[new_tids, new_tids]
+            if hasattr(self, "_intertemplate_dist"):
+                new_template_group._intertemplate_dist = self._intertemplate_dist.loc[
+                    new_tids, new_tids
+                ]
+            if hasattr(self, "_dir_errors"):
+                new_template_group._dir_errors = self._dir_errors.loc[
+                    new_tids, new_tids
+                ]
+            if hasattr(self, "_ellipsoid_dist"):
+                new_template_group._ellipsoid_dist = self._ellipsoid_dist.loc[
+                    new_tids, new_tids
+                ]
+            if hasattr(self, "_intertemplate_cc"):
+                new_template_group._intertemplate_cc = self._intertemplate_cc.loc[
+                    new_tids, new_tids
+                ]
             return new_template_group
 
     def compute_intertemplate_dist(self):
-        """Compute the template-pairwise distances, in km.  
-
-        """
+        """Compute the template-pairwise distances, in km."""
         longitudes = np.float32([tp.longitude for tp in self.templates])
         latitudes = np.float32([tp.latitude for tp in self.templates])
         depths = np.float32([tp.depth for tp in self.templates])
         _intertemplate_dist = utils.compute_distances(
-                longitudes, latitudes, depths,
-                longitudes, latitudes, depths)
+            longitudes, latitudes, depths, longitudes, latitudes, depths
+        )
         self._intertemplate_dist = pd.DataFrame(
-                index=self.tids, columns=self.tids, data=_intertemplate_dist)
+            index=self.tids, columns=self.tids, data=_intertemplate_dist
+        )
 
     def compute_dir_errors(self):
-        """Compute length of uncertainty ellipsoid in inter-template direction.  
+        """Compute length of uncertainty ellipsoid in inter-template direction.
 
-        New Attributes 
+        New Attributes
         ----------
         _dir_errors: (n_templates, n_templates) pandas.DataFrame
             The length, in kilometers, of the uncertainty ellipsoid in the
-            inter-template direction.  
+            inter-template direction.
             Example: self.directional_errors.loc[tid1, tid2] is the width of
             template tid1's uncertainty ellipsoid in the direction of
             template tid2.
         """
         from cartopy import crs
+
         # X: west, Y: south, Z: downward
         s_68_3df = 3.52
-        print('Computing the inter-template directional errors...')
+        print("Computing the inter-template directional errors...")
         longitudes = np.float32([tp.longitude for tp in self.templates])
         latitudes = np.float32([tp.latitude for tp in self.templates])
         depths = np.float32([tp.depth for tp in self.templates])
@@ -2494,40 +2801,50 @@ class TemplateGroup(Family):
         #      work in a cartesian space
         # ----------------------------------------------
         data_coords = crs.PlateCarree()
-        projection = crs.Mercator(central_longitude=np.mean(longitudes),
-                                  min_latitude=latitudes.min(),
-                                  max_latitude=latitudes.max())
+        projection = crs.Mercator(
+            central_longitude=np.mean(longitudes),
+            min_latitude=latitudes.min(),
+            max_latitude=latitudes.max(),
+        )
         XY = projection.transform_points(data_coords, longitudes, latitudes)
         cartesian_coords = np.stack([XY[:, 0], XY[:, 1], depths], axis=1)
         # compute the directional errors
         _dir_errors = np.zeros((self.n_templates, self.n_templates), dtype=np.float32)
         for t in range(self.n_templates):
             unit_direction = cartesian_coords - cartesian_coords[t, :]
-            unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[:, np.newaxis]
+            unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[
+                :, np.newaxis
+            ]
             # this operation produced NaNs for i=t
-            unit_direction[np.isnan(unit_direction)] = 0.
+            unit_direction[np.isnan(unit_direction)] = 0.0
             # compute the length of the covariance ellipsoid
             # in the direction that links the two earthquakes
-            cov_dir = np.abs(np.sum(
-                self.templates[t].cov_mat.dot(unit_direction.T)*unit_direction.T, axis=0))
+            cov_dir = np.abs(
+                np.sum(
+                    self.templates[t].cov_mat.dot(unit_direction.T) * unit_direction.T,
+                    axis=0,
+                )
+            )
             # covariance is unit of [distance**2], therefore we need the sqrt:
-            _dir_errors[t, :] = np.sqrt(s_68_3df*cov_dir)
+            _dir_errors[t, :] = np.sqrt(s_68_3df * cov_dir)
         self._dir_errors = pd.DataFrame(
-                index=self.tids, columns=self.tids, data=_dir_errors)
+            index=self.tids, columns=self.tids, data=_dir_errors
+        )
 
     def compute_ellipsoid_dist(self):
         """Compute separation between unc. ellipsoids in inter-template dir.
 
         Can be negative if the uncertainty ellipsoids overlap.
         """
-        self._ellipsoid_dist = self.intertemplate_dist\
-                - self.dir_errors - self.dir_errors.T
+        self._ellipsoid_dist = (
+            self.intertemplate_dist - self.dir_errors - self.dir_errors.T
+        )
 
-    #def compute_intertemplate_cc(self, distance_threshold=5.,
+    # def compute_intertemplate_cc(self, distance_threshold=5.,
     #                             n_stations=10, max_lag=10,
     #                             save_cc=False, compute_from_scratch=False,
     #                             device='cpu'):
-    #    """Compute the pairwise template CCs.  
+    #    """Compute the pairwise template CCs.
 
     #    Parameters
     #    -----------
@@ -2595,7 +2912,7 @@ class TemplateGroup(Family):
     #                    keep = (weights[:, s, c] != 0.)\
     #                          &  (np.sum(template_arr[slice_], axis=-1).squeeze() != 0.)
     #                    if (np.sum(keep) == 0) or (np.sum(data_) == 0):
-    #                        # occurs if this station is not among the 
+    #                        # occurs if this station is not among the
     #                        # n_stations closest stations
     #                        # or if no data were available
     #                        continue
@@ -2613,11 +2930,16 @@ class TemplateGroup(Family):
     #    if compute_from_scratch and save_cc:
     #        self._save_intertp_cc(self._intertemplate_cc, cc_fn)
 
-    def compute_intertemplate_cc(self, distance_threshold=5.,
-                                 n_stations=10, max_lag=10,
-                                 save_cc=False, compute_from_scratch=False,
-                                 device='cpu'):
-        """Compute the pairwise template CCs.  
+    def compute_intertemplate_cc(
+        self,
+        distance_threshold=5.0,
+        n_stations=10,
+        max_lag=10,
+        save_cc=False,
+        compute_from_scratch=False,
+        device="cpu",
+    ):
+        """Compute the pairwise template CCs.
 
         Parameters
         -----------
@@ -2642,17 +2964,20 @@ class TemplateGroup(Family):
         device: string, default to 'cpu'
             Either 'cpu' or 'gpu'.
         """
-        import fast_matched_filter as fmf # clearly need some optimization
+        import fast_matched_filter as fmf  # clearly need some optimization
+
         # try reading the inter-template CC from db
         db_path, db_filename = os.path.split(self.templates[0].where)
-        cc_fn = os.path.join(db_path, 'intertp_cc.h5')
+        cc_fn = os.path.join(db_path, "intertp_cc.h5")
         if os.path.isfile(cc_fn):
             _intertemplate_cc = self._read_intertp_cc(cc_fn)
-            if (len(np.intersect1d(self.tids, np.int32(_intertemplate_cc.index)))
-                    == self.n_templates):
+            if (
+                len(np.intersect1d(self.tids, np.int32(_intertemplate_cc.index)))
+                == self.n_templates
+            ):
                 # all current templates are contained in intertp_cc
                 self._intertemplate_cc = _intertemplate_cc.loc[self.tids, self.tids]
-                print(f'Read inter-template CCs from {cc_fn}.')
+                print(f"Read inter-template CCs from {cc_fn}.")
             else:
                 compute_from_scratch = True
         else:
@@ -2660,44 +2985,44 @@ class TemplateGroup(Family):
         if compute_from_scratch:
             # compute from scratch
             self.n_closest_stations(n_stations)
-            print('Computing the similarity matrix...')
+            print("Computing the similarity matrix...")
             # format arrays for FMF
             data_arr = self.waveforms_arr.copy()
             template_arr = self.waveforms_arr[..., max_lag:-max_lag]
             moveouts_arr = np.zeros(self.waveforms_arr.shape[:-1], dtype=np.int32)
             intertp_cc = np.zeros(
-                    (self.n_templates, self.n_templates), dtype=np.float32)
+                (self.n_templates, self.n_templates), dtype=np.float32
+            )
             n_stations, n_components = moveouts_arr.shape[1:]
             # use FMF on one template at a time against all others
             for t, template in enumerate(self.templates):
-                #print(f'--- {t} / {self.n_templates} ---')
+                # print(f'--- {t} / {self.n_templates} ---')
                 weights = np.zeros(template_arr.shape[:-1], dtype=np.float32)
-                weights[:, self.network_to_template_map[t, ...]] = 1.
+                weights[:, self.network_to_template_map[t, ...]] = 1.0
                 weights /= np.sum(weights, axis=(1, 2), keepdims=True)
                 above_thrs = self.ellipsoid_dist[self.tids[t]] > distance_threshold
-                weights[above_thrs, ...] = 0.
-                keep = (np.sum(weights != 0., axis=(1, 2)) > 0)
+                weights[above_thrs, ...] = 0.0
+                keep = np.sum(weights != 0.0, axis=(1, 2)) > 0
                 cc = fmf.matched_filter(
-                        template_arr[keep, ...],
-                        moveouts_arr[keep, ...],
-                        weights[keep, ...],
-                        data_arr[t, ...],
-                        1,
-                        arch=device,
-                        network_sum=False
-                        )
+                    template_arr[keep, ...],
+                    moveouts_arr[keep, ...],
+                    weights[keep, ...],
+                    data_arr[t, ...],
+                    1,
+                    arch=device,
+                    network_sum=False,
+                )
                 intertp_cc[t, keep] = np.sum(
-                        weights[keep, ...]*np.max(cc, axis=1),
-                        axis=(-1, -2)
-                        )
+                    weights[keep, ...] * np.max(cc, axis=1), axis=(-1, -2)
+                )
             # make the CC matrix symmetric by averaging the lower
             # and upper triangles
-            _intertemplate_cc = (intertp_cc + intertp_cc.T)/2.
+            _intertemplate_cc = (intertp_cc + intertp_cc.T) / 2.0
             self._intertemplate_cc = pd.DataFrame(
-                    index=self.tids, columns=self.tids, data=_intertemplate_cc)
+                index=self.tids, columns=self.tids, data=_intertemplate_cc
+            )
         if compute_from_scratch and save_cc:
             self._save_intertp_cc(self._intertemplate_cc, cc_fn)
-
 
     @staticmethod
     def _save_intertp_cc(intertp_cc, fullpath):
@@ -2710,13 +3035,13 @@ class TemplateGroup(Family):
         fullpath: string
             Full path to output file.
         """
-        with h5.File(fullpath, mode='w') as f:
-            f.create_dataset('tids', data=np.int32(intertp_cc.columns))
-            f.create_dataset('intertp_cc', data=np.float32(intertp_cc.values))
+        with h5.File(fullpath, mode="w") as f:
+            f.create_dataset("tids", data=np.int32(intertp_cc.columns))
+            f.create_dataset("intertp_cc", data=np.float32(intertp_cc.values))
 
     @staticmethod
     def _read_intertp_cc(fullpath):
-        """Read inter-template correlation coefficients from file. 
+        """Read inter-template correlation coefficients from file.
 
         Parameters
         -----------
@@ -2728,20 +3053,18 @@ class TemplateGroup(Family):
         intertp_cc: `pd.DataFrame`
             The inter-template CC in a `pd.DataFrame`.
         """
-        with h5.File(fullpath, mode='r') as f:
-            tids = f['tids'][()]
-            intertp_cc = f['intertp_cc'][()]
-        return pd.DataFrame(
-                index=tids, columns=tids, data=intertp_cc)
+        with h5.File(fullpath, mode="r") as f:
+            tids = f["tids"][()]
+            intertp_cc = f["intertp_cc"][()]
+        return pd.DataFrame(index=tids, columns=tids, data=intertp_cc)
 
     def read_waveforms(self):
         for tp in self.templates:
-            tp.read_waveforms(
-                    stations=self.stations, components=self.components)
-        self._remember('read_waveforms')
+            tp.read_waveforms(stations=self.stations, components=self.components)
+        self._remember("read_waveforms")
 
     def set_network_to_template_map(self):
-        """Compute the map between network arrays and template data.  
+        """Compute the map between network arrays and template data.
 
         Template data are broadcasted to fit the dimensions of the network
         arrays. This method computes the `network_to_template_map` that tells
@@ -2750,24 +3073,21 @@ class TemplateGroup(Family):
         channel c are not used on template t.
         """
         _network_to_template_map = np.zeros(
-                (self.n_templates, self.network.n_stations,
-                    self.network.n_components), dtype=np.bool)
+            (self.n_templates, self.network.n_stations, self.network.n_components),
+            dtype=np.bool,
+        )
         # 1) find the non-zero channels
-        _network_to_template_map = ~(np.sum(self.waveforms_arr, axis=-1) == 0.)
+        _network_to_template_map = ~(np.sum(self.waveforms_arr, axis=-1) == 0.0)
         # 2) only keep the stations that were selected on each template
-        selected_stations = np.zeros(
-                _network_to_template_map.shape, dtype=bool
-                )
+        selected_stations = np.zeros(_network_to_template_map.shape, dtype=bool)
         for t, tp in enumerate(self.templates):
-            valid_sta = self.network.station_indexes\
-                    .loc[tp.stations]
+            valid_sta = self.network.station_indexes.loc[tp.stations]
             selected_stations[t, valid_sta, :] = True
-        _network_to_template_map = _network_to_template_map\
-                & selected_stations
+        _network_to_template_map = _network_to_template_map & selected_stations
         self._network_to_template_map = _network_to_template_map
 
     def n_best_SNR_stations(self, n, available_stations=None):
-        """Adjust `self.stations` on each template to the `n` best SNR stations.  
+        """Adjust `self.stations` on each template to the `n` best SNR stations.
 
 
         Find the `n` best stations and modify `self.stations` accordingly.
@@ -2784,11 +3104,11 @@ class TemplateGroup(Family):
         """
         for tp in self.templates:
             tp.n_best_SNR_stations(n, available_stations=available_stations)
-        if hasattr(self, '_network_to_template_map'):
+        if hasattr(self, "_network_to_template_map"):
             del self._network_to_template_map
 
     def n_closest_stations(self, n, available_stations=None):
-        """Adjust `self.stations` on each template to the `n` closest stations.  
+        """Adjust `self.stations` on each template to the `n` closest stations.
 
 
         Find the `n` closest stations and modify `self.stations` accordingly.
@@ -2805,7 +3125,7 @@ class TemplateGroup(Family):
         """
         for tp in self.templates:
             tp.n_closest_stations(n, available_stations=available_stations)
-        if hasattr(self, '_network_to_template_map'):
+        if hasattr(self, "_network_to_template_map"):
             del self._network_to_template_map
 
     def read_catalog(self, extra_attributes=[], fill_value=np.nan):
@@ -2823,15 +3143,24 @@ class TemplateGroup(Family):
 
         """
         for template in self.templates:
-            if not hasattr(template, 'catalog'):
-                template.read_catalog(extra_attributes=extra_attributes,
-                        fill_value=fill_value)
+            if not hasattr(template, "catalog"):
+                template.read_catalog(
+                    extra_attributes=extra_attributes, fill_value=fill_value
+                )
         # concatenate all catalogs
-        self.catalog = Catalog.concatenate([template.catalog.catalog for
-            template in self.templates], ignore_index=False)
+        self.catalog = Catalog.concatenate(
+            [template.catalog.catalog for template in self.templates],
+            ignore_index=False,
+        )
 
-    def remove_multiples(self, n_closest_stations=10, dt_criterion=3.,
-            distance_criterion=1., similarity_criterion=-1., **kwargs):
+    def remove_multiples(
+        self,
+        n_closest_stations=10,
+        dt_criterion=3.0,
+        distance_criterion=1.0,
+        similarity_criterion=-1.0,
+        **kwargs,
+    ):
         """Search for events detected by multiple templates.
 
         Parameters
@@ -2852,59 +3181,65 @@ class TemplateGroup(Family):
             value of -1 is always verified, meaning that similarity is
             actually not taken into account.
         """
-        if not hasattr(self, 'catalog'):
-            self.read_catalog(extra_attributes=['cc'])
+        if not hasattr(self, "catalog"):
+            self.read_catalog(extra_attributes=["cc"])
         # alias:
         catalog = self.catalog.catalog
-        if similarity_criterion > -1.:
-            if not hasattr(self, '_intertemplate_cc'):
+        if similarity_criterion > -1.0:
+            if not hasattr(self, "_intertemplate_cc"):
                 self.compute_intertemplate_cc(
-                        distance_threshold=distance_criterion,
-                        n_stations=n_closest_stations,
-                        max_lag=kwargs.get('max_lag', 10),
-                        device=kwargs.get('device', 'cpu'))
+                    distance_threshold=distance_criterion,
+                    n_stations=n_closest_stations,
+                    max_lag=kwargs.get("max_lag", 10),
+                    device=kwargs.get("device", "cpu"),
+                )
         # -----------------------------------
         t1 = give_time()
-        print('Searching for events detected by multiple templates')
-        print('All events occurring within {:.1f} sec, with uncertainty '
-              'ellipsoids closer than {:.1f} km will and '
-              'inter-template CC larger than {:.2f} be considered the same'.
-              format(dt_criterion, distance_criterion, similarity_criterion))
+        print("Searching for events detected by multiple templates")
+        print(
+            "All events occurring within {:.1f} sec, with uncertainty "
+            "ellipsoids closer than {:.1f} km will and "
+            "inter-template CC larger than {:.2f} be considered the same".format(
+                dt_criterion, distance_criterion, similarity_criterion
+            )
+        )
         n_events = len(self.catalog.catalog)
-        dt_criterion = np.timedelta64(int(1000.*dt_criterion), 'ms')
+        dt_criterion = np.timedelta64(int(1000.0 * dt_criterion), "ms")
         unique_events = np.ones(n_events, dtype=np.bool)
         for n1 in range(n_events):
             if not unique_events[n1]:
                 continue
-            tid1 = catalog['tid'].iloc[n1]
+            tid1 = catalog["tid"].iloc[n1]
             # apply the time criterion
-            dt_n1 = (catalog['origin_time'] - catalog['origin_time'].iloc[n1])
-            temporal_neighbors = (dt_n1 < dt_criterion) \
-                    & (dt_n1 >= np.timedelta64(0, 's')) \
-                    & unique_events
+            dt_n1 = catalog["origin_time"] - catalog["origin_time"].iloc[n1]
+            temporal_neighbors = (
+                (dt_n1 < dt_criterion)
+                & (dt_n1 >= np.timedelta64(0, "s"))
+                & unique_events
+            )
             # comment this line if you keep best CC
-            #temporal_neighbors[n1] = False
+            # temporal_neighbors[n1] = False
             # get indices of where the above selection is True
             candidates = np.where(temporal_neighbors)[0]
             if len(candidates) == 0:
                 continue
             # get template ids of all events that passed the time criterion
-            tids_candidates = np.int32([catalog['tid'].iloc[idx]
-                                       for idx in candidates])
+            tids_candidates = np.int32([catalog["tid"].iloc[idx] for idx in candidates])
             # apply the spatial criterion to the distance between
             # uncertainty ellipsoids
             ellips_dist = self.ellipsoid_dist[tid1].loc[tids_candidates].values
-            if similarity_criterion > -1.:
-                similarities = self.intertemplate_cc[tid1].\
-                        loc[tids_candidates].values
-                multiples = candidates[np.where(
-                    (ellips_dist < distance_criterion)\
-                   & (similarities >= similarity_criterion))[0]]
+            if similarity_criterion > -1.0:
+                similarities = self.intertemplate_cc[tid1].loc[tids_candidates].values
+                multiples = candidates[
+                    np.where(
+                        (ellips_dist < distance_criterion)
+                        & (similarities >= similarity_criterion)
+                    )[0]
+                ]
             else:
-                multiples = candidates[np.where(
-                    ellips_dist < distance_criterion)[0]]
+                multiples = candidates[np.where(ellips_dist < distance_criterion)[0]]
             # comment this line if you keep best CC
-            #if len(multiples) == 0:
+            # if len(multiples) == 0:
             #    continue
             # uncomment if you keep best CC
             if len(multiples) == 1:
@@ -2912,20 +3247,22 @@ class TemplateGroup(Family):
             else:
                 unique_events[multiples] = False
                 # find best CC and keep it
-                ccs = catalog['cc'].values[multiples]
+                ccs = catalog["cc"].values[multiples]
                 best_cc = multiples[ccs.argmax()]
                 unique_events[best_cc] = True
         t2 = give_time()
-        print(f'{t2-t1:.2f}s to flag the multiples')
+        print(f"{t2-t1:.2f}s to flag the multiples")
         # -------------------------------------------
-        catalog['unique_events'] = unique_events
+        catalog["unique_events"] = unique_events
         for tid in self.tids:
             tt = self.tindexes.loc[tid]
-            cat_indexes = catalog.index[catalog['tid'] == tid]
-            self.templates[tt].catalog.catalog['unique_events'] = \
-                    np.zeros(len(self.templates[tt].catalog.catalog), dtype=bool)
-            self.templates[tt].catalog.catalog.loc[cat_indexes, 'unique_events'] = \
-                    catalog.loc[cat_indexes, 'unique_events'].values
+            cat_indexes = catalog.index[catalog["tid"] == tid]
+            self.templates[tt].catalog.catalog["unique_events"] = np.zeros(
+                len(self.templates[tt].catalog.catalog), dtype=bool
+            )
+            self.templates[tt].catalog.catalog.loc[
+                cat_indexes, "unique_events"
+            ] = catalog.loc[cat_indexes, "unique_events"].values
 
     # plotting routines
     def plot_detection(self, idx, **kwargs):
@@ -2941,15 +3278,15 @@ class TemplateGroup(Family):
         fig: `plt.Figure`
             The figure showing the detected event.
         """
-        tid, evidx = self.catalog.catalog.index[idx].split('.')
+        tid, evidx = self.catalog.catalog.index[idx].split(".")
         tt = self.tindexes.loc[int(tid)]
-        print('Plotting:')
+        print("Plotting:")
         print(self.catalog.catalog.iloc[idx])
         fig = self.templates[tt].plot_detection(int(evidx), **kwargs)
         return fig
 
     def plot_recurrence_times(self, figsize=(20, 10)):
-        """Plot recurrence times vs detection times, template-wise.  
+        """Plot recurrence times vs detection times, template-wise.
 
         Parameters
         -----------
@@ -2957,27 +3294,37 @@ class TemplateGroup(Family):
             Size in inches of the figure (width, height).
         """
         import matplotlib.pyplot as plt
-        fig = plt.figure('recurrence_times', figsize=figsize)
+
+        fig = plt.figure("recurrence_times", figsize=figsize)
         ax = fig.add_subplot(111)
         for template in self.templates:
             template.plot_recurrence_times(ax=ax, annotate_axes=False)
-        ax.set_xlabel('Detection Time')
-        ax.set_ylabel('Recurrence Time (s)')
+        ax.set_xlabel("Detection Time")
+        ax.set_ylabel("Recurrence Time (s)")
         ax.semilogy()
         return fig
 
 
-
 class Stack(Event):
-    """A modification of the Event class for stacked events.  
+    """A modification of the Event class for stacked events."""
 
-    """
-    def __init__(self, stacked_traces, moveouts, stations, phases,
-            latitude=None, longitude=None, depth=None,
-            component_aliases={'N': ['N', '1'], 'E': ['E', '2'], 'Z': ['Z']},
-            sampling_rate=None, components=['N', 'E', 'Z'],
-            aux_data={}, id=None, filtered_data=None):
-        """Initialize an Event instance with basic attributes.  
+    def __init__(
+        self,
+        stacked_traces,
+        moveouts,
+        stations,
+        phases,
+        latitude=None,
+        longitude=None,
+        depth=None,
+        component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
+        sampling_rate=None,
+        components=["N", "E", "Z"],
+        aux_data={},
+        id=None,
+        filtered_data=None,
+    ):
+        """Initialize an Event instance with basic attributes.
 
         Parameters
         -----------
@@ -3002,7 +3349,7 @@ class Stack(Event):
         components: List of strings, default to ['N','E','Z']
             List of the components to use in reading and plotting methods.
         component_aliases: Dictionary, optional
-            Each entry of the dictionary is a list of strings.  
+            Each entry of the dictionary is a list of strings.
             `component_aliases[comp]` is the list of all aliases used for
             the same component 'comp'. For example, `component_aliases['N'] =
             ['N', '1']` means that both the 'N' and '1' channels will be mapped
@@ -3020,34 +3367,41 @@ class Stack(Event):
         self.stacked_traces = stacked_traces
         self.filtered_data = filtered_data
         self.origin_time = udt(datetime.datetime.now())
-        self.date = self.origin_time # for compatibility with Data class
-        self.stations = np.asarray(stations).astype('U')
-        self.components = np.asarray(components).astype('U')
+        self.date = self.origin_time  # for compatibility with Data class
+        self.stations = np.asarray(stations).astype("U")
+        self.components = np.asarray(components).astype("U")
         self.component_aliases = component_aliases
-        self.phases = np.asarray(phases).astype('U')
+        self.phases = np.asarray(phases).astype("U")
         self.latitude = latitude
         self.longitude = longitude
         self.depth = depth
-        self.where = ''
+        self.where = ""
         self.sampling_rate = sampling_rate
         if moveouts.dtype in (np.int32, np.int64):
-            print('Integer data type detected for moveouts. Are you sure these'
-                  ' are in seconds?')
+            print(
+                "Integer data type detected for moveouts. Are you sure these"
+                " are in seconds?"
+            )
         # format moveouts in a Pandas data frame
-        mv_table = {'stations': self.stations}
+        mv_table = {"stations": self.stations}
         for p, ph in enumerate(self.phases):
-            mv_table[f'moveouts_{ph.upper()}'] = moveouts[:, p]
+            mv_table[f"moveouts_{ph.upper()}"] = moveouts[:, p]
         self.moveouts = pd.DataFrame(mv_table)
-        self.moveouts.set_index('stations', inplace=True)
+        self.moveouts.set_index("stations", inplace=True)
         if id is None:
-            self.id = self.origin_time.strftime('%Y%m%d_%H%M%S')
+            self.id = self.origin_time.strftime("%Y%m%d_%H%M%S")
         else:
             self.id = id
 
-    def read_waveforms(self, duration, phase_on_comp={'N': 'S', '1': 'S',
-                  'E': 'S', '2': 'S', 'Z': 'P'}, offset_phase={'P': 1., 'S': 4.},
-                  time_shifted=True, offset_ot=cfg.buffer_extracted_events):
-        """Read waveform data.  
+    def read_waveforms(
+        self,
+        duration,
+        phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
+        offset_phase={"P": 1.0, "S": 4.0},
+        time_shifted=True,
+        offset_ot=cfg.buffer_extracted_events,
+    ):
+        """Read waveform data.
 
         Parameters
         -----------
@@ -3075,30 +3429,49 @@ class Stack(Event):
             for c, cp in enumerate(self.components):
                 ph = phase_on_comp[cp].upper()
                 if time_shifted:
-                    mv = offset_ot \
-                        + self.moveouts[f'moveouts_{ph}'].loc[sta] \
+                    mv = (
+                        offset_ot
+                        + self.moveouts[f"moveouts_{ph}"].loc[sta]
                         - offset_phase[ph]
+                    )
                 else:
                     mv = offset_ot
-                tr = self.stacked_traces.select(station=sta, component=cp)[0]\
-                        .slice(starttime=self.origin_time+mv,
-                               endtime=self.origin_time+mv+duration).copy()
-                tr = tr.trim(starttime=self.origin_time+mv,
-                             endtime=self.origin_time+mv+duration,
-                             pad=True, fill_value=0.)
+                tr = (
+                    self.stacked_traces.select(station=sta, component=cp)[0]
+                    .slice(
+                        starttime=self.origin_time + mv,
+                        endtime=self.origin_time + mv + duration,
+                    )
+                    .copy()
+                )
+                tr = tr.trim(
+                    starttime=self.origin_time + mv,
+                    endtime=self.origin_time + mv + duration,
+                    pad=True,
+                    fill_value=0.0,
+                )
                 self.traces += tr
-        aux_data = {f'offset_{ph.upper()}': offset_phase[ph] for ph in
-                offset_phase.keys()}
+        aux_data = {
+            f"offset_{ph.upper()}": offset_phase[ph] for ph in offset_phase.keys()
+        }
         self.set_aux_data(aux_data)
         self.set_availability(stations=self.stations)
 
-    def pick_PS_phases(self, duration, threshold_P=0.60, threshold_S=0.60,
-                       mini_batch_size=126, phase_on_comp={'N': 'S', '1': 'S',
-                       'E': 'S', '2': 'S', 'Z': 'P'}, n_threshold=1,
-                       err_threshold=100, central='mean', **kwargs):
-        """Use PhaseNet (Zhu et al., 2019) to pick P and S waves.  
+    def pick_PS_phases(
+        self,
+        duration,
+        threshold_P=0.60,
+        threshold_S=0.60,
+        mini_batch_size=126,
+        phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
+        n_threshold=1,
+        err_threshold=100,
+        central="mean",
+        **kwargs,
+    ):
+        """Use PhaseNet (Zhu et al., 2019) to pick P and S waves.
 
-        Note1: PhaseNet must be used with 3-comp data.  
+        Note1: PhaseNet must be used with 3-comp data.
         Note2: Extra kwargs are passed to
         `phasenet.wrapper.automatic_detection`.
 
@@ -3122,61 +3495,76 @@ class Stack(Event):
             extracted on the north component.
         n_threshold: scalar int, optional
             Used if `self.filtered_data` is not None. Minimum number of
-            successful picks to keep the phase. Default to 1. 
+            successful picks to keep the phase. Default to 1.
         err_threshold: scalar int or float, optional
             Used if `self.filtered_data` is not None. Maximum error (in samples)
             on pick to keep the phase. Default to 100.
         central: string, optional
             Used if `self.filtered_data` is not None. Either 'mean' or 'mode'.
             The pick is either taken as the mean or the mode of the empirical
-            distribution of picks. 
+            distribution of picks.
         """
         from phasenet import wrapper as PN
+
         # read waveforms in "picking" mode
-        self.read_waveforms(duration, offset_ot=0., phase_on_comp=phase_on_comp,
-                time_shifted=False)
-        data_arr = self.get_np_array(self.stations, components=['N', 'E', 'Z'])
+        self.read_waveforms(
+            duration, offset_ot=0.0, phase_on_comp=phase_on_comp, time_shifted=False
+        )
+        data_arr = self.get_np_array(self.stations, components=["N", "E", "Z"])
         if self.filtered_data is not None:
-            data_arr = np.concatenate([data_arr[np.newaxis, ...],
-                self.filtered_data], axis=0)
+            data_arr = np.concatenate(
+                [data_arr[np.newaxis, ...], self.filtered_data], axis=0
+            )
             # call PhaseNet
             PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
-                    data_arr, self.stations,
-                    mini_batch_size=mini_batch_size, format='ram',
-                    threshold_P=threshold_P, threshold_S=threshold_S,
-                    **kwargs)
+                data_arr,
+                self.stations,
+                mini_batch_size=mini_batch_size,
+                format="ram",
+                threshold_P=threshold_P,
+                threshold_S=threshold_S,
+                **kwargs,
+            )
             PhaseNet_picks = PN.get_all_picks(PhaseNet_picks)
             PhaseNet_picks = PN.fit_probability_density(PhaseNet_picks)
             PhaseNet_picks = PN.select_picks_family(
-                    PhaseNet_picks, n_threshold, err_threshold, central=central)
+                PhaseNet_picks, n_threshold, err_threshold, central=central
+            )
             # format picks in pandas DataFrame
-            pandas_picks = {'stations': self.stations}
-            for ph in ['P', 'S']:
+            pandas_picks = {"stations": self.stations}
+            for ph in ["P", "S"]:
                 rel_picks_sec = np.zeros(len(self.stations), dtype=np.float32)
                 err_picks = np.zeros(len(self.stations), dtype=np.float32)
                 abs_picks = np.zeros(len(self.stations), dtype=object)
                 for s, sta in enumerate(self.stations):
-                    if sta in PhaseNet_picks[f'{ph}_picks'].keys():
-                        rel_picks_sec[s] = PhaseNet_picks[f'{ph}_picks'][sta]/self.sr
-                        err_picks[s] = PhaseNet_picks[f'{ph}_err'][sta]/self.sr
-                        abs_picks[s] = self.traces.select(station=sta)[0].stats.starttime \
-                                + rel_picks_sec[s]
-                pandas_picks[f'{ph}_picks_sec'] = rel_picks_sec
-                pandas_picks[f'{ph}_err'] = err_picks
-                pandas_picks[f'{ph}_abs_picks'] = abs_picks
+                    if sta in PhaseNet_picks[f"{ph}_picks"].keys():
+                        rel_picks_sec[s] = PhaseNet_picks[f"{ph}_picks"][sta] / self.sr
+                        err_picks[s] = PhaseNet_picks[f"{ph}_err"][sta] / self.sr
+                        abs_picks[s] = (
+                            self.traces.select(station=sta)[0].stats.starttime
+                            + rel_picks_sec[s]
+                        )
+                pandas_picks[f"{ph}_picks_sec"] = rel_picks_sec
+                pandas_picks[f"{ph}_err"] = err_picks
+                pandas_picks[f"{ph}_abs_picks"] = abs_picks
             self.picks = pd.DataFrame(pandas_picks)
-            self.picks.set_index('stations', inplace=True)
-            self.picks.replace(0., np.nan, inplace=True)
+            self.picks.set_index("stations", inplace=True)
+            self.picks.replace(0.0, np.nan, inplace=True)
         else:
-            super(Stack, self).pick_PS_phases(duration, '',
-                    threshold_P=threshold_P, threshold_S=threshold_S,
-                    read_waveforms=False)
+            super(Stack, self).pick_PS_phases(
+                duration,
+                "",
+                threshold_P=threshold_P,
+                threshold_S=threshold_S,
+                read_waveforms=False,
+            )
+
 
 # -------------------------------------------------
 # old classes that will disappear in the future
 
-#class Stack(object):
-#    """A class for stacked waveforms.  
+# class Stack(object):
+#    """A class for stacked waveforms.
 #
 #    """
 #
@@ -3270,7 +3658,7 @@ class Stack(Event):
 #                tr.stats.sampling_rate = self.sampling_rate
 #                self.traces += tr
 
-#class FamilyCatalog(object):
+# class FamilyCatalog(object):
 #
 #    def __init__(self, filename, db_path_M, db_path=cfg.dbpath):
 #        self.filename = filename
@@ -3370,7 +3758,7 @@ class Stack(Event):
 #                print(f'Template {self.tid} catalog has no attribute {attr}')
 #        return catalog
 #
-#class FamilyGroupCatalog(object):
+# class FamilyGroupCatalog(object):
 #
 #    def __init__(self, families=None, filenames=None,
 #                 db_path_M=None, db_path=cfg.dbpath):
@@ -3545,7 +3933,7 @@ class Stack(Event):
 #        if return_catalog:
 #            return catalog
 #
-#class FamilyEvents(object):
+# class FamilyEvents(object):
 #
 #    def __init__(self, tid, db_path_T, db_path_M, db_path=cfg.dbpath):
 #        """
@@ -3591,7 +3979,7 @@ class Stack(Event):
 #
 #    @property
 #    def dtt_P(self, max_corr=1000.):
-#        """ Travel-time corrections to individual events.  
+#        """ Travel-time corrections to individual events.
 #
 #        Parameters
 #        -----------
@@ -3612,7 +4000,7 @@ class Stack(Event):
 #
 #    @property
 #    def dtt_S(self, max_corr=1000.):
-#        """ Travel-time corrections to individual events.  
+#        """ Travel-time corrections to individual events.
 #
 #        Parameters
 #        -----------
@@ -3632,7 +4020,7 @@ class Stack(Event):
 #        return _dtt_S
 #
 #    def get_tt_corrections(self, max_corr=1000.):
-#        """ Read travel-time corrections to individual events.  
+#        """ Read travel-time corrections to individual events.
 #
 #        Parameters
 #        -----------
@@ -3662,7 +4050,7 @@ class Stack(Event):
 #                        dtype=np.float32)
 #
 #    def read_data(self, **kwargs):
-#        """Call 'fetch_detection_waveforms' from utils.  
+#        """Call 'fetch_detection_waveforms' from utils.
 #
 #        Read waveforms from the event waveforms that were
 #        extracted at the time of detection.
@@ -4133,7 +4521,7 @@ class Stack(Event):
 #        with open(os.path.join(path, filename), 'w') as f:
 #            for s in range(len(subnet.stations)):
 #                f.write('{:<5}\t{:.6f}\t{:.6f}\t{:.3f}\n'.
-#                        format(subnet.stations[s], subnet.latitude[s], 
+#                        format(subnet.stations[s], subnet.latitude[s],
 #                               subnet.longitude[s], -1000.*subnet.depth[s]))
 #
 #    def write_GrowClust_eventlist(self, filename, path):
@@ -4186,7 +4574,7 @@ class Stack(Event):
 #                                       self.lags_P[n, s]/self.sr,
 #                                       self.CCs_P[n, s]))
 #
-#class FamilyGroupEvents(FamilyEvents):
+# class FamilyGroupEvents(FamilyEvents):
 #
 #    def __init__(self, tids, db_path_T, db_path_M, db_path=cfg.dbpath):
 #        self.tids = tids
@@ -4536,13 +4924,13 @@ class Stack(Event):
 #
 #
 ##class TemplateGroup(object):
-##    """A TemplateGroup class to handle groups of templates.  
+##    """A TemplateGroup class to handle groups of templates.
 ##
 ##
 ##    """
 ##
 ##    def __init__(self, tids, db_path_T, db_path=cfg.dbpath):
-##        """Read the templates' data and metadata.  
+##        """Read the templates' data and metadata.
 ##
 ##        Parameters
 ##        -----------
@@ -4565,7 +4953,7 @@ class Stack(Event):
 ##            self.tids_map[tid] = t
 ##
 ##    def attach_intertp_distances(self):
-##        """Compute distance between all template pairs.  
+##        """Compute distance between all template pairs.
 ##
 ##        """
 ##        print('Computing the inter-template distances...')
@@ -4574,13 +4962,13 @@ class Stack(Event):
 ##
 ##    def attach_directional_errors(self):
 ##        """Compute the length of the uncertainty ellipsoid
-##        inter-template direction.  
+##        inter-template direction.
 ##
-##        New Attributes 
+##        New Attributes
 ##        ----------
 ##        directional_errors: (n_templates, n_templates) pandas DataFrame
 ##            The length, in kilometers, of the uncertainty ellipsoid in the
-##            inter-template direction.  
+##            inter-template direction.
 ##            Example: self.directional_errors.loc[tid1, tid2] is the width of
 ##            template tid1's uncertainty ellipsoid in the direction of
 ##            template tid2.
@@ -4641,7 +5029,7 @@ class Stack(Event):
 ##                columns=[tid for tid in self.tids],
 ##                index=[tid for tid in self.tids],
 ##                data=ellipsoid_distances)
-##    
+##
 ##    def read_stacks(self, **SVDWF_kwargs):
 ##        self.db_path_M = SVDWF_kwargs.get('db_path_M', 'none')
 ##        self.stacks = []
@@ -4724,7 +5112,7 @@ class Stack(Event):
 ##                    keep = (weights[:, s, c] != 0.)\
 ##                          &  (np.sum(tp_array[slice_], axis=-1).squeeze() != 0.)
 ##                    if (np.sum(keep) == 0) or (np.sum(data[(t,)+slice_[1:]]) == 0):
-##                        # occurs if this station is not among the 
+##                        # occurs if this station is not among the
 ##                        # n_stations closest stations
 ##                        # or if no data were available
 ##                        continue
@@ -4837,7 +5225,7 @@ class Stack(Event):
 ##        with open(os.path.join(path, filename), 'w') as f:
 ##            for s in range(len(subnet.stations)):
 ##                f.write('{:<5}\t{:.6f}\t{:.6f}\t{:.3f}\n'.
-##                        format(subnet.stations[s], subnet.latitude[s], 
+##                        format(subnet.stations[s], subnet.latitude[s],
 ##                               subnet.longitude[s], -1000.*subnet.depth[s]))
 ##
 ##    def write_GrowClust_eventlist(self, filename, path):
@@ -4878,4 +5266,3 @@ class Stack(Event):
 ##                                    format(self.CCs_stations[s],
 ##                                           self.lags_P[t1, t2, s]/sr,
 ##                                           self.CCs_P[t1, t2, s]))
-

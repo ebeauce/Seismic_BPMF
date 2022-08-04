@@ -10,7 +10,7 @@ import glob
 
 
 def load_pykonal_tts(filename, path):
-    """Load the travel-time grid computed with Pykonal.  
+    """Load the travel-time grid computed with Pykonal.
 
     Load the travel times previously computed with Pykonal and reformat the axes
     to follow NLLoc's convention.
@@ -38,18 +38,18 @@ def load_pykonal_tts(filename, path):
     """
     path_tts = os.path.join(path, filename)
     # load grid point coordinates
-    with h5.File(path_tts, mode='r') as f:
-        latitude = f['source_coordinates']['latitude'][()]
-        longitude = f['source_coordinates']['longitude'][()]
-        depth = f['source_coordinates']['depth'][()]
+    with h5.File(path_tts, mode="r") as f:
+        latitude = f["source_coordinates"]["latitude"][()]
+        longitude = f["source_coordinates"]["longitude"][()]
+        depth = f["source_coordinates"]["depth"][()]
 
     # load travel times
     tts = {}
-    with h5.File(path_tts, mode='r') as f:
-        for phase in ['P', 'S']:
+    with h5.File(path_tts, mode="r") as f:
+        for phase in ["P", "S"]:
             tts[phase] = {}
-            for sta in f[f'tt_{phase}'].keys():
-                tts[phase][sta] = f[f'tt_{phase}'][sta][()]
+            for sta in f[f"tt_{phase}"].keys():
+                tts[phase][sta] = f[f"tt_{phase}"][sta][()]
 
     # initial axis order is (depth, latitude, longitude) with decreasing depths
 
@@ -62,7 +62,7 @@ def load_pykonal_tts(filename, path):
     latitude = latitude[::-1, ::-1, :]
     depth = depth[::-1, ::-1, :]
 
-    for phase in ['P', 'S']:
+    for phase in ["P", "S"]:
         for sta in tts[phase].keys():
             tts[phase][sta] = tts[phase][sta][::-1, ::-1, :]
 
@@ -70,14 +70,15 @@ def load_pykonal_tts(filename, path):
     longitude = np.swapaxes(longitude, axis1=0, axis2=2)
     latitude = np.swapaxes(latitude, axis1=0, axis2=2)
     depth = np.swapaxes(depth, axis1=0, axis2=2)
-    for phase in ['P', 'S']:
+    for phase in ["P", "S"]:
         for sta in tts[phase].keys():
             tts[phase][sta] = np.swapaxes(tts[phase][sta], axis1=0, axis2=2)
 
     return longitude, latitude, depth, tts
 
+
 def read_NLLoc_outputs(filename, path):
-    """Read the NLLoc output hyp file.  
+    """Read the NLLoc output hyp file.
 
     Parameters
     -----------
@@ -95,91 +96,98 @@ def read_NLLoc_outputs(filename, path):
         `pandas.DataFrame` with the predicted arrival times and the residuals.
     """
     hypocenter = {}
-    f = open(os.path.join(path, filename), mode='r')
+    f = open(os.path.join(path, filename), mode="r")
     # read until relevant line
     for line in f:
-        if line.split()[0] == 'GEOGRAPHIC':
+        if line.split()[0] == "GEOGRAPHIC":
             hypocenter_info = line[:-1].split()
             break
 
-    hypocenter['origin_time'] = '{}-{}-{}T{}:{}:{}'.format(
-            hypocenter_info[2],
-            hypocenter_info[3],
-            hypocenter_info[4],
-            hypocenter_info[5],
-            hypocenter_info[6],
-            max(0., float(hypocenter_info[7])))
-    hypocenter['origin_time'] = pd.Timestamp(hypocenter['origin_time'])
-    if float(hypocenter_info[7]) < 0.:
+    hypocenter["origin_time"] = "{}-{}-{}T{}:{}:{}".format(
+        hypocenter_info[2],
+        hypocenter_info[3],
+        hypocenter_info[4],
+        hypocenter_info[5],
+        hypocenter_info[6],
+        max(0.0, float(hypocenter_info[7])),
+    )
+    hypocenter["origin_time"] = pd.Timestamp(hypocenter["origin_time"])
+    if float(hypocenter_info[7]) < 0.0:
         # it happens that NLLoc returns negative seconds
-        hypocenter['origin_time'] -= \
-                pd.Timedelta(float(hypocenter_info[7]), unit='s')
+        hypocenter["origin_time"] -= pd.Timedelta(float(hypocenter_info[7]), unit="s")
 
-    hypocenter['latitude'] = float(hypocenter_info[9])
-    hypocenter['longitude'] = float(hypocenter_info[11])
-    hypocenter['depth'] = float(hypocenter_info[13])
+    hypocenter["latitude"] = float(hypocenter_info[9])
+    hypocenter["longitude"] = float(hypocenter_info[11])
+    hypocenter["depth"] = float(hypocenter_info[13])
     # read until relevant line
     for line in f:
-        if line.split()[0] == 'QUALITY':
+        if line.split()[0] == "QUALITY":
             tt_rms = float(line.split()[8])
             break
-    hypocenter['tt_rms'] = tt_rms
+    hypocenter["tt_rms"] = tt_rms
     # read until relevant line
     for line in f:
-        if line.split()[0] == 'STATISTICS':
+        if line.split()[0] == "STATISTICS":
             uncertainty_info = line[:-1].split()
             break
     # warning! The covariance matrix is expressed
     # in a LEFT HANDED system (make sure to define
     # rotations accordingly!)
     cov_mat = np.zeros((3, 3), dtype=np.float32)
-    cov_mat[0, 0] = float(uncertainty_info[8]) # cov XX
-    cov_mat[0, 1] = float(uncertainty_info[10]) # cov XY
-    cov_mat[0, 2] = float(uncertainty_info[12]) # cov XZ
-    cov_mat[1, 1] = float(uncertainty_info[14]) # cov YY
-    cov_mat[1, 2] = float(uncertainty_info[16]) # cov YZ
-    cov_mat[2, 2] = float(uncertainty_info[18]) # cov ZZ
+    cov_mat[0, 0] = float(uncertainty_info[8])  # cov XX
+    cov_mat[0, 1] = float(uncertainty_info[10])  # cov XY
+    cov_mat[0, 2] = float(uncertainty_info[12])  # cov XZ
+    cov_mat[1, 1] = float(uncertainty_info[14])  # cov YY
+    cov_mat[1, 2] = float(uncertainty_info[16])  # cov YZ
+    cov_mat[2, 2] = float(uncertainty_info[18])  # cov ZZ
     # symmetrical matrix:
-    hypocenter['cov_mat'] = cov_mat + cov_mat.T - np.diag(cov_mat.diagonal())
+    hypocenter["cov_mat"] = cov_mat + cov_mat.T - np.diag(cov_mat.diagonal())
     # read until relevant line
     for line in f:
-        if line.split()[0] == 'PHASE':
+        if line.split()[0] == "PHASE":
             break
     predicted_times = {}
-    predicted_times['P_residuals_sec'] = []
-    predicted_times['P_tt_sec'] = []
-    predicted_times['S_residuals_sec'] = []
-    predicted_times['S_tt_sec'] = []
-    predicted_times['stations_P'] = []
-    predicted_times['stations_S'] = []
+    predicted_times["P_residuals_sec"] = []
+    predicted_times["P_tt_sec"] = []
+    predicted_times["S_residuals_sec"] = []
+    predicted_times["S_tt_sec"] = []
+    predicted_times["stations_P"] = []
+    predicted_times["stations_S"] = []
     for line in f:
-        if line == 'END_PHASE\n':
+        if line == "END_PHASE\n":
             break
         phase_info = line[:-1].split()
-        if phase_info[4] == 'P':
-            predicted_times['stations_P'].append(phase_info[0])
-            predicted_times['P_tt_sec'].append(float(phase_info[15]))
-            predicted_times['P_residuals_sec'].append(float(phase_info[16]))
-        elif phase_info[4] == 'S':
-            predicted_times['stations_S'].append(phase_info[0])
-            predicted_times['S_tt_sec'].append(float(phase_info[15]))
-            predicted_times['S_residuals_sec'].append(float(phase_info[16]))
+        if phase_info[4] == "P":
+            predicted_times["stations_P"].append(phase_info[0])
+            predicted_times["P_tt_sec"].append(float(phase_info[15]))
+            predicted_times["P_residuals_sec"].append(float(phase_info[16]))
+        elif phase_info[4] == "S":
+            predicted_times["stations_S"].append(phase_info[0])
+            predicted_times["S_tt_sec"].append(float(phase_info[15]))
+            predicted_times["S_residuals_sec"].append(float(phase_info[16]))
     f.close()
-    test = list(set(predicted_times['stations_P']) -
-            set(predicted_times['stations_S']))
+    test = list(set(predicted_times["stations_P"]) - set(predicted_times["stations_S"]))
     if len(test) > 0:
-        print('Unexpected output: Not the same stations for P and S waves.')
+        print("Unexpected output: Not the same stations for P and S waves.")
         return
-    predicted_times['stations'] = predicted_times['stations_P']
-    del predicted_times['stations_P']
-    del predicted_times['stations_S']
+    predicted_times["stations"] = predicted_times["stations_P"]
+    del predicted_times["stations_P"]
+    del predicted_times["stations_S"]
     predicted_times = pd.DataFrame(predicted_times)
-    predicted_times.set_index('stations', inplace=True)
+    predicted_times.set_index("stations", inplace=True)
     return hypocenter, predicted_times
 
-def write_NLLoc_inputs(longitude, latitude, depth, tts, net,
-        output_path=cfg.NLLoc_input_path, basename=cfg.NLLoc_basename):
-    """Write the hdr and buf travel-time files for NLLoc.  
+
+def write_NLLoc_inputs(
+    longitude,
+    latitude,
+    depth,
+    tts,
+    net,
+    output_path=cfg.NLLoc_input_path,
+    basename=cfg.NLLoc_basename,
+):
+    """Write the hdr and buf travel-time files for NLLoc.
 
     Write the hdr and buf NLLoc files assuming the GLOBAL mode. In this mode,
     coordinates are given in geographic coordinates: longitude, latitude and
@@ -217,44 +225,46 @@ def write_NLLoc_inputs(longitude, latitude, depth, tts, net,
     lon_ori = longitude.min()
     lat_ori = latitude.min()
     z_ori = depth.min()
-    print(f'The origin of the grid is: {lon_ori:.4f}, {lat_ori:.4f},'
-          f' {z_ori:.3f}km')
+    print(f"The origin of the grid is: {lon_ori:.4f}, {lat_ori:.4f}," f" {z_ori:.3f}km")
     # get the grid spacing
     d_lon = longitude[1, 0, 0] - longitude[0, 0, 0]
     d_lat = latitude[0, 1, 0] - latitude[0, 0, 0]
     d_dep = depth[0, 0, 1] - depth[0, 0, 0]
-    print(f'Longitude spacing: {d_lon:.3f}deg')
-    print(f'Latitude spacing: {d_lat:.3f}deg')
-    print(f'Depth spacing: {d_dep:.3f}km')
+    print(f"Longitude spacing: {d_lon:.3f}deg")
+    print(f"Latitude spacing: {d_lat:.3f}deg")
+    print(f"Depth spacing: {d_dep:.3f}km")
     # specify grid type
-    grid_type = 'TIME'
+    grid_type = "TIME"
     # define line1
-    line1 = f'{n_lon} {n_lat} {n_dep} {lon_ori} {lat_ori} {z_ori} '\
-            f'{d_lon:.3f} {d_lat:.3f} {d_dep:.3f} {grid_type}\n'
+    line1 = (
+        f"{n_lon} {n_lat} {n_dep} {lon_ori} {lat_ori} {z_ori} "
+        f"{d_lon:.3f} {d_lat:.3f} {d_dep:.3f} {grid_type}\n"
+    )
     # --------------------------------------------------
     #    line 2: station-specific line
     # --------------------------------------------------
     for s, sta in enumerate(net.stations):
-        print(f'Station {sta}')
+        print(f"Station {sta}")
         for phase in tts.keys():
-            print(f'--- Phase {phase.upper()}')
-            filename = f'{basename}.{phase.upper()}.{sta}.time'
-            line2 = f'{sta} {net.longitude[s]} {net.latitude[s]} '\
-                    f'{net.depth[s]}\n'
-            line3 = 'TRANS GLOBAL\n'
+            print(f"--- Phase {phase.upper()}")
+            filename = f"{basename}.{phase.upper()}.{sta}.time"
+            line2 = f"{sta} {net.longitude[s]} {net.latitude[s]} " f"{net.depth[s]}\n"
+            line3 = "TRANS GLOBAL\n"
             # write the header file
-            with open(os.path.join(output_path, filename+'.hdr'), mode='w') as f:
+            with open(os.path.join(output_path, filename + ".hdr"), mode="w") as f:
                 f.write(line1)
                 f.write(line2)
                 f.write(line3)
             # wriute the data binary file
-            with open(os.path.join(output_path, filename+'.buf'), mode='w') as f:
+            with open(os.path.join(output_path, filename + ".buf"), mode="w") as f:
                 np.float32(tts[phase][sta].flatten()).tofile(f)
-    print('Done!')
+    print("Done!")
 
-def write_NLLoc_obs(origin_time, picks, stations, filename,
-        path=cfg.NLLoc_input_path, err_min=0.04):
-    """Write the .obs file for NLLoc.  
+
+def write_NLLoc_obs(
+    origin_time, picks, stations, filename, path=cfg.NLLoc_input_path, err_min=0.04
+):
+    """Write the .obs file for NLLoc.
 
     Parameters
     -----------
@@ -274,142 +284,155 @@ def write_NLLoc_obs(origin_time, picks, stations, filename,
     """
     from obspy import UTCDateTime as udt
 
-    NLLoc = open(os.path.join(path, filename), 'a')
+    NLLoc = open(os.path.join(path, filename), "a")
 
     ot = udt(origin_time)
 
     for st in stations:
-        #if st not in stations_to_use:
+        # if st not in stations_to_use:
         #    continue
-        if st in picks['P_abs_picks'].dropna().index:
-            if 'P_err' in picks.columns:
-                err = min(err_min, picks.loc[st, 'P_err'])
+        if st in picks["P_abs_picks"].dropna().index:
+            if "P_err" in picks.columns:
+                err = min(err_min, picks.loc[st, "P_err"])
             else:
                 err = err_min
-            P_arrival_time = udt(picks.loc[st]['P_abs_picks'])
-            NLLoc.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.
-                    format(st,   # station name
-                           '?',  # instrument type
-                           '?',  # component
-                           '?',  # P phase onset (?)
-                           'P',  # Phase type
-                           '?',  # first motion
-                           P_arrival_time.strftime('%Y%m%d'),
-                           P_arrival_time.strftime('%H%M'),
-                           P_arrival_time.strftime('%S.%f'),
-                           'GAU', # Gaussian errors
-                           #max(dt, picks['picks_p'][st][1]), # uncertainty [s]
-                           err, # uncertainty [s]
-                           '-1.0', # coda duration
-                           '-1.0', # amplitude
-                           '-1.0', # period
-                           '1'  # prior weight
-                           ))
+            P_arrival_time = udt(picks.loc[st]["P_abs_picks"])
+            NLLoc.write(
+                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
+                    st,  # station name
+                    "?",  # instrument type
+                    "?",  # component
+                    "?",  # P phase onset (?)
+                    "P",  # Phase type
+                    "?",  # first motion
+                    P_arrival_time.strftime("%Y%m%d"),
+                    P_arrival_time.strftime("%H%M"),
+                    P_arrival_time.strftime("%S.%f"),
+                    "GAU",  # Gaussian errors
+                    # max(dt, picks['picks_p'][st][1]), # uncertainty [s]
+                    err,  # uncertainty [s]
+                    "-1.0",  # coda duration
+                    "-1.0",  # amplitude
+                    "-1.0",  # period
+                    "1",  # prior weight
+                )
+            )
         else:
             P_arrival_time = ot
             # create a fake pick item that will not be ised
-            NLLoc.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.
-                    format(st,   # station name
-                           '?',  # instrument type
-                           '?',  # component
-                           '?',  # P phase onset (?)
-                           'P',  # Phase type
-                           '?',  # first motion
-                           P_arrival_time.strftime('%Y%m%d'),
-                           P_arrival_time.strftime('%H%M'),
-                           P_arrival_time.strftime('%S.%f'),
-                           'GAU', # Gaussian errors
-                           0., # uncertainty [s]
-                           '-1.0', # coda duration
-                           '-1.0', # amplitude
-                           '-1.0', # period
-                           '0'  # prior weight
-                           ))
-        if st in picks['S_abs_picks'].dropna().index:
-            if 'S_err' in picks.columns:
-                err = min(err_min, picks.loc[st, 'S_err'])
+            NLLoc.write(
+                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
+                    st,  # station name
+                    "?",  # instrument type
+                    "?",  # component
+                    "?",  # P phase onset (?)
+                    "P",  # Phase type
+                    "?",  # first motion
+                    P_arrival_time.strftime("%Y%m%d"),
+                    P_arrival_time.strftime("%H%M"),
+                    P_arrival_time.strftime("%S.%f"),
+                    "GAU",  # Gaussian errors
+                    0.0,  # uncertainty [s]
+                    "-1.0",  # coda duration
+                    "-1.0",  # amplitude
+                    "-1.0",  # period
+                    "0",  # prior weight
+                )
+            )
+        if st in picks["S_abs_picks"].dropna().index:
+            if "S_err" in picks.columns:
+                err = min(err_min, picks.loc[st, "S_err"])
             else:
                 err = err_min
-            S_arrival_time = udt(picks.loc[st]['S_abs_picks'])
-            NLLoc.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.
-                    format(st,   # station name
-                           '?',  # instrument type
-                           '?',  # component
-                           '?',  # P phase onset (?)
-                           'S',  # Phase type
-                           '?',  # first motion
-                           S_arrival_time.strftime('%Y%m%d'),
-                           S_arrival_time.strftime('%H%M'),
-                           S_arrival_time.strftime('%S.%f'),
-                           'GAU', # Gaussian errors
-                           err, # uncertainty [s]
-                           '-1.0', # coda duration
-                           '-1.0', # amplitude
-                           '-1.0', # period
-                           '1'  # prior weight
-                           ))
+            S_arrival_time = udt(picks.loc[st]["S_abs_picks"])
+            NLLoc.write(
+                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
+                    st,  # station name
+                    "?",  # instrument type
+                    "?",  # component
+                    "?",  # P phase onset (?)
+                    "S",  # Phase type
+                    "?",  # first motion
+                    S_arrival_time.strftime("%Y%m%d"),
+                    S_arrival_time.strftime("%H%M"),
+                    S_arrival_time.strftime("%S.%f"),
+                    "GAU",  # Gaussian errors
+                    err,  # uncertainty [s]
+                    "-1.0",  # coda duration
+                    "-1.0",  # amplitude
+                    "-1.0",  # period
+                    "1",  # prior weight
+                )
+            )
         else:
             S_arrival_time = ot
             # create a fake pick item that will not be ised
-            NLLoc.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.
-                    format(st,   # station name
-                           '?',  # instrument type
-                           '?',  # component
-                           '?',  # P phase onset (?)
-                           'S',  # Phase type
-                           '?',  # first motion
-                           S_arrival_time.strftime('%Y%m%d'),
-                           S_arrival_time.strftime('%H%M'),
-                           S_arrival_time.strftime('%S.%f'),
-                           'GAU', # Gaussian errors
-                           0., # uncertainty [s]
-                           '-1.0', # coda duration
-                           '-1.0', # amplitude
-                           '-1.0', # period
-                           '0'  # prior weight
-                           ))
+            NLLoc.write(
+                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
+                    st,  # station name
+                    "?",  # instrument type
+                    "?",  # component
+                    "?",  # P phase onset (?)
+                    "S",  # Phase type
+                    "?",  # first motion
+                    S_arrival_time.strftime("%Y%m%d"),
+                    S_arrival_time.strftime("%H%M"),
+                    S_arrival_time.strftime("%S.%f"),
+                    "GAU",  # Gaussian errors
+                    0.0,  # uncertainty [s]
+                    "-1.0",  # coda duration
+                    "-1.0",  # amplitude
+                    "-1.0",  # period
+                    "0",  # prior weight
+                )
+            )
 
-    NLLoc.write(' \n')
+    NLLoc.write(" \n")
     NLLoc.close()
 
-def write_NLLoc_control(ctrl_filename, out_filename, obs_filename,
-        TRANS='GLOBAL', author='Eric Beauce',
-        affiliation='Lamont-Doherty Earth Observatory',
-        NLLoc_input_path=cfg.NLLoc_input_path,
-        NLLoc_output_path=cfg.NLLoc_output_path,
-        NLLoc_basename=cfg.NLLoc_basename,
-        min_node_size=0.00001,
-        method='EDT_OT_WT_ML',
-        angle_grid='ANGLES_NO',
-        grid='MISFIT'):
-    """Write the NLLoc control file.  
-    """
-    fc = open(os.path.join(NLLoc_input_path, ctrl_filename), 'w')
-    fc.write('# ---------------------------\n')
-    fc.write('#    Generic control file statements    \n')
-    fc.write('# ---------------------------\n')
-    fc.write('CONTROL  3  54321\n')
-    fc.write(f'TRANS  {TRANS}\n')
-    fc.write('# ---------------------------\n')
-    fc.write('#    NLLoc control file statements    \n')
-    fc.write('# ---------------------------\n')
-    fc.write(f'LOCSIG  {author}  --  {affiliation}\n')
+
+def write_NLLoc_control(
+    ctrl_filename,
+    out_filename,
+    obs_filename,
+    TRANS="GLOBAL",
+    author="Eric Beauce",
+    affiliation="Lamont-Doherty Earth Observatory",
+    NLLoc_input_path=cfg.NLLoc_input_path,
+    NLLoc_output_path=cfg.NLLoc_output_path,
+    NLLoc_basename=cfg.NLLoc_basename,
+    min_node_size=0.00001,
+    method="EDT_OT_WT_ML",
+    angle_grid="ANGLES_NO",
+    grid="MISFIT",
+):
+    """Write the NLLoc control file."""
+    fc = open(os.path.join(NLLoc_input_path, ctrl_filename), "w")
+    fc.write("# ---------------------------\n")
+    fc.write("#    Generic control file statements    \n")
+    fc.write("# ---------------------------\n")
+    fc.write("CONTROL  3  54321\n")
+    fc.write(f"TRANS  {TRANS}\n")
+    fc.write("# ---------------------------\n")
+    fc.write("#    NLLoc control file statements    \n")
+    fc.write("# ---------------------------\n")
+    fc.write(f"LOCSIG  {author}  --  {affiliation}\n")
     in_fn = os.path.join(NLLoc_input_path, obs_filename)
     NLLoc_basename = os.path.join(NLLoc_input_path, NLLoc_basename)
     out_fn = os.path.join(NLLoc_output_path, out_filename)
-    fc.write(f'LOCFILES  {in_fn}  NLLOC_OBS  {NLLoc_basename}  {out_fn}\n')
-    #fc.write('LOCHYPOUT  SAVE_NLLOC_ALL  SAVE_HYPOINV_SUM\n')
-    fc.write('LOCHYPOUT  SAVE_NLLOC_ALL\n')
-    fc.write(f'LOCSEARCH  OCT 10 10 10 {min_node_size} 10000 1000 1 1\n')
+    fc.write(f"LOCFILES  {in_fn}  NLLOC_OBS  {NLLoc_basename}  {out_fn}\n")
+    # fc.write('LOCHYPOUT  SAVE_NLLOC_ALL  SAVE_HYPOINV_SUM\n')
+    fc.write("LOCHYPOUT  SAVE_NLLOC_ALL\n")
+    fc.write(f"LOCSEARCH  OCT 10 10 10 {min_node_size} 10000 1000 1 1\n")
     # read header file to automatically determine grid dimensions
-    fn = glob.glob(os.path.join(NLLoc_input_path, '*hdr'))[0]
-    with open(fn, 'r') as fhdr:
+    fn = glob.glob(os.path.join(NLLoc_input_path, "*hdr"))[0]
+    with open(fn, "r") as fhdr:
         dim = fhdr.readline()
-    fc.write('LOCGRID  '+'  '.join(dim.split()[:-1])+f'  {grid}  SAVE\n')
-    fc.write(f'LOCMETH {method} 5000 6 -1 -1 -1 6 -1 1\n')
-    fc.write('LOCGAU  0.2  5.0\n')
-    fc.write('LOCGAU2 0.02 0.05 10.0\n')
-    fc.write('LOCPHASEID  P\n')
-    fc.write('LOCPHASEID  S\n')
-    fc.write('LOCQUAL2ERR 0.1 0.5 1.0 2.0 99999.9\n')
-    fc.write(f'LOCANGLES  {angle_grid}  5\n')
+    fc.write("LOCGRID  " + "  ".join(dim.split()[:-1]) + f"  {grid}  SAVE\n")
+    fc.write(f"LOCMETH {method} 5000 6 -1 -1 -1 6 -1 1\n")
+    fc.write("LOCGAU  0.2  5.0\n")
+    fc.write("LOCGAU2 0.02 0.05 10.0\n")
+    fc.write("LOCPHASEID  P\n")
+    fc.write("LOCPHASEID  S\n")
+    fc.write("LOCQUAL2ERR 0.1 0.5 1.0 2.0 99999.9\n")
+    fc.write(f"LOCANGLES  {angle_grid}  5\n")
