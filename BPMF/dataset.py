@@ -13,6 +13,7 @@ import datetime
 from obspy import UTCDateTime as udt
 
 from abc import ABC, abstractmethod
+from tqdm import tqdm
 
 from time import time as give_time
 from time import sleep
@@ -619,6 +620,7 @@ class Data(object):
     def __init__(
         self,
         date,
+        data_reader,
         db_path=cfg.input_path,
         filename=None,
         duration=24.0 * 3600.0,
@@ -629,6 +631,9 @@ class Data(object):
         -----------
         date: string
             Date of the requested day. Example: '2016-01-23'.
+        data_reader: function
+            Function that takes a path and optional key-word arguments to read
+            data from this path and returns an `obspy.Stream` instance.
         db_path: string, default to `cfg.dbpath`
             Path to the data root directory. Data are then organized by year
             such as: db_path/year/data_file1...
@@ -649,9 +654,11 @@ class Data(object):
             self.filename = filename
         # full path:
         self.where = os.path.join(db_path, str(self.date.year), self.filename)
+        # data reader
+        self.data_reader = data_reader
         self.duration = duration
         # fetch metadata
-        self._read_metadata()
+        # self._read_metadata()
         if sampling_rate is not None:
             self.sampling_rate = sampling_rate
             self.n_samples = utils.sec_to_samp(duration, sr=self.sampling_rate)
@@ -692,45 +699,39 @@ class Data(object):
             verbose=verbose,
         )
 
-    def _read_metadata(self):
-        from pyasdf import ASDFDataSet
+    # def _read_metadata(self):
+    #    from pyasdf import ASDFDataSet
 
-        with ASDFDataSet(self.where, mode="r") as ds:
-            metadata = pd.DataFrame(ds.get_all_coordinates()).transpose()
-            net_sta = [code.split(sep=".") for code in metadata.index]
-            networks, stations = [
-                [net for net, sta in net_sta],
-                [sta for net, sta in net_sta],
-            ]
-            metadata["network_code"] = networks
-            metadata["station_code"] = stations
-            metadata.rename(columns={"elevation_in_m": "elevation"}, inplace=True)
-        self.metadata = metadata
+    #    with ASDFDataSet(self.where, mode="r") as ds:
+    #        metadata = pd.DataFrame(ds.get_all_coordinates()).transpose()
+    #        net_sta = [code.split(sep=".") for code in metadata.index]
+    #        networks, stations = [
+    #            [net for net, sta in net_sta],
+    #            [sta for net, sta in net_sta],
+    #        ]
+    #        metadata["network_code"] = networks
+    #        metadata["station_code"] = stations
+    #        metadata.rename(columns={"elevation_in_m": "elevation"}, inplace=True)
+    #    self.metadata = metadata
 
-    def read_waveforms(self, tag, trim_traces=True):
+    def read_waveforms(self, trim_traces=True, **reader_kwargs):
         """Read the waveform time series.
 
         Parameters
         -----------
-        tag: string
-            Tag name of the waveforms in the the ASDF data set. Example: "raw"
-            or "preprocessed_1_12"
         trim_traces: boolean, default to True
             If True, call `trim_waveforms` to make sure all traces have the same
             start time.
         """
-        from pyasdf import ASDFDataSet
-
-        traces = obs.Stream()
-        with ASDFDataSet(self.where, mode="r") as ds:
-            for station in ds.ifilter(ds.q.tag == tag):
-                traces += getattr(station, tag)
-        # for i in range(len(traces)):
-        #    # round time to proper precision
-        #    sr = traces[i].stats.sampling_rate
-        #    traces[i].stats.starttime = udt(utils.round_time(
-        #        traces[i].stats.starttime.timestamp + 0.5/sr, sr=sr))
-        self.traces = traces
+        reader_kwargs.setdefault("starttime", self.date)
+        reader_kwargs.setdefault("endtime", self.date + self.duration)
+        self.traces = self.data_reader(self.where, **reader_kwargs)
+        # from pyasdf import ASDFDataSet
+        # traces = obs.Stream()
+        # with ASDFDataSet(self.where, mode="r") as ds:
+        #    for station in ds.ifilter(ds.q.tag == tag):
+        #        traces += getattr(station, tag)
+        # self.traces = traces
         if trim_traces:
             self.trim_waveforms()
 
@@ -776,6 +777,7 @@ class Event(object):
         sampling_rate=None,
         components=["N", "E", "Z"],
         id=None,
+        data_reader=None,
     ):
         """Initialize an Event instance with basic attributes.
 
@@ -814,6 +816,10 @@ class Event(object):
             to the Event's 'N' channel.
         id: string, default to None
             Identifying label.
+        data_reader: function, default to None
+            Function that takes a path and optional key-word arguments to read
+            data from this path and returns an `obspy.Stream` instance. If None,
+            `data_reader` has to be specified when calling `read_waveforms`.
         """
         self.origin_time = udt(origin_time)
         self.date = self.origin_time  # for compatibility with Data class
@@ -841,6 +847,7 @@ class Event(object):
             self.id = self.origin_time.strftime("%Y%m%d_%H%M%S")
         else:
             self.id = id
+        self.data_reader = data_reader
 
     @classmethod
     def read_from_file(
@@ -1103,7 +1110,6 @@ class Event(object):
     def pick_PS_phases(
         self,
         duration,
-        tag,
         threshold_P=0.60,
         threshold_S=0.60,
         offset_ot=cfg.buffer_extracted_events,
@@ -1144,10 +1150,10 @@ class Event(object):
             # read waveforms in picking mode, i.e. with `time_shifted`=False
             self.read_waveforms(
                 duration,
-                tag,
                 offset_ot=offset_ot,
                 phase_on_comp=phase_on_comp,
                 time_shifted=False,
+                **kwargs,
             )
         data_arr = self.get_np_array(self.stations, components=["N", "E", "Z"])
         # call PhaseNet
@@ -1189,11 +1195,12 @@ class Event(object):
     def read_waveforms(
         self,
         duration,
-        tag,
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
         offset_phase={"P": 1.0, "S": 4.0},
         time_shifted=True,
         offset_ot=cfg.buffer_extracted_events,
+        data_reader=None,
+        **reader_kwargs,
     ):
         """Read waveform data.
 
@@ -1201,8 +1208,6 @@ class Event(object):
         -----------
         duration: scalar float
             Duration, in seconds, of the extracted time windows.
-        tag: string
-            Tag name of the target data. For example: 'preprocessed_1_12'.
         phase_on_comp: dictionary, optional
             Dictionary defining which seismic phase is extracted on each
             component. For example, phase_on_comp['N'] gives the phase that is
@@ -1218,40 +1223,41 @@ class Event(object):
         offset_ot: scalar float, default to `cfg.buffer_extracted_events`
             Only used if `time_shifted` is False. Time, in seconds, taken before
             `origin_time`.
+        data_reader: function, default to None
+            Function that takes a path and optional key-word arguments to read
+            data from this path and returns an `obspy.Stream` instance. If None,
+            use `self.data_reader` and return None if `self.data_reader=None`.
         """
-        from pyasdf import ASDFDataSet
+        # from pyasdf import ASDFDataSet
         from obspy import Stream
 
+        if data_reader is None:
+            data_reader = self.data_reader
+        if data_reader is None:
+            print("You need to specify a data reader for the class instance.")
+            return
         self.traces = Stream()
         self.duration = duration
         self.n_samples = utils.sec_to_samp(self.duration, sr=self.sr)
-        with ASDFDataSet(self.where, mode="r") as ds:
-            for station in ds.ifilter(ds.q.tag == tag, ds.q.station == self.stations):
-                net = station.StationXML.networks[0].code
-                sta = station.StationXML.networks[0].stations[0].code
-                for channel in station.StationXML.networks[0].stations[0]:
-                    cha = channel.code
-                    comp = cha[-1]
-                    loc = channel.location_code
-                    ph = phase_on_comp[comp]
-                    if time_shifted:
-                        pick = (
-                            self.origin_time
-                            + self.moveouts[f"moveouts_{ph.upper()}"].loc[sta]
-                            - offset_phase[ph.upper()]
-                        )
-                    else:
-                        pick = self.origin_time - offset_ot
-                    # query the exact data
-                    self.traces += ds.get_waveforms(
-                        network=net,
-                        station=sta,
-                        location=loc,
-                        channel=cha,
-                        starttime=pick,
-                        endtime=pick + duration,
-                        tag=tag,
+        for sta in self.stations:
+            for comp in self.components:
+                ph = phase_on_comp[comp]
+                if time_shifted:
+                    pick = (
+                        self.origin_time
+                        + self.moveouts[f"moveouts_{ph.upper()}"].loc[sta]
+                        - offset_phase[ph.upper()]
                     )
+                else:
+                    pick = self.origin_time - offset_ot
+                self.traces += data_reader(
+                    self.where,
+                    station=sta,
+                    channel=f"*{comp}",
+                    starttime=pick,
+                    endtime=pick + duration,
+                    **reader_kwargs,
+                )
         for ph in offset_phase.keys():
             self.set_aux_data({f"offset_{ph.upper()}": offset_phase[ph]})
         for comp in phase_on_comp.keys():
@@ -2938,6 +2944,7 @@ class TemplateGroup(Family):
         save_cc=False,
         compute_from_scratch=False,
         device="cpu",
+        progress=False,
     ):
         """Compute the pairwise template CCs.
 
@@ -2963,8 +2970,12 @@ class TemplateGroup(Family):
             potentially large file.
         device: string, default to 'cpu'
             Either 'cpu' or 'gpu'.
+        progress: boolean, default to False
+            If True, print progress bar with `tqdm`.
         """
         import fast_matched_filter as fmf  # clearly need some optimization
+
+        disable = np.bitwise_not(progress)
 
         # try reading the inter-template CC from db
         db_path, db_filename = os.path.split(self.templates[0].where)
@@ -2995,7 +3006,9 @@ class TemplateGroup(Family):
             )
             n_stations, n_components = moveouts_arr.shape[1:]
             # use FMF on one template at a time against all others
-            for t, template in enumerate(self.templates):
+            for t, template in tqdm(
+                enumerate(self.templates), desc="Inter-tp CC", disable=disable
+            ):
                 # print(f'--- {t} / {self.n_templates} ---')
                 weights = np.zeros(template_arr.shape[:-1], dtype=np.float32)
                 weights[:, self.network_to_template_map[t, ...]] = 1.0
@@ -3011,6 +3024,7 @@ class TemplateGroup(Family):
                     1,
                     arch=device,
                     network_sum=False,
+                    check_zeros=False,
                 )
                 intertp_cc[t, keep] = np.sum(
                     weights[keep, ...] * np.max(cc, axis=1), axis=(-1, -2)
@@ -3022,6 +3036,7 @@ class TemplateGroup(Family):
                 index=self.tids, columns=self.tids, data=_intertemplate_cc
             )
         if compute_from_scratch and save_cc:
+            print(f"Saving inter-tp CC to {cc_fn}")
             self._save_intertp_cc(self._intertemplate_cc, cc_fn)
 
     @staticmethod
@@ -3058,8 +3073,15 @@ class TemplateGroup(Family):
             intertp_cc = f["intertp_cc"][()]
         return pd.DataFrame(index=tids, columns=tids, data=intertp_cc)
 
-    def read_waveforms(self):
-        for tp in self.templates:
+    def read_waveforms(self, progress=False):
+        """
+        Parameters
+        ----------
+        progress: boolean, default to False
+            If True, print progress bar with `tqdm`.
+        """
+        disable = np.bitwise_not(progress)
+        for tp in tqdm(self.templates, desc="Reading waveforms", disable=disable):
             tp.read_waveforms(stations=self.stations, components=self.components)
         self._remember("read_waveforms")
 
@@ -3128,7 +3150,7 @@ class TemplateGroup(Family):
         if hasattr(self, "_network_to_template_map"):
             del self._network_to_template_map
 
-    def read_catalog(self, extra_attributes=[], fill_value=np.nan):
+    def read_catalog(self, extra_attributes=[], fill_value=np.nan, progress=False):
         """Build a catalog from all templates' detections.
 
         Work only if folder and file names follow the standard convention.
@@ -3140,9 +3162,13 @@ class TemplateGroup(Family):
             'latitude', 'depth', and 'origin_time'.
         fill_value: string, int, or float, default to np.nan
             Default value if the target attribute does not exist.
-
+        progress: boolean, default to False
+            If True, print progress bar with `tqdm`.
         """
-        for template in self.templates:
+        disable = np.bitwise_not(progress)
+        for template in tqdm(
+            self.templates, desc="Reading catalog", disable=disable
+        ):
             if not hasattr(template, "catalog"):
                 template.read_catalog(
                     extra_attributes=extra_attributes, fill_value=fill_value
@@ -3159,6 +3185,7 @@ class TemplateGroup(Family):
         dt_criterion=3.0,
         distance_criterion=1.0,
         similarity_criterion=-1.0,
+        progress=False,
         **kwargs,
     ):
         """Search for events detected by multiple templates.
@@ -3180,7 +3207,10 @@ class TemplateGroup(Family):
             which two events are examined for redundancy. The default
             value of -1 is always verified, meaning that similarity is
             actually not taken into account.
+        progress: boolean, default to False
+            If True, print progress bar with `tqdm`.
         """
+        disable = np.bitwise_not(progress)
         if not hasattr(self, "catalog"):
             self.read_catalog(extra_attributes=["cc"])
         # alias:
@@ -3206,7 +3236,7 @@ class TemplateGroup(Family):
         n_events = len(self.catalog.catalog)
         dt_criterion = np.timedelta64(int(1000.0 * dt_criterion), "ms")
         unique_events = np.ones(n_events, dtype=np.bool)
-        for n1 in range(n_events):
+        for n1 in tqdm(range(n_events), desc="Removing multiples", disable=disable):
             if not unique_events[n1]:
                 continue
             tid1 = catalog["tid"].iloc[n1]
@@ -3285,19 +3315,25 @@ class TemplateGroup(Family):
         fig = self.templates[tt].plot_detection(int(evidx), **kwargs)
         return fig
 
-    def plot_recurrence_times(self, figsize=(20, 10)):
+    def plot_recurrence_times(self, figsize=(20, 10), progress=False):
         """Plot recurrence times vs detection times, template-wise.
 
         Parameters
         -----------
         figsize: tuple of floats, default to (20, 10)
             Size in inches of the figure (width, height).
+        progress: boolean, default to False
+            If True, print progress bar with `tqdm`.
         """
         import matplotlib.pyplot as plt
 
+        disable = np.bitwise_not(progress)
+
         fig = plt.figure("recurrence_times", figsize=figsize)
         ax = fig.add_subplot(111)
-        for template in self.templates:
+        for template in tqdm(
+            self.templates, desc="Plotting rec. times", disable=disable
+        ):
             template.plot_recurrence_times(ax=ax, annotate_axes=False)
         ax.set_xlabel("Detection Time")
         ax.set_ylabel("Recurrence Time (s)")

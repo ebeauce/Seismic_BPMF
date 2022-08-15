@@ -13,6 +13,7 @@ from obspy.core import UTCDateTime as udt
 from obspy import Stream
 
 from functools import partial
+from scipy.stats import kurtosis
 import concurrent.futures
 
 from time import time as give_time
@@ -74,8 +75,7 @@ class MatchedFilter(object):
             run to not exceed this memory threshold.
         max_workers: scalar int or None, default to None
             Controls the maximum number of threads created when finding
-            detections of new events in the CC time series. If None, use all
-            visible CPUs.
+            detections of new events in the CC time series. If None, use one CPU.
         """
         self.template_group = template_group
         self.min_channels = min_channels
@@ -88,7 +88,7 @@ class MatchedFilter(object):
         self.step_sec = step
         self.max_memory = max_memory
         if max_workers is None:
-            max_workers = 0
+            max_workers = 1
         self.max_workers = max_workers
 
     # properties
@@ -278,7 +278,6 @@ class MatchedFilter(object):
             Dictionary where `detections[tid]` is a list of `dataset.Event` for
             all events detected with template `tid`.
         """
-        from scipy.stats import kurtosis
 
         self.minimum_interevent_time = minimum_interevent_time
         self.threshold_window_dur = threshold_window_dur
@@ -389,6 +388,7 @@ class MatchedFilter(object):
                 longitude=longitude,
                 depth=depth,
                 sampling_rate=self.data.sr,
+                data_reader=self.data.data_reader
             )
             aux_data = {}
             aux_data["cc"] = cc_t[cc_idx[i]]
