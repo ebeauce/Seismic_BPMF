@@ -1676,7 +1676,9 @@ class Event(object):
     #            plotting method(s)
     # -----------------------------------------------------------
 
-    def plot(self, figsize=(20, 15), gain=1.0e6, ylabel=r"Velocity ($\mu$m/s)"):
+    def plot(
+        self, figsize=(20, 15), gain=1.0e6, ylabel=r"Velocity ($\mu$m/s)", **kwargs
+    ):
         """Plot the waveforms of the Event instance.
 
         Parameters
@@ -2239,7 +2241,6 @@ class Template(Event):
         db_path=None,
         duration=60.0,
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
-        tag="preprocessed_1_12",
         offset_ot=10.0,
         **kwargs,
     ):
@@ -2256,7 +2257,7 @@ class Template(Event):
 
         """
         if not hasattr(self, "traces"):
-            print("Call `self.read_waveforms` first.")
+            print("Call `Template.read_waveforms` first.")
             return
         db_path_T, filename_T = os.path.split(self.where)
         if filename is None:
@@ -2272,10 +2273,10 @@ class Template(Event):
             event = Event.read_from_file(hdf5_file=f[keys[idx]])
         event.read_waveforms(
             duration,
-            tag,
             offset_ot=offset_ot,
             phase_on_comp=phase_on_comp,
             time_shifted=False,
+            **kwargs,
         )
         fig = event.plot(**kwargs)
         axes = fig.get_axes()
@@ -2798,6 +2799,7 @@ class TemplateGroup(Family):
 
         # X: west, Y: south, Z: downward
         s_68_3df = 3.52
+        s_90_3df = 6.251
         print("Computing the inter-template directional errors...")
         longitudes = np.float32([tp.longitude for tp in self.templates])
         latitudes = np.float32([tp.latitude for tp in self.templates])
@@ -3166,9 +3168,7 @@ class TemplateGroup(Family):
             If True, print progress bar with `tqdm`.
         """
         disable = np.bitwise_not(progress)
-        for template in tqdm(
-            self.templates, desc="Reading catalog", disable=disable
-        ):
+        for template in tqdm(self.templates, desc="Reading catalog", disable=disable):
             if not hasattr(template, "catalog"):
                 template.read_catalog(
                     extra_attributes=extra_attributes, fill_value=fill_value
@@ -3182,8 +3182,9 @@ class TemplateGroup(Family):
     def remove_multiples(
         self,
         n_closest_stations=10,
-        dt_criterion=3.0,
+        dt_criterion=4.0,
         distance_criterion=1.0,
+        speed_criterion=5.0,
         similarity_criterion=-1.0,
         progress=False,
         **kwargs,
@@ -3196,12 +3197,16 @@ class TemplateGroup(Family):
             In case template similarity is taken into account,
             this is the number of stations closest to each template
             that are used in the calculation of the average cc.
-        dt_criterion: float, default to 3
+        dt_criterion: float, default to 4
             Time interval, in seconds, under which two events are
             examined for redundancy.
         distance_criterion: float, default to 1
             Distance threshold, in kilometers, between two uncertainty
             ellipsoids under which two events are examined for redundancy.
+        speed_criterion: float, default to 5
+            Speed criterion, in km/s, below which the inter-event time and
+            inter-event distance can be explained by errors in origin times and
+            a reasonable P-wave speed.
         similarity_criterion: float, default to -1
             Template similarity threshold, in terms of average CC, over
             which two events are examined for redundancy. The default
@@ -3213,6 +3218,20 @@ class TemplateGroup(Family):
         disable = np.bitwise_not(progress)
         if not hasattr(self, "catalog"):
             self.read_catalog(extra_attributes=["cc"])
+        self.catalog.catalog["origin_time_sec"] = (
+            self.catalog.catalog["origin_time"]
+            .values.astype("datetime64[ms]")
+            .astype("float64")
+            / 1000.0
+        )
+        self.catalog.catalog.sort_values("origin_time_sec", inplace=True)
+        self.catalog.catalog["interevent_time_sec"] = np.hstack(
+            (
+                [0.0],
+                self.catalog.catalog["origin_time_sec"].values[1:]
+                - self.catalog.catalog["origin_time_sec"].values[:-1],
+            )
+        )
         # alias:
         catalog = self.catalog.catalog
         if similarity_criterion > -1.0:
@@ -3234,45 +3253,67 @@ class TemplateGroup(Family):
             )
         )
         n_events = len(self.catalog.catalog)
-        dt_criterion = np.timedelta64(int(1000.0 * dt_criterion), "ms")
+        index_pool = np.arange(n_events)
+        # dt_criterion = np.timedelta64(int(1000.0 * dt_criterion), "ms")
         unique_events = np.ones(n_events, dtype=np.bool)
         for n1 in tqdm(range(n_events), desc="Removing multiples", disable=disable):
             if not unique_events[n1]:
                 continue
             tid1 = catalog["tid"].iloc[n1]
             # apply the time criterion
-            dt_n1 = catalog["origin_time"] - catalog["origin_time"].iloc[n1]
-            temporal_neighbors = (
-                (dt_n1 < dt_criterion)
-                & (dt_n1 >= np.timedelta64(0, "s"))
-                & unique_events
-            )
-            # comment this line if you keep best CC
-            # temporal_neighbors[n1] = False
-            # get indices of where the above selection is True
-            candidates = np.where(temporal_neighbors)[0]
-            if len(candidates) == 0:
+            # ---------- version 4 ------------
+            n2 = n1 + 1
+            if n2 < n_events:
+                dt_n1n2 = catalog["interevent_time_sec"].iloc[n2]
+            else:
+                continue
+            temporal_neighbors = [n1]
+            while dt_n1n2 < dt_criterion:
+                temporal_neighbors.append(n2)
+                n2 += 1
+                if n2 >= n_events:
+                    break
+                dt_n1n2 += catalog["interevent_time_sec"].iloc[n2]
+            temporal_neighbors = np.array(temporal_neighbors).astype("int64")
+            if len(temporal_neighbors) == 1:
+                # did not find any temporal neighbors
+                continue
+            # remove events that were already flagged as non unique
+            temporal_neighbors = temporal_neighbors[unique_events[temporal_neighbors]]
+            candidates = temporal_neighbors
+            if len(candidates) == 1:
                 continue
             # get template ids of all events that passed the time criterion
-            tids_candidates = np.int32([catalog["tid"].iloc[idx] for idx in candidates])
+            tids_candidates = np.array(
+                [catalog["tid"].iloc[idx] for idx in candidates]
+            ).astype("int64")
             # apply the spatial criterion to the distance between
             # uncertainty ellipsoids
-            ellips_dist = self.ellipsoid_dist[tid1].loc[tids_candidates].values
+            ellips_dist = self.ellipsoid_dist.loc[tid1, tids_candidates].values
+            time_diff = (
+                catalog["origin_time_sec"].iloc[candidates]
+                - catalog["origin_time_sec"].iloc[n1]
+            )
+            # if the time difference were to be entirely due to errors in
+            # origin times, what would be wave speed explaining the location
+            # differences?
+            # time_diff = 0 is the time_diff between n1 and n1
+            time_diff[time_diff == 0.0] = 1.0
+            speed_diff = ellips_dist / time_diff
             if similarity_criterion > -1.0:
-                similarities = self.intertemplate_cc[tid1].loc[tids_candidates].values
+                similarities = self.intertemplate_cc.loc[tid1, tids_candidates].values
                 multiples = candidates[
                     np.where(
-                        (ellips_dist < distance_criterion)
+                        (
+                            (ellips_dist < distance_criterion)
+                            | (speed_diff < speed_criterion)
+                        )
                         & (similarities >= similarity_criterion)
                     )[0]
                 ]
             else:
                 multiples = candidates[np.where(ellips_dist < distance_criterion)[0]]
-            # comment this line if you keep best CC
-            # if len(multiples) == 0:
-            #    continue
-            # uncomment if you keep best CC
-            if len(multiples) == 1:
+            if len(multiples) <= 1:
                 continue
             else:
                 unique_events[multiples] = False
