@@ -8,8 +8,6 @@ am still implementing features, correcting bugs, improving docstrings, etc.
 
 
 ## New features in v2.0.0
-- Data I/O is be based on
-  [pyasdf](https://seismicdata.github.io/pyasdf/installation.html).
 - Integrated and easy use of PhaseNet and NLLoc.
 - New classes to represent events and templates with methods to conveniently
   pick P-/S-waves and locate them.
@@ -28,12 +26,7 @@ and then install `beamnetresponse` ([https://github.com/ebeauce/beamnetresponse]
 here](https://github.com/beridel/fast_matched_filter)). I also recommend
 installing my customized version of PhaseNet
 ([https://github.com/ebeauce/PhaseNet](https://github.com/ebeauce/PhaseNet)) that
-has a wrapper module to simplify its use from a python script. *Note*: You
-should install `pyasdf` from my github
-([https://github.com/ebeauce/pyasdf](https://github.com/ebeauce/pyasdf)) as I
-fixed an issue with time rounding errors when extracting sequences from continuous
-data streams. It is important to use accurate times to maximize the efficacy of template matching.
-
+has a wrapper module to simplify its use from a python script.
 
 Before I release the documentation and tutorials, I suggest you create your
 python environment by following the instructions at

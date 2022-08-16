@@ -226,6 +226,7 @@ class NetworkResponse(object):
                 longitude=longitude,
                 depth=depth,
                 sampling_rate=sr,
+                data_reader=self.data.data_reader
             )
             aux_data = {}
             aux_data["cnr"] = self.cnr[peak_indexes[i]]
