@@ -735,6 +735,31 @@ class Data(object):
         if trim_traces:
             self.trim_waveforms()
 
+    def set_availability(self, stations):
+        """Set the data availability.
+
+        A station is available if at least one station has non-zero data. The
+        availability is then accessed via the property `self.availability`.
+
+        Parameters
+        -----------
+        stations: list of strings or numpy.ndarray
+            Names of the stations on which we check availability. If None, use
+            `self.stations`.
+        """
+        availability = np.zeros(len(stations), dtype=np.bool)
+        if not hasattr(self, "traces"):
+            print("Call `self.read_waveforms` first.")
+            return
+        for s, sta in enumerate(stations):
+            n_valid = 0
+            for tr in self.traces.select(station=sta):
+                if np.sum(tr.data != 0.0):
+                    n_valid += 1
+            if n_valid > 0:
+                availability[s] = True
+        self.availability = pd.Series(index=stations, data=availability)
+
     def trim_waveforms(self, starttime=None, endtime=None):
         """Trim waveforms.
 
@@ -2322,6 +2347,9 @@ class Template(Event):
                 except IndexError:
                     # trace not found
                     max_amp = 0.0
+                except ValueError:
+                    print(sta, cp, idx1, idx2)
+                    max_amp = 0.0
                 axes[s * len(event.components) + c].plot(
                     time[: self.n_samples],
                     utils.max_norm(tr.data[: self.n_samples]) * max_amp,
@@ -2332,7 +2360,8 @@ class Template(Event):
         fig.suptitle(fig._suptitle.get_text() + f" CC={cc:.3f}")
         return fig
 
-    def plot_recurrence_times(self, ax=None, annotate_axes=True, figsize=(20, 10)):
+    def plot_recurrence_times(self, ax=None, annotate_axes=True, figsize=(20,
+        10), **kwargs):
         """Plot recurrence times vs detection times.
 
         Parameters
@@ -2341,7 +2370,9 @@ class Template(Event):
             If not None, use this `plt.Axes` instance to plot the data.
         """
         import matplotlib.pyplot as plt
-
+        kwargs.setdefault("marker", "v")
+        kwargs.setdefault("color", "k")
+        kwargs.setdefault("ls", "")
         if ax is not None:
             fig = ax.get_figure()
         else:
@@ -2353,7 +2384,7 @@ class Template(Event):
         rt = (
             self.catalog.origin_time.values[1:] - self.catalog.origin_time.values[:-1]
         ) / 1.0e9  # in sec
-        ax.plot(self.catalog.origin_time[1:], rt, marker="v", color="k", ls="")
+        ax.plot(self.catalog.origin_time[1:], rt, **kwargs)
         if annotate_axes:
             ax.set_xlabel("Detection Time")
             ax.set_ylabel("Recurrence Time (s)")
@@ -3356,7 +3387,7 @@ class TemplateGroup(Family):
         fig = self.templates[tt].plot_detection(int(evidx), **kwargs)
         return fig
 
-    def plot_recurrence_times(self, figsize=(20, 10), progress=False):
+    def plot_recurrence_times(self, figsize=(20, 10), progress=False, **kwargs):
         """Plot recurrence times vs detection times, template-wise.
 
         Parameters
@@ -3375,7 +3406,7 @@ class TemplateGroup(Family):
         for template in tqdm(
             self.templates, desc="Plotting rec. times", disable=disable
         ):
-            template.plot_recurrence_times(ax=ax, annotate_axes=False)
+            template.plot_recurrence_times(ax=ax, annotate_axes=False, **kwargs)
         ax.set_xlabel("Detection Time")
         ax.set_ylabel("Recurrence Time (s)")
         ax.semilogy()

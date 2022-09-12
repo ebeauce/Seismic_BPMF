@@ -1,3 +1,45 @@
+def data_reader_template(
+    where,
+    network="*",
+    station="*",
+    channel="*",
+    location="*",
+    starttime="*",
+    endtime="*",
+    **kwargs
+):
+    """Data reader for BPMF.
+
+    Any data reader must have the present signature.
+
+    Parameters
+    -----------
+    where: string
+        Path to data file or root data folder.
+    network: string or list, optional
+        Code(s) of the target network(s).
+    station: string or list, optional
+        Code(s) of the target station(s).
+    channel: string or list, optional
+        Code(s) of the target channel(s).
+    location: string or list, optional
+        Code(s) of the target location(s).
+    starttime: string or obspy.UTCDateTime, optional
+        Target start time.
+    endtime: string or obspy.UTCDateTime, optional
+        Target end time.
+
+    Returns
+    -------
+    traces: obspy.Stream
+        The seismic data.
+    """
+    from obspy import Stream
+
+    traces = Stream()
+    # read your data into traces
+    return traces
+
 def data_reader_pyasdf(
     where,
     network="*",
@@ -9,9 +51,7 @@ def data_reader_pyasdf(
     tag="raw",
     **kwargs
 ):
-    """Data reader for BPMF.
-
-    Any data reader must have the present signature.
+    """Data reader for BPMF based on the ASDF format.
 
     Parameters
     -----------
