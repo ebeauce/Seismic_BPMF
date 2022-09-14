@@ -26,6 +26,7 @@ class MatchedFilter(object):
         self,
         template_group,
         min_channels=6,
+        min_stations=3,
         max_kurto=100.0,
         remove_edges=True,
         normalize=True,
@@ -43,13 +44,15 @@ class MatchedFilter(object):
         template_group: `dataset.TemplateGroup` instance
             The `dataset.TemplateGroup` instance with all the templates to search
             for in the data.
-        remove_edges : boolean, default to True
+        remove_edges: boolean, default to True
             If True, remove the detections occurring at the beginning and end of the
             data time series. The duration of the edges are set by
             `BPMF.cfg.data_buffer`.
-        min_channels : scalar int, default to 6
+        min_channels: scalar int, default to 6
             Minimum number of channels to consider the CCs valid.
-        max_kurto : scalar float, default to 100
+        min_stations: scalar int, default to 3
+            Minimum number of stations to consider the CCs valid.
+        max_kurto: scalar float, default to 100
             Maximum kurtosis allowed on the CC distribution. Above this threshold,
             it is likely that something went wrong on that day.
             Warning! A higher number of stations will tend to improve the SNR
@@ -79,6 +82,7 @@ class MatchedFilter(object):
         """
         self.template_group = template_group
         self.min_channels = min_channels
+        self.min_stations = min_stations
         self.max_kurto = max_kurto
         self.remove_edges = remove_edges
         self.normalize = normalize
@@ -210,11 +214,16 @@ class MatchedFilter(object):
             weights_arr = np.float32(
                 self.template_group.network_to_template_map[select_tts, ...]
             )
+            if hasattr(self.data, "availability"):
+                # turn weights to zero on unavailable stations
+                weights_arr[:, ~self.data.availability.values, :] = 0.0
             norm = np.sum(weights_arr, axis=(1, 2), keepdims=True)
             norm[norm == 0.0] = 1.0
             weights_arr /= norm
             # insufficient data
-            invalid = np.sum((weights_arr != 0.0), axis=(1, 2)) < self.min_channels
+            invalid = (
+                np.sum((weights_arr != 0.0), axis=(1, 2)) < self.min_channels
+            ) | (np.sum(np.sum(weights_arr, axis=2) > 0.0, axis=1) < self.min_stations)
             weights_arr[invalid] = 0.0
         self.weights_arr = weights_arr
         # ----------------------------------------------
@@ -388,7 +397,7 @@ class MatchedFilter(object):
                 longitude=longitude,
                 depth=depth,
                 sampling_rate=self.data.sr,
-                data_reader=self.data.data_reader
+                data_reader=self.data.data_reader,
             )
             aux_data = {}
             aux_data["cc"] = cc_t[cc_idx[i]]
