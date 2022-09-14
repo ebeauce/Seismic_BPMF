@@ -205,6 +205,7 @@ class MatchedFilter(object):
         else:
             select_tts = self.template_group.tindexes.loc[tids]
 
+        # ----------------------------------------------
         # parameters
         nt, ns, nc, Nsamp = self.template_group.waveforms_arr[select_tts, ...].shape
         step = utils.sec_to_samp(self.step_sec, sr=self.data.sr)
@@ -227,36 +228,45 @@ class MatchedFilter(object):
             weights_arr[invalid] = 0.0
         self.weights_arr = weights_arr
         # ----------------------------------------------
+        #  are there templates with zero-weights only?
+        #  if yes, skip them to gain time
+        tindexes_to_skip = select_tts[np.sum(self.weights_arr, axis=(1, 2)) ==
+                0.]
+        select_tts = np.setdiff1d(select_tts, tindexes_to_skip)
+        # ----------------------------------------------
         #   compute the CC time series: run FMF
-        CC_SUMS = []
-        L = ns // self.n_network_chunks + 1
-        for i in range(self.n_network_chunks):
-            # to be memory friendly, we subdivide the network into n_network_chunks
-            # and the resulting correlation coefficients are then manually stacked
-            # in a separate loop
-            id1 = i * L
-            id2 = (i + 1) * L
-            if id2 > ns:
-                id2 = ns
-            cc_sums = fmf.matched_filter(
-                self.template_group.waveforms_arr[select_tts, id1:id2, :, :],
-                self.template_group.moveouts_arr[select_tts, id1:id2, :],
-                weights_arr[:, id1:id2, :],
-                self.data_arr[id1:id2, ...],
-                step,
-                arch=device,
-            )
-            CC_SUMS.append(cc_sums)
-        cc_sums = CC_SUMS[0]
-        for i in range(1, self.n_network_chunks):
-            # stack the correlation coefficients
-            cc_sums += CC_SUMS[i]
+        if len(select_tts) > 0:
+            CC_SUMS = []
+            L = ns // self.n_network_chunks + 1
+            for i in range(self.n_network_chunks):
+                # to be memory friendly, we subdivide the network into n_network_chunks
+                # and the resulting correlation coefficients are then manually stacked
+                # in a separate loop
+                id1 = i * L
+                id2 = (i + 1) * L
+                if id2 > ns:
+                    id2 = ns
+                cc_sums = fmf.matched_filter(
+                    self.template_group.waveforms_arr[select_tts, id1:id2, :, :],
+                    self.template_group.moveouts_arr[select_tts, id1:id2, :],
+                    weights_arr[:, id1:id2, :],
+                    self.data_arr[id1:id2, ...],
+                    step,
+                    arch=device,
+                )
+                CC_SUMS.append(cc_sums)
+            cc_sums = CC_SUMS[0]
+            for i in range(1, self.n_network_chunks):
+                # stack the correlation coefficients
+                cc_sums += CC_SUMS[i]
 
-        cc_sums[np.isnan(cc_sums)] = 0.0
+            cc_sums[np.isnan(cc_sums)] = 0.0
 
         self.cc = {}
         for t, tid in enumerate(self.template_group.tids[select_tts]):
             self.cc[tid] = cc_sums[t, ...]
+        for tid in self.template_group.tids[tindexes_to_skip]:
+            self.cc[tid] = np.array([0.])
 
     def find_detections(
         self,
@@ -327,9 +337,8 @@ class MatchedFilter(object):
         weights_t = self.weights_arr[t, ...]
         valid = cc_t != 0.0
         if np.sum(valid) == 0:
-            # fix the threshold to some value so
-            # that there won't be any detections
-            threshold = 10.0
+            # return no detection
+            return [], tid
         else:
             threshold = time_dependent_threshold(
                 cc_t,
