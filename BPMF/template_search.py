@@ -125,12 +125,13 @@ class NetworkResponse(object):
             print("Moveouts should be integer typed and in unit of samples.")
             return
         if reduce == "max":
-            self.cnr, self.cnr_sources = bp.beampower.beamform_max(
+            self.cnr, self.cnr_sources = bp.beampower.beamform(
                 detection_traces,
                 self.moveouts,
                 self.weights_phases,
                 self.weights_sources,
                 device=device,
+                reduce=reduce,
             )
         elif reduce == "none":
             self.nr = bp.beampower.beamform(
@@ -139,6 +140,7 @@ class NetworkResponse(object):
                 self.weights_phases,
                 self.weights_sources,
                 device=device,
+                reduce=reduce,
             )
         else:
             print(f"'reduce' should be 'max' or 'none' but {reduce} was given.")
