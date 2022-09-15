@@ -2346,10 +2346,10 @@ class Template(Event):
                         n_channels += 1
                 except IndexError:
                     # trace not found
-                    max_amp = 0.0
+                    max_amp = 1.0
                 except ValueError:
                     print(sta, cp, idx1, idx2)
-                    max_amp = 0.0
+                    max_amp = 1.0
                 axes[s * len(event.components) + c].plot(
                     time[: self.n_samples],
                     utils.max_norm(tr.data[: self.n_samples]) * max_amp,
