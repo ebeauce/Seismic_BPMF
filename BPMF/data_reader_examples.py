@@ -90,20 +90,20 @@ def data_reader_pyasdf(
             ds.q.location == location,
         ):
             for tr in getattr(station_, tag):
-                traces += tr.slice(starttime=starttime,
-                        endtime=endtime, nearest_sample=True)
-                #net = tr.stats.network
-                #sta = tr.stats.station
-                #cha = tr.stats.channel
-                #loc = tr.stats.location
-                #traces += ds.get_waveforms(
-                #    network=net,
-                #    station=sta,
-                #    location=loc,
-                #    channel=cha,
-                #    starttime=starttime,
-                #    endtime=endtime,
-                #    tag=tag,
-                #)
+                #traces += tr.slice(starttime=starttime,
+                #        endtime=endtime, nearest_sample=True)
+                net = tr.stats.network
+                sta = tr.stats.station
+                cha = tr.stats.channel
+                loc = tr.stats.location
+                traces += ds.get_waveforms(
+                    network=net,
+                    station=sta,
+                    location=loc,
+                    channel=cha,
+                    starttime=starttime,
+                    endtime=endtime,
+                    tag=tag,
+                )
     return traces
 
