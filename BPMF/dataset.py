@@ -699,21 +699,6 @@ class Data(object):
             verbose=verbose,
         )
 
-    # def _read_metadata(self):
-    #    from pyasdf import ASDFDataSet
-
-    #    with ASDFDataSet(self.where, mode="r") as ds:
-    #        metadata = pd.DataFrame(ds.get_all_coordinates()).transpose()
-    #        net_sta = [code.split(sep=".") for code in metadata.index]
-    #        networks, stations = [
-    #            [net for net, sta in net_sta],
-    #            [sta for net, sta in net_sta],
-    #        ]
-    #        metadata["network_code"] = networks
-    #        metadata["station_code"] = stations
-    #        metadata.rename(columns={"elevation_in_m": "elevation"}, inplace=True)
-    #    self.metadata = metadata
-
     def read_waveforms(self, trim_traces=True, **reader_kwargs):
         """Read the waveform time series.
 
@@ -726,12 +711,6 @@ class Data(object):
         reader_kwargs.setdefault("starttime", self.date)
         reader_kwargs.setdefault("endtime", self.date + self.duration)
         self.traces = self.data_reader(self.where, **reader_kwargs)
-        # from pyasdf import ASDFDataSet
-        # traces = obs.Stream()
-        # with ASDFDataSet(self.where, mode="r") as ds:
-        #    for station in ds.ifilter(ds.q.tag == tag):
-        #        traces += getattr(station, tag)
-        # self.traces = traces
         if trim_traces:
             self.trim_waveforms()
 
