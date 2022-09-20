@@ -69,7 +69,7 @@ class MatchedFilter(object):
             detection threshold uses the rms or the mad of the correlation
             coefficient time series.
         step: scalar float, default to `cfg.MATCHED_FILTER_STEP_SAMP`
-            Step, in seconds, of the matched filter search. That is, time
+            Step, in samples, of the matched filter search. That is, time
             interval between two sliding windows.
         max_memory: scalar float, default to None
             If not None, `max_memory` is the maximum memory, in Gb, to not
@@ -89,7 +89,7 @@ class MatchedFilter(object):
         self.max_CC_threshold = max_CC_threshold
         self.n_network_chunks = n_network_chunks
         self.threshold_type = threshold_type.lower()
-        self.step_sec = step
+        self.step = step
         self.max_memory = max_memory
         if max_workers is None:
             max_workers = 1
@@ -110,7 +110,7 @@ class MatchedFilter(object):
             return 0.0
         else:
             # 1 float32 = 4 bytes
-            nbytes = 4 * int(self.data.duration / self.step_sec)
+            nbytes = 4 * int(self.data.duration / (self.step / self.data.sr))
             nGbytes = nbytes / (1024.0**3)
             return nGbytes
 
@@ -150,7 +150,7 @@ class MatchedFilter(object):
             detected events.
         """
         sr = self.data.sr
-        step = utils.sec_to_samp(self.step_sec, sr=sr)
+        step = self.step
         cc_detections = cc_t > threshold
         cc_idx = np.where(cc_detections)[0]
 
@@ -168,7 +168,7 @@ class MatchedFilter(object):
         cc_idx = np.asarray(cc_idx)
 
         # go back to regular sampling space
-        detection_indexes = cc_idx * step
+        detection_indexes = cc_idx * self.step
         if self.remove_edges:
             # remove detections from buffer
             limit = utils.sec_to_samp(cfg.DATA_BUFFER_SEC, sr=sr)
@@ -211,7 +211,6 @@ class MatchedFilter(object):
         # ----------------------------------------------
         # parameters
         nt, ns, nc, Nsamp = self.template_group.waveforms_arr[select_tts, ...].shape
-        step = utils.sec_to_samp(self.step_sec, sr=self.data.sr)
         n_stations, n_components, n_samples_data = self.data_arr.shape
         if weight_type == "simple":
             # equal weights to all channels
@@ -254,7 +253,7 @@ class MatchedFilter(object):
                     self.template_group.moveouts_arr[select_tts, id1:id2, :],
                     weights_arr[~invalid_weights, id1:id2, :],
                     self.data_arr[id1:id2, ...],
-                    step,
+                    self.step,
                     arch=device,
                 )
                 # cc_sums = fmf.matched_filter(
@@ -340,7 +339,6 @@ class MatchedFilter(object):
         t = self.tids_subset.index(tid)
         tt = self.template_group.tindexes.loc[tid]
 
-        step = utils.sec_to_samp(self.step_sec, sr=self.data.sr)
         minimum_interevent_time = utils.sec_to_samp(
             self.minimum_interevent_time, sr=self.data.sr
         )
@@ -390,9 +388,9 @@ class MatchedFilter(object):
         search_win = min(
             10 * minimum_interevent_time, max(d_mv, minimum_interevent_time)
         )
-        search_win /= step  # time in correlation steps units
+        search_win /= self.step  # time in correlation steps units
         cc_idx = self.select_cc_indexes(cc_t, threshold, search_win)
-        detection_indexes = cc_idx * step
+        detection_indexes = cc_idx * self.step
         # ----------------------------------------------------------
         n_detections = len(detection_indexes)
 
@@ -547,7 +545,6 @@ class MatchedFilter(object):
             return
 
         sr = self.data.sr
-        step = utils.sec_to_samp(self.step_sec, sr=sr)
         cc_t = self.cc[tid]
         weights_t = self.weights_arr[self.template_group.tindexes.loc[tid], ...]
 
@@ -563,10 +560,10 @@ class MatchedFilter(object):
         cc_idx = self.select_cc_indexes(
             cc_t,
             detection_threshold,
-            utils.sec_to_samp(self.minimum_interevent_time, sr=sr) // step,
+            utils.sec_to_samp(self.minimum_interevent_time, sr=sr) // self.step,
         )
 
-        time_indexes = np.arange(len(self.data.time), dtype=np.int32)[::step][
+        time_indexes = np.arange(len(self.data.time), dtype=np.int32)[::self.step][
             : len(cc_t)
         ]
         ax.plot(self.data.time[time_indexes], cc_t)
@@ -579,8 +576,8 @@ class MatchedFilter(object):
         )
         if len(cc_idx) > 0:
             ax.plot(
-                self.data.time[cc_idx * step],
-                cc_t[cc_idx * step],
+                self.data.time[cc_idx * self.step],
+                cc_t[cc_idx * self.step],
                 marker="o",
                 ls="",
                 color="C3",
