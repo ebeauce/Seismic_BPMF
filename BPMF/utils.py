@@ -141,6 +141,131 @@ def lowpass_chebyshev_II(
     return X
 
 
+def preprocess_stream(
+    stream,
+    freqmin=None,
+    freqmax=None,
+    target_SR=None,
+    remove_response=False,
+    remove_sensitivity=False,
+    plot_resp=False,
+    target_duration=None,
+    minimum_length=0.9,
+    verbose=True,
+    unit="VEL",
+    **kwargs,
+):
+    preprocessed_stream = obs.Stream()
+    if len(stream) == 0:
+        print("Input data is empty!")
+        return preprocessed_stream
+    # start by cleaning the gaps if there are any
+    for tr in stream:
+        if np.isnan(tr.data.max()):
+            print(f"Problem with {tr.id} (detected NaNs)!")
+            continue
+        # measure gap duration
+        gap_duration = 0.0
+        for gap in tr.get_gaps():
+            gap_duration += gap[6]
+        if (target_duration is not None) and (
+            gap_duration > minimum_length * target_duration
+        ):
+            return preprocessed_stream
+        # split will lose information about start and end times
+        # if the start or the end is masked
+        t1 = udt(tr.stats.starttime.timestamp)
+        t2 = udt(tr.stats.endtime.timestamp)
+        tr = tr.split()
+        tr.detrend("constant")
+        tr.detrend("linear")
+        tr.taper(0.05, type="cosine")
+        # it's now safe to fill the gaps with zeros
+        tr.merge(fill_value=0.0)[0]
+        tr.trim(starttime=t1, endtime=t2, pad=True, fill_value=0.0)
+        preprocessed_stream += tr
+    for tr in preprocessed_st:
+        tr.stats.sampling_rate = np.round(tr.stats.sampling_rate, decimals=2)
+    # if the trace came as separated segments without masked
+    # elements,
+    # it is necessary to merge the stream
+    preprocessed_st = preprocessed_st.merge(fill_value=0.0)
+    if target_starttime is not None:
+        preprocessed_st.trim(starttime=target_starttime, pad=True, fill_value=0.0)
+    if target_endtime is not None:
+        preprocessed_st.trim(endtime=target_endtime, pad=True, fill_value=0.0)
+    # delete the original data to save memory
+    del stream
+    # resample if necessary:
+    for tr in preprocessed_stream:
+        if target_SR is None:
+            continue
+        sr_ratio = tr.stats.sampling_rate / target_SR
+        if sr_ratio > 1:
+            tr.data = autodet.utils.lowpass_chebyshev_II(
+                tr.data,
+                0.49 * target_SR,
+                tr.stats.sampling_rate,
+                order=10,
+                min_attenuation_dB=40.0,
+                zerophase=True,
+            )
+            if np.round(sr_ratio, decimals=0) == sr_ratio:
+                # tr's sampling rate is an integer
+                # multiple of target_SR
+                # do not re-filter the data
+                tr.decimate(int(sr_ratio), no_filter=True)
+            else:
+                tr.resample(target_SR, no_filter=True)
+        elif sr_ratio < 1:
+            if verbose:
+                print("Sampling rate is too high!")
+                print(tr)
+            preprocessed_stream.remove(tr)
+            continue
+        else:
+            pass
+    if target_duration is not None:
+        for i in range(len(preprocessed_stream)):
+            n_samples = autodet.utils.sec_to_samp(
+                target_duration, sr=preprocessed_stream[i].stats.sampling_rate
+            )
+            preprocessed_stream[i].data = preprocessed_stream[i].data[:n_samples]
+    # remove response if requested
+    if remove_response:
+        for tr in preprocessed_stream:
+            # assume that the instrument response
+            # is already attached to the trace
+            T_max = tr.stats.npts * tr.stats.delta
+            T_min = tr.stats.delta
+            f_min = 1.0 / T_max
+            f_max = 1.0 / (2.0 * T_min)
+            pre_filt = [f_min, 3.0 * f_min, 0.90 * f_max, 0.97 * f_max]
+            tr.remove_response(pre_filt=pre_filt, output=unit, plot=plot_resp)
+    elif remove_sensitivity:
+        for tr in preprocessed_stream:
+            tr.remove_sensitivity()
+    # filter
+    preprocessed_stream.detrend("constant")
+    preprocessed_stream.detrend("linear")
+    preprocessed_stream.taper(0.02, type="cosine")
+    if freqmin is None and freqmax is None:
+        # no filtering
+        pass
+    elif freqmin is None:
+        # lowpass filtering
+        preprocessed_stream.filter("lowpass", freq=freqmax, zerophase=True)
+    elif freqmax is None:
+        # highpass filtering
+        preprocessed_stream.filter("highpass", freq=freqmin, zerophase=True)
+    else:
+        # bandpass filtering
+        preprocessed_stream.filter(
+            "bandpass", freqmin=freqmin, freqmax=freqmax, zerophase=True
+        )
+    return preprocessed_stream
+
+
 # -------------------------------------------------
 #       Loading travel-time data
 # -------------------------------------------------
