@@ -21,7 +21,7 @@ from obspy.core import UTCDateTime as udt
 def plot_template(
     idx,
     db_path_T="template_db_2/",
-    db_path=cfg.dbpath,
+    db_path=cfg.INPUT_PATH,
     n_stations=10,
     stations=None,
     mv_view=True,
@@ -143,7 +143,7 @@ def plot_detection_matrix(
     else:
         fig = ax.get_figure()
     ax.set_title(title)
-    time = np.linspace(0.0, X.shape[-1] / cfg.sampling_rate, X.shape[-1])
+    time = np.linspace(0.0, X.shape[-1] / cfg.SAMPLING_RATE_HZ, X.shape[-1])
     time_min = kwargs["time_min"] if kwargs["time_min"] is not None else time.min()
     time_max = kwargs["time_max"] if kwargs["time_max"] is not None else time.max()
     time -= time_min
@@ -183,7 +183,7 @@ def plot_catalog(
     remove_multiples=True,
     scat_kwargs={},
     cmap=None,
-    db_path=cfg.dbpath,
+    db_path=cfg.INPUT_PATH,
 ):
 
     if cmap is None:

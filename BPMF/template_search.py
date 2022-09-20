@@ -34,7 +34,7 @@ class NetworkResponse(object):
         data,
         network,
         tt_filename="tts.h5",
-        path_tts=cfg.moveouts_path,
+        path_tts=cfg.MOVEOUTS_PATH,
         phases=["P", "S"],
         starttime=None,
     ):
@@ -51,7 +51,7 @@ class NetworkResponse(object):
             a subset of the data stored in `data`.
         tt_filename: string, default to 'tts.h5'
             Name of the hdf5 file with travel-times.
-        path_tts: string, default to `cfg.moveouts_path`
+        path_tts: string, default to `cfg.MOVEOUTS_PATH`
             Path to the directory with the travel-time files.
         phases: list, default to ['P', 'S']
             List of seismic phases used in the computation of the network
@@ -805,7 +805,7 @@ def baseline(X, w):
 
 
 def time_dependent_threshold(
-    network_response, window, overlap=0.75, CNR_threshold=cfg.CNR_threshold
+    network_response, window, overlap=0.75, CNR_threshold=cfg.N_DEV_BP_THRESHOLD
 ):
     """Compute a time-dependent detection threshold.
 
@@ -902,7 +902,7 @@ def time_dependent_threshold_pd(network_response, window):
     run_med = r.median().shift(1)
     run_mad = r.apply(scimad).shift(1)
     # combine these into a detection threshold
-    detection_threshold = run_med + cfg.CNR_threshold * run_mad
+    detection_threshold = run_med + cfg.N_DEV_BP_THRESHOLD * run_mad
     return detection_threshold.values
 
 

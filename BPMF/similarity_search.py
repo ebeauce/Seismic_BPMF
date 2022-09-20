@@ -33,7 +33,7 @@ class MatchedFilter(object):
         max_CC_threshold=0.80,
         n_network_chunks=1,
         threshold_type="rms",
-        step=cfg.matched_filter_step,
+        step=cfg.MATCHED_FILTER_STEP_SAMP,
         max_memory=None,
         max_workers=None,
     ):
@@ -47,7 +47,7 @@ class MatchedFilter(object):
         remove_edges: boolean, default to True
             If True, remove the detections occurring at the beginning and end of the
             data time series. The duration of the edges are set by
-            `BPMF.cfg.data_buffer`.
+            `BPMF.cfg.DATA_BUFFER_SEC`.
         min_channels: scalar int, default to 6
             Minimum number of channels to consider the CCs valid.
         min_stations: scalar int, default to 3
@@ -68,7 +68,7 @@ class MatchedFilter(object):
             Either 'rms' or 'mad'. Determines whether the
             detection threshold uses the rms or the mad of the correlation
             coefficient time series.
-        step: scalar float, default to `cfg.matched_filter_step`
+        step: scalar float, default to `cfg.MATCHED_FILTER_STEP_SAMP`
             Step, in seconds, of the matched filter search. That is, time
             interval between two sliding windows.
         max_memory: scalar float, default to None
@@ -171,12 +171,12 @@ class MatchedFilter(object):
         detection_indexes = cc_idx * step
         if self.remove_edges:
             # remove detections from buffer
-            limit = utils.sec_to_samp(cfg.data_buffer, sr=sr)
+            limit = utils.sec_to_samp(cfg.DATA_BUFFER_SEC, sr=sr)
             idx = detection_indexes >= limit
             cc_idx = cc_idx[idx]
             detection_indexes = detection_indexes[idx]
 
-            limit = utils.sec_to_samp(self.data.duration + cfg.data_buffer, sr=sr)
+            limit = utils.sec_to_samp(self.data.duration + cfg.DATA_BUFFER_SEC, sr=sr)
             idx = detection_indexes < limit
             cc_idx = cc_idx[idx]
         return cc_idx
@@ -204,6 +204,9 @@ class MatchedFilter(object):
             select_tts = np.arange(self.template_group.n_templates, dtype=np.int32)
         else:
             select_tts = self.template_group.tindexes.loc[tids]
+        # store in memory the list of tids corresponding to the subset
+        # of templates selected for this run
+        self.tids_subset = self.template_group.tids[select_tts].tolist()
 
         # ----------------------------------------------
         # parameters
@@ -230,9 +233,9 @@ class MatchedFilter(object):
         # ----------------------------------------------
         #  are there templates with zero-weights only?
         #  if yes, skip them to gain time
-        tindexes_to_skip = select_tts[np.sum(self.weights_arr, axis=(1, 2)) ==
-                0.]
-        select_tts = np.setdiff1d(select_tts, tindexes_to_skip)
+        invalid_weights = np.sum(self.weights_arr, axis=(1, 2)) == 0
+        tindexes_to_skip = select_tts[invalid_weights]
+        select_tts = select_tts[~invalid_weights]
         # ----------------------------------------------
         #   compute the CC time series: run FMF
         if len(select_tts) > 0:
@@ -249,11 +252,19 @@ class MatchedFilter(object):
                 cc_sums = fmf.matched_filter(
                     self.template_group.waveforms_arr[select_tts, id1:id2, :, :],
                     self.template_group.moveouts_arr[select_tts, id1:id2, :],
-                    weights_arr[:, id1:id2, :],
+                    weights_arr[~invalid_weights, id1:id2, :],
                     self.data_arr[id1:id2, ...],
                     step,
                     arch=device,
                 )
+                # cc_sums = fmf.matched_filter(
+                #    self.template_group.waveforms_arr[:, id1:id2, :, :],
+                #    self.template_group.moveouts_arr[:, id1:id2, :],
+                #    weights_arr[:, id1:id2, :],
+                #    self.data_arr[id1:id2, ...],
+                #    step,
+                #    arch=device,
+                # )
                 CC_SUMS.append(cc_sums)
             cc_sums = CC_SUMS[0]
             for i in range(1, self.n_network_chunks):
@@ -266,7 +277,7 @@ class MatchedFilter(object):
         for t, tid in enumerate(self.template_group.tids[select_tts]):
             self.cc[tid] = cc_sums[t, ...]
         for tid in self.template_group.tids[tindexes_to_skip]:
-            self.cc[tid] = np.array([0.])
+            self.cc[tid] = np.array([0.0])
 
     def find_detections(
         self,
@@ -314,18 +325,19 @@ class MatchedFilter(object):
         with concurrent.futures.ThreadPoolExecutor(
             max_workers=min(len(tids), self.max_workers)
         ) as executor:
-            output = list(executor.map(self._find_detections_t, range(len(tids)), tids))
+            output = list(executor.map(self._find_detections_t, tids))
         detections.update({output[i][1]: output[i][0] for i in range(len(output))})
         if verbose > 0:
             for tid in tids:
                 print(f"Template {tid} detected {len(detections[tid]):d} events.")
         return detections
 
-    def _find_detections_t(self, t, tid):
+    def _find_detections_t(self, tid):
         """ """
         # t: index in this run's loop
         # tt: index in the self.template_group.templates list
         # tid: template id
+        t = self.tids_subset.index(tid)
         tt = self.template_group.tindexes.loc[tid]
 
         step = utils.sec_to_samp(self.step_sec, sr=self.data.sr)
@@ -335,6 +347,7 @@ class MatchedFilter(object):
 
         cc_t = self.cc[tid]
         weights_t = self.weights_arr[t, ...]
+
         valid = cc_t != 0.0
         if np.sum(valid) == 0:
             # return no detection
@@ -348,6 +361,9 @@ class MatchedFilter(object):
             )
             # saturate threshold as requested by the user
             threshold = np.minimum(self.max_CC_threshold * np.sum(weights_t), threshold)
+            # temporary:
+            if threshold.max() == 0.0:
+                print(f"Issue with detection threshold on template {tid}!")
         if self.sanity_check:
             # ------------------
             # sanity check: the cc time series should approximately
@@ -765,7 +781,7 @@ def time_dependent_threshold(
                 np.median(np.abs(last_win - center[-1]), axis=-1),
             )
         )
-    threshold = center + cfg.matched_filter_threshold * deviation
+    threshold = center + cfg.N_DEV_MF_THRESHOLD * deviation
     threshold = np.hstack((threshold[0], threshold, threshold[-1]))
     time = np.hstack((0.0, time, len(time_series)))
     threshold = np.interp(np.arange(n_samples, dtype=np.int32), time, threshold)

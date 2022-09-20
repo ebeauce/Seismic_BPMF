@@ -20,9 +20,9 @@ from . import dataset
 def bandpass_filter(
     X,
     filter_order=4,
-    freqmin=cfg.min_freq,
-    freqmax=cfg.max_freq,
-    f_Nyq=cfg.sampling_rate / 2.0,
+    freqmin=cfg.MIN_FREQ_HZ,
+    freqmax=cfg.MAX_FREQ_HZ,
+    f_Nyq=cfg.SAMPLING_RATE_HZ / 2.0,
     taper_alpha=0.01,
     zerophase=True,
 ):
@@ -35,11 +35,11 @@ def bandpass_filter(
         single observation.
     filter_order: integer scalar, default to 4,
         Order/number of corners of the bandpass filter.
-    freqmin: scalar float, default to cfg.min_freq,
+    freqmin: scalar float, default to cfg.MIN_FREQ_HZ,
         Low frequency cutoff.
-    freqmax: scalar float, default to cfg.max_freq,
+    freqmax: scalar float, default to cfg.MAX_FREQ_HZ,
         High frequency cutoff.
-    f_Nyq: scalar float, default to cfg.sampling_rate/2,
+    f_Nyq: scalar float, default to cfg.SAMPLING_RATE_HZ/2,
         Nyquist frequency of the data. By definition,
         the Nyquist frequency is half the sampling rate.
     taper_alpha: scalar float, default to 0.01,
@@ -359,9 +359,9 @@ def SVDWF(
     matrix,
     expl_var=0.4,
     max_singular_values=5,
-    freqmin=cfg.min_freq,
-    freqmax=cfg.max_freq,
-    sampling_rate=cfg.sampling_rate,
+    freqmin=cfg.MIN_FREQ_HZ,
+    freqmax=cfg.MAX_FREQ_HZ,
+    sampling_rate=cfg.SAMPLING_RATE_HZ,
     wiener_filter_colsize=None,
 ):
     """
@@ -376,7 +376,7 @@ def SVDWF(
     n_singular_values: scalar float
         Number of singular values to retain in the
         SVD decomposition of matrix.
-    max_freq: scalar float, default to cfg.max_freq
+    max_freq: scalar float, default to cfg.MAX_FREQ_HZ
         The maximum frequency of the data, or maximum target
         frequency, is used to determined the size in the
         time axis of the Wiener filter.
@@ -398,7 +398,7 @@ def SVDWF(
         return np.random.normal(loc=0.0, scale=1.0, size=matrix.shape)
     if wiener_filter_colsize is None:
         wiener_filter_colsize = U.shape[0]
-    # wiener_filter = [wiener_filter_colsize, int(cfg.sampling_rate/max_freq)]
+    # wiener_filter = [wiener_filter_colsize, int(cfg.SAMPLING_RATE_HZ/max_freq)]
     wiener_filter = [wiener_filter_colsize, 1]
     filtered_data = np.zeros((U.shape[0], Vt.shape[1]), dtype=np.float32)
     # select the number of singular values
@@ -423,7 +423,7 @@ def SVDWF(
             # onto a vector space with one dimension, all the waveforms are colinear: they just differ by an amplitude factor (but same shape).
             filtered_projection = wiener(
                 projection_n,
-                # mysize=[max(2, int(U.shape[0]/10)), int(cfg.sampling_rate/freqmax)]
+                # mysize=[max(2, int(U.shape[0]/10)), int(cfg.SAMPLING_RATE_HZ/freqmax)]
                 mysize=wiener_filter,
             )
         # filtered_projection = projection_n
@@ -454,7 +454,7 @@ def fetch_detection_waveforms(
     tid,
     db_path_T,
     db_path_M,
-    db_path=cfg.dbpath,
+    db_path=cfg.INPUT_PATH,
     best_CC=False,
     max_n_events=0,
     norm_rms=True,
@@ -546,7 +546,7 @@ def fetch_detection_waveforms_refilter(
     db_path_T,
     db_path_M,
     net,
-    db_path=cfg.dbpath,
+    db_path=cfg.INPUT_PATH,
     best_CC=False,
     max_n_events=0,
     norm_rms=True,
@@ -661,16 +661,16 @@ def fetch_detection_waveforms_refilter(
 
 def SVDWF_multiplets(
     tid,
-    db_path=cfg.dbpath,
+    db_path=cfg.INPUT_PATH,
     db_path_M="matched_filter_1",
     db_path_T="template_db_1",
     best=False,
     norm_rms=True,
     max_singular_values=5,
     expl_var=0.4,
-    freqmin=cfg.min_freq,
-    freqmax=cfg.max_freq,
-    sampling_rate=cfg.sampling_rate,
+    freqmin=cfg.MIN_FREQ_HZ,
+    freqmax=cfg.MAX_FREQ_HZ,
+    sampling_rate=cfg.SAMPLING_RATE_HZ,
     wiener_filter_colsize=None,
     attach_raw_data=False,
     detection_waveforms=None,
@@ -681,7 +681,7 @@ def SVDWF_multiplets(
     -----------
     tid: scalar integer,
         Template id.
-    db_path: string, default to cfg.dbpath
+    db_path: string, default to cfg.INPUT_PATH
         Root path of the database.
     db_path_M: string, default to 'matched_filter_1'
         Name of the folder where matched-filtering results
@@ -699,7 +699,7 @@ def SVDWF_multiplets(
         to reconstruct 100xexp_var% of the variance of
         the detection matrix, the number of singular values
         will not be larger than max_singular_values.
-    max_freq: scalar float, default to cfg.max_freq
+    max_freq: scalar float, default to cfg.MAX_FREQ_HZ
         The maximum frequency of the data, or maximum target
         frequency, is used to determined the size in the
         time axis of the Wiener filter.
@@ -905,7 +905,7 @@ def find_template_clusters(
 # -------------------------------------------------
 
 
-def round_time(t, sr=cfg.sampling_rate):
+def round_time(t, sr=cfg.SAMPLING_RATE_HZ):
     """
     Parameters
     -----------
@@ -913,7 +913,7 @@ def round_time(t, sr=cfg.sampling_rate):
         Time, in seconds, to be rounded so that the number
         of meaningful decimals is consistent with the precision
         allowed by the sampling rate.
-    sr: scalar float, default to cfg.sampling_rate,
+    sr: scalar float, default to cfg.SAMPLING_RATE_HZ,
         Sampling rate of the data. It is used to
         round the time.
 
@@ -929,7 +929,7 @@ def round_time(t, sr=cfg.sampling_rate):
     return t
 
 
-def sec_to_samp(t, sr=cfg.sampling_rate, epsilon=0.2):
+def sec_to_samp(t, sr=cfg.SAMPLING_RATE_HZ, epsilon=0.2):
     """Convert seconds to samples taking into account rounding errors.
 
     Parameters

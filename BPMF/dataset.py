@@ -32,7 +32,7 @@ class Network(object):
         network_file: string
             Name of the station metadata file.
         """
-        self.where = os.path.join(cfg.network_path, network_file)
+        self.where = os.path.join(cfg.NETWORK_PATH, network_file)
 
     @property
     def n_stations(self):
@@ -389,7 +389,7 @@ class Catalog(object):
     def read_from_detection_file(
         cls,
         filename,
-        db_path=cfg.dbpath,
+        db_path=cfg.INPUT_PATH,
         gid=None,
         extra_attributes=[],
         fill_value=np.nan,
@@ -621,7 +621,7 @@ class Data(object):
         self,
         date,
         data_reader,
-        db_path=cfg.input_path,
+        db_path=cfg.INPUT_PATH,
         filename=None,
         duration=24.0 * 3600.0,
         sampling_rate=None,
@@ -634,7 +634,7 @@ class Data(object):
         data_reader: function
             Function that takes a path and optional key-word arguments to read
             data from this path and returns an `obspy.Stream` instance.
-        db_path: string, default to `cfg.dbpath`
+        db_path: string, default to `cfg.INPUT_PATH`
             Path to the data root directory. Data are then organized by year
             such as: db_path/year/data_file1...
         filename: string, default to None
@@ -855,7 +855,7 @@ class Event(object):
 
     @classmethod
     def read_from_file(
-        cls, filename=None, db_path=cfg.dbpath, hdf5_file=None, gid=None
+        cls, filename=None, db_path=cfg.INPUT_PATH, hdf5_file=None, gid=None
     ):
         """Initialize an Event instance from `filename`.
 
@@ -864,7 +864,7 @@ class Event(object):
         filename: string, default to None
             Name of the hdf5 file with the event's data. If None, then
             `hdf5_file` should be specified.
-        db_path: string, default to `cfg.dbpath`
+        db_path: string, default to `cfg.INPUT_PATH`
             Name of the directory where `filename` is located.
         gid: string, default to None
             If not None, this string is the hdf5's group name of the event.
@@ -1298,35 +1298,35 @@ class Event(object):
         out_basename = self.id + "_out"
         obs_fn = self.id + ".obs"
         # write obs file
-        if os.path.isfile(os.path.join(cfg.NLLoc_input_path, obs_fn)):
-            os.remove(os.path.join(cfg.NLLoc_input_path, obs_fn))
+        if os.path.isfile(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn)):
+            os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn))
         NLLoc_utils.write_NLLoc_obs(self.origin_time, self.picks, stations, obs_fn)
         # write control file
         NLLoc_utils.write_NLLoc_control(ctrl_fn, out_basename, obs_fn, method=method)
         if verbose == 0:
             # run NLLoc
             subprocess.run(
-                f"NLLoc {os.path.join(cfg.NLLoc_input_path, ctrl_fn)} "
+                f"NLLoc {os.path.join(cfg.NLLOC_INPUT_PATH, ctrl_fn)} "
                 f"> {os.devnull}",
                 shell=True,
             )
         else:
             # run NLLoc
             subprocess.run(
-                "NLLoc " + os.path.join(cfg.NLLoc_input_path, ctrl_fn), shell=True
+                "NLLoc " + os.path.join(cfg.NLLOC_INPUT_PATH, ctrl_fn), shell=True
             )
         # read results
         try:
             out_fn = os.path.basename(
                 glob.glob(
-                    os.path.join(cfg.NLLoc_output_path, out_basename + ".[!s]*hyp")
+                    os.path.join(cfg.NLLOC_OUTPUT_PATH, out_basename + ".[!s]*hyp")
                 )[0]
             )
         except IndexError:
             # relocation failed
             return
         hypocenter, predicted_times = NLLoc_utils.read_NLLoc_outputs(
-            out_fn, cfg.NLLoc_output_path
+            out_fn, cfg.NLLOC_OUTPUT_PATH
         )
         hypocenter["origin_time"] = udt(hypocenter["origin_time"])
         # round seconds to reasonable precision to avoid producing
@@ -1350,15 +1350,15 @@ class Event(object):
         self.set_aux_data({"NLLoc_reloc": True})
         self.set_aux_data({"cov_mat": self.cov_mat, "tt_rms": self.tt_rms})
         # clean the temporary control and pick files
-        if os.path.isfile(os.path.join(cfg.NLLoc_input_path, obs_fn)):
-            os.remove(os.path.join(cfg.NLLoc_input_path, obs_fn))
-        if os.path.isfile(os.path.join(cfg.NLLoc_input_path, ctrl_fn)):
-            os.remove(os.path.join(cfg.NLLoc_input_path, ctrl_fn))
-        for fn in glob.glob(os.path.join(cfg.NLLoc_output_path, out_basename + "*")):
+        if os.path.isfile(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn)):
+            os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn))
+        if os.path.isfile(os.path.join(cfg.NLLOC_INPUT_PATH, ctrl_fn)):
+            os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, ctrl_fn))
+        for fn in glob.glob(os.path.join(cfg.NLLOC_OUTPUT_PATH, out_basename + "*")):
             os.remove(fn)
-        for fn in glob.glob(os.path.join(cfg.NLLoc_input_path, out_basename + "*.in")):
+        for fn in glob.glob(os.path.join(cfg.NLLOC_INPUT_PATH, out_basename + "*.in")):
             os.remove(fn)
-        for fn in glob.glob(os.path.join(cfg.NLLoc_input_path, out_basename + "*.obs")):
+        for fn in glob.glob(os.path.join(cfg.NLLOC_INPUT_PATH, out_basename + "*.obs")):
             os.remove(fn)
 
     def set_aux_data(self, aux_data):
@@ -1539,7 +1539,7 @@ class Event(object):
     def write(
         self,
         db_filename,
-        db_path=cfg.dbpath,
+        db_path=cfg.INPUT_PATH,
         save_waveforms=False,
         gid=None,
         hdf5_file=None,
@@ -1550,7 +1550,7 @@ class Event(object):
         ------------
         db_filename: string
             Name of the hdf5 file storing the event information.
-        db_path: string, default to `cfg.dbpath`
+        db_path: string, default to `cfg.INPUT_PATH`
             Name of the directory with `db_filename`.
         save_waveforms: boolean, default to False
             If True, save the waveforms.
@@ -1867,7 +1867,7 @@ class Template(Event):
         return template
 
     @classmethod
-    def read_from_file(cls, filename, db_path=cfg.dbpath, gid=None):
+    def read_from_file(cls, filename, db_path=cfg.INPUT_PATH, gid=None):
         """Initialize a `Template` instance from a file."""
         template = cls.init_from_event(
             Event.read_from_file(filename, db_path=db_path, gid=gid),
@@ -2074,7 +2074,7 @@ class Template(Event):
     def write(
         self,
         db_filename,
-        db_path=cfg.dbpath,
+        db_path=cfg.INPUT_PATH,
         save_waveforms=True,
         gid=None,
         overwrite=False,
@@ -3659,7 +3659,7 @@ class Stack(Event):
 #                 stations,
 #                 components,
 #                 tid=None,
-#                 sampling_rate=cfg.sampling_rate):
+#                 sampling_rate=cfg.SAMPLING_RATE_HZ):
 #
 #        self.stations = stations
 #        self.components = components
@@ -3716,7 +3716,7 @@ class Stack(Event):
 #    def read_data(self,
 #                  filename,
 #                  db_path_S,
-#                  db_path=cfg.dbpath):
+#                  db_path=cfg.INPUT_PATH):
 #
 #        with h5.File(os.path.join(db_path, db_path_S,
 #            '{}meta.h5'.format(filename)), mode='r') as f:
@@ -3747,7 +3747,7 @@ class Stack(Event):
 
 # class FamilyCatalog(object):
 #
-#    def __init__(self, filename, db_path_M, db_path=cfg.dbpath):
+#    def __init__(self, filename, db_path_M, db_path=cfg.INPUT_PATH):
 #        self.filename = filename
 #        self.db_path_M = db_path_M
 #        self.db_path = db_path
@@ -3848,7 +3848,7 @@ class Stack(Event):
 # class FamilyGroupCatalog(object):
 #
 #    def __init__(self, families=None, filenames=None,
-#                 db_path_M=None, db_path=cfg.dbpath):
+#                 db_path_M=None, db_path=cfg.INPUT_PATH):
 #        """
 #        Must either provide families (list of instances of Family),
 #        or list of filenames.
@@ -4022,7 +4022,7 @@ class Stack(Event):
 #
 # class FamilyEvents(object):
 #
-#    def __init__(self, tid, db_path_T, db_path_M, db_path=cfg.dbpath):
+#    def __init__(self, tid, db_path_T, db_path_M, db_path=cfg.INPUT_PATH):
 #        """
 #        Initializes an FamilyEvents instance and attaches the
 #        Template instance corresponding to this family.
@@ -4663,7 +4663,7 @@ class Stack(Event):
 #
 # class FamilyGroupEvents(FamilyEvents):
 #
-#    def __init__(self, tids, db_path_T, db_path_M, db_path=cfg.dbpath):
+#    def __init__(self, tids, db_path_T, db_path_M, db_path=cfg.INPUT_PATH):
 #        self.tids = tids
 #        self.n_templates = len(tids)
 #        self.db_path_T = db_path_T
@@ -5016,7 +5016,7 @@ class Stack(Event):
 ##
 ##    """
 ##
-##    def __init__(self, tids, db_path_T, db_path=cfg.dbpath):
+##    def __init__(self, tids, db_path_T, db_path=cfg.INPUT_PATH):
 ##        """Read the templates' data and metadata.
 ##
 ##        Parameters
@@ -5025,7 +5025,7 @@ class Stack(Event):
 ##            List of template ids in the group.
 ##        db_path_T: string
 ##            Name of the folder with template files.
-##        db_path: string, default to cfg.dbpath
+##        db_path: string, default to cfg.INPUT_PATH
 ##            Name of the folder with output files.
 ##        """
 ##        self.templates = []

@@ -3,11 +3,11 @@ import os
 import ctypes as C
 import numpy as np
 import datetime as dt
-from .config import package
+from .config import cfg
 
 cpu_loaded = False
 
-libpath = os.path.join(package, "lib")
+libpath = os.path.join(cfg.PACKAGE, "lib")
 
 try:
     _libc = C.cdll.LoadLibrary(os.path.join(libpath, "libc.so"))

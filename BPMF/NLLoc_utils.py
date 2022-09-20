@@ -19,7 +19,7 @@ def load_pykonal_tts(filename, path):
     -----------
     filename: string
         Name of the travel-time file. Example: 'tts.h5'.
-    path: string, default to `BPMF.cfg.moveouts_path`
+    path: string, default to `BPMF.cfg.MOVEOUTS_PATH`
         Name of the directory where the travel-time file is located.
 
     Returns
@@ -184,8 +184,8 @@ def write_NLLoc_inputs(
     depth,
     tts,
     net,
-    output_path=cfg.NLLoc_input_path,
-    basename=cfg.NLLoc_basename,
+    output_path=cfg.NLLOC_INPUT_PATH,
+    basename=cfg.NLLOC_BASENAME,
 ):
     """Write the hdr and buf travel-time files for NLLoc.
 
@@ -209,9 +209,9 @@ def write_NLLoc_inputs(
         (n_longitude, n_latitude, n_depth) numpy.ndarray of travel times.
     net: dataset.Network class
         The `dataset.Network` instance with the station names and coordinates.
-    output_path: string, default to 'cfg.NLLoc_input_path'
+    output_path: string, default to 'cfg.NLLOC_INPUT_PATH'
         Path to the directory where NLLoc grid files are stored.
-    basename: string, default to 'cfg.NLLoc_basename'
+    basename: string, default to 'cfg.NLLOC_BASENAME'
         Basename of all NLLoc input files.
     """
     if not os.path.isdir(output_path):
@@ -262,7 +262,7 @@ def write_NLLoc_inputs(
 
 
 def write_NLLoc_obs(
-    origin_time, picks, stations, filename, path=cfg.NLLoc_input_path, err_min=0.04
+    origin_time, picks, stations, filename, path=cfg.NLLOC_INPUT_PATH, err_min=0.04
 ):
     """Write the .obs file for NLLoc.
 
@@ -277,7 +277,7 @@ def write_NLLoc_obs(
         List of the station names to use for the relocation.
     filename: string
         Name of the .obs file.
-    path: string, default to `cfg.NLLoc_input_path`
+    path: string, default to `cfg.NLLOC_INPUT_PATH`
         Name of the directory where to save the .obs file.
     err_min: scalar float, default to 0.04
         Minimum error, in seconds, on phase picks.
@@ -398,9 +398,9 @@ def write_NLLoc_control(
     TRANS="GLOBAL",
     author="Eric Beauce",
     affiliation="Lamont-Doherty Earth Observatory",
-    NLLoc_input_path=cfg.NLLoc_input_path,
-    NLLoc_output_path=cfg.NLLoc_output_path,
-    NLLoc_basename=cfg.NLLoc_basename,
+    NLLoc_input_path=cfg.NLLOC_INPUT_PATH,
+    NLLoc_output_path=cfg.NLLOC_OUTPUT_PATH,
+    NLLoc_basename=cfg.NLLOC_BASENAME,
     min_node_size=0.00001,
     method="EDT_OT_WT_ML",
     angle_grid="ANGLES_NO",

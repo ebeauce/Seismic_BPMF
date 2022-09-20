@@ -36,12 +36,12 @@ def extract_event(origin_time, net, duration=60.0, offset_start=0.0, folder="raw
     S = obs.Stream()
     ot = udt(origin_time)
     # make sure ot falls onto a sample
-    ot = udt(float(int(ot.timestamp * cfg.sampling_rate)) / cfg.sampling_rate)
+    ot = udt(float(int(ot.timestamp * cfg.SAMPLING_RATE_HZ)) / cfg.SAMPLING_RATE_HZ)
     t1 = give_time()
     for s in range(n_stations):
         for c in range(n_components):
             filename = os.path.join(
-                cfg.input_path,
+                cfg.INPUT_PATH,
                 str(ot.year),
                 "continuous{:03d}".format(ot.julday),
                 "{}/*.{}*{}*".format(folder, net.stations[s], net.components[c]),
@@ -94,10 +94,10 @@ def extract_event_parallel(
     n_components = len(net.components)
     ot = udt(origin_time)
     # make sure ot falls onto a sample
-    ot = udt(float(int(ot.timestamp * cfg.sampling_rate)) / cfg.sampling_rate)
+    ot = udt(float(int(ot.timestamp * cfg.SAMPLING_RATE_HZ)) / cfg.SAMPLING_RATE_HZ)
     # path to data
     data_path = os.path.join(
-        cfg.input_path, str(ot.year), "continuous{:03d}".format(ot.julday), folder
+        cfg.INPUT_PATH, str(ot.year), "continuous{:03d}".format(ot.julday), folder
     )
     target_starttime = ot + offset_start
     target_endtime = target_starttime + duration + 1.0
@@ -146,10 +146,10 @@ def extract_event_realigned(
     n_components = len(net.components)
     ot = udt(origin_time)
     # make sure ot falls onto a sample
-    ot = udt(float(int(ot.timestamp * cfg.sampling_rate)) / cfg.sampling_rate)
+    ot = udt(float(int(ot.timestamp * cfg.SAMPLING_RATE_HZ)) / cfg.SAMPLING_RATE_HZ)
     # path to data
     data_path = os.path.join(
-        cfg.input_path, str(ot.year), "continuous{:03d}".format(ot.julday), folder
+        cfg.INPUT_PATH, str(ot.year), "continuous{:03d}".format(ot.julday), folder
     )
     t1 = give_time()
     # get all names
