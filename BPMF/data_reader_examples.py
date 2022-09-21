@@ -107,3 +107,61 @@ def data_reader_pyasdf(
                 )
     return traces
 
+def data_reader_mseed(
+    where,
+    network="*",
+    station="*",
+    channel="*",
+    location="*",
+    starttime=None,
+    endtime=None,
+    attach_response=False,
+    **kwargs
+):
+    """Data reader for BPMF.
+
+    This data reader is specifically designed for the folder tree convention
+    that we use in the tutorial. We will use the same data reader at later
+    stages of the workflow.
+
+    Note: This is the data reader introduced in BPMF's tutorial.
+
+    Parameters
+    -----------
+    where: string
+        Path to data file or root data folder.
+    network: string or list, optional
+        Code(s) of the target network(s).
+    station: string or list, optional
+        Code(s) of the target station(s).
+    channel: string or list, optional
+        Code(s) of the target channel(s).
+    location: string or list, optional
+        Code(s) of the target location(s).
+    starttime: string or obspy.UTCDateTime, optional
+        Target start time.
+    endtime: string or obspy.UTCDateTime, optional
+        Target end time.
+
+    Returns
+    -------
+    traces: obspy.Stream
+        The seismic data.
+    """
+    from obspy import Stream
+
+    traces = Stream()
+    # read your data into traces
+    data_files = glob.glob(
+        os.path.join(where, f"{network}.{station}.{location}.{channel}*")
+    )
+    for fname in data_files:
+        traces += obs.read(fname, starttime=starttime, endtime=endtime, **kwargs)
+    if attach_response:
+        resp_files = glob.glob(
+            os.path.join(where, os.pardir, "resp", f"{network}.{station}.xml")
+        )
+        invs = list(map(obs.read_inventory, resp_files))
+        traces.attach_response(invs)
+    return traces
+
