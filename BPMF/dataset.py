@@ -1116,7 +1116,7 @@ class Event(object):
         duration,
         threshold_P=0.60,
         threshold_S=0.60,
-        offset_ot=cfg.buffer_extracted_events,
+        offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
         mini_batch_size=126,
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
         **kwargs,
@@ -1202,7 +1202,7 @@ class Event(object):
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
         offset_phase={"P": 1.0, "S": 4.0},
         time_shifted=True,
-        offset_ot=cfg.buffer_extracted_events,
+        offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
         data_reader=None,
         **reader_kwargs,
     ):
@@ -1224,7 +1224,7 @@ class Event(object):
             If True, the moveouts are used to extract time windows from specific
             seismic phases. If False, windows are simply extracted with respect to
             the origin time.
-        offset_ot: scalar float, default to `cfg.buffer_extracted_events`
+        offset_ot: scalar float, default to `cfg.BUFFER_EXTRACTED_EVENTS_SEC`
             Only used if `time_shifted` is False. Time, in seconds, taken before
             `origin_time`.
         data_reader: function, default to None
@@ -3486,7 +3486,7 @@ class Stack(Event):
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
         offset_phase={"P": 1.0, "S": 4.0},
         time_shifted=True,
-        offset_ot=cfg.buffer_extracted_events,
+        offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
     ):
         """Read waveform data.
 
@@ -3506,7 +3506,7 @@ class Stack(Event):
             If True, the moveouts are used to extract time windows from specific
             seismic phases. If False, windows are simply extracted with respect to
             the origin time.
-        offset_ot: scalar float, default to `cfg.buffer_extracted_events`
+        offset_ot: scalar float, default to `cfg.BUFFER_EXTRACTED_EVENTS_SEC`
             Only used if `time_shifted` is False. Time, in seconds, taken before
             `origin_time`.
         """
@@ -4161,7 +4161,7 @@ class Stack(Event):
 #            self.event_ids_str = [f'{self.tid},{event_id}' for event_id in self.event_ids]
 #
 #    def trim_waveforms(self, duration, offset_start_S, offset_start_P,
-#                       t0=cfg.buffer_extracted_events,
+#                       t0=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
 #                       S_window_time=4., P_window_time=1., correct_tt=False):
 #        """Trim the waveforms using the P- and S-wave moveouts from the template.
 #

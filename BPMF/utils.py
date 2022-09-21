@@ -150,7 +150,9 @@ def preprocess_stream(
     remove_sensitivity=False,
     plot_resp=False,
     target_duration=None,
-    minimum_length=0.9,
+    target_starttime=None,
+    target_endtime=None,
+    minimum_length=0.75,
     verbose=True,
     unit="VEL",
     **kwargs,
@@ -159,11 +161,19 @@ def preprocess_stream(
     if len(stream) == 0:
         print("Input data is empty!")
         return preprocessed_stream
+    if ((target_duration is None) and ((target_starttime is not None) and
+        target_endtime is not None)):
+        target_duration = target_endtime - target_starttime
     # start by cleaning the gaps if there are any
     for tr in stream:
         if np.isnan(tr.data.max()):
             print(f"Problem with {tr.id} (detected NaNs)!")
             continue
+        # split will lose information about start and end times
+        # if the start or the end is masked
+        t1 = udt(tr.stats.starttime.timestamp)
+        t2 = udt(tr.stats.endtime.timestamp)
+        tr = tr.split()
         # measure gap duration
         gap_duration = 0.0
         for gap in tr.get_gaps():
@@ -172,11 +182,6 @@ def preprocess_stream(
             gap_duration > minimum_length * target_duration
         ):
             return preprocessed_stream
-        # split will lose information about start and end times
-        # if the start or the end is masked
-        t1 = udt(tr.stats.starttime.timestamp)
-        t2 = udt(tr.stats.endtime.timestamp)
-        tr = tr.split()
         tr.detrend("constant")
         tr.detrend("linear")
         tr.taper(0.05, type="cosine")
@@ -184,16 +189,11 @@ def preprocess_stream(
         tr.merge(fill_value=0.0)[0]
         tr.trim(starttime=t1, endtime=t2, pad=True, fill_value=0.0)
         preprocessed_stream += tr
-    for tr in preprocessed_st:
+    for tr in preprocessed_stream:
         tr.stats.sampling_rate = np.round(tr.stats.sampling_rate, decimals=2)
     # if the trace came as separated segments without masked
-    # elements,
-    # it is necessary to merge the stream
-    preprocessed_st = preprocessed_st.merge(fill_value=0.0)
-    if target_starttime is not None:
-        preprocessed_st.trim(starttime=target_starttime, pad=True, fill_value=0.0)
-    if target_endtime is not None:
-        preprocessed_st.trim(endtime=target_endtime, pad=True, fill_value=0.0)
+    # elements, it is necessary to merge the stream
+    preprocessed_stream = preprocessed_stream.merge(fill_value=0.0)
     # delete the original data to save memory
     del stream
     # resample if necessary:
@@ -202,7 +202,7 @@ def preprocess_stream(
             continue
         sr_ratio = tr.stats.sampling_rate / target_SR
         if sr_ratio > 1:
-            tr.data = autodet.utils.lowpass_chebyshev_II(
+            tr.data = lowpass_chebyshev_II(
                 tr.data,
                 0.49 * target_SR,
                 tr.stats.sampling_rate,
@@ -225,17 +225,12 @@ def preprocess_stream(
             continue
         else:
             pass
-    if target_duration is not None:
-        for i in range(len(preprocessed_stream)):
-            n_samples = autodet.utils.sec_to_samp(
-                target_duration, sr=preprocessed_stream[i].stats.sampling_rate
-            )
-            preprocessed_stream[i].data = preprocessed_stream[i].data[:n_samples]
     # remove response if requested
     if remove_response:
         for tr in preprocessed_stream:
-            # assume that the instrument response
-            # is already attached to the trace
+            if not hasattr(tr.stats, "response"):
+                print(f"Could not find the instrument response for {tr.id}.")
+                continue
             T_max = tr.stats.npts * tr.stats.delta
             T_min = tr.stats.delta
             f_min = 1.0 / T_max
@@ -244,6 +239,9 @@ def preprocess_stream(
             tr.remove_response(pre_filt=pre_filt, output=unit, plot=plot_resp)
     elif remove_sensitivity:
         for tr in preprocessed_stream:
+            if not hasattr(tr.stats, "response"):
+                print(f"Could not find the instrument response for {tr.id}.")
+                continue
             tr.remove_sensitivity()
     # filter
     preprocessed_stream.detrend("constant")
@@ -263,6 +261,17 @@ def preprocess_stream(
         preprocessed_stream.filter(
             "bandpass", freqmin=freqmin, freqmax=freqmax, zerophase=True
         )
+    # adjust duration
+    if target_starttime is not None:
+        preprocessed_stream.trim(starttime=target_starttime, pad=True, fill_value=0.0)
+    if target_endtime is not None:
+        preprocessed_stream.trim(endtime=target_endtime, pad=True, fill_value=0.0)
+    if target_duration is not None:
+        for i in range(len(preprocessed_stream)):
+            n_samples = sec_to_samp(
+                target_duration, sr=preprocessed_stream[i].stats.sampling_rate
+            )
+            preprocessed_stream[i].data = preprocessed_stream[i].data[:n_samples]
     return preprocessed_stream
 
 
@@ -570,7 +579,7 @@ def fetch_detection_waveforms_refilter(
 
     T = dataset.Template(f"template{tid}", db_path_T)
     if t0 == "detection_time":
-        correction_time = T.reference_absolute_time - cfg.buffer_extracted_events
+        correction_time = T.reference_absolute_time - cfg.BUFFER_EXTRACTED_EVENTS_SEC
     elif t0 == "origin_time":
         correction_time = 0.0
     else:
