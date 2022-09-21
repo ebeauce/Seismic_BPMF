@@ -100,13 +100,7 @@ class Network(object):
         return subnet
 
     def datelist(self):
-        dates = []
-        date = self.start_date
-        while date <= self.end_date:
-            dates.append(date)
-            date += datetime.timedelta(days=1)
-
-        return dates
+        return pd.date_range(start=str(self.start_date), end=str(self.end_date))
 
     def read(self):
         """
@@ -620,9 +614,9 @@ class Data(object):
     def __init__(
         self,
         date,
+        where,
         data_reader,
         db_path=cfg.INPUT_PATH,
-        filename=None,
         duration=24.0 * 3600.0,
         sampling_rate=None,
     ):
@@ -631,14 +625,15 @@ class Data(object):
         -----------
         date: string
             Date of the requested day. Example: '2016-01-23'.
+        where: string
+            Path to root folder or data file itself (depending on the data
+            reader you are using).
         data_reader: function
             Function that takes a path and optional key-word arguments to read
             data from this path and returns an `obspy.Stream` instance.
         db_path: string, default to `cfg.INPUT_PATH`
             Path to the data root directory. Data are then organized by year
             such as: db_path/year/data_file1...
-        filename: string, default to None
-            File name. If None, it assumes a standard format: data_YYYYmmdd.h5
         duration: float, default to 24*3600
             Target duration, in seconds, of the waveform time series. Waveforms
             will be trimmed and zero-padded to match this duration.
@@ -648,12 +643,8 @@ class Data(object):
             sampling rates.
         """
         self.date = udt(date)
-        if filename is None:
-            self.filename = f'data_{self.date.strftime("%Y%m%d")}.h5'
-        else:
-            self.filename = filename
         # full path:
-        self.where = os.path.join(db_path, str(self.date.year), self.filename)
+        self.where = where
         # data reader
         self.data_reader = data_reader
         self.duration = duration

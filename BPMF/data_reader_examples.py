@@ -116,6 +116,7 @@ def data_reader_mseed(
     starttime=None,
     endtime=None,
     attach_response=False,
+    data_folder="",
     **kwargs
 ):
     """Data reader for BPMF.
@@ -142,26 +143,35 @@ def data_reader_mseed(
         Target start time.
     endtime: string or obspy.UTCDateTime, optional
         Target end time.
+    attach_response: boolean, optional
+        If True, find the instrument response from the xml files
+        and attach it to the obspy.Stream output instance.
+    data_folder: string, optional
+        If given, is the child folder in `where` containing
+        the mseed files to read.
 
     Returns
     -------
     traces: obspy.Stream
         The seismic data.
     """
-    from obspy import Stream
+    import glob
+    import os
+
+    from obspy import Stream, read, read_inventory
 
     traces = Stream()
     # read your data into traces
     data_files = glob.glob(
-        os.path.join(where, f"{network}.{station}.{location}.{channel}*")
+        os.path.join(where, data_folder, f"{network}.{station}.{location}.{channel}*")
     )
     for fname in data_files:
-        traces += obs.read(fname, starttime=starttime, endtime=endtime, **kwargs)
+        traces += read(fname, starttime=starttime, endtime=endtime, **kwargs)
     if attach_response:
         resp_files = glob.glob(
-            os.path.join(where, os.pardir, "resp", f"{network}.{station}.xml")
+            os.path.join(where, "resp", f"{network}.{station}.xml")
         )
-        invs = list(map(obs.read_inventory, resp_files))
+        invs = list(map(read_inventory, resp_files))
         traces.attach_response(invs)
     return traces
 
