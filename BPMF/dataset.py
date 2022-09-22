@@ -1530,7 +1530,7 @@ class Event(object):
     def write(
         self,
         db_filename,
-        db_path=cfg.INPUT_PATH,
+        db_path=cfg.OUTPUT_PATH,
         save_waveforms=False,
         gid=None,
         hdf5_file=None,
@@ -1541,7 +1541,7 @@ class Event(object):
         ------------
         db_filename: string
             Name of the hdf5 file storing the event information.
-        db_path: string, default to `cfg.INPUT_PATH`
+        db_path: string, default to `cfg.OUTPUT_PATH`
             Name of the directory with `db_filename`.
         save_waveforms: boolean, default to False
             If True, save the waveforms.
@@ -2065,7 +2065,7 @@ class Template(Event):
     def write(
         self,
         db_filename,
-        db_path=cfg.INPUT_PATH,
+        db_path=cfg.OUTPUT_PATH,
         save_waveforms=True,
         gid=None,
         overwrite=False,
@@ -2330,8 +2330,9 @@ class Template(Event):
         fig.suptitle(fig._suptitle.get_text() + f" CC={cc:.3f}")
         return fig
 
-    def plot_recurrence_times(self, ax=None, annotate_axes=True, figsize=(20,
-        10), **kwargs):
+    def plot_recurrence_times(
+        self, ax=None, annotate_axes=True, figsize=(20, 10), **kwargs
+    ):
         """Plot recurrence times vs detection times.
 
         Parameters
@@ -2340,6 +2341,7 @@ class Template(Event):
             If not None, use this `plt.Axes` instance to plot the data.
         """
         import matplotlib.pyplot as plt
+
         kwargs.setdefault("marker", "v")
         kwargs.setdefault("color", "k")
         kwargs.setdefault("ls", "")
@@ -3586,7 +3588,11 @@ class Stack(Event):
 
         # read waveforms in "picking" mode
         self.read_waveforms(
-            duration, offset_ot=0.0, phase_on_comp=phase_on_comp, time_shifted=False
+            duration,
+            offset_ot=0.0,
+            phase_on_comp=phase_on_comp,
+            time_shifted=False,
+            **kwargs,
         )
         data_arr = self.get_np_array(self.stations, components=["N", "E", "Z"])
         if self.filtered_data is not None:
