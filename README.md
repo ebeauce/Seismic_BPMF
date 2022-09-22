@@ -62,6 +62,9 @@ the 1999 M7.4 Izmit Earthquake. Under review at JGR.
 If you use this package for your research. An updated publication is coming
 soon!
 
+## To do:
+- [ ] PhaseNet and NLLoc independent relocation method.
+
 ## Contact
 Questions? Contact me at:<br/>
 ebeauce@ldeo.columbia.edu
