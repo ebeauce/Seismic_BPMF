@@ -1065,6 +1065,12 @@ class Event(object):
         """
         if not hasattr(self, "cov_mat"):
             print("Class instance does not have a `cov_mat` attribute.")
+            # these private attributes should be called via their property names
+            self._hmax_unc = 15.
+            self._hmin_unc = 15.
+            self._vmax_unc = 15.
+            self._az_hmax_unc = 0.
+            self._az_hmin_unc = 0.
             return
         # X: west, Y: south, Z: downward
         s_68_3df = 3.52
@@ -2828,16 +2834,20 @@ class TemplateGroup(Family):
             ]
             # this operation produced NaNs for i=t
             unit_direction[np.isnan(unit_direction)] = 0.0
-            # compute the length of the covariance ellipsoid
-            # in the direction that links the two earthquakes
-            cov_dir = np.abs(
-                np.sum(
-                    self.templates[t].cov_mat.dot(unit_direction.T) * unit_direction.T,
-                    axis=0,
+            if hasattr(self.templates[t], "cov_mat"):
+                # compute the length of the covariance ellipsoid
+                # in the direction that links the two earthquakes
+                cov_dir = np.abs(
+                    np.sum(
+                        self.templates[t].cov_mat.dot(unit_direction.T) * unit_direction.T,
+                        axis=0,
+                    )
                 )
-            )
-            # covariance is unit of [distance**2], therefore we need the sqrt:
-            _dir_errors[t, :] = np.sqrt(s_68_3df * cov_dir)
+                # covariance is unit of [distance**2], therefore we need the sqrt:
+                _dir_errors[t, :] = np.sqrt(s_68_3df * cov_dir)
+            else:
+                # use default large error
+                _dir_errors[t, :] = 15.
         self._dir_errors = pd.DataFrame(
             index=self.tids, columns=self.tids, data=_dir_errors
         )
