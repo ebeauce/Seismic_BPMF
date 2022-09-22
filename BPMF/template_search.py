@@ -26,7 +26,7 @@ from math import isnan
 from obspy.core import UTCDateTime as udt
 
 
-class NetworkResponse(object):
+class Beamformer(object):
     """Class for computing and post-processing the network response."""
 
     def __init__(
@@ -97,14 +97,14 @@ class NetworkResponse(object):
         else:
             return self._source_coordinates
 
-    def compute_network_response(self, detection_traces, reduce="max", device="cpu"):
-        """Compute the network response.
+    def backproject(self, waveform_features, reduce="max", device="cpu"):
+        """Backproject the waveform features.
 
         Parameters
         --------------
-        detection_traces: (n_stations, n_components, n_samples) numpy.ndarray
-            Some characteristic function of the waveform time series to
-            backproject onto the grid of theoretical sources.
+        waveform_features: (n_stations, n_components, n_samples) numpy.ndarray
+            Features of the waveform time series used for the
+            backprojection onto the grid of theoretical sources.
         device: string, default to 'cpu'
             Either 'cpu' or 'gpu', depending on the available hardware and
             user's preferences.
@@ -125,8 +125,8 @@ class NetworkResponse(object):
             print("Moveouts should be integer typed and in unit of samples.")
             return
         if reduce == "max":
-            self.cnr, self.cnr_sources = bp.beampower.beamform(
-                detection_traces,
+            self.maxbeam, self.maxbeam_sources = bp.beampower.beamform(
+                waveform_features,
                 self.moveouts,
                 self.weights_phases,
                 self.weights_sources,
@@ -134,8 +134,8 @@ class NetworkResponse(object):
                 reduce=reduce,
             )
         elif reduce == "none":
-            self.nr = bp.beampower.beamform(
-                detection_traces,
+            self.beam = bp.beampower.beamform(
+                waveform_features,
                 self.moveouts,
                 self.weights_phases,
                 self.weights_sources,
@@ -144,7 +144,7 @@ class NetworkResponse(object):
             )
         else:
             print(f"'reduce' should be 'max' or 'none' but {reduce} was given.")
-            self.nr = None
+            self.beam = None
 
     def find_detections(
         self, detection_threshold, minimum_interevent_time, n_max_stations=None
@@ -177,10 +177,10 @@ class NetworkResponse(object):
         minimum_interevent_time = utils.sec_to_samp(minimum_interevent_time, sr=sr)
 
         # select peaks
-        peak_indexes = _detect_peaks(self.cnr, mpd=minimum_interevent_time)
+        peak_indexes = _detect_peaks(self.maxbeam, mpd=minimum_interevent_time)
         # only keep peaks above detection threshold
         peak_indexes = peak_indexes[
-            self.cnr[peak_indexes] > detection_threshold[peak_indexes]
+            self.maxbeam[peak_indexes] > detection_threshold[peak_indexes]
         ]
 
         # keep the largest peak for grouped detection
@@ -188,16 +188,16 @@ class NetworkResponse(object):
             idx = np.int32(
                 np.arange(
                     max(0, peak_indexes[i] - minimum_interevent_time / 2),
-                    min(peak_indexes[i] + minimum_interevent_time / 2, len(self.cnr)),
+                    min(peak_indexes[i] + minimum_interevent_time / 2, len(self.maxbeam)),
                 )
             )
             idx_to_update = np.where(peak_indexes == peak_indexes[i])[0]
-            peak_indexes[idx_to_update] = np.argmax(self.cnr[idx]) + idx[0]
+            peak_indexes[idx_to_update] = np.argmax(self.maxbeam[idx]) + idx[0]
 
         peak_indexes = np.unique(peak_indexes)
 
         peak_indexes = np.asarray(peak_indexes)
-        source_indexes = self.cnr_sources[peak_indexes]
+        source_indexes = self.maxbeam_sources[peak_indexes]
 
         # extract waveforms
         detections = []
@@ -231,7 +231,7 @@ class NetworkResponse(object):
                 data_reader=self.data.data_reader
             )
             aux_data = {}
-            aux_data["cnr"] = self.cnr[peak_indexes[i]]
+            aux_data["maxbeam"] = self.maxbeam[peak_indexes[i]]
             aux_data["source_index"] = src_idx
             event.set_aux_data(aux_data)
             detections.append(event)
@@ -280,7 +280,7 @@ class NetworkResponse(object):
         attr_baseline = self._baseline(getattr(self, attribute), window)
         setattr(self, attribute, getattr(self, attribute) - attr_baseline)
 
-    def return_pd_series(self, attribute="cnr"):
+    def return_pd_series(self, attribute="maxbeam"):
         """Return the network response as a Pandas.Series."""
         import pandas as pd
 
@@ -293,7 +293,7 @@ class NetworkResponse(object):
         pd_attr = pd.Series(data=time_series, index=indexes)
         return pd_attr
 
-    def smooth_cnr(self, window):
+    def smooth_maxbeam(self, window):
         """Smooth the network response with a gaussian kernel."""
         from scipy.ndimage.filters import gaussian_filter1d
 
@@ -436,7 +436,7 @@ class NetworkResponse(object):
     # -------------------------------------------
     #       Plotting methods
     # -------------------------------------------
-    def plot_cnr(self, ax=None, detection=None, figsize=(20, 7)):
+    def plot_maxbeam(self, ax=None, detection=None, figsize=(20, 7)):
         """Plot the composite network response.
 
         Parameters
@@ -457,34 +457,35 @@ class NetworkResponse(object):
         import matplotlib.dates as mdates
 
         if ax is None:
-            # plot the composite network response
-            fig = plt.figure("composite_network_response", figsize=figsize)
+            # plot the maximum beam
+            fig = plt.figure("maximum_beam", figsize=figsize)
             ax = fig.add_subplot(111)
         else:
             fig = ax.get_figure()
 
-        ax.plot(self.data.time, self.cnr)
-        ax.plot(
-            self.data.time,
-            self.detection_threshold,
-            color="C3",
-            ls="--",
-            label="Detection Threshold",
-        )
-        ax.plot(
-            self.data.time[self.peak_indexes],
-            self.cnr[self.peak_indexes],
-            marker="o",
-            ls="",
-            color="C3",
-        )
+        ax.plot(self.data.time, self.maxbeam)
+        if hasattr(self, "detection_threshold"):
+            ax.plot(
+                self.data.time,
+                self.detection_threshold,
+                color="C3",
+                ls="--",
+                label="Detection Threshold",
+            )
+            ax.plot(
+                self.data.time[self.peak_indexes],
+                self.maxbeam[self.peak_indexes],
+                marker="o",
+                ls="",
+                color="C3",
+            )
         ax.legend(loc="upper right")
         ax.set_xlabel("Time of the day")
-        ax.set_ylabel("Composite Network Response")
+        ax.set_ylabel("Maximum Beam")
 
         ax.set_xlim(self.data.time.min(), self.data.time.max())
-        # ax.set_ylim(-0.1*(detection_threshold.max() - cnr.min()), 1.2*detection_threshold.max())
-        # ax.set_ylim(-0.1*(detection_threshold.max() - cnr.min()), 1.2*detection_threshold.max())
+        # ax.set_ylim(-0.1*(detection_threshold.max() - maxbeam.min()), 1.2*detection_threshold.max())
+        # ax.set_ylim(-0.1*(detection_threshold.max() - maxbeam.min()), 1.2*detection_threshold.max())
 
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
@@ -494,10 +495,10 @@ class NetworkResponse(object):
             ot = np.datetime64(detection.origin_time)
             ax.annotate(
                 "detection",
-                (ot, detection.aux_data["cnr"]),
+                (ot, detection.aux_data["maxbeam"]),
                 (
                     ot + np.timedelta64(15, "m"),
-                    min(ax.get_ylim()[1], 2.0 * detection.aux_data["cnr"]),
+                    min(ax.get_ylim()[1], 2.0 * detection.aux_data["maxbeam"]),
                 ),
                 arrowprops={"width": 2, "headwidth": 5, "color": "k"},
             )
@@ -510,7 +511,7 @@ class NetworkResponse(object):
         component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
         n_stations=None,
     ):
-        """Plot a detection and the composite network response.
+        """Plot a detection and the maximum beam.
 
         Parameters
         -----------
@@ -552,9 +553,9 @@ class NetworkResponse(object):
         )
         start_times, end_times = [], []
         wav_axes = []
-        ax_cnr = fig.add_subplot(grid[:2, :])
-        self.plot_cnr(ax=ax_cnr, detection=detection)
-        ax_cnr.set_ylim(-0.5, 2.0 * detection.aux_data["cnr"])
+        ax_maxbeam = fig.add_subplot(grid[:2, :])
+        self.plot_maxbeam(ax=ax_maxbeam, detection=detection)
+        ax_maxbeam.set_ylim(-0.5, 2.0 * detection.aux_data["maxbeam"])
         beam = 0.0
         for s, sta in enumerate(stations):
             for c, cp in enumerate(self.network.components):
@@ -845,16 +846,16 @@ def time_dependent_threshold(
     for i in range(1, n_windows + 1):
         i1 = i * shift
         i2 = min(network_response.size, i1 + window)
-        cnr_window = network_response[i1:i2]
-        # non_zero = cnr_window != 0
+        maxbeam_window = network_response[i1:i2]
+        # non_zero = maxbeam_window != 0
         # if sum(non_zero) < 3:
         #    # won't be possible to calculate median
         #    # and mad on that few samples
         #    continue
-        # med_[i] = np.median(cnr_window[non_zero])
-        # mad_[i] = scimad(cnr_window[non_zero])
-        med_[i] = np.median(cnr_window)
-        mad_[i] = scimad(cnr_window)
+        # med_[i] = np.median(maxbeam_window[non_zero])
+        # mad_[i] = scimad(maxbeam_window[non_zero])
+        med_[i] = np.median(maxbeam_window)
+        mad_[i] = scimad(maxbeam_window)
         time[i] = (i1 + i2) / 2.0
     # add boundary cases manually
     time[0] = 0.0
@@ -928,7 +929,7 @@ def saturated_envelopes(traces, anomaly_threshold=1.0e-11, max_dynamic_range=1.0
     """
     n_stations, n_components, n_samples = traces.shape
     tstart = give_time()
-    detection_traces = envelope_parallel(
+    waveform_features = envelope_parallel(
         traces
     )  # take the upper envelope of the traces
     tend = give_time()
@@ -936,25 +937,25 @@ def saturated_envelopes(traces, anomaly_threshold=1.0e-11, max_dynamic_range=1.0
     data_availability = np.zeros(n_stations, dtype=np.int32)
     for s in range(n_stations):
         for c in range(n_components):
-            missing_samples = detection_traces[s, c, :] == 0.0
-            if np.sum(missing_samples) > detection_traces.shape[-1] / 2:
+            missing_samples = waveform_features[s, c, :] == 0.0
+            if np.sum(missing_samples) > waveform_features.shape[-1] / 2:
                 # too many samples are missing, don't use this trace
                 # do not increment data_availability
-                detection_traces[s, c, :] = 0.0
+                waveform_features[s, c, :] = 0.0
                 continue
-            median = np.median(detection_traces[s, c, ~missing_samples])
-            mad = scimad(detection_traces[s, c, ~missing_samples])
+            median = np.median(waveform_features[s, c, ~missing_samples])
+            mad = scimad(waveform_features[s, c, ~missing_samples])
             if mad < anomaly_threshold:
-                detection_traces[s, c, :] = 0.0
+                waveform_features[s, c, :] = 0.0
                 continue
-            detection_traces[s, c, :] = (detection_traces[s, c, :] - median) / mad
-            detection_traces[s, c, missing_samples] = 0.0
+            waveform_features[s, c, :] = (waveform_features[s, c, :] - median) / mad
+            waveform_features[s, c, missing_samples] = 0.0
             # saturate traces
-            detection_traces[s, c, :] = np.clip(
-                detection_traces[s, c, :], detection_traces[s, c, :], max_dynamic_range
+            waveform_features[s, c, :] = np.clip(
+                waveform_features[s, c, :], waveform_features[s, c, :], max_dynamic_range
             )
             data_availability[s] += 1
-    return detection_traces, data_availability
+    return waveform_features, data_availability
 
 
 def envelope_parallel(traces):
