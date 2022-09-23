@@ -383,7 +383,7 @@ class Catalog(object):
     def read_from_detection_file(
         cls,
         filename,
-        db_path=cfg.INPUT_PATH,
+        db_path=cfg.OUTPUT_PATH,
         gid=None,
         extra_attributes=[],
         fill_value=np.nan,
@@ -1066,11 +1066,11 @@ class Event(object):
         if not hasattr(self, "cov_mat"):
             print("Class instance does not have a `cov_mat` attribute.")
             # these private attributes should be called via their property names
-            self._hmax_unc = 15.
-            self._hmin_unc = 15.
-            self._vmax_unc = 15.
-            self._az_hmax_unc = 0.
-            self._az_hmin_unc = 0.
+            self._hmax_unc = 15.0
+            self._hmin_unc = 15.0
+            self._vmax_unc = 15.0
+            self._az_hmax_unc = 0.0
+            self._az_hmin_unc = 0.0
             return
         # X: west, Y: south, Z: downward
         s_68_3df = 3.52
@@ -2839,7 +2839,8 @@ class TemplateGroup(Family):
                 # in the direction that links the two earthquakes
                 cov_dir = np.abs(
                     np.sum(
-                        self.templates[t].cov_mat.dot(unit_direction.T) * unit_direction.T,
+                        self.templates[t].cov_mat.dot(unit_direction.T)
+                        * unit_direction.T,
                         axis=0,
                     )
                 )
@@ -2847,7 +2848,7 @@ class TemplateGroup(Family):
                 _dir_errors[t, :] = np.sqrt(s_68_3df * cov_dir)
             else:
                 # use default large error
-                _dir_errors[t, :] = 15.
+                _dir_errors[t, :] = 15.0
         self._dir_errors = pd.DataFrame(
             index=self.tids, columns=self.tids, data=_dir_errors
         )
@@ -3165,7 +3166,9 @@ class TemplateGroup(Family):
         if hasattr(self, "_network_to_template_map"):
             del self._network_to_template_map
 
-    def read_catalog(self, extra_attributes=[], fill_value=np.nan, progress=False):
+    def read_catalog(
+        self, extra_attributes=[], fill_value=np.nan, progress=False, **kwargs
+    ):
         """Build a catalog from all templates' detections.
 
         Work only if folder and file names follow the standard convention.
@@ -3184,7 +3187,7 @@ class TemplateGroup(Family):
         for template in tqdm(self.templates, desc="Reading catalog", disable=disable):
             if not hasattr(template, "catalog"):
                 template.read_catalog(
-                    extra_attributes=extra_attributes, fill_value=fill_value
+                    extra_attributes=extra_attributes, fill_value=fill_value, **kwargs
                 )
         # concatenate all catalogs
         self.catalog = Catalog.concatenate(
