@@ -54,13 +54,15 @@ Beaucé, E., Frank, W. B., Paul, A., Campillo, M., & van der Hilst, R. D.
 (2019). Systematic detection of clustered seismicity beneath the Southwestern
 Alps. Journal of Geophysical Research: Solid Earth, 124(11), 11531-11548.
 
+and/or
 
 Beaucé, E., van der Hilst, R. D., & Campillo M. (2022). Microseismic Constraints
 on the Mechanical State of the North Anatolian Fault Zone Thirteen Years after
-the 1999 M7.4 Izmit Earthquake. Under review at JGR.
+the 1999 M7.4 Izmit Earthquake. Journal of Geophysical Research: Solid Earth.
+DOI:
+[https://doi.org/10.1029/2022JB024416](https://doi.org/10.1029/2022JB024416).
 
-If you use this package for your research. An updated publication is coming
-soon!
+If you use this package for your research.
 
 ## To do:
 - [ ] PhaseNet and NLLoc independent relocation method.
