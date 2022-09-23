@@ -285,7 +285,7 @@ class MatchedFilter(object):
         sanity_check=True,
         verbose=0,
     ):
-        """Analyze the composite network response to find detections.
+        """Analyze the time series of correlation coefficients to find detections.
 
         Parameters
         -----------
@@ -509,7 +509,7 @@ class MatchedFilter(object):
     #       Plotting methods
     # -------------------------------------------
     def plot_cc(self, tid, ax=None, detection=None, figsize=(20, 7)):
-        """Plot the composite network response.
+        """Plot the time series of correlation coefficients.
 
         Parameters
         -----------
@@ -531,8 +531,8 @@ class MatchedFilter(object):
         import matplotlib.dates as mdates
 
         if ax is None:
-            # plot the composite network response
-            fig = plt.figure("composite_network_response", figsize=figsize)
+            # plot the correlation coefficients
+            fig = plt.figure(f"correlation_coefficients_tp{tid}", figsize=figsize)
             ax = fig.add_subplot(111)
         else:
             fig = ax.get_figure()
@@ -613,7 +613,7 @@ class MatchedFilter(object):
         figsize=(20, 20),
         component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
     ):
-        """Plot a detection and the composite network response.
+        """Plot a detection and the correlation coefficients.
 
         Parameters
         -----------
