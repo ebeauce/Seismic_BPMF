@@ -1108,6 +1108,55 @@ class Event(object):
         self._az_hmax_unc = az_hmax
         self._az_hmin_unc = az_hmin
 
+    def n_closest_stations(self, n, available_stations=None):
+        """Adjust `self.stations` to the `n` closest stations.
+
+
+        Find the `n` closest stations and modify `self.stations` accordingly.
+        The instance's properties will also change accordingly.
+
+        Parameters
+        ----------------
+        n: scalar int
+            The `n` closest stations to fetch.
+        available_stations: list of strings, default to None
+            The list of stations from which we search the closest stations.
+            If some stations are known to lack data, the user
+            may choose to not include these in the closest stations.
+        """
+        if not hasattr(self, "network_stations"):
+            # typically, an Event instance has not network_stations
+            # attribute, but a Template instance does
+            self.network_stations = self.stations.copy()
+        # re-initialize the stations attribute
+        self.stations = np.array(self.network_stations, copy=True)
+        index_pool = np.arange(len(self.network_stations))
+        # limit the index pool to available stations
+        if available_stations is not None:
+            availability = np.in1d(
+                self.network_stations, np.asarray(available_stations).astype("U")
+            )
+            valid = availability & self.availability
+        else:
+            valid = self.availability
+        station_pool = self.network_stations[valid]
+        closest_stations = (
+            self.source_receiver_dist.loc[station_pool].sort_values().index[:n]
+        )
+        # make sure we return a n-vector
+        if len(closest_stations) < n:
+            missing = n - len(closest_stations)
+            closest_stations = np.hstack(
+                (
+                    closest_stations,
+                    self.source_receiver_dist.drop(closest_stations, axis="rows")
+                    .sort_values()
+                    .index[:missing],
+                )
+            )
+        self.stations = np.asarray(closest_stations).astype("U")
+
+
     def pick_PS_phases(
         self,
         duration,
@@ -1484,9 +1533,12 @@ class Event(object):
             data=distances.squeeze(),
             name="source-receiver dist (km)",
         )
+        if not hasattr(self, "network_stations"):
+            self.network_stations = self.stations.copy()
         self._source_receiver_dist = self.source_receiver_dist.loc[
             self.network_stations
         ]
+
 
     def trim_waveforms(self, starttime=None, endtime=None):
         """Trim waveforms.
@@ -1944,49 +1996,49 @@ class Template(Event):
             self.longitude, self.latitude, self.depth, longitude, latitude, depth
         )
 
-    def n_closest_stations(self, n, available_stations=None):
-        """Adjust `self.stations` to the `n` closest stations.
+    #def n_closest_stations(self, n, available_stations=None):
+    #    """Adjust `self.stations` to the `n` closest stations.
 
 
-        Find the `n` closest stations and modify `self.stations` accordingly.
-        The instance's properties will also change accordingly.
+    #    Find the `n` closest stations and modify `self.stations` accordingly.
+    #    The instance's properties will also change accordingly.
 
-        Parameters
-        ----------------
-        n: scalar int
-            The `n` closest stations to fetch.
-        available_stations: list of strings, default to None
-            The list of stations from which we search the closest stations.
-            If some stations are known to lack data, the user
-            may choose to not include these in the closest stations.
-        """
-        # re-initialize the stations attribute
-        self.stations = np.array(self.network_stations, copy=True)
-        index_pool = np.arange(len(self.network_stations))
-        # limit the index pool to available stations
-        if available_stations is not None:
-            availability = np.in1d(
-                self.network_stations, np.asarray(available_stations).astype("U")
-            )
-            valid = availability & self.availability
-        else:
-            valid = self.availability
-        station_pool = self.network_stations[valid]
-        closest_stations = (
-            self.source_receiver_dist.loc[station_pool].sort_values().index[:n]
-        )
-        # make sure we return a n-vector
-        if len(closest_stations) < n:
-            missing = n - len(closest_stations)
-            closest_stations = np.hstack(
-                (
-                    closest_stations,
-                    self.source_receiver_dist.drop(closest_stations, axis="rows")
-                    .sort_values()
-                    .index[:missing],
-                )
-            )
-        self.stations = np.asarray(closest_stations).astype("U")
+    #    Parameters
+    #    ----------------
+    #    n: scalar int
+    #        The `n` closest stations to fetch.
+    #    available_stations: list of strings, default to None
+    #        The list of stations from which we search the closest stations.
+    #        If some stations are known to lack data, the user
+    #        may choose to not include these in the closest stations.
+    #    """
+    #    # re-initialize the stations attribute
+    #    self.stations = np.array(self.network_stations, copy=True)
+    #    index_pool = np.arange(len(self.network_stations))
+    #    # limit the index pool to available stations
+    #    if available_stations is not None:
+    #        availability = np.in1d(
+    #            self.network_stations, np.asarray(available_stations).astype("U")
+    #        )
+    #        valid = availability & self.availability
+    #    else:
+    #        valid = self.availability
+    #    station_pool = self.network_stations[valid]
+    #    closest_stations = (
+    #        self.source_receiver_dist.loc[station_pool].sort_values().index[:n]
+    #    )
+    #    # make sure we return a n-vector
+    #    if len(closest_stations) < n:
+    #        missing = n - len(closest_stations)
+    #        closest_stations = np.hstack(
+    #            (
+    #                closest_stations,
+    #                self.source_receiver_dist.drop(closest_stations, axis="rows")
+    #                .sort_values()
+    #                .index[:missing],
+    #            )
+    #        )
+    #    self.stations = np.asarray(closest_stations).astype("U")
 
     def n_best_SNR_stations(self, n, available_stations=None):
         """Adjust `self.stations` to the `n` best SNR stations.

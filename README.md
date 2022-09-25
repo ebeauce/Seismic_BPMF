@@ -66,6 +66,7 @@ If you use this package for your research.
 
 ## To do:
 - [ ] PhaseNet and NLLoc independent relocation method.
+- [ ] Convert `availability` and `source_receiver_dist` to properties.
 
 ## Contact
 Questions? Contact me at:<br/>
