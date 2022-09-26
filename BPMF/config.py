@@ -1,79 +1,64 @@
 import os
-import sys
 import inspect
-import numpy as np
 
+str_parameters = [
+            "INPUT_PATH",
+            "NETWORK_PATH",
+            "MOVEOUTS_PATH",
+            "OUTPUT_PATH",
+            "NLLOC_INPUT_PATH",
+            "NLLOC_OUTPUT_PATH",
+            "NLLOC_BASENAME",
+        ]
+float_parameters = [
+            "MIN_FREQ_HZ",
+            "MAX_FREQ_HZ",
+            "SAMPLING_RATE_HZ",
+            "TEMPLATE_LEN_SEC",
+            "N_DEV_MF_THRESHOLD",
+            "N_DEV_BP_THRESHOLD",
+            "DATA_BUFFER_SEC",
+            "BUFFER_EXTRACTED_EVENTS_SEC",
+        ]
+int_parameters = [
+            "SEARCH_WIN",
+            "MATCHED_FILTER_STEP_SAMP",
+        ]
 
-class Config():
+class Config:
     def __init__(self, parameters):
-        for attr in ['min_freq', 'max_freq', 'sampling_rate', 'template_len',
-                'multiplet_len', 'search_win', 'CNR_threshold',
-                'matched_filter_step', 'matched_filter_threshold',
-                'data_buffer', 'buffer_extracted_events']:
+        for attr in int_parameters:
             # allow meaningless default values in case BPMF is used for
             # very specific usage
             parameters.setdefault(attr, -10)
-        for attr in ['input_path', 'network_path', 'moveouts_path',
-                'output_path', 'NLLoc_input_path', 'NLLoc_output_path',
-                'NLLoc_basename']:
-            parameters.setdefault(attr, '')
-        self.__dict__ = parameters
-        self.base = os.getcwd()
-        self.data = os.path.join(self.base, self.__dict__.get('input_path', ''))
-        self.network_path = os.path.join(self.base, self.__dict__.get('network_path', ''))
-        self.moveouts_path = os.path.join(self.base, self.__dict__.get('moveouts_path', ''))
-        self.dbpath = self.chk_trailing(self.__dict__.get('output_path', ''))
-        self.package = os.path.dirname(inspect.getfile(inspect.currentframe()))
+        for attr in float_parameters:
+            parameters.setdefault(attr, -10.)
+        for attr in str_parameters:
+            parameters.setdefault(attr, "")
+        for key in parameters:
+            setattr(self, key, parameters[key])
+        # for backward compatibility
+        self.dbpath = self.OUTPUT_PATH
+        self.PACKAGE = os.path.dirname(inspect.getfile(inspect.currentframe())) + '/'
 
-    def chk_folder(self, path):
-        if not os.path.isdir(path):
-            os.makedirs(path)
+parameter_types = {}
+for param in str_parameters:
+    parameter_types[param] = str
+for param in float_parameters:
+    parameter_types[param] = float
+for param in int_parameters:
+    parameter_types[param] = int
 
-    def chk_trailing(self, to_test):
-        if to_test.endswith('/'):
-            return to_test
-        else:
-            return to_test + '/'
-
-package = os.path.dirname(inspect.getfile(inspect.currentframe())) + '/'
-# read in study parameters
-parameters_path = os.path.join(os.getcwd(), 'parameters.cfg')
-if os.path.isfile(parameters_path):
-    with open(parameters_path) as file:
-        param_dict = {}
-        for line in file:
-            key, value = line.split('=')
-            key = key.strip()
-            value = value.strip()
-            try:
-                value = np.float32(value)
-            except Exception:
-                pass
-            if isinstance(value, str) and len(value.split(',')) > 1:
-                value = [np.float32(freq) for freq in value.split(',')]
-            param_dict[key] = value
-    cfg = Config(param_dict)
+if not os.path.isfile("BPMF_parameters.cfg"):
+    print("Could not find the BPMF_parameters.cfg file in "
+          "current working directory.")
+    parameters = {}
 else:
-    print(f'Couldn\'t find the parameter file at {parameters_path}.')
-    print('See https://github.com/ebeauce/Seismic_BPMF/ for an example'
-          ' of a parameters.cfg file.')
-    cfg = Config({})
+    parameters = {}
+    with open("BPMF_parameters.cfg", "r") as fparams:
+        for line in fparams:
+            key, value = line.split("=")
+            key, value = key.strip(), value.strip()
+            parameters[key] = parameter_types[key](value)
 
-## specific parameter config
-## frequency bands
-#if 'min_freq' and 'max_freq' in param_dict:
-#    param_dict['freq_bands'] = []
-#    if isinstance(param_dict['min_freq'], list):
-#        n_freqs = len(param_dict['min_freq'])
-#        min_freq = param_dict.pop('min_freq')
-#        max_freq = param_dict.pop('max_freq')
-#        for f in range(n_freqs):
-#            param_dict['freq_bands'].append([min_freq[f], max_freq[f]])
-#    else:
-#        param_dict['freq_bands'].append(
-#            [param_dict['min_freq'], param_dict['max_freq']])
-#
-## sampling_rate (needs to be an int)
-#if 'sampling_rate' in param_dict:
-#    param_dict['sampling_rate'] = np.int32(param_dict['sampling_rate'])
-
+cfg = Config(parameters)
