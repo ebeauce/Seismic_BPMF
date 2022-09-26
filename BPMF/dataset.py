@@ -3323,9 +3323,9 @@ class TemplateGroup(Family):
         n_events = len(self.catalog.catalog)
         index_pool = np.arange(n_events)
         # dt_criterion = np.timedelta64(int(1000.0 * dt_criterion), "ms")
-        unique_events = np.ones(n_events, dtype=np.bool)
+        unique_event = np.ones(n_events, dtype=np.bool)
         for n1 in tqdm(range(n_events), desc="Removing multiples", disable=disable):
-            if not unique_events[n1]:
+            if not unique_event[n1]:
                 continue
             tid1 = catalog["tid"].iloc[n1]
             # apply the time criterion
@@ -3347,7 +3347,7 @@ class TemplateGroup(Family):
                 # did not find any temporal neighbors
                 continue
             # remove events that were already flagged as non unique
-            temporal_neighbors = temporal_neighbors[unique_events[temporal_neighbors]]
+            temporal_neighbors = temporal_neighbors[unique_event[temporal_neighbors]]
             candidates = temporal_neighbors
             if len(candidates) == 1:
                 continue
@@ -3384,24 +3384,24 @@ class TemplateGroup(Family):
             if len(multiples) <= 1:
                 continue
             else:
-                unique_events[multiples] = False
+                unique_event[multiples] = False
                 # find best CC and keep it
                 ccs = catalog["cc"].values[multiples]
                 best_cc = multiples[ccs.argmax()]
-                unique_events[best_cc] = True
+                unique_event[best_cc] = True
         t2 = give_time()
         print(f"{t2-t1:.2f}s to flag the multiples")
         # -------------------------------------------
-        catalog["unique_events"] = unique_events
+        catalog["unique_event"] = unique_event
         for tid in self.tids:
             tt = self.tindexes.loc[tid]
             cat_indexes = catalog.index[catalog["tid"] == tid]
-            self.templates[tt].catalog.catalog["unique_events"] = np.zeros(
+            self.templates[tt].catalog.catalog["unique_event"] = np.zeros(
                 len(self.templates[tt].catalog.catalog), dtype=bool
             )
             self.templates[tt].catalog.catalog.loc[
-                cat_indexes, "unique_events"
-            ] = catalog.loc[cat_indexes, "unique_events"].values
+                cat_indexes, "unique_event"
+            ] = catalog.loc[cat_indexes, "unique_event"].values
 
     # plotting routines
     def plot_detection(self, idx, **kwargs):
@@ -3847,7 +3847,7 @@ class Stack(Event):
 #        # alias
 #        self.tid = self.template_idx
 #
-#    def flatten_catalog(self, attributes=[], unique_events=False):
+#    def flatten_catalog(self, attributes=[], unique_event=False):
 #        """Output a catalog with one row for each requested attribute.
 #
 #        Parameters
@@ -3855,7 +3855,7 @@ class Stack(Event):
 #        attributes: list of strings, default to an empty list
 #            List of all the attributes, in addition to origin_times
 #            and tids, that will be included in the flat catalog.
-#        unique_events: boolean, default to False
+#        unique_event: boolean, default to False
 #            If True, only returns the events flagged as unique.
 #
 #        Returns
@@ -3892,8 +3892,8 @@ class Stack(Event):
 #                            reshape((n_events,)+flat_catalog[attr].shape)
 #                else:
 #                    flat_catalog[attr] = flat_catalog[attr]
-#        if unique_events:
-#            selection = self.unique_events
+#        if unique_event:
+#            selection = self.unique_event
 #            for attr in flat_catalog.keys():
 #                flat_catalog[attr] = flat_catalog[attr][selection]
 #        return flat_catalog
@@ -3966,9 +3966,9 @@ class Stack(Event):
 #        self.tids = list(self.families.keys())
 #
 #    def flatten_catalog(self, attributes=[], chronological_order=True,
-#                        unique_events=False):
+#                        unique_event=False):
 #        flat_catalogs = [self.families[tid].flatten_catalog(
-#            attributes=attributes, unique_events=unique_events)
+#            attributes=attributes, unique_event=unique_event)
 #            for tid in self.tids]
 #        flat_agg_catalog = {}
 #        for attr in flat_catalogs[0].keys():
@@ -4028,15 +4028,15 @@ class Stack(Event):
 #              'inter-template CC larger than {:.2f} be considered the same'.
 #              format(dt_criterion, distance_criterion, similarity_criterion))
 #        n_events = len(catalog['origin_times'])
-#        unique_events = np.ones(n_events, dtype=np.bool)
+#        unique_event = np.ones(n_events, dtype=np.bool)
 #        for n1 in range(n_events):
-#            if not unique_events[n1]:
+#            if not unique_event[n1]:
 #                continue
 #            tid1 = catalog['template_ids'][n1]
 #            # apply the time criterion
 #            dt_n1 = (catalog['origin_times'] - catalog['origin_times'][n1])
 #            temporal_neighbors = (dt_n1 < dt_criterion) & (dt_n1 >= 0.)\
-#                                & unique_events
+#                                & unique_event
 #            # comment this line if you keep best CC
 #            #temporal_neighbors[n1] = False
 #            # get indices of where the above selection is True
@@ -4066,19 +4066,19 @@ class Stack(Event):
 #            if len(multiples) == 1:
 #                continue
 #            else:
-#                unique_events[multiples] = False
+#                unique_event[multiples] = False
 #                # find best CC and keep it
 #                ccs = catalog['correlation_coefficients'][multiples]
 #                best_cc = multiples[ccs.argmax()]
-#                unique_events[best_cc] = True
+#                unique_event[best_cc] = True
 #        t2 = give_time()
 #        print('{:.2f}s to flag the multiples'.format(t2-t1))
 #        # -------------------------------------------
-#        catalog['unique_events'] = unique_events
+#        catalog['unique_event'] = unique_event
 #        for tid in self.tids:
 #            selection = catalog['tids'] == tid
-#            unique_events_t = catalog['unique_events'][selection]
-#            self.families[tid].unique_events = unique_events_t
+#            unique_event_t = catalog['unique_event'][selection]
+#            self.families[tid].unique_event = unique_event_t
 #        if return_catalog:
 #            return catalog
 #
@@ -4209,8 +4209,8 @@ class Stack(Event):
 #        # force ordering to be chronological
 #        kwargs['ordering'] = 'origin_times'
 #        #kwargs['flip_order'] = True # why did I do that?? This seems totally unnecessary
-#        if (kwargs.get('unique_events', False)\
-#                and np.sum(self.catalog.unique_events) == 0):
+#        if (kwargs.get('unique_event', False)\
+#                and np.sum(self.catalog.unique_event) == 0):
 #            self.detection_waveforms = []
 #            self.event_ids, self.event_ids_str = [], []
 #            self.n_events = 0
@@ -4308,7 +4308,7 @@ class Stack(Event):
 #
 #    def read_trimmed_waveforms(self, duration, offset_start, net, target_SR,
 #                               tt_phases=['S', 'S', 'P'], norm_rms=True,
-#                               buffer=2., unique_events=False, correct_tt=False,
+#                               buffer=2., unique_event=False, correct_tt=False,
 #                               selection=None, **preprocess_kwargs):
 #        """
 #        Read waveforms from raw data and refilter/resample. Extra key-word
@@ -4330,7 +4330,7 @@ class Stack(Event):
 #            Time, in seconds, taken at the beginning and end of the window.
 #            It is used to make sure the preprocessing does not alter the
 #            actual window.
-#        unique_events: boolean, default to False
+#        unique_event: boolean, default to False
 #            If True, only loads the unique detections.
 #        correct_tt: boolean, default to False
 #            If True, use the individual phase picks -- if available -- to
@@ -4352,8 +4352,8 @@ class Stack(Event):
 #                [station_indexes, phase_index[tt_phases[c]]]
 #            for c in range(len(tt_phases))], axis=1)
 #        if selection is None:
-#            if unique_events:
-#                selection = self.catalog.unique_events
+#            if unique_event:
+#                selection = self.catalog.unique_event
 #            else:
 #                selection = np.ones(len(self.catalog.origin_times), dtype=np.bool)
 #        self.event_ids = np.arange(len(selection), dtype=np.int32)[selection]
@@ -4399,7 +4399,7 @@ class Stack(Event):
 #    def read_trimmed_waveforms_raw(
 #            self, duration, offset_start, net,
 #            tt_phases=['S', 'S', 'P'],
-#            buffer=2., unique_events=False, correct_tt=False,
+#            buffer=2., unique_event=False, correct_tt=False,
 #            selection=None, **preprocess_kwargs):
 #        """
 #        Read waveforms from raw data and remove instrument response if requested.
@@ -4423,7 +4423,7 @@ class Stack(Event):
 #            Time, in seconds, taken at the beginning and end of the window.
 #            It is used to make sure the preprocessing does not alter the
 #            actual window.
-#        unique_events: boolean, default to False
+#        unique_event: boolean, default to False
 #            If True, only loads the unique detections.
 #        correct_tt: boolean, default to False
 #            If True, use the individual phase picks -- if available -- to
@@ -4444,8 +4444,8 @@ class Stack(Event):
 #                [station_indexes, phase_index[tt_phases[c]]]
 #            for c in range(len(tt_phases))], axis=1)
 #        if selection is None:
-#            if unique_events:
-#                selection = self.catalog.unique_events
+#            if unique_event:
+#                selection = self.catalog.unique_event
 #            else:
 #                selection = np.ones(len(self.catalog.origin_times), dtype=np.bool)
 #        self.event_ids = np.arange(len(selection), dtype=np.int32)[selection]
@@ -4763,7 +4763,7 @@ class Stack(Event):
 #        """
 #        # force 'origin_times' and 'magnitudes' to be among the items
 #        items_in = items_in + ['origin_times', 'magnitudes',
-#                    'correlation_coefficients', 'unique_events']
+#                    'correlation_coefficients', 'unique_event']
 #        filenames = [f'multiplets{tid}catalog.h5' for tid in self.tids]
 #        self.aggcat = AggregatedCatalogs(
 #                filenames=filenames, db_path_M=self.db_path_M, db_path=self.db_path)
@@ -4808,7 +4808,7 @@ class Stack(Event):
 #        # all valid events are the unique events and also
 #        # the events with highest CC from each family, to make
 #        # sure all families will end up being paired by at least one event
-#        valid_events = self.catalog['unique_events'].copy()
+#        valid_events = self.catalog['unique_event'].copy()
 #        highest_CC_events_idx = {}
 #        for tid in self.tids:
 #            selection = self.catalog['tids'] == tid
