@@ -1,10 +1,7 @@
 # Seismic_BPMF
 Complete framework for earthquake detection and location: Backprojection and matched-filtering (BPMF), packaged with methods for automatic picking, relocation and efficient waveform stacking. This project uses the deep neural network phase picker [PhaseNet](https://github.com/wayneweiqiang/PhaseNet) and the earthquake locator [NLLoc](http://alomax.free.fr/nlloc/). The backprojection earthquake detector uses our package [beampower](https://github.com/ebeauce/beampower) and the template matching earthquake detector uses our package [fast_matched_filter](https://github.com/beridel/fast_matched_filter).  
 
-BPMF v2.0.0 is now out but is still under development (v2.0.0.a1). It is ready
-to run the full detection and location workflow (tutorial coming soon!), but I
-am still implementing features, correcting bugs, improving docstrings, etc.
-  pick P-/S-waves and locate them.
+`BPMF` v2.0.0-alpha is now out! Checkout the online tutorial at [https://ebeauce.github.io/Seismic_BPMF/tutorial](https://ebeauce.github.io/Seismic_BPMF/tutorial) to learn how to use our fully automated workflow and build your own earthquake catalog.
 
 ## Documentation
 
