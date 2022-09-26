@@ -13,3 +13,5 @@ Tutorial
    tutorial/notebooks/4_travel_times
    tutorial/notebooks/5_backprojection
    tutorial/notebooks/6_build_template_database
+   tutorial/notebooks/7_template_matching.ipynb
+   tutorial/notebooks/8_build_earthquake_catalog.ipynb
