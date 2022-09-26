@@ -2848,7 +2848,7 @@ class TemplateGroup(Family):
         """Compute length of uncertainty ellipsoid in inter-template direction.
 
         New Attributes
-        ----------
+        --------------
         _dir_errors: (n_templates, n_templates) pandas.DataFrame
             The length, in kilometers, of the uncertainty ellipsoid in the
             inter-template direction.

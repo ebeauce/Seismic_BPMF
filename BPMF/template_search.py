@@ -324,12 +324,11 @@ class Beamformer(object):
     def set_weights(self, weights_phases=None, weights_sources=None):
         """Set the weights required by `beampower`.
 
-        weights_phases: (n_stations, n_channels, n_phases) np.ndarray, default
-        to None
+        weights_phases: (n_stations, n_channels, n_phases) np.ndarray, optional
             Weight given to each station and channel for a given phase. For
             example, horizontal components might be given a small or zero
             weight for the P-wave stacking.
-        weights_sources: (n_sources, n_stations) np.ndarray, default to None
+        weights_sources: (n_sources, n_stations) np.ndarray, optional
             Source-receiver-specific weights. For example, based on the
             source-receiver distance.
         """
