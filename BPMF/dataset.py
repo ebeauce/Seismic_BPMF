@@ -1165,9 +1165,10 @@ class Event(object):
         offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
         mini_batch_size=126,
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
+        component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
         **kwargs,
     ):
-        """Use PhaseNet (Zhu et al., 2019) to pick P and S waves.
+        """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
 
         Note1: PhaseNet must be used with 3-comp data.
         Note2: Extra kwargs are passed to
@@ -1193,6 +1194,12 @@ class Event(object):
             Dictionary defining which seismic phase is extracted on each
             component. For example, phase_on_comp['N'] gives the phase that is
             extracted on the north component.
+        component_aliases: Dictionary
+            Each entry of the dictionary is a list of strings.
+            `component_aliases[comp]` is the list of all aliases used for
+            the same component 'comp'. For example, `component_aliases['N'] =
+            ['N', '1']` means that both the 'N' and '1' channels will be mapped
+            to the Event's 'N' channel.
         """
         from phasenet import wrapper as PN
 
@@ -1202,6 +1209,7 @@ class Event(object):
                 duration,
                 offset_ot=offset_ot,
                 phase_on_comp=phase_on_comp,
+                component_aliases=component_aliases,
                 time_shifted=False,
                 **kwargs,
             )
@@ -1263,6 +1271,12 @@ class Event(object):
             Dictionary defining which seismic phase is extracted on each
             component. For example, phase_on_comp['N'] gives the phase that is
             extracted on the north component.
+        component_aliases: Dictionary
+            Each entry of the dictionary is a list of strings.
+            `component_aliases[comp]` is the list of all aliases used for
+            the same component 'comp'. For example, `component_aliases['N'] =
+            ['N', '1']` means that both the 'N' and '1' channels will be mapped
+            to the Event's 'N' channel.
         offset_phase: dictionary, optional
             Dictionary defining when the time window starts with respect to the
             pick. A positive offset means the window starts before the pick. Not
