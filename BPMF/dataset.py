@@ -1246,13 +1246,14 @@ class Event(object):
         self,
         duration,
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
+        component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
         offset_phase={"P": 1.0, "S": 4.0},
         time_shifted=True,
         offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
         data_reader=None,
         **reader_kwargs,
     ):
-        """Read waveform data.
+        """Read waveform data (Event class).
 
         Parameters
         -----------
@@ -1300,10 +1301,11 @@ class Event(object):
                     )
                 else:
                     pick = self.origin_time - offset_ot
+                comp_string = str(component_aliases[comp]).replace("'", "")
                 self.traces += data_reader(
                     self.where,
                     station=sta,
-                    channel=f"*{comp}",
+                    channel=f"*{comp_string}",
                     starttime=pick,
                     endtime=pick + duration,
                     **reader_kwargs,
