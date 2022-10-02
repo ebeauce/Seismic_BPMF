@@ -616,7 +616,6 @@ class Data(object):
         date,
         where,
         data_reader,
-        db_path=cfg.INPUT_PATH,
         duration=24.0 * 3600.0,
         sampling_rate=None,
     ):
@@ -631,9 +630,6 @@ class Data(object):
         data_reader: function
             Function that takes a path and optional key-word arguments to read
             data from this path and returns an `obspy.Stream` instance.
-        db_path: string, default to `cfg.INPUT_PATH`
-            Path to the data root directory. Data are then organized by year
-            such as: db_path/year/data_file1...
         duration: float, default to 24*3600
             Target duration, in seconds, of the waveform time series. Waveforms
             will be trimmed and zero-padded to match this duration.
