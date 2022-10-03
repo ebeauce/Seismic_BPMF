@@ -8,6 +8,7 @@ from . import utils
 
 import obspy as obs
 import pandas as pd
+import pathlib
 import copy
 import datetime
 from obspy import UTCDateTime as udt
@@ -1351,10 +1352,17 @@ class Event(object):
 
         if stations is None:
             stations = self.stations
+        # create folder for input/output files
+        input_dir = os.path.join(cfg.NLLOC_INPUT_PATH, self.id)
+        output_dir = os.path.join(cfg.NLLOC_OUTPUT_PATH, self.id)
+        if not os.path.isdir(input_dir):
+            os.mkdir(input_dir)
+        if not os.path.isdir(output_dir):
+            os.mkdir(output_dir)
         # file names:
-        ctrl_fn = self.id + ".in"
-        out_basename = self.id + "_out"
-        obs_fn = self.id + ".obs"
+        ctrl_fn = os.path.join(self.id, self.id + ".in")
+        out_basename = os.path.join(self.id, self.id + "_out")
+        obs_fn = os.path.join(self.id, self.id + ".obs")
         # write obs file
         if os.path.isfile(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn)):
             os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn))
@@ -1382,10 +1390,37 @@ class Event(object):
             )
         except IndexError:
             # relocation failed
+            for fn in glob.glob(os.path.join(input_dir, "*")):
+                pathlib.Path(fn).unlink()
+            if os.path.isdir(input_dir):
+                # add this protection against unexpected
+                # external change
+                pathlib.Path(input_dir).rmdir()
+            for fn in glob.glob(os.path.join(output_dir, "*")):
+                pathlib.Path(fn).unlink()
+            if os.path.isdir(output_dir):
+                # add this protection against unexpected
+                # external change
+                pathlib.Path(output_dir).rmdir()
             return
         hypocenter, predicted_times = NLLoc_utils.read_NLLoc_outputs(
-            out_fn, cfg.NLLOC_OUTPUT_PATH
+            out_fn, os.path.join(cfg.NLLOC_OUTPUT_PATH, self.id)
         )
+        if hypocenter is None:
+            # problem when reading the output
+            for fn in glob.glob(os.path.join(input_dir, "*")):
+                pathlib.Path(fn).unlink()
+            if os.path.isdir(input_dir):
+                # add this protection against unexpected
+                # external change
+                pathlib.Path(input_dir).rmdir()
+            for fn in glob.glob(os.path.join(output_dir, "*")):
+                pathlib.Path(fn).unlink()
+            if os.path.isdir(output_dir):
+                # add this protection against unexpected
+                # external change
+                pathlib.Path(output_dir).rmdir()
+            return
         hypocenter["origin_time"] = udt(hypocenter["origin_time"])
         # round seconds to reasonable precision to avoid producing
         # origin times that are in between samples
@@ -1408,16 +1443,18 @@ class Event(object):
         self.set_aux_data({"NLLoc_reloc": True})
         self.set_aux_data({"cov_mat": self.cov_mat, "tt_rms": self.tt_rms})
         # clean the temporary control and pick files
-        if os.path.isfile(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn)):
-            os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn))
-        if os.path.isfile(os.path.join(cfg.NLLOC_INPUT_PATH, ctrl_fn)):
-            os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, ctrl_fn))
-        for fn in glob.glob(os.path.join(cfg.NLLOC_OUTPUT_PATH, out_basename + "*")):
-            os.remove(fn)
-        for fn in glob.glob(os.path.join(cfg.NLLOC_INPUT_PATH, out_basename + "*.in")):
-            os.remove(fn)
-        for fn in glob.glob(os.path.join(cfg.NLLOC_INPUT_PATH, out_basename + "*.obs")):
-            os.remove(fn)
+        for fn in glob.glob(os.path.join(input_dir, "*")):
+            pathlib.Path(fn).unlink()
+        if os.path.isdir(input_dir):
+            # add this protection against unexpected
+            # external change
+            pathlib.Path(input_dir).rmdir()
+        for fn in glob.glob(os.path.join(output_dir, "*")):
+            pathlib.Path(fn).unlink()
+        if os.path.isdir(output_dir):
+            # add this protection against unexpected
+            # external change
+            pathlib.Path(output_dir).rmdir()
 
     def set_aux_data(self, aux_data):
         """Adds any extra data to the Event instance.
