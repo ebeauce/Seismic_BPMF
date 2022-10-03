@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Pre-requisites" href="tutorial/general.html" />
-    <link rel="prev" title="API" href="usage/api.html" />
+    <link rel="prev" title="BPMF.template_search" href="usage/api/template_search.html" />
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
   </head><body>
@@ -86,7 +86,7 @@
       </div>
     </header>
     <nav>
-      <a href="usage/api.html" class="nav-icon previous" title="previous:&#13;API" aria-label="Previous topic" accesskey="P" tabindex="-1">
+      <a href="usage/api/template_search.html" class="nav-icon previous" title="previous:&#13;BPMF.template_search" aria-label="Previous topic" accesskey="P" tabindex="-1">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M31.7 239l136-136c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9L127.9 256l96.4 96.4c9.4 9.4 9.4 24.6 0 33.9L201.7 409c-9.4 9.4-24.6 9.4-33.9 0l-136-136c-9.5-9.4-9.5-24.6-.1-34z"/></svg>
       </a>
       <a href="tutorial/general.html" class="nav-icon next" title="next:&#13;Pre-requisites" aria-label="Next topic" accesskey="N" tabindex="-1">
@@ -95,14 +95,14 @@
     </nav>
 
     <nav class="relbar">
-      <a class="previous" href="usage/api.html" aria-label="Previous topic" >
+      <a class="previous" href="usage/api/template_search.html" aria-label="Previous topic" >
         <div class="icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
         </div>
         <div class="title">
           <span class="text">
             <span class="direction">previous</span>
-            API
+            BPMF.template_search
           </span>
         </div>
       </a>
@@ -195,6 +195,21 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/6_build_template_database.html#Save-the-non-redundant-templates-in-a-database">Save the non-redundant templates in a database</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/notebooks/7_template_matching.html">Template Matching</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_template_matching.html#Read-the-template-database">Read the template database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_template_matching.html#Initialize-the-BPMF.similarity_search.MatchedFilter-instance.">Initialize the <code class="docutils literal notranslate"><span class="pre">BPMF.similarity_search.MatchedFilter</span></code> instance.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_template_matching.html#Load-the-data">Load the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_template_matching.html#Run-the-matched-filter-search">Run the matched-filter search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_template_matching.html#Plot-the-detected-events">Plot the detected events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_template_matching.html#Save-the-detected-events-to-database">Save the detected events to database</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/notebooks/8_build_earthquake_catalog.html">Build Earthquake Catalog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_build_earthquake_catalog.html#Read-the-detected-events’-metadata-for-each-template">Read the detected events’ metadata for each template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_build_earthquake_catalog.html#Remove-the-multiple-detections">Remove the multiple detections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_build_earthquake_catalog.html#Relocate-events">Relocate events</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
@@ -222,6 +237,8 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/4_travel_times.html">Compute P-/S-wave travel Times</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html">Backprojection of the Seismic Wavefield</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/6_build_template_database.html">Build Template Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_template_matching.html">Template Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="updates.html">Updates</a></li>
@@ -239,14 +256,14 @@
     </div>
 
     <nav class="relbar">
-      <a class="previous" href="usage/api.html" aria-label="Previous topic" >
+      <a class="previous" href="usage/api/template_search.html" aria-label="Previous topic" >
         <div class="icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
         </div>
         <div class="title">
           <span class="text">
             <span class="direction">previous</span>
-            API
+            BPMF.template_search
           </span>
         </div>
       </a>

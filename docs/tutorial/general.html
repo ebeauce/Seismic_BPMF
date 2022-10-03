@@ -126,7 +126,7 @@
             
 <section id="pre-requisites">
 <h1>Pre-requisites<a class="headerlink" href="#pre-requisites" title="Permalink to this heading">¶</a></h1>
-<p>The goal of this tutorial is to learm how to implement a full earthquake detection and location workflow with <a class="reference internal" href="../usage/api.html#module-BPMF" title="BPMF"><code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code></a>.
+<p>The goal of this tutorial is to learm how to implement a full earthquake detection and location workflow with <code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code>.
 Environment
 ———–</p>
 <p>Creating the virtual environment as described here is <em>essential</em> for running the tutorial successfully. We will use the python package manager <cite>Anaconda</cite>, or rather its ligther version <cite>Miniconda</cite>. Follow the instructions here <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">https://docs.conda.io/en/latest/miniconda.html</a> to install <cite>Miniconda</cite>.</p>
@@ -155,12 +155,12 @@ Environment
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip install .
 </pre></div>
 </div>
-<p>Several important features of <a class="reference internal" href="../usage/api.html#module-BPMF" title="BPMF"><code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code></a> relies on the deep neural network phase picker PhaseNet. In order to use PhaseNet, you have to install <code class="xref py py-data docutils literal notranslate"><span class="pre">phasenet</span></code> from E.B.’s Github (modified version with wrapper functions to use PhaseNet from within a python script) at: <a class="reference external" href="https://github.com/ebeauce/PhaseNet">https://github.com/ebeauce/PhaseNet</a>. Go to PhaseNet’s root folder and run:</p>
+<p>Several important features of <code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code> relies on the deep neural network phase picker PhaseNet. In order to use PhaseNet, you have to install <code class="xref py py-data docutils literal notranslate"><span class="pre">phasenet</span></code> from E.B.’s Github (modified version with wrapper functions to use PhaseNet from within a python script) at: <a class="reference external" href="https://github.com/ebeauce/PhaseNet">https://github.com/ebeauce/PhaseNet</a>. Go to PhaseNet’s root folder and run:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip install .
 </pre></div>
 </div>
 <p>This should download the package <code class="xref py py-data docutils literal notranslate"><span class="pre">tensorflow</span></code> and may take some time.</p>
-<p>Finally, we need to install <a class="reference internal" href="../usage/api.html#module-BPMF" title="BPMF"><code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code></a> to our new environment. We refer you to the <a class="reference internal" href="../introduction.html#installation"><span class="std std-ref">Installation</span></a> Section of the documentation.</p>
+<p>Finally, we need to install <code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code> to our new environment. We refer you to the <a class="reference internal" href="../introduction.html#installation"><span class="std std-ref">Installation</span></a> Section of the documentation.</p>
 <section id="running-the-tutorial">
 <h2>Running the Tutorial<a class="headerlink" href="#running-the-tutorial" title="Permalink to this heading">¶</a></h2>
 <p>The tutorial is made of a series of Ipython notebooks that are meant to be run from 0 to 3.</p>
@@ -194,6 +194,8 @@ Environment
 <li class="toctree-l2"><a class="reference internal" href="notebooks/4_travel_times.html">Compute P-/S-wave travel Times</a></li>
 <li class="toctree-l2"><a class="reference internal" href="notebooks/5_backprojection.html">Backprojection of the Seismic Wavefield</a></li>
 <li class="toctree-l2"><a class="reference internal" href="notebooks/6_build_template_database.html">Build Template Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/7_template_matching.html">Template Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/8_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../updates.html">Updates</a></li>
