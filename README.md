@@ -46,6 +46,7 @@ BPMF v1.0.1, than you can find at
 ## To do:
 - [ ] PhaseNet and NLLoc independent relocation method.
 - [ ] Convert `availability` and `source_receiver_dist` to properties.
+- [ ] Robust and fast detection threshold for template macthing.
 
 ## Contact
 Questions? Contact me at:<br/>
