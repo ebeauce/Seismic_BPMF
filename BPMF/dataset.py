@@ -1122,7 +1122,7 @@ class Event(object):
             may choose to not include these in the closest stations.
         """
         if not hasattr(self, "network_stations"):
-            # typically, an Event instance has not network_stations
+            # typically, an Event instance has no network_stations
             # attribute, but a Template instance does
             self.network_stations = self.stations.copy()
         # re-initialize the stations attribute
@@ -1312,15 +1312,15 @@ class Event(object):
                     )
                 else:
                     pick = self.origin_time - offset_ot
-                comp_string = str(component_aliases[comp]).replace("'", "")
-                self.traces += data_reader(
-                    self.where,
-                    station=sta,
-                    channel=f"*{comp_string}",
-                    starttime=pick,
-                    endtime=pick + duration,
-                    **reader_kwargs,
-                )
+                for cp_alias in component_aliases[comp]:
+                    self.traces += data_reader(
+                        self.where,
+                        station=sta,
+                        channel=f"*{cp_alias}",
+                        starttime=pick,
+                        endtime=pick + duration,
+                        **reader_kwargs,
+                    )
         for ph in offset_phase.keys():
             self.set_aux_data({f"offset_{ph.upper()}": offset_phase[ph]})
         for comp in phase_on_comp.keys():
