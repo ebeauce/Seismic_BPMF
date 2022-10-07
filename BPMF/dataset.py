@@ -8,6 +8,7 @@ from . import utils
 
 import obspy as obs
 import pandas as pd
+import pathlib
 import copy
 import datetime
 from obspy import UTCDateTime as udt
@@ -616,7 +617,6 @@ class Data(object):
         date,
         where,
         data_reader,
-        db_path=cfg.INPUT_PATH,
         duration=24.0 * 3600.0,
         sampling_rate=None,
     ):
@@ -631,9 +631,6 @@ class Data(object):
         data_reader: function
             Function that takes a path and optional key-word arguments to read
             data from this path and returns an `obspy.Stream` instance.
-        db_path: string, default to `cfg.INPUT_PATH`
-            Path to the data root directory. Data are then organized by year
-            such as: db_path/year/data_file1...
         duration: float, default to 24*3600
             Target duration, in seconds, of the waveform time series. Waveforms
             will be trimmed and zero-padded to match this duration.
@@ -1125,7 +1122,7 @@ class Event(object):
             may choose to not include these in the closest stations.
         """
         if not hasattr(self, "network_stations"):
-            # typically, an Event instance has not network_stations
+            # typically, an Event instance has no network_stations
             # attribute, but a Template instance does
             self.network_stations = self.stations.copy()
         # re-initialize the stations attribute
@@ -1156,103 +1153,202 @@ class Event(object):
             )
         self.stations = np.asarray(closest_stations).astype("U")
 
+    #def pick_PS_phases(
+    #    self,
+    #    duration,
+    #    threshold_P=0.60,
+    #    threshold_S=0.60,
+    #    offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
+    #    mini_batch_size=126,
+    #    phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
+    #    component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
+    #    **kwargs,
+    #):
+    #    """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
+
+    #    Note1: PhaseNet must be used with 3-comp data.
+    #    Note2: Extra kwargs are passed to
+    #    `phasenet.wrapper.automatic_detection`.
+
+    #    Parameters
+    #    -----------
+    #    duration: scalar float
+    #        Duration, in seconds, of the time window to process to search for P
+    #        and S wave arrivals.
+    #    tag: string
+    #        Tag name of the target data. For example: 'preprocessed_1_12'.
+    #    threshold_P: scalar float, default to 0.60
+    #        Threshold on PhaseNet's probabilities to trigger the identification
+    #        of a P-wave arrival.
+    #    threshold_S: scalar float, default to 0.60
+    #        Threshold on PhaseNet's probabilities to trigger the identification
+    #        of a S-wave arrival.
+    #    mini_batch_size: scalar int, default to 126
+    #        Number of traces processed in a single batch by PhaseNet. This
+    #        shouldn't have to be tuned.
+    #    phase_on_comp: dictionary, optional
+    #        Dictionary defining which seismic phase is extracted on each
+    #        component. For example, phase_on_comp['N'] gives the phase that is
+    #        extracted on the north component.
+    #    component_aliases: Dictionary
+    #        Each entry of the dictionary is a list of strings.
+    #        `component_aliases[comp]` is the list of all aliases used for
+    #        the same component 'comp'. For example, `component_aliases['N'] =
+    #        ['N', '1']` means that both the 'N' and '1' channels will be mapped
+    #        to the Event's 'N' channel.
+    #    """
+    #    import seisbench.models as sbm
+
+    #    # load model
+    #    model = sbm.EQTransformer.from_pretrained("original")
+
+    #    if kwargs.get("read_waveforms", True):
+    #        # read waveforms in picking mode, i.e. with `time_shifted`=False
+    #        self.read_waveforms(
+    #            duration,
+    #            offset_ot=offset_ot,
+    #            phase_on_comp=phase_on_comp,
+    #            component_aliases=component_aliases,
+    #            time_shifted=False,
+    #            **kwargs,
+    #        )
+    #    ML_picks = model.classify(
+    #        self.traces,
+    #        P_threshold=threshold_P,
+    #        S_threshold=threshold_S,
+    #    )
+    #    # add picks to auxiliary data
+    #    # self.set_aux_data(PhaseNet_picks)
+    #    # format picks in pandas DataFrame
+    #    pandas_picks = pd.DataFrame(
+    #        index=self.stations,
+    #        columns=[
+    #            "P_picks_sec",
+    #            "P_probas",
+    #            "P_abs_picks",
+    #            "S_picks_sec",
+    #            "S_probas",
+    #            "S_abs_picks",
+    #        ],
+    #    )
+    #    for pick in ML_picks[0]:
+    #        sta = pick.trace_id.split(".")[1]
+    #        if (
+    #            ~pd.isna(pandas_picks.loc[sta, f"{pick.phase}_probas"])
+    #            and pick.peak_value > pandas_picks.loc[sta, f"{pick.phase}_probas"]
+    #        ):
+    #            pandas_picks.loc[sta, f"{pick.phase}_probas"] = pick.peak_value
+    #            pandas_picks.loc[sta, f"{pick.phase}_picks_sec"] = (
+    #                pick.peak_time - self.origin_time
+    #            )
+    #            pandas_picks.loc[sta, f"{pick.phase}_abs_picks"] = pick.peak_time
+    #    self.picks = pandas_picks
 
     def pick_PS_phases(
-        self,
-        duration,
-        threshold_P=0.60,
-        threshold_S=0.60,
-        offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
-        mini_batch_size=126,
-        phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
-        **kwargs,
+       self,
+       duration,
+       threshold_P=0.60,
+       threshold_S=0.60,
+       offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
+       mini_batch_size=126,
+       phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
+       component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
+       **kwargs,
     ):
-        """Use PhaseNet (Zhu et al., 2019) to pick P and S waves.
+       """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
 
-        Note1: PhaseNet must be used with 3-comp data.
-        Note2: Extra kwargs are passed to
-        `phasenet.wrapper.automatic_detection`.
+       Note1: PhaseNet must be used with 3-comp data.
+       Note2: Extra kwargs are passed to
+       `phasenet.wrapper.automatic_detection`.
 
-        Parameters
-        -----------
-        duration: scalar float
-            Duration, in seconds, of the time window to process to search for P
-            and S wave arrivals.
-        tag: string
-            Tag name of the target data. For example: 'preprocessed_1_12'.
-        threshold_P: scalar float, default to 0.60
-            Threshold on PhaseNet's probabilities to trigger the identification
-            of a P-wave arrival.
-        threshold_S: scalar float, default to 0.60
-            Threshold on PhaseNet's probabilities to trigger the identification
-            of a S-wave arrival.
-        mini_batch_size: scalar int, default to 126
-            Number of traces processed in a single batch by PhaseNet. This
-            shouldn't have to be tuned.
-        phase_on_comp: dictionary, optional
-            Dictionary defining which seismic phase is extracted on each
-            component. For example, phase_on_comp['N'] gives the phase that is
-            extracted on the north component.
-        """
-        from phasenet import wrapper as PN
+       Parameters
+       -----------
+       duration: scalar float
+           Duration, in seconds, of the time window to process to search for P
+           and S wave arrivals.
+       tag: string
+           Tag name of the target data. For example: 'preprocessed_1_12'.
+       threshold_P: scalar float, default to 0.60
+           Threshold on PhaseNet's probabilities to trigger the identification
+           of a P-wave arrival.
+       threshold_S: scalar float, default to 0.60
+           Threshold on PhaseNet's probabilities to trigger the identification
+           of a S-wave arrival.
+       mini_batch_size: scalar int, default to 126
+           Number of traces processed in a single batch by PhaseNet. This
+           shouldn't have to be tuned.
+       phase_on_comp: dictionary, optional
+           Dictionary defining which seismic phase is extracted on each
+           component. For example, phase_on_comp['N'] gives the phase that is
+           extracted on the north component.
+       component_aliases: Dictionary
+           Each entry of the dictionary is a list of strings.
+           `component_aliases[comp]` is the list of all aliases used for
+           the same component 'comp'. For example, `component_aliases['N'] =
+           ['N', '1']` means that both the 'N' and '1' channels will be mapped
+           to the Event's 'N' channel.
+       """
+       from phasenet import wrapper as PN
 
-        if kwargs.get("read_waveforms", True):
-            # read waveforms in picking mode, i.e. with `time_shifted`=False
-            self.read_waveforms(
-                duration,
-                offset_ot=offset_ot,
-                phase_on_comp=phase_on_comp,
-                time_shifted=False,
-                **kwargs,
-            )
-        data_arr = self.get_np_array(self.stations, components=["N", "E", "Z"])
-        # call PhaseNet
-        PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
-            data_arr[np.newaxis, ...],
-            self.stations,
-            mini_batch_size=mini_batch_size,
-            format="ram",
-            threshold_P=threshold_P,
-            threshold_S=threshold_S,
-            **kwargs,
-        )
-        # keep best P- and S-wave pick on each 3-comp seismogram
-        PhaseNet_picks = PN.get_best_picks(PhaseNet_picks)
-        # add picks to auxiliary data
-        # self.set_aux_data(PhaseNet_picks)
-        # format picks in pandas DataFrame
-        pandas_picks = {"stations": self.stations}
-        for ph in ["P", "S"]:
-            rel_picks_sec = np.zeros(len(self.stations), dtype=np.float32)
-            proba_picks = np.zeros(len(self.stations), dtype=np.float32)
-            abs_picks = np.zeros(len(self.stations), dtype=object)
-            for s, sta in enumerate(self.stations):
-                if sta in PhaseNet_picks[f"{ph}_picks"].keys():
-                    rel_picks_sec[s] = PhaseNet_picks[f"{ph}_picks"][sta][0] / self.sr
-                    proba_picks[s] = PhaseNet_picks[f"{ph}_proba"][sta][0]
-                    if proba_picks[s] > 0.0:
-                        abs_picks[s] = (
-                            self.traces.select(station=sta)[0].stats.starttime
-                            + rel_picks_sec[s]
-                        )
-            pandas_picks[f"{ph}_picks_sec"] = rel_picks_sec
-            pandas_picks[f"{ph}_probas"] = proba_picks
-            pandas_picks[f"{ph}_abs_picks"] = abs_picks
-        self.picks = pd.DataFrame(pandas_picks)
-        self.picks.set_index("stations", inplace=True)
-        self.picks.replace(0.0, np.nan, inplace=True)
+       if kwargs.get("read_waveforms", True):
+           # read waveforms in picking mode, i.e. with `time_shifted`=False
+           self.read_waveforms(
+               duration,
+               offset_ot=offset_ot,
+               phase_on_comp=phase_on_comp,
+               component_aliases=component_aliases,
+               time_shifted=False,
+               **kwargs,
+           )
+       data_arr = self.get_np_array(self.stations, components=["N", "E", "Z"])
+       # call PhaseNet
+       PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
+           data_arr[np.newaxis, ...],
+           self.stations,
+           mini_batch_size=mini_batch_size,
+           format="ram",
+           threshold_P=threshold_P,
+           threshold_S=threshold_S,
+           **kwargs,
+       )
+       # keep best P- and S-wave pick on each 3-comp seismogram
+       PhaseNet_picks = PN.get_best_picks(PhaseNet_picks)
+       # add picks to auxiliary data
+       # self.set_aux_data(PhaseNet_picks)
+       # format picks in pandas DataFrame
+       pandas_picks = {"stations": self.stations}
+       for ph in ["P", "S"]:
+           rel_picks_sec = np.zeros(len(self.stations), dtype=np.float32)
+           proba_picks = np.zeros(len(self.stations), dtype=np.float32)
+           abs_picks = np.zeros(len(self.stations), dtype=object)
+           for s, sta in enumerate(self.stations):
+               if sta in PhaseNet_picks[f"{ph}_picks"].keys():
+                   rel_picks_sec[s] = PhaseNet_picks[f"{ph}_picks"][sta][0] / self.sr
+                   proba_picks[s] = PhaseNet_picks[f"{ph}_proba"][sta][0]
+                   if proba_picks[s] > 0.0:
+                       abs_picks[s] = (
+                           self.traces.select(station=sta)[0].stats.starttime
+                           + rel_picks_sec[s]
+                       )
+           pandas_picks[f"{ph}_picks_sec"] = rel_picks_sec
+           pandas_picks[f"{ph}_probas"] = proba_picks
+           pandas_picks[f"{ph}_abs_picks"] = abs_picks
+       self.picks = pd.DataFrame(pandas_picks)
+       self.picks.set_index("stations", inplace=True)
+       self.picks.replace(0.0, np.nan, inplace=True)
 
     def read_waveforms(
         self,
         duration,
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
+        component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
         offset_phase={"P": 1.0, "S": 4.0},
         time_shifted=True,
         offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
         data_reader=None,
         **reader_kwargs,
     ):
-        """Read waveform data.
+        """Read waveform data (Event class).
 
         Parameters
         -----------
@@ -1262,6 +1358,12 @@ class Event(object):
             Dictionary defining which seismic phase is extracted on each
             component. For example, phase_on_comp['N'] gives the phase that is
             extracted on the north component.
+        component_aliases: Dictionary
+            Each entry of the dictionary is a list of strings.
+            `component_aliases[comp]` is the list of all aliases used for
+            the same component 'comp'. For example, `component_aliases['N'] =
+            ['N', '1']` means that both the 'N' and '1' channels will be mapped
+            to the Event's 'N' channel.
         offset_phase: dictionary, optional
             Dictionary defining when the time window starts with respect to the
             pick. A positive offset means the window starts before the pick. Not
@@ -1300,14 +1402,15 @@ class Event(object):
                     )
                 else:
                     pick = self.origin_time - offset_ot
-                self.traces += data_reader(
-                    self.where,
-                    station=sta,
-                    channel=f"*{comp}",
-                    starttime=pick,
-                    endtime=pick + duration,
-                    **reader_kwargs,
-                )
+                for cp_alias in component_aliases[comp]:
+                    self.traces += data_reader(
+                        self.where,
+                        station=sta,
+                        channel=f"*{cp_alias}",
+                        starttime=pick,
+                        endtime=pick + duration,
+                        **reader_kwargs,
+                    )
         for ph in offset_phase.keys():
             self.set_aux_data({f"offset_{ph.upper()}": offset_phase[ph]})
         for comp in phase_on_comp.keys():
@@ -1339,10 +1442,17 @@ class Event(object):
 
         if stations is None:
             stations = self.stations
+        # create folder for input/output files
+        input_dir = os.path.join(cfg.NLLOC_INPUT_PATH, self.id)
+        output_dir = os.path.join(cfg.NLLOC_OUTPUT_PATH, self.id)
+        if not os.path.isdir(input_dir):
+            os.mkdir(input_dir)
+        if not os.path.isdir(output_dir):
+            os.mkdir(output_dir)
         # file names:
-        ctrl_fn = self.id + ".in"
-        out_basename = self.id + "_out"
-        obs_fn = self.id + ".obs"
+        ctrl_fn = os.path.join(self.id, self.id + ".in")
+        out_basename = os.path.join(self.id, self.id + "_out")
+        obs_fn = os.path.join(self.id, self.id + ".obs")
         # write obs file
         if os.path.isfile(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn)):
             os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn))
@@ -1370,10 +1480,37 @@ class Event(object):
             )
         except IndexError:
             # relocation failed
+            for fn in glob.glob(os.path.join(input_dir, "*")):
+                pathlib.Path(fn).unlink()
+            if os.path.isdir(input_dir):
+                # add this protection against unexpected
+                # external change
+                pathlib.Path(input_dir).rmdir()
+            for fn in glob.glob(os.path.join(output_dir, "*")):
+                pathlib.Path(fn).unlink()
+            if os.path.isdir(output_dir):
+                # add this protection against unexpected
+                # external change
+                pathlib.Path(output_dir).rmdir()
             return
         hypocenter, predicted_times = NLLoc_utils.read_NLLoc_outputs(
-            out_fn, cfg.NLLOC_OUTPUT_PATH
+            out_fn, os.path.join(cfg.NLLOC_OUTPUT_PATH, self.id)
         )
+        if hypocenter is None:
+            # problem when reading the output
+            for fn in glob.glob(os.path.join(input_dir, "*")):
+                pathlib.Path(fn).unlink()
+            if os.path.isdir(input_dir):
+                # add this protection against unexpected
+                # external change
+                pathlib.Path(input_dir).rmdir()
+            for fn in glob.glob(os.path.join(output_dir, "*")):
+                pathlib.Path(fn).unlink()
+            if os.path.isdir(output_dir):
+                # add this protection against unexpected
+                # external change
+                pathlib.Path(output_dir).rmdir()
+            return
         hypocenter["origin_time"] = udt(hypocenter["origin_time"])
         # round seconds to reasonable precision to avoid producing
         # origin times that are in between samples
@@ -1396,16 +1533,18 @@ class Event(object):
         self.set_aux_data({"NLLoc_reloc": True})
         self.set_aux_data({"cov_mat": self.cov_mat, "tt_rms": self.tt_rms})
         # clean the temporary control and pick files
-        if os.path.isfile(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn)):
-            os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn))
-        if os.path.isfile(os.path.join(cfg.NLLOC_INPUT_PATH, ctrl_fn)):
-            os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, ctrl_fn))
-        for fn in glob.glob(os.path.join(cfg.NLLOC_OUTPUT_PATH, out_basename + "*")):
-            os.remove(fn)
-        for fn in glob.glob(os.path.join(cfg.NLLOC_INPUT_PATH, out_basename + "*.in")):
-            os.remove(fn)
-        for fn in glob.glob(os.path.join(cfg.NLLOC_INPUT_PATH, out_basename + "*.obs")):
-            os.remove(fn)
+        for fn in glob.glob(os.path.join(input_dir, "*")):
+            pathlib.Path(fn).unlink()
+        if os.path.isdir(input_dir):
+            # add this protection against unexpected
+            # external change
+            pathlib.Path(input_dir).rmdir()
+        for fn in glob.glob(os.path.join(output_dir, "*")):
+            pathlib.Path(fn).unlink()
+        if os.path.isdir(output_dir):
+            # add this protection against unexpected
+            # external change
+            pathlib.Path(output_dir).rmdir()
 
     def set_aux_data(self, aux_data):
         """Adds any extra data to the Event instance.
@@ -1538,7 +1677,6 @@ class Event(object):
         self._source_receiver_dist = self.source_receiver_dist.loc[
             self.network_stations
         ]
-
 
     def trim_waveforms(self, starttime=None, endtime=None):
         """Trim waveforms.
@@ -1996,9 +2134,8 @@ class Template(Event):
             self.longitude, self.latitude, self.depth, longitude, latitude, depth
         )
 
-    #def n_closest_stations(self, n, available_stations=None):
+    # def n_closest_stations(self, n, available_stations=None):
     #    """Adjust `self.stations` to the `n` closest stations.
-
 
     #    Find the `n` closest stations and modify `self.stations` accordingly.
     #    The instance's properties will also change accordingly.

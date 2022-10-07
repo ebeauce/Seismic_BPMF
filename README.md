@@ -1,5 +1,8 @@
 # Seismic_BPMF
-Complete framework for earthquake detection and location: Backprojection and matched-filtering (BPMF), packaged with methods for automatic picking, relocation and efficient waveform stacking. This project uses the deep neural network phase picker [PhaseNet](https://github.com/wayneweiqiang/PhaseNet) and the earthquake locator [NLLoc](http://alomax.free.fr/nlloc/). The backprojection earthquake detector uses our package [beampower](https://github.com/ebeauce/beampower) and the template matching earthquake detector uses our package [fast_matched_filter](https://github.com/beridel/fast_matched_filter).  
+
+Complete framework for earthquake detection and location with GPU-accelerated processing.
+
+Backprojection and matched-filtering (BPMF) is a two-step earthquake detection workflow with 1) backprojection for template finding and 2) template matching for lowering the magnitude of completeness of the catalog. BPMF offers a number of routine for the automatic location of the detected events with the deep neural network phase picker [PhaseNet](https://github.com/wayneweiqiang/PhaseNet) and the earthquake locator [NLLoc](http://alomax.free.fr/nlloc/). BPMF leverages the low-level C and CUDA-C programming languages for the efficient processing of large data volumes. The core routines for backprojection and template matching are provided in our two packages [beampower](https://github.com/ebeauce/beampower) and [fast_matched_filter](https://github.com/beridel/fast_matched_filter), respectively.  
 
 `BPMF` v2.0.0-alpha is now out! Checkout the online tutorial at [https://ebeauce.github.io/Seismic_BPMF/tutorial](https://ebeauce.github.io/Seismic_BPMF/tutorial) to learn how to use our fully automated workflow and build your own earthquake catalog.
 
@@ -46,6 +49,8 @@ BPMF v1.0.1, than you can find at
 ## To do:
 - [ ] PhaseNet and NLLoc independent relocation method.
 - [ ] Convert `availability` and `source_receiver_dist` to properties.
+- [ ] Robust and fast detection threshold for template macthing.
+- [ ] Use Seisbench for the easier interfacing of ML pickers.
 
 ## Contact
 Questions? Contact me at:<br/>

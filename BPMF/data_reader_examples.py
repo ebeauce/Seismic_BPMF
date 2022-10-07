@@ -163,7 +163,8 @@ def data_reader_mseed(
     traces = Stream()
     # read your data into traces
     data_files = glob.glob(
-        os.path.join(where, data_folder, f"{network}.{station}.{location}.{channel}*")
+        os.path.join(where, data_folder,
+            f"{network}.{station}.{location}.{channel}[_.]*")
     )
     for fname in data_files:
         traces += read(fname, starttime=starttime, endtime=endtime, **kwargs)

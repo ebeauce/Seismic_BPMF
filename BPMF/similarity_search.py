@@ -551,7 +551,7 @@ class MatchedFilter(object):
 
         sr = self.data.sr
         cc_t = self.cc[tid]
-        weights_t = self.weights_arr[self.template_group.tindexes.loc[tid], ...]
+        weights_t = self.weights_arr[self.tids_subset.index(tid), ...]
 
         detection_threshold = time_dependent_threshold(
             cc_t,
@@ -678,6 +678,7 @@ class MatchedFilter(object):
                         # succesfully retrieved data
                         break
                 if len(tr) == 0:
+                    print(f"Did not find any continuous data on {sta}.{cp}")
                     continue
                 else:
                     tr = tr[0]
@@ -733,7 +734,7 @@ class MatchedFilter(object):
 #        FMF (float 32).
 #    sliding_window: scalar integer
 #        The size of the sliding window, in samples, used
-#        to calculate the time dependent central tendancy
+#        to calculate the time dependent central tendency
 #        and deviation of the time series.
 #    overlap: scalar float, default to 0.75
 #    threshold_type: string, default to 'rms'
@@ -821,7 +822,7 @@ def time_dependent_threshold(
         FMF (float 32).
     sliding_window: scalar integer
         The size of the sliding window, in samples, used
-        to calculate the time dependent central tendancy
+        to calculate the time dependent central tendency
         and deviation of the time series.
     overlap: scalar float, default to 0.75
     threshold_type: string, default to 'rms'
@@ -843,9 +844,9 @@ def time_dependent_threshold(
     n_samples = len(time_series)
     half_window = sliding_window // 2
     shift = int((1.0 - overlap) * sliding_window)
-    # last_valid_win = n_samples - sliding_window + 1
-    # time = np.arange(n_samples, dtype=np.int32)[0:last_valid_win:shift]
     zeros = time_series == 0.0
+    #short_window = min(sliding_window, int(60.*50))
+    #ctrl_time_series = time_series[:short_window*(n_samples//short_window)].reshape(-1, short_window)
     if white_noise is None:
         white_noise = np.random.normal(size=np.sum(zeros)).astype("float32")
     if threshold_type == "rms":
@@ -859,6 +860,8 @@ def time_dependent_threshold(
         )[::shift, :]
         center = np.mean(time_series_win, axis=-1)
         deviation = np.std(time_series_win, axis=-1)
+        #ctrl_threshold = np.mean(ctrl_time_series, axis=-1) +\
+        #             np.std(ctrl_time_series, axis=-1)
     elif threshold_type == "mad":
         default_center = np.median(time_series[~zeros])
         default_deviation = np.median(np.abs(time_series[~zeros] - default_center))
@@ -872,13 +875,20 @@ def time_dependent_threshold(
         deviation = np.median(
             np.abs(time_series_win - center[:-1, np.newaxis]), axis=-1
         )
+        #ctrl_threshold = np.median(ctrl_time_series, axis=-1) +\
+        #             np.median(np.abs(ctrl_threshold -
+        #                 np.median(ctrl_time_series, axis=-1, keepdims=True)), axis=-1)
+
     threshold = center + cfg.N_DEV_MF_THRESHOLD * deviation
+    threshold[1:] = np.maximum(threshold[:-1], threshold[1:])
+    threshold[:-1] = np.maximum(threshold[:-1], threshold[1:])
     time = np.arange(half_window, n_samples - (sliding_window - half_window))
     indexes_l = time // shift
     indexes_l[indexes_l >= len(threshold)] = len(threshold) - 1
-    indexes_r = time // shift + 1
-    indexes_r[indexes_r >= len(threshold)] = len(threshold) - 1
-    threshold = np.maximum(threshold[indexes_l], threshold[indexes_r])
+    #indexes_r = time // shift + 1
+    #indexes_r[indexes_r >= len(threshold)] = len(threshold) - 1
+    #threshold = np.maximum(threshold[indexes_l], threshold[indexes_r])
+    threshold = threshold[indexes_l]
     threshold = np.hstack(
         (
             threshold[0] * np.ones(half_window, dtype=np.float32),
@@ -886,4 +896,93 @@ def time_dependent_threshold(
             threshold[-1] * np.ones(sliding_window - half_window, dtype=np.float32),
         )
     )
+    #indexes_ctrl = time // short_window
+    #indexes_ctrl[indexes_ctrl >= len(threshold)] = len(threshold) - 1
+    #ctrl_threshold = ctrl_threshold[indexes_ctrl]
+    #ctrl_threshold = np.hstack(
+    #    (
+    #        ctrl_threshold,
+    #        ctrl_threshold[-1] * np.ones(n_samples - len(ctrl_threshold), dtype=np.float32),
+    #    )
+    #)
+    #threshold[threshold < 0.75*ctrl_threshold] = ctrl_threshold
     return threshold
+
+#def time_dependent_threshold(
+#    time_series, sliding_window, threshold_type="rms", white_noise=None,
+#    overlap=None
+#):
+#    """
+#    Time dependent detection threshold.
+#
+#    Parameters
+#    -----------
+#    time_series: (n_correlations) array_like
+#        The array of correlation coefficients calculated by
+#        FMF (float 32).
+#    sliding_window: scalar integer
+#        The size of the non-overlapping sliding window, in samples, used to
+#        compute the time dependent central tendency
+#        and deviation of the time series.
+#    threshold_type: string, default to 'rms'
+#        Either rms or mad, depending on which measure
+#        of deviation you want to use.
+#    white_noise: `numpy.ndarray` or None, default to None
+#        If not None, `white_noise` is a vector of random values sampled from the
+#        standard normal distribution. It is used to fill zeros in the CC time
+#        series. If None, a random vector is generated from scratch.
+#
+#    Returns
+#    ----------
+#    threshold: (n_correlations) array_like
+#        Returns the time dependent threshold, with same
+#        size as the input time series.
+#    """
+#
+#    threshold_type = threshold_type.lower()
+#    n_samples = len(time_series)
+#    half_window = sliding_window // 2
+#    truncated_duration = sliding_window*(n_samples//sliding_window)
+#    zeros = time_series == 0.0
+#    if white_noise is None:
+#        white_noise = np.random.normal(size=np.sum(zeros)).astype("float32")
+#    if threshold_type == "rms":
+#        default_center = time_series[~zeros].mean()
+#        default_deviation = np.std(time_series[~zeros])
+#        time_series[zeros] = (
+#            white_noise[: np.sum(zeros)] * default_deviation + default_center
+#        )
+#        time_series_win = time_series[:truncated_duration].reshape(-1,
+#                sliding_window)
+#        center = np.mean(time_series_win, axis=-1)
+#        deviation = np.std(time_series_win, axis=-1)
+#    elif threshold_type == "mad":
+#        default_center = np.median(time_series[~zeros])
+#        default_deviation = np.median(np.abs(time_series[~zeros] - default_center))
+#        time_series[zeros] = (
+#            white_noise[: np.sum(zeros)] * default_deviation + default_center
+#        )
+#        time_series_win = time_series[:truncated_duration].reshape(-1,
+#                sliding_window)
+#        center = np.median(time_series_win, axis=-1)
+#        deviation = np.median(
+#            np.abs(time_series_win - center[:-1, np.newaxis]), axis=-1
+#        )
+#    threshold = center + cfg.N_DEV_MF_THRESHOLD * deviation
+#    threshold[1:] = np.maximum(threshold[:-1], threshold[1:])
+#    threshold[:-1] = np.maximum(threshold[:-1], threshold[1:])
+#    time = np.arange(half_window, n_samples - (sliding_window - half_window))
+#    indexes_l = time // sliding_window
+#    indexes_l[indexes_l >= len(threshold)] = len(threshold) - 1
+#    #indexes_r = time // shift + 1
+#    #indexes_r[indexes_r >= len(threshold)] = len(threshold) - 1
+#    #threshold = np.maximum(threshold[indexes_l], threshold[indexes_r])
+#    threshold = threshold[indexes_l]
+#    threshold = np.hstack(
+#        (
+#            threshold[0] * np.ones(half_window, dtype=np.float32),
+#            threshold,
+#            threshold[-1] * np.ones(sliding_window - half_window, dtype=np.float32),
+#        )
+#    )
+#    return threshold
