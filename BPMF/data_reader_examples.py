@@ -86,7 +86,7 @@ def data_reader_pyasdf(
             ds.q.tag == tag,
             ds.q.network == network,
             ds.q.station == station,
-            ds.q.channel == channel,
+            ds.q.channel == f"*{channel}",
             ds.q.location == location,
         ):
             for tr in getattr(station_, tag):
@@ -164,7 +164,7 @@ def data_reader_mseed(
     # read your data into traces
     data_files = glob.glob(
         os.path.join(where, data_folder,
-            f"{network}.{station}.{location}.{channel}[_.]*")
+            f"{network}.{station}.{location}.*[!0,1,2,3,4,5,6,7,8,9]{channel}[_.]*")
     )
     for fname in data_files:
         traces += read(fname, starttime=starttime, endtime=endtime, **kwargs)
