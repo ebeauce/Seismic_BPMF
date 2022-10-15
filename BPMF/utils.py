@@ -154,6 +154,7 @@ def preprocess_stream(
     target_endtime=None,
     minimum_length=0.75,
     verbose=True,
+    SR_decimals=1,
     unit="VEL",
     **kwargs,
 ):
@@ -190,7 +191,8 @@ def preprocess_stream(
         tr.trim(starttime=t1, endtime=t2, pad=True, fill_value=0.0)
         preprocessed_stream += tr
     for tr in preprocessed_stream:
-        tr.stats.sampling_rate = np.round(tr.stats.sampling_rate, decimals=1)
+        tr.stats.sampling_rate = np.round(tr.stats.sampling_rate,
+                decimals=SR_decimals)
     # if the trace came as separated segments without masked
     # elements, it is necessary to merge the stream
     preprocessed_stream = preprocessed_stream.merge(fill_value=0.0)
