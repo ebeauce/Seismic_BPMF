@@ -1406,7 +1406,7 @@ class Event(object):
                     self.traces += data_reader(
                         self.where,
                         station=sta,
-                        channel=f"*{cp_alias}",
+                        channel=cp_alias,
                         starttime=pick,
                         endtime=pick + duration,
                         **reader_kwargs,
@@ -1849,7 +1849,10 @@ class Event(object):
                         cha = tr.stats.channel
                         if sta not in f["waveforms"]:
                             f["waveforms"].create_group(sta)
-                        f["waveforms"][sta].create_dataset(cha, data=tr.data)
+                        if cha in f["waveforms"][sta]:
+                            print(f"{sta}.{cha} already exists!")
+                        else:
+                            f["waveforms"][sta].create_dataset(cha, data=tr.data)
                 else:
                     print(
                         "You are trying to save the waveforms whereas you did"

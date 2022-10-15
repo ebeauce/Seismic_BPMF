@@ -188,7 +188,9 @@ class Beamformer(object):
             idx = np.int32(
                 np.arange(
                     max(0, peak_indexes[i] - minimum_interevent_time / 2),
-                    min(peak_indexes[i] + minimum_interevent_time / 2, len(self.maxbeam)),
+                    min(
+                        peak_indexes[i] + minimum_interevent_time / 2, len(self.maxbeam)
+                    ),
                 )
             )
             idx_to_update = np.where(peak_indexes == peak_indexes[i])[0]
@@ -228,7 +230,7 @@ class Beamformer(object):
                 longitude=longitude,
                 depth=depth,
                 sampling_rate=sr,
-                data_reader=self.data.data_reader
+                data_reader=self.data.data_reader,
             )
             aux_data = {}
             aux_data["maxbeam"] = self.maxbeam[peak_indexes[i]]
@@ -347,11 +349,14 @@ class Beamformer(object):
             the `n_max_stations` stations will be set a weight > 0.
         """
         weights_sources = np.ones((self.n_sources, self.n_stations), dtype=np.float32)
-        if n_max_stations < self.n_stations:
+        if hasattr(self.data, "availability"):
+            mv = self.moveouts[:, self.data.availability.values, 0]
+        else:
+            mv = self.moveouts[:, :, 0]
+        n_max_stations = min(mv.shape[1], n_max_stations)
+        if (n_max_stations < self.n_stations) and (n_max_stations > 0):
             cutoff_mv = np.max(
-                np.partition(self.moveouts[:, :, 0], n_max_stations)[
-                    :, :n_max_stations
-                ],
+                np.partition(mv, n_max_stations - 1)[:, :n_max_stations],
                 axis=1,
                 keepdims=True,
             )
@@ -951,7 +956,9 @@ def saturated_envelopes(traces, anomaly_threshold=1.0e-11, max_dynamic_range=1.0
             waveform_features[s, c, missing_samples] = 0.0
             # saturate traces
             waveform_features[s, c, :] = np.clip(
-                waveform_features[s, c, :], waveform_features[s, c, :], max_dynamic_range
+                waveform_features[s, c, :],
+                waveform_features[s, c, :],
+                max_dynamic_range,
             )
             data_availability[s] += 1
     return waveform_features, data_availability
