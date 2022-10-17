@@ -219,14 +219,14 @@ class MatchedFilter(object):
             )
             if hasattr(self.data, "availability"):
                 # turn weights to zero on unavailable stations
-                weights_arr[:, ~self.data.availability.values, :] = 0.0
+                weights_arr[:, ~self.data.availability_per_cha.values] = 0.0
             norm = np.sum(weights_arr, axis=(1, 2), keepdims=True)
             norm[norm == 0.0] = 1.0
             weights_arr /= norm
             # insufficient data
             invalid = (
-                np.sum((weights_arr != 0.0), axis=(1, 2)) < self.min_channels
-            ) | (np.sum(np.sum(weights_arr, axis=2) > 0.0, axis=1) < self.min_stations)
+                np.sum((weights_arr != 0.0), axis=(1, 2)) <= self.min_channels
+            ) | (np.sum(np.sum(weights_arr, axis=2) > 0.0, axis=1) <= self.min_stations)
             weights_arr[invalid] = 0.0
         self.weights_arr = weights_arr
         # ----------------------------------------------

@@ -702,7 +702,12 @@ class Data(object):
         if trim_traces:
             self.trim_waveforms()
 
-    def set_availability(self, stations):
+    def set_availability(
+        self,
+        stations,
+        components=["N", "E", "Z"],
+        component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
+    ):
         """Set the data availability.
 
         A station is available if at least one station has non-zero data. The
@@ -714,18 +719,29 @@ class Data(object):
             Names of the stations on which we check availability. If None, use
             `self.stations`.
         """
-        availability = np.zeros(len(stations), dtype=np.bool)
         if not hasattr(self, "traces"):
             print("Call `self.read_waveforms` first.")
             return
-        for s, sta in enumerate(stations):
-            n_valid = 0
-            for tr in self.traces.select(station=sta):
-                if np.sum(tr.data != 0.0):
-                    n_valid += 1
-            if n_valid > 0:
-                availability[s] = True
-        self.availability = pd.Series(index=stations, data=availability)
+        self.availability_per_sta = pd.Series(index=stations, dtype=bool)
+        self.availability_per_sta.fillna(False, inplace=True)
+        self.availability_per_cha = pd.DataFrame(index=stations)
+        for c, cp in enumerate(components):
+            availability = np.zeros(len(stations), dtype=bool)
+            for s, sta in enumerate(stations):
+                for cp_alias in component_aliases[cp]:
+                    tr = self.traces.select(station=sta, component=cp_alias)
+                    if len(tr) > 0:
+                        tr = tr[0]
+                    else:
+                        continue
+                    if np.sum(tr.data != 0.0):
+                        availability[s] = True
+                        break
+            self.availability_per_cha[cp] = availability
+            self.availability_per_sta = np.bitwise_or(
+                self.availability_per_sta, availability
+            )
+        self.availability = self.availability_per_sta
 
     def trim_waveforms(self, starttime=None, endtime=None):
         """Trim waveforms.
@@ -955,6 +971,31 @@ class Event(object):
             return
 
     @property
+    def availability_per_sta(self):
+        if hasattr(self, "_availability_per_sta"):
+            return self._availability_per_sta
+        if hasattr(self, "aux_data") and "availability_per_sta" in self.aux_data:
+            return self.aux_data["availability_per_sta"].loc[self.stations]
+        else:
+            print("Call `self.set_availability` first.")
+            return
+
+    @property
+    def availability_per_cha(self):
+        if hasattr(self, "_availability_per_cha"):
+            return self._availability_per_cha
+        availability = pd.DataFrame(index=self.stations, columns=self.components)
+        for cp in self.components:
+            if hasattr(self, "aux_data") and f"availability_{cp}" in self.aux_data:
+                availability.loc[self.stations, cp] = self.aux_data[
+                    f"availability_{cp}"
+                ].loc[self.stations]
+            else:
+                print("Call `self.set_availability` first.")
+                return
+        return availability
+
+    @property
     def hmax_unc(self):
         if hasattr(self, "_hmax_unc"):
             return self._hmax_unc
@@ -1153,7 +1194,7 @@ class Event(object):
             )
         self.stations = np.asarray(closest_stations).astype("U")
 
-    #def pick_PS_phases(
+    # def pick_PS_phases(
     #    self,
     #    duration,
     #    threshold_P=0.60,
@@ -1163,7 +1204,7 @@ class Event(object):
     #    phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
     #    component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
     #    **kwargs,
-    #):
+    # ):
     #    """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
 
     #    Note1: PhaseNet must be used with 3-comp data.
@@ -1245,97 +1286,97 @@ class Event(object):
     #    self.picks = pandas_picks
 
     def pick_PS_phases(
-       self,
-       duration,
-       threshold_P=0.60,
-       threshold_S=0.60,
-       offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
-       mini_batch_size=126,
-       phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
-       component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
-       **kwargs,
+        self,
+        duration,
+        threshold_P=0.60,
+        threshold_S=0.60,
+        offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
+        mini_batch_size=126,
+        phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
+        component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
+        **kwargs,
     ):
-       """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
+        """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
 
-       Note1: PhaseNet must be used with 3-comp data.
-       Note2: Extra kwargs are passed to
-       `phasenet.wrapper.automatic_detection`.
+        Note1: PhaseNet must be used with 3-comp data.
+        Note2: Extra kwargs are passed to
+        `phasenet.wrapper.automatic_detection`.
 
-       Parameters
-       -----------
-       duration: scalar float
-           Duration, in seconds, of the time window to process to search for P
-           and S wave arrivals.
-       tag: string
-           Tag name of the target data. For example: 'preprocessed_1_12'.
-       threshold_P: scalar float, default to 0.60
-           Threshold on PhaseNet's probabilities to trigger the identification
-           of a P-wave arrival.
-       threshold_S: scalar float, default to 0.60
-           Threshold on PhaseNet's probabilities to trigger the identification
-           of a S-wave arrival.
-       mini_batch_size: scalar int, default to 126
-           Number of traces processed in a single batch by PhaseNet. This
-           shouldn't have to be tuned.
-       phase_on_comp: dictionary, optional
-           Dictionary defining which seismic phase is extracted on each
-           component. For example, phase_on_comp['N'] gives the phase that is
-           extracted on the north component.
-       component_aliases: Dictionary
-           Each entry of the dictionary is a list of strings.
-           `component_aliases[comp]` is the list of all aliases used for
-           the same component 'comp'. For example, `component_aliases['N'] =
-           ['N', '1']` means that both the 'N' and '1' channels will be mapped
-           to the Event's 'N' channel.
-       """
-       from phasenet import wrapper as PN
+        Parameters
+        -----------
+        duration: scalar float
+            Duration, in seconds, of the time window to process to search for P
+            and S wave arrivals.
+        tag: string
+            Tag name of the target data. For example: 'preprocessed_1_12'.
+        threshold_P: scalar float, default to 0.60
+            Threshold on PhaseNet's probabilities to trigger the identification
+            of a P-wave arrival.
+        threshold_S: scalar float, default to 0.60
+            Threshold on PhaseNet's probabilities to trigger the identification
+            of a S-wave arrival.
+        mini_batch_size: scalar int, default to 126
+            Number of traces processed in a single batch by PhaseNet. This
+            shouldn't have to be tuned.
+        phase_on_comp: dictionary, optional
+            Dictionary defining which seismic phase is extracted on each
+            component. For example, phase_on_comp['N'] gives the phase that is
+            extracted on the north component.
+        component_aliases: Dictionary
+            Each entry of the dictionary is a list of strings.
+            `component_aliases[comp]` is the list of all aliases used for
+            the same component 'comp'. For example, `component_aliases['N'] =
+            ['N', '1']` means that both the 'N' and '1' channels will be mapped
+            to the Event's 'N' channel.
+        """
+        from phasenet import wrapper as PN
 
-       if kwargs.get("read_waveforms", True):
-           # read waveforms in picking mode, i.e. with `time_shifted`=False
-           self.read_waveforms(
-               duration,
-               offset_ot=offset_ot,
-               phase_on_comp=phase_on_comp,
-               component_aliases=component_aliases,
-               time_shifted=False,
-               **kwargs,
-           )
-       data_arr = self.get_np_array(self.stations, components=["N", "E", "Z"])
-       # call PhaseNet
-       PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
-           data_arr[np.newaxis, ...],
-           self.stations,
-           mini_batch_size=mini_batch_size,
-           format="ram",
-           threshold_P=threshold_P,
-           threshold_S=threshold_S,
-           **kwargs,
-       )
-       # keep best P- and S-wave pick on each 3-comp seismogram
-       PhaseNet_picks = PN.get_best_picks(PhaseNet_picks)
-       # add picks to auxiliary data
-       # self.set_aux_data(PhaseNet_picks)
-       # format picks in pandas DataFrame
-       pandas_picks = {"stations": self.stations}
-       for ph in ["P", "S"]:
-           rel_picks_sec = np.zeros(len(self.stations), dtype=np.float32)
-           proba_picks = np.zeros(len(self.stations), dtype=np.float32)
-           abs_picks = np.zeros(len(self.stations), dtype=object)
-           for s, sta in enumerate(self.stations):
-               if sta in PhaseNet_picks[f"{ph}_picks"].keys():
-                   rel_picks_sec[s] = PhaseNet_picks[f"{ph}_picks"][sta][0] / self.sr
-                   proba_picks[s] = PhaseNet_picks[f"{ph}_proba"][sta][0]
-                   if proba_picks[s] > 0.0:
-                       abs_picks[s] = (
-                           self.traces.select(station=sta)[0].stats.starttime
-                           + rel_picks_sec[s]
-                       )
-           pandas_picks[f"{ph}_picks_sec"] = rel_picks_sec
-           pandas_picks[f"{ph}_probas"] = proba_picks
-           pandas_picks[f"{ph}_abs_picks"] = abs_picks
-       self.picks = pd.DataFrame(pandas_picks)
-       self.picks.set_index("stations", inplace=True)
-       self.picks.replace(0.0, np.nan, inplace=True)
+        if kwargs.get("read_waveforms", True):
+            # read waveforms in picking mode, i.e. with `time_shifted`=False
+            self.read_waveforms(
+                duration,
+                offset_ot=offset_ot,
+                phase_on_comp=phase_on_comp,
+                component_aliases=component_aliases,
+                time_shifted=False,
+                **kwargs,
+            )
+        data_arr = self.get_np_array(self.stations, components=["N", "E", "Z"])
+        # call PhaseNet
+        PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
+            data_arr[np.newaxis, ...],
+            self.stations,
+            mini_batch_size=mini_batch_size,
+            format="ram",
+            threshold_P=threshold_P,
+            threshold_S=threshold_S,
+            **kwargs,
+        )
+        # keep best P- and S-wave pick on each 3-comp seismogram
+        PhaseNet_picks = PN.get_best_picks(PhaseNet_picks)
+        # add picks to auxiliary data
+        # self.set_aux_data(PhaseNet_picks)
+        # format picks in pandas DataFrame
+        pandas_picks = {"stations": self.stations}
+        for ph in ["P", "S"]:
+            rel_picks_sec = np.zeros(len(self.stations), dtype=np.float32)
+            proba_picks = np.zeros(len(self.stations), dtype=np.float32)
+            abs_picks = np.zeros(len(self.stations), dtype=object)
+            for s, sta in enumerate(self.stations):
+                if sta in PhaseNet_picks[f"{ph}_picks"].keys():
+                    rel_picks_sec[s] = PhaseNet_picks[f"{ph}_picks"][sta][0] / self.sr
+                    proba_picks[s] = PhaseNet_picks[f"{ph}_proba"][sta][0]
+                    if proba_picks[s] > 0.0:
+                        abs_picks[s] = (
+                            self.traces.select(station=sta)[0].stats.starttime
+                            + rel_picks_sec[s]
+                        )
+            pandas_picks[f"{ph}_picks_sec"] = rel_picks_sec
+            pandas_picks[f"{ph}_probas"] = proba_picks
+            pandas_picks[f"{ph}_abs_picks"] = abs_picks
+        self.picks = pd.DataFrame(pandas_picks)
+        self.picks.set_index("stations", inplace=True)
+        self.picks.replace(0.0, np.nan, inplace=True)
 
     def read_waveforms(
         self,
@@ -1559,7 +1600,12 @@ class Event(object):
         for field in aux_data:
             self.aux_data[field] = aux_data[field]
 
-    def set_availability(self, stations=None):
+    def set_availability(
+        self,
+        stations=None,
+        components=["N", "E", "Z"],
+        component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
+    ):
         """Set the data availability.
 
         A station is available if at least one station has non-zero data. The
@@ -1573,19 +1619,36 @@ class Event(object):
         """
         if stations is None:
             stations = self.stations
-        availability = np.zeros(len(stations), dtype=np.bool)
         if not hasattr(self, "traces"):
             print("Call `self.read_waveforms` first.")
             return
-        for s, sta in enumerate(stations):
-            n_valid = 0
-            for tr in self.traces.select(station=sta):
-                if np.sum(tr.data != 0.0):
-                    n_valid += 1
-            if n_valid > 0:
-                availability[s] = True
+        self._availability_per_sta = pd.Series(index=stations, dtype=bool)
+        self._availability_per_sta.fillna(False, inplace=True)
+        self._availability_per_cha = pd.DataFrame(index=stations)
+        for c, cp in enumerate(components):
+            availability = np.zeros(len(stations), dtype=bool)
+            for s, sta in enumerate(stations):
+                for cp_alias in component_aliases[cp]:
+                    tr = self.traces.select(station=sta, component=cp_alias)
+                    if len(tr) > 0:
+                        tr = tr[0]
+                    else:
+                        continue
+                    if np.sum(tr.data != 0.0):
+                        availability[s] = True
+                        break
+            self._availability_per_cha[cp] = availability
+            self._availability_per_sta = np.bitwise_or(
+                self._availability_per_sta, availability
+            )
         self.set_aux_data(
-            {"availability": pd.Series(index=stations, data=availability)}
+            {
+                "availability": pd.Series(index=stations, data=availability),
+                "availability_per_sta": self._availability_per_sta,
+            }
+        )
+        self.set_aux_data(
+            {f"availability_{cp}": self._availability_per_cha[cp] for cp in components}
         )
 
     def set_components(self, components):
