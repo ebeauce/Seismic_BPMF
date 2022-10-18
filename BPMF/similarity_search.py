@@ -153,6 +153,13 @@ class MatchedFilter(object):
         step = self.step
         cc_detections = cc_t > threshold
         cc_idx = np.where(cc_detections)[0]
+        #CDF_AT_MEAN_PLUS_1SIG = 0.78
+        #WINDOW_FOR_VALIDATION = int(1.0 / cfg.MIN_FREQ_HZ * 100.0)
+        #cc_at_mean_plus_1sig = threshold / cfg.N_DEV_MF_THRESHOLD
+
+        #if self.threshold_type == "mad":
+        #    # get estimate of STD from MAD
+        #    cc_at_mean_plus_1sig *= 1.48
 
         cc_idx = list(cc_idx)
         n_rm = 0
@@ -166,6 +173,23 @@ class MatchedFilter(object):
                     cc_idx.remove(cc_idx[i - n_rm])
                 n_rm += 1
         cc_idx = np.asarray(cc_idx)
+
+        # test the validity of detection threshold?
+        #valid_detections = np.ones(len(cc_idx), dtype=bool)
+        #for i in range(len(cc_idx)):
+        #    idx0 = max(0, cc_idx[i] - WINDOW_FOR_VALIDATION // 2)
+        #    idx1 = idx0 + WINDOW_FOR_VALIDATION
+        #    if idx1 >= len(cc_t):
+        #        idx1 = len(cc_t) - 1
+        #        idx0 = idx1 - WINDOW_FOR_VALIDATION
+        #    frac = np.sum(cc_t[idx0:idx1] < cc_at_mean_plus_1sig[cc_idx[i]]) / float(
+        #        WINDOW_FOR_VALIDATION
+        #    )
+        #    #print(frac)
+        #    if frac < 0.75 * CDF_AT_MEAN_PLUS_1SIG:
+        #        # theoretical fraction is 0.78
+        #        valid_detections[i] = False
+        #cc_idx = cc_idx[valid_detections]
 
         # go back to regular sampling space
         detection_indexes = cc_idx * self.step
@@ -646,6 +670,7 @@ class MatchedFilter(object):
         tid = detection.aux_data["tid"]
         if n_max_stations is not None:
             from copy import deepcopy
+
             detection = deepcopy(detection)
             detection.n_closest_stations(n_max_stations)
 
@@ -840,13 +865,14 @@ def time_dependent_threshold(
         size as the input time series.
     """
 
+    time_series = time_series.copy()
     threshold_type = threshold_type.lower()
     n_samples = len(time_series)
     half_window = sliding_window // 2
     shift = int((1.0 - overlap) * sliding_window)
     zeros = time_series == 0.0
-    #short_window = min(sliding_window, int(60.*50))
-    #ctrl_time_series = time_series[:short_window*(n_samples//short_window)].reshape(-1, short_window)
+    # short_window = min(sliding_window, int(60.*50))
+    # ctrl_time_series = time_series[:short_window*(n_samples//short_window)].reshape(-1, short_window)
     if white_noise is None:
         white_noise = np.random.normal(size=np.sum(zeros)).astype("float32")
     if threshold_type == "rms":
@@ -860,7 +886,7 @@ def time_dependent_threshold(
         )[::shift, :]
         center = np.mean(time_series_win, axis=-1)
         deviation = np.std(time_series_win, axis=-1)
-        #ctrl_threshold = np.mean(ctrl_time_series, axis=-1) +\
+        # ctrl_threshold = np.mean(ctrl_time_series, axis=-1) +\
         #             np.std(ctrl_time_series, axis=-1)
     elif threshold_type == "mad":
         default_center = np.median(time_series[~zeros])
@@ -875,7 +901,7 @@ def time_dependent_threshold(
         deviation = np.median(
             np.abs(time_series_win - center[:-1, np.newaxis]), axis=-1
         )
-        #ctrl_threshold = np.median(ctrl_time_series, axis=-1) +\
+        # ctrl_threshold = np.median(ctrl_time_series, axis=-1) +\
         #             np.median(np.abs(ctrl_threshold -
         #                 np.median(ctrl_time_series, axis=-1, keepdims=True)), axis=-1)
 
@@ -885,9 +911,9 @@ def time_dependent_threshold(
     time = np.arange(half_window, n_samples - (sliding_window - half_window))
     indexes_l = time // shift
     indexes_l[indexes_l >= len(threshold)] = len(threshold) - 1
-    #indexes_r = time // shift + 1
-    #indexes_r[indexes_r >= len(threshold)] = len(threshold) - 1
-    #threshold = np.maximum(threshold[indexes_l], threshold[indexes_r])
+    # indexes_r = time // shift + 1
+    # indexes_r[indexes_r >= len(threshold)] = len(threshold) - 1
+    # threshold = np.maximum(threshold[indexes_l], threshold[indexes_r])
     threshold = threshold[indexes_l]
     threshold = np.hstack(
         (
@@ -896,22 +922,23 @@ def time_dependent_threshold(
             threshold[-1] * np.ones(sliding_window - half_window, dtype=np.float32),
         )
     )
-    #indexes_ctrl = time // short_window
-    #indexes_ctrl[indexes_ctrl >= len(threshold)] = len(threshold) - 1
-    #ctrl_threshold = ctrl_threshold[indexes_ctrl]
-    #ctrl_threshold = np.hstack(
+    # indexes_ctrl = time // short_window
+    # indexes_ctrl[indexes_ctrl >= len(threshold)] = len(threshold) - 1
+    # ctrl_threshold = ctrl_threshold[indexes_ctrl]
+    # ctrl_threshold = np.hstack(
     #    (
     #        ctrl_threshold,
     #        ctrl_threshold[-1] * np.ones(n_samples - len(ctrl_threshold), dtype=np.float32),
     #    )
-    #)
-    #threshold[threshold < 0.75*ctrl_threshold] = ctrl_threshold
+    # )
+    # threshold[threshold < 0.75*ctrl_threshold] = ctrl_threshold
     return threshold
 
-#def time_dependent_threshold(
+
+# def time_dependent_threshold(
 #    time_series, sliding_window, threshold_type="rms", white_noise=None,
 #    overlap=None
-#):
+# ):
 #    """
 #    Time dependent detection threshold.
 #
