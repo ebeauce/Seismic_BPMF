@@ -195,8 +195,20 @@ def preprocess_stream(
         tr.merge(fill_value=0.0)[0]
         tr.trim(starttime=t1, endtime=t2, pad=True, fill_value=0.0)
         preprocessed_stream += tr
-    for tr in preprocessed_stream:
+    # solve and detect issues with sampling rates
+    sampling_rates = []
+    for i, tr in enumerate(preprocessed_stream):
         tr.stats.sampling_rate = np.round(tr.stats.sampling_rate, decimals=SR_decimals)
+        sampling_rates.append(tr.stats.sampling_rate)
+    unique_sampling_rates, sampling_rates_counts = np.unique(
+            sampling_rates, return_counts=True
+            )
+    if len(unique_sampling_rates) > 1:
+        ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
+        for tr in preprocessed_stream:
+            if tr.stats.sampling_rate != ref_sampling_rate:
+                print(f"Removing {tr} (target SR is {ref_sampling_rate})")
+                preprocessed_stream.remove(tr)
     # if the trace came as separated segments without masked
     # elements, it is necessary to merge the stream
     preprocessed_stream = preprocessed_stream.merge(fill_value=0.0)
