@@ -153,13 +153,13 @@ class MatchedFilter(object):
         step = self.step
         cc_detections = cc_t > threshold
         cc_idx = np.where(cc_detections)[0]
-        #CDF_AT_MEAN_PLUS_1SIG = 0.78
-        #WINDOW_FOR_VALIDATION = int(1.0 / cfg.MIN_FREQ_HZ * 100.0)
-        #cc_at_mean_plus_1sig = threshold / cfg.N_DEV_MF_THRESHOLD
+        CDF_AT_MEAN_PLUS_1SIG = 0.78
+        WINDOW_FOR_VALIDATION = int(1.0 / cfg.MIN_FREQ_HZ * 100.0)
+        cc_at_mean_plus_1sig = threshold / cfg.N_DEV_MF_THRESHOLD
 
-        #if self.threshold_type == "mad":
-        #    # get estimate of STD from MAD
-        #    cc_at_mean_plus_1sig *= 1.48
+        if self.threshold_type == "mad":
+            # get estimate of STD from MAD
+            cc_at_mean_plus_1sig *= 1.48
 
         cc_idx = list(cc_idx)
         n_rm = 0
@@ -175,21 +175,30 @@ class MatchedFilter(object):
         cc_idx = np.asarray(cc_idx)
 
         # test the validity of detection threshold?
-        #valid_detections = np.ones(len(cc_idx), dtype=bool)
-        #for i in range(len(cc_idx)):
-        #    idx0 = max(0, cc_idx[i] - WINDOW_FOR_VALIDATION // 2)
-        #    idx1 = idx0 + WINDOW_FOR_VALIDATION
-        #    if idx1 >= len(cc_t):
-        #        idx1 = len(cc_t) - 1
-        #        idx0 = idx1 - WINDOW_FOR_VALIDATION
-        #    frac = np.sum(cc_t[idx0:idx1] < cc_at_mean_plus_1sig[cc_idx[i]]) / float(
-        #        WINDOW_FOR_VALIDATION
-        #    )
-        #    #print(frac)
-        #    if frac < 0.75 * CDF_AT_MEAN_PLUS_1SIG:
-        #        # theoretical fraction is 0.78
-        #        valid_detections[i] = False
-        #cc_idx = cc_idx[valid_detections]
+        valid_detections = np.ones(len(cc_idx), dtype=bool)
+        for i in range(len(cc_idx)):
+            idx0 = max(0, cc_idx[i] - WINDOW_FOR_VALIDATION // 2)
+            idx1 = idx0 + WINDOW_FOR_VALIDATION
+            if idx1 >= len(cc_t):
+                idx1 = len(cc_t) - 1
+                idx0 = idx1 - WINDOW_FOR_VALIDATION
+            #frac = np.sum(cc_t[idx0:idx1] < cc_at_mean_plus_1sig[cc_idx[i]]) / float(
+            #    WINDOW_FOR_VALIDATION
+            #)
+            ##print(frac)
+            #if frac < 0.75 * CDF_AT_MEAN_PLUS_1SIG:
+            cc1 = cc_t[idx0:idx1][:WINDOW_FOR_VALIDATION//2]
+            cc2 = cc_t[idx0:idx1][WINDOW_FOR_VALIDATION//2:]
+            frac = min(
+                    np.sum(cc1 < cc_at_mean_plus_1sig[cc_idx[i]]) / float(len(cc1)),
+                    np.sum(cc2 < cc_at_mean_plus_1sig[cc_idx[i]]) / float(len(cc2))
+                    )
+            if frac < 0.75 * CDF_AT_MEAN_PLUS_1SIG:
+                # theoretical fraction is 0.78
+                # an anomalous amount of CCs are above +1sig
+                # the detection threshold most likely failed (gap in data?)
+                valid_detections[i] = False
+        cc_idx = cc_idx[valid_detections]
 
         # go back to regular sampling space
         detection_indexes = cc_idx * self.step
