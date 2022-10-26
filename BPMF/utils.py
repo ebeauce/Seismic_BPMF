@@ -153,6 +153,7 @@ def preprocess_stream(
     target_starttime=None,
     target_endtime=None,
     minimum_length=0.75,
+    minimum_chunk_duration=600.,
     verbose=True,
     SR_decimals=1,
     unit="VEL",
@@ -162,8 +163,9 @@ def preprocess_stream(
     if len(stream) == 0:
         print("Input data is empty!")
         return preprocessed_stream
-    if ((target_duration is None) and ((target_starttime is not None) and
-        target_endtime is not None)):
+    if (target_duration is None) and (
+        (target_starttime is not None) and target_endtime is not None
+    ):
         target_duration = target_endtime - target_starttime
     # start by cleaning the gaps if there are any
     for tr in stream:
@@ -174,6 +176,9 @@ def preprocess_stream(
         # if the start or the end is masked
         t1 = udt(tr.stats.starttime.timestamp)
         t2 = udt(tr.stats.endtime.timestamp)
+        if t2-t1 < minimum_chunk_duration:
+            # don't include this chunk
+            continue
         tr = tr.split()
         # measure gap duration
         gap_duration = 0.0
@@ -190,9 +195,20 @@ def preprocess_stream(
         tr.merge(fill_value=0.0)[0]
         tr.trim(starttime=t1, endtime=t2, pad=True, fill_value=0.0)
         preprocessed_stream += tr
-    for tr in preprocessed_stream:
-        tr.stats.sampling_rate = np.round(tr.stats.sampling_rate,
-                decimals=SR_decimals)
+    # solve and detect issues with sampling rates
+    sampling_rates = []
+    for i, tr in enumerate(preprocessed_stream):
+        tr.stats.sampling_rate = np.round(tr.stats.sampling_rate, decimals=SR_decimals)
+        sampling_rates.append(tr.stats.sampling_rate)
+    unique_sampling_rates, sampling_rates_counts = np.unique(
+            sampling_rates, return_counts=True
+            )
+    if len(unique_sampling_rates) > 1:
+        ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
+        for tr in preprocessed_stream:
+            if tr.stats.sampling_rate != ref_sampling_rate:
+                print(f"Removing {tr} (target SR is {ref_sampling_rate})")
+                preprocessed_stream.remove(tr)
     # if the trace came as separated segments without masked
     # elements, it is necessary to merge the stream
     preprocessed_stream = preprocessed_stream.merge(fill_value=0.0)
