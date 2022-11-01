@@ -722,8 +722,10 @@ class Data(object):
         if not hasattr(self, "traces"):
             print("Call `self.read_waveforms` first.")
             return
-        self.availability_per_sta = pd.Series(index=stations, dtype=bool)
-        self.availability_per_sta.fillna(False, inplace=True)
+        self.availability_per_sta = pd.Series(
+                index=stations,
+                data=np.zeros(len(stations), dtype=bool),
+                )
         self.availability_per_cha = pd.DataFrame(index=stations)
         for c, cp in enumerate(components):
             availability = np.zeros(len(stations), dtype=bool)
