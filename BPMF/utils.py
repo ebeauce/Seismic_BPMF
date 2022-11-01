@@ -325,7 +325,8 @@ def get_moveout_array(tts, stations, phases):
     return moveout_arr.reshape(-1, n_stations, n_phases)
 
 
-def load_travel_times(path, phases, source_indexes=None, return_coords=False):
+def load_travel_times(path, phases, source_indexes=None, return_coords=False,
+        stations=None):
     """Load the travel times from `path`.
 
     Parameters
@@ -338,6 +339,8 @@ def load_travel_times(path, phases, source_indexes=None, return_coords=False):
         If not None, this is used to select a subset of sources from the grid.
     return_coords: boolean, default to False
         If True, also return the source coordinates.
+    stations: list of strings, default to None
+        If not None, only read the travel times for stations in `stations`.
 
     Returns
     ---------
@@ -356,6 +359,8 @@ def load_travel_times(path, phases, source_indexes=None, return_coords=False):
         for ph in phases:
             tts[ph] = {}
             for sta in f[f"tt_{ph}"].keys():
+                if stations is not None and sta not in stations:
+                    continue
                 # flatten the lon/lat/dep grid as we work with
                 # flat source indexes
                 if source_indexes is not None:

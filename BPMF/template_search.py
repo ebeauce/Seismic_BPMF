@@ -265,7 +265,11 @@ class Beamformer(object):
             times.
         """
         tts, self._source_coordinates = utils.load_travel_times(
-            self.path_tts, phases, source_indexes=source_indexes, return_coords=True
+            self.path_tts,
+            phases,
+            source_indexes=source_indexes,
+            return_coords=True,
+            stations=self.network.stations,
         )
         self._moveouts = utils.get_moveout_array(
             tts, self.network.stations, self.phases
