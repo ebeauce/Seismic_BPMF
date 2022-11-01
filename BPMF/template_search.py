@@ -268,7 +268,7 @@ class Beamformer(object):
             self.path_tts, phases, source_indexes=source_indexes, return_coords=True
         )
         self._moveouts = utils.get_moveout_array(
-            tts, self.networks.stations, self.phases
+            tts, self.network.stations, self.phases
         )
         del tts
         if remove_min:
