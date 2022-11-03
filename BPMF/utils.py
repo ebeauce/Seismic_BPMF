@@ -195,20 +195,41 @@ def preprocess_stream(
         tr.merge(fill_value=0.0)[0]
         tr.trim(starttime=t1, endtime=t2, pad=True, fill_value=0.0)
         preprocessed_stream += tr
-    # solve and detect issues with sampling rates
-    sampling_rates = []
-    for i, tr in enumerate(preprocessed_stream):
+    # find errors in sampling rate metadata
+    # first, round sampling rates that may be misrepresented in floating point numbers
+    for tr in preprocessed_stream:
         tr.stats.sampling_rate = np.round(tr.stats.sampling_rate, decimals=SR_decimals)
-        sampling_rates.append(tr.stats.sampling_rate)
-    unique_sampling_rates, sampling_rates_counts = np.unique(
-            sampling_rates, return_counts=True
-            )
-    if len(unique_sampling_rates) > 1:
-        ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
-        for tr in preprocessed_stream:
-            if tr.stats.sampling_rate != ref_sampling_rate:
-                print(f"Removing {tr} (target SR is {ref_sampling_rate})")
-                preprocessed_stream.remove(tr)
+    # second, make a list of all stations in stream
+    stations = []
+    for tr in preprocessed_stream:
+        stations.append(tr.stats.station)
+    stations = list(set(stations))
+    # third, make a list of all channel types for each station
+    for station in stations:
+        st = preprocessed_stream.select(station=station)
+        channels = []
+        for tr in st:
+            channels.append(tr.stats.channel[:-1])
+        channels = list(set(channels))
+        # fourth, for each channel type, make a list of all sampling
+        # rates and detect anomalies if there are more than one single
+        # sampling rate
+        sampling_rates = []
+        for cha in channels:
+            st_cha = st.select(channel=f"{cha}*")
+            for tr in st_cha:
+                sampling_rates.append(tr.stats.sampling_rate)
+        unique_sampling_rates, sampling_rates_counts = np.unique(
+                sampling_rates, return_counts=True
+                )
+        # if more than one sampling rate, remove the traces with the least
+        # represented sampling rate
+        if len(unique_sampling_rates) > 1:
+            ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
+            for tr in preprocessed_stream:
+                if tr.stats.sampling_rate != ref_sampling_rate:
+                    print(f"Removing {tr} (target SR is {ref_sampling_rate})")
+                    preprocessed_stream.remove(tr)
     # if the trace came as separated segments without masked
     # elements, it is necessary to merge the stream
     preprocessed_stream = preprocessed_stream.merge(fill_value=0.0)
@@ -325,7 +346,8 @@ def get_moveout_array(tts, stations, phases):
     return moveout_arr.reshape(-1, n_stations, n_phases)
 
 
-def load_travel_times(path, phases, source_indexes=None, return_coords=False):
+def load_travel_times(path, phases, source_indexes=None, return_coords=False,
+        stations=None):
     """Load the travel times from `path`.
 
     Parameters
@@ -338,6 +360,8 @@ def load_travel_times(path, phases, source_indexes=None, return_coords=False):
         If not None, this is used to select a subset of sources from the grid.
     return_coords: boolean, default to False
         If True, also return the source coordinates.
+    stations: list of strings, default to None
+        If not None, only read the travel times for stations in `stations`.
 
     Returns
     ---------
@@ -356,6 +380,8 @@ def load_travel_times(path, phases, source_indexes=None, return_coords=False):
         for ph in phases:
             tts[ph] = {}
             for sta in f[f"tt_{ph}"].keys():
+                if stations is not None and sta not in stations:
+                    continue
                 # flatten the lon/lat/dep grid as we work with
                 # flat source indexes
                 if source_indexes is not None:

@@ -37,6 +37,7 @@ class Beamformer(object):
         path_tts=cfg.MOVEOUTS_PATH,
         phases=["P", "S"],
         starttime=None,
+        **kwargs
     ):
         """Initialize the essential attributes.
 
@@ -265,10 +266,14 @@ class Beamformer(object):
             times.
         """
         tts, self._source_coordinates = utils.load_travel_times(
-            self.path_tts, phases, source_indexes=source_indexes, return_coords=True
+            self.path_tts,
+            self.phases,
+            source_indexes=source_indexes,
+            return_coords=True,
+            stations=self.network.stations,
         )
         self._moveouts = utils.get_moveout_array(
-            tts, self.networks.stations, self.phases
+            tts, self.network.stations, self.phases
         )
         del tts
         if remove_min:
@@ -349,10 +354,12 @@ class Beamformer(object):
             the `n_max_stations` stations will be set a weight > 0.
         """
         weights_sources = np.ones((self.n_sources, self.n_stations), dtype=np.float32)
-        if hasattr(self.data, "availability"):
-            mv = self.moveouts[:, self.data.availability.values, 0]
-        else:
-            mv = self.moveouts[:, :, 0]
+        self.data.set_availability(self.network.stations)
+        mv = self.moveouts[:, self.data.availability.values, 0]
+        #if hasattr(self.data, "availability"):
+        #    mv = self.moveouts[:, self.data.availability.values, 0]
+        #else:
+        #    mv = self.moveouts[:, :, 0]
         n_max_stations = min(mv.shape[1], n_max_stations)
         if (n_max_stations < self.n_stations) and (n_max_stations > 0):
             cutoff_mv = np.max(

@@ -722,8 +722,10 @@ class Data(object):
         if not hasattr(self, "traces"):
             print("Call `self.read_waveforms` first.")
             return
-        self.availability_per_sta = pd.Series(index=stations, dtype=bool)
-        self.availability_per_sta.fillna(False, inplace=True)
+        self.availability_per_sta = pd.Series(
+            index=stations,
+            data=np.zeros(len(stations), dtype=bool),
+        )
         self.availability_per_cha = pd.DataFrame(index=stations)
         for c, cp in enumerate(components):
             availability = np.zeros(len(stations), dtype=bool)
@@ -1462,7 +1464,88 @@ class Event(object):
                 endtime=self.origin_time - offset_ot + self.duration,
             )
 
-    def relocate(self, stations=None, method="EDT", verbose=0):
+    def relocate(self, *args, routine="NLLoc", **kwargs):
+        """Wrapper function for relocation with multiple methods.
+
+        This single function interfaces the earthquake relocation with
+        multiple relocation routines. All key-word arguments go the
+        routine corresponding to `routine`.
+
+        Parameters
+        ----------
+        routine: string, default to 'NLLoc'
+            Method used for relocation. 'NLLoc' calls `relocated_NLLoc` and
+            requires `self` to have the attribute `picks`.
+        """
+        if routine.lower() == "nlloc":
+            self.relocate_NLLoc(**kwargs)
+        elif routine.lower() == "beam":
+            self.relocate_beam(*args, **kwargs)
+
+    def relocate_beam(
+        self,
+        beamformer,
+        duration=60.0,
+        offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
+        phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
+        component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
+        waveform_features=None,
+        device="cpu",
+        **kwargs,
+    ):
+        """ """
+        from .template_search import Beamformer, envelope_parallel
+
+        if kwargs.get("read_waveforms", True):
+            # read waveforms in picking mode, i.e. with `time_shifted`=False
+            self.read_waveforms(
+                duration,
+                offset_ot=offset_ot,
+                phase_on_comp=phase_on_comp,
+                component_aliases=component_aliases,
+                time_shifted=False,
+                **kwargs,
+            )
+        if waveform_features is None:
+            data_arr = self.get_np_array(
+                beamformer.network.stations, components=["N", "E", "Z"]
+            )
+            waveform_features = envelope_parallel(data_arr)
+        beamformer.backproject(waveform_features, device=device, reduce="none")
+        # find where the maximum focusing occurred
+        idx_max = np.where(beamformer.beam == beamformer.beam.max())
+        src_idx = idx_max[0][0]
+        time_idx = idx_max[1][0]
+        # update hypocenter
+        self.origin_time = (
+            self.traces[0].stats.starttime + time_idx / self.sampling_rate
+        )
+        self.longitude = beamformer.source_coordinates["longitude"][src_idx]
+        self.latitude = beamformer.source_coordinates["latitude"][src_idx]
+        self.depth = beamformer.source_coordinates["depth"][src_idx]
+        # fill arrival time attribute
+        self.arrival_times = pd.DataFrame(
+            index=beamformer.network.stations,
+            columns=[
+                "P_tt_sec",
+                "P_abs_arrival_times",
+                "S_tt_sec",
+                "S_abs_arrival_times",
+            ],
+        )
+        travel_times = beamformer.moveouts[src_idx, ...]
+        beamformer.phases = [ph.upper() for ph in beamformer.phases]
+        for s, sta in enumerate(beamformer.network.stations):
+            for p, ph in enumerate(["P", "S"]):
+                pp = beamformer.phases.index(ph)
+                self.arrival_times.loc[sta, f"{ph}_tt_sec"] = (
+                    travel_times[s, pp] / self.sampling_rate
+                )
+                self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"] = (
+                    self.origin_times + self.arrival_times.loc[sta, f"{ph}_tt_sec"]
+                )
+
+    def relocate_NLLoc(self, stations=None, method="EDT", verbose=0):
         """Relocate with NLLoc using `self.picks`.
 
         Parameters
