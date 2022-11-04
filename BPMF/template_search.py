@@ -37,6 +37,7 @@ class Beamformer(object):
         data=None,
         network=None,
         phases=None,
+        remove_tt_min=True,
     ):
         """Initialize the essential attributes.
 
@@ -55,10 +56,12 @@ class Beamformer(object):
         for sta in self.travel_times_samp.index:
             for ph in self.travel_times_samp.columns:
                 self.travel_times_samp.loc[sta, ph] = utils.sec_to_samp(
-                    self.travel_times_samp.loc[sta, ph]
-                    - self.travel_times_samp.loc[sta, ph].min(),
+                    self.travel_times_samp.loc[sta, ph],
                     sr=sampling_rate,
                 )
+                if remove_tt_min:
+                    self.travel_times_samp.loc[sta, ph] -= \
+                            self.travel_times_samp.loc[sta, ph].min()
         self.source_coordinates = source_coordinates
         self.n_sources = len(self.source_coordinates["depth"])
         self.data = data
