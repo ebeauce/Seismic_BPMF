@@ -1,3 +1,6 @@
+__all__ = ["dataset", "template_search", "similarity_search", "utils",
+           "plotting_utils", "clib"]
+
 # import local package modules
 from .config import cfg
 
@@ -9,4 +12,4 @@ from . import clib
 from . import utils
 from . import plotting_utils
 
-__version__ = "2.0.0.a1"
+__version__ = "2.0.0.a2"
