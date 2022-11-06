@@ -377,6 +377,7 @@ def load_travel_times(
     """
     tts = pd.DataFrame(columns=phases, index=stations)
     with h5.File(path, mode="r") as f:
+        grid_shape = f["source_coordinates"]["depth"].shape
         for ph in phases:
             for sta in f[f"tt_{ph}"].keys():
                 if stations is not None and sta not in stations:
@@ -385,18 +386,28 @@ def load_travel_times(
                 # flat source indexes
                 if source_indexes is not None:
                     # select a subset of the source grid
-                    tts.loc[sta, ph] = f[f"tt_{ph}"][sta][()].flatten()[source_indexes]
+                    source_indexes_unravelled = np.unravel_index(
+                            source_indexes, grid_shape
+                            )
+                    selection = np.zeros(grid_shape, dtype=bool)
+                    selection[source_indexes_unravelled] = True
+                    tts.loc[sta, ph] = f[f"tt_{ph}"][sta][selection].flatten()
                 else:
                     tts.loc[sta, ph] = f[f"tt_{ph}"][sta][()].flatten()
         if return_coords:
             if source_indexes is not None:
+                source_indexes_unravelled = np.unravel_index(
+                        source_indexes, grid_shape
+                        )
+                selection = np.zeros(grid_shape, dtype=bool)
+                selection[source_indexes_unravelled] = True
                 source_coords = pd.DataFrame(
                     columns=["longitude", "latitude", "depth"], index=source_indexes
                 )
                 for coord in f["source_coordinates"].keys():
                     source_coords.loc[source_indexes, coord] = f["source_coordinates"][
                         coord
-                    ][()].flatten()[source_indexes]
+                    ][selection].flatten()
             else:
                 source_coords = pd.DataFrame(
                     columns=["longitude", "latitude", "depth"],

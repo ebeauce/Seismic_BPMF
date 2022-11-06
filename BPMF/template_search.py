@@ -59,14 +59,24 @@ class Beamformer(object):
                     self.travel_times_samp.loc[sta, ph],
                     sr=sampling_rate,
                 )
-                if remove_tt_min:
-                    self.travel_times_samp.loc[sta, ph] -= \
-                            self.travel_times_samp.loc[sta, ph].min()
         self.source_coordinates = source_coordinates
         self.n_sources = len(self.source_coordinates["depth"])
         self.data = data
         self.network = network
         self.phases = phases
+        if remove_tt_min:
+            # find min travel-time for each source
+            tts = np.asarray(
+                [
+                    [self.travel_times_samp.loc[sta, ph] for sta in
+                        self.travel_times_samp.index]
+                    for ph in self.phases
+                ]
+            ).T
+            tt_min = np.min(tts, axis=(1, 2))
+            for sta in self.travel_times_samp.index:
+                for ph in self.phases:
+                    self.travel_times_samp.loc[sta, ph] -= tt_min
 
     @property
     def n_stations(self):

@@ -1510,7 +1510,11 @@ class Event(object):
             data_arr = self.get_np_array(
                 beamformer.network.stations, components=["N", "E", "Z"]
             )
+            norm = np.std(data_arr, axis=(1, 2), keepdims=True)
+            norm[norm == 0.] = 1.
+            data_arr /= norm
             waveform_features = envelope_parallel(data_arr)
+        #print(waveform_features)
         beamformer.backproject(waveform_features, device=device, reduce="none")
         # find where the maximum focusing occurred
         idx_max = np.where(beamformer.beam == beamformer.beam.max())
@@ -1520,9 +1524,9 @@ class Event(object):
         self.origin_time = (
             self.traces[0].stats.starttime + time_idx / self.sampling_rate
         )
-        self.longitude = beamformer.source_coordinates["longitude"][src_idx]
-        self.latitude = beamformer.source_coordinates["latitude"][src_idx]
-        self.depth = beamformer.source_coordinates["depth"][src_idx]
+        self.longitude = beamformer.source_coordinates["longitude"].iloc[src_idx]
+        self.latitude = beamformer.source_coordinates["latitude"].iloc[src_idx]
+        self.depth = beamformer.source_coordinates["depth"].iloc[src_idx]
         # fill arrival time attribute
         self.arrival_times = pd.DataFrame(
             index=beamformer.network.stations,
@@ -1542,7 +1546,7 @@ class Event(object):
                     travel_times[s, pp] / self.sampling_rate
                 )
                 self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"] = (
-                    self.origin_times + self.arrival_times.loc[sta, f"{ph}_tt_sec"]
+                    self.origin_time + self.arrival_times.loc[sta, f"{ph}_tt_sec"]
                 )
 
     def relocate_NLLoc(self, stations=None, method="EDT", verbose=0):
