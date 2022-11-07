@@ -68,8 +68,10 @@ class Beamformer(object):
             # find min travel-time for each source
             tts = np.asarray(
                 [
-                    [self.travel_times_samp.loc[sta, ph] for sta in
-                        self.travel_times_samp.index]
+                    [
+                        self.travel_times_samp.loc[sta, ph]
+                        for sta in self.travel_times_samp.index
+                    ]
                     for ph in self.phases
                 ]
             ).T
@@ -642,6 +644,105 @@ class Beamformer(object):
                 mdates.ConciseDateFormatter(ax.xaxis.get_major_locator())
             )
         plt.subplots_adjust(top=0.95, bottom=0.06, right=0.98, left=0.06)
+        return fig
+
+    def plot_likelihood(self, time_index=None, **kwargs):
+        """Plot likelihood (beam) slices at a given time."""
+        from cartopy.crs import PlateCarree
+        from matplotlib.colors import Normalize
+        from matplotlib.cm import ScalarMappable
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+        from . import plotting_utils
+
+        if time_index is None:
+            src_idx, time_index = np.unravel_index(self.beam.argmax(), self.beam.shape)
+        likelihood = self.beam[:, time_index]
+        likelihood = (likelihood - likelihood.min()) / (
+            likelihood.max() - likelihood.min()
+        )
+        # define slices
+        longitude = self.source_coordinates["longitude"].iloc[src_idx]
+        latitude = self.source_coordinates["latitude"].iloc[src_idx]
+        depth = self.source_coordinates["depth"].iloc[src_idx]
+        hor_slice = np.where(self.source_coordinates["depth"] == depth)[0]
+        lon_slice = np.where(self.source_coordinates["latitude"] == latitude)[0]
+        lat_slice = np.where(self.source_coordinates["longitude"] == longitude)[0]
+        # initialize map
+        data_coords = PlateCarree()
+        lat_min = np.min(self.source_coordinates["latitude"].iloc[hor_slice])
+        lat_max = np.max(self.source_coordinates["latitude"].iloc[hor_slice])
+        lon_min = np.min(self.source_coordinates["longitude"].iloc[hor_slice])
+        lon_max = np.max(self.source_coordinates["longitude"].iloc[hor_slice])
+        ax = plotting_utils.initialize_map(
+            [lon_min, lon_max],
+            [lat_min, lat_max],
+            **kwargs,
+        )
+        fig = ax.get_figure()
+        mappable = ax.tricontourf(
+            self.source_coordinates["longitude"].iloc[hor_slice],
+            self.source_coordinates["latitude"].iloc[hor_slice],
+            likelihood[hor_slice],
+            levels=np.linspace(0.0, 1.0, 10),
+            cmap="inferno",
+            alpha=0.50,
+            transform=data_coords,
+            zorder=-1,
+        )
+        ax.scatter(
+            self.network.longitude,
+            self.network.latitude,
+            marker="v",
+            color="k",
+            s=50,
+            transform=data_coords,
+            zorder=-1.5,
+        )
+        # add slices
+        divider = make_axes_locatable(ax)
+        ax_lon = divider.append_axes("bottom", size="50%", pad=0.2, axes_class=plt.Axes)
+        ax_lat = divider.append_axes("right", size="50%", pad=0.2, axes_class=plt.Axes)
+        projected_coords = ax.projection.transform_points(
+            data_coords,
+            self.source_coordinates["longitude"].iloc[lon_slice],
+            self.source_coordinates["latitude"].iloc[lon_slice],
+        )
+        ax_lon.tricontourf(
+            projected_coords[..., 0],
+            self.source_coordinates["depth"].iloc[lon_slice],
+            likelihood[lon_slice],
+            levels=np.linspace(0.0, 1.0, 10),
+            cmap="inferno",
+            alpha=0.50,
+            zorder=-1,
+        )
+        plt.setp(ax_lon.get_xticklabels(), visible=False)
+        ax_lon.invert_yaxis()
+        ax_lon.set_ylabel("Depth (km)")
+        projected_coords = ax.projection.transform_points(
+            data_coords,
+            self.source_coordinates["longitude"].iloc[lat_slice],
+            self.source_coordinates["latitude"].iloc[lat_slice],
+        )
+        ax_lat.tricontourf(
+            self.source_coordinates["depth"].iloc[lat_slice],
+            projected_coords[..., 1],
+            likelihood[lat_slice],
+            levels=np.linspace(0.0, 1.0, 10),
+            cmap="inferno",
+            alpha=0.50,
+            zorder=-1,
+        )
+        plt.setp(ax_lat.get_yticklabels(), visible=False)
+        ax_lat.set_xlabel("Depth (km)")
+        cax = divider.append_axes("top", size="3%", pad=0.1, axes_class=plt.Axes)
+        plt.colorbar(
+            mappable, cax=cax, label="Location Likelihood", orientation="horizontal"
+        )
+        cax.xaxis.set_label_position("top")
+        cax.xaxis.tick_top()
+
         return fig
 
 

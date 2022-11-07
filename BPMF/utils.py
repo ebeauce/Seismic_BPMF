@@ -411,9 +411,7 @@ def load_travel_times(
             else:
                 source_coords = pd.DataFrame(
                     columns=["longitude", "latitude", "depth"],
-                    index=np.arange(
-                        f["source_coordinates"][f["source_coordinates"].keys()[0]].size
-                    ),
+                    index=np.arange(np.prod(grid_shape)),
                 )
                 for coord in f["source_coordinates"].keys():
                     source_coords[coord] = f["source_coordinates"][coord][()].flatten()

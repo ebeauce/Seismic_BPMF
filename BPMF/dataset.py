@@ -1494,7 +1494,7 @@ class Event(object):
         **kwargs,
     ):
         """ """
-        from .template_search import Beamformer, envelope_parallel
+        from .template_search import Beamformer, envelope
 
         if kwargs.get("read_waveforms", True):
             # read waveforms in picking mode, i.e. with `time_shifted`=False
@@ -1513,13 +1513,14 @@ class Event(object):
             norm = np.std(data_arr, axis=(1, 2), keepdims=True)
             norm[norm == 0.] = 1.
             data_arr /= norm
-            waveform_features = envelope_parallel(data_arr)
+            waveform_features = envelope(data_arr)
         #print(waveform_features)
         beamformer.backproject(waveform_features, device=device, reduce="none")
         # find where the maximum focusing occurred
-        idx_max = np.where(beamformer.beam == beamformer.beam.max())
-        src_idx = idx_max[0][0]
-        time_idx = idx_max[1][0]
+        src_idx, time_idx = np.unravel_index(
+                beamformer.beam.argmax(),
+                beamformer.beam.shape
+                )
         # update hypocenter
         self.origin_time = (
             self.traces[0].stats.starttime + time_idx / self.sampling_rate
@@ -1527,6 +1528,7 @@ class Event(object):
         self.longitude = beamformer.source_coordinates["longitude"].iloc[src_idx]
         self.latitude = beamformer.source_coordinates["latitude"].iloc[src_idx]
         self.depth = beamformer.source_coordinates["depth"].iloc[src_idx]
+        # estimate location uncertainty
         # fill arrival time attribute
         self.arrival_times = pd.DataFrame(
             index=beamformer.network.stations,
