@@ -1001,6 +1001,8 @@ class Event(object):
     def hmax_unc(self):
         if hasattr(self, "_hmax_unc"):
             return self._hmax_unc
+        elif hasattr(self, "aux_data") and "hmax_unc" in self.aux_data:
+            return self.aux_data["hmax_unc"]
         else:
             self.hor_ver_uncertainties()
             return self._hmax_unc
@@ -1009,6 +1011,8 @@ class Event(object):
     def hmin_unc(self):
         if hasattr(self, "_hmin_unc"):
             return self._hmin_unc
+        elif hasattr(self, "aux_data") and "hmax_unc" in self.aux_data:
+            return self.aux_data["hmax_unc"]
         else:
             self.hor_ver_uncertainties()
             return self._hmin_unc
@@ -1296,6 +1300,8 @@ class Event(object):
         mini_batch_size=126,
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
         component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
+        upsampling=1,
+        downsampling=1,
         **kwargs,
     ):
         """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
@@ -1330,6 +1336,10 @@ class Event(object):
             the same component 'comp'. For example, `component_aliases['N'] =
             ['N', '1']` means that both the 'N' and '1' channels will be mapped
             to the Event's 'N' channel.
+        upsampling: scalar integer, default to 1
+            Upsampling factor applied before calling PhaseNet.
+        downsampling: scalar integer, default to 1
+            Downsampling factor applied before calling PhaseNet.
         """
         from phasenet import wrapper as PN
 
@@ -1344,6 +1354,17 @@ class Event(object):
                 **kwargs,
             )
         data_arr = self.get_np_array(self.stations, components=["N", "E", "Z"])
+        if upsampling > 1 or downsampling > 1:
+            from scipy.signal import resample_poly
+            data_arr = resample_poly(
+                    data_arr,
+                    upsampling,
+                    downsampling,
+                    axis=-1
+                    )
+            # momentarily update samping_rate
+            sampling_rate0 = float(self.sampling_rate)
+            self.sampling_rate = self.sr * upsampling / downsampling
         # call PhaseNet
         PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
             data_arr[np.newaxis, ...],
@@ -1379,6 +1400,9 @@ class Event(object):
         self.picks = pd.DataFrame(pandas_picks)
         self.picks.set_index("stations", inplace=True)
         self.picks.replace(0.0, np.nan, inplace=True)
+        if upsampling > 1 or downsampling > 1:
+            # reset the sampling rate to initial value
+            self.sampling_rate = sampling_rate0
 
     def read_waveforms(
         self,
@@ -1711,8 +1735,10 @@ class Event(object):
         if not hasattr(self, "traces"):
             print("Call `self.read_waveforms` first.")
             return
-        self._availability_per_sta = pd.Series(index=stations, dtype=bool)
-        self._availability_per_sta.fillna(False, inplace=True)
+        self._availability_per_sta = pd.Series(
+            index=stations,
+            data=np.zeros(len(stations), dtype=bool),
+        )
         self._availability_per_cha = pd.DataFrame(index=stations)
         for c, cp in enumerate(components):
             availability = np.zeros(len(stations), dtype=bool)
@@ -1730,6 +1756,25 @@ class Event(object):
             self._availability_per_sta = np.bitwise_or(
                 self._availability_per_sta, availability
             )
+        #self._availability_per_sta = pd.Series(index=stations, dtype=bool)
+        #self._availability_per_sta.fillna(False, inplace=True)
+        #self._availability_per_cha = pd.DataFrame(index=stations)
+        #for c, cp in enumerate(components):
+        #    availability = np.zeros(len(stations), dtype=bool)
+        #    for s, sta in enumerate(stations):
+        #        for cp_alias in component_aliases[cp]:
+        #            tr = self.traces.select(station=sta, component=cp_alias)
+        #            if len(tr) > 0:
+        #                tr = tr[0]
+        #            else:
+        #                continue
+        #            if np.sum(tr.data != 0.0):
+        #                availability[s] = True
+        #                break
+        #    self._availability_per_cha[cp] = availability
+        #    self._availability_per_sta = np.bitwise_or(
+        #        self._availability_per_sta, availability
+        #    )
         self.set_aux_data(
             {
                 "availability": pd.Series(index=stations, data=availability),
@@ -3906,6 +3951,8 @@ class Stack(Event):
         n_threshold=1,
         err_threshold=100,
         central="mean",
+        upsampling=1,
+        downsampling=1,
         **kwargs,
     ):
         """Use PhaseNet (Zhu et al., 2019) to pick P and S waves.
@@ -3932,6 +3979,10 @@ class Stack(Event):
             Dictionary defining which seismic phase is extracted on each
             component. For example, phase_on_comp['N'] gives the phase that is
             extracted on the north component.
+        upsampling: scalar integer, default to 1
+            Upsampling factor applied before calling PhaseNet.
+        downsampling: scalar integer, default to 1
+            Downsampling factor applied before calling PhaseNet.
         n_threshold: scalar int, optional
             Used if `self.filtered_data` is not None. Minimum number of
             successful picks to keep the phase. Default to 1.
@@ -3958,6 +4009,17 @@ class Stack(Event):
             data_arr = np.concatenate(
                 [data_arr[np.newaxis, ...], self.filtered_data], axis=0
             )
+            if upsampling > 1 or downsampling > 1:
+                from scipy.signal import resample_poly
+                data_arr = resample_poly(
+                        data_arr,
+                        upsampling,
+                        downsampling,
+                        axis=-1
+                        )
+                # momentarily update samping_rate
+                sampling_rate0 = float(self.sampling_rate)
+                self.sampling_rate = self.sr * upsampling / downsampling
             # call PhaseNet
             PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
                 data_arr,
@@ -3993,6 +4055,9 @@ class Stack(Event):
             self.picks = pd.DataFrame(pandas_picks)
             self.picks.set_index("stations", inplace=True)
             self.picks.replace(0.0, np.nan, inplace=True)
+            if upsampling > 1 or downsampling > 1:
+                # reset the sampling rate to initial value
+                self.sampling_rate = sampling_rate0
         else:
             super(Stack, self).pick_PS_phases(
                 duration,
