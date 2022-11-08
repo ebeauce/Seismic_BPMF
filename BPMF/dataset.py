@@ -1494,7 +1494,7 @@ class Event(object):
         **kwargs,
     ):
         """ """
-        from .template_search import Beamformer, envelope_parallel
+        from .template_search import Beamformer, envelope
 
         if kwargs.get("read_waveforms", True):
             # read waveforms in picking mode, i.e. with `time_shifted`=False
@@ -1510,19 +1510,25 @@ class Event(object):
             data_arr = self.get_np_array(
                 beamformer.network.stations, components=["N", "E", "Z"]
             )
-            waveform_features = envelope_parallel(data_arr)
+            norm = np.std(data_arr, axis=(1, 2), keepdims=True)
+            norm[norm == 0.] = 1.
+            data_arr /= norm
+            waveform_features = envelope(data_arr)
+        #print(waveform_features)
         beamformer.backproject(waveform_features, device=device, reduce="none")
         # find where the maximum focusing occurred
-        idx_max = np.where(beamformer.beam == beamformer.beam.max())
-        src_idx = idx_max[0][0]
-        time_idx = idx_max[1][0]
+        src_idx, time_idx = np.unravel_index(
+                beamformer.beam.argmax(),
+                beamformer.beam.shape
+                )
         # update hypocenter
         self.origin_time = (
             self.traces[0].stats.starttime + time_idx / self.sampling_rate
         )
-        self.longitude = beamformer.source_coordinates["longitude"][src_idx]
-        self.latitude = beamformer.source_coordinates["latitude"][src_idx]
-        self.depth = beamformer.source_coordinates["depth"][src_idx]
+        self.longitude = beamformer.source_coordinates["longitude"].iloc[src_idx]
+        self.latitude = beamformer.source_coordinates["latitude"].iloc[src_idx]
+        self.depth = beamformer.source_coordinates["depth"].iloc[src_idx]
+        # estimate location uncertainty
         # fill arrival time attribute
         self.arrival_times = pd.DataFrame(
             index=beamformer.network.stations,
@@ -1542,7 +1548,7 @@ class Event(object):
                     travel_times[s, pp] / self.sampling_rate
                 )
                 self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"] = (
-                    self.origin_times + self.arrival_times.loc[sta, f"{ph}_tt_sec"]
+                    self.origin_time + self.arrival_times.loc[sta, f"{ph}_tt_sec"]
                 )
 
     def relocate_NLLoc(self, stations=None, method="EDT", verbose=0):
@@ -2017,7 +2023,7 @@ class Event(object):
     # -----------------------------------------------------------
 
     def plot(
-        self, figsize=(20, 15), gain=1.0e6, ylabel=r"Velocity ($\mu$m/s)", **kwargs
+        self, figsize=(20, 15), gain=1.0e6, stations=None, ylabel=r"Velocity ($\mu$m/s)", **kwargs
     ):
         """Plot the waveforms of the Event instance.
 
@@ -2032,15 +2038,17 @@ class Event(object):
         import matplotlib.pyplot as plt
         import matplotlib.dates as mdates
 
+        if stations is None:
+            stations = self.stations
         start_times, end_times = [], []
         fig, axes = plt.subplots(
             num=f"event_{str(self.origin_time)}",
             figsize=figsize,
-            nrows=len(self.stations),
+            nrows=len(stations),
             ncols=len(self.components),
         )
         fig.suptitle(f'Event at {self.origin_time.strftime("%Y-%m-%d %H:%M:%S")}')
-        for s, sta in enumerate(self.stations):
+        for s, sta in enumerate(stations):
             for c, cp in enumerate(self.components):
                 for cp_alias in self.component_aliases[cp]:
                     tr = self.traces.select(station=sta, component=cp_alias)
