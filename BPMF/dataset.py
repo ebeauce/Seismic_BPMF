@@ -2023,7 +2023,7 @@ class Event(object):
     # -----------------------------------------------------------
 
     def plot(
-        self, figsize=(20, 15), gain=1.0e6, ylabel=r"Velocity ($\mu$m/s)", **kwargs
+        self, figsize=(20, 15), gain=1.0e6, stations=None, ylabel=r"Velocity ($\mu$m/s)", **kwargs
     ):
         """Plot the waveforms of the Event instance.
 
@@ -2038,15 +2038,17 @@ class Event(object):
         import matplotlib.pyplot as plt
         import matplotlib.dates as mdates
 
+        if stations is None:
+            stations = self.stations
         start_times, end_times = [], []
         fig, axes = plt.subplots(
             num=f"event_{str(self.origin_time)}",
             figsize=figsize,
-            nrows=len(self.stations),
+            nrows=len(stations),
             ncols=len(self.components),
         )
         fig.suptitle(f'Event at {self.origin_time.strftime("%Y-%m-%d %H:%M:%S")}')
-        for s, sta in enumerate(self.stations):
+        for s, sta in enumerate(stations):
             for c, cp in enumerate(self.components):
                 for cp_alias in self.component_aliases[cp]:
                     tr = self.traces.select(station=sta, component=cp_alias)
