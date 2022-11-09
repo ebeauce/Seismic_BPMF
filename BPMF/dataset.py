@@ -1777,7 +1777,7 @@ class Event(object):
         #    )
         self.set_aux_data(
             {
-                "availability": pd.Series(index=stations, data=availability),
+                "availability": self._availability_per_sta,
                 "availability_per_sta": self._availability_per_sta,
             }
         )

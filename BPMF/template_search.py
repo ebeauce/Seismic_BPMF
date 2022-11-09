@@ -399,7 +399,8 @@ class Beamformer(object):
         """
         weights_sources = np.ones((self.n_sources, self.n_stations), dtype=np.float32)
         self.data.set_availability(self.stations)
-        mv = self.moveouts[:, self.data.availability.values, 0]
+        operational_stations = self.data.availability_per_sta.loc[self.stations].values
+        mv = self.moveouts[:, operational_stations, 0]
         n_max_stations = min(mv.shape[1], n_max_stations)
         if (n_max_stations < self.n_stations) and (n_max_stations > 0):
             cutoff_mv = np.max(
