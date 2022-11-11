@@ -388,7 +388,7 @@ class Beamformer(object):
         if weights_sources is not None:
             self.weights_sources = weights_sources
 
-    def set_weights_sources(self, n_max_stations):
+    def set_weights_sources(self, n_max_stations, n_min_stations=0):
         """Set network-geometry-based weights of each source-receiver pair.
 
         Parameters
@@ -409,6 +409,9 @@ class Beamformer(object):
                 keepdims=True,
             )
             weights_sources[self.moveouts[:, :, 0] > cutoff_mv] = 0.0
+        if n_min_stations > 0:
+            n_stations_per_source = np.sum(weights_sources > 0.0, axis=-1)
+            weights_sources[n_stations_per_source < n_min_stations, :] = 0.0
         self.weights_sources = weights_sources
 
     def weights_station_density(
