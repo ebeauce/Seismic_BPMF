@@ -16,6 +16,7 @@
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script defer src="../../_static/insipid.js"></script>
     <script defer src="../../_static/insipid-sidebar.js"></script>
@@ -249,7 +250,7 @@ are located at the surface.</p></li>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>event_timings_str</strong> (<em>list of array of str</em>) – Timings of the events given as strings of characters.</p></li>
+<li><p><strong>event_timings_str</strong> (<em>list</em><em> of </em><em>array</em><em> of </em><em>str</em>) – Timings of the events given as strings of characters.</p></li>
 <li><p><strong>start_date</strong> (<em>str</em>) – Starting date of the event count time series.</p></li>
 <li><p><strong>end_date</strong> (<em>str</em>) – End date of the event count time series.</p></li>
 <li><p><strong>freq</strong> (<em>str</em><em>, </em><em>default to '1D'</em>) – Desired frequency of the event count time series.
@@ -329,9 +330,9 @@ with the hierarchical clustering package from scipy.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tts</strong> (<em>dictionary</em>) – Output of <cite>load_travel_times</cite>.</p></li>
-<li><p><strong>stations</strong> (<em>list of strings</em>) – List of station names. Determine the order in which travel times are
+<li><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em>) – List of station names. Determine the order in which travel times are
 written in the output array.</p></li>
-<li><p><strong>phases</strong> (<em>list of strings</em>) – List of seismic phases. Determine the order in which travel times are
+<li><p><strong>phases</strong> (<em>list</em><em> of </em><em>strings</em>) – List of seismic phases. Determine the order in which travel times are
 writtem in the output array.</p></li>
 </ul>
 </dd>
@@ -354,9 +355,9 @@ seconds.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stream</strong> (<em>Obspy Stream instance</em>) – The Obspy Stream instance with the waveform time series.</p></li>
-<li><p><strong>stations</strong> (<em>List of strings</em>) – Names of the stations to include in the output array. Define the order
+<li><p><strong>stations</strong> (<em>List</em><em> of </em><em>strings</em>) – Names of the stations to include in the output array. Define the order
 of the station axis.</p></li>
-<li><p><strong>components</strong> (<em>List of strings</em><em>, </em><em>default to</em><em> [</em><em>'N'</em><em>,</em><em>'E'</em><em>,</em><em>'Z'</em><em>]</em>) – Names of the components to include in the output array. Define the order
+<li><p><strong>components</strong> (<em>List</em><em> of </em><em>strings</em><em>, </em><em>default to</em><em> [</em><em>'N'</em><em>,</em><em>'E'</em><em>,</em><em>'Z'</em><em>]</em>) – Names of the components to include in the output array. Define the order
 of the component axis.</p></li>
 <li><p><strong>component_aliases</strong> (<em>Dictionary</em><em>, </em><em>optional</em>) – Sometimes, components might be named differently than N, E, Z. This
 dictionary tells the function which alternative component names can be
@@ -408,7 +409,7 @@ the fit</p></li>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>string</em>) – Path to the file with the travel times.</p></li>
-<li><p><strong>phases</strong> (<em>list of strings</em>) – List of the seismic phases to load.</p></li>
+<li><p><strong>phases</strong> (<em>list</em><em> of </em><em>strings</em>) – List of the seismic phases to load.</p></li>
 <li><p><strong>source_indexes</strong> (<em>(</em><em>n_sources</em><em>,</em><em>) </em><em>int numpy.ndarray</em><em>, </em><em>default to None</em>) – If not None, this is used to select a subset of sources from the grid.</p></li>
 <li><p><strong>return_coords</strong> (<em>boolean</em><em>, </em><em>default to False</em>) – If True, also return the source coordinates.</p></li>
 </ul>
@@ -609,7 +610,7 @@ round the time.</p></li>
 
     <footer role="contentinfo">
       &#169; Copyright 2022, Eric Beauce, William B. Frank.
-      Created using <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+      Created using <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
       <a class="reference external" href="https://insipid-sphinx-theme.readthedocs.io/">Insipid Theme</a>.
 <a class="reference internal" href="../../_sources/usage/api/utils.rst.txt" rel="nofollow">Show Source</a>.
     </footer>

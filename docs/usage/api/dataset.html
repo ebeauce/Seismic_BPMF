@@ -16,13 +16,14 @@
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script defer src="../../_static/insipid.js"></script>
     <script defer src="../../_static/insipid-sidebar.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="BPMF.template_search" href="template_search.html" />
-    <link rel="prev" title="API" href="../api.html" />
+    <link rel="next" title="BPMF.data_reader_examples" href="data_reader_examples.html" />
+    <link rel="prev" title="BPMF.clib" href="clib.html" />
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
   </head><body>
@@ -86,31 +87,31 @@
       </div>
     </header>
     <nav>
-      <a href="../api.html" class="nav-icon previous" title="previous:&#13;API" aria-label="Previous topic" accesskey="P" tabindex="-1">
+      <a href="clib.html" class="nav-icon previous" title="previous:&#13;BPMF.clib" aria-label="Previous topic" accesskey="P" tabindex="-1">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M31.7 239l136-136c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9L127.9 256l96.4 96.4c9.4 9.4 9.4 24.6 0 33.9L201.7 409c-9.4 9.4-24.6 9.4-33.9 0l-136-136c-9.5-9.4-9.5-24.6-.1-34z"/></svg>
       </a>
-      <a href="template_search.html" class="nav-icon next" title="next:&#13;BPMF.template_search" aria-label="Next topic" accesskey="N" tabindex="-1">
+      <a href="data_reader_examples.html" class="nav-icon next" title="next:&#13;BPMF.data_reader_examples" aria-label="Next topic" accesskey="N" tabindex="-1">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"/></svg>
       </a>
     </nav>
 
     <nav class="relbar">
-      <a class="previous" href="../api.html" aria-label="Previous topic" >
+      <a class="previous" href="clib.html" aria-label="Previous topic" >
         <div class="icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
         </div>
         <div class="title">
           <span class="text">
             <span class="direction">previous</span>
-            API
+            BPMF.clib
           </span>
         </div>
       </a>
-      <a class="next" href="template_search.html" aria-label="Next topic" >
+      <a class="next" href="data_reader_examples.html" aria-label="Next topic" >
         <div class="title">
           <span class="text">
             <span class="direction">next</span>
-            BPMF.template_search
+            BPMF.data_reader_examples
           </span>
         </div>
         <div class="icon">
@@ -171,7 +172,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ax</strong> (<cite>plt.Axes</cite>, default to None) – If None, create a new <cite>plt.Figure</cite> and <cite>plt.Axes</cite> instances. If
 speficied by user, use the provided instance to plot.</p></li>
-<li><p><strong>figsize</strong> (<em>tuple of floats</em><em>, </em><em>default to</em><em> (</em><em>20</em><em>, </em><em>10</em><em>)</em>) – Size, in inches, of the figure (width, height).</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em> of </em><em>floats</em><em>, </em><em>default to</em><em> (</em><em>20</em><em>, </em><em>10</em><em>)</em>) – Size, in inches, of the figure (width, height).</p></li>
 <li><p><strong>depth_min</strong> (<em>scalar float</em><em>, </em><em>default to 0</em>) – Smallest depth, in km, in the depth colormap.</p></li>
 <li><p><strong>depth_max</strong> (<em>scalar float</em><em>, </em><em>default to 20</em>) – Largest depth, in km, in the depth colormap.</p></li>
 </ul>
@@ -194,7 +195,7 @@ speficied by user, use the provided instance to plot.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ax</strong> (<cite>plt.Axes</cite>, default to None) – If None, create a new <cite>plt.Figure</cite> and <cite>plt.Axes</cite> instances. If
 speficied by user, use the provided instance to plot.</p></li>
-<li><p><strong>figsize</strong> (<em>tuple of floats</em><em>, </em><em>default to</em><em> (</em><em>20</em><em>, </em><em>10</em><em>)</em>) – Size, in inches, of the figure (width, height).</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em> of </em><em>floats</em><em>, </em><em>default to</em><em> (</em><em>20</em><em>, </em><em>10</em><em>)</em>) – Size, in inches, of the figure (width, height).</p></li>
 <li><p><strong>color_coded</strong> (<em>string</em><em>, </em><em>default to 'longitude'</em>) – Can be either ‘longitude’, ‘latitude’, or ‘depth’. This is the
 attribute used to define the color scale of each dot.</p></li>
 <li><p><strong>y_axis</strong> (<em>string</em><em>, </em><em>default to 'latitude'</em>) – Can be either ‘longitude’, ‘latitude’, or ‘depth’. This is the
@@ -216,7 +217,7 @@ attribute used to define the y-axis coordinates.</p></li>
 <dd><p>Plot the histograms of time of the day and day of the week.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>figsize</strong> (<em>tuple of floats</em><em>, </em><em>default to</em><em> (</em><em>16</em><em>, </em><em>7</em><em>)</em>) – Size, in inches, of the figure (width, height).</p>
+<dd class="field-odd"><p><strong>figsize</strong> (<em>tuple</em><em> of </em><em>floats</em><em>, </em><em>default to</em><em> (</em><em>16</em><em>, </em><em>7</em><em>)</em>) – Size, in inches, of the figure (width, height).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>fig</strong></p>
@@ -271,7 +272,7 @@ start time.</p>
 availability is then accessed via the property <cite>self.availability</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>stations</strong> (<em>list of strings</em><em> or </em><em>numpy.ndarray</em>) – Names of the stations on which we check availability. If None, use
+<dd class="field-odd"><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em><em> or </em><em>numpy.ndarray</em>) – Names of the stations on which we check availability. If None, use
 <cite>self.stations</cite>.</p>
 </dd>
 </dl>
@@ -367,7 +368,7 @@ uncertainty, in degrees.</p></li>
 <li><p><strong>Note</strong> (<em>hmax + vmax does not have to be equal to the</em>) – </p></li>
 <li><p><strong>max_loc</strong> – </p></li>
 <li><p><strong>the</strong> (<em>the latter simply being the length of</em>) – </p></li>
-<li><p><strong>ellipsoid.</strong> (<em>longest semi-axis of the uncertainty</em>) – </p></li>
+<li><p><strong>ellipsoid.</strong> (<em>longest semi-axis</em><em> of </em><em>the uncertainty</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -383,7 +384,7 @@ The instance’s properties will also change accordingly.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n</strong> (<em>scalar int</em>) – The <cite>n</cite> closest stations to fetch.</p></li>
-<li><p><strong>available_stations</strong> (<em>list of strings</em><em>, </em><em>default to None</em>) – The list of stations from which we search the closest stations.
+<li><p><strong>available_stations</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to None</em>) – The list of stations from which we search the closest stations.
 If some stations are known to lack data, the user
 may choose to not include these in the closest stations.</p></li>
 </ul>
@@ -490,7 +491,7 @@ use <cite>self.data_reader</cite> and return None if <cite>self.data_reader=None
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>stations</strong> (<em>list of strings</em><em>, </em><em>default to None</em>) – Names of the stations to include in the relocation process. If None,
+<li><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to None</em>) – Names of the stations to include in the relocation process. If None,
 <cite>stations</cite> is set to <cite>self.stations</cite>.</p></li>
 <li><p><strong>method</strong> (<em>string</em><em>, </em><em>default to 'EDT'</em>) – Optimization algorithm used by NonLinLoc. Either ‘GAU_ANALYTIC’,
 ‘EDT’, ‘EDT_OT’, ‘EDT_OT_WT_ML’. See NonLinLoc’s documentation for
@@ -520,7 +521,7 @@ more information.</p></li>
 availability is then accessed via the property <cite>self.availability</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>stations</strong> (<em>list of strings</em><em> or </em><em>numpy.ndarray</em><em>, </em><em>default to None</em>) – Names of the stations on which we check availability. If None, use
+<dd class="field-odd"><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em><em> or </em><em>numpy.ndarray</em><em>, </em><em>default to None</em>) – Names of the stations on which we check availability. If None, use
 <cite>self.stations</cite>.</p>
 </dd>
 </dl>
@@ -547,7 +548,7 @@ to the Event’s ‘N’ channel.</p>
 <dd><p>Set the list of components.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>components</strong> (<em>list of strings</em>) – The names of the components on which the <cite>Template</cite> instance will
+<dd class="field-odd"><p><strong>components</strong> (<em>list</em><em> of </em><em>strings</em>) – The names of the components on which the <cite>Template</cite> instance will
 work after this call to <cite>self.set_components</cite>.</p>
 </dd>
 </dl>
@@ -819,7 +820,7 @@ templates.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ax</strong> (<cite>plt.Axes</cite>, default to None) – If None, create a new <cite>plt.Figure</cite> and <cite>plt.Axes</cite> instances. If
 speficied by user, use the provided instance to plot.</p></li>
-<li><p><strong>figsize</strong> (<em>tuple of floats</em><em>, </em><em>default to</em><em> (</em><em>20</em><em>, </em><em>10</em><em>)</em>) – Size, in inches, of the figure (width, height).</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em> of </em><em>floats</em><em>, </em><em>default to</em><em> (</em><em>20</em><em>, </em><em>10</em><em>)</em>) – Size, in inches, of the figure (width, height).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -860,8 +861,8 @@ data convention.</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>stations</strong> (<em>list</em><em> or </em><em>array of strings</em>) – Stations to keep or discard, depending on the method.</p></li>
-<li><p><strong>components</strong> (<em>list</em><em> or </em><em>array of strings</em>) – Components to keep or discard, depending on the method.</p></li>
+<li><p><strong>stations</strong> (<em>list</em><em> or </em><em>array</em><em> of </em><em>strings</em>) – Stations to keep or discard, depending on the method.</p></li>
+<li><p><strong>components</strong> (<em>list</em><em> or </em><em>array</em><em> of </em><em>strings</em>) – Components to keep or discard, depending on the method.</p></li>
 <li><p><strong>method</strong> (<em>string</em><em>, </em><em>default to 'keep'</em>) – Should be ‘keep’ or ‘discard’.
 If ‘keep’, the stations and components provided to
 this function are what will be left in the subnetwork.
@@ -1003,7 +1004,7 @@ The instance’s properties will also change accordingly.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n</strong> (<em>scalar int</em>) – The <cite>n</cite> closest stations.</p></li>
-<li><p><strong>available_stations</strong> (<em>list of strings</em><em>, </em><em>default to None</em>) – The list of stations from which we search the closest stations.
+<li><p><strong>available_stations</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to None</em>) – The list of stations from which we search the closest stations.
 If some stations are known to lack data, the user
 may choose to not include these in the closest stations.</p></li>
 </ul>
@@ -1050,7 +1051,7 @@ and folder naming convention.</p></li>
 <li><p><strong>db_path</strong> (<em>string</em><em>, </em><em>default to None</em>) – Name of the directory where the detection file is located. If None,
 use the standard file and folder naming convention.</p></li>
 <li><p><strong>gid</strong> (<em>string</em><em>, </em><em>int</em><em>, or </em><em>float</em><em>, </em><em>default to None</em>) – If not None, this is the hdf5 group where to read the data.</p></li>
-<li><p><strong>extra_attributes</strong> (<em>list of strings</em><em>, </em><em>default to</em><em> [</em><em>]</em>) – Attributes to read in addition to the default ‘longitude’,
+<li><p><strong>extra_attributes</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to</em><em> [</em><em>]</em>) – Attributes to read in addition to the default ‘longitude’,
 ‘latitude’, ‘depth’, and ‘origin_time’.</p></li>
 <li><p><strong>fill_value</strong> (<em>string</em><em>, </em><em>int</em><em>, or </em><em>float</em><em>, </em><em>default to np.nan</em>) – Default value if the target attribute does not exist.</p></li>
 <li><p><strong>return_events</strong> (<em>boolean</em><em>, </em><em>default to False</em>) – If True, return a list of <cite>dataset.Event</cite> instances. Can only be
@@ -1160,6 +1161,8 @@ use the standard file and folder naming convention.</p></li>
 <dt class="sig sig-object py" id="BPMF.dataset.TemplateGroup.compute_dir_errors">
 <span class="sig-name descname"><span class="pre">compute_dir_errors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.dataset.TemplateGroup.compute_dir_errors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute length of uncertainty ellipsoid in inter-template direction.</p>
+<section id="new-attributes">
+<h2>New Attributes<a class="headerlink" href="#new-attributes" title="Permalink to this heading">¶</a></h2>
 <dl class="simple">
 <dt>_dir_errors: (n_templates, n_templates) pandas.DataFrame</dt><dd><p>The length, in kilometers, of the uncertainty ellipsoid in the
 inter-template direction.
@@ -1168,6 +1171,7 @@ template tid1’s uncertainty ellipsoid in the direction of
 template tid2.</p>
 </dd>
 </dl>
+</section>
 </dd></dl>
 
 <dl class="py method">
@@ -1240,7 +1244,7 @@ The instance’s properties will also change accordingly.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n</strong> (<em>scalar int</em>) – The <cite>n</cite> closest stations.</p></li>
-<li><p><strong>available_stations</strong> (<em>list of strings</em><em>, </em><em>default to None</em>) – The list of stations from which we search the closest stations.
+<li><p><strong>available_stations</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to None</em>) – The list of stations from which we search the closest stations.
 If some stations are known to lack data, the user
 may choose to not include these in the closest stations.</p></li>
 </ul>
@@ -1258,7 +1262,7 @@ The instance’s properties will also change accordingly.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n</strong> (<em>scalar int</em>) – The <cite>n</cite> closest stations to fetch.</p></li>
-<li><p><strong>available_stations</strong> (<em>list of strings</em><em>, </em><em>default to None</em>) – The list of stations from which we search the closest stations.
+<li><p><strong>available_stations</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to None</em>) – The list of stations from which we search the closest stations.
 If some stations are known to lack data, the user
 may choose to not include these in the closest stations.</p></li>
 </ul>
@@ -1299,7 +1303,7 @@ may choose to not include these in the closest stations.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>figsize</strong> (<em>tuple of floats</em><em>, </em><em>default to</em><em> (</em><em>20</em><em>, </em><em>10</em><em>)</em>) – Size in inches of the figure (width, height).</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em> of </em><em>floats</em><em>, </em><em>default to</em><em> (</em><em>20</em><em>, </em><em>10</em><em>)</em>) – Size in inches of the figure (width, height).</p></li>
 <li><p><strong>progress</strong> (<em>boolean</em><em>, </em><em>default to False</em>) – If True, print progress bar with <cite>tqdm</cite>.</p></li>
 </ul>
 </dd>
@@ -1314,7 +1318,7 @@ may choose to not include these in the closest stations.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>extra_attributes</strong> (<em>list of strings</em><em>, </em><em>default to</em><em> [</em><em>]</em>) – Attributes to read in addition to the default ‘longitude’,
+<li><p><strong>extra_attributes</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to</em><em> [</em><em>]</em>) – Attributes to read in addition to the default ‘longitude’,
 ‘latitude’, ‘depth’, and ‘origin_time’.</p></li>
 <li><p><strong>fill_value</strong> (<em>string</em><em>, </em><em>int</em><em>, or </em><em>float</em><em>, </em><em>default to np.nan</em>) – Default value if the target attribute does not exist.</p></li>
 <li><p><strong>progress</strong> (<em>boolean</em><em>, </em><em>default to False</em>) – If True, print progress bar with <cite>tqdm</cite>.</p></li>
@@ -1330,11 +1334,11 @@ may choose to not include these in the closest stations.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filenames</strong> (<em>(</em><em>n_templates</em><em>,</em><em>) </em><em>list of strings</em>) – List of full file paths from which we instanciate the list of
+<li><p><strong>filenames</strong> (<em>(</em><em>n_templates</em><em>,</em><em>) </em><em>list</em><em> of </em><em>strings</em>) – List of full file paths from which we instanciate the list of
 <cite>dataset.Template</cite> objects.</p></li>
 <li><p><strong>network</strong> (<cite>dataset.Network</cite> instance) – The <cite>Network</cite> instance used to query consistent data accross all
 templates.</p></li>
-<li><p><strong>gids</strong> (<em>(</em><em>n_templates</em><em>,</em><em>) </em><em>list of strings</em><em>, </em><em>default to None</em>) – If not None, this should be a list of group ids where the template
+<li><p><strong>gids</strong> (<em>(</em><em>n_templates</em><em>,</em><em>) </em><em>list</em><em> of </em><em>strings</em><em>, </em><em>default to None</em>) – If not None, this should be a list of group ids where the template
 data are stored in their hdf5 files.</p></li>
 </ul>
 </dd>
@@ -1432,22 +1436,22 @@ channel c are not used on template t.</p>
     </div>
 
     <nav class="relbar">
-      <a class="previous" href="../api.html" aria-label="Previous topic" >
+      <a class="previous" href="clib.html" aria-label="Previous topic" >
         <div class="icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
         </div>
         <div class="title">
           <span class="text">
             <span class="direction">previous</span>
-            API
+            BPMF.clib
           </span>
         </div>
       </a>
-      <a class="next" href="template_search.html" aria-label="Next topic" >
+      <a class="next" href="data_reader_examples.html" aria-label="Next topic" >
         <div class="title">
           <span class="text">
             <span class="direction">next</span>
-            BPMF.template_search
+            BPMF.data_reader_examples
           </span>
         </div>
         <div class="icon">
@@ -1458,7 +1462,7 @@ channel c are not used on template t.</p>
 
     <footer role="contentinfo">
       &#169; Copyright 2022, Eric Beauce, William B. Frank.
-      Created using <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+      Created using <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
       <a class="reference external" href="https://insipid-sphinx-theme.readthedocs.io/">Insipid Theme</a>.
 <a class="reference internal" href="../../_sources/usage/api/dataset.rst.txt" rel="nofollow">Show Source</a>.
     </footer>

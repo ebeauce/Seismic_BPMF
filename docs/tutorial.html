@@ -16,13 +16,14 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script defer src="_static/insipid.js"></script>
     <script defer src="_static/insipid-sidebar.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Pre-requisites" href="tutorial/general.html" />
-    <link rel="prev" title="BPMF.template_search" href="usage/api/template_search.html" />
+    <link rel="prev" title="BPMF.ploting_utils" href="usage/api/plotting_utils.html" />
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
   </head><body>
@@ -86,7 +87,7 @@
       </div>
     </header>
     <nav>
-      <a href="usage/api/template_search.html" class="nav-icon previous" title="previous:&#13;BPMF.template_search" aria-label="Previous topic" accesskey="P" tabindex="-1">
+      <a href="usage/api/plotting_utils.html" class="nav-icon previous" title="previous:&#13;BPMF.ploting_utils" aria-label="Previous topic" accesskey="P" tabindex="-1">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M31.7 239l136-136c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9L127.9 256l96.4 96.4c9.4 9.4 9.4 24.6 0 33.9L201.7 409c-9.4 9.4-24.6 9.4-33.9 0l-136-136c-9.5-9.4-9.5-24.6-.1-34z"/></svg>
       </a>
       <a href="tutorial/general.html" class="nav-icon next" title="next:&#13;Pre-requisites" aria-label="Next topic" accesskey="N" tabindex="-1">
@@ -95,14 +96,14 @@
     </nav>
 
     <nav class="relbar">
-      <a class="previous" href="usage/api/template_search.html" aria-label="Previous topic" >
+      <a class="previous" href="usage/api/plotting_utils.html" aria-label="Previous topic" >
         <div class="icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
         </div>
         <div class="title">
           <span class="text">
             <span class="direction">previous</span>
-            BPMF.template_search
+            BPMF.ploting_utils
           </span>
         </div>
       </a>
@@ -179,12 +180,14 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html#Load-the-data">Load the data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html#Compute-the-waveform-features">Compute the waveform features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html#Initialize-the-Beamformer-instance">Initialize the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html#Inform-the-Beamformer-instance-of-the-data-and-metadata">Inform the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance of the data and metadata</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html#Define-the-phase-specific-weights">Define the phase-specific weights</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html#Define-the-source-specific-weights">Define the source-specific weights</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html#Run-the-backprojection">Run the backprojection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html#Define-the-earthquake-detections">Define the earthquake detections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html#Extract-the-detected-events-from-the-continuous-data">Extract the detected events from the continuous data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html#Relocate-each-detection-with-NLLoc">Relocate each detection with <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html#Compare-with-beamforming-based-relocation">Compare with beamforming-based relocation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html#Store-the-metadata-of-the-detected-earthquakes-in-a-database">Store the metadata of the detected earthquakes in a database</a></li>
 </ul>
 </li>
@@ -256,14 +259,14 @@
     </div>
 
     <nav class="relbar">
-      <a class="previous" href="usage/api/template_search.html" aria-label="Previous topic" >
+      <a class="previous" href="usage/api/plotting_utils.html" aria-label="Previous topic" >
         <div class="icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
         </div>
         <div class="title">
           <span class="text">
             <span class="direction">previous</span>
-            BPMF.template_search
+            BPMF.ploting_utils
           </span>
         </div>
       </a>
@@ -282,7 +285,7 @@
 
     <footer role="contentinfo">
       &#169; Copyright 2022, Eric Beauce, William B. Frank.
-      Created using <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+      Created using <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
       <a class="reference external" href="https://insipid-sphinx-theme.readthedocs.io/">Insipid Theme</a>.
 <a class="reference internal" href="_sources/tutorial.rst.txt" rel="nofollow">Show Source</a>.
     </footer>
