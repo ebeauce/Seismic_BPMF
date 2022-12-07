@@ -1001,6 +1001,8 @@ class Event(object):
     def hmax_unc(self):
         if hasattr(self, "_hmax_unc"):
             return self._hmax_unc
+        elif hasattr(self, "aux_data") and "hmax_unc" in self.aux_data:
+            return self.aux_data["hmax_unc"]
         else:
             self.hor_ver_uncertainties()
             return self._hmax_unc
@@ -1009,6 +1011,8 @@ class Event(object):
     def hmin_unc(self):
         if hasattr(self, "_hmin_unc"):
             return self._hmin_unc
+        elif hasattr(self, "aux_data") and "hmax_unc" in self.aux_data:
+            return self.aux_data["hmax_unc"]
         else:
             self.hor_ver_uncertainties()
             return self._hmin_unc
@@ -1296,6 +1300,8 @@ class Event(object):
         mini_batch_size=126,
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
         component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
+        upsampling=1,
+        downsampling=1,
         **kwargs,
     ):
         """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
@@ -1330,6 +1336,10 @@ class Event(object):
             the same component 'comp'. For example, `component_aliases['N'] =
             ['N', '1']` means that both the 'N' and '1' channels will be mapped
             to the Event's 'N' channel.
+        upsampling: scalar integer, default to 1
+            Upsampling factor applied before calling PhaseNet.
+        downsampling: scalar integer, default to 1
+            Downsampling factor applied before calling PhaseNet.
         """
         from phasenet import wrapper as PN
 
@@ -1344,6 +1354,17 @@ class Event(object):
                 **kwargs,
             )
         data_arr = self.get_np_array(self.stations, components=["N", "E", "Z"])
+        if upsampling > 1 or downsampling > 1:
+            from scipy.signal import resample_poly
+            data_arr = resample_poly(
+                    data_arr,
+                    upsampling,
+                    downsampling,
+                    axis=-1
+                    )
+            # momentarily update samping_rate
+            sampling_rate0 = float(self.sampling_rate)
+            self.sampling_rate = self.sr * upsampling / downsampling
         # call PhaseNet
         PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
             data_arr[np.newaxis, ...],
@@ -1379,6 +1400,9 @@ class Event(object):
         self.picks = pd.DataFrame(pandas_picks)
         self.picks.set_index("stations", inplace=True)
         self.picks.replace(0.0, np.nan, inplace=True)
+        if upsampling > 1 or downsampling > 1:
+            # reset the sampling rate to initial value
+            self.sampling_rate = sampling_rate0
 
     def read_waveforms(
         self,
@@ -1494,7 +1518,7 @@ class Event(object):
         **kwargs,
     ):
         """ """
-        from .template_search import Beamformer, envelope_parallel
+        from .template_search import Beamformer, envelope
 
         if kwargs.get("read_waveforms", True):
             # read waveforms in picking mode, i.e. with `time_shifted`=False
@@ -1510,19 +1534,25 @@ class Event(object):
             data_arr = self.get_np_array(
                 beamformer.network.stations, components=["N", "E", "Z"]
             )
-            waveform_features = envelope_parallel(data_arr)
+            norm = np.std(data_arr, axis=(1, 2), keepdims=True)
+            norm[norm == 0.] = 1.
+            data_arr /= norm
+            waveform_features = envelope(data_arr)
+        #print(waveform_features)
         beamformer.backproject(waveform_features, device=device, reduce="none")
         # find where the maximum focusing occurred
-        idx_max = np.where(beamformer.beam == beamformer.beam.max())
-        src_idx = idx_max[0][0]
-        time_idx = idx_max[1][0]
+        src_idx, time_idx = np.unravel_index(
+                beamformer.beam.argmax(),
+                beamformer.beam.shape
+                )
         # update hypocenter
         self.origin_time = (
             self.traces[0].stats.starttime + time_idx / self.sampling_rate
         )
-        self.longitude = beamformer.source_coordinates["longitude"][src_idx]
-        self.latitude = beamformer.source_coordinates["latitude"][src_idx]
-        self.depth = beamformer.source_coordinates["depth"][src_idx]
+        self.longitude = beamformer.source_coordinates["longitude"].iloc[src_idx]
+        self.latitude = beamformer.source_coordinates["latitude"].iloc[src_idx]
+        self.depth = beamformer.source_coordinates["depth"].iloc[src_idx]
+        # estimate location uncertainty
         # fill arrival time attribute
         self.arrival_times = pd.DataFrame(
             index=beamformer.network.stations,
@@ -1542,7 +1572,7 @@ class Event(object):
                     travel_times[s, pp] / self.sampling_rate
                 )
                 self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"] = (
-                    self.origin_times + self.arrival_times.loc[sta, f"{ph}_tt_sec"]
+                    self.origin_time + self.arrival_times.loc[sta, f"{ph}_tt_sec"]
                 )
 
     def relocate_NLLoc(self, stations=None, method="EDT", verbose=0):
@@ -1705,8 +1735,10 @@ class Event(object):
         if not hasattr(self, "traces"):
             print("Call `self.read_waveforms` first.")
             return
-        self._availability_per_sta = pd.Series(index=stations, dtype=bool)
-        self._availability_per_sta.fillna(False, inplace=True)
+        self._availability_per_sta = pd.Series(
+            index=stations,
+            data=np.zeros(len(stations), dtype=bool),
+        )
         self._availability_per_cha = pd.DataFrame(index=stations)
         for c, cp in enumerate(components):
             availability = np.zeros(len(stations), dtype=bool)
@@ -1724,9 +1756,28 @@ class Event(object):
             self._availability_per_sta = np.bitwise_or(
                 self._availability_per_sta, availability
             )
+        #self._availability_per_sta = pd.Series(index=stations, dtype=bool)
+        #self._availability_per_sta.fillna(False, inplace=True)
+        #self._availability_per_cha = pd.DataFrame(index=stations)
+        #for c, cp in enumerate(components):
+        #    availability = np.zeros(len(stations), dtype=bool)
+        #    for s, sta in enumerate(stations):
+        #        for cp_alias in component_aliases[cp]:
+        #            tr = self.traces.select(station=sta, component=cp_alias)
+        #            if len(tr) > 0:
+        #                tr = tr[0]
+        #            else:
+        #                continue
+        #            if np.sum(tr.data != 0.0):
+        #                availability[s] = True
+        #                break
+        #    self._availability_per_cha[cp] = availability
+        #    self._availability_per_sta = np.bitwise_or(
+        #        self._availability_per_sta, availability
+        #    )
         self.set_aux_data(
             {
-                "availability": pd.Series(index=stations, data=availability),
+                "availability": self._availability_per_sta,
                 "availability_per_sta": self._availability_per_sta,
             }
         )
@@ -2017,7 +2068,7 @@ class Event(object):
     # -----------------------------------------------------------
 
     def plot(
-        self, figsize=(20, 15), gain=1.0e6, ylabel=r"Velocity ($\mu$m/s)", **kwargs
+        self, figsize=(20, 15), gain=1.0e6, stations=None, ylabel=r"Velocity ($\mu$m/s)", **kwargs
     ):
         """Plot the waveforms of the Event instance.
 
@@ -2032,15 +2083,17 @@ class Event(object):
         import matplotlib.pyplot as plt
         import matplotlib.dates as mdates
 
+        if stations is None:
+            stations = self.stations
         start_times, end_times = [], []
         fig, axes = plt.subplots(
             num=f"event_{str(self.origin_time)}",
             figsize=figsize,
-            nrows=len(self.stations),
+            nrows=len(stations),
             ncols=len(self.components),
         )
         fig.suptitle(f'Event at {self.origin_time.strftime("%Y-%m-%d %H:%M:%S")}')
-        for s, sta in enumerate(self.stations):
+        for s, sta in enumerate(stations):
             for c, cp in enumerate(self.components):
                 for cp_alias in self.component_aliases[cp]:
                     tr = self.traces.select(station=sta, component=cp_alias)
@@ -3898,6 +3951,8 @@ class Stack(Event):
         n_threshold=1,
         err_threshold=100,
         central="mean",
+        upsampling=1,
+        downsampling=1,
         **kwargs,
     ):
         """Use PhaseNet (Zhu et al., 2019) to pick P and S waves.
@@ -3924,6 +3979,10 @@ class Stack(Event):
             Dictionary defining which seismic phase is extracted on each
             component. For example, phase_on_comp['N'] gives the phase that is
             extracted on the north component.
+        upsampling: scalar integer, default to 1
+            Upsampling factor applied before calling PhaseNet.
+        downsampling: scalar integer, default to 1
+            Downsampling factor applied before calling PhaseNet.
         n_threshold: scalar int, optional
             Used if `self.filtered_data` is not None. Minimum number of
             successful picks to keep the phase. Default to 1.
@@ -3950,6 +4009,17 @@ class Stack(Event):
             data_arr = np.concatenate(
                 [data_arr[np.newaxis, ...], self.filtered_data], axis=0
             )
+            if upsampling > 1 or downsampling > 1:
+                from scipy.signal import resample_poly
+                data_arr = resample_poly(
+                        data_arr,
+                        upsampling,
+                        downsampling,
+                        axis=-1
+                        )
+                # momentarily update samping_rate
+                sampling_rate0 = float(self.sampling_rate)
+                self.sampling_rate = self.sr * upsampling / downsampling
             # call PhaseNet
             PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
                 data_arr,
@@ -3985,6 +4055,9 @@ class Stack(Event):
             self.picks = pd.DataFrame(pandas_picks)
             self.picks.set_index("stations", inplace=True)
             self.picks.replace(0.0, np.nan, inplace=True)
+            if upsampling > 1 or downsampling > 1:
+                # reset the sampling rate to initial value
+                self.sampling_rate = sampling_rate0
         else:
             super(Stack, self).pick_PS_phases(
                 duration,

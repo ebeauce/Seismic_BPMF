@@ -27,29 +27,22 @@ from obspy.core import UTCDateTime as udt
 
 
 class Beamformer(object):
-    """Class for computing and post-processing the network response."""
+    """Class for backprojecting waveform features with beamforming."""
 
     def __init__(
         self,
-        data,
-        network,
-        tt_filename="tts.h5",
-        path_tts=cfg.MOVEOUTS_PATH,
-        phases=["P", "S"],
-        starttime=None,
-        **kwargs
+        travel_times,
+        source_coordinates,
+        sampling_rate=cfg.SAMPLING_RATE_HZ,
+        data=None,
+        network=None,
+        phases=None,
+        remove_tt_min=True,
     ):
         """Initialize the essential attributes.
 
         Parameters
         -----------
-        data: dataset.Data instance
-            The Data instance with the waveform time series and metadata
-            required for the computation of the (composite) network response.
-        network: dataset.Network instance
-            The Network instance with the station network information.
-            `network` can force the network response to be computed only on
-            a subset of the data stored in `data`.
         tt_filename: string, default to 'tts.h5'
             Name of the hdf5 file with travel-times.
         path_tts: string, default to `cfg.MOVEOUTS_PATH`
@@ -57,46 +50,65 @@ class Beamformer(object):
         phases: list, default to ['P', 'S']
             List of seismic phases used in the computation of the network
             response.
-        starttime: string or Datetime, default to None
-            Start time of the network response time series. If None, takes
-            `self.data.date` as the start time.
         """
+        self.travel_times = travel_times
+        self.travel_times_samp = self.travel_times.copy()
+        for sta in self.travel_times_samp.index:
+            for ph in self.travel_times_samp.columns:
+                self.travel_times_samp.loc[sta, ph] = utils.sec_to_samp(
+                    self.travel_times_samp.loc[sta, ph],
+                    sr=sampling_rate,
+                )
+        self.source_coordinates = source_coordinates
+        self.n_sources = len(self.source_coordinates["depth"])
         self.data = data
         self.network = network
-        self.path_tts = os.path.join(path_tts, tt_filename)
         self.phases = phases
-        if starttime is None:
-            self.starttime = self.data.date
-        else:
-            self.starttime = udt(starttime)
-
-    @property
-    def n_sources(self):
-        if hasattr(self, "moveouts"):
-            return self.moveouts.shape[0]
-        else:
-            print("You should attribute moveouts to the class instance first.")
-            return
+        if remove_tt_min:
+            # find min travel-time for each source
+            tts = np.asarray(
+                [
+                    [
+                        self.travel_times_samp.loc[sta, ph]
+                        for sta in self.travel_times_samp.index
+                    ]
+                    for ph in self.phases
+                ]
+            ).T
+            tt_min = np.min(tts, axis=(1, 2))
+            for sta in self.travel_times_samp.index:
+                for ph in self.phases:
+                    self.travel_times_samp.loc[sta, ph] -= tt_min
 
     @property
     def n_stations(self):
+        if not hasattr(self, "network") or self.network == None:
+            print("You need to call set_network first.")
+            return
         return self.network.n_stations
 
     @property
-    def moveouts(self):
-        if not hasattr(self, "_moveouts"):
-            print("You need to call `load_moveouts` or `set_moveouts` first.")
+    def n_phases(self):
+        if not hasattr(self, "phases") or self.phases == None:
+            print("You need to call set_phases first.")
             return
-        else:
-            return self._moveouts
+        return len(self.phases)
 
     @property
-    def source_coordinates(self):
-        if not hasattr(self, "_source_coordinates"):
-            print("You need to call `load_moveouts` or `set_source_coords`" " first.")
+    def moveouts(self):
+        return np.asarray(
+            [
+                [self.travel_times_samp.loc[sta, ph] for sta in self.stations]
+                for ph in self.phases
+            ]
+        ).T
+
+    @property
+    def stations(self):
+        if not hasattr(self, "network") or self.network == None:
+            print("You need to call set_network first.")
             return
-        else:
-            return self._source_coordinates
+        return self.network.stations
 
     def backproject(self, waveform_features, reduce="max", device="cpu"):
         """Backproject the waveform features.
@@ -118,12 +130,6 @@ class Beamformer(object):
             return
         if not hasattr(self, "weights_sources"):
             print("You need to set self.weights_sources first.")
-            return
-        if not hasattr(self, "_moveouts"):
-            print("You need to call `load_moveouts` or `set_moveouts` first.")
-            return
-        elif self.moveouts.dtype not in (np.int32, np.int64):
-            print("Moveouts should be integer typed and in unit of samples.")
             return
         if reduce == "max":
             self.maxbeam, self.maxbeam_sources = bp.beampower.beamform(
@@ -206,10 +212,10 @@ class Beamformer(object):
         detections = []
         data_path, data_filename = os.path.split(self.data.where)
         for i in range(len(peak_indexes)):
-            src_idx = source_indexes[i]
+            src_idx = self.source_coordinates.index[source_indexes[i]]
             event = Stream()
             ot_i = self.data.date + peak_indexes[i] / sr
-            mv = self.moveouts[src_idx, ...] / sr
+            mv = self.moveouts[source_indexes[i], ...] / sr
             if n_max_stations is not None:
                 # use moveouts as a proxy for distance
                 # keep only the n_max_stations closest stations
@@ -217,9 +223,9 @@ class Beamformer(object):
             else:
                 mv_max = np.finfo(np.float32).max
             stations_in = np.asarray(self.network.stations)[mv[:, 0] < mv_max]
-            latitude = self.source_coordinates["latitude"][src_idx]
-            longitude = self.source_coordinates["longitude"][src_idx]
-            depth = self.source_coordinates["depth"][src_idx]
+            latitude = self.source_coordinates.loc[src_idx, "latitude"]
+            longitude = self.source_coordinates.loc[src_idx, "longitude"]
+            depth = self.source_coordinates.loc[src_idx, "depth"]
             event = dataset.Event(
                 ot_i,
                 mv,
@@ -245,40 +251,40 @@ class Beamformer(object):
         self.source_indexes = source_indexes
         return detections, peak_indexes, source_indexes
 
-    def load_moveouts(self, source_indexes=None, remove_min=True):
-        """Load the moveouts, in units of samples.
+    # def load_moveouts(self, source_indexes=None, remove_min=True):
+    #    """Load the moveouts, in units of samples.
 
-        Call `utils.load_travel_times` and `utils.get_moveout_array` using the
-        instance's attributes and the optional parameters given here. Add the
-        attribute `self.moveouts` to the instance. The moveouts are converted
-        to samples using the sampling rate `self.data.sampling_rate`.
+    #    Call `utils.load_travel_times` and `utils.get_moveout_array` using the
+    #    instance's attributes and the optional parameters given here. Add the
+    #    attribute `self.moveouts` to the instance. The moveouts are converted
+    #    to samples using the sampling rate `self.data.sampling_rate`.
 
-        Parameters
-        ------------
-        source_indexes: (n_sources,) int numpy.ndarray, default to None
-            If not None, this is used to select a subset of sources from the
-            grid.
-        remove_min: boolean, default to True
-            If True, remove the smallest travel time from the collection of
-            travel times for each source of the grid. The network response only
-            depends on the relative travel times -- the moveouts -- and
-            therefore it is unnecessary to carry potentially very large travel
-            times.
-        """
-        tts, self._source_coordinates = utils.load_travel_times(
-            self.path_tts,
-            self.phases,
-            source_indexes=source_indexes,
-            return_coords=True,
-            stations=self.network.stations,
-        )
-        self._moveouts = utils.get_moveout_array(
-            tts, self.network.stations, self.phases
-        )
-        del tts
-        if remove_min:
-            self._moveouts -= np.min(self._moveouts, axis=(1, 2), keepdims=True)
-        self._moveouts = utils.sec_to_samp(self._moveouts, sr=self.data.sr)
+    #    Parameters
+    #    ------------
+    #    source_indexes: (n_sources,) int numpy.ndarray, default to None
+    #        If not None, this is used to select a subset of sources from the
+    #        grid.
+    #    remove_min: boolean, default to True
+    #        If True, remove the smallest travel time from the collection of
+    #        travel times for each source of the grid. The network response only
+    #        depends on the relative travel times -- the moveouts -- and
+    #        therefore it is unnecessary to carry potentially very large travel
+    #        times.
+    #    """
+    #    tts, self._source_coordinates = utils.load_travel_times(
+    #        self.path_tts,
+    #        self.phases,
+    #        source_indexes=source_indexes,
+    #        return_coords=True,
+    #        stations=self.network.stations,
+    #    )
+    #    self._moveouts = utils.get_moveout_array(
+    #        tts, self.network.stations, self.phases
+    #    )
+    #    del tts
+    #    if remove_min:
+    #        self._moveouts -= np.min(self._moveouts, axis=(1, 2), keepdims=True)
+    #    self._moveouts = utils.sec_to_samp(self._moveouts, sr=self.data.sr)
 
     def remove_baseline(self, window, attribute="composite"):
         """Remove baseline from network response."""
@@ -308,15 +314,53 @@ class Beamformer(object):
         window = int(window * self.sampling_rate)
         self.smoothed = gaussian_filter1d(self.composite, window)
 
-    def set_moveouts(self, moveouts):
+    def set_data(self, data):
+        """Attribute `data` to the class instance.
+
+        Parameters
+        ----------
+        data: `dataset.Data`
+            Instance of `dataset.Data`.
+        """
+        self.data = data
+        self.starttime = self.data.date
+
+    def set_moveouts(self, moveouts, stations, phases):
         """Attribute `_moveouts` to the class instance.
 
         Parameters
         -----------
         moveouts: (n_sources, n_stations, n_phases) numpy.ndarray
             The moveouts to use for backprojection.
+        stations: (n_stations,) list or numpy.ndarray of strings
+            Station names corresponding with the second axis of `moveouts`.
+        phases: (n_phases,) list or numpy.ndarray of strings
+            Phase names corresponing with the third axis of `moveouts`.
         """
-        self._moveouts = moveouts
+        self._moveouts = pd.DataFrame(
+            index=stations,
+            columns=phases,
+        )
+        for s, sta in enumerate(stations):
+            for ph in enumerate(phases):
+                self._moveouts.loc[sta, ph] = moveouts[:, s, p]
+
+    def set_network(self, network):
+        """Attribute `network` to the class instance.
+
+        `network` determines which stations are included in the computation
+        of the beams. All arrays with a station axis are ordered according to
+        `network.stations`.
+
+        Parameters
+        ----------
+        network: dataset.Network instance
+            The Network instance with the station network information.
+            `network` can force the network response to be computed only on
+            a subset of the data stored in `data`.
+
+        """
+        self.network = network
 
     def set_source_coordinates(self, source_coords):
         """Attribute `_source_coordinates` to the class instance.
@@ -344,7 +388,7 @@ class Beamformer(object):
         if weights_sources is not None:
             self.weights_sources = weights_sources
 
-    def set_weights_sources(self, n_max_stations):
+    def set_weights_sources(self, n_max_stations, n_min_stations=0):
         """Set network-geometry-based weights of each source-receiver pair.
 
         Parameters
@@ -354,12 +398,9 @@ class Beamformer(object):
             the `n_max_stations` stations will be set a weight > 0.
         """
         weights_sources = np.ones((self.n_sources, self.n_stations), dtype=np.float32)
-        self.data.set_availability(self.network.stations)
-        mv = self.moveouts[:, self.data.availability.values, 0]
-        #if hasattr(self.data, "availability"):
-        #    mv = self.moveouts[:, self.data.availability.values, 0]
-        #else:
-        #    mv = self.moveouts[:, :, 0]
+        self.data.set_availability(self.stations)
+        operational_stations = self.data.availability_per_sta.loc[self.stations].values
+        mv = self.moveouts[:, operational_stations, 0]
         n_max_stations = min(mv.shape[1], n_max_stations)
         if (n_max_stations < self.n_stations) and (n_max_stations > 0):
             cutoff_mv = np.max(
@@ -368,6 +409,9 @@ class Beamformer(object):
                 keepdims=True,
             )
             weights_sources[self.moveouts[:, :, 0] > cutoff_mv] = 0.0
+        if n_min_stations > 0:
+            n_stations_per_source = np.sum(weights_sources > 0.0, axis=-1)
+            weights_sources[n_stations_per_source < n_min_stations, :] = 0.0
         self.weights_sources = weights_sources
 
     def weights_station_density(
@@ -604,6 +648,105 @@ class Beamformer(object):
                 mdates.ConciseDateFormatter(ax.xaxis.get_major_locator())
             )
         plt.subplots_adjust(top=0.95, bottom=0.06, right=0.98, left=0.06)
+        return fig
+
+    def plot_likelihood(self, time_index=None, **kwargs):
+        """Plot likelihood (beam) slices at a given time."""
+        from cartopy.crs import PlateCarree
+        from matplotlib.colors import Normalize
+        from matplotlib.cm import ScalarMappable
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+        from . import plotting_utils
+
+        if time_index is None:
+            src_idx, time_index = np.unravel_index(self.beam.argmax(), self.beam.shape)
+        likelihood = self.beam[:, time_index]
+        likelihood = (likelihood - likelihood.min()) / (
+            likelihood.max() - likelihood.min()
+        )
+        # define slices
+        longitude = self.source_coordinates["longitude"].iloc[src_idx]
+        latitude = self.source_coordinates["latitude"].iloc[src_idx]
+        depth = self.source_coordinates["depth"].iloc[src_idx]
+        hor_slice = np.where(self.source_coordinates["depth"] == depth)[0]
+        lon_slice = np.where(self.source_coordinates["latitude"] == latitude)[0]
+        lat_slice = np.where(self.source_coordinates["longitude"] == longitude)[0]
+        # initialize map
+        data_coords = PlateCarree()
+        lat_min = np.min(self.source_coordinates["latitude"].iloc[hor_slice])
+        lat_max = np.max(self.source_coordinates["latitude"].iloc[hor_slice])
+        lon_min = np.min(self.source_coordinates["longitude"].iloc[hor_slice])
+        lon_max = np.max(self.source_coordinates["longitude"].iloc[hor_slice])
+        ax = plotting_utils.initialize_map(
+            [lon_min, lon_max],
+            [lat_min, lat_max],
+            **kwargs,
+        )
+        fig = ax.get_figure()
+        mappable = ax.tricontourf(
+            self.source_coordinates["longitude"].iloc[hor_slice],
+            self.source_coordinates["latitude"].iloc[hor_slice],
+            likelihood[hor_slice],
+            levels=np.linspace(0.0, 1.0, 10),
+            cmap="inferno",
+            alpha=0.50,
+            transform=data_coords,
+            zorder=-1,
+        )
+        ax.scatter(
+            self.network.longitude,
+            self.network.latitude,
+            marker="v",
+            color="k",
+            s=50,
+            transform=data_coords,
+            zorder=-1.5,
+        )
+        # add slices
+        divider = make_axes_locatable(ax)
+        ax_lon = divider.append_axes("bottom", size="50%", pad=0.2, axes_class=plt.Axes)
+        ax_lat = divider.append_axes("right", size="50%", pad=0.2, axes_class=plt.Axes)
+        projected_coords = ax.projection.transform_points(
+            data_coords,
+            self.source_coordinates["longitude"].iloc[lon_slice],
+            self.source_coordinates["latitude"].iloc[lon_slice],
+        )
+        ax_lon.tricontourf(
+            projected_coords[..., 0],
+            self.source_coordinates["depth"].iloc[lon_slice],
+            likelihood[lon_slice],
+            levels=np.linspace(0.0, 1.0, 10),
+            cmap="inferno",
+            alpha=0.50,
+            zorder=-1,
+        )
+        plt.setp(ax_lon.get_xticklabels(), visible=False)
+        ax_lon.invert_yaxis()
+        ax_lon.set_ylabel("Depth (km)")
+        projected_coords = ax.projection.transform_points(
+            data_coords,
+            self.source_coordinates["longitude"].iloc[lat_slice],
+            self.source_coordinates["latitude"].iloc[lat_slice],
+        )
+        ax_lat.tricontourf(
+            self.source_coordinates["depth"].iloc[lat_slice],
+            projected_coords[..., 1],
+            likelihood[lat_slice],
+            levels=np.linspace(0.0, 1.0, 10),
+            cmap="inferno",
+            alpha=0.50,
+            zorder=-1,
+        )
+        plt.setp(ax_lat.get_yticklabels(), visible=False)
+        ax_lat.set_xlabel("Depth (km)")
+        cax = divider.append_axes("top", size="3%", pad=0.1, axes_class=plt.Axes)
+        plt.colorbar(
+            mappable, cax=cax, label="Location Likelihood", orientation="horizontal"
+        )
+        cax.xaxis.set_label_position("top")
+        cax.xaxis.tick_top()
+
         return fig
 
 

@@ -3,6 +3,7 @@ import sys
 import glob
 import numpy as np
 import h5py as h5
+import pandas as pd
 
 import obspy as obs
 from obspy.core import UTCDateTime as udt
@@ -153,7 +154,7 @@ def preprocess_stream(
     target_starttime=None,
     target_endtime=None,
     minimum_length=0.75,
-    minimum_chunk_duration=600.,
+    minimum_chunk_duration=600.0,
     verbose=True,
     SR_decimals=1,
     unit="VEL",
@@ -176,7 +177,7 @@ def preprocess_stream(
         # if the start or the end is masked
         t1 = udt(tr.stats.starttime.timestamp)
         t2 = udt(tr.stats.endtime.timestamp)
-        if t2-t1 < minimum_chunk_duration:
+        if t2 - t1 < minimum_chunk_duration:
             # don't include this chunk
             continue
         tr = tr.split()
@@ -220,8 +221,8 @@ def preprocess_stream(
             for tr in st_cha:
                 sampling_rates.append(tr.stats.sampling_rate)
         unique_sampling_rates, sampling_rates_counts = np.unique(
-                sampling_rates, return_counts=True
-                )
+            sampling_rates, return_counts=True
+        )
         # if more than one sampling rate, remove the traces with the least
         # represented sampling rate
         if len(unique_sampling_rates) > 1:
@@ -346,8 +347,9 @@ def get_moveout_array(tts, stations, phases):
     return moveout_arr.reshape(-1, n_stations, n_phases)
 
 
-def load_travel_times(path, phases, source_indexes=None, return_coords=False,
-        stations=None):
+def load_travel_times(
+    path, phases, source_indexes=None, return_coords=False, stations=None
+):
     """Load the travel times from `path`.
 
     Parameters
@@ -373,12 +375,10 @@ def load_travel_times(path, phases, source_indexes=None, return_coords=False,
         three (n_sources,) numpy.ndarray: `source_coords['latitude']`,
         `source_coords['longitude']`, `source_coords['depth']`.
     """
-    tts = {}
-    if return_coords:
-        source_coords = {}
+    tts = pd.DataFrame(columns=phases, index=stations)
     with h5.File(path, mode="r") as f:
+        grid_shape = f["source_coordinates"]["depth"].shape
         for ph in phases:
-            tts[ph] = {}
             for sta in f[f"tt_{ph}"].keys():
                 if stations is not None and sta not in stations:
                     continue
@@ -386,16 +386,34 @@ def load_travel_times(path, phases, source_indexes=None, return_coords=False,
                 # flat source indexes
                 if source_indexes is not None:
                     # select a subset of the source grid
-                    tts[ph][sta] = f[f"tt_{ph}"][sta][()].flatten()[source_indexes]
+                    source_indexes_unravelled = np.unravel_index(
+                            source_indexes, grid_shape
+                            )
+                    selection = np.zeros(grid_shape, dtype=bool)
+                    selection[source_indexes_unravelled] = True
+                    tts.loc[sta, ph] = f[f"tt_{ph}"][sta][selection].flatten()
                 else:
-                    tts[ph][sta] = f[f"tt_{ph}"][sta][()].flatten()
+                    tts.loc[sta, ph] = f[f"tt_{ph}"][sta][()].flatten()
         if return_coords:
-            for coord in f["source_coordinates"].keys():
-                if source_indexes is not None:
-                    source_coords[coord] = f["source_coordinates"][coord][()].flatten()[
-                        source_indexes
-                    ]
-                else:
+            if source_indexes is not None:
+                source_indexes_unravelled = np.unravel_index(
+                        source_indexes, grid_shape
+                        )
+                selection = np.zeros(grid_shape, dtype=bool)
+                selection[source_indexes_unravelled] = True
+                source_coords = pd.DataFrame(
+                    columns=["longitude", "latitude", "depth"], index=source_indexes
+                )
+                for coord in f["source_coordinates"].keys():
+                    source_coords.loc[source_indexes, coord] = f["source_coordinates"][
+                        coord
+                    ][selection].flatten()
+            else:
+                source_coords = pd.DataFrame(
+                    columns=["longitude", "latitude", "depth"],
+                    index=np.arange(np.prod(grid_shape)),
+                )
+                for coord in f["source_coordinates"].keys():
                     source_coords[coord] = f["source_coordinates"][coord][()].flatten()
     if return_coords:
         return tts, source_coords
