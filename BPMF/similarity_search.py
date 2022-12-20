@@ -908,7 +908,7 @@ def time_dependent_threshold(
         )[::shift, :]
         center = np.median(time_series_win, axis=-1)
         deviation = np.median(
-            np.abs(time_series_win - center[:-1, np.newaxis]), axis=-1
+            np.abs(time_series_win - center[:, np.newaxis]), axis=-1
         )
         # ctrl_threshold = np.median(ctrl_time_series, axis=-1) +\
         #             np.median(np.abs(ctrl_threshold -
