@@ -1580,7 +1580,7 @@ class Event(object):
                     self.origin_time + self.arrival_times.loc[sta, f"{ph}_tt_sec"]
                 )
 
-    def relocate_NLLoc(self, stations=None, method="EDT", verbose=0):
+    def relocate_NLLoc(self, stations=None, method="EDT", verbose=0, **kwargs):
         """Relocate with NLLoc using `self.picks`.
 
         Parameters
@@ -1617,7 +1617,9 @@ class Event(object):
             os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn))
         NLLoc_utils.write_NLLoc_obs(self.origin_time, self.picks, stations, obs_fn)
         # write control file
-        NLLoc_utils.write_NLLoc_control(ctrl_fn, out_basename, obs_fn, method=method)
+        NLLoc_utils.write_NLLoc_control(
+                ctrl_fn, out_basename, obs_fn, method=method, **kwargs
+                )
         if verbose == 0:
             # run NLLoc
             subprocess.run(

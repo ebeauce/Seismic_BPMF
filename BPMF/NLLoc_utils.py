@@ -409,6 +409,7 @@ def write_NLLoc_control(
     method="EDT_OT_WT_ML",
     angle_grid="ANGLES_NO",
     grid="MISFIT",
+    n_depth_points=None,
 ):
     """Write the NLLoc control file."""
     fc = open(os.path.join(NLLoc_input_path, ctrl_filename), "w")
@@ -432,7 +433,10 @@ def write_NLLoc_control(
     fn = glob.glob(os.path.join(NLLoc_input_path, "*hdr"))[0]
     with open(fn, "r") as fhdr:
         dim = fhdr.readline()
-    fc.write("LOCGRID  " + "  ".join(dim.split()[:-1]) + f"  {grid}  SAVE\n")
+    locgrid_params = dim.split()[:-1]
+    if n_depth_points is not None:
+        locgrid_params[2] = str(min(int(locgrid_params[2]), n_depth_points))
+    fc.write("LOCGRID  " + "  ".join(locgrid_params) + f"  {grid}  SAVE\n")
     fc.write(f"LOCMETH {method} 5000 6 -1 -1 -1 6 -1 1\n")
     fc.write("LOCGAU  0.2  5.0\n")
     fc.write("LOCGAU2 0.02 0.05 10.0\n")
