@@ -1707,6 +1707,46 @@ class Event(object):
             # external change
             pathlib.Path(output_dir).rmdir()
 
+    def remove_outlier_picks(self, max_diff_percent=25.):
+        """Remove picks that are too far from predicted arrival times.
+
+        Parameters
+        ----------
+        max_diff_percent: float, default to 25
+            Maximum difference, in percentage, between the picked and predicted
+            arrival time.
+        """
+        stations_outlier = []
+        for sta in self.stations:
+            for ph in self.phases:
+                pick = pd.Timestamp(str(self.picks.loc[sta, f"{ph}_abs_picks"]))
+                predicted = pd.Timestamp(str(self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"]))
+                predicted_tt = self.arrival_times.loc[sta, f"{ph}_tt_sec"]
+                diff_percent = (
+                        100. * abs((pick - predicted).total_seconds())/predicted_tt
+                        )
+                if diff_percent > max_diff_percent:
+                    stations_outlier.append(sta)
+                    self.picks.loc[sta, f"{ph}_abs_picks"] = np.nan
+                    self.picks.loc[sta, f"{ph}_picks_sec"] = np.nan
+                    self.picks.loc[sta, f"{ph}_probas"] = np.nan
+
+    def remove_distant_stations(self, max_distance_km=50.):
+        """Remove picks on stations that are further than given distance.
+
+        Parameters
+        ----------
+        max_distance_km: float, default to 50
+            Maximum distance, in km, beyond which picks are set to NaN.
+        """
+        if self.source_receiver_dist is None:
+            print("Call self.set_source_receiver_dist(network) before "
+                  "using self.remove_distant_stations.")
+            return
+        for sta in self.stations:
+            if self.source_receiver_dist.loc[sta] > max_distance_km:
+                self.picks.loc[sta] = np.nan
+
     def set_aux_data(self, aux_data):
         """Adds any extra data to the Event instance.
 
