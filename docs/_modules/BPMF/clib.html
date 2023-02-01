@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BPMF.clib &mdash; BPMF 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> BPMF
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BPMF</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">BPMF.clib</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for BPMF.clib</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">ctypes</span> <span class="k">as</span> <span class="nn">C</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">cfg</span>
+
+<span class="n">cpu_loaded</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="n">libpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">PACKAGE</span><span class="p">,</span> <span class="s2">&quot;lib&quot;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">_libc</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">cdll</span><span class="o">.</span><span class="n">LoadLibrary</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">libpath</span><span class="p">,</span> <span class="s2">&quot;libc.so&quot;</span><span class="p">))</span>
+    <span class="n">cpu_loaded</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="s2">&quot;Missing libc.so! You won&quot;</span>
+        <span class="s2">&quot;t be able to run multiplet/template searches on the CPU&quot;</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Should be at </span><span class="si">{}</span><span class="s2">libc.so&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">libpath</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)))</span>
+
+
+<span class="k">if</span> <span class="n">cpu_loaded</span><span class="p">:</span>
+    <span class="n">_libc</span><span class="o">.</span><span class="n">kurtosis</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="n">_libc</span><span class="o">.</span><span class="n">find_similar_moveouts</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>  <span class="c1"># moveouts</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">,</span>  <span class="c1"># average absolute time difference threshold</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>  <span class="c1"># number of grid points</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>  <span class="c1"># number of stations</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>  <span class="c1"># number of nearest neighbors</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">),</span>  <span class="c1"># output pointer: redundant sources</span>
+    <span class="p">]</span>
+
+    <span class="n">_libc</span><span class="o">.</span><span class="n">select_cc_indexes</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>  <span class="c1"># CCs</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>  <span class="c1"># threshold</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>  <span class="c1"># search window</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>  <span class="c1"># length of CCs</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">),</span>  <span class="c1"># selected corr</span>
+    <span class="p">]</span>
+
+
+<div class="viewcode-block" id="kurtosis"><a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.kurtosis">[docs]</a><span class="k">def</span> <span class="nf">kurtosis</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">W</span><span class="p">):</span>
+    <span class="n">n_stations</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n_components</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">Kurto</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_stations</span> <span class="o">*</span> <span class="n">n_components</span> <span class="o">*</span> <span class="n">length</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+    <span class="n">_libc</span><span class="o">.</span><span class="n">kurtosis</span><span class="p">(</span>
+        <span class="n">signal</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">)),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">W</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">n_stations</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">n_components</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">length</span><span class="p">),</span>
+        <span class="n">Kurto</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">)),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">Kurto</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_stations</span><span class="p">,</span> <span class="n">n_components</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="find_similar_sources"><a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.find_similar_sources">[docs]</a><span class="k">def</span> <span class="nf">find_similar_sources</span><span class="p">(</span><span class="n">moveouts</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">n_nearest_neighbors</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find sources with similar moveouts so that users can discard</span>
+<span class="sd">    some of them during the computation of the network response,</span>
+<span class="sd">    and thus speedup the process.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -------------</span>
+<span class="sd">    moveouts: (n_sources, n_stations) float numpy.ndarray</span>
+<span class="sd">        The moveouts in seconds. Note: It makes more sense to input the moveouts</span>
+<span class="sd">        rather than the absolute travel times here.</span>
+<span class="sd">    threshold: scalar float</span>
+<span class="sd">        The station average time difference tolerance to consider</span>
+<span class="sd">        two sources as being redundant.</span>
+<span class="sd">    n_nearest_neighbors: scalar int, default to 200</span>
+<span class="sd">        Check redundancy in chunks of `n_nearest_neighbors` contiguous sources</span>
+<span class="sd">        before starting the all pair-wise computation. If the moveouts are</span>
+<span class="sd">        ordered such that contiguous elements correspond to proximal grid</span>
+<span class="sd">        sources, then this can considerably speed up the computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------------</span>
+<span class="sd">    redundant_sources: (n_sources,) boolean numpy.ndarray</span>
+<span class="sd">        Boolean numpy array with True elements for sources that</span>
+<span class="sd">        share similar moveouts with other sources.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_sources</span> <span class="o">=</span> <span class="n">moveouts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n_stations</span> <span class="o">=</span> <span class="n">moveouts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">moveouts</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Integer typed moveouts detected. Are you sure these are in&quot;</span> <span class="s2">&quot; seconds?&quot;</span><span class="p">)</span>
+    <span class="c1"># format moveouts</span>
+    <span class="n">moveouts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">moveouts</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+    <span class="c1"># initialize the output pointer</span>
+    <span class="n">redundant_sources</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_sources</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">n_nearest_neighbors</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">n_sources</span><span class="p">,</span> <span class="n">n_nearest_neighbors</span><span class="p">)</span>
+    <span class="c1"># call the C function:</span>
+    <span class="n">_libc</span><span class="o">.</span><span class="n">find_similar_moveouts</span><span class="p">(</span>
+        <span class="n">moveouts</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">)),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">threshold</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">n_sources</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">n_stations</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">n_nearest_neighbors</span><span class="p">),</span>
+        <span class="n">redundant_sources</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">)),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">redundant_sources</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="select_cc_indexes"><a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.select_cc_indexes">[docs]</a><span class="k">def</span> <span class="nf">select_cc_indexes</span><span class="p">(</span><span class="n">ccs</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">search_win</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Select new event detection&#39;s correlation indexes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    ccs: (n_corr,) `numpy.ndarray`</span>
+<span class="sd">        Time series of correlation coefficients.</span>
+<span class="sd">    threshold (n_corr,) `numpy.ndarray` or `float` scalar</span>
+<span class="sd">        Time series or scalar detection threshold.</span>
+<span class="sd">    search_win: `int` scalar</span>
+<span class="sd">        Size of the time window, in number of consecutive correlations, defining</span>
+<span class="sd">        grouped detections.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    selection: (n_corr,) bool `numpy.ndarray`</span>
+<span class="sd">        Vector of `n_corr` booleans that are true if the corresponding CC index</span>
+<span class="sd">        is a new event detection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_corr</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ccs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_corr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_corr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">_libc</span><span class="o">.</span><span class="n">select_cc_indexes</span><span class="p">(</span>
+        <span class="n">ccs</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">)),</span>
+        <span class="n">threshold</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">)),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">search_win</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">n_corr</span><span class="p">),</span>
+        <span class="n">selection</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">)),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">selection</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Eric Beauce, William B. Frank.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
