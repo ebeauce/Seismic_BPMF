@@ -818,7 +818,6 @@ def time_dependent_threshold(
         deviation = np.median(
             np.abs(time_series_win - center[:, np.newaxis]), axis=-1
         )
-
     threshold = center + cfg.N_DEV_MF_THRESHOLD * deviation
     threshold[1:] = np.maximum(threshold[:-1], threshold[1:])
     threshold[:-1] = np.maximum(threshold[:-1], threshold[1:])
