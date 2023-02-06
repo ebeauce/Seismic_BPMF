@@ -1200,96 +1200,101 @@ class Event(object):
             )
         self.stations = np.asarray(closest_stations).astype("U")
 
-    # def pick_PS_phases(
-    #    self,
-    #    duration,
-    #    threshold_P=0.60,
-    #    threshold_S=0.60,
-    #    offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
-    #    mini_batch_size=126,
-    #    phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
-    #    component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
-    #    **kwargs,
-    # ):
-    #    """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
+    def pick_PS_phases_EQTransformer(
+       self,
+       duration,
+       threshold_P=0.60,
+       threshold_S=0.60,
+       offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
+       phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
+       component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
+       **kwargs,
+    ):
+       """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
 
-    #    Note1: PhaseNet must be used with 3-comp data.
-    #    Note2: Extra kwargs are passed to
-    #    `phasenet.wrapper.automatic_detection`.
+       Note1: PhaseNet must be used with 3-comp data.
+       Note2: Extra kwargs are passed to
+       `phasenet.wrapper.automatic_detection`.
 
-    #    Parameters
-    #    -----------
-    #    duration: scalar float
-    #        Duration, in seconds, of the time window to process to search for P
-    #        and S wave arrivals.
-    #    tag: string
-    #        Tag name of the target data. For example: 'preprocessed_1_12'.
-    #    threshold_P: scalar float, default to 0.60
-    #        Threshold on PhaseNet's probabilities to trigger the identification
-    #        of a P-wave arrival.
-    #    threshold_S: scalar float, default to 0.60
-    #        Threshold on PhaseNet's probabilities to trigger the identification
-    #        of a S-wave arrival.
-    #    mini_batch_size: scalar int, default to 126
-    #        Number of traces processed in a single batch by PhaseNet. This
-    #        shouldn't have to be tuned.
-    #    phase_on_comp: dictionary, optional
-    #        Dictionary defining which seismic phase is extracted on each
-    #        component. For example, phase_on_comp['N'] gives the phase that is
-    #        extracted on the north component.
-    #    component_aliases: Dictionary
-    #        Each entry of the dictionary is a list of strings.
-    #        `component_aliases[comp]` is the list of all aliases used for
-    #        the same component 'comp'. For example, `component_aliases['N'] =
-    #        ['N', '1']` means that both the 'N' and '1' channels will be mapped
-    #        to the Event's 'N' channel.
-    #    """
-    #    import seisbench.models as sbm
+       Parameters
+       -----------
+       duration: scalar float
+           Duration, in seconds, of the time window to process to search for P
+           and S wave arrivals.
+       tag: string
+           Tag name of the target data. For example: 'preprocessed_1_12'.
+       threshold_P: scalar float, default to 0.60
+           Threshold on PhaseNet's probabilities to trigger the identification
+           of a P-wave arrival.
+       threshold_S: scalar float, default to 0.60
+           Threshold on PhaseNet's probabilities to trigger the identification
+           of a S-wave arrival.
+       mini_batch_size: scalar int, default to 126
+           Number of traces processed in a single batch by PhaseNet. This
+           shouldn't have to be tuned.
+       phase_on_comp: dictionary, optional
+           Dictionary defining which seismic phase is extracted on each
+           component. For example, phase_on_comp['N'] gives the phase that is
+           extracted on the north component.
+       component_aliases: Dictionary
+           Each entry of the dictionary is a list of strings.
+           `component_aliases[comp]` is the list of all aliases used for
+           the same component 'comp'. For example, `component_aliases['N'] =
+           ['N', '1']` means that both the 'N' and '1' channels will be mapped
+           to the Event's 'N' channel.
+       """
+       import seisbench.models as sbm
 
-    #    # load model
-    #    model = sbm.EQTransformer.from_pretrained("original")
+       # load model
+       model = sbm.EQTransformer.from_pretrained("original")
 
-    #    if kwargs.get("read_waveforms", True):
-    #        # read waveforms in picking mode, i.e. with `time_shifted`=False
-    #        self.read_waveforms(
-    #            duration,
-    #            offset_ot=offset_ot,
-    #            phase_on_comp=phase_on_comp,
-    #            component_aliases=component_aliases,
-    #            time_shifted=False,
-    #            **kwargs,
-    #        )
-    #    ML_picks = model.classify(
-    #        self.traces,
-    #        P_threshold=threshold_P,
-    #        S_threshold=threshold_S,
-    #    )
-    #    # add picks to auxiliary data
-    #    # self.set_aux_data(PhaseNet_picks)
-    #    # format picks in pandas DataFrame
-    #    pandas_picks = pd.DataFrame(
-    #        index=self.stations,
-    #        columns=[
-    #            "P_picks_sec",
-    #            "P_probas",
-    #            "P_abs_picks",
-    #            "S_picks_sec",
-    #            "S_probas",
-    #            "S_abs_picks",
-    #        ],
-    #    )
-    #    for pick in ML_picks[0]:
-    #        sta = pick.trace_id.split(".")[1]
-    #        if (
-    #            ~pd.isna(pandas_picks.loc[sta, f"{pick.phase}_probas"])
-    #            and pick.peak_value > pandas_picks.loc[sta, f"{pick.phase}_probas"]
-    #        ):
-    #            pandas_picks.loc[sta, f"{pick.phase}_probas"] = pick.peak_value
-    #            pandas_picks.loc[sta, f"{pick.phase}_picks_sec"] = (
-    #                pick.peak_time - self.origin_time
-    #            )
-    #            pandas_picks.loc[sta, f"{pick.phase}_abs_picks"] = pick.peak_time
-    #    self.picks = pandas_picks
+       if kwargs.get("read_waveforms", True):
+           # read waveforms in picking mode, i.e. with `time_shifted`=False
+           self.read_waveforms(
+               duration,
+               offset_ot=offset_ot,
+               phase_on_comp=phase_on_comp,
+               component_aliases=component_aliases,
+               time_shifted=False,
+               **kwargs,
+           )
+       ML_picks = model.classify(
+           self.traces,
+           P_threshold=threshold_P,
+           S_threshold=threshold_S,
+       )
+       # add picks to auxiliary data
+       # self.set_aux_data(PhaseNet_picks)
+       # format picks in pandas DataFrame
+       pandas_picks = pd.DataFrame(
+           index=self.stations,
+           columns=[
+               "P_picks_sec",
+               "P_probas",
+               "P_abs_picks",
+               "S_picks_sec",
+               "S_probas",
+               "S_abs_picks",
+           ],
+       )
+       for pick in ML_picks[0]:
+           sta = pick.trace_id.split(".")[1]
+           if (
+               ~pd.isna(pandas_picks.loc[sta, f"{pick.phase}_probas"])
+               and pick.peak_value > pandas_picks.loc[sta, f"{pick.phase}_probas"]
+           ):
+               pandas_picks.loc[sta, f"{pick.phase}_probas"] = pick.peak_value
+               pandas_picks.loc[sta, f"{pick.phase}_picks_sec"] = (
+                   pick.peak_time - self.origin_time
+               )
+               pandas_picks.loc[sta, f"{pick.phase}_abs_picks"] = pick.peak_time
+           else:
+               pandas_picks.loc[sta, f"{pick.phase}_probas"] = pick.peak_value
+               pandas_picks.loc[sta, f"{pick.phase}_picks_sec"] = (
+                   pick.peak_time - self.origin_time
+               )
+               pandas_picks.loc[sta, f"{pick.phase}_abs_picks"] = pick.peak_time
+       self.picks = pandas_picks
 
     def pick_PS_phases(
         self,
@@ -1575,7 +1580,7 @@ class Event(object):
                     self.origin_time + self.arrival_times.loc[sta, f"{ph}_tt_sec"]
                 )
 
-    def relocate_NLLoc(self, stations=None, method="EDT", verbose=0):
+    def relocate_NLLoc(self, stations=None, method="EDT", verbose=0, **kwargs):
         """Relocate with NLLoc using `self.picks`.
 
         Parameters
@@ -1612,7 +1617,9 @@ class Event(object):
             os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn))
         NLLoc_utils.write_NLLoc_obs(self.origin_time, self.picks, stations, obs_fn)
         # write control file
-        NLLoc_utils.write_NLLoc_control(ctrl_fn, out_basename, obs_fn, method=method)
+        NLLoc_utils.write_NLLoc_control(
+                ctrl_fn, out_basename, obs_fn, method=method, **kwargs
+                )
         if verbose == 0:
             # run NLLoc
             subprocess.run(
@@ -1699,6 +1706,46 @@ class Event(object):
             # add this protection against unexpected
             # external change
             pathlib.Path(output_dir).rmdir()
+
+    def remove_outlier_picks(self, max_diff_percent=25.):
+        """Remove picks that are too far from predicted arrival times.
+
+        Parameters
+        ----------
+        max_diff_percent: float, default to 25
+            Maximum difference, in percentage, between the picked and predicted
+            arrival time.
+        """
+        stations_outlier = []
+        for sta in self.stations:
+            for ph in self.phases:
+                pick = pd.Timestamp(str(self.picks.loc[sta, f"{ph}_abs_picks"]))
+                predicted = pd.Timestamp(str(self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"]))
+                predicted_tt = self.arrival_times.loc[sta, f"{ph}_tt_sec"]
+                diff_percent = (
+                        100. * abs((pick - predicted).total_seconds())/predicted_tt
+                        )
+                if diff_percent > max_diff_percent:
+                    stations_outlier.append(sta)
+                    self.picks.loc[sta, f"{ph}_abs_picks"] = np.nan
+                    self.picks.loc[sta, f"{ph}_picks_sec"] = np.nan
+                    self.picks.loc[sta, f"{ph}_probas"] = np.nan
+
+    def remove_distant_stations(self, max_distance_km=50.):
+        """Remove picks on stations that are further than given distance.
+
+        Parameters
+        ----------
+        max_distance_km: float, default to 50
+            Maximum distance, in km, beyond which picks are set to NaN.
+        """
+        if self.source_receiver_dist is None:
+            print("Call self.set_source_receiver_dist(network) before "
+                  "using self.remove_distant_stations.")
+            return
+        for sta in self.stations:
+            if self.source_receiver_dist.loc[sta] > max_distance_km:
+                self.picks.loc[sta] = np.nan
 
     def set_aux_data(self, aux_data):
         """Adds any extra data to the Event instance.
@@ -2663,6 +2710,7 @@ class Template(Event):
         with h5.File(os.path.join(db_path, filename), mode="r") as f:
             keys = list(f.keys())
             event = Event.read_from_file(hdf5_file=f[keys[idx]])
+        event.stations = self.stations.copy()
         event.read_waveforms(
             duration,
             offset_ot=offset_ot,
