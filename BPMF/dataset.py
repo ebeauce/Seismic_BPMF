@@ -1947,7 +1947,7 @@ class Event(object):
 
     def update_picks(self):
         """Update the picks w.r.t the current origin time."""
-        if not hasatr(self, "picks"):
+        if not hasattr(self, "picks"):
             print("Does not have a `picks` attribute.")
             return
         for station in self.picks.index:
