@@ -188,7 +188,7 @@ def preprocess_stream(
         if (target_duration is not None) and (
             gap_duration > minimum_length * target_duration
         ):
-            return preprocessed_stream
+            continue
         tr.detrend("constant")
         tr.detrend("linear")
         tr.taper(0.05, type="cosine")
