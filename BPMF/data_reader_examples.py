@@ -117,6 +117,7 @@ def data_reader_mseed(
     endtime=None,
     attach_response=False,
     data_folder="",
+    data_files=None,
     **kwargs
 ):
     """Data reader for BPMF.
@@ -149,6 +150,9 @@ def data_reader_mseed(
     data_folder: string, optional
         If given, is the child folder in `where` containing
         the mseed files to read.
+    data_files: list of strings, optional
+        If not None, is the list of full paths to the data files
+        to read.
 
     Returns
     -------
@@ -162,10 +166,11 @@ def data_reader_mseed(
 
     traces = Stream()
     # read your data into traces
-    data_files = glob.glob(
-        os.path.join(where, data_folder,
-            f"{network}.{station}.{location}.*[!0,1,2,3,4,5,6,7,8,9]{channel}[_.]*")
-    )
+    if data_files is None:
+        data_files = glob.glob(
+            os.path.join(where, data_folder,
+                f"{network}.{station}.{location}.*[!0,1,2,3,4,5,6,7,8,9]{channel}[_.]*")
+        )
     for fname in data_files:
         traces += read(fname, starttime=starttime, endtime=endtime, **kwargs)
     if attach_response:
