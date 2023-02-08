@@ -178,7 +178,7 @@ def preprocess_stream(
         t2 = udt(tr.stats.endtime.timestamp)
         if t2 - t1 < minimum_chunk_duration:
             # don't include this chunk
-            stream.remove(chunk)
+            stream.remove(tr)
     # second, make a list of all stations in stream
     stations = []
     for tr in stream:
