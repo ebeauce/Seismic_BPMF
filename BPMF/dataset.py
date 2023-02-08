@@ -1952,6 +1952,8 @@ class Event(object):
             return
         for station in self.picks.index:
             for ph in self.phases:
+                if pd.isnull(self.picks.loc[station, f"{ph.upper()}_abs_picks"]):
+                    continue
                 self.picks.loc[station, f"{ph.upper()}_picks_sec"] = udt(
                     self.picks.loc[station, f"{ph.upper()}_abs_picks"]
                 ) - udt(self.origin_time)
