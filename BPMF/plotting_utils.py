@@ -359,7 +359,6 @@ def initialize_map(
         # print('Plot the topography.')
         # transform data
         # fast version
-        t1 = give_time()
         lon_g, lat_g = np.meshgrid(lon_topo, lat_topo, indexing="xy")
         trans_data = map_axis.projection.transform_points(
             data_coords, lon_g, lat_g, topo
@@ -377,8 +376,6 @@ def initialize_map(
             interpolation="bilinear",
             zorder=-1,
         )
-        t2 = give_time()
-        # print('Topography plotted in {:.2f}s'.format(t2-t1))
 
     # ------------ DRAW MERIDIANS AND PARALLELS --------------
     LON0 = (int(map_longitudes[0] / 0.5) + 1.0) * 0.5
