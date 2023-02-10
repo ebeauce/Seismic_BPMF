@@ -1307,6 +1307,8 @@ class Event(object):
         component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
         upsampling=1,
         downsampling=1,
+        use_apriori_picks=False,
+        search_win_sec=2.,
         **kwargs,
     ):
         """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
@@ -1380,8 +1382,35 @@ class Event(object):
             threshold_S=threshold_S,
             **kwargs,
         )
+        if use_apriori_picks and hasattr(self, "arrival_times"):
+            columns = []
+            if "P" in self.phases:
+                columns.append("P")
+            if "S" in self.phases:
+                columns.append("S")
+            prior_knowledge = pd.DataFrame(columns=columns)
+            for sta in self.stations:
+                for ph in prior_knowledge.columns:
+                    prior_knowledge.loc[sta, ph] = utils.sec_to_samp(
+                            udt(self.arrival_times.loc[
+                                sta, f"{ph}_abs_arrival_times"
+                                ])
+                            -
+                            self.origin_time,
+                            sr=self.sampling_rate
+                            )
+        else:
+            prior_knowledge = None
+        # only used if use_apriori_picks is True
+        search_win_samp = utils.sec_to_samp(
+                search_win_sec, sr=self.sampling_rate
+                )
         # keep best P- and S-wave pick on each 3-comp seismogram
-        PhaseNet_picks = PN.get_best_picks(PhaseNet_picks)
+        PhaseNet_picks = PN.get_picks(
+                PhaseNet_picks,
+                prior_knowledge=prior_knowledge,
+                search_win_samp=search_win_samp
+                )
         # add picks to auxiliary data
         # self.set_aux_data(PhaseNet_picks)
         # format picks in pandas DataFrame
@@ -1731,6 +1760,23 @@ class Event(object):
                     self.picks.loc[sta, f"{ph}_picks_sec"] = np.nan
                     self.picks.loc[sta, f"{ph}_probas"] = np.nan
 
+    def zero_out_clipped_waveforms(self, kurtosis_threshold=-1.):
+        """Find waveforms with anomalous statistic and zero them out.
+
+        Parameters
+        ----------
+        kurtosis_threshold: scalar float, optional
+            Threshold below which the kurtosis is considered anomalous.
+            Note that the Fischer definition of the kurtosis is used,
+            that is, kurtosis=0 for gaussian distribution.
+        """
+        from scipy.stats import kurtosis
+        if not hasattr(self, "traces"):
+            return
+        for tr in self.traces:
+            if kurtosis(tr.data) < kurtosis_threshold:
+                tr.data = np.zeros(len(tr.data), dtype=tr.data.dtype)
+
     def remove_distant_stations(self, max_distance_km=50.):
         """Remove picks on stations that are further than given distance.
 
@@ -1803,25 +1849,6 @@ class Event(object):
             self._availability_per_sta = np.bitwise_or(
                 self._availability_per_sta, availability
             )
-        #self._availability_per_sta = pd.Series(index=stations, dtype=bool)
-        #self._availability_per_sta.fillna(False, inplace=True)
-        #self._availability_per_cha = pd.DataFrame(index=stations)
-        #for c, cp in enumerate(components):
-        #    availability = np.zeros(len(stations), dtype=bool)
-        #    for s, sta in enumerate(stations):
-        #        for cp_alias in component_aliases[cp]:
-        #            tr = self.traces.select(station=sta, component=cp_alias)
-        #            if len(tr) > 0:
-        #                tr = tr[0]
-        #            else:
-        #                continue
-        #            if np.sum(tr.data != 0.0):
-        #                availability[s] = True
-        #                break
-        #    self._availability_per_cha[cp] = availability
-        #    self._availability_per_sta = np.bitwise_or(
-        #        self._availability_per_sta, availability
-        #    )
         self.set_aux_data(
             {
                 "availability": self._availability_per_sta,
@@ -1856,6 +1883,23 @@ class Event(object):
             to the Event's 'N' channel.
         """
         self.component_aliases = component_aliases
+
+    def set_arrival_times_from_moveouts(self, verbose=1):
+        """Build arrival times assuming at = ot + mv."""
+        if verbose > 0:
+            print("Make sure origin_time + moveout points at the phase arrival!")
+        self.arrival_times = pd.DataFrame(
+                columns=[
+                    f"{ph.upper()}_abs_arrival_times" for ph in self.phases
+                    ]
+                )
+        for ph in self.phases:
+            ph = ph.upper()
+            field = f"{ph}_abs_arrival_times"
+            for sta in self.moveouts.index:
+                self.arrival_times.loc[sta, field] = (
+                        self.origin_time + self.moveouts.loc[sta, f"moveouts_{ph}"]
+                        )
 
     def set_moveouts_to_empirical_times(self):
         """Set moveouts equal to picks, if available."""
