@@ -8,6 +8,16 @@ class Spectrum:
     def __init__(self, event=None):
         self.event = event
 
+    def attenuation_Q_model(self, Q, frequencies):
+        from scipy.interpolate import interp1d
+        interpolator = interp1d(
+            frequencies, Q, kind="linear", fill_value=(Q[0], Q[-1]),
+            bounds_error=False
+                )
+        self.attenuation_model = {}
+        self.attenuation_model["p"] = np.vectorize(interpolator)
+        self.attenuation_model["s"] = np.vectorize(interpolator)
+
     def compute_correction_factor(
         self,
         rho,
@@ -15,8 +25,6 @@ class Spectrum:
         vs,
         radiation_S=np.sqrt(2.0 / 5.0),
         radiation_P=np.sqrt(4.0 / 15.0),
-        quality_factor_P=None,
-        quality_factor_S=None,
     ):
         """ """
         if not hasattr(self, "event"):
@@ -32,20 +40,22 @@ class Spectrum:
             tt_s = self.event.arrival_times.loc[sta, "S_tt_sec"]
             corr_s = 2.0 * rho * vs**3 * r_m / radiation_S
             correction_factor.loc[sta, f"correction_S"] = corr_s
-            if quality_factor_S is not None:
+            if hasattr(self, "attenuation_model"):
                 attenuation_factor.loc[sta, f"attenuation_S"] = lambda freq: np.exp(
-                    np.pi * tt_s * freq / (quality_factor_S)
+                    np.pi * tt_s * freq / self.attenuation_model["s"](freq)
                 )
             else:
                 attenuation_factor.loc[sta, f"attenuation_S"] = None
             tt_p = self.event.arrival_times.loc[sta, "P_tt_sec"]
             corr_p = 2.0 * rho * vp**3 * r_m / radiation_P
             correction_factor.loc[sta, f"correction_P"] = corr_p
-            if quality_factor_P is not None:
+            if hasattr(self, "attenuation_model"):
                 attenuation_factor.loc[sta, f"attenuation_P"] = lambda freq: np.exp(
-                    np.pi * tt_p * freq / (quality_factor_P)
+                    np.pi * tt_p * freq / self.attenuation_model["p"](freq)
                 )
+                print(attenuation_factor.loc[sta, f"attenuation_P"])
             else:
+                print("No attenuation model found!")
                 attenuation_factor.loc[sta, f"attenuation_P"] = None
         self.correction_factor = correction_factor
         self.attenuation_factor = attenuation_factor
@@ -302,7 +312,7 @@ class Spectrum:
                 r"$f_c$="
                 f"{self.fc:.2f}Hz"
             )
-            ax.plot(freq, fit, color="C3", ls="--", label=label)
+            ax.plot(freq, fit, color=colors[ph], ls="--", label=label)
         ax.legend(loc="lower left")
         ax.set_xlabel("Frequency (Hz)")
         ax.set_ylabel("Amplitude spectrum ([input units/Hz])")
@@ -367,6 +377,10 @@ class Spectrum:
                         ls=linestyle["noise"],
                         label=f"{ph} snr: {trid}",
                     )
+        plt.subplots_adjust(right=0.85, bottom=0.20)
+        ax.legend(
+                bbox_to_anchor=(1.01, 1.00), loc="upper left", handlelength=0.9
+                )
         ax.set_xlabel("Frequency (Hz)")
         ax.set_ylabel("Amplitude spectrum ([input units/Hz])")
         ax.loglog()
