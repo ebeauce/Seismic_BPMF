@@ -792,13 +792,16 @@ def time_dependent_threshold(
     half_window = sliding_window // 2
     shift = int((1.0 - overlap) * sliding_window)
     zeros = time_series == 0.0
+    n_zeros = np.sum(zeros)
     if white_noise is None:
-        white_noise = np.random.normal(size=np.sum(zeros)).astype("float32")
+        white_noise = np.random.normal(size=n_zeros).astype("float32")
     if threshold_type == "rms":
         default_center = time_series[~zeros].mean()
         default_deviation = np.std(time_series[~zeros])
+        # note: white_noise[n_zeros] is necessary in case white_noise
+        # was not None
         time_series[zeros] = (
-            white_noise * default_deviation + default_center
+                white_noise[:n_zeros] * default_deviation + default_center
         )
         time_series_win = np.lib.stride_tricks.sliding_window_view(
             time_series, sliding_window
@@ -809,7 +812,7 @@ def time_dependent_threshold(
         default_center = np.median(time_series[~zeros])
         default_deviation = np.median(np.abs(time_series[~zeros] - default_center))
         time_series[zeros] = (
-            white_noise * default_deviation + default_center
+                white_noise[:n_zeros] * default_deviation + default_center
         )
         time_series_win = np.lib.stride_tricks.sliding_window_view(
             time_series, sliding_window

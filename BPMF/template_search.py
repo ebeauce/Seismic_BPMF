@@ -251,41 +251,6 @@ class Beamformer(object):
         self.source_indexes = source_indexes
         return detections, peak_indexes, source_indexes
 
-    # def load_moveouts(self, source_indexes=None, remove_min=True):
-    #    """Load the moveouts, in units of samples.
-
-    #    Call `utils.load_travel_times` and `utils.get_moveout_array` using the
-    #    instance's attributes and the optional parameters given here. Add the
-    #    attribute `self.moveouts` to the instance. The moveouts are converted
-    #    to samples using the sampling rate `self.data.sampling_rate`.
-
-    #    Parameters
-    #    ------------
-    #    source_indexes: (n_sources,) int numpy.ndarray, default to None
-    #        If not None, this is used to select a subset of sources from the
-    #        grid.
-    #    remove_min: boolean, default to True
-    #        If True, remove the smallest travel time from the collection of
-    #        travel times for each source of the grid. The network response only
-    #        depends on the relative travel times -- the moveouts -- and
-    #        therefore it is unnecessary to carry potentially very large travel
-    #        times.
-    #    """
-    #    tts, self._source_coordinates = utils.load_travel_times(
-    #        self.path_tts,
-    #        self.phases,
-    #        source_indexes=source_indexes,
-    #        return_coords=True,
-    #        stations=self.network.stations,
-    #    )
-    #    self._moveouts = utils.get_moveout_array(
-    #        tts, self.network.stations, self.phases
-    #    )
-    #    del tts
-    #    if remove_min:
-    #        self._moveouts -= np.min(self._moveouts, axis=(1, 2), keepdims=True)
-    #    self._moveouts = utils.sec_to_samp(self._moveouts, sr=self.data.sr)
-
     def remove_baseline(self, window, attribute="composite"):
         """Remove baseline from network response."""
         # convert window from seconds to samples

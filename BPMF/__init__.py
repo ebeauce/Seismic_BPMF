@@ -11,5 +11,6 @@ from . import similarity_search
 from . import clib
 from . import utils
 from . import plotting_utils
+from . import spectrum
 
-__version__ = "2.0.0.a2"
+__version__ = "2.0.0.a3"
