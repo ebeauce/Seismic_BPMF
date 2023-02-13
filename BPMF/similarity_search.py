@@ -36,6 +36,8 @@ class MatchedFilter(object):
         step=cfg.MATCHED_FILTER_STEP_SAMP,
         max_memory=None,
         max_workers=None,
+        anomalous_cdf_at_mean_plus_1sig=0.50,
+        window_for_validation_Tmax=100.,
     ):
         """Instanciate a MatchedFilter object.
 
@@ -79,6 +81,24 @@ class MatchedFilter(object):
         max_workers: scalar int or None, default to None
             Controls the maximum number of threads created when finding
             detections of new events in the CC time series. If None, use one CPU.
+        anomalous_cdf_at_mean_plus_1sig: scalar float, optional
+            Anomalous cumulative distribution function (cdf), between 0 and 1,
+            at {mean + 1xsigma}(CC), default to 0.50. The CC distribution is
+            approximately gaussian and, therefore, the expected value of 
+            {mean + 1xsigma}(CC) is 0.78. If {mean + 1xsigma}(CC) is
+            significantly lower than 0.78 in the vicinity of a CC(t) that
+            exceeded `threshold`, that is, lower than
+            `anomalous_cdf_at_mean_plus_1sig`, then we consider that {mean +
+            1xsigma}(CC) was not properly estimated at time t. Since {mean +
+            1xsigma}(CC) is computed from `threshold`, the detection threshold
+            was probably not adequate and we discard CC(t). **Set this parameter
+            to zero to deactivate validation of the detection threshold.**
+        window_for_validation_Tmax: scalar float, optional
+            Window duration, in units of Tmax, the longest period in the data
+            (that is, the inverse of `cfg.MIN_FREQ_HZ`), for analyzing the
+            statistic of CC(t) in the vicinity of each CC(t) > `threshold`.
+            Default to 100.
+
         """
         self.template_group = template_group
         self.min_channels = min_channels
@@ -94,6 +114,9 @@ class MatchedFilter(object):
         if max_workers is None:
             max_workers = 1
         self.max_workers = max_workers
+        self.anomalous_cdf_at_mean_plus_1sig = anomalous_cdf_at_mean_plus_1sig
+        self.window_for_validation_Tmax = window_for_validation_Tmax
+
 
     # properties
     @property
@@ -131,7 +154,14 @@ class MatchedFilter(object):
             norm[norm == 0.0] = 1.0
             self.data_arr /= norm
 
-    def select_cc_indexes(self, cc_t, threshold, search_win):
+    def select_cc_indexes(
+            self,
+            cc_t,
+            threshold,
+            search_win,
+            anomalous_cdf_at_mean_plus_1sig=0.50,
+            window_for_validation_Tmax=100.,
+            ):
         """Select the peaks in the CC time series.
 
         Parameters
@@ -142,6 +172,23 @@ class MatchedFilter(object):
             The detection threshold.
         search_win: scalar int
             The minimum inter-event time, in units of correlation step.
+        anomalous_cdf_at_mean_plus_1sig: scalar float, optional
+            Anomalous cumulative distribution function (cdf), between 0 and 1,
+            at {mean + 1xsigma}(CC), default to 0.50. The CC distribution is
+            approximately gaussian and, therefore, the expected value of 
+            {mean + 1xsigma}(CC) is 0.78. If {mean + 1xsigma}(CC) is
+            significantly lower than 0.78 in the vicinity of a CC(t) that
+            exceeded `threshold`, that is, lower than
+            `anomalous_cdf_at_mean_plus_1sig`, then we consider that {mean +
+            1xsigma}(CC) was not properly estimated at time t. Since {mean +
+            1xsigma}(CC) is computed from `threshold`, the detection threshold
+            was probably not adequate and we discard CC(t). **Set this parameter
+            to zero to deactivate validation of the detection threshold.**
+        window_for_validation_Tmax: scalar float, optional
+            Window duration, in units of Tmax, the longest period in the data
+            (that is, the inverse of `cfg.MIN_FREQ_HZ`), for analyzing the
+            statistic of CC(t) in the vicinity of each CC(t) > `threshold`.
+            Default to 100.
 
         Returns
         --------
@@ -153,8 +200,9 @@ class MatchedFilter(object):
         step = self.step
         cc_detections = cc_t > threshold
         cc_idx = np.where(cc_detections)[0]
-        CDF_AT_MEAN_PLUS_1SIG = 0.78
-        WINDOW_FOR_VALIDATION = int(1.0 / cfg.MIN_FREQ_HZ * 100.0)
+        WINDOW_FOR_VALIDATION = int(
+                1.0 / cfg.MIN_FREQ_HZ * window_for_validation_Tmax
+                )
         cc_at_mean_plus_1sig = threshold / cfg.N_DEV_MF_THRESHOLD
 
         if self.threshold_type == "mad":
@@ -174,31 +222,26 @@ class MatchedFilter(object):
                 n_rm += 1
         cc_idx = np.asarray(cc_idx)
 
-        # test the validity of detection threshold?
-        valid_detections = np.ones(len(cc_idx), dtype=bool)
-        for i in range(len(cc_idx)):
-            idx0 = max(0, cc_idx[i] - WINDOW_FOR_VALIDATION // 2)
-            idx1 = idx0 + WINDOW_FOR_VALIDATION
-            if idx1 >= len(cc_t):
-                idx1 = len(cc_t) - 1
-                idx0 = idx1 - WINDOW_FOR_VALIDATION
-            #frac = np.sum(cc_t[idx0:idx1] < cc_at_mean_plus_1sig[cc_idx[i]]) / float(
-            #    WINDOW_FOR_VALIDATION
-            #)
-            ##print(frac)
-            #if frac < 0.75 * CDF_AT_MEAN_PLUS_1SIG:
-            cc1 = cc_t[idx0:idx1][:WINDOW_FOR_VALIDATION//2]
-            cc2 = cc_t[idx0:idx1][WINDOW_FOR_VALIDATION//2:]
-            frac = min(
-                    np.sum(cc1 < cc_at_mean_plus_1sig[cc_idx[i]]) / float(len(cc1)),
-                    np.sum(cc2 < cc_at_mean_plus_1sig[cc_idx[i]]) / float(len(cc2))
-                    )
-            if frac < 0.75 * CDF_AT_MEAN_PLUS_1SIG:
-                # theoretical fraction is 0.78
-                # an anomalous amount of CCs are above +1sig
-                # the detection threshold most likely failed (gap in data?)
-                valid_detections[i] = False
-        cc_idx = cc_idx[valid_detections]
+        if anomalous_cdf_at_mean_plus_1sig > 0.:
+            # test the validity of detection threshold?
+            valid_detections = np.ones(len(cc_idx), dtype=bool)
+            for i in range(len(cc_idx)):
+                idx0 = max(0, cc_idx[i] - WINDOW_FOR_VALIDATION // 2)
+                idx1 = idx0 + WINDOW_FOR_VALIDATION
+                if idx1 >= len(cc_t):
+                    idx1 = len(cc_t) - 1
+                    idx0 = idx1 - WINDOW_FOR_VALIDATION
+                cc1 = cc_t[idx0:idx1][:WINDOW_FOR_VALIDATION//2]
+                cc2 = cc_t[idx0:idx1][WINDOW_FOR_VALIDATION//2:]
+                frac = min(
+                        np.sum(cc1 < cc_at_mean_plus_1sig[cc_idx[i]]) / float(len(cc1)),
+                        np.sum(cc2 < cc_at_mean_plus_1sig[cc_idx[i]]) / float(len(cc2))
+                        )
+                if frac < anomalous_cdf_at_mean_plus_1sig:
+                    # an anomalous amount of CCs are above +1sig
+                    # the detection threshold most likely failed (gap in data?)
+                    valid_detections[i] = False
+            cc_idx = cc_idx[valid_detections]
 
         # go back to regular sampling space
         detection_indexes = cc_idx * self.step
@@ -289,14 +332,6 @@ class MatchedFilter(object):
                     self.step,
                     arch=device,
                 )
-                # cc_sums = fmf.matched_filter(
-                #    self.template_group.waveforms_arr[:, id1:id2, :, :],
-                #    self.template_group.moveouts_arr[:, id1:id2, :],
-                #    weights_arr[:, id1:id2, :],
-                #    self.data_arr[id1:id2, ...],
-                #    step,
-                #    arch=device,
-                # )
                 CC_SUMS.append(cc_sums)
             cc_sums = CC_SUMS[0]
             for i in range(1, self.n_network_chunks):
@@ -425,7 +460,13 @@ class MatchedFilter(object):
             10 * minimum_interevent_time, max(d_mv, minimum_interevent_time)
         )
         search_win /= self.step  # time in correlation steps units
-        cc_idx = self.select_cc_indexes(cc_t, threshold, search_win)
+        cc_idx = self.select_cc_indexes(
+                cc_t,
+                threshold,
+                search_win,
+                anomalous_cdf_at_mean_plus_1sig=self.anomalous_cdf_at_mean_plus_1sig,
+                window_for_validation_Tmax=self.window_for_validation_Tmax,
+                )
         detection_indexes = cc_idx * self.step
         # ----------------------------------------------------------
         n_detections = len(detection_indexes)
@@ -475,6 +516,7 @@ class MatchedFilter(object):
         overlap=0.25,
         sanity_check=True,
         verbose=0,
+        **kwargs
     ):
         """Run the matched-filter search.
 
@@ -505,6 +547,11 @@ class MatchedFilter(object):
             Dictionary where `detections[tid]` is a list of `dataset.Event` for
             all events detected with template `tid`.
         """
+        if "anomalous_cdf_at_mean_plus_1sig" in kwargs:
+            self.anomalous_cdf_at_mean_plus_1sig = kwargs["anomalous_cdf_at_mean_plus_1sig"]
+        if "window_for_validation_Tmax" in kwargs:
+            self.window_for_validation_Tmax = kwargs["window_for_validation_Tmax"]
+
         if self.max_memory is not None:
             n_tp_chunk = int(self.max_memory / self.memory_cc_time_series)
         else:
