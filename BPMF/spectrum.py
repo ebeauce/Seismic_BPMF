@@ -238,7 +238,12 @@ class Spectrum:
         y = obs[~spectrum["fft"].mask]
         x = spectrum["freq"][~spectrum["fft"].mask]
         p0 = np.array([omega0_first_guess, fc_first_guess])
-        popt, pcov = curve_fit(mod, x, y, p0=p0)
+        try:
+            popt, pcov = curve_fit(mod, x, y, p0=p0)
+            self.inversion_success = True
+        except RuntimeError:
+            self.inversion_success = False
+            return
         perr = np.sqrt(np.diag(pcov))
         self.M0 = popt[0]
         self.fc = popt[1]
