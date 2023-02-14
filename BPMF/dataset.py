@@ -1987,7 +1987,8 @@ class Event(object):
         if endtime is None:
             endtime = self.date + self.duration
         for tr in self.traces:
-            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=0.0)
+            fill_value = np.zeros(1, dtype=tr.data.dtype)[0]
+            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=fill_value)
 
     def update_picks(self):
         """Update the picks w.r.t the current origin time."""

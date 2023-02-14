@@ -647,6 +647,8 @@ class MatchedFilter(object):
             cc_t,
             detection_threshold,
             utils.sec_to_samp(self.minimum_interevent_time, sr=sr) // self.step,
+            anomalous_cdf_at_mean_plus_1sig=self.anomalous_cdf_at_mean_plus_1sig,
+            window_for_validation_Tmax=self.window_for_validation_Tmax,
         )
 
         time_indexes = np.arange(len(self.data.time), dtype=np.int32)[:: self.step][
