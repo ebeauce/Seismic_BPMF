@@ -10,10 +10,10 @@ class Spectrum:
 
     def attenuation_Q_model(self, Q, frequencies):
         from scipy.interpolate import interp1d
+
         interpolator = interp1d(
-            frequencies, Q, kind="linear", fill_value=(Q[0], Q[-1]),
-            bounds_error=False
-                )
+            frequencies, Q, kind="linear", fill_value=(Q[0], Q[-1]), bounds_error=False
+        )
         self.attenuation_model = {}
         self.attenuation_model["p"] = np.vectorize(interpolator)
         self.attenuation_model["s"] = np.vectorize(interpolator)
@@ -162,9 +162,16 @@ class Spectrum:
         snr = {}
         for trid in signal_spectrum:
             snr[trid] = {}
-            snr_ = np.abs(signal_spectrum[trid]["fft"]) / np.abs(
-                noise_spectrum[trid]["fft"]
-            )
+            if trid in noise_spectrum:
+                snr_ = np.abs(signal_spectrum[trid]["fft"]) / np.abs(
+                    noise_spectrum[trid]["fft"]
+                )
+            else:
+                # no noise spectrum, probably because of gap
+                snr_ = np.zeros(
+                        len(signal_spectrum[trid]["fft"]),
+                        dtype=np.float32
+                        )
             snr[trid]["snr"] = snr_
             snr[trid]["freq"] = signal_spectrum[trid]["freq"]
         setattr(self, f"snr_{phase}_spectrum", snr)
@@ -205,7 +212,9 @@ class Spectrum:
             for trid in spectrum:
                 spectrum[trid]["fft"] *= spectrum[trid]["freq"]
 
-    def fit_average_spectrum(self, phase, model="brune", log=True):
+    def fit_average_spectrum(
+        self, phase, model="brune", log=True, min_fraction_valid_points_below_fc=0.50
+    ):
         """Fit average displacement spectrum with model."""
         from scipy.optimize import curve_fit
         from functools import partial
@@ -238,10 +247,22 @@ class Spectrum:
         y = obs[~spectrum["fft"].mask]
         x = spectrum["freq"][~spectrum["fft"].mask]
         p0 = np.array([omega0_first_guess, fc_first_guess])
+        bounds = (np.array([0.0, 0.0]), np.array([np.inf, np.inf]))
         try:
-            popt, pcov = curve_fit(mod, x, y, p0=p0)
+            popt, pcov = curve_fit(mod, x, y, p0=p0, bounds=bounds)
             self.inversion_success = True
         except RuntimeError:
+            self.inversion_success = False
+            return
+        # check whether the low-frequency plateau was well constrained
+        npts_below_fc = np.sum(spectrum["freq"] < popt[1])
+        npts_valid_below_fc = np.sum(x < popt[1])
+        if npts_below_fc <= int(0.05 * len(spectrum["freq"])):
+            self.inversion_success = False
+            return
+        if (
+            float(npts_valid_below_fc) / float(npts_below_fc)
+        ) < min_fraction_valid_points_below_fc:
             self.inversion_success = False
             return
         perr = np.sqrt(np.diag(pcov))
@@ -278,6 +299,7 @@ class Spectrum:
         self,
         phase,
         figname="spectrum",
+        figtitle="",
         figsize=(10, 10),
         colors={"noise": "dimgrey", "s": "black", "p": "C3"},
         linestyle={"noise": "--", "s": "-", "p": "-"},
@@ -288,6 +310,7 @@ class Spectrum:
         if isinstance(phase, str):
             phase = [phase]
         fig, ax = plt.subplots(num=figname, figsize=figsize)
+        ax.set_title(figtitle)
         for ph in phase:
             ph = ph.lower()
             if not hasattr(self, f"average_{ph}_spectrum"):
@@ -383,9 +406,7 @@ class Spectrum:
                         label=f"{ph} snr: {trid}",
                     )
         plt.subplots_adjust(right=0.85, bottom=0.20)
-        ax.legend(
-                bbox_to_anchor=(1.01, 1.00), loc="upper left", handlelength=0.9
-                )
+        ax.legend(bbox_to_anchor=(1.01, 1.00), loc="upper left", handlelength=0.9)
         ax.set_xlabel("Frequency (Hz)")
         ax.set_ylabel("Amplitude spectrum ([input units/Hz])")
         ax.loglog()
