@@ -238,7 +238,7 @@ def preprocess_stream(
             preprocessed_stream = list(executor.map(data_preprocessor, stream))
             try:
                 preprocessed_stream = [
-                        tr[0] for tr in preprocessed_stream if tr is not None
+                        tr[0] for tr in preprocessed_stream if len(tr) > 0
                         ]
             except Exception as e:
                 print(e)
