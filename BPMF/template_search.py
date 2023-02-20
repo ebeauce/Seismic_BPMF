@@ -456,7 +456,7 @@ class Beamformer(object):
     # -------------------------------------------
     #       Plotting methods
     # -------------------------------------------
-    def plot_maxbeam(self, ax=None, detection=None, figsize=(20, 7)):
+    def plot_maxbeam(self, ax=None, detection=None, **kwargs):
         """Plot the composite network response.
 
         Parameters
@@ -478,12 +478,16 @@ class Beamformer(object):
 
         if ax is None:
             # plot the maximum beam
-            fig = plt.figure("maximum_beam", figsize=figsize)
+            fig = plt.figure(
+                    "maximum_beam", figsize=kwargs.get("figsize", (15, 10))
+                    )
             ax = fig.add_subplot(111)
         else:
             fig = ax.get_figure()
 
-        ax.plot(self.data.time, self.maxbeam)
+        ax.plot(
+                self.data.time, self.maxbeam, rasterized=kwargs.get("rasterized", True)
+                )
         if hasattr(self, "detection_threshold"):
             ax.plot(
                 self.data.time,
@@ -504,8 +508,6 @@ class Beamformer(object):
         ax.set_ylabel("Maximum Beam")
 
         ax.set_xlim(self.data.time.min(), self.data.time.max())
-        # ax.set_ylim(-0.1*(detection_threshold.max() - maxbeam.min()), 1.2*detection_threshold.max())
-        # ax.set_ylim(-0.1*(detection_threshold.max() - maxbeam.min()), 1.2*detection_threshold.max())
 
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
