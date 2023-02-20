@@ -226,6 +226,7 @@ class Spectrum:
         spectrum = getattr(self, f"average_{phase}_spectrum")
         if np.sum(~spectrum["fft"].mask) == 0:
             print("Spectrum is below SNR threshold everywhere, cannot fit it.")
+            self.inversion_success = False
             return
         omega0_first_guess = spectrum["fft"].data[~spectrum["fft"].mask][0]
         fc_first_guess = fc_circular_crack(moment_to_magnitude(omega0_first_guess))
