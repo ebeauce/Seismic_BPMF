@@ -593,7 +593,7 @@ class MatchedFilter(object):
     # -------------------------------------------
     #       Plotting methods
     # -------------------------------------------
-    def plot_cc(self, tid, ax=None, detection=None, figsize=(20, 7)):
+    def plot_cc(self, tid, ax=None, detection=None, **kwargs):
         """Plot the time series of correlation coefficients.
 
         Parameters
@@ -617,7 +617,10 @@ class MatchedFilter(object):
 
         if ax is None:
             # plot the correlation coefficients
-            fig = plt.figure(f"correlation_coefficients_tp{tid}", figsize=figsize)
+            fig = plt.figure(
+                    f"correlation_coefficients_tp{tid}",
+                    figsize=kwargs.get("figsize", (15, 7))
+                    )
             ax = fig.add_subplot(111)
         else:
             fig = ax.get_figure()
@@ -654,13 +657,18 @@ class MatchedFilter(object):
         time_indexes = np.arange(len(self.data.time), dtype=np.int32)[:: self.step][
             : len(cc_t)
         ]
-        ax.plot(self.data.time[time_indexes], cc_t)
+        ax.plot(
+                self.data.time[time_indexes],
+                cc_t,
+                rasterized=kwargs.get("rasterized", True)
+                )
         ax.plot(
             self.data.time[time_indexes],
             detection_threshold,
             color="C3",
             ls="--",
             label="Detection Threshold",
+            rasterized=kwargs.get("rasterized", True)
         )
         if len(cc_idx) > 0:
             ax.plot(
