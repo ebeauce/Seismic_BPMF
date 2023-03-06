@@ -262,7 +262,6 @@ def initialize_map(
     map_latitudes,
     map_axis=None,
     seismic_stations=None,
-    GPS_stations=None,
     text_size=14,
     markersize=10,
     topography_file=None,
@@ -453,35 +452,6 @@ def initialize_map(
                     seismic_stations["longitude"][s] + 0.02,
                     seismic_stations["latitude"][s],
                     seismic_stations["stations"][s],
-                    fontsize=text_size,
-                    transform=data_coords,
-                    zorder=2,
-                    bbox=props,
-                )
-    if GPS_stations is not None:
-        # print('Add GPS stations.')
-        for s in range(len(GPS_stations["stations"])):
-            if (
-                (GPS_stations["longitude"][s] > map_longitudes[1])
-                or (GPS_stations["longitude"][s] < map_longitudes[0])
-                or (GPS_stations["latitude"][s] > map_latitudes[1])
-                or (GPS_stations["latitude"][s] < map_latitudes[0])
-            ):
-                continue
-            map_axis.plot(
-                GPS_stations["longitude"][s],
-                GPS_stations["latitude"][s],
-                marker="s",
-                color="C4",
-                markersize=markersize,
-                transform=data_coords,
-                zorder=1,
-            )
-            if GPS_stations["stations"][s] != "":
-                map_axis.text(
-                    GPS_stations["longitude"][s] + 0.01,
-                    GPS_stations["latitude"][s],
-                    GPS_stations["stations"][s],
                     fontsize=text_size,
                     transform=data_coords,
                     zorder=2,
