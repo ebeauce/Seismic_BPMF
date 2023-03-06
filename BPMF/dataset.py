@@ -381,6 +381,21 @@ class Catalog(object):
         return cls(longitudes, latitudes, depths, origin_times, **extra_attr)
 
     @classmethod
+    def read_from_dataframe(cls, dataframe):
+        """Initialize a Catalog instance from a `pandas.DataFrame` instance.
+        """
+        catalog = cls(
+                dataframe["longitude"],
+                dataframe["latitude"],
+                dataframe["depth"],
+                dataframe["origin_time"],
+                **dataframe.drop(
+                    columns=["longitude", "latitude", "depth", "origin_time"]
+                    )
+                )
+        return catalog
+
+    @classmethod
     def read_from_detection_file(
         cls,
         filename,
