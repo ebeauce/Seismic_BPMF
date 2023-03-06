@@ -67,6 +67,7 @@ setup(
         "scipy",
         "pandas",
         "h5py",
+        "obspy",
         "matplotlib"],
     python_requires=">=3.6",
     zip_safe=False,
