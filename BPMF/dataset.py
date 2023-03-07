@@ -324,19 +324,23 @@ class Catalog(object):
 
     @property
     def latitude(self):
-        return self.catalog.latitude
+        return self.catalog.latitude.values
 
     @property
     def longitude(self):
-        return self.catalog.longitude
+        return self.catalog.longitude.values
 
     @property
     def depth(self):
-        return self.catalog.depth
+        return self.catalog.depth.values
 
     @property
     def origin_time(self):
-        return self.catalog.origin_time
+        return self.catalog.origin_time.values
+
+    @property
+    def n_events(self):
+        return len(self.catalog)
 
     @classmethod
     def concatenate(cls, catalogs, ignore_index=True):
@@ -551,7 +555,7 @@ class Catalog(object):
         ax.scatter(
             self.longitude,
             self.latitude,
-            c=scalar_map.to_rgba(self.depth.values),
+            c=scalar_map.to_rgba(self.depth),
             label="Earthquakes",
             **scatter_kwargs,
             transform=data_coords,
@@ -572,7 +576,7 @@ class Catalog(object):
                         row.longitude,
                         row.latitude,
                     )
-                    color = scalar_map.to_rgba(self.depth.values[i])
+                    color = scalar_map.to_rgba(self.depth[i])
                     if color[:3] == (1., 1., 1.):
                         # white!
                         color = "dimgrey"
@@ -1627,6 +1631,7 @@ class Event(object):
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
         component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
         waveform_features=None,
+        restricted_domain_side_km=100.,
         device="cpu",
         **kwargs,
     ):
@@ -1665,6 +1670,32 @@ class Event(object):
         self.latitude = beamformer.source_coordinates["latitude"].iloc[src_idx]
         self.depth = beamformer.source_coordinates["depth"].iloc[src_idx]
         # estimate location uncertainty
+        # 1) compute likelihood
+        likelihood = beamformer._likelihood(beamformer.beam[:, time_idx])
+        beamformer.likelihood = likelihood
+        # 2) define a restricted domain
+        domain = beamformer._rectangular_domain(
+                self.longitude,
+                self.latitude,
+                side_km=restricted_domain_side_km,
+                )
+        # 3) compute uncertainty
+        hunc, vunc = beamformer._compute_location_uncertainty(
+                self.longitude,
+                self.latitude,
+                self.depth,
+                likelihood,
+                domain,
+                )
+        # 4) set attributes
+        self._hmax_unc = hunc
+        self._hmin_unc = hunc
+        self._az_hmax_unc = 0.
+        self._az_hmin_unc = 0.
+        self._vmax_unc = vunc
+        self.set_aux_data(
+                {"hmax_unc": hunc, "hmin_unc": hunc, "az_hmax_unc": 0., "vmax_unc": vunc}
+                )
         # fill arrival time attribute
         self.arrival_times = pd.DataFrame(
             index=beamformer.network.stations,
