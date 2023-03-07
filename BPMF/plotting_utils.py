@@ -533,3 +533,50 @@ def add_scale_bar(
         va="top",
     )
     return
+
+def uncertainty_ellipse(
+        hmax_uncertainty_km,
+        hmin_uncertainty_km,
+        hmax_azimuth_deg,
+        longitude_center,
+        latitude_center,
+        num_points=100
+        ):
+    """
+    Compute a set of longitude and latitude points that describe the uncertainty ellipse.
+
+    Parameters
+    ----------
+    hmax_uncertainty_km : float
+        The length of the major axis of the uncertainty ellipse in kilometers.
+    hmin_uncertainty_km : float
+        The length of the minor axis of the uncertainty ellipse in kilometers.
+    hmax_azimuth_deg : float
+        The azimuth angle of the major axis of the uncertainty ellipse in degrees.
+    longitude_center : float
+        The longitude coordinate of the center point of the ellipse.
+    latitude_center : float
+        The latitude coordinate of the center point of the ellipse.
+    num_points : int, optional
+        The number of points used to describe the ellipse, default is 100.
+
+    Returns
+    -------
+    longitude_ellipse : numpy.ndarray
+        The longitude coordinates of the points that make up the uncertainty ellipse.
+    latitude_ellipse : numpy.ndarray
+        The latitude coordinates of the points that make up the uncertainty ellipse.
+    """
+    from cartopy.geodesic import Geodesic
+
+    azimuths = np.linspace(0., 360., num_points)
+    theta = np.deg2rad(-(azimuths - hmax_azimuth_deg))
+    # ellipse formula
+    eccentricity_pow2 = 1. - (hmin_uncertainty_km / hmax_uncertainty_km)**2
+    ellipse_m = hmin_uncertainty_km / np.sqrt(1. - eccentricity_pow2 * np.cos(theta)**2)
+    # ray shooting with Geodesic
+    G = Geodesic()
+    longitude_ellipse, latitude_ellipse, _ = np.asarray(
+        G.direct([longitude_center, latitude_center], azimuths, 1000. * ellipse_m)
+    ).T
+    return longitude_ellipse, latitude_ellipse
