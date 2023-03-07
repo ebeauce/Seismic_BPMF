@@ -311,7 +311,7 @@ class Catalog(object):
         catalog["longitude"] = longitudes
         catalog["latitude"] = latitudes
         catalog["depth"] = depths
-        catalog["origin_time"] = pd.to_datetime(origin_times)
+        catalog["origin_time"] = pd.to_datetime(np.datetime64(origin_times))
         catalog.update(kwargs)
         if event_ids is not None:
             catalog["event_id"] = event_ids
@@ -465,7 +465,13 @@ class Catalog(object):
         return fig
 
     def plot_map(
-        self, ax=None, figsize=(20, 10), depth_min=0.0, depth_max=20.0, **kwargs
+        self,
+        ax=None,
+        figsize=(20, 10),
+        depth_min=0.0,
+        depth_max=20.0,
+        network=None,
+        **kwargs
     ):
         """Plot epicenters on map.
 
@@ -513,14 +519,24 @@ class Catalog(object):
         scatter_kwargs["s"] = kwargs.get("s", 10)
         scatter_kwargs["zorder"] = kwargs.get("zorder", 1)
         # ------------------------------------------------
-        map_longitudes = [
-            min(self.longitude) - lon_margin,
-            max(self.longitude) + lon_margin,
-        ]
-        map_latitudes = [
-            min(self.latitude) - lat_margin,
-            max(self.latitude) + lat_margin,
-        ]
+        if network is None:
+            map_longitudes = [
+                min(self.longitude) - lon_margin,
+                max(self.longitude) + lon_margin,
+            ]
+            map_latitudes = [
+                min(self.latitude) - lat_margin,
+                max(self.latitude) + lat_margin,
+            ]
+        else:
+            map_longitudes = [
+                min(self.longitude.tolist() + network.longitude.tolist()) - lon_margin,
+                max(self.longitude.tolist() + network.longitude.tolist()) + lon_margin,
+            ]
+            map_latitudes = [
+                min(self.latitude.tolist() + network.latitude.tolist()) - lat_margin,
+                max(self.latitude.tolist() + network.latitude.tolist()) + lat_margin,
+            ]
         ax = plotting_utils.initialize_map(
             map_longitudes, map_latitudes, figsize=figsize, map_axis=ax, **kwargs
         )
@@ -531,11 +547,22 @@ class Catalog(object):
         ax.scatter(
             self.longitude,
             self.latitude,
-            c=scalar_map.to_rgba(self.depth),
+            c=scalar_map.to_rgba(self.depth.values),
+            label="Earthquakes",
             **scatter_kwargs,
             transform=data_coords,
         )
-
+        if network is not None:
+            ax.scatter(
+                network.longitude,
+                network.latitude,
+                c="magenta",
+                marker="v",
+                label="Seismic stations",
+                s=kwargs.get("markersize_station", 10),
+                transform=data_coords,
+            )
+        ax.legend(loc="lower right")
         ax_divider = make_axes_locatable(ax)
         cax = ax_divider.append_axes("right", size="2%", pad=0.08, axes_class=plt.Axes)
         plt.colorbar(scalar_map, cax, orientation="vertical", label="Depth (km)")
@@ -876,7 +903,8 @@ class Event(object):
 
     @classmethod
     def read_from_file(
-        cls, filename=None, db_path=cfg.INPUT_PATH, hdf5_file=None, gid=None
+        cls, filename=None, db_path=cfg.INPUT_PATH, hdf5_file=None, gid=None,
+        data_reader=None,
     ):
         """Initialize an Event instance from `filename`.
 
@@ -892,6 +920,10 @@ class Event(object):
         hdf5_file: `h5py.File`, default to None
             If not None, is an opened file pointing directly at the subfolder of
             interest.
+        data_reader: function, default to None
+            Function that takes a path and optional key-word arguments to read
+            data from this path and returns an `obspy.Stream` instance. If None,
+            `data_reader` has to be specified when calling `read_waveforms`.
 
         Returns
         ----------
@@ -966,6 +998,7 @@ class Event(object):
             # close the file
             parent_file.close()
         # ! the order of args is important !
+        kwargs["data_reader"] = data_reader
         event = cls(*args, **kwargs)
         if "cov_mat" in aux_data:
             event.cov_mat = aux_data["cov_mat"]
@@ -1726,8 +1759,8 @@ class Event(object):
         for key in hypocenter.keys():
             setattr(self, key, hypocenter[key])
         # add absolute arrival times to predicted_times
-        P_abs_arrivals = np.zeros(len(predicted_times), dtype=np.object)
-        S_abs_arrivals = np.zeros(len(predicted_times), dtype=np.object)
+        P_abs_arrivals = np.zeros(len(predicted_times), dtype=object)
+        S_abs_arrivals = np.zeros(len(predicted_times), dtype=object)
         for s, sta in enumerate(predicted_times.index):
             P_abs_arrivals[s] = self.origin_time + predicted_times.loc[sta, "P_tt_sec"]
             S_abs_arrivals[s] = self.origin_time + predicted_times.loc[sta, "S_tt_sec"]
