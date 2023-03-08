@@ -990,6 +990,7 @@ class Event(object):
         close_file = False
         if filename is not None:
             parent_file = h5.File(os.path.join(db_path, filename), mode="r")
+            path_database = parent_file.filename
             if gid is not None:
                 # go to specified group
                 f = parent_file[gid]
@@ -998,6 +999,11 @@ class Event(object):
             close_file = True  # remember to close file at the end
         else:
             f = hdf5_file
+            if hasattr(f, "file"):
+                path_database = f.file.filename
+                gid = f.name
+            else:
+                path_database = f.filename
         for attr in attributes:
             args.append(f[attr][()])
         if type(f["where"][()]) == bytes:
@@ -1054,6 +1060,7 @@ class Event(object):
         if gid is not None:
             # keep trace that we read from a group
             event.hdf5_gid = gid
+        event.path_database = path_database
         return event
 
     @property
@@ -2128,6 +2135,38 @@ class Event(object):
                     self.arrival_times.loc[station, f"{ph.upper()}_abs_arrival_times"]
                 ) - udt(self.origin_time)
 
+    def update_aux_data_database(self):
+        """Add the new elements of `self.aux_data` that are not in the database.
+        """
+        if not hasattr(self, "path_database"):
+            print("It looks like you create this Event instance from scratch...")
+            print("Call Event.write instead.")
+            return
+        lock_file = os.path.splitext(self.path_database)[0] + ".lock"
+        while os.path.isfile(lock_file):
+            # another process is already writing in this file
+            # wait a bit a check again
+            sleep(1.0)
+        # create empty lock file
+        open(lock_file, "w").close()
+        try:
+            with h5.File(self.path_database, mode="a") as fdb:
+                if hasattr(self, "hdf5_gid"):
+                    fdb = fdb[self.hdf5_gid]
+                for key in self.aux_data:
+                    if key in fdb["aux_data"]:
+                        # already exists
+                        continue
+                    fdb["aux_data"].create_dataset(
+                            key, data=self.aux_data[key]
+                            )
+        except Exception as e:
+            os.remove(lock_file)
+            raise (e)
+        # remove lock file
+        os.remove(lock_file)
+
+
     def write(
         self,
         db_filename,
@@ -2195,14 +2234,6 @@ class Event(object):
                 f = hdf5_file[gid]
             else:
                 f = hdf5_file
-            # with h5.File(output_where, mode='a') as f:
-            #    if gid is not None:
-            #        if gid in f:
-            #            # overwrite existing detection with same id
-            #            print(f'Found existing event {gid} in {output_where}. Overwrite it.')
-            #            del f[gid]
-            #        f.create_group(gid)
-            #        f = f[gid]
             for attr in attributes:
                 if not hasattr(self, attr):
                     continue
@@ -3584,7 +3615,7 @@ class TemplateGroup(Family):
         """
         _network_to_template_map = np.zeros(
             (self.n_templates, self.network.n_stations, self.network.n_components),
-            dtype=np.bool,
+            dtype=bool,
         )
         # 1) find the non-zero channels
         _network_to_template_map = ~(np.sum(self.waveforms_arr, axis=-1) == 0.0)
@@ -3743,7 +3774,7 @@ class TemplateGroup(Family):
         n_events = len(self.catalog.catalog)
         index_pool = np.arange(n_events)
         # dt_criterion = np.timedelta64(int(1000.0 * dt_criterion), "ms")
-        unique_event = np.ones(n_events, dtype=np.bool)
+        unique_event = np.ones(n_events, dtype=bool)
         for n1 in tqdm(range(n_events), desc="Removing multiples", disable=disable):
             if not unique_event[n1]:
                 continue
@@ -4464,7 +4495,7 @@ class Stack(Event):
 #              'inter-template CC larger than {:.2f} be considered the same'.
 #              format(dt_criterion, distance_criterion, similarity_criterion))
 #        n_events = len(catalog['origin_times'])
-#        unique_event = np.ones(n_events, dtype=np.bool)
+#        unique_event = np.ones(n_events, dtype=bool)
 #        for n1 in range(n_events):
 #            if not unique_event[n1]:
 #                continue
@@ -4791,7 +4822,7 @@ class Stack(Event):
 #            if unique_event:
 #                selection = self.catalog.unique_event
 #            else:
-#                selection = np.ones(len(self.catalog.origin_times), dtype=np.bool)
+#                selection = np.ones(len(self.catalog.origin_times), dtype=bool)
 #        self.event_ids = np.arange(len(selection), dtype=np.int32)[selection]
 #        if correct_tt:
 #            self.get_tt_corrections(max_corr=5.)
@@ -4883,7 +4914,7 @@ class Stack(Event):
 #            if unique_event:
 #                selection = self.catalog.unique_event
 #            else:
-#                selection = np.ones(len(self.catalog.origin_times), dtype=np.bool)
+#                selection = np.ones(len(self.catalog.origin_times), dtype=bool)
 #        self.event_ids = np.arange(len(selection), dtype=np.int32)[selection]
 #        if correct_tt:
 #            self.get_tt_corrections(max_corr=5.)
@@ -4953,7 +4984,7 @@ class Stack(Event):
 #        n_stations, n_components = data_arr.shape[1:-1]
 #        # initialize ouputs
 #        if paired is None:
-#            paired = np.ones((self.n_events, self.n_events), dtype=np.bool)
+#            paired = np.ones((self.n_events, self.n_events), dtype=bool)
 #            self.paired = paired
 #        output_shape = (np.sum(paired), n_stations)
 #        CCs_S = np.zeros(output_shape, dtype=np.float32)
@@ -5252,7 +5283,7 @@ class Stack(Event):
 #                self.catalog['correlation_coefficients']
 #                == self.catalog['correlation_coefficients'][selection].max())[0][0]
 #            valid_events[highest_CC_events_idx[tid]] = True
-#        self.paired = np.zeros((self.n_events, self.n_events), dtype=np.bool)
+#        self.paired = np.zeros((self.n_events, self.n_events), dtype=bool)
 #        for n in range(self.n_events):
 #            if valid_events[n]:
 #                # if this is a valid event, pair it with
