@@ -38,6 +38,9 @@ class MatchedFilter(object):
         max_workers=None,
         anomalous_cdf_at_mean_plus_1sig=0.50,
         window_for_validation_Tmax=100.,
+        offset_win_peak_amp_sec=1.0,
+        duration_win_peak_amp_sec=3.0,
+        phase_on_comp_peak_amp={"N": "S", "E": "S", "Z": "P"}
     ):
         """Instanciate a MatchedFilter object.
 
@@ -98,7 +101,16 @@ class MatchedFilter(object):
             (that is, the inverse of `cfg.MIN_FREQ_HZ`), for analyzing the
             statistic of CC(t) in the vicinity of each CC(t) > `threshold`.
             Default to 100.
-
+        offset_win_peak_amp_sec : scalar, optional
+            The offset, in seconds, between the phase pick and the beginning of the window
+            used to extract the event peak amplitude at a given channel.
+            Default is 1 second.
+        duration_win_peak_amp_sec : scalar, optional
+            The duration, in seconds, of the window used to extract the event
+            peak amplitude at a given channel. Default is 3 seconds.
+        phase_on_comp_peak_amp : dictionary, optional
+            A dictionary defining which phase is used on each channel when
+            measuring the peak amplides.
         """
         self.template_group = template_group
         self.min_channels = min_channels
@@ -116,6 +128,9 @@ class MatchedFilter(object):
         self.max_workers = max_workers
         self.anomalous_cdf_at_mean_plus_1sig = anomalous_cdf_at_mean_plus_1sig
         self.window_for_validation_Tmax = window_for_validation_Tmax
+        self.offset_win_peak_amp_sec = offset_win_peak_amp_sec
+        self.duration_win_peak_amp_sec = duration_win_peak_amp_sec
+        self.phase_on_comp_peak_amp = phase_on_comp_peak_amp
 
 
     # properties
@@ -147,11 +162,18 @@ class MatchedFilter(object):
         """
         self.data = data
         self.data_arr = self.data.get_np_array(
-            self.template_group.stations, components=self.template_group.components
+            self.stations, components=self.components
         )
+        self.offset_win_peak_amp_samp = utils.sec_to_samp(
+                self.offset_win_peak_amp_sec, sr=self.data.sr
+                )
+        self.duration_win_peak_amp_samp = utils.sec_to_samp(
+                self.duration_win_peak_amp_sec, sr=self.data.sr
+                )
         if self.normalize:
             norm = np.std(self.data_arr, axis=-1, keepdims=True)
             norm[norm == 0.0] = 1.0
+            self.data_norm = norm
             self.data_arr /= norm
 
     def select_cc_indexes(
@@ -477,11 +499,11 @@ class MatchedFilter(object):
         # give template's attributes to each detection
         template = self.template_group.templates[tt]
         # make sure stations and mv are consistent
-        stations = template.moveouts.index.values.astype("U")
+        stations = self.stations.values.astype("U")
         latitude = template.latitude
         longitude = template.longitude
         depth = template.depth
-        mv = template.moveouts.values
+        mv = template.moveouts.loc[self.stations].values
         phases = template.phases
         for i in range(len(detection_indexes)):
             event = Stream()
@@ -499,10 +521,34 @@ class MatchedFilter(object):
                 sampling_rate=self.data.sr,
                 data_reader=self.data.data_reader,
             )
+            if self.extract_peak_amplitudes:
+                peak_amplitudes = np.zeros(
+                        (len(self.stations), len(self.components)), dtype=np.float32
+                        )
+                for s, sta in enumerate(self.stations):
+                    for c, cp in enumerate(self.components):
+                        ph = self.phase_on_comp_peak_amp[cp].upper()
+                        mv_sc = utils.sec_to_samp(
+                                template.moveouts.loc[sta, f"moveouts_{ph}"],
+                                sr=self.data.sr
+                                )
+                        time_idx1 = (
+                                detection_indexes[i]
+                                + mv_sc
+                                - self.offset_win_peak_amp_samp
+                                )
+                        time_idx2 = time_idx1 + self.duration_win_peak_amp_samp
+                        win_peak_amp = self.data_arr[s, c, time_idx1:time_idx2]
+                        if len(win_peak_amp) > 0:
+                            peak_amplitudes[s, c] = (
+                                    win_peak_amp.max() * self.data_norm[s, c]
+                                    )
             aux_data = {}
             aux_data["cc"] = cc_t[cc_idx[i]]
             aux_data["n_threshold"] = cc_t[cc_idx[i]] / threshold[cc_idx[i]]
             aux_data["tid"] = tid
+            if self.extract_peak_amplitudes:
+                aux_data["peak_amplitudes"] = peak_amplitudes
             event.set_aux_data(aux_data)
             detections_t.append(event)
         return detections_t, tid
@@ -515,6 +561,7 @@ class MatchedFilter(object):
         threshold_window_dur=1800.0,
         overlap=0.25,
         sanity_check=True,
+        extract_peak_amplitudes=True,
         verbose=0,
         **kwargs
     ):
@@ -551,7 +598,7 @@ class MatchedFilter(object):
             self.anomalous_cdf_at_mean_plus_1sig = kwargs["anomalous_cdf_at_mean_plus_1sig"]
         if "window_for_validation_Tmax" in kwargs:
             self.window_for_validation_Tmax = kwargs["window_for_validation_Tmax"]
-
+        self.extract_peak_amplitudes = extract_peak_amplitudes
         if self.max_memory is not None:
             n_tp_chunk = int(self.max_memory / self.memory_cc_time_series)
         else:

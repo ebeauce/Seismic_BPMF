@@ -1171,6 +1171,32 @@ class Event(object):
             verbose=verbose,
         )
 
+    def get_peak_amplitudes(self, stations, components):
+        """Get peak waveform amplitudes.
+
+        The peak waveform amplitudes are typically used to compute
+        amplitude-based local magnitudes.
+
+        Parameters
+        ----------
+        stations : list of strings
+            Names of the stations to include in the output array. Define the order
+            of the station axis.
+        components : list of strings, default to ['N','E','Z']
+            Names of the components to include in the output array. Define the order
+            of the component axis.
+
+        Returns
+        -------
+        peak_amplitudes : numpy.ndarray
+            (num_stations, num_components) numpy.ndarray with the peak
+            waveform amplitude on each channel.
+        """
+        waveforms = self.get_np_array(stations, components=components)
+        peak_amplitudes = np.max(waveforms, axis=-1)
+        return peak_amplitudes
+
+
     def hor_ver_uncertainties(self, mode="intersection"):
         """Compute the horizontal and vertical uncertainties on location.
 
@@ -2467,9 +2493,10 @@ class Template(Event):
         if hasattr(event, "arrival_times"):
             template.arrival_times = event.arrival_times
         aux_data_to_keep = [f"offset_{ph}" for ph in event.phases] + [
-            "tt_rms",
             "tid",
             "cov_mat",
+            "Mw",
+            "Mw_err"
         ]
         select = lambda str: str.startswith("phase_on_comp")
         aux_data_to_keep += list(filter(select, event.aux_data.keys()))

@@ -1416,13 +1416,13 @@ def get_np_array(
     -----------
     stream: Obspy Stream instance
         The Obspy Stream instance with the waveform time series.
-    stations: List of strings
+    stations: list of strings
         Names of the stations to include in the output array. Define the order
         of the station axis.
-    components: List of strings, default to ['N','E','Z']
+    components: list of strings, default to ['N','E','Z']
         Names of the components to include in the output array. Define the order
         of the component axis.
-    component_aliases: Dictionary, optional
+    component_aliases: dictionary, optional
         Sometimes, components might be named differently than N, E, Z. This
         dictionary tells the function which alternative component names can be
         associated with each "canonical" component. For example,
