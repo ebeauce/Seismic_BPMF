@@ -262,7 +262,6 @@ def initialize_map(
     map_latitudes,
     map_axis=None,
     seismic_stations=None,
-    GPS_stations=None,
     text_size=14,
     markersize=10,
     topography_file=None,
@@ -458,35 +457,6 @@ def initialize_map(
                     zorder=2,
                     bbox=props,
                 )
-    if GPS_stations is not None:
-        # print('Add GPS stations.')
-        for s in range(len(GPS_stations["stations"])):
-            if (
-                (GPS_stations["longitude"][s] > map_longitudes[1])
-                or (GPS_stations["longitude"][s] < map_longitudes[0])
-                or (GPS_stations["latitude"][s] > map_latitudes[1])
-                or (GPS_stations["latitude"][s] < map_latitudes[0])
-            ):
-                continue
-            map_axis.plot(
-                GPS_stations["longitude"][s],
-                GPS_stations["latitude"][s],
-                marker="s",
-                color="C4",
-                markersize=markersize,
-                transform=data_coords,
-                zorder=1,
-            )
-            if GPS_stations["stations"][s] != "":
-                map_axis.text(
-                    GPS_stations["longitude"][s] + 0.01,
-                    GPS_stations["latitude"][s],
-                    GPS_stations["stations"][s],
-                    fontsize=text_size,
-                    transform=data_coords,
-                    zorder=2,
-                    bbox=props,
-                )
 
     return map_axis
 
@@ -563,3 +533,50 @@ def add_scale_bar(
         va="top",
     )
     return
+
+def uncertainty_ellipse(
+        hmax_uncertainty_km,
+        hmin_uncertainty_km,
+        hmax_azimuth_deg,
+        longitude_center,
+        latitude_center,
+        num_points=100
+        ):
+    """
+    Compute a set of longitude and latitude points that describe the uncertainty ellipse.
+
+    Parameters
+    ----------
+    hmax_uncertainty_km : float
+        The length of the major axis of the uncertainty ellipse in kilometers.
+    hmin_uncertainty_km : float
+        The length of the minor axis of the uncertainty ellipse in kilometers.
+    hmax_azimuth_deg : float
+        The azimuth angle of the major axis of the uncertainty ellipse in degrees.
+    longitude_center : float
+        The longitude coordinate of the center point of the ellipse.
+    latitude_center : float
+        The latitude coordinate of the center point of the ellipse.
+    num_points : int, optional
+        The number of points used to describe the ellipse, default is 100.
+
+    Returns
+    -------
+    longitude_ellipse : numpy.ndarray
+        The longitude coordinates of the points that make up the uncertainty ellipse.
+    latitude_ellipse : numpy.ndarray
+        The latitude coordinates of the points that make up the uncertainty ellipse.
+    """
+    from cartopy.geodesic import Geodesic
+
+    azimuths = np.linspace(0., 360., num_points)
+    theta = np.deg2rad(-(azimuths - hmax_azimuth_deg))
+    # ellipse formula
+    eccentricity_pow2 = 1. - (hmin_uncertainty_km / hmax_uncertainty_km)**2
+    ellipse_m = hmin_uncertainty_km / np.sqrt(1. - eccentricity_pow2 * np.cos(theta)**2)
+    # ray shooting with Geodesic
+    G = Geodesic()
+    longitude_ellipse, latitude_ellipse, _ = np.asarray(
+        G.direct([longitude_center, latitude_center], azimuths, 1000. * ellipse_m)
+    ).T
+    return longitude_ellipse, latitude_ellipse

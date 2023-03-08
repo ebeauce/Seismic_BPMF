@@ -10,10 +10,10 @@ class Spectrum:
 
     def attenuation_Q_model(self, Q, frequencies):
         from scipy.interpolate import interp1d
+
         interpolator = interp1d(
-            frequencies, Q, kind="linear", fill_value=(Q[0], Q[-1]),
-            bounds_error=False
-                )
+            frequencies, Q, kind="linear", fill_value=(Q[0], Q[-1]), bounds_error=False
+        )
         self.attenuation_model = {}
         self.attenuation_model["p"] = np.vectorize(interpolator)
         self.attenuation_model["s"] = np.vectorize(interpolator)
@@ -26,7 +26,33 @@ class Spectrum:
         radiation_S=np.sqrt(2.0 / 5.0),
         radiation_P=np.sqrt(4.0 / 15.0),
     ):
-        """ """
+        """
+        Compute the correction factor and attenuation factor for a seismic event.
+
+        Parameters
+        ----------
+        rho : float
+            Density of the medium, in kg/m3.
+        vp : float
+            P-wave velocity of the medium, in m/s.
+        vs : float
+            S-wave velocity of the medium, in m/s.
+        radiation_S : float, optional
+            Radiation coefficient for S-wave. Default is sqrt(2/5).
+        radiation_P : float, optional
+            Radiation coefficient for P-wave. Default is sqrt(4/15).
+
+        Returns
+        -------
+        None
+            The correction factor and attenuation factor are stored in the
+            object's attributes `correction_factor` and `attenuation_factor`.
+
+        Notes
+        -----
+        This method requires the object to have an attached `BPMF.dataset.Event`
+        instance and for the instance to have called the `set_source_receiver_dist(network)` method.
+        """
         if not hasattr(self, "event"):
             print("Attach the BPMF.dataset.Event instance first.")
             return
@@ -53,7 +79,6 @@ class Spectrum:
                 attenuation_factor.loc[sta, f"attenuation_P"] = lambda freq: np.exp(
                     np.pi * tt_p * freq / self.attenuation_model["p"](freq)
                 )
-                print(attenuation_factor.loc[sta, f"attenuation_P"])
             else:
                 print("No attenuation model found!")
                 attenuation_factor.loc[sta, f"attenuation_P"] = None
@@ -61,7 +86,12 @@ class Spectrum:
         self.attenuation_factor = attenuation_factor
 
     def compute_network_average_spectrum(
-        self, phase, snr_threshold, correct_propagation=True, average_log=True
+        self,
+        phase,
+        snr_threshold,
+        correct_propagation=True,
+        average_log=True,
+        min_num_valid_channels_per_freq_bin=0,
     ):
         phase = phase.lower()
         assert phase in ["p", "s"], "phase should be 'p' or 's'"
@@ -91,8 +121,6 @@ class Spectrum:
                     att = self.attenuation_factor.loc[
                         sta, f"attenuation_{phase.upper()}"
                     ]
-                    print(att)
-                    print(pd.isnull(att), ~pd.isnull(att))
                     amplitude_spectrum *= self.attenuation_factor.loc[
                         sta, f"attenuation_{phase.upper()}"
                     ](signal_spectrum[trid]["freq"])
@@ -100,6 +128,13 @@ class Spectrum:
                 np.ma.masked_array(data=amplitude_spectrum, mask=mask)
             )
         masked_spectra = np.ma.asarray(masked_spectra)
+        # count the number of channels that satisfied the SNR criterion
+        num_valid_channels = np.sum(~masked_spectra.mask, axis=0)
+        # discard the frequency bins for which the minimum number
+        # of valid channels was not achieved
+        discarded_freq_bins = num_valid_channels < min_num_valid_channels_per_freq_bin
+        masked_spectra.mask[:, discarded_freq_bins] = True
+        # compute average spectrum without masked elements
         if average_log:
             log10_masked_spectra = np.ma.log10(masked_spectra)
             average_spectrum = np.ma.power(
@@ -116,6 +151,7 @@ class Spectrum:
             {
                 "fft": average_spectrum,
                 "std": std_spectrum,
+                "num_valid_channels": num_valid_channels,
                 "spectra": masked_spectra,
                 "freq": self.frequencies,
                 "snr_threshold": snr_threshold,
@@ -162,9 +198,13 @@ class Spectrum:
         snr = {}
         for trid in signal_spectrum:
             snr[trid] = {}
-            snr_ = np.abs(signal_spectrum[trid]["fft"]) / np.abs(
-                noise_spectrum[trid]["fft"]
-            )
+            if trid in noise_spectrum:
+                snr_ = np.abs(signal_spectrum[trid]["fft"]) / np.abs(
+                    noise_spectrum[trid]["fft"]
+                )
+            else:
+                # no noise spectrum, probably because of gap
+                snr_ = np.zeros(len(signal_spectrum[trid]["fft"]), dtype=np.float32)
             snr[trid]["snr"] = snr_
             snr[trid]["freq"] = signal_spectrum[trid]["freq"]
         setattr(self, f"snr_{phase}_spectrum", snr)
@@ -205,7 +245,14 @@ class Spectrum:
             for trid in spectrum:
                 spectrum[trid]["fft"] *= spectrum[trid]["freq"]
 
-    def fit_average_spectrum(self, phase, model="brune", log=True):
+    def fit_average_spectrum(
+        self,
+        phase,
+        model="brune",
+        log=True,
+        min_fraction_valid_points_below_fc=0.50,
+        weighted=False,
+    ):
         """Fit average displacement spectrum with model."""
         from scipy.optimize import curve_fit
         from functools import partial
@@ -217,11 +264,14 @@ class Spectrum:
         spectrum = getattr(self, f"average_{phase}_spectrum")
         if np.sum(~spectrum["fft"].mask) == 0:
             print("Spectrum is below SNR threshold everywhere, cannot fit it.")
+            self.inversion_success = False
             return
         omega0_first_guess = spectrum["fft"].data[~spectrum["fft"].mask][0]
         fc_first_guess = fc_circular_crack(moment_to_magnitude(omega0_first_guess))
-        weights = np.ones(len(spectrum["fft"]), dtype=np.float32)
-        weights[spectrum["fft"].mask] = 0.0
+        standardized_num_valid_channels = (
+            spectrum["num_valid_channels"] - spectrum["num_valid_channels"].mean()
+        ) / np.std(spectrum["num_valid_channels"])
+        sigmoid_weights = 1.0 / (1.0 + np.exp(-standardized_num_valid_channels))
         if model == "brune":
             mod = brune
         elif model == "boatwright":
@@ -237,8 +287,31 @@ class Spectrum:
         mod = partial(mod, log=log)
         y = obs[~spectrum["fft"].mask]
         x = spectrum["freq"][~spectrum["fft"].mask]
+        if weighted:
+            inverse_weights = 1.0 / sigmoid_weights[~spectrum["fft"].mask]
+        else:
+            inverse_weights = None
         p0 = np.array([omega0_first_guess, fc_first_guess])
-        popt, pcov = curve_fit(mod, x, y, p0=p0)
+        bounds = (np.array([0.0, 0.0]), np.array([np.inf, np.inf]))
+        try:
+            popt, pcov = curve_fit(
+                mod, x, y, p0=p0, bounds=bounds, sigma=inverse_weights
+            )
+            self.inversion_success = True
+        except RuntimeError:
+            self.inversion_success = False
+            return
+        # check whether the low-frequency plateau was well constrained
+        npts_below_fc = np.sum(spectrum["freq"] < popt[1])
+        npts_valid_below_fc = np.sum(x < popt[1])
+        if npts_below_fc <= int(0.05 * len(spectrum["freq"])):
+            self.inversion_success = False
+            return
+        if (
+            float(npts_valid_below_fc) / float(npts_below_fc)
+        ) < min_fraction_valid_points_below_fc:
+            self.inversion_success = False
+            return
         perr = np.sqrt(np.diag(pcov))
         self.M0 = popt[0]
         self.fc = popt[1]
@@ -273,16 +346,21 @@ class Spectrum:
         self,
         phase,
         figname="spectrum",
+        figtitle="",
         figsize=(10, 10),
         colors={"noise": "dimgrey", "s": "black", "p": "C3"},
         linestyle={"noise": "--", "s": "-", "p": "-"},
         plot_fit=False,
+        plot_std=False,
+        plot_num_valid_channels=False,
     ):
         import fnmatch
+        from matplotlib.ticker import MaxNLocator
 
         if isinstance(phase, str):
             phase = [phase]
         fig, ax = plt.subplots(num=figname, figsize=figsize)
+        ax.set_title(figtitle)
         for ph in phase:
             ph = ph.lower()
             if not hasattr(self, f"average_{ph}_spectrum"):
@@ -299,6 +377,29 @@ class Spectrum:
                 ls=linestyle[ph],
                 label=f"Average {ph} spectrum",
             )
+            if plot_std:
+                lower_amp = 10.0 ** (np.log10(amplitude_spec) - spectrum["std"])
+                upper_amp = 10.0 ** (np.log10(amplitude_spec) + spectrum["std"])
+                ax.fill_between(
+                    freq, lower_amp, upper_amp, color=colors[ph], alpha=0.33
+                )
+            if plot_num_valid_channels:
+                axb = ax.twinx()
+                axb.plot(
+                    freq,
+                    spectrum["num_valid_channels"],
+                    marker="o",
+                    ls="",
+                    color=colors[ph],
+                    label="Number of channels above SNR threshold",
+                )
+                axb.set_ylabel("Number of channels above SNR threshold")
+                ylim = axb.get_ylim()
+                axb.set_ylim(max(0, ylim[0] - 1), ylim[1] + 1)
+                axb.yaxis.set_major_locator(MaxNLocator(integer=True))
+                ax.set_zorder(axb.get_zorder() + 1)
+                ax.patch.set_visible(False)
+                axb.legend(loc="upper right")
         if plot_fit and hasattr(self, "M0"):
             if self.model == "brune":
                 model = brune
@@ -378,9 +479,7 @@ class Spectrum:
                         label=f"{ph} snr: {trid}",
                     )
         plt.subplots_adjust(right=0.85, bottom=0.20)
-        ax.legend(
-                bbox_to_anchor=(1.01, 1.00), loc="upper left", handlelength=0.9
-                )
+        ax.legend(bbox_to_anchor=(1.01, 1.00), loc="upper left", handlelength=0.9)
         ax.set_xlabel("Frequency (Hz)")
         ax.set_ylabel("Amplitude spectrum ([input units/Hz])")
         ax.loglog()

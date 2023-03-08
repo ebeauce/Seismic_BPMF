@@ -110,6 +110,16 @@ class Beamformer(object):
             return
         return self.network.stations
 
+    @staticmethod
+    def _likelihood(beam_volume):
+        likelihood = (beam_volume - beam_volume.min()) / (
+            beam_volume.max() - beam_volume.min()
+        )
+        # likelihood is not meant to be outside [0, 1] beside numerical
+        # imprecisions
+        likelihood = np.clip(likelihood, a_min=0., a_max=1.)
+        return likelihood
+
     def backproject(self, waveform_features, reduce="max", device="cpu"):
         """Backproject the waveform features.
 
@@ -456,7 +466,7 @@ class Beamformer(object):
     # -------------------------------------------
     #       Plotting methods
     # -------------------------------------------
-    def plot_maxbeam(self, ax=None, detection=None, figsize=(20, 7)):
+    def plot_maxbeam(self, ax=None, detection=None, **kwargs):
         """Plot the composite network response.
 
         Parameters
@@ -478,12 +488,16 @@ class Beamformer(object):
 
         if ax is None:
             # plot the maximum beam
-            fig = plt.figure("maximum_beam", figsize=figsize)
+            fig = plt.figure(
+                    "maximum_beam", figsize=kwargs.get("figsize", (15, 10))
+                    )
             ax = fig.add_subplot(111)
         else:
             fig = ax.get_figure()
 
-        ax.plot(self.data.time, self.maxbeam)
+        ax.plot(
+                self.data.time, self.maxbeam, rasterized=kwargs.get("rasterized", True)
+                )
         if hasattr(self, "detection_threshold"):
             ax.plot(
                 self.data.time,
@@ -504,8 +518,6 @@ class Beamformer(object):
         ax.set_ylabel("Maximum Beam")
 
         ax.set_xlim(self.data.time.min(), self.data.time.max())
-        # ax.set_ylim(-0.1*(detection_threshold.max() - maxbeam.min()), 1.2*detection_threshold.max())
-        # ax.set_ylim(-0.1*(detection_threshold.max() - maxbeam.min()), 1.2*detection_threshold.max())
 
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
@@ -615,7 +627,7 @@ class Beamformer(object):
         plt.subplots_adjust(top=0.95, bottom=0.06, right=0.98, left=0.06)
         return fig
 
-    def plot_likelihood(self, time_index=None, **kwargs):
+    def plot_likelihood(self, likelihood=None, time_index=None, **kwargs):
         """Plot likelihood (beam) slices at a given time."""
         from cartopy.crs import PlateCarree
         from matplotlib.colors import Normalize
@@ -626,10 +638,8 @@ class Beamformer(object):
 
         if time_index is None:
             src_idx, time_index = np.unravel_index(self.beam.argmax(), self.beam.shape)
-        likelihood = self.beam[:, time_index]
-        likelihood = (likelihood - likelihood.min()) / (
-            likelihood.max() - likelihood.min()
-        )
+        if likelihood is None:
+            likelihood = self._likelihood(self.beam[:, time_index])
         # define slices
         longitude = self.source_coordinates["longitude"].iloc[src_idx]
         latitude = self.source_coordinates["latitude"].iloc[src_idx]
@@ -714,6 +724,105 @@ class Beamformer(object):
 
         return fig
 
+    def _rectangular_domain(self, lon0, lat0, side_km=100.0):
+        """Return a boolean array indicating which points in a given grid are inside
+        a rectangular domain centered at the given longitude and latitude.
+
+        Parameters
+        ----------
+        lon0 : float
+            Longitude of the center of the domain, in degrees.
+        lat0 : float
+            Latitude of the center of the domain, in degrees.
+        side_km : float, optional
+            Length of the sides of the rectangular domain, in kilometers.
+            Default is 100km.
+
+        Returns
+        -------
+        selection : ndarray
+            1-D boolean array indicating which grid points are inside the domain.
+
+        Notes
+        -----
+        This function uses the Haversine formula to compute the distances between
+        the center of the domain and each grid point. It assumes a spherical Earth
+        of radius 6371.0 km.
+        """
+        R_earth_km = 6371.0  # km
+        colat0 = 90.0 - lat0
+        Rlat = R_earth_km * np.sin(np.deg2rad(colat0))
+        dist_per_lat = 2.0 * np.pi * (1.0 / 360.0) * Rlat
+        dist_per_lon = 2.0 * np.pi * (1.0 / 360.0) * R_earth_km
+        longitudes = self.source_coordinates["longitude"].values
+        latitudes = self.source_coordinates["latitude"].values
+        selection = (np.abs(longitudes - lon0) * dist_per_lon < side_km / 2.0) & (
+            np.abs(latitudes - lat0) * dist_per_lat < side_km / 2.0
+        )
+        return selection
+
+    def _compute_location_uncertainty(
+            self, event_longitude, event_latitude, event_depth, likelihood, domain
+            ):
+        """
+        Compute the horizontal and vertical uncertainties of an event location.
+
+        Parameters
+        ----------
+        event_longitude : float
+            The longitude, in decimal system, of the event located with the
+            present Beamformer instance.
+        event_latitude : float
+            The latitude, in decimal system, of the event located with the
+            present Beamformer instance.
+        event_depth : float
+            The depth, in km, of the event located with the present
+            Beamformer instance.
+        likelihood : ndarray
+            A 1D numpy array containing the likelihood of each source location in
+            the beamformer domain.
+        domain : ndarray
+            A 1D numpy array containing the indices of the beamformer domain.
+
+        Returns
+        -------
+        tuple
+            A tuple of two floats representing the horizontal and vertical
+            uncertainties of the event location in km, respectively.
+
+        Notes
+        -----
+        The horizontal uncertainty is computed as the weighted average of the
+        distance from each source in the domain to the event location, with the
+        weight being the likelihood of each source. The vertical uncertainty is
+        computed as the weighted average of the absolute depth difference between
+        each source in the domain and the event depth, with the weight being the
+        likelihood of each source. The distance is calculated using the Geodesic
+        library from the Cartopy package.
+
+        """
+        from cartopy.geodesic import Geodesic
+        # initialize the Geodesic instance
+        G = Geodesic()
+        epi_distances = G.inverse(
+            np.array([event_longitude, event_latitude]),
+            np.hstack(
+                (
+                    self.source_coordinates["longitude"].values[domain, None],
+                    self.source_coordinates["latitude"].values[domain, None],
+                )
+            ),
+        )
+        pointwise_distances = np.asarray(epi_distances)[:, 0].squeeze() / 1000.0
+
+        # horizontal uncertainty
+        hunc = np.sum(likelihood[domain]*pointwise_distances)/np.sum(likelihood[domain])
+
+        # vertical uncertainty
+        depth_diff = np.abs(event_depth - self.source_coordinates["depth"].values[domain])
+        vunc = np.sum(likelihood[domain]*depth_diff)/np.sum(likelihood[domain])
+        
+        return hunc, vunc
 
 def _detect_peaks(
     x,

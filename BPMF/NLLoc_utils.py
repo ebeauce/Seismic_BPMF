@@ -410,8 +410,12 @@ def write_NLLoc_control(
     angle_grid="ANGLES_NO",
     grid="MISFIT",
     n_depth_points=None,
+    **kwargs
 ):
     """Write the NLLoc control file."""
+    kwargs.setdefault("initNumCells_x", 10)
+    kwargs.setdefault("initNumCells_y", 10)
+    kwargs.setdefault("initNumCells_z", 10)
     fc = open(os.path.join(NLLoc_input_path, ctrl_filename), "w")
     fc.write("# ---------------------------\n")
     fc.write("#    Generic control file statements    \n")
@@ -428,12 +432,26 @@ def write_NLLoc_control(
     fc.write(f"LOCFILES  {in_fn}  NLLOC_OBS  {NLLoc_basename}  {out_fn}\n")
     # fc.write('LOCHYPOUT  SAVE_NLLOC_ALL  SAVE_HYPOINV_SUM\n')
     fc.write("LOCHYPOUT  SAVE_NLLOC_ALL\n")
-    fc.write(f"LOCSEARCH  OCT 10 10 10 {min_node_size} 10000 1000 1 1\n")
+
+    fc.write(
+            f"LOCSEARCH  OCT {kwargs['initNumCells_x']} "
+            f"{kwargs['initNumCells_y']} {kwargs['initNumCells_z']} "
+            f"{min_node_size} 10000 1000 1 1\n"
+            )
     # read header file to automatically determine grid dimensions
     fn = glob.glob(os.path.join(NLLoc_input_path, "*hdr"))[0]
     with open(fn, "r") as fhdr:
         dim = fhdr.readline()
     locgrid_params = dim.split()[:-1]
+    locgrid_params[0] = str(kwargs.get("xNum", locgrid_params[0]))
+    locgrid_params[1] = str(kwargs.get("yNum", locgrid_params[1]))
+    locgrid_params[2] = str(kwargs.get("zNum", locgrid_params[2]))
+    locgrid_params[3] = str(kwargs.get("xOrig", locgrid_params[3]))
+    locgrid_params[4] = str(kwargs.get("yOrig", locgrid_params[4]))
+    locgrid_params[5] = str(kwargs.get("zOrig", locgrid_params[5]))
+    locgrid_params[6] = str(kwargs.get("dx", locgrid_params[6]))
+    locgrid_params[7] = str(kwargs.get("dy", locgrid_params[7]))
+    locgrid_params[8] = str(kwargs.get("dz", locgrid_params[8]))
     if n_depth_points is not None:
         locgrid_params[2] = str(min(int(locgrid_params[2]), n_depth_points))
     fc.write("LOCGRID  " + "  ".join(locgrid_params) + f"  {grid}  SAVE\n")

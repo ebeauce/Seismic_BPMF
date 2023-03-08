@@ -157,9 +157,125 @@ def preprocess_stream(
     minimum_chunk_duration=600.0,
     verbose=True,
     SR_decimals=1,
+    decimation_method="simple",
+    unit="VEL",
+    n_threads=1,
+    **kwargs,
+):
+    """
+    Preprocesses a stream of seismic data.
+
+    Parameters
+    ----------
+    stream : obspy.Stream
+        A stream of seismic data.
+    freqmin : float, optional
+        The minimum frequency to bandpass filter the data.
+    freqmax : float, optional
+        The maximum frequency to bandpass filter the data.
+    target_SR : float, optional
+        The target sampling rate of the data.
+    remove_response : bool, optional
+        Whether to remove instrument response from the data.
+    remove_sensitivity : bool, optional
+        Whether to remove instrument sensitivity from the data.
+    plot_resp : bool, optional
+        Whether to plot the instrument response of the data.
+    target_duration : float, optional
+        The target duration of the data.
+    target_starttime : obspy.UTCDateTime, optional
+        The start time of the target data.
+    target_endtime : obspy.UTCDateTime, optional
+        The end time of the target data.
+    minimum_length : float, optional
+        The minimum length of the data as a fraction of the target duration.
+    minimum_chunk_duration : float, optional
+        The minimum duration of each data chunk.
+    verbose : bool, optional
+        Whether to print verbose output during processing.
+    SR_decimals : int, optional
+        The number of decimals to round sampling rate values to.
+    decimation_method : str, optional
+        The method used for decimation.
+    unit : str, optional
+        The unit of the data.
+    n_threads : int, optional
+        The number of threads over which preprocesing is parallelized.
+    **kwargs : dict
+        Other keyword arguments to pass to the function.
+
+    Returns
+    -------
+    obspy.Stream
+        A preprocessed stream of seismic data.
+    """
+    from functools import partial
+    data_preprocessor = partial(
+            _preprocess_stream,
+            freqmin=freqmin,
+            freqmax=freqmax,
+            target_SR=target_SR,
+            remove_response=remove_response,
+            remove_sensitivity=remove_sensitivity,
+            plot_resp=plot_resp,
+            target_duration=target_duration,
+            target_starttime=target_starttime,
+            target_endtime=target_endtime,
+            minimum_length=minimum_length,
+            minimum_chunk_duration=minimum_chunk_duration,
+            verbose=verbose,
+            SR_decimals=SR_decimals,
+            decimation_method=decimation_method,
+            unit=unit,
+            **kwargs
+            )
+    if n_threads != 1:
+        from concurrent.futures import ProcessPoolExecutor
+        with ProcessPoolExecutor(max_workers=n_threads) as executor:
+            # we need to group traces from same channels, therefore,
+            # we use merge to fill gaps with masked arrays
+            stream.merge()
+            preprocessed_stream = list(executor.map(data_preprocessor, stream))
+            try:
+                preprocessed_stream = [
+                        tr[0] for tr in preprocessed_stream if len(tr) > 0
+                        ]
+            except Exception as e:
+                print(e)
+                print(preprocessed_stream)
+                for i, tr in enumerate(preprocessed_stream):
+                    print(i, tr, len(tr))
+                sys.exit(0)
+        return obs.Stream(preprocessed_stream)
+    else:
+        return data_preprocessor(stream)
+
+
+def _preprocess_stream(
+    stream,
+    freqmin=None,
+    freqmax=None,
+    target_SR=None,
+    remove_response=False,
+    remove_sensitivity=False,
+    plot_resp=False,
+    target_duration=None,
+    target_starttime=None,
+    target_endtime=None,
+    minimum_length=0.75,
+    minimum_chunk_duration=600.0,
+    verbose=True,
+    SR_decimals=1,
+    decimation_method="simple",
     unit="VEL",
     **kwargs,
 ):
+    """
+    See `preprocess_stream`.
+    """
+    if isinstance(stream, obs.Trace):
+        # user gave a single trace instead of a stream
+        stream = obs.Stream(stream)
     preprocessed_stream = obs.Stream()
     if len(stream) == 0:
         print("Input data is empty!")
@@ -172,7 +288,7 @@ def preprocess_stream(
     # first, round sampling rates that may be misrepresented in floating point numbers
     for tr in stream:
         tr.stats.sampling_rate = np.round(tr.stats.sampling_rate, decimals=SR_decimals)
-        # and remove the short chunks now to gain time 
+        # and remove the short chunks now to gain time
         # (only works if the traces do not come with masked arrays)
         t1 = udt(tr.stats.starttime.timestamp)
         t2 = udt(tr.stats.endtime.timestamp)
@@ -227,7 +343,7 @@ def preprocess_stream(
         # split will lose information about start and end times
         # if the start or the end is masked
         tr = tr.split()
-        for chunk in tr: 
+        for chunk in tr:
             t1 = udt(chunk.stats.starttime.timestamp)
             t2 = udt(chunk.stats.endtime.timestamp)
             if t2 - t1 < minimum_chunk_duration:
@@ -255,37 +371,6 @@ def preprocess_stream(
     # elements, it is necessary to merge the stream
     preprocessed_stream = preprocessed_stream.merge(fill_value=0.0)
 
-    ## second, make a list of all stations in stream
-    #stations = []
-    #for tr in preprocessed_stream:
-    #    stations.append(tr.stats.station)
-    #stations = list(set(stations))
-    ## third, make a list of all channel types for each station
-    #for station in stations:
-    #    st = preprocessed_stream.select(station=station)
-    #    channels = []
-    #    for tr in st:
-    #        channels.append(tr.stats.channel[:-1])
-    #    channels = list(set(channels))
-    #    # fourth, for each channel type, make a list of all sampling
-    #    # rates and detect anomalies if there are more than one single
-    #    # sampling rate
-    #    sampling_rates = []
-    #    for cha in channels:
-    #        st_cha = st.select(channel=f"{cha}*")
-    #        for tr in st_cha:
-    #            sampling_rates.append(tr.stats.sampling_rate)
-    #    unique_sampling_rates, sampling_rates_counts = np.unique(
-    #        sampling_rates, return_counts=True
-    #    )
-    #    # if more than one sampling rate, remove the traces with the least
-    #    # represented sampling rate
-    #    if len(unique_sampling_rates) > 1:
-    #        ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
-    #        for tr in preprocessed_stream:
-    #            if tr.stats.sampling_rate != ref_sampling_rate:
-    #                print(f"Removing {tr} (target SR is {ref_sampling_rate})")
-    #                preprocessed_stream.remove(tr)
     # delete the original data to save memory
     del stream
     # resample if necessary:
@@ -302,11 +387,15 @@ def preprocess_stream(
                 min_attenuation_dB=40.0,
                 zerophase=True,
             )
-            if np.round(sr_ratio, decimals=0) == sr_ratio:
+            if (
+                np.round(sr_ratio, decimals=0) == sr_ratio
+            ) and decimation_method == "simple":
                 # tr's sampling rate is an integer
                 # multiple of target_SR
                 # do not re-filter the data
                 tr.decimate(int(sr_ratio), no_filter=True)
+            elif decimation_method == "fourier":
+                tr.resample(target_SR, no_filter=True)
             else:
                 tr.resample(target_SR, no_filter=True)
         elif sr_ratio < 1:
@@ -439,8 +528,8 @@ def load_travel_times(
                 if source_indexes is not None:
                     # select a subset of the source grid
                     source_indexes_unravelled = np.unravel_index(
-                            source_indexes, grid_shape
-                            )
+                        source_indexes, grid_shape
+                    )
                     selection = np.zeros(grid_shape, dtype=bool)
                     selection[source_indexes_unravelled] = True
                     tts.loc[sta, ph] = f[f"tt_{ph}"][sta][selection].flatten()
@@ -448,9 +537,7 @@ def load_travel_times(
                     tts.loc[sta, ph] = f[f"tt_{ph}"][sta][()].flatten()
         if return_coords:
             if source_indexes is not None:
-                source_indexes_unravelled = np.unravel_index(
-                        source_indexes, grid_shape
-                        )
+                source_indexes_unravelled = np.unravel_index(source_indexes, grid_shape)
                 selection = np.zeros(grid_shape, dtype=bool)
                 selection[source_indexes_unravelled] = True
                 source_coords = pd.DataFrame(
@@ -1329,13 +1416,13 @@ def get_np_array(
     -----------
     stream: Obspy Stream instance
         The Obspy Stream instance with the waveform time series.
-    stations: List of strings
+    stations: list of strings
         Names of the stations to include in the output array. Define the order
         of the station axis.
-    components: List of strings, default to ['N','E','Z']
+    components: list of strings, default to ['N','E','Z']
         Names of the components to include in the output array. Define the order
         of the component axis.
-    component_aliases: Dictionary, optional
+    component_aliases: dictionary, optional
         Sometimes, components might be named differently than N, E, Z. This
         dictionary tells the function which alternative component names can be
         associated with each "canonical" component. For example,
@@ -1471,3 +1558,19 @@ def two_point_distance(lon_1, lat_1, depth_1, lon_2, lat_2, depth_2):
     dist /= 1000.0  # from m to km
     dist = np.sqrt(dist**2 + (depth_1 - depth_2) ** 2)
     return dist
+
+def donefun():
+    """
+    Super useful function.
+    """
+    print("""⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+    ⠀⠀⠀⠀⠀⠀⢀⡤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀
+    ⠀⠀⠀⠀⠀⢀⡏⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⣀⠴⠋⠉⠉⡆⠀⠀⠀⠀⠀
+    ⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠈⠉⠉⠙⠓⠚⠁⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀
+    ⠀⠀⠀⠀⢀⠞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣄⠀⠀⠀⠀
+    ⠀⠀⠀⠀⡞⠀⠀⠀⠀⠀⠶⠀⠀⠀⠀⠀⠀⠦⠀⠀⠀⠀⠀⠸⡆⠀⠀⠀
+    ⢠⣤⣶⣾⣧⣤⣤⣀⡀⠀⠀⠀⠀⠈⠀⠀⠀⢀⡤⠴⠶⠤⢤⡀⣧⣀⣀⠀
+    ⠻⠶⣾⠁⠀⠀⠀⠀⠙⣆⠀⠀⠀⠀⠀⠀⣰⠋⠀⠀⠀⠀⠀⢹⣿⣭⣽⠇
+    ⠀⠀⠙⠤⠴⢤⡤⠤⠤⠋⠉⠉⠉⠉⠉⠉⠉⠳⠖⠦⠤⠶⠦⠞⠁⠀⠀⠀
+                ALL DONE!⠀⠀⠀⠀
+    """)
