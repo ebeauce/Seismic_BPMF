@@ -10,10 +10,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -27,11 +25,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -58,7 +60,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
       <li class="breadcrumb-item active">BPMF.similarity_search</li>
       <li class="wy-breadcrumbs-aside">
@@ -92,7 +94,7 @@
 
 
 <div class="viewcode-block" id="MatchedFilter"><a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter">[docs]</a><span class="k">class</span> <span class="nc">MatchedFilter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class for running a matched filter search and detecting earthquakes.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for running a matched filter search and detecting earthquakes.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -108,8 +110,13 @@
         <span class="n">step</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">MATCHED_FILTER_STEP_SAMP</span><span class="p">,</span>
         <span class="n">max_memory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">max_workers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">anomalous_cdf_at_mean_plus_1sig</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
+        <span class="n">window_for_validation_Tmax</span><span class="o">=</span><span class="mf">100.</span><span class="p">,</span>
+        <span class="n">offset_win_peak_amp_sec</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">duration_win_peak_amp_sec</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
+        <span class="n">phase_on_comp_peak_amp</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="s2">&quot;P&quot;</span><span class="p">}</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Instanciate a MatchedFilter object.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instanciate a MatchedFilter object.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ------------</span>
@@ -151,6 +158,33 @@
 <span class="sd">        max_workers: scalar int or None, default to None</span>
 <span class="sd">            Controls the maximum number of threads created when finding</span>
 <span class="sd">            detections of new events in the CC time series. If None, use one CPU.</span>
+<span class="sd">        anomalous_cdf_at_mean_plus_1sig: scalar float, optional</span>
+<span class="sd">            Anomalous cumulative distribution function (cdf), between 0 and 1,</span>
+<span class="sd">            at {mean + 1xsigma}(CC), default to 0.50. The CC distribution is</span>
+<span class="sd">            approximately gaussian and, therefore, the expected value of </span>
+<span class="sd">            {mean + 1xsigma}(CC) is 0.78. If {mean + 1xsigma}(CC) is</span>
+<span class="sd">            significantly lower than 0.78 in the vicinity of a CC(t) that</span>
+<span class="sd">            exceeded `threshold`, that is, lower than</span>
+<span class="sd">            `anomalous_cdf_at_mean_plus_1sig`, then we consider that {mean +</span>
+<span class="sd">            1xsigma}(CC) was not properly estimated at time t. Since {mean +</span>
+<span class="sd">            1xsigma}(CC) is computed from `threshold`, the detection threshold</span>
+<span class="sd">            was probably not adequate and we discard CC(t). **Set this parameter</span>
+<span class="sd">            to zero to deactivate validation of the detection threshold.**</span>
+<span class="sd">        window_for_validation_Tmax: scalar float, optional</span>
+<span class="sd">            Window duration, in units of Tmax, the longest period in the data</span>
+<span class="sd">            (that is, the inverse of `cfg.MIN_FREQ_HZ`), for analyzing the</span>
+<span class="sd">            statistic of CC(t) in the vicinity of each CC(t) &gt; `threshold`.</span>
+<span class="sd">            Default to 100.</span>
+<span class="sd">        offset_win_peak_amp_sec : scalar, optional</span>
+<span class="sd">            The offset, in seconds, between the phase pick and the beginning of the window</span>
+<span class="sd">            used to extract the event peak amplitude at a given channel.</span>
+<span class="sd">            Default is 1 second.</span>
+<span class="sd">        duration_win_peak_amp_sec : scalar, optional</span>
+<span class="sd">            The duration, in seconds, of the window used to extract the event</span>
+<span class="sd">            peak amplitude at a given channel. Default is 3 seconds.</span>
+<span class="sd">        phase_on_comp_peak_amp : dictionary, optional</span>
+<span class="sd">            A dictionary defining which phase is used on each channel when</span>
+<span class="sd">            measuring the peak amplides.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span> <span class="o">=</span> <span class="n">template_group</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_channels</span> <span class="o">=</span> <span class="n">min_channels</span>
@@ -166,6 +200,12 @@
         <span class="k">if</span> <span class="n">max_workers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">max_workers</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_workers</span> <span class="o">=</span> <span class="n">max_workers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_cdf_at_mean_plus_1sig</span> <span class="o">=</span> <span class="n">anomalous_cdf_at_mean_plus_1sig</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_for_validation_Tmax</span> <span class="o">=</span> <span class="n">window_for_validation_Tmax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset_win_peak_amp_sec</span> <span class="o">=</span> <span class="n">offset_win_peak_amp_sec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">duration_win_peak_amp_sec</span> <span class="o">=</span> <span class="n">duration_win_peak_amp_sec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase_on_comp_peak_amp</span> <span class="o">=</span> <span class="n">phase_on_comp_peak_amp</span>
+
 
     <span class="c1"># properties</span>
     <span class="nd">@property</span>
@@ -187,7 +227,7 @@
             <span class="k">return</span> <span class="n">nGbytes</span>
 
 <div class="viewcode-block" id="MatchedFilter.set_data"><a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.set_data">[docs]</a>    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Attribute `dataset.Data` instance to `self`.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Attribute `dataset.Data` instance to `self`.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ------------</span>
@@ -196,15 +236,29 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_np_array</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">components</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">components</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset_win_peak_amp_samp</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">offset_win_peak_amp_sec</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sr</span>
+                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">duration_win_peak_amp_samp</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">duration_win_peak_amp_sec</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sr</span>
+                <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">:</span>
             <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_arr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">norm</span><span class="p">[</span><span class="n">norm</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_norm</span> <span class="o">=</span> <span class="n">norm</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data_arr</span> <span class="o">/=</span> <span class="n">norm</span></div>
 
-<div class="viewcode-block" id="MatchedFilter.select_cc_indexes"><a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.select_cc_indexes">[docs]</a>    <span class="k">def</span> <span class="nf">select_cc_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cc_t</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">search_win</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Select the peaks in the CC time series.</span>
+<div class="viewcode-block" id="MatchedFilter.select_cc_indexes"><a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.select_cc_indexes">[docs]</a>    <span class="k">def</span> <span class="nf">select_cc_indexes</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">cc_t</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="p">,</span>
+            <span class="n">search_win</span><span class="p">,</span>
+            <span class="n">anomalous_cdf_at_mean_plus_1sig</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
+            <span class="n">window_for_validation_Tmax</span><span class="o">=</span><span class="mf">100.</span><span class="p">,</span>
+            <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Select the peaks in the CC time series.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ------------</span>
@@ -214,6 +268,23 @@
 <span class="sd">            The detection threshold.</span>
 <span class="sd">        search_win: scalar int</span>
 <span class="sd">            The minimum inter-event time, in units of correlation step.</span>
+<span class="sd">        anomalous_cdf_at_mean_plus_1sig: scalar float, optional</span>
+<span class="sd">            Anomalous cumulative distribution function (cdf), between 0 and 1,</span>
+<span class="sd">            at {mean + 1xsigma}(CC), default to 0.50. The CC distribution is</span>
+<span class="sd">            approximately gaussian and, therefore, the expected value of </span>
+<span class="sd">            {mean + 1xsigma}(CC) is 0.78. If {mean + 1xsigma}(CC) is</span>
+<span class="sd">            significantly lower than 0.78 in the vicinity of a CC(t) that</span>
+<span class="sd">            exceeded `threshold`, that is, lower than</span>
+<span class="sd">            `anomalous_cdf_at_mean_plus_1sig`, then we consider that {mean +</span>
+<span class="sd">            1xsigma}(CC) was not properly estimated at time t. Since {mean +</span>
+<span class="sd">            1xsigma}(CC) is computed from `threshold`, the detection threshold</span>
+<span class="sd">            was probably not adequate and we discard CC(t). **Set this parameter</span>
+<span class="sd">            to zero to deactivate validation of the detection threshold.**</span>
+<span class="sd">        window_for_validation_Tmax: scalar float, optional</span>
+<span class="sd">            Window duration, in units of Tmax, the longest period in the data</span>
+<span class="sd">            (that is, the inverse of `cfg.MIN_FREQ_HZ`), for analyzing the</span>
+<span class="sd">            statistic of CC(t) in the vicinity of each CC(t) &gt; `threshold`.</span>
+<span class="sd">            Default to 100.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        --------</span>
@@ -225,8 +296,9 @@
         <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span>
         <span class="n">cc_detections</span> <span class="o">=</span> <span class="n">cc_t</span> <span class="o">&gt;</span> <span class="n">threshold</span>
         <span class="n">cc_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">cc_detections</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">CDF_AT_MEAN_PLUS_1SIG</span> <span class="o">=</span> <span class="mf">0.78</span>
-        <span class="n">WINDOW_FOR_VALIDATION</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">MIN_FREQ_HZ</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">)</span>
+        <span class="n">WINDOW_FOR_VALIDATION</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                <span class="mf">1.0</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">MIN_FREQ_HZ</span> <span class="o">*</span> <span class="n">window_for_validation_Tmax</span>
+                <span class="p">)</span>
         <span class="n">cc_at_mean_plus_1sig</span> <span class="o">=</span> <span class="n">threshold</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">N_DEV_MF_THRESHOLD</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold_type</span> <span class="o">==</span> <span class="s2">&quot;mad&quot;</span><span class="p">:</span>
@@ -246,31 +318,26 @@
                 <span class="n">n_rm</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">cc_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">cc_idx</span><span class="p">)</span>
 
-        <span class="c1"># test the validity of detection threshold?</span>
-        <span class="n">valid_detections</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cc_idx</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cc_idx</span><span class="p">)):</span>
-            <span class="n">idx0</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cc_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">WINDOW_FOR_VALIDATION</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="n">idx1</span> <span class="o">=</span> <span class="n">idx0</span> <span class="o">+</span> <span class="n">WINDOW_FOR_VALIDATION</span>
-            <span class="k">if</span> <span class="n">idx1</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cc_t</span><span class="p">):</span>
-                <span class="n">idx1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cc_t</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-                <span class="n">idx0</span> <span class="o">=</span> <span class="n">idx1</span> <span class="o">-</span> <span class="n">WINDOW_FOR_VALIDATION</span>
-            <span class="c1">#frac = np.sum(cc_t[idx0:idx1] &lt; cc_at_mean_plus_1sig[cc_idx[i]]) / float(</span>
-            <span class="c1">#    WINDOW_FOR_VALIDATION</span>
-            <span class="c1">#)</span>
-            <span class="c1">##print(frac)</span>
-            <span class="c1">#if frac &lt; 0.75 * CDF_AT_MEAN_PLUS_1SIG:</span>
-            <span class="n">cc1</span> <span class="o">=</span> <span class="n">cc_t</span><span class="p">[</span><span class="n">idx0</span><span class="p">:</span><span class="n">idx1</span><span class="p">][:</span><span class="n">WINDOW_FOR_VALIDATION</span><span class="o">//</span><span class="mi">2</span><span class="p">]</span>
-            <span class="n">cc2</span> <span class="o">=</span> <span class="n">cc_t</span><span class="p">[</span><span class="n">idx0</span><span class="p">:</span><span class="n">idx1</span><span class="p">][</span><span class="n">WINDOW_FOR_VALIDATION</span><span class="o">//</span><span class="mi">2</span><span class="p">:]</span>
-            <span class="n">frac</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cc1</span> <span class="o">&lt;</span> <span class="n">cc_at_mean_plus_1sig</span><span class="p">[</span><span class="n">cc_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cc1</span><span class="p">)),</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cc2</span> <span class="o">&lt;</span> <span class="n">cc_at_mean_plus_1sig</span><span class="p">[</span><span class="n">cc_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cc2</span><span class="p">))</span>
-                    <span class="p">)</span>
-            <span class="k">if</span> <span class="n">frac</span> <span class="o">&lt;</span> <span class="mf">0.75</span> <span class="o">*</span> <span class="n">CDF_AT_MEAN_PLUS_1SIG</span><span class="p">:</span>
-                <span class="c1"># theoretical fraction is 0.78</span>
-                <span class="c1"># an anomalous amount of CCs are above +1sig</span>
-                <span class="c1"># the detection threshold most likely failed (gap in data?)</span>
-                <span class="n">valid_detections</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">cc_idx</span> <span class="o">=</span> <span class="n">cc_idx</span><span class="p">[</span><span class="n">valid_detections</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">anomalous_cdf_at_mean_plus_1sig</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">:</span>
+            <span class="c1"># test the validity of detection threshold?</span>
+            <span class="n">valid_detections</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cc_idx</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cc_idx</span><span class="p">)):</span>
+                <span class="n">idx0</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cc_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">WINDOW_FOR_VALIDATION</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">idx1</span> <span class="o">=</span> <span class="n">idx0</span> <span class="o">+</span> <span class="n">WINDOW_FOR_VALIDATION</span>
+                <span class="k">if</span> <span class="n">idx1</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cc_t</span><span class="p">):</span>
+                    <span class="n">idx1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cc_t</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="n">idx0</span> <span class="o">=</span> <span class="n">idx1</span> <span class="o">-</span> <span class="n">WINDOW_FOR_VALIDATION</span>
+                <span class="n">cc1</span> <span class="o">=</span> <span class="n">cc_t</span><span class="p">[</span><span class="n">idx0</span><span class="p">:</span><span class="n">idx1</span><span class="p">][:</span><span class="n">WINDOW_FOR_VALIDATION</span><span class="o">//</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">cc2</span> <span class="o">=</span> <span class="n">cc_t</span><span class="p">[</span><span class="n">idx0</span><span class="p">:</span><span class="n">idx1</span><span class="p">][</span><span class="n">WINDOW_FOR_VALIDATION</span><span class="o">//</span><span class="mi">2</span><span class="p">:]</span>
+                <span class="n">frac</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cc1</span> <span class="o">&lt;</span> <span class="n">cc_at_mean_plus_1sig</span><span class="p">[</span><span class="n">cc_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cc1</span><span class="p">)),</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cc2</span> <span class="o">&lt;</span> <span class="n">cc_at_mean_plus_1sig</span><span class="p">[</span><span class="n">cc_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cc2</span><span class="p">))</span>
+                        <span class="p">)</span>
+                <span class="k">if</span> <span class="n">frac</span> <span class="o">&lt;</span> <span class="n">anomalous_cdf_at_mean_plus_1sig</span><span class="p">:</span>
+                    <span class="c1"># an anomalous amount of CCs are above +1sig</span>
+                    <span class="c1"># the detection threshold most likely failed (gap in data?)</span>
+                    <span class="n">valid_detections</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">cc_idx</span> <span class="o">=</span> <span class="n">cc_idx</span><span class="p">[</span><span class="n">valid_detections</span><span class="p">]</span>
 
         <span class="c1"># go back to regular sampling space</span>
         <span class="n">detection_indexes</span> <span class="o">=</span> <span class="n">cc_idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span>
@@ -287,7 +354,7 @@
         <span class="k">return</span> <span class="n">cc_idx</span></div>
 
 <div class="viewcode-block" id="MatchedFilter.compute_cc_time_series"><a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.compute_cc_time_series">[docs]</a>    <span class="k">def</span> <span class="nf">compute_cc_time_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight_type</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">tids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Compute the CC time series (step 1 of matched-filter search).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the CC time series (step 1 of matched-filter search).</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -361,14 +428,6 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">,</span>
                     <span class="n">arch</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
                 <span class="p">)</span>
-                <span class="c1"># cc_sums = fmf.matched_filter(</span>
-                <span class="c1">#    self.template_group.waveforms_arr[:, id1:id2, :, :],</span>
-                <span class="c1">#    self.template_group.moveouts_arr[:, id1:id2, :],</span>
-                <span class="c1">#    weights_arr[:, id1:id2, :],</span>
-                <span class="c1">#    self.data_arr[id1:id2, ...],</span>
-                <span class="c1">#    step,</span>
-                <span class="c1">#    arch=device,</span>
-                <span class="c1"># )</span>
                 <span class="n">CC_SUMS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc_sums</span><span class="p">)</span>
             <span class="n">cc_sums</span> <span class="o">=</span> <span class="n">CC_SUMS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_network_chunks</span><span class="p">):</span>
@@ -391,7 +450,7 @@
         <span class="n">sanity_check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Analyze the time series of correlation coefficients to find detections.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Analyze the time series of correlation coefficients to find detections.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        -----------</span>
@@ -439,7 +498,7 @@
         <span class="k">return</span> <span class="n">detections</span></div>
 
     <span class="k">def</span> <span class="nf">_find_detections_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tid</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
         <span class="c1"># t: index in this run&#39;s loop</span>
         <span class="c1"># tt: index in the self.template_group.templates list</span>
         <span class="c1"># tid: template id</span>
@@ -497,7 +556,13 @@
             <span class="mi">10</span> <span class="o">*</span> <span class="n">minimum_interevent_time</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">d_mv</span><span class="p">,</span> <span class="n">minimum_interevent_time</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">search_win</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span>  <span class="c1"># time in correlation steps units</span>
-        <span class="n">cc_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_cc_indexes</span><span class="p">(</span><span class="n">cc_t</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">search_win</span><span class="p">)</span>
+        <span class="n">cc_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_cc_indexes</span><span class="p">(</span>
+                <span class="n">cc_t</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="p">,</span>
+                <span class="n">search_win</span><span class="p">,</span>
+                <span class="n">anomalous_cdf_at_mean_plus_1sig</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">anomalous_cdf_at_mean_plus_1sig</span><span class="p">,</span>
+                <span class="n">window_for_validation_Tmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">window_for_validation_Tmax</span><span class="p">,</span>
+                <span class="p">)</span>
         <span class="n">detection_indexes</span> <span class="o">=</span> <span class="n">cc_idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span>
         <span class="c1"># ----------------------------------------------------------</span>
         <span class="n">n_detections</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">detection_indexes</span><span class="p">)</span>
@@ -508,11 +573,11 @@
         <span class="c1"># give template&#39;s attributes to each detection</span>
         <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">templates</span><span class="p">[</span><span class="n">tt</span><span class="p">]</span>
         <span class="c1"># make sure stations and mv are consistent</span>
-        <span class="n">stations</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">moveouts</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;U&quot;</span><span class="p">)</span>
+        <span class="n">stations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;U&quot;</span><span class="p">)</span>
         <span class="n">latitude</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">latitude</span>
         <span class="n">longitude</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">longitude</span>
         <span class="n">depth</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">depth</span>
-        <span class="n">mv</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">moveouts</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">mv</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">moveouts</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
         <span class="n">phases</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">phases</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">detection_indexes</span><span class="p">)):</span>
             <span class="n">event</span> <span class="o">=</span> <span class="n">Stream</span><span class="p">()</span>
@@ -530,10 +595,34 @@
                 <span class="n">sampling_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sr</span><span class="p">,</span>
                 <span class="n">data_reader</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">data_reader</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_peak_amplitudes</span><span class="p">:</span>
+                <span class="n">peak_amplitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                        <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+                        <span class="p">)</span>
+                <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">cp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">):</span>
+                        <span class="n">ph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_on_comp_peak_amp</span><span class="p">[</span><span class="n">cp</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                        <span class="n">mv_sc</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span>
+                                <span class="n">template</span><span class="o">.</span><span class="n">moveouts</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;moveouts_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span>
+                                <span class="n">sr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sr</span>
+                                <span class="p">)</span>
+                        <span class="n">time_idx1</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="n">detection_indexes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                                <span class="o">+</span> <span class="n">mv_sc</span>
+                                <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset_win_peak_amp_samp</span>
+                                <span class="p">)</span>
+                        <span class="n">time_idx2</span> <span class="o">=</span> <span class="n">time_idx1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration_win_peak_amp_samp</span>
+                        <span class="n">win_peak_amp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_arr</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">time_idx1</span><span class="p">:</span><span class="n">time_idx2</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">win_peak_amp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">peak_amplitudes</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                                    <span class="n">win_peak_amp</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_norm</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span>
+                                    <span class="p">)</span>
             <span class="n">aux_data</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;cc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cc_t</span><span class="p">[</span><span class="n">cc_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
             <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;n_threshold&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cc_t</span><span class="p">[</span><span class="n">cc_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">/</span> <span class="n">threshold</span><span class="p">[</span><span class="n">cc_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
             <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;tid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tid</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_peak_amplitudes</span><span class="p">:</span>
+                <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;peak_amplitudes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak_amplitudes</span>
             <span class="n">event</span><span class="o">.</span><span class="n">set_aux_data</span><span class="p">(</span><span class="n">aux_data</span><span class="p">)</span>
             <span class="n">detections_t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">detections_t</span><span class="p">,</span> <span class="n">tid</span>
@@ -546,9 +635,11 @@
         <span class="n">threshold_window_dur</span><span class="o">=</span><span class="mf">1800.0</span><span class="p">,</span>
         <span class="n">overlap</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
         <span class="n">sanity_check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">extract_peak_amplitudes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Run the matched-filter search.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the matched-filter search.</span>
 
 <span class="sd">        If `self.max_memory` is specified, divide the task into chunks so that</span>
 <span class="sd">        the device memory is not exceeded.</span>
@@ -577,6 +668,11 @@
 <span class="sd">            Dictionary where `detections[tid]` is a list of `dataset.Event` for</span>
 <span class="sd">            all events detected with template `tid`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;anomalous_cdf_at_mean_plus_1sig&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_cdf_at_mean_plus_1sig</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;anomalous_cdf_at_mean_plus_1sig&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;window_for_validation_Tmax&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">window_for_validation_Tmax</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;window_for_validation_Tmax&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extract_peak_amplitudes</span> <span class="o">=</span> <span class="n">extract_peak_amplitudes</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_memory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">n_tp_chunk</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_memory</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_cc_time_series</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -618,8 +714,8 @@
     <span class="c1"># -------------------------------------------</span>
     <span class="c1">#       Plotting methods</span>
     <span class="c1"># -------------------------------------------</span>
-<div class="viewcode-block" id="MatchedFilter.plot_cc"><a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.plot_cc">[docs]</a>    <span class="k">def</span> <span class="nf">plot_cc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">7</span><span class="p">)):</span>
-        <span class="sd">&quot;&quot;&quot;Plot the time series of correlation coefficients.</span>
+<div class="viewcode-block" id="MatchedFilter.plot_cc"><a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.plot_cc">[docs]</a>    <span class="k">def</span> <span class="nf">plot_cc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the time series of correlation coefficients.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        -----------</span>
@@ -642,7 +738,10 @@
 
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># plot the correlation coefficients</span>
-            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;correlation_coefficients_tp</span><span class="si">{</span><span class="n">tid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;correlation_coefficients_tp</span><span class="si">{</span><span class="n">tid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">figsize</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;figsize&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+                    <span class="p">)</span>
             <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
@@ -672,18 +771,25 @@
             <span class="n">cc_t</span><span class="p">,</span>
             <span class="n">detection_threshold</span><span class="p">,</span>
             <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minimum_interevent_time</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">sr</span><span class="p">)</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">,</span>
+            <span class="n">anomalous_cdf_at_mean_plus_1sig</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">anomalous_cdf_at_mean_plus_1sig</span><span class="p">,</span>
+            <span class="n">window_for_validation_Tmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">window_for_validation_Tmax</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">time_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)[::</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">][</span>
             <span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">cc_t</span><span class="p">)</span>
         <span class="p">]</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">time_indexes</span><span class="p">],</span> <span class="n">cc_t</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">time_indexes</span><span class="p">],</span>
+                <span class="n">cc_t</span><span class="p">,</span>
+                <span class="n">rasterized</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;rasterized&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">time_indexes</span><span class="p">],</span>
             <span class="n">detection_threshold</span><span class="p">,</span>
             <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">,</span>
             <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Detection Threshold&quot;</span><span class="p">,</span>
+            <span class="n">rasterized</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;rasterized&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cc_idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
@@ -725,7 +831,7 @@
         <span class="n">component_aliases</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">],</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">],</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">]},</span>
         <span class="n">n_max_stations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Plot a detection and the correlation coefficients.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot a detection and the correlation coefficients.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        -----------</span>
@@ -827,98 +933,10 @@
         <span class="k">return</span> <span class="n">fig</span></div></div>
 
 
-<span class="c1"># def time_dependent_threshold(</span>
-<span class="c1">#    time_series, sliding_window, overlap=0.66, threshold_type=&quot;rms&quot;, white_noise=None</span>
-<span class="c1"># ):</span>
-<span class="c1">#    &quot;&quot;&quot;</span>
-<span class="c1">#    Time dependent detection threshold.</span>
-<span class="c1">#</span>
-<span class="c1">#    Parameters</span>
-<span class="c1">#    -----------</span>
-<span class="c1">#    time_series: (n_correlations) array_like</span>
-<span class="c1">#        The array of correlation coefficients calculated by</span>
-<span class="c1">#        FMF (float 32).</span>
-<span class="c1">#    sliding_window: scalar integer</span>
-<span class="c1">#        The size of the sliding window, in samples, used</span>
-<span class="c1">#        to calculate the time dependent central tendency</span>
-<span class="c1">#        and deviation of the time series.</span>
-<span class="c1">#    overlap: scalar float, default to 0.75</span>
-<span class="c1">#    threshold_type: string, default to &#39;rms&#39;</span>
-<span class="c1">#        Either rms or mad, depending on which measure</span>
-<span class="c1">#        of deviation you want to use.</span>
-<span class="c1">#    white_noise: `numpy.ndarray` or None, default to None</span>
-<span class="c1">#        If not None, `white_noise` is a vector of random values sampled from the</span>
-<span class="c1">#        standard normal distribution. It is used to fill zeros in the CC time</span>
-<span class="c1">#        series. If None, a random vector is generated from scratch.</span>
-<span class="c1">#</span>
-<span class="c1">#    Returns</span>
-<span class="c1">#    ----------</span>
-<span class="c1">#    threshold: (n_correlations) array_like</span>
-<span class="c1">#        Returns the time dependent threshold, with same</span>
-<span class="c1">#        size as the input time series.</span>
-<span class="c1">#    &quot;&quot;&quot;</span>
-<span class="c1">#    from scipy.interpolate import interp1d</span>
-<span class="c1">#</span>
-<span class="c1">#    threshold_type = threshold_type.lower()</span>
-<span class="c1">#    n_samples = len(time_series)</span>
-<span class="c1">#    shift = int((1.0 - overlap) * sliding_window)</span>
-<span class="c1">#    last_valid_win = n_samples - sliding_window + 1</span>
-<span class="c1">#    # time is the time at the end of the sliding window</span>
-<span class="c1">#    time = (</span>
-<span class="c1">#        np.hstack(</span>
-<span class="c1">#            (</span>
-<span class="c1">#                np.arange(n_samples, dtype=np.int32)[0:last_valid_win:shift],</span>
-<span class="c1">#                last_valid_win,</span>
-<span class="c1">#            )</span>
-<span class="c1">#        )</span>
-<span class="c1">#        + sliding_window</span>
-<span class="c1">#    )</span>
-<span class="c1">#    zeros = time_series == 0.0</span>
-<span class="c1">#    if white_noise is None:</span>
-<span class="c1">#        white_noise = np.random.normal(size=np.sum(zeros)).astype(&quot;float32&quot;)</span>
-<span class="c1">#    if threshold_type == &quot;rms&quot;:</span>
-<span class="c1">#        default_center = time_series[~zeros].mean()</span>
-<span class="c1">#        default_deviation = np.std(time_series[~zeros])</span>
-<span class="c1">#        time_series[zeros] = (</span>
-<span class="c1">#            white_noise[: np.sum(zeros)] * default_deviation + default_center</span>
-<span class="c1">#        )</span>
-<span class="c1">#        time_series_win = np.lib.stride_tricks.sliding_window_view(</span>
-<span class="c1">#            time_series, sliding_window</span>
-<span class="c1">#        )[::shift, :]</span>
-<span class="c1">#        last_win = time_series[time[-1] :]</span>
-<span class="c1">#        center = np.hstack((np.mean(time_series_win, axis=-1), np.mean(last_win)))</span>
-<span class="c1">#        deviation = np.hstack((np.std(time_series_win, axis=-1), np.std(last_win)))</span>
-<span class="c1">#    elif threshold_type == &quot;mad&quot;:</span>
-<span class="c1">#        default_center = np.median(time_series[~zeros])</span>
-<span class="c1">#        default_deviation = np.median(np.abs(time_series[~zeros] - default_center))</span>
-<span class="c1">#        time_series[zeros] = (</span>
-<span class="c1">#            white_noise[: np.sum(zeros)] * default_deviation + default_center</span>
-<span class="c1">#        )</span>
-<span class="c1">#        time_series_win = np.lib.stride_tricks.sliding_window_view(</span>
-<span class="c1">#            time_series, sliding_window</span>
-<span class="c1">#        )[::shift, :]</span>
-<span class="c1">#        last_win = time_series[time[-1] :]</span>
-<span class="c1">#        center = np.hstack((np.median(time_series_win, axis=-1), np.median(last_win)))</span>
-<span class="c1">#        deviation = np.hstack(</span>
-<span class="c1">#            (</span>
-<span class="c1">#                np.median(np.abs(time_series_win - center[:-1, np.newaxis]), axis=-1),</span>
-<span class="c1">#                np.median(np.abs(last_win - center[-1]), axis=-1),</span>
-<span class="c1">#            )</span>
-<span class="c1">#        )</span>
-<span class="c1">#    threshold = center + cfg.N_DEV_MF_THRESHOLD * deviation</span>
-<span class="c1">#    threshold = np.hstack((threshold[0], threshold, threshold[-1]))</span>
-<span class="c1">#    time = np.hstack((0.0, time, len(time_series)))</span>
-<span class="c1">#    breakpoint()</span>
-<span class="c1">#    interpolator = interp1d(time, threshold, kind=&quot;next&quot;)</span>
-<span class="c1">#    threshold = interpolator(range(n_samples))</span>
-<span class="c1">#    #threshold = np.interp(np.arange(n_samples, dtype=np.int32), time, threshold)</span>
-<span class="c1">#    return threshold</span>
-
-
 <div class="viewcode-block" id="time_dependent_threshold"><a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.time_dependent_threshold">[docs]</a><span class="k">def</span> <span class="nf">time_dependent_threshold</span><span class="p">(</span>
     <span class="n">time_series</span><span class="p">,</span> <span class="n">sliding_window</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.66</span><span class="p">,</span> <span class="n">threshold_type</span><span class="o">=</span><span class="s2">&quot;rms&quot;</span><span class="p">,</span> <span class="n">white_noise</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Time dependent detection threshold.</span>
 
 <span class="sd">    Parameters</span>
@@ -952,49 +970,41 @@
     <span class="n">half_window</span> <span class="o">=</span> <span class="n">sliding_window</span> <span class="o">//</span> <span class="mi">2</span>
     <span class="n">shift</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">*</span> <span class="n">sliding_window</span><span class="p">)</span>
     <span class="n">zeros</span> <span class="o">=</span> <span class="n">time_series</span> <span class="o">==</span> <span class="mf">0.0</span>
-    <span class="c1"># short_window = min(sliding_window, int(60.*50))</span>
-    <span class="c1"># ctrl_time_series = time_series[:short_window*(n_samples//short_window)].reshape(-1, short_window)</span>
+    <span class="n">n_zeros</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">zeros</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">white_noise</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">white_noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">zeros</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">white_noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n_zeros</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">threshold_type</span> <span class="o">==</span> <span class="s2">&quot;rms&quot;</span><span class="p">:</span>
         <span class="n">default_center</span> <span class="o">=</span> <span class="n">time_series</span><span class="p">[</span><span class="o">~</span><span class="n">zeros</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">default_deviation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">time_series</span><span class="p">[</span><span class="o">~</span><span class="n">zeros</span><span class="p">])</span>
+        <span class="c1"># note: white_noise[n_zeros] is necessary in case white_noise</span>
+        <span class="c1"># was not None</span>
         <span class="n">time_series</span><span class="p">[</span><span class="n">zeros</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">white_noise</span><span class="p">[:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">zeros</span><span class="p">)]</span> <span class="o">*</span> <span class="n">default_deviation</span> <span class="o">+</span> <span class="n">default_center</span>
+                <span class="n">white_noise</span><span class="p">[:</span><span class="n">n_zeros</span><span class="p">]</span> <span class="o">*</span> <span class="n">default_deviation</span> <span class="o">+</span> <span class="n">default_center</span>
         <span class="p">)</span>
         <span class="n">time_series_win</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">stride_tricks</span><span class="o">.</span><span class="n">sliding_window_view</span><span class="p">(</span>
             <span class="n">time_series</span><span class="p">,</span> <span class="n">sliding_window</span>
         <span class="p">)[::</span><span class="n">shift</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">time_series_win</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">deviation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">time_series_win</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="c1"># ctrl_threshold = np.mean(ctrl_time_series, axis=-1) +\</span>
-        <span class="c1">#             np.std(ctrl_time_series, axis=-1)</span>
     <span class="k">elif</span> <span class="n">threshold_type</span> <span class="o">==</span> <span class="s2">&quot;mad&quot;</span><span class="p">:</span>
         <span class="n">default_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">time_series</span><span class="p">[</span><span class="o">~</span><span class="n">zeros</span><span class="p">])</span>
         <span class="n">default_deviation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">time_series</span><span class="p">[</span><span class="o">~</span><span class="n">zeros</span><span class="p">]</span> <span class="o">-</span> <span class="n">default_center</span><span class="p">))</span>
         <span class="n">time_series</span><span class="p">[</span><span class="n">zeros</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">white_noise</span><span class="p">[:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">zeros</span><span class="p">)]</span> <span class="o">*</span> <span class="n">default_deviation</span> <span class="o">+</span> <span class="n">default_center</span>
+                <span class="n">white_noise</span><span class="p">[:</span><span class="n">n_zeros</span><span class="p">]</span> <span class="o">*</span> <span class="n">default_deviation</span> <span class="o">+</span> <span class="n">default_center</span>
         <span class="p">)</span>
         <span class="n">time_series_win</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">stride_tricks</span><span class="o">.</span><span class="n">sliding_window_view</span><span class="p">(</span>
             <span class="n">time_series</span><span class="p">,</span> <span class="n">sliding_window</span>
         <span class="p">)[::</span><span class="n">shift</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">time_series_win</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">deviation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">time_series_win</span> <span class="o">-</span> <span class="n">center</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">time_series_win</span> <span class="o">-</span> <span class="n">center</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
         <span class="p">)</span>
-        <span class="c1"># ctrl_threshold = np.median(ctrl_time_series, axis=-1) +\</span>
-        <span class="c1">#             np.median(np.abs(ctrl_threshold -</span>
-        <span class="c1">#                 np.median(ctrl_time_series, axis=-1, keepdims=True)), axis=-1)</span>
-
     <span class="n">threshold</span> <span class="o">=</span> <span class="n">center</span> <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">N_DEV_MF_THRESHOLD</span> <span class="o">*</span> <span class="n">deviation</span>
     <span class="n">threshold</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">threshold</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">threshold</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
     <span class="n">threshold</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">threshold</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">threshold</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
     <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">half_window</span><span class="p">,</span> <span class="n">n_samples</span> <span class="o">-</span> <span class="p">(</span><span class="n">sliding_window</span> <span class="o">-</span> <span class="n">half_window</span><span class="p">))</span>
     <span class="n">indexes_l</span> <span class="o">=</span> <span class="n">time</span> <span class="o">//</span> <span class="n">shift</span>
     <span class="n">indexes_l</span><span class="p">[</span><span class="n">indexes_l</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">threshold</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="c1"># indexes_r = time // shift + 1</span>
-    <span class="c1"># indexes_r[indexes_r &gt;= len(threshold)] = len(threshold) - 1</span>
-    <span class="c1"># threshold = np.maximum(threshold[indexes_l], threshold[indexes_r])</span>
     <span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span><span class="p">[</span><span class="n">indexes_l</span><span class="p">]</span>
     <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
         <span class="p">(</span>
@@ -1003,97 +1013,9 @@
             <span class="n">threshold</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">sliding_window</span> <span class="o">-</span> <span class="n">half_window</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
         <span class="p">)</span>
     <span class="p">)</span>
-    <span class="c1"># indexes_ctrl = time // short_window</span>
-    <span class="c1"># indexes_ctrl[indexes_ctrl &gt;= len(threshold)] = len(threshold) - 1</span>
-    <span class="c1"># ctrl_threshold = ctrl_threshold[indexes_ctrl]</span>
-    <span class="c1"># ctrl_threshold = np.hstack(</span>
-    <span class="c1">#    (</span>
-    <span class="c1">#        ctrl_threshold,</span>
-    <span class="c1">#        ctrl_threshold[-1] * np.ones(n_samples - len(ctrl_threshold), dtype=np.float32),</span>
-    <span class="c1">#    )</span>
-    <span class="c1"># )</span>
-    <span class="c1"># threshold[threshold &lt; 0.75*ctrl_threshold] = ctrl_threshold</span>
     <span class="k">return</span> <span class="n">threshold</span></div>
 
 
-<span class="c1"># def time_dependent_threshold(</span>
-<span class="c1">#    time_series, sliding_window, threshold_type=&quot;rms&quot;, white_noise=None,</span>
-<span class="c1">#    overlap=None</span>
-<span class="c1"># ):</span>
-<span class="c1">#    &quot;&quot;&quot;</span>
-<span class="c1">#    Time dependent detection threshold.</span>
-<span class="c1">#</span>
-<span class="c1">#    Parameters</span>
-<span class="c1">#    -----------</span>
-<span class="c1">#    time_series: (n_correlations) array_like</span>
-<span class="c1">#        The array of correlation coefficients calculated by</span>
-<span class="c1">#        FMF (float 32).</span>
-<span class="c1">#    sliding_window: scalar integer</span>
-<span class="c1">#        The size of the non-overlapping sliding window, in samples, used to</span>
-<span class="c1">#        compute the time dependent central tendency</span>
-<span class="c1">#        and deviation of the time series.</span>
-<span class="c1">#    threshold_type: string, default to &#39;rms&#39;</span>
-<span class="c1">#        Either rms or mad, depending on which measure</span>
-<span class="c1">#        of deviation you want to use.</span>
-<span class="c1">#    white_noise: `numpy.ndarray` or None, default to None</span>
-<span class="c1">#        If not None, `white_noise` is a vector of random values sampled from the</span>
-<span class="c1">#        standard normal distribution. It is used to fill zeros in the CC time</span>
-<span class="c1">#        series. If None, a random vector is generated from scratch.</span>
-<span class="c1">#</span>
-<span class="c1">#    Returns</span>
-<span class="c1">#    ----------</span>
-<span class="c1">#    threshold: (n_correlations) array_like</span>
-<span class="c1">#        Returns the time dependent threshold, with same</span>
-<span class="c1">#        size as the input time series.</span>
-<span class="c1">#    &quot;&quot;&quot;</span>
-<span class="c1">#</span>
-<span class="c1">#    threshold_type = threshold_type.lower()</span>
-<span class="c1">#    n_samples = len(time_series)</span>
-<span class="c1">#    half_window = sliding_window // 2</span>
-<span class="c1">#    truncated_duration = sliding_window*(n_samples//sliding_window)</span>
-<span class="c1">#    zeros = time_series == 0.0</span>
-<span class="c1">#    if white_noise is None:</span>
-<span class="c1">#        white_noise = np.random.normal(size=np.sum(zeros)).astype(&quot;float32&quot;)</span>
-<span class="c1">#    if threshold_type == &quot;rms&quot;:</span>
-<span class="c1">#        default_center = time_series[~zeros].mean()</span>
-<span class="c1">#        default_deviation = np.std(time_series[~zeros])</span>
-<span class="c1">#        time_series[zeros] = (</span>
-<span class="c1">#            white_noise[: np.sum(zeros)] * default_deviation + default_center</span>
-<span class="c1">#        )</span>
-<span class="c1">#        time_series_win = time_series[:truncated_duration].reshape(-1,</span>
-<span class="c1">#                sliding_window)</span>
-<span class="c1">#        center = np.mean(time_series_win, axis=-1)</span>
-<span class="c1">#        deviation = np.std(time_series_win, axis=-1)</span>
-<span class="c1">#    elif threshold_type == &quot;mad&quot;:</span>
-<span class="c1">#        default_center = np.median(time_series[~zeros])</span>
-<span class="c1">#        default_deviation = np.median(np.abs(time_series[~zeros] - default_center))</span>
-<span class="c1">#        time_series[zeros] = (</span>
-<span class="c1">#            white_noise[: np.sum(zeros)] * default_deviation + default_center</span>
-<span class="c1">#        )</span>
-<span class="c1">#        time_series_win = time_series[:truncated_duration].reshape(-1,</span>
-<span class="c1">#                sliding_window)</span>
-<span class="c1">#        center = np.median(time_series_win, axis=-1)</span>
-<span class="c1">#        deviation = np.median(</span>
-<span class="c1">#            np.abs(time_series_win - center[:-1, np.newaxis]), axis=-1</span>
-<span class="c1">#        )</span>
-<span class="c1">#    threshold = center + cfg.N_DEV_MF_THRESHOLD * deviation</span>
-<span class="c1">#    threshold[1:] = np.maximum(threshold[:-1], threshold[1:])</span>
-<span class="c1">#    threshold[:-1] = np.maximum(threshold[:-1], threshold[1:])</span>
-<span class="c1">#    time = np.arange(half_window, n_samples - (sliding_window - half_window))</span>
-<span class="c1">#    indexes_l = time // sliding_window</span>
-<span class="c1">#    indexes_l[indexes_l &gt;= len(threshold)] = len(threshold) - 1</span>
-<span class="c1">#    #indexes_r = time // shift + 1</span>
-<span class="c1">#    #indexes_r[indexes_r &gt;= len(threshold)] = len(threshold) - 1</span>
-<span class="c1">#    #threshold = np.maximum(threshold[indexes_l], threshold[indexes_r])</span>
-<span class="c1">#    threshold = threshold[indexes_l]</span>
-<span class="c1">#    threshold = np.hstack(</span>
-<span class="c1">#        (</span>
-<span class="c1">#            threshold[0] * np.ones(half_window, dtype=np.float32),</span>
-<span class="c1">#            threshold,</span>
-<span class="c1">#            threshold[-1] * np.ones(sliding_window - half_window, dtype=np.float32),</span>
-<span class="c1">#        )</span>
-<span class="c1">#    )</span>
-<span class="c1">#    return threshold</span>
 </pre></div>
 
            </div>

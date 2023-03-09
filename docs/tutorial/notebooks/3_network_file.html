@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Make Network File &mdash; BPMF 2.0.0 documentation</title>
@@ -11,10 +11,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -32,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -58,9 +60,11 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="4_travel_times.html">Compute P-/S-wave travel Times</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5_backprojection.html">Backprojection of the Seismic Wavefield</a></li>
-<li class="toctree-l2"><a class="reference internal" href="6_build_template_database.html">Build Template Database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_template_matching.html">Template Matching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_relocate.html">Relocation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_magnitudes.html">Estimate the seismic moments and moment magnitudes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_build_template_database.html">Build Template Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="9_template_matching.html">Template Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
@@ -79,7 +83,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../tutorial.html">Tutorial</a></li>
       <li class="breadcrumb-item active">Make Network File</li>
       <li class="wy-breadcrumbs-aside">
@@ -201,10 +205,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -520,6 +525,14 @@ DatetimeIndex([&#39;2012-07-07&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
   </thead>
   <tbody>
     <tr>
+      <th>YH.DD06</th>
+      <td>YH</td>
+      <td>DD06</td>
+      <td>30.31777</td>
+      <td>40.623539</td>
+      <td>182.0</td>
+    </tr>
+    <tr>
       <th>YH.SAUV</th>
       <td>YH</td>
       <td>SAUV</td>
@@ -528,28 +541,20 @@ DatetimeIndex([&#39;2012-07-07&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
       <td>170.0</td>
     </tr>
     <tr>
-      <th>YH.DE07</th>
+      <th>YH.DC06</th>
       <td>YH</td>
-      <td>DE07</td>
-      <td>30.411539</td>
-      <td>40.679661</td>
-      <td>40.0</td>
+      <td>DC06</td>
+      <td>30.265751</td>
+      <td>40.616718</td>
+      <td>555.0</td>
     </tr>
     <tr>
-      <th>YH.DC07</th>
+      <th>YH.DC08</th>
       <td>YH</td>
-      <td>DC07</td>
-      <td>30.24217</td>
-      <td>40.66708</td>
-      <td>164.0</td>
-    </tr>
-    <tr>
-      <th>YH.DD06</th>
-      <td>YH</td>
-      <td>DD06</td>
-      <td>30.31777</td>
-      <td>40.623539</td>
-      <td>182.0</td>
+      <td>DC08</td>
+      <td>30.25013</td>
+      <td>40.744438</td>
+      <td>162.0</td>
     </tr>
     <tr>
       <th>YH.SPNC</th>
@@ -568,20 +573,20 @@ DatetimeIndex([&#39;2012-07-07&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
       <td>31.0</td>
     </tr>
     <tr>
-      <th>YH.DC08</th>
+      <th>YH.DC07</th>
       <td>YH</td>
-      <td>DC08</td>
-      <td>30.25013</td>
-      <td>40.744438</td>
-      <td>162.0</td>
+      <td>DC07</td>
+      <td>30.24217</td>
+      <td>40.66708</td>
+      <td>164.0</td>
     </tr>
     <tr>
-      <th>YH.DC06</th>
+      <th>YH.DE07</th>
       <td>YH</td>
-      <td>DC06</td>
-      <td>30.265751</td>
-      <td>40.616718</td>
-      <td>555.0</td>
+      <td>DE07</td>
+      <td>30.411539</td>
+      <td>40.679661</td>
+      <td>40.0</td>
     </tr>
   </tbody>
 </table>
@@ -618,14 +623,14 @@ DatetimeIndex([&#39;2012-07-07&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>YH.SAUV</th>
-      <th>YH.DE07</th>
-      <th>YH.DC07</th>
       <th>YH.DD06</th>
+      <th>YH.SAUV</th>
+      <th>YH.DC06</th>
+      <th>YH.DC08</th>
       <th>YH.SPNC</th>
       <th>YH.DE08</th>
-      <th>YH.DC08</th>
-      <th>YH.DC06</th>
+      <th>YH.DC07</th>
+      <th>YH.DE07</th>
     </tr>
   </thead>
   <tbody>
@@ -668,6 +673,7 @@ DatetimeIndex([&#39;2012-07-07&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
     <span class="c1"># keep consistent data dimensions across stations</span>
     <span class="n">fnet</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;N</span><span class="se">\t</span><span class="s2">E</span><span class="se">\t</span><span class="s2">Z</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">fnet</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+<span class="n">daily_availability</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">NETWORK_PATH</span><span class="p">,</span> <span class="n">AVAILABILITY_FILENAME</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -708,14 +714,14 @@ DatetimeIndex([&#39;2012-07-07&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 stations
-SAUV    SAUV
-DE07    DE07
-DC07    DC07
 DD06    DD06
+SAUV    SAUV
+DC06    DC06
+DC08    DC08
 SPNC    SPNC
 DE08    DE08
-DC08    DC08
-DC06    DC06
+DC07    DC07
+DE07    DE07
 Name: stations, dtype: object
 </pre></div></div>
 </div>
@@ -727,14 +733,6 @@ Name: stations, dtype: object
 <span class="n">net</span><span class="o">.</span><span class="n">interstation_distances</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-ERROR 1: PROJ: proj_create_from_database: Open of /home/ebeauce/miniconda3/envs/hy7_py310/share/proj failed
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -759,14 +757,14 @@ ERROR 1: PROJ: proj_create_from_database: Open of /home/ebeauce/miniconda3/envs/
   <thead>
     <tr style="text-align: right;">
       <th>stations</th>
-      <th>SAUV</th>
-      <th>DE07</th>
-      <th>DC07</th>
       <th>DD06</th>
+      <th>SAUV</th>
+      <th>DC06</th>
+      <th>DC08</th>
       <th>SPNC</th>
       <th>DE08</th>
-      <th>DC08</th>
-      <th>DC06</th>
+      <th>DC07</th>
+      <th>DE07</th>
     </tr>
     <tr>
       <th>stations</th>
@@ -782,91 +780,91 @@ ERROR 1: PROJ: proj_create_from_database: Open of /home/ebeauce/miniconda3/envs/
   </thead>
   <tbody>
     <tr>
-      <th>SAUV</th>
-      <td>0.000000</td>
-      <td>9.790711</td>
-      <td>10.842688</td>
-      <td>12.979910</td>
-      <td>6.228594</td>
-      <td>6.748812</td>
-      <td>6.525864</td>
-      <td>14.676627</td>
-    </tr>
-    <tr>
-      <th>DE07</th>
-      <td>9.803980</td>
-      <td>0.000000</td>
-      <td>14.392302</td>
-      <td>10.093446</td>
-      <td>8.764449</td>
-      <td>7.662741</td>
-      <td>15.423741</td>
-      <td>14.192278</td>
-    </tr>
-    <tr>
-      <th>DC07</th>
-      <td>10.843241</td>
-      <td>14.383684</td>
-      <td>0.000000</td>
-      <td>8.017919</td>
-      <td>5.974924</td>
-      <td>16.568395</td>
-      <td>8.616650</td>
-      <td>5.970460</td>
-    </tr>
-    <tr>
       <th>DD06</th>
-      <td>12.978986</td>
-      <td>10.079368</td>
-      <td>8.015674</td>
       <td>0.000000</td>
+      <td>12.978986</td>
+      <td>4.507919</td>
+      <td>14.591825</td>
       <td>6.982891</td>
       <td>15.774078</td>
-      <td>14.591825</td>
-      <td>4.507919</td>
+      <td>8.015674</td>
+      <td>10.079368</td>
     </tr>
     <tr>
-      <th>SPNC</th>
-      <td>6.225382</td>
-      <td>8.747317</td>
-      <td>5.970570</td>
-      <td>6.981746</td>
+      <th>SAUV</th>
+      <td>12.979910</td>
       <td>0.000000</td>
-      <td>10.812369</td>
-      <td>8.138928</td>
-      <td>8.515170</td>
-    </tr>
-    <tr>
-      <th>DE08</th>
-      <td>6.769376</td>
-      <td>7.663916</td>
-      <td>16.576421</td>
-      <td>15.783648</td>
-      <td>10.827065</td>
-      <td>0.000000</td>
-      <td>13.216772</td>
-      <td>18.878441</td>
-    </tr>
-    <tr>
-      <th>DC08</th>
-      <td>6.527089</td>
-      <td>15.415829</td>
-      <td>8.616882</td>
-      <td>14.593195</td>
-      <td>8.142368</td>
-      <td>13.206857</td>
-      <td>0.000000</td>
-      <td>14.258154</td>
+      <td>14.676627</td>
+      <td>6.525864</td>
+      <td>6.228594</td>
+      <td>6.748812</td>
+      <td>10.842688</td>
+      <td>9.790711</td>
     </tr>
     <tr>
       <th>DC06</th>
-      <td>14.650371</td>
-      <td>14.155945</td>
-      <td>5.904608</td>
       <td>4.424402</td>
+      <td>14.650371</td>
+      <td>0.000000</td>
+      <td>14.230564</td>
       <td>8.472197</td>
       <td>18.850665</td>
-      <td>14.230564</td>
+      <td>5.904608</td>
+      <td>14.155945</td>
+    </tr>
+    <tr>
+      <th>DC08</th>
+      <td>14.593195</td>
+      <td>6.527089</td>
+      <td>14.258154</td>
+      <td>0.000000</td>
+      <td>8.142368</td>
+      <td>13.206857</td>
+      <td>8.616882</td>
+      <td>15.415829</td>
+    </tr>
+    <tr>
+      <th>SPNC</th>
+      <td>6.981746</td>
+      <td>6.225382</td>
+      <td>8.515170</td>
+      <td>8.138928</td>
+      <td>0.000000</td>
+      <td>10.812369</td>
+      <td>5.970570</td>
+      <td>8.747317</td>
+    </tr>
+    <tr>
+      <th>DE08</th>
+      <td>15.783648</td>
+      <td>6.769376</td>
+      <td>18.878441</td>
+      <td>13.216772</td>
+      <td>10.827065</td>
+      <td>0.000000</td>
+      <td>16.576421</td>
+      <td>7.663916</td>
+    </tr>
+    <tr>
+      <th>DC07</th>
+      <td>8.017919</td>
+      <td>10.843241</td>
+      <td>5.970460</td>
+      <td>8.616650</td>
+      <td>5.974924</td>
+      <td>16.568395</td>
+      <td>0.000000</td>
+      <td>14.383684</td>
+    </tr>
+    <tr>
+      <th>DE07</th>
+      <td>10.093446</td>
+      <td>9.803980</td>
+      <td>14.192278</td>
+      <td>15.423741</td>
+      <td>8.764449</td>
+      <td>7.662741</td>
+      <td>14.392302</td>
       <td>0.000000</td>
     </tr>
   </tbody>
@@ -874,13 +872,13 @@ ERROR 1: PROJ: proj_create_from_database: Open of /home/ebeauce/miniconda3/envs/
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&#39;svg&#39;]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&quot;svg&quot;]
 
 <span class="c1"># plot a simple map of station locations</span>
-<span class="n">net</span><span class="o">.</span><span class="n">plot_map</span><span class="p">()</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">plot_map</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>API &mdash; BPMF 2.0.0 documentation</title>
@@ -11,10 +11,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -30,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -74,7 +76,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../usage.html">Usage</a></li>
       <li class="breadcrumb-item active">API</li>
       <li class="wy-breadcrumbs-aside">
@@ -127,10 +129,12 @@
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.depth"><code class="docutils literal notranslate"><span class="pre">Catalog.depth</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.latitude"><code class="docutils literal notranslate"><span class="pre">Catalog.latitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.longitude"><code class="docutils literal notranslate"><span class="pre">Catalog.longitude</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.n_events"><code class="docutils literal notranslate"><span class="pre">Catalog.n_events</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.origin_time"><code class="docutils literal notranslate"><span class="pre">Catalog.origin_time</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.plot_map"><code class="docutils literal notranslate"><span class="pre">Catalog.plot_map()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.plot_space_time"><code class="docutils literal notranslate"><span class="pre">Catalog.plot_space_time()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.plot_time_statistics"><code class="docutils literal notranslate"><span class="pre">Catalog.plot_time_statistics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.read_from_dataframe"><code class="docutils literal notranslate"><span class="pre">Catalog.read_from_dataframe()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.read_from_detection_file"><code class="docutils literal notranslate"><span class="pre">Catalog.read_from_detection_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.read_from_events"><code class="docutils literal notranslate"><span class="pre">Catalog.read_from_events()</span></code></a></li>
 </ul>
@@ -151,17 +155,22 @@
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.az_hmax_unc"><code class="docutils literal notranslate"><span class="pre">Event.az_hmax_unc</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.az_hmin_unc"><code class="docutils literal notranslate"><span class="pre">Event.az_hmin_unc</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.get_np_array"><code class="docutils literal notranslate"><span class="pre">Event.get_np_array()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.get_peak_amplitudes"><code class="docutils literal notranslate"><span class="pre">Event.get_peak_amplitudes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.hmax_unc"><code class="docutils literal notranslate"><span class="pre">Event.hmax_unc</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.hmin_unc"><code class="docutils literal notranslate"><span class="pre">Event.hmin_unc</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.hor_ver_uncertainties"><code class="docutils literal notranslate"><span class="pre">Event.hor_ver_uncertainties()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.n_closest_stations"><code class="docutils literal notranslate"><span class="pre">Event.n_closest_stations()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.pick_PS_phases"><code class="docutils literal notranslate"><span class="pre">Event.pick_PS_phases()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.pick_PS_phases_EQTransformer"><code class="docutils literal notranslate"><span class="pre">Event.pick_PS_phases_EQTransformer()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.plot"><code class="docutils literal notranslate"><span class="pre">Event.plot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.read_from_file"><code class="docutils literal notranslate"><span class="pre">Event.read_from_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.read_waveforms"><code class="docutils literal notranslate"><span class="pre">Event.read_waveforms()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.relocate"><code class="docutils literal notranslate"><span class="pre">Event.relocate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.relocate_NLLoc"><code class="docutils literal notranslate"><span class="pre">Event.relocate_NLLoc()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.relocate_beam"><code class="docutils literal notranslate"><span class="pre">Event.relocate_beam()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.remove_distant_stations"><code class="docutils literal notranslate"><span class="pre">Event.remove_distant_stations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.remove_outlier_picks"><code class="docutils literal notranslate"><span class="pre">Event.remove_outlier_picks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_arrival_times_from_moveouts"><code class="docutils literal notranslate"><span class="pre">Event.set_arrival_times_from_moveouts()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_aux_data"><code class="docutils literal notranslate"><span class="pre">Event.set_aux_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_availability"><code class="docutils literal notranslate"><span class="pre">Event.set_availability()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_component_aliases"><code class="docutils literal notranslate"><span class="pre">Event.set_component_aliases()</span></code></a></li>
@@ -172,10 +181,12 @@
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.source_receiver_dist"><code class="docutils literal notranslate"><span class="pre">Event.source_receiver_dist</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.sr"><code class="docutils literal notranslate"><span class="pre">Event.sr</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.trim_waveforms"><code class="docutils literal notranslate"><span class="pre">Event.trim_waveforms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.update_aux_data_database"><code class="docutils literal notranslate"><span class="pre">Event.update_aux_data_database()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.update_picks"><code class="docutils literal notranslate"><span class="pre">Event.update_picks()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.update_travel_times"><code class="docutils literal notranslate"><span class="pre">Event.update_travel_times()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.vmax_unc"><code class="docutils literal notranslate"><span class="pre">Event.vmax_unc</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.write"><code class="docutils literal notranslate"><span class="pre">Event.write()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.zero_out_clipped_waveforms"><code class="docutils literal notranslate"><span class="pre">Event.zero_out_clipped_waveforms()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="api/dataset.html#BPMF.dataset.EventGroup"><code class="docutils literal notranslate"><span class="pre">EventGroup</span></code></a><ul>
@@ -323,6 +334,7 @@
 <li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.SVDWF_multiplets"><code class="docutils literal notranslate"><span class="pre">SVDWF_multiplets()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.bandpass_filter"><code class="docutils literal notranslate"><span class="pre">bandpass_filter()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.compute_distances"><code class="docutils literal notranslate"><span class="pre">compute_distances()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.donefun"><code class="docutils literal notranslate"><span class="pre">donefun()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.event_count"><code class="docutils literal notranslate"><span class="pre">event_count()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.extract_colors_from_tree"><code class="docutils literal notranslate"><span class="pre">extract_colors_from_tree()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.fetch_detection_waveforms"><code class="docutils literal notranslate"><span class="pre">fetch_detection_waveforms()</span></code></a></li>
@@ -358,6 +370,7 @@
 <li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.plot_catalog"><code class="docutils literal notranslate"><span class="pre">plot_catalog()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.plot_detection_matrix"><code class="docutils literal notranslate"><span class="pre">plot_detection_matrix()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.plot_template"><code class="docutils literal notranslate"><span class="pre">plot_template()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.uncertainty_ellipse"><code class="docutils literal notranslate"><span class="pre">uncertainty_ellipse()</span></code></a></li>
 </ul>
 </li>
 </ul>

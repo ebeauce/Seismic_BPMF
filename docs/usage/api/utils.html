@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BPMF.utils &mdash; BPMF 2.0.0 documentation</title>
@@ -11,10 +11,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -30,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -55,6 +57,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.SVDWF_multiplets"><code class="docutils literal notranslate"><span class="pre">SVDWF_multiplets()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.bandpass_filter"><code class="docutils literal notranslate"><span class="pre">bandpass_filter()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.compute_distances"><code class="docutils literal notranslate"><span class="pre">compute_distances()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.donefun"><code class="docutils literal notranslate"><span class="pre">donefun()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.event_count"><code class="docutils literal notranslate"><span class="pre">event_count()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.extract_colors_from_tree"><code class="docutils literal notranslate"><span class="pre">extract_colors_from_tree()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.fetch_detection_waveforms"><code class="docutils literal notranslate"><span class="pre">fetch_detection_waveforms()</span></code></a></li>
@@ -99,7 +102,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../usage.html">Usage</a></li>
           <li class="breadcrumb-item"><a href="../api.html">API</a></li>
       <li class="breadcrumb-item active">BPMF.utils</li>
@@ -144,7 +147,7 @@
 <dd><p>Implementation of the Singular Value Decomposition Wiener Filter (SVDWF)
 described in Moreau et al 2017.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>matrix</strong> (<em>(</em><em>n x m</em><em>) </em><em>numpy array</em>) – n is the number of events, m is the number of time samples
 per event.</p></li>
@@ -155,10 +158,10 @@ frequency, is used to determined the size in the
 time axis of the Wiener filter.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>filtered_data</strong> – The matrix filtered through the SVD procedure.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(n x m) numpy array</p>
 </dd>
 </dl>
@@ -168,7 +171,7 @@ time axis of the Wiener filter.</p></li>
 <dt class="sig sig-object py" id="BPMF.utils.SVDWF_multiplets">
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">SVDWF_multiplets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_M</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'matched_filter_1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'template_db_1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_rms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_singular_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expl_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wiener_filter_colsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attach_raw_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detection_waveforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#SVDWF_multiplets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.SVDWF_multiplets" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tid</strong> (<em>scalar integer</em><em>,</em>) – Template id.</p></li>
 <li><p><strong>db_path</strong> (<em>string</em><em>, </em><em>default to cfg.INPUT_PATH</em>) – Root path of the database.</p></li>
@@ -193,7 +196,7 @@ then it will be equal to the number of rows.</p></li>
 search are returned.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>S</strong> – Return the SVDWF-processed detections traces in the
 format of an obspy Stream. Stacked traces can be
 found in the obspy Traces, and the filtered (and raw,
@@ -201,7 +204,7 @@ if attach_raw_data is True) data matrix is returned as
 an attribute. See also all the useful metadata in
 the attributes.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>obspy Stream,</p>
 </dd>
 </dl>
@@ -211,7 +214,7 @@ the attributes.</p>
 <dt class="sig sig-object py" id="BPMF.utils.bandpass_filter">
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">bandpass_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_Nyq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#bandpass_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.bandpass_filter" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> (<em>(</em><em>n x m</em><em>) </em><em>numpy array</em><em>,</em>) – Numpy array of n observations of m samples each.
 Use X.reshape(1, -1) if you want to process a
@@ -226,10 +229,10 @@ function. We use the tukey window function. The
 default value of 0.01 produces sharp windows.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>filtered_X</strong> – The input array X after filtering.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(n x m) numpy array,</p>
 </dd>
 </dl>
@@ -241,7 +244,7 @@ default value of 0.01 produces sharp windows.</p></li>
 <dd><p>Fast distance computation between all source points and all receivers.</p>
 <p>Use <cite>cartopy.geodesic.Geodesic</cite> to compute pair-wise distances.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>source_longitudes</strong> (<em>(</em><em>n_sources</em><em>,</em><em>) </em><em>list</em><em> or </em><em>numpy.array</em>) – Longitudes, in decimal degrees, of the source points.</p></li>
 <li><p><strong>source_latitudes</strong> (<em>(</em><em>n_sources</em><em>,</em><em>) </em><em>list</em><em> or </em><em>numpy.array</em>) – Latitudes, in decimal degrees, of the source points.</p></li>
@@ -256,10 +259,16 @@ are located at the surface.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="BPMF.utils.donefun">
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">donefun</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#donefun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.donefun" title="Permalink to this definition"></a></dt>
+<dd><p>Super useful function.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.event_count">
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">event_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_timings_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1D'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'end'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#event_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.event_count" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>event_timings_str</strong> (<em>list</em><em> of </em><em>array</em><em> of </em><em>str</em>) – Timings of the events given as strings of characters.</p></li>
 <li><p><strong>start_date</strong> (<em>str</em>) – Starting date of the event count time series.</p></li>
@@ -275,14 +284,14 @@ the seismicity counted between time 1 and time 2 is
 indexed at time 2 (‘end’) or time 1 (‘beginning’).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>event_count</strong> – Pandas Series with temporal indexes defined
 by freq and base, and values given by the
 event count.
 To get a numpy array from this Pandas Series,
 use: event_count.values</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Pandas Series</p>
 </dd>
 </dl>
@@ -293,7 +302,7 @@ use: event_count.values</p>
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">extract_colors_from_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dendogram</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_singleton</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#extract_colors_from_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.extract_colors_from_tree" title="Permalink to this definition"></a></dt>
 <dd><p>Routine to build the map from cluster ids to dendogram colors.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dendogram</strong> (<em>dendogram from scipy.hierarchy.dendogram.</em>) – </p></li>
 <li><p><strong>labels</strong> (<em>(</em><em>n_samples</em><em>) </em><em>numpy array</em><em>,</em>) – Labels, or cluster ids, returned by
@@ -305,12 +314,12 @@ data point i belongs to cluster k.</p></li>
 scipy.hierarchy.dendogram.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>cluster_colors</strong> – Map between cluster id and plotting color.
 cluster_colors[k] = ‘C0’ means that cluster k
 is colored in ‘C0’.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dictionary,</p>
 </dd>
 </dl>
@@ -338,7 +347,7 @@ with the hierarchical clustering package from scipy.</p>
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">get_moveout_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#get_moveout_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.get_moveout_array" title="Permalink to this definition"></a></dt>
 <dd><p>Format the travel times into a numpy.ndarray.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tts</strong> (<em>dictionary</em>) – Output of <cite>load_travel_times</cite>.</p></li>
 <li><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em>) – List of station names. Determine the order in which travel times are
@@ -347,12 +356,12 @@ written in the output array.</p></li>
 writtem in the output array.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>moveout_arr</strong> – Numpy array of travel times, in the order specified by <cite>stations</cite> and
 <cite>phases</cite>. At this stage, moveout_arr should still be in units of
 seconds.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(n_sources, n_stations, n_phases) numpy.ndarray</p>
 </dd>
 </dl>
@@ -363,14 +372,14 @@ seconds.</p>
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">get_np_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['N',</span> <span class="pre">'E',</span> <span class="pre">'Z']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'HH'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'E':</span> <span class="pre">['E',</span> <span class="pre">'2'],</span> <span class="pre">'N':</span> <span class="pre">['N',</span> <span class="pre">'1'],</span> <span class="pre">'Z':</span> <span class="pre">['Z']}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#get_np_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.get_np_array" title="Permalink to this definition"></a></dt>
 <dd><p>Fetch data from Obspy Stream and returns an ndarray.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stream</strong> (<em>Obspy Stream instance</em>) – The Obspy Stream instance with the waveform time series.</p></li>
-<li><p><strong>stations</strong> (<em>List</em><em> of </em><em>strings</em>) – Names of the stations to include in the output array. Define the order
+<li><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em>) – Names of the stations to include in the output array. Define the order
 of the station axis.</p></li>
-<li><p><strong>components</strong> (<em>List</em><em> of </em><em>strings</em><em>, </em><em>default to</em><em> [</em><em>'N'</em><em>,</em><em>'E'</em><em>,</em><em>'Z'</em><em>]</em>) – Names of the components to include in the output array. Define the order
+<li><p><strong>components</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to</em><em> [</em><em>'N'</em><em>,</em><em>'E'</em><em>,</em><em>'Z'</em><em>]</em>) – Names of the components to include in the output array. Define the order
 of the component axis.</p></li>
-<li><p><strong>component_aliases</strong> (<em>Dictionary</em><em>, </em><em>optional</em>) – Sometimes, components might be named differently than N, E, Z. This
+<li><p><strong>component_aliases</strong> (<em>dictionary</em><em>, </em><em>optional</em>) – Sometimes, components might be named differently than N, E, Z. This
 dictionary tells the function which alternative component names can be
 associated with each “canonical” component. For example,
 <cite>component_aliases[‘N’] = [‘N’, ‘1’]</cite> means that the function will also
@@ -383,10 +392,10 @@ the length of the first trace.</p></li>
 <li><p><strong>verbose</strong> (<em>boolean</em><em>, </em><em>default to True</em>) – If True, print extra output in case the target data cannot be fetched.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>data</strong> – The waveform time series formatted as an numpy.ndarray.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(n_stations, n_components, n_samples) numpy.ndarray</p>
 </dd>
 </dl>
@@ -397,7 +406,7 @@ the length of the first trace.</p></li>
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">linear_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#linear_regression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.linear_regression" title="Permalink to this definition"></a></dt>
 <dd><p>cf. <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html</a></p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><ul class="simple">
 <li><p><strong>a</strong> (<em>slope</em>)</p></li>
 <li><p><strong>b</strong> (<em>intercept</em>)</p></li>
@@ -417,7 +426,7 @@ the fit</p></li>
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">load_travel_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_indexes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#load_travel_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.load_travel_times" title="Permalink to this definition"></a></dt>
 <dd><p>Load the travel times from <cite>path</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>string</em>) – Path to the file with the travel times.</p></li>
 <li><p><strong>phases</strong> (<em>list</em><em> of </em><em>strings</em>) – List of the seismic phases to load.</p></li>
@@ -426,7 +435,7 @@ the fit</p></li>
 <li><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to None</em>) – If not None, only read the travel times for stations in <cite>stations</cite>.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>tts</strong> (<em>dictionary</em>) – Dictionary with one field per phase. <cite>tts[phase_n]</cite> is itself
 a dictionary with one field per station.</p></li>
@@ -456,14 +465,45 @@ three (n_sources,) numpy.ndarray: <cite>source_coords[‘latitude’]</cite>,
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.preprocess_stream">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">preprocess_stream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_SR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_response</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_sensitivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_resp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_starttime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_endtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_chunk_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SR_decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'VEL'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#preprocess_stream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.preprocess_stream" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">preprocess_stream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_SR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_response</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_sensitivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_resp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_starttime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_endtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_chunk_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SR_decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'VEL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#preprocess_stream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.preprocess_stream" title="Permalink to this definition"></a></dt>
+<dd><p>Preprocesses a stream of seismic data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stream</strong> (<em>obspy.Stream</em>) – A stream of seismic data.</p></li>
+<li><p><strong>freqmin</strong> (<em>float</em><em>, </em><em>optional</em>) – The minimum frequency to bandpass filter the data.</p></li>
+<li><p><strong>freqmax</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum frequency to bandpass filter the data.</p></li>
+<li><p><strong>target_SR</strong> (<em>float</em><em>, </em><em>optional</em>) – The target sampling rate of the data.</p></li>
+<li><p><strong>remove_response</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to remove instrument response from the data.</p></li>
+<li><p><strong>remove_sensitivity</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to remove instrument sensitivity from the data.</p></li>
+<li><p><strong>plot_resp</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to plot the instrument response of the data.</p></li>
+<li><p><strong>target_duration</strong> (<em>float</em><em>, </em><em>optional</em>) – The target duration of the data.</p></li>
+<li><p><strong>target_starttime</strong> (<em>obspy.UTCDateTime</em><em>, </em><em>optional</em>) – The start time of the target data.</p></li>
+<li><p><strong>target_endtime</strong> (<em>obspy.UTCDateTime</em><em>, </em><em>optional</em>) – The end time of the target data.</p></li>
+<li><p><strong>minimum_length</strong> (<em>float</em><em>, </em><em>optional</em>) – The minimum length of the data as a fraction of the target duration.</p></li>
+<li><p><strong>minimum_chunk_duration</strong> (<em>float</em><em>, </em><em>optional</em>) – The minimum duration of each data chunk.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to print verbose output during processing.</p></li>
+<li><p><strong>SR_decimals</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of decimals to round sampling rate values to.</p></li>
+<li><p><strong>decimation_method</strong> (<em>str</em><em>, </em><em>optional</em>) – The method used for decimation.</p></li>
+<li><p><strong>unit</strong> (<em>str</em><em>, </em><em>optional</em>) – The unit of the data.</p></li>
+<li><p><strong>n_threads</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of threads over which preprocesing is parallelized.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Other keyword arguments to pass to the function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A preprocessed stream of seismic data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>obspy.Stream</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.round_time">
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">round_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#round_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.round_time" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t</strong> (<em>scalar float</em><em>,</em>) – Time, in seconds, to be rounded so that the number
 of meaningful decimals is consistent with the precision
@@ -472,10 +512,10 @@ allowed by the sampling rate.</p></li>
 round the time.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>t</strong> – Rounded time.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>scalar float,</p>
 </dd>
 </dl>
@@ -497,7 +537,7 @@ round the time.</p></li>
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">time_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ms'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'ms':</span> <span class="pre">1000.0,</span> <span class="pre">'ns':</span> <span class="pre">1000000000.0,</span> <span class="pre">'us':</span> <span class="pre">1000000.0}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#time_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.time_range" title="Permalink to this definition"></a></dt>
 <dd><p>Compute a range of datetime64.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>start_time</strong> (<em>string</em><em> or </em><em>datetime</em>) – Start of the time range.</p></li>
 <li><p><strong>end_time</strong> (<em>string</em><em> or </em><em>datetime</em>) – End of the time range.</p></li>
@@ -506,10 +546,10 @@ round the time.</p></li>
 <li><p><strong>unit_value</strong> (<em>dictionary</em><em>, </em><em>optional</em>) – Dictionary with the value of 1 second in different units.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>time_range</strong> – The time range computed from the input parameters.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(n_samples,) numpy.ndarray of numpy.datetime64</p>
 </dd>
 </dl>
@@ -520,7 +560,7 @@ round the time.</p></li>
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">two_point_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#two_point_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.two_point_distance" title="Permalink to this definition"></a></dt>
 <dd><p>Compute the distance between two points.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>lon_1</strong> (<em>scalar</em><em>, </em><em>float</em>) – Longitude of Point 1.</p></li>
 <li><p><strong>lat_1</strong> (<em>scalar</em><em>, </em><em>float</em>) – Latitude of Point 1.</p></li>
@@ -530,10 +570,10 @@ round the time.</p></li>
 <li><p><strong>depth_2</strong> (<em>scalar</em><em>, </em><em>float</em>) – Depth of Point 2 (in km).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>dist</strong> – Distance between Point 1 and Point 2 in kilometers.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>scalar, float</p>
 </dd>
 </dl>
@@ -543,14 +583,14 @@ round the time.</p></li>
 <dt class="sig sig-object py" id="BPMF.utils.weighted_linear_regression">
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">weighted_linear_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#weighted_linear_regression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.weighted_linear_regression" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> (<em>(</em><em>n</em><em>,</em><em>) </em><em>numpy array</em><em> or </em><em>list</em>) – </p></li>
 <li><p><strong>Y</strong> (<em>(</em><em>n</em><em>,</em><em>) </em><em>numpy array</em><em> or </em><em>list</em>) – </p></li>
 <li><p><strong>W</strong> (<em>default to None</em><em>, </em><em>(</em><em>n</em><em>,</em><em>) </em><em>numpy array</em><em> or </em><em>list</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>best_slope</strong> (<em>scalar float,</em>) – Best slope from the least square formula</p></li>
 <li><p><strong>best_intercept</strong> (<em>scalar float,</em>) – Best intercept from the least square formula</p></li>

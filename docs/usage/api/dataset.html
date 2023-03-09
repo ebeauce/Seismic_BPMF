@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BPMF.dataset &mdash; BPMF 2.0.0 documentation</title>
@@ -11,10 +11,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -30,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -85,7 +87,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../usage.html">Usage</a></li>
           <li class="breadcrumb-item"><a href="../api.html">API</a></li>
       <li class="breadcrumb-item active">BPMF.dataset</li>
@@ -134,7 +136,7 @@
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">concatenate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">catalogs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Catalog.concatenate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Catalog.concatenate" title="Permalink to this definition"></a></dt>
 <dd><p>Build catalog from list of <cite>pandas.DataFrame</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>catalogs</strong> (list of <cite>pandas.DataFrame</cite>) – List of <cite>pandas.DataFrame</cite> with consistent columns.</p>
 </dd>
 </dl>
@@ -156,29 +158,36 @@
 <dd></dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="BPMF.dataset.Catalog.n_events">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_events</span></span><a class="headerlink" href="#BPMF.dataset.Catalog.n_events" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="BPMF.dataset.Catalog.origin_time">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">origin_time</span></span><a class="headerlink" href="#BPMF.dataset.Catalog.origin_time" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Catalog.plot_map">
-<span class="sig-name descname"><span class="pre">plot_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Catalog.plot_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Catalog.plot_map" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_uncertainties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Catalog.plot_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Catalog.plot_map" title="Permalink to this definition"></a></dt>
 <dd><p>Plot epicenters on map.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ax</strong> (<cite>plt.Axes</cite>, default to None) – If None, create a new <cite>plt.Figure</cite> and <cite>plt.Axes</cite> instances. If
+<li><p><strong>ax</strong> (<em>matplotlib.pyplot.Axes</em><em>, </em><em>default to None</em>) – If None, create a new <cite>plt.Figure</cite> and <cite>plt.Axes</cite> instances. If
 speficied by user, use the provided instance to plot.</p></li>
 <li><p><strong>figsize</strong> (<em>tuple</em><em> of </em><em>floats</em><em>, </em><em>default to</em><em> (</em><em>20</em><em>, </em><em>10</em><em>)</em>) – Size, in inches, of the figure (width, height).</p></li>
 <li><p><strong>depth_min</strong> (<em>scalar float</em><em>, </em><em>default to 0</em>) – Smallest depth, in km, in the depth colormap.</p></li>
 <li><p><strong>depth_max</strong> (<em>scalar float</em><em>, </em><em>default to 20</em>) – Largest depth, in km, in the depth colormap.</p></li>
+<li><p><strong>network</strong> (<a class="reference internal" href="#BPMF.dataset.Network" title="BPMF.dataset.Network"><em>BPMF.dataset.Network</em></a><em>, </em><em>optional</em>) – If provided, use information in <cite>network</cite> to plot the stations.</p></li>
+<li><p><strong>plot_uncertainties</strong> (<em>boolean</em><em>, </em><em>default to False</em>) – If True, plot the location uncertainty ellipses.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>fig</strong> – The figure with depth color-coded epicenters.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><cite>plt.Figure</cite></p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.pyplot.Figure</p>
 </dd>
 </dl>
 </dd></dl>
@@ -188,7 +197,7 @@ speficied by user, use the provided instance to plot.</p></li>
 <span class="sig-name descname"><span class="pre">plot_space_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_coded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'longitude'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'latitude'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Catalog.plot_space_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Catalog.plot_space_time" title="Permalink to this definition"></a></dt>
 <dd><p>Plot the space-time event distribution.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ax</strong> (<cite>plt.Axes</cite>, default to None) – If None, create a new <cite>plt.Figure</cite> and <cite>plt.Axes</cite> instances. If
 speficied by user, use the provided instance to plot.</p></li>
@@ -199,10 +208,10 @@ attribute used to define the color scale of each dot.</p></li>
 attribute used to define the y-axis coordinates.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>fig</strong> – The figure with color coded latitudes or longitudes.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><cite>plt.Figure</cite></p>
 </dd>
 </dl>
@@ -213,16 +222,22 @@ attribute used to define the y-axis coordinates.</p></li>
 <span class="sig-name descname"><span class="pre">plot_time_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(16,</span> <span class="pre">7)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Catalog.plot_time_statistics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Catalog.plot_time_statistics" title="Permalink to this definition"></a></dt>
 <dd><p>Plot the histograms of time of the day and day of the week.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>figsize</strong> (<em>tuple</em><em> of </em><em>floats</em><em>, </em><em>default to</em><em> (</em><em>16</em><em>, </em><em>7</em><em>)</em>) – Size, in inches, of the figure (width, height).</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>fig</strong></p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><cite>plt.Figure</cite></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.dataset.Catalog.read_from_dataframe">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_from_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Catalog.read_from_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Catalog.read_from_dataframe" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize a Catalog instance from a <cite>pandas.DataFrame</cite> instance.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -254,7 +269,7 @@ attribute used to define the y-axis coordinates.</p></li>
 <span class="sig-name descname"><span class="pre">read_waveforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trim_traces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">reader_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Data.read_waveforms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Data.read_waveforms" title="Permalink to this definition"></a></dt>
 <dd><p>Read the waveform time series.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>trim_traces</strong> (<em>boolean</em><em>, </em><em>default to True</em>) – If True, call <cite>trim_waveforms</cite> to make sure all traces have the same
 start time.</p>
 </dd>
@@ -268,7 +283,7 @@ start time.</p>
 <p>A station is available if at least one station has non-zero data. The
 availability is then accessed via the property <cite>self.availability</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em><em> or </em><em>numpy.ndarray</em>) – Names of the stations on which we check availability. If None, use
 <cite>self.stations</cite>.</p>
 </dd>
@@ -292,7 +307,7 @@ availability is then accessed via the property <cite>self.availability</cite>.</
 <p>Start times might differ of one sample on different traces. Use this
 method to make sure all traces have the same start time.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>starttime</strong> (<em>string</em><em> or </em><em>datetime</em><em>, </em><em>default to None</em>) – If None, use <cite>self.date</cite> as the start time.</p></li>
 <li><p><strong>endtime</strong> (<em>string</em><em> or </em><em>datetime</em><em>, </em><em>default to None</em>) – If None, use <cite>self.date</cite> + <cite>self.duration</cite> as the end time.</p></li>
@@ -338,6 +353,31 @@ method to make sure all traces have the same start time.</p>
 <span class="sig-name descname"><span class="pre">get_np_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'HH'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.get_np_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.get_np_array" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.dataset.Event.get_peak_amplitudes">
+<span class="sig-name descname"><span class="pre">get_peak_amplitudes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.get_peak_amplitudes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.get_peak_amplitudes" title="Permalink to this definition"></a></dt>
+<dd><p>Get peak waveform amplitudes.</p>
+<p>The peak waveform amplitudes are typically used to compute
+amplitude-based local magnitudes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em>) – Names of the stations to include in the output array. Define the order
+of the station axis.</p></li>
+<li><p><strong>components</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to</em><em> [</em><em>'N'</em><em>,</em><em>'E'</em><em>,</em><em>'Z'</em><em>]</em>) – Names of the components to include in the output array. Define the order
+of the component axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>peak_amplitudes</strong> – (num_stations, num_components) numpy.ndarray with the peak
+waveform amplitude on each channel.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.dataset.Event.hmax_unc">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hmax_unc</span></span><a class="headerlink" href="#BPMF.dataset.Event.hmax_unc" title="Permalink to this definition"></a></dt>
@@ -354,7 +394,7 @@ method to make sure all traces have the same start time.</p>
 <dd><p>Compute the horizontal and vertical uncertainties on location.</p>
 <p>Return errors as given by the 68% confidence ellipsoid.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mode</strong> (<em>string</em><em>, </em><em>default to 'intersection'</em>) – Either ‘intersection’ or ‘projection’. If <cite>mode</cite> is ‘intersection’, the
 horizontal uncertainties are the lengths of the semi-axes of the ellipse
@@ -388,7 +428,7 @@ uncertainty, in degrees.</p></li>
 <p>Find the <cite>n</cite> closest stations and modify <cite>self.stations</cite> accordingly.
 The instance’s properties will also change accordingly.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n</strong> (<em>scalar int</em>) – The <cite>n</cite> closest stations to fetch.</p></li>
 <li><p><strong>available_stations</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to None</em>) – The list of stations from which we search the closest stations.
@@ -401,13 +441,13 @@ may choose to not include these in the closest stations.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Event.pick_PS_phases">
-<span class="sig-name descname"><span class="pre">pick_PS_phases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_P</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_S</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_ot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mini_batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">126</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_on_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'1':</span> <span class="pre">'S',</span> <span class="pre">'2':</span> <span class="pre">'S',</span> <span class="pre">'E':</span> <span class="pre">'S',</span> <span class="pre">'N':</span> <span class="pre">'S',</span> <span class="pre">'Z':</span> <span class="pre">'P'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'E':</span> <span class="pre">['E',</span> <span class="pre">'2'],</span> <span class="pre">'N':</span> <span class="pre">['N',</span> <span class="pre">'1'],</span> <span class="pre">'Z':</span> <span class="pre">['Z']}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upsampling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downsampling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.pick_PS_phases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.pick_PS_phases" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pick_PS_phases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_P</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_S</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_ot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mini_batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">126</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_on_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'1':</span> <span class="pre">'S',</span> <span class="pre">'2':</span> <span class="pre">'S',</span> <span class="pre">'E':</span> <span class="pre">'S',</span> <span class="pre">'N':</span> <span class="pre">'S',</span> <span class="pre">'Z':</span> <span class="pre">'P'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'E':</span> <span class="pre">['E',</span> <span class="pre">'2'],</span> <span class="pre">'N':</span> <span class="pre">['N',</span> <span class="pre">'1'],</span> <span class="pre">'Z':</span> <span class="pre">['Z']}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upsampling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downsampling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_apriori_picks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_win_sec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.pick_PS_phases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.pick_PS_phases" title="Permalink to this definition"></a></dt>
 <dd><p>Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).</p>
 <p>Note1: PhaseNet must be used with 3-comp data.
 Note2: Extra kwargs are passed to
 <cite>phasenet.wrapper.automatic_detection</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>duration</strong> (<em>scalar float</em>) – Duration, in seconds, of the time window to process to search for P
 and S wave arrivals.</p></li>
@@ -434,14 +474,46 @@ to the Event’s ‘N’ channel.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="BPMF.dataset.Event.pick_PS_phases_EQTransformer">
+<span class="sig-name descname"><span class="pre">pick_PS_phases_EQTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_P</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_S</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_ot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_on_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'1':</span> <span class="pre">'S',</span> <span class="pre">'2':</span> <span class="pre">'S',</span> <span class="pre">'E':</span> <span class="pre">'S',</span> <span class="pre">'N':</span> <span class="pre">'S',</span> <span class="pre">'Z':</span> <span class="pre">'P'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'E':</span> <span class="pre">['E',</span> <span class="pre">'2'],</span> <span class="pre">'N':</span> <span class="pre">['N',</span> <span class="pre">'1'],</span> <span class="pre">'Z':</span> <span class="pre">['Z']}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.pick_PS_phases_EQTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.pick_PS_phases_EQTransformer" title="Permalink to this definition"></a></dt>
+<dd><p>Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).</p>
+<p>Note1: PhaseNet must be used with 3-comp data.
+Note2: Extra kwargs are passed to
+<cite>phasenet.wrapper.automatic_detection</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>duration</strong> (<em>scalar float</em>) – Duration, in seconds, of the time window to process to search for P
+and S wave arrivals.</p></li>
+<li><p><strong>tag</strong> (<em>string</em>) – Tag name of the target data. For example: ‘preprocessed_1_12’.</p></li>
+<li><p><strong>threshold_P</strong> (<em>scalar float</em><em>, </em><em>default to 0.60</em>) – Threshold on PhaseNet’s probabilities to trigger the identification
+of a P-wave arrival.</p></li>
+<li><p><strong>threshold_S</strong> (<em>scalar float</em><em>, </em><em>default to 0.60</em>) – Threshold on PhaseNet’s probabilities to trigger the identification
+of a S-wave arrival.</p></li>
+<li><p><strong>mini_batch_size</strong> (<em>scalar int</em><em>, </em><em>default to 126</em>) – Number of traces processed in a single batch by PhaseNet. This
+shouldn’t have to be tuned.</p></li>
+<li><p><strong>phase_on_comp</strong> (<em>dictionary</em><em>, </em><em>optional</em>) – Dictionary defining which seismic phase is extracted on each
+component. For example, phase_on_comp[‘N’] gives the phase that is
+extracted on the north component.</p></li>
+<li><p><strong>component_aliases</strong> (<em>Dictionary</em>) – Each entry of the dictionary is a list of strings.
+<cite>component_aliases[comp]</cite> is the list of all aliases used for
+the same component ‘comp’. For example, <cite>component_aliases[‘N’] =
+[‘N’, ‘1’]</cite> means that both the ‘N’ and ‘1’ channels will be mapped
+to the Event’s ‘N’ channel.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Event.plot">
 <span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">15)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Velocity</span> <span class="pre">($\\mu$m/s)'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.plot" title="Permalink to this definition"></a></dt>
 <dd><p>Plot the waveforms of the Event instance.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>fig</strong> – Figure instance produced by this method.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>plt.Figure</p>
 </dd>
 </dl>
@@ -449,10 +521,10 @@ to the Event’s ‘N’ channel.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Event.read_from_file">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdf5_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.read_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.read_from_file" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdf5_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_reader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.read_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.read_from_file" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize an Event instance from <cite>filename</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>string</em><em>, </em><em>default to None</em>) – Name of the hdf5 file with the event’s data. If None, then
 <cite>hdf5_file</cite> should be specified.</p></li>
@@ -460,12 +532,15 @@ to the Event’s ‘N’ channel.</p></li>
 <li><p><strong>gid</strong> (<em>string</em><em>, </em><em>default to None</em>) – If not None, this string is the hdf5’s group name of the event.</p></li>
 <li><p><strong>hdf5_file</strong> (<cite>h5py.File</cite>, default to None) – If not None, is an opened file pointing directly at the subfolder of
 interest.</p></li>
+<li><p><strong>data_reader</strong> (<em>function</em><em>, </em><em>default to None</em>) – Function that takes a path and optional key-word arguments to read
+data from this path and returns an <cite>obspy.Stream</cite> instance. If None,
+<cite>data_reader</cite> has to be specified when calling <cite>read_waveforms</cite>.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>event</strong> – The <cite>Event</cite> instance defined by the data in <cite>filename</cite>.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><cite>Event</cite> instance</p>
 </dd>
 </dl>
@@ -476,7 +551,7 @@ interest.</p></li>
 <span class="sig-name descname"><span class="pre">read_waveforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_on_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'1':</span> <span class="pre">'S',</span> <span class="pre">'2':</span> <span class="pre">'S',</span> <span class="pre">'E':</span> <span class="pre">'S',</span> <span class="pre">'N':</span> <span class="pre">'S',</span> <span class="pre">'Z':</span> <span class="pre">'P'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'E':</span> <span class="pre">['E',</span> <span class="pre">'2'],</span> <span class="pre">'N':</span> <span class="pre">['N',</span> <span class="pre">'1'],</span> <span class="pre">'Z':</span> <span class="pre">['Z']}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'P':</span> <span class="pre">1.0,</span> <span class="pre">'S':</span> <span class="pre">4.0}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_shifted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_ot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_reader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">reader_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.read_waveforms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.read_waveforms" title="Permalink to this definition"></a></dt>
 <dd><p>Read waveform data (Event class).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>duration</strong> (<em>scalar float</em>) – Duration, in seconds, of the extracted time windows.</p></li>
 <li><p><strong>phase_on_comp</strong> (<em>dictionary</em><em>, </em><em>optional</em>) – Dictionary defining which seismic phase is extracted on each
@@ -511,7 +586,7 @@ use <cite>self.data_reader</cite> and return None if <cite>self.data_reader=None
 multiple relocation routines. All key-word arguments go the
 routine corresponding to <cite>routine</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>routine</strong> (<em>string</em><em>, </em><em>default to 'NLLoc'</em>) – Method used for relocation. ‘NLLoc’ calls <cite>relocated_NLLoc</cite> and
 requires <cite>self</cite> to have the attribute <cite>picks</cite>.</p>
 </dd>
@@ -520,10 +595,10 @@ requires <cite>self</cite> to have the attribute <cite>picks</cite>.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Event.relocate_NLLoc">
-<span class="sig-name descname"><span class="pre">relocate_NLLoc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EDT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.relocate_NLLoc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.relocate_NLLoc" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">relocate_NLLoc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EDT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.relocate_NLLoc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.relocate_NLLoc" title="Permalink to this definition"></a></dt>
 <dd><p>Relocate with NLLoc using <cite>self.picks</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to None</em>) – Names of the stations to include in the relocation process. If None,
 <cite>stations</cite> is set to <cite>self.stations</cite>.</p></li>
@@ -538,15 +613,44 @@ more information.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Event.relocate_beam">
-<span class="sig-name descname"><span class="pre">relocate_beam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beamformer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_ot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_on_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'1':</span> <span class="pre">'S',</span> <span class="pre">'2':</span> <span class="pre">'S',</span> <span class="pre">'E':</span> <span class="pre">'S',</span> <span class="pre">'N':</span> <span class="pre">'S',</span> <span class="pre">'Z':</span> <span class="pre">'P'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'E':</span> <span class="pre">['E',</span> <span class="pre">'2'],</span> <span class="pre">'N':</span> <span class="pre">['N',</span> <span class="pre">'1'],</span> <span class="pre">'Z':</span> <span class="pre">['Z']}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.relocate_beam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.relocate_beam" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">relocate_beam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beamformer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_ot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_on_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'1':</span> <span class="pre">'S',</span> <span class="pre">'2':</span> <span class="pre">'S',</span> <span class="pre">'E':</span> <span class="pre">'S',</span> <span class="pre">'N':</span> <span class="pre">'S',</span> <span class="pre">'Z':</span> <span class="pre">'P'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'E':</span> <span class="pre">['E',</span> <span class="pre">'2'],</span> <span class="pre">'N':</span> <span class="pre">['N',</span> <span class="pre">'1'],</span> <span class="pre">'Z':</span> <span class="pre">['Z']}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restricted_domain_side_km</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.relocate_beam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.relocate_beam" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.dataset.Event.remove_distant_stations">
+<span class="sig-name descname"><span class="pre">remove_distant_stations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_distance_km</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.remove_distant_stations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.remove_distant_stations" title="Permalink to this definition"></a></dt>
+<dd><p>Remove picks on stations that are further than given distance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>max_distance_km</strong> (<em>float</em><em>, </em><em>default to 50</em>) – Maximum distance, in km, beyond which picks are set to NaN.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.dataset.Event.remove_outlier_picks">
+<span class="sig-name descname"><span class="pre">remove_outlier_picks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_diff_percent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.remove_outlier_picks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.remove_outlier_picks" title="Permalink to this definition"></a></dt>
+<dd><p>Remove picks that are too far from predicted arrival times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>max_diff_percent</strong> (<em>float</em><em>, </em><em>default to 25</em>) – Maximum difference, in percentage, between the picked and predicted
+arrival time.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.dataset.Event.set_arrival_times_from_moveouts">
+<span class="sig-name descname"><span class="pre">set_arrival_times_from_moveouts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.set_arrival_times_from_moveouts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.set_arrival_times_from_moveouts" title="Permalink to this definition"></a></dt>
+<dd><p>Build arrival times assuming at = ot + mv.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Event.set_aux_data">
 <span class="sig-name descname"><span class="pre">set_aux_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aux_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.set_aux_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.set_aux_data" title="Permalink to this definition"></a></dt>
 <dd><p>Adds any extra data to the Event instance.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>aux_data</strong> (<em>dictionary</em>) – Dictionary with any auxiliary data.</p>
 </dd>
 </dl>
@@ -559,7 +663,7 @@ more information.</p></li>
 <p>A station is available if at least one station has non-zero data. The
 availability is then accessed via the property <cite>self.availability</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em><em> or </em><em>numpy.ndarray</em><em>, </em><em>default to None</em>) – Names of the stations on which we check availability. If None, use
 <cite>self.stations</cite>.</p>
 </dd>
@@ -571,7 +675,7 @@ availability is then accessed via the property <cite>self.availability</cite>.</
 <span class="sig-name descname"><span class="pre">set_component_aliases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_aliases</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.set_component_aliases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.set_component_aliases" title="Permalink to this definition"></a></dt>
 <dd><p>Set or modify the <cite>component_aliases</cite> attribute.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>component_aliases</strong> (<em>Dictionary</em>) – Each entry of the dictionary is a list of strings.
 <cite>component_aliases[comp]</cite> is the list of all aliases used for
 the same component ‘comp’. For example, <cite>component_aliases[‘N’] =
@@ -586,7 +690,7 @@ to the Event’s ‘N’ channel.</p>
 <span class="sig-name descname"><span class="pre">set_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">components</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.set_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.set_components" title="Permalink to this definition"></a></dt>
 <dd><p>Set the list of components.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>components</strong> (<em>list</em><em> of </em><em>strings</em>) – The names of the components on which the <cite>Template</cite> instance will
 work after this call to <cite>self.set_components</cite>.</p>
 </dd>
@@ -610,7 +714,7 @@ work after this call to <cite>self.set_components</cite>.</p>
 <span class="sig-name descname"><span class="pre">set_source_receiver_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.set_source_receiver_dist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.set_source_receiver_dist" title="Permalink to this definition"></a></dt>
 <dd><p>Set source-receiver distances, given <cite>network</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>network</strong> (<cite>dataset.Network</cite> instance) – The <cite>Network</cite> instance with the station coordinates to use
 in the source-receiver computation.</p>
 </dd>
@@ -634,13 +738,19 @@ in the source-receiver computation.</p>
 <p>Start times might differ of one sample on different traces. Use this
 method to make sure all traces have the same start time.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>starttime</strong> (<em>string</em><em> or </em><em>datetime</em><em>, </em><em>default to None</em>) – If None, use <cite>self.date</cite> as the start time.</p></li>
 <li><p><strong>endtime</strong> (<em>string</em><em> or </em><em>datetime</em><em>, </em><em>default to None</em>) – If None, use <cite>self.date</cite> + <cite>self.duration</cite> as the end time.</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.dataset.Event.update_aux_data_database">
+<span class="sig-name descname"><span class="pre">update_aux_data_database</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.update_aux_data_database"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.update_aux_data_database" title="Permalink to this definition"></a></dt>
+<dd><p>Add the new elements of <cite>self.aux_data</cite> that are not in the database.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -665,7 +775,7 @@ method to make sure all traces have the same start time.</p>
 <span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_waveforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdf5_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.write" title="Permalink to this definition"></a></dt>
 <dd><p>Write to hdf5 file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>db_filename</strong> (<em>string</em>) – Name of the hdf5 file storing the event information.</p></li>
 <li><p><strong>db_path</strong> (string, default to <cite>cfg.OUTPUT_PATH</cite>) – Name of the directory with <cite>db_filename</cite>.</p></li>
@@ -675,6 +785,19 @@ then Event is directly stored at the root.</p></li>
 <li><p><strong>hdf5_file</strong> (<cite>h5py.File</cite>, default to None) – If not None, is an opened file pointing directly at the subfolder of
 interest.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.dataset.Event.zero_out_clipped_waveforms">
+<span class="sig-name descname"><span class="pre">zero_out_clipped_waveforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kurtosis_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.zero_out_clipped_waveforms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.zero_out_clipped_waveforms" title="Permalink to this definition"></a></dt>
+<dd><p>Find waveforms with anomalous statistic and zero them out.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kurtosis_threshold</strong> (<em>scalar float</em><em>, </em><em>optional</em>) – Threshold below which the kurtosis is considered anomalous.
+Note that the Fischer definition of the kurtosis is used,
+that is, kurtosis=0 for gaussian distribution.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -735,7 +858,7 @@ interest.</p></li>
 <span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rms'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Family.normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Family.normalize" title="Permalink to this definition"></a></dt>
 <dd><p>Normalize the template waveforms.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>method</strong> (<em>string</em><em>, </em><em>default to 'rms'</em>) – Either ‘rms’ (default) or ‘max’.</p>
 </dd>
 </dl>
@@ -751,7 +874,7 @@ interest.</p></li>
 <span class="sig-name descname"><span class="pre">set_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Family.set_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Family.set_network" title="Permalink to this definition"></a></dt>
 <dd><p>Update <cite>self.network</cite> to the new desired <cite>network</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>network</strong> (<cite>dataset.Network</cite> instance) – The <cite>Network</cite> instance used to query consistent data accross all
 templates.</p>
 </dd>
@@ -787,7 +910,7 @@ templates.</p>
 <span class="sig-name descname"><span class="pre">box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_max</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Network.box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Network.box" title="Permalink to this definition"></a></dt>
 <dd><p>Geographical selection of sub-network.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>lat_min</strong> (<em>scalar</em><em>, </em><em>float</em>) – Minimum latitude of the box.</p></li>
 <li><p><strong>lat_max</strong> (<em>scalar</em><em>, </em><em>float</em>) – Maximum latitude of the box.</p></li>
@@ -795,10 +918,10 @@ templates.</p>
 <li><p><strong>lon_max</strong> (<em>scalar</em><em>, </em><em>float</em>) – Maximum longitude of the box.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>subnet</strong> – The Network instance restricted to the relevant stations.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Network instance</p>
 </dd>
 </dl>
@@ -855,17 +978,17 @@ templates.</p>
 <span class="sig-name descname"><span class="pre">plot_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Network.plot_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Network.plot_map" title="Permalink to this definition"></a></dt>
 <dd><p>Plot stations on map.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ax</strong> (<cite>plt.Axes</cite>, default to None) – If None, create a new <cite>plt.Figure</cite> and <cite>plt.Axes</cite> instances. If
 speficied by user, use the provided instance to plot.</p></li>
 <li><p><strong>figsize</strong> (<em>tuple</em><em> of </em><em>floats</em><em>, </em><em>default to</em><em> (</em><em>20</em><em>, </em><em>10</em><em>)</em>) – Size, in inches, of the figure (width, height).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>fig</strong> – The map with seismic stations.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><cite>plt.Figure</cite></p>
 </dd>
 </dl>
@@ -898,7 +1021,7 @@ data convention.</p>
 <dt class="sig sig-object py" id="BPMF.dataset.Network.subset">
 <span class="sig-name descname"><span class="pre">subset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'keep'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Network.subset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Network.subset" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stations</strong> (<em>list</em><em> or </em><em>array</em><em> of </em><em>strings</em>) – Stations to keep or discard, depending on the method.</p></li>
 <li><p><strong>components</strong> (<em>list</em><em> or </em><em>array</em><em> of </em><em>strings</em>) – Components to keep or discard, depending on the method.</p></li>
@@ -910,7 +1033,7 @@ this function are what won’t be featured in the
 subnetwork.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>subnetwork</p>
 </dd>
 </dl>
@@ -931,7 +1054,7 @@ subnetwork.</p></li>
 Note2: Extra kwargs are passed to
 <cite>phasenet.wrapper.automatic_detection</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>duration</strong> (<em>scalar float</em>) – Duration, in seconds, of the time window to process to search for P
 and S wave arrivals.</p></li>
@@ -963,7 +1086,7 @@ distribution of picks.</p></li>
 <span class="sig-name descname"><span class="pre">read_waveforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_on_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'1':</span> <span class="pre">'S',</span> <span class="pre">'2':</span> <span class="pre">'S',</span> <span class="pre">'E':</span> <span class="pre">'S',</span> <span class="pre">'N':</span> <span class="pre">'S',</span> <span class="pre">'Z':</span> <span class="pre">'P'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'P':</span> <span class="pre">1.0,</span> <span class="pre">'S':</span> <span class="pre">4.0}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_shifted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_ot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Stack.read_waveforms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Stack.read_waveforms" title="Permalink to this definition"></a></dt>
 <dd><p>Read waveform data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>duration</strong> (<em>scalar float</em>) – Duration, in seconds, of the extracted time windows.</p></li>
 <li><p><strong>phase_on_comp</strong> (<em>dictionary</em><em>, </em><em>optional</em>) – Dictionary defining which seismic phase is extracted on each
@@ -994,7 +1117,7 @@ the origin time.</p></li>
 <span class="sig-name descname"><span class="pre">distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Template.distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Template.distance" title="Permalink to this definition"></a></dt>
 <dd><p>Compute distance between template and a given location.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>longitude</strong> (<em>scalar</em><em>, </em><em>float</em>) – Longitude of the target location.</p></li>
 <li><p><strong>latitude</strong> (<em>scalar</em><em>, </em><em>float</em>) – Latitude of the target location.</p></li>
@@ -1009,16 +1132,16 @@ the origin time.</p></li>
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init_from_event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attach_waveforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Template.init_from_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Template.init_from_event" title="Permalink to this definition"></a></dt>
 <dd><p>Instanciate a <cite>Template</cite> object from an <cite>Event</cite> object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>event</strong> (<cite>Event</cite> instance) – The <cite>Event</cite> instance to convert to a <cite>Template</cite> instance.</p></li>
 <li><p><strong>attach_waveforms</strong> (<em>boolean</em><em>, </em><em>default to True</em>) – Should not be turned to False when used directly.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>template</strong> – <cite>Template</cite> instance base on <cite>event</cite>.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Template instance</p>
 </dd>
 </dl>
@@ -1042,7 +1165,7 @@ the origin time.</p></li>
 <p>Find the <cite>n</cite> best stations and modify <cite>self.stations</cite> accordingly.
 The instance’s properties will also change accordingly.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n</strong> (<em>scalar int</em>) – The <cite>n</cite> closest stations.</p></li>
 <li><p><strong>available_stations</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to None</em>) – The list of stations from which we search the closest stations.
@@ -1058,7 +1181,7 @@ may choose to not include these in the closest stations.</p></li>
 <span class="sig-name descname"><span class="pre">plot_detection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_on_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'1':</span> <span class="pre">'S',</span> <span class="pre">'2':</span> <span class="pre">'S',</span> <span class="pre">'E':</span> <span class="pre">'S',</span> <span class="pre">'N':</span> <span class="pre">'S',</span> <span class="pre">'Z':</span> <span class="pre">'P'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_ot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Template.plot_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Template.plot_detection" title="Permalink to this definition"></a></dt>
 <dd><p>Plot the <cite>idx</cite>-th detection made with this template.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>string</em><em>, </em><em>default to None</em>) – Name of the detection file. If None, use the standard file
 and folder naming convention.</p></li>
@@ -1074,7 +1197,7 @@ use the standard file and folder naming convention.</p></li>
 <span class="sig-name descname"><span class="pre">plot_recurrence_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Template.plot_recurrence_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Template.plot_recurrence_times" title="Permalink to this definition"></a></dt>
 <dd><p>Plot recurrence times vs detection times.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ax</strong> (<cite>plt.Axes</cite>, default to None) – If not None, use this <cite>plt.Axes</cite> instance to plot the data.</p>
 </dd>
 </dl>
@@ -1085,7 +1208,7 @@ use the standard file and folder naming convention.</p></li>
 <span class="sig-name descname"><span class="pre">read_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_summary_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Template.read_catalog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Template.read_catalog" title="Permalink to this definition"></a></dt>
 <dd><p>Build a <cite>Catalog</cite> instance.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>string</em><em>, </em><em>default to None</em>) – Name of the detection file. If None, use the standard file
 and folder naming convention.</p></li>
@@ -1138,7 +1261,7 @@ it builds the catalog from the detection output.</p></li>
 <span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_waveforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Template.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Template.write" title="Permalink to this definition"></a></dt>
 <dd><p>Write to hdf5 file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>db_filename</strong> (<em>string</em>) – Name of the hdf5 file storing the event information.</p></li>
 <li><p><strong>db_path</strong> (string, default to <cite>cfg.OUTPUT_PATH</cite>) – Name of the directory with <cite>db_filename</cite>.</p></li>
@@ -1159,7 +1282,7 @@ interest.</p></li>
 <p>hdf5 does not support storing datasets of strings. Therefore, You need
 to convert strings to bytes or this method will raise an error.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>attributes</strong> (<em>dictionary</em>) – Dictionary with scalars, <cite>numpy.ndarray</cite>, dictionary, or
 <cite>pandas.DataFrame</cite>. The keys of the dictionary are used to name the
@@ -1187,7 +1310,7 @@ use the standard file and folder naming convention.</p></li>
 <span class="sig-name descname"><span class="pre">box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#TemplateGroup.box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.TemplateGroup.box" title="Permalink to this definition"></a></dt>
 <dd><p>Keep templates inside the requested geographic bounds.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>lon_min</strong> (<em>scalar float</em>) – Minimum longitude, in decimal degrees.</p></li>
 <li><p><strong>lon_max</strong> (<em>scalar float</em>) – Maximum longitude, in decimal degrees.</p></li>
@@ -1227,7 +1350,7 @@ template tid2.</p>
 <span class="sig-name descname"><span class="pre">compute_intertemplate_cc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_lag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_cc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_from_scratch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#TemplateGroup.compute_intertemplate_cc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.TemplateGroup.compute_intertemplate_cc" title="Permalink to this definition"></a></dt>
 <dd><p>Compute the pairwise template CCs.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>distance_threshold</strong> (<em>float</em><em>, </em><em>default to 5</em>) – The distance threshold, in kilometers, between two
 uncertainty ellipsoids under which similarity is computed.</p></li>
@@ -1282,7 +1405,7 @@ potentially large file.</p></li>
 <p>Find the <cite>n</cite> best stations and modify <cite>self.stations</cite> accordingly.
 The instance’s properties will also change accordingly.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n</strong> (<em>scalar int</em>) – The <cite>n</cite> closest stations.</p></li>
 <li><p><strong>available_stations</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to None</em>) – The list of stations from which we search the closest stations.
@@ -1300,7 +1423,7 @@ may choose to not include these in the closest stations.</p></li>
 <p>Find the <cite>n</cite> closest stations and modify <cite>self.stations</cite> accordingly.
 The instance’s properties will also change accordingly.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n</strong> (<em>scalar int</em>) – The <cite>n</cite> closest stations to fetch.</p></li>
 <li><p><strong>available_stations</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to None</em>) – The list of stations from which we search the closest stations.
@@ -1325,13 +1448,13 @@ may choose to not include these in the closest stations.</p></li>
 <dt class="sig sig-object py" id="BPMF.dataset.TemplateGroup.plot_detection">
 <span class="sig-name descname"><span class="pre">plot_detection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#TemplateGroup.plot_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.TemplateGroup.plot_detection" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>idx</strong> (<em>scalar int</em>) – Event index in <cite>self.catalog.catalog</cite>.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>fig</strong> – The figure showing the detected event.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><cite>plt.Figure</cite></p>
 </dd>
 </dl>
@@ -1342,7 +1465,7 @@ may choose to not include these in the closest stations.</p></li>
 <span class="sig-name descname"><span class="pre">plot_recurrence_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#TemplateGroup.plot_recurrence_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.TemplateGroup.plot_recurrence_times" title="Permalink to this definition"></a></dt>
 <dd><p>Plot recurrence times vs detection times, template-wise.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>figsize</strong> (<em>tuple</em><em> of </em><em>floats</em><em>, </em><em>default to</em><em> (</em><em>20</em><em>, </em><em>10</em><em>)</em>) – Size in inches of the figure (width, height).</p></li>
 <li><p><strong>progress</strong> (<em>boolean</em><em>, </em><em>default to False</em>) – If True, print progress bar with <cite>tqdm</cite>.</p></li>
@@ -1357,7 +1480,7 @@ may choose to not include these in the closest stations.</p></li>
 <dd><p>Build a catalog from all templates’ detections.</p>
 <p>Work only if folder and file names follow the standard convention.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>extra_attributes</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to</em><em> [</em><em>]</em>) – Attributes to read in addition to the default ‘longitude’,
 ‘latitude’, ‘depth’, and ‘origin_time’.</p></li>
@@ -1373,7 +1496,7 @@ may choose to not include these in the closest stations.</p></li>
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_from_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filenames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#TemplateGroup.read_from_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.TemplateGroup.read_from_files" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize the TemplateGroup instance given a list of filenames.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filenames</strong> (<em>(</em><em>n_templates</em><em>,</em><em>) </em><em>list</em><em> of </em><em>strings</em>) – List of full file paths from which we instanciate the list of
 <cite>dataset.Template</cite> objects.</p></li>
@@ -1383,10 +1506,10 @@ templates.</p></li>
 data are stored in their hdf5 files.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>template_group</strong> – The initialized TemplateGroup instance.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TemplateGroup instance</p>
 </dd>
 </dl>
@@ -1396,7 +1519,7 @@ data are stored in their hdf5 files.</p></li>
 <dt class="sig sig-object py" id="BPMF.dataset.TemplateGroup.read_waveforms">
 <span class="sig-name descname"><span class="pre">read_waveforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#TemplateGroup.read_waveforms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.TemplateGroup.read_waveforms" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>progress</strong> (<em>boolean</em><em>, </em><em>default to False</em>) – If True, print progress bar with <cite>tqdm</cite>.</p>
 </dd>
 </dl>
@@ -1407,7 +1530,7 @@ data are stored in their hdf5 files.</p></li>
 <span class="sig-name descname"><span class="pre">remove_multiples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_closest_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">similarity_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#TemplateGroup.remove_multiples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.TemplateGroup.remove_multiples" title="Permalink to this definition"></a></dt>
 <dd><p>Search for events detected by multiple templates.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n_closest_stations</strong> (<em>integer</em><em>, </em><em>default to 10</em>) – In case template similarity is taken into account,
 this is the number of stations closest to each template

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BPMF.NLLoc_utils &mdash; BPMF 2.0.0 documentation</title>
@@ -11,10 +11,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -30,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -81,7 +83,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../usage.html">Usage</a></li>
           <li class="breadcrumb-item"><a href="../api.html">API</a></li>
       <li class="breadcrumb-item active">BPMF.NLLoc_utils</li>
@@ -127,13 +129,13 @@
 <p>Load the travel times previously computed with Pykonal and reformat the axes
 to follow NLLoc’s convention.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>string</em>) – Name of the travel-time file. Example: ‘tts.h5’.</p></li>
 <li><p><strong>path</strong> (string, default to <cite>BPMF.cfg.MOVEOUTS_PATH</cite>) – Name of the directory where the travel-time file is located.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>longitude</strong> (<em>(n_longitude, n_latitude, n_depth) numpy.ndarray</em>) – longitudes of the grid points, in decimals.</p></li>
 <li><p><strong>latitude</strong> (<em>(n_longitude, n_latitude, n_depth) numpy.ndarray</em>) – latitudes of the grid points, in decimals.</p></li>
@@ -153,13 +155,13 @@ made of sub-dictionaries, one for each station: e.g.
 <span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">read_NLLoc_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#read_NLLoc_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.read_NLLoc_outputs" title="Permalink to this definition"></a></dt>
 <dd><p>Read the NLLoc output hyp file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>string</em>) – Name of the NLLoc output file.</p></li>
 <li><p><strong>path</strong> (<em>string</em>) – Name of the NLLoc output directory.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>hypocenter</strong> (<em>dictionary</em>) – Dictionary with four fields: <cite>origin_time</cite>, <cite>latitude</cite>, <cite>longitude</cite>,
 <cite>depth</cite>.</p></li>
@@ -172,7 +174,7 @@ made of sub-dictionaries, one for each station: e.g.
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.NLLoc_utils.write_NLLoc_control">
-<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">write_NLLoc_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctrl_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TRANS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'GLOBAL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">author</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Eric</span> <span class="pre">Beauce'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">affiliation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Lamont-Doherty</span> <span class="pre">Earth</span> <span class="pre">Observatory'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLLoc_input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLLoc_output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLLoc_basename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_node_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EDT_OT_WT_ML'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ANGLES_NO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MISFIT'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#write_NLLoc_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.write_NLLoc_control" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">write_NLLoc_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctrl_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TRANS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'GLOBAL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">author</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Eric</span> <span class="pre">Beauce'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">affiliation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Lamont-Doherty</span> <span class="pre">Earth</span> <span class="pre">Observatory'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLLoc_input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLLoc_output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLLoc_basename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_node_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EDT_OT_WT_ML'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ANGLES_NO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MISFIT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_depth_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#write_NLLoc_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.write_NLLoc_control" title="Permalink to this definition"></a></dt>
 <dd><p>Write the NLLoc control file.</p>
 </dd></dl>
 
@@ -185,7 +187,7 @@ coordinates are given in geographic coordinates: longitude, latitude and
 depth. The origin of the grid is taken as the southwest corner. More
 information at: <a class="reference external" href="http://alomax.free.fr/nlloc/soft7.00/formats.html#_grid_">http://alomax.free.fr/nlloc/soft7.00/formats.html#_grid_</a></p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>longitude</strong> (<em>(</em><em>n_longitude</em><em>, </em><em>n_latitude</em><em>, </em><em>n_depth</em><em>) </em><em>numpy.ndarray</em>) – longitudes of the grid points, in decimals.</p></li>
 <li><p><strong>latitude</strong> (<em>(</em><em>n_longitude</em><em>, </em><em>n_latitude</em><em>, </em><em>n_depth</em><em>) </em><em>numpy.ndarray</em>) – latitudes of the grid points, in decimals.</p></li>
@@ -207,7 +209,7 @@ made of sub-dictionaries, one for each station: e.g.
 <span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">write_NLLoc_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">picks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.04</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#write_NLLoc_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.write_NLLoc_obs" title="Permalink to this definition"></a></dt>
 <dd><p>Write the .obs file for NLLoc.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>origin_time</strong> (<em>string</em><em> or </em><em>datetime</em>) – Origin, or reference, time of the picks.</p></li>
 <li><p><strong>picks</strong> (<em>pandas.DataFrame</em>) – Attribute of an <cite>dataset.Event</cite> instance, produced by

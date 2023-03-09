@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Download Seismic Data &mdash; BPMF 2.0.0 documentation</title>
@@ -11,10 +11,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -32,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -61,9 +63,11 @@
 <li class="toctree-l2"><a class="reference internal" href="3_network_file.html">Make Network File</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4_travel_times.html">Compute P-/S-wave travel Times</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5_backprojection.html">Backprojection of the Seismic Wavefield</a></li>
-<li class="toctree-l2"><a class="reference internal" href="6_build_template_database.html">Build Template Database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_template_matching.html">Template Matching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_relocate.html">Relocation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_magnitudes.html">Estimate the seismic moments and moment magnitudes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_build_template_database.html">Build Template Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="9_template_matching.html">Template Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
@@ -82,7 +86,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../tutorial.html">Tutorial</a></li>
       <li class="breadcrumb-item active">Download Seismic Data</li>
       <li class="wy-breadcrumbs-aside">
@@ -204,10 +208,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -457,8 +462,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-[2022-09-21 15:01:27,518] - obspy.clients.fdsn.mass_downloader - INFO: Initializing FDSN client(s) for IRIS.
-[2022-09-21 15:01:28,051] - obspy.clients.fdsn.mass_downloader - INFO: Successfully initialized 1 client(s): IRIS.
+[2023-03-06 14:53:37,052] - obspy.clients.fdsn.mass_downloader - INFO: Initializing FDSN client(s) for IRIS.
+[2023-03-06 14:53:37,818] - obspy.clients.fdsn.mass_downloader - INFO: Successfully initialized 1 client(s): IRIS.
 </pre></div></div>
 </div>
 </section>
@@ -486,32 +491,40 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-[2022-09-21 15:01:28,216] - obspy.clients.fdsn.mass_downloader - INFO: Total acquired or preexisting stations: 0
-[2022-09-21 15:01:28,217] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Requesting reliable availability.
-[2022-09-21 15:01:28,606] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully requested availability (0.39 seconds)
-[2022-09-21 15:01:28,609] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Found 8 stations (24 channels).
-[2022-09-21 15:01:28,611] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Will attempt to download data from 8 stations.
-[2022-09-21 15:01:28,617] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Status for 24 time intervals/channels before downloading: NEEDS_DOWNLOADING
-[2022-09-21 15:01:39,510] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2022-09-21 15:01:40,525] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2022-09-21 15:01:43,379] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2022-09-21 15:01:45,017] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2022-09-21 15:01:53,964] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2022-09-21 15:01:54,003] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2022-09-21 15:01:54,325] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 1 channels (of 1)
-[2022-09-21 15:01:57,254] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 1 channels (of 1)
-[2022-09-21 15:02:01,300] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 1 channels (of 1)
-[2022-09-21 15:02:05,636] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2022-09-21 15:02:05,638] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Launching basic QC checks...
-[2022-09-21 15:02:05,844] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Downloaded 233.5 MB [6458.41 KB/sec] of data, 0.0 MB of which were discarded afterwards.
-[2022-09-21 15:02:05,845] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Status for 24 time intervals/channels after downloading: DOWNLOADED
-[2022-09-21 15:02:05,892] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - No station information to download.
-[2022-09-21 15:02:05,893] - obspy.clients.fdsn.mass_downloader - INFO: ============================== Final report
-[2022-09-21 15:02:05,893] - obspy.clients.fdsn.mass_downloader - INFO: 0 MiniSEED files [0.0 MB] already existed.
-[2022-09-21 15:02:05,894] - obspy.clients.fdsn.mass_downloader - INFO: 8 StationXML files [2.0 MB] already existed.
-[2022-09-21 15:02:05,895] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Acquired 24 MiniSEED files [233.5 MB].
-[2022-09-21 15:02:05,896] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Acquired 0 StationXML files [0.0 MB].
-[2022-09-21 15:02:05,896] - obspy.clients.fdsn.mass_downloader - INFO: Downloaded 233.5 MB in total.
+[2023-03-06 14:53:41,213] - obspy.clients.fdsn.mass_downloader - INFO: Total acquired or preexisting stations: 0
+[2023-03-06 14:53:41,215] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Requesting reliable availability.
+[2023-03-06 14:53:41,458] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully requested availability (0.24 seconds)
+[2023-03-06 14:53:41,460] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Found 8 stations (24 channels).
+[2023-03-06 14:53:41,461] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Will attempt to download data from 8 stations.
+[2023-03-06 14:53:41,467] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Status for 24 time intervals/channels before downloading: NEEDS_DOWNLOADING
+[2023-03-06 14:53:52,897] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2023-03-06 14:53:54,187] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2023-03-06 14:53:55,484] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2023-03-06 14:53:56,833] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2023-03-06 14:55:07,119] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 1 channels (of 1)
+[2023-03-06 14:55:09,626] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 1 channels (of 1)
+[2023-03-06 14:55:53,490] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2023-03-06 14:55:54,800] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2023-03-06 14:56:19,988] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 1 channels (of 1)
+[2023-03-06 14:57:09,768] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2023-03-06 14:57:09,772] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Launching basic QC checks...
+[2023-03-06 14:57:09,997] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Downloaded 233.5 MB [1147.77 KB/sec] of data, 0.0 MB of which were discarded afterwards.
+[2023-03-06 14:57:09,998] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Status for 24 time intervals/channels after downloading: DOWNLOADED
+[2023-03-06 14:57:10,243] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120707/resp/YH.DC08.xml&#39;.
+[2023-03-06 14:57:10,252] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120707/resp/YH.DC06.xml&#39;.
+[2023-03-06 14:57:10,342] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120707/resp/YH.DC07.xml&#39;.
+[2023-03-06 14:57:10,484] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120707/resp/YH.DD06.xml&#39;.
+[2023-03-06 14:57:10,494] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120707/resp/YH.DE07.xml&#39;.
+[2023-03-06 14:57:10,586] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120707/resp/YH.DE08.xml&#39;.
+[2023-03-06 14:57:10,778] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120707/resp/YH.SPNC.xml&#39;.
+[2023-03-06 14:57:10,930] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120707/resp/YH.SAUV.xml&#39;.
+[2023-03-06 14:57:10,994] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Downloaded 8 station files [2.0 MB] in 0.9 seconds [2222.01 KB/sec].
+[2023-03-06 14:57:10,996] - obspy.clients.fdsn.mass_downloader - INFO: ============================== Final report
+[2023-03-06 14:57:10,996] - obspy.clients.fdsn.mass_downloader - INFO: 0 MiniSEED files [0.0 MB] already existed.
+[2023-03-06 14:57:10,997] - obspy.clients.fdsn.mass_downloader - INFO: 0 StationXML files [0.0 MB] already existed.
+[2023-03-06 14:57:10,999] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Acquired 24 MiniSEED files [233.5 MB].
+[2023-03-06 14:57:11,000] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Acquired 8 StationXML files [2.0 MB].
+[2023-03-06 14:57:11,001] - obspy.clients.fdsn.mass_downloader - INFO: Downloaded 235.5 MB in total.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -520,11 +533,11 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;IRIS&#39;: &lt;obspy.clients.fdsn.mass_downloader.download_helpers.ClientDownloadHelper at 0x7faf98777c40&gt;}
+{&#39;IRIS&#39;: &lt;obspy.clients.fdsn.mass_downloader.download_helpers.ClientDownloadHelper at 0x7ff44074baf0&gt;}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># check the files in DIRPATH_WAVEFORMS</span>
@@ -533,35 +546,35 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;../BPMF_data/2012/20120707/raw/YH.DC06..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DD06..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DE07..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DE08..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DE08..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.SPNC..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.SPNC..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC07..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.SAUV..HHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC08..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC07..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.SAUV..HHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.SPNC..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC08..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC07..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.SAUV..HHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC08..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+[&#39;../BPMF_data/2012/20120707/raw/YH.DE07..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DE08..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DE07..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120707/raw/YH.DD06..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120707/raw/YH.DD06..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DE07..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DE07..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DE08..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC07..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.SAUV..HHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC08..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC08..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.SPNC..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120707/raw/YH.DC06..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC06..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;]
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC06..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC06..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC07..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.SAUV..HHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC07..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.SAUV..HHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC08..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.SPNC..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.SPNC..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DE08..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DE07..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DE08..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DD06..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;]
 </pre></div></div>
 </div>
 </section>
@@ -569,20 +582,20 @@ div.rendered_html tbody tr:hover {
 <h2>Cleanup the Downloaded Data<a class="headerlink" href="#Cleanup-the-Downloaded-Data" title="Permalink to this heading"></a></h2>
 <p>Even though <code class="docutils literal notranslate"><span class="pre">mass_downloader.Restrictions</span></code> handles channel priorities, some components might end up being downloaded at multiple channels because of failed data requests (see the output of the previous cell). To avoid data duplicate and in the interest of keeping the memory footprint low, we now remove these duplicated data.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fnmatch</span> <span class="kn">import</span> <span class="nb">filter</span> <span class="k">as</span> <span class="n">fnfilter</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># keep only HH channels when HH and BH channels were downloaded</span>
 <span class="n">data_list</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath_raw_waveforms</span><span class="p">,</span> <span class="s2">&quot;*mseed&quot;</span><span class="p">))</span>
-<span class="n">station_list</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath_raw_waveforms</span><span class="p">,</span> <span class="s2">&quot;*xml&quot;</span><span class="p">))</span>
+<span class="n">station_list</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath_resp_files</span><span class="p">,</span> <span class="s2">&quot;*xml&quot;</span><span class="p">))</span>
 <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="n">station_list</span><span class="p">:</span>
     <span class="n">sta_id</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">sta</span><span class="p">))</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">sta_id</span><span class="p">)</span>
@@ -597,8 +610,23 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+YH.DC07
+YH.DC08
+YH.DC06
+YH.DE08
+YH.DD06
+YH.SPNC
+YH.SAUV
+YH.DE07
+</pre></div></div>
+</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_list</span>
@@ -606,42 +634,42 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;../BPMF_data/2012/20120707/raw/YH.DC06..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DD06..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DE07..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DE08..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DE08..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.SPNC..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.SPNC..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC07..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.SAUV..HHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC08..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC07..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.SAUV..HHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.SPNC..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC08..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC07..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.SAUV..HHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC08..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+[&#39;../BPMF_data/2012/20120707/raw/YH.DE07..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DE08..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DE07..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120707/raw/YH.DD06..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120707/raw/YH.DD06..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DE07..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DE07..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DE08..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC07..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.SAUV..HHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC08..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC08..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.SPNC..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120707/raw/YH.DC06..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120707/raw/YH.DC06..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;]
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC06..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC06..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC07..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.SAUV..HHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC07..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.SAUV..HHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DC08..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.SPNC..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.SPNC..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DE08..BHE__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DE07..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DE08..BHZ__20120706T235140Z__20120708T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120707/raw/YH.DD06..BHN__20120706T235140Z__20120708T000820Z.mseed&#39;]
 </pre></div></div>
 </div>
 </section>
 <section id="Plot-the-Raw-Data">
 <h2>Plot the Raw Data<a class="headerlink" href="#Plot-the-Raw-Data" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">traces</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
@@ -652,27 +680,27 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 30 Trace(s) in Stream:
 
-YH.DC06..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE07..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
 ...
 (28 other traces)
 ...
-YH.DC06..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DD06..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
 
 [Use &#34;print(Stream.__str__(extended=True))&#34; to print all Traces]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&#39;svg&#39;]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&quot;svg&quot;]
 
 <span class="n">fig</span> <span class="o">=</span> <span class="n">traces</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">equal_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>

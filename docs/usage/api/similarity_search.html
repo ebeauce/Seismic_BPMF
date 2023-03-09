@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BPMF.similarity_search &mdash; BPMF 2.0.0 documentation</title>
@@ -11,10 +11,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -30,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -78,7 +80,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../usage.html">Usage</a></li>
           <li class="breadcrumb-item"><a href="../api.html">API</a></li>
       <li class="breadcrumb-item active">BPMF.similarity_search</li>
@@ -119,7 +121,7 @@
 <span id="bpmf-similarity-search"></span><h1>BPMF.similarity_search<a class="headerlink" href="#module-BPMF.similarity_search" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="BPMF.similarity_search.MatchedFilter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BPMF.similarity_search.</span></span><span class="sig-name descname"><span class="pre">MatchedFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template_group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_kurto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_CC_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_network_chunks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rms'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_memory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/similarity_search.html#MatchedFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.similarity_search.MatchedFilter" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BPMF.similarity_search.</span></span><span class="sig-name descname"><span class="pre">MatchedFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template_group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_kurto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_CC_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_network_chunks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rms'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_memory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomalous_cdf_at_mean_plus_1sig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_for_validation_Tmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_win_peak_amp_sec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_win_peak_amp_sec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_on_comp_peak_amp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'E':</span> <span class="pre">'S',</span> <span class="pre">'N':</span> <span class="pre">'S',</span> <span class="pre">'Z':</span> <span class="pre">'P'}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/similarity_search.html#MatchedFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.similarity_search.MatchedFilter" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class for running a matched filter search and detecting earthquakes.</p>
 <dl class="py property">
@@ -132,7 +134,7 @@
 <span class="sig-name descname"><span class="pre">compute_cc_time_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weight_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/similarity_search.html#MatchedFilter.compute_cc_time_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.similarity_search.MatchedFilter.compute_cc_time_series" title="Permalink to this definition"></a></dt>
 <dd><p>Compute the CC time series (step 1 of matched-filter search).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>weight_type</strong> (<em>string</em><em>, </em><em>default to 'simple'</em>) – Either of ‘simple (default), ‘distance’, or ‘snr’.</p></li>
 <li><p><strong>device</strong> (<em>string</em><em>, </em><em>default to 'cpu'</em>) – Either ‘cpu’ or ‘gpu’.</p></li>
@@ -150,7 +152,7 @@ device’s memory).</p></li>
 <span class="sig-name descname"><span class="pre">find_detections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minimum_interevent_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_window_dur</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1800.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanity_check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/similarity_search.html#MatchedFilter.find_detections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.similarity_search.MatchedFilter.find_detections" title="Permalink to this definition"></a></dt>
 <dd><p>Analyze the time series of correlation coefficients to find detections.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>minimum_interevent_time</strong> (<em>scalar</em><em>, </em><em>float</em>) – The shortest duration, in seconds, allowed between two
 consecutive detections.</p></li>
@@ -161,11 +163,11 @@ of the time-dependent detection threshold.</p></li>
 <li><p><strong>verbose</strong> (<em>scalar int</em><em>, </em><em>default to 0</em>) – If &gt; 0, print some messages.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>detections</strong> – Dictionary where <cite>detections[tid]</cite> is a list of <cite>dataset.Event</cite> for
 all events detected with template <cite>tid</cite>.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dictionary,</p>
 </dd>
 </dl>
@@ -178,10 +180,10 @@ all events detected with template <cite>tid</cite>.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.similarity_search.MatchedFilter.plot_cc">
-<span class="sig-name descname"><span class="pre">plot_cc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">7)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/similarity_search.html#MatchedFilter.plot_cc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.similarity_search.MatchedFilter.plot_cc" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_cc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/similarity_search.html#MatchedFilter.plot_cc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.similarity_search.MatchedFilter.plot_cc" title="Permalink to this definition"></a></dt>
 <dd><p>Plot the time series of correlation coefficients.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tid</strong> (<em>string</em><em> or </em><em>scalar int</em>) – The id of the template that produces the CCs.</p></li>
 <li><p><strong>ax</strong> (<em>plt.Axes</em><em>, </em><em>default to None</em>) – If not None, plot in this axis.</p></li>
@@ -189,10 +191,10 @@ all events detected with template <cite>tid</cite>.</p>
 <li><p><strong>figsize</strong> (<em>tuple</em><em>, </em><em>default to</em><em> (</em><em>20</em><em>, </em><em>7</em><em>)</em>) – Width and height of the figure, in inches.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>fig</strong> – The Figure instance produced by this method.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>plt.Figure</p>
 </dd>
 </dl>
@@ -203,7 +205,7 @@ all events detected with template <cite>tid</cite>.</p>
 <span class="sig-name descname"><span class="pre">plot_detection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">20)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'E':</span> <span class="pre">['E',</span> <span class="pre">'2'],</span> <span class="pre">'N':</span> <span class="pre">['N',</span> <span class="pre">'1'],</span> <span class="pre">'Z':</span> <span class="pre">['Z']}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/similarity_search.html#MatchedFilter.plot_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.similarity_search.MatchedFilter.plot_detection" title="Permalink to this definition"></a></dt>
 <dd><p>Plot a detection and the correlation coefficients.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>detection</strong> (<a class="reference internal" href="dataset.html#BPMF.dataset.Event" title="BPMF.dataset.Event"><em>dataset.Event</em></a>) – A dataset.Event instance of a given detection.</p></li>
 <li><p><strong>figsize</strong> (<em>tuple</em><em>, </em><em>default to</em><em> (</em><em>20</em><em>, </em><em>20</em><em>)</em>) – Widht and height of the figure, in inches.</p></li>
@@ -214,10 +216,10 @@ associated with each “canonical” component. For example,
 check the ‘1’ component in case the ‘N’ component doesn’t exist.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>fig</strong> – The Figure instance produced by this method.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>plt.Figure</p>
 </dd>
 </dl>
@@ -225,12 +227,12 @@ check the ‘1’ component in case the ‘N’ component doesn’t exist.</p></
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.similarity_search.MatchedFilter.run_matched_filter_search">
-<span class="sig-name descname"><span class="pre">run_matched_filter_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minimum_interevent_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_window_dur</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1800.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanity_check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/similarity_search.html#MatchedFilter.run_matched_filter_search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.similarity_search.MatchedFilter.run_matched_filter_search" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_matched_filter_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minimum_interevent_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_window_dur</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1800.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanity_check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract_peak_amplitudes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/similarity_search.html#MatchedFilter.run_matched_filter_search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.similarity_search.MatchedFilter.run_matched_filter_search" title="Permalink to this definition"></a></dt>
 <dd><p>Run the matched-filter search.</p>
 <p>If <cite>self.max_memory</cite> is specified, divide the task into chunks so that
 the device memory is not exceeded.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>minimum_interevent_time</strong> (<em>scalar float</em>) – The shortest duration, in seconds, allowed between two
 consecutive detections.</p></li>
@@ -243,11 +245,11 @@ of the time-dependent detection threshold.</p></li>
 <li><p><strong>verbose</strong> (<em>scalar int</em><em>, </em><em>default to 0</em>) – If &gt; 0, print some messages.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>detections</strong> – Dictionary where <cite>detections[tid]</cite> is a list of <cite>dataset.Event</cite> for
 all events detected with template <cite>tid</cite>.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dictionary,</p>
 </dd>
 </dl>
@@ -255,21 +257,36 @@ all events detected with template <cite>tid</cite>.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.similarity_search.MatchedFilter.select_cc_indexes">
-<span class="sig-name descname"><span class="pre">select_cc_indexes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cc_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_win</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/similarity_search.html#MatchedFilter.select_cc_indexes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.similarity_search.MatchedFilter.select_cc_indexes" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">select_cc_indexes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cc_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_win</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomalous_cdf_at_mean_plus_1sig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_for_validation_Tmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/similarity_search.html#MatchedFilter.select_cc_indexes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.similarity_search.MatchedFilter.select_cc_indexes" title="Permalink to this definition"></a></dt>
 <dd><p>Select the peaks in the CC time series.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cc_t</strong> (<em>(</em><em>n_corr</em><em>,</em><em>) </em><em>numpy.ndarray</em>) – The CC time series for one template.</p></li>
 <li><p><strong>threshold</strong> (<em>(</em><em>n_corr</em><em>,</em><em>) </em><em>numpy.ndarray</em><em> or </em><em>scalar</em>) – The detection threshold.</p></li>
 <li><p><strong>search_win</strong> (<em>scalar int</em>) – The minimum inter-event time, in units of correlation step.</p></li>
+<li><p><strong>anomalous_cdf_at_mean_plus_1sig</strong> (<em>scalar float</em><em>, </em><em>optional</em>) – Anomalous cumulative distribution function (cdf), between 0 and 1,
+at {mean + 1xsigma}(CC), default to 0.50. The CC distribution is
+approximately gaussian and, therefore, the expected value of
+{mean + 1xsigma}(CC) is 0.78. If {mean + 1xsigma}(CC) is
+significantly lower than 0.78 in the vicinity of a CC(t) that
+exceeded <cite>threshold</cite>, that is, lower than
+<cite>anomalous_cdf_at_mean_plus_1sig</cite>, then we consider that {mean +
+1xsigma}(CC) was not properly estimated at time t. Since {mean +
+1xsigma}(CC) is computed from <cite>threshold</cite>, the detection threshold
+was probably not adequate and we discard CC(t). <strong>Set this parameter
+to zero to deactivate validation of the detection threshold.</strong></p></li>
+<li><p><strong>window_for_validation_Tmax</strong> (<em>scalar float</em><em>, </em><em>optional</em>) – Window duration, in units of Tmax, the longest period in the data
+(that is, the inverse of <cite>cfg.MIN_FREQ_HZ</cite>), for analyzing the
+statistic of CC(t) in the vicinity of each CC(t) &gt; <cite>threshold</cite>.
+Default to 100.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>cc_idx</strong> – The list of all selected CC indexes. They give the timings of the
 detected events.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(n_detections,) numpy.ndarray</p>
 </dd>
 </dl>
@@ -280,7 +297,7 @@ detected events.</p>
 <span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/similarity_search.html#MatchedFilter.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.similarity_search.MatchedFilter.set_data" title="Permalink to this definition"></a></dt>
 <dd><p>Attribute <cite>dataset.Data</cite> instance to <cite>self</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<cite>dataset.Data</cite> instance) – The <cite>dataset.Data</cite> instance to read the continuous data to scan.</p>
 </dd>
 </dl>
@@ -298,7 +315,7 @@ detected events.</p>
 <span class="sig-prename descclassname"><span class="pre">BPMF.similarity_search.</span></span><span class="sig-name descname"><span class="pre">time_dependent_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sliding_window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.66</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rms'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">white_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/similarity_search.html#time_dependent_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.similarity_search.time_dependent_threshold" title="Permalink to this definition"></a></dt>
 <dd><p>Time dependent detection threshold.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>time_series</strong> (<em>(</em><em>n_correlations</em><em>) </em><em>array_like</em>) – The array of correlation coefficients calculated by
 FMF (float 32).</p></li>
@@ -313,11 +330,11 @@ standard normal distribution. It is used to fill zeros in the CC time
 series. If None, a random vector is generated from scratch.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>threshold</strong> – Returns the time dependent threshold, with same
 size as the input time series.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(n_correlations) array_like</p>
 </dd>
 </dl>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Compute P-/S-wave travel Times &mdash; BPMF 2.0.0 documentation</title>
@@ -11,10 +11,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -32,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -53,18 +55,22 @@
 <li class="toctree-l2"><a class="reference internal" href="2_preprocess_data.html">Preprocess Seismic Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3_network_file.html">Make Network File</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Compute P-/S-wave travel Times</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Load-station-metadata">Load station metadata</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Read-the-velocity-model-from-Karabulut-et-al. 2011">Read the velocity model from Karabulut et al. 2011</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Build-a-3D-Grid-of-P-/S-wave-Velocities">Build a 3D Grid of P-/S-wave Velocities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Compute-the-P-/S-wave-travel-times">Compute the P-/S-wave travel times</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Store-travel-time-table-for-backprojection">Store travel time table for backprojection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Store-travel-time-tables-for-NLLoc">Store travel time tables for <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Plot-the-travel-time-field-for-a-given-station">Plot the travel time field for a given station</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Bonus:-Do-you-need-a-downsampled-grid-for-efficient-earthquake-detection-(backprojection)?">Bonus: Do you need a downsampled grid for efficient earthquake detection (backprojection)?</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="5_backprojection.html">Backprojection of the Seismic Wavefield</a></li>
-<li class="toctree-l2"><a class="reference internal" href="6_build_template_database.html">Build Template Database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_template_matching.html">Template Matching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_relocate.html">Relocation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_magnitudes.html">Estimate the seismic moments and moment magnitudes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_build_template_database.html">Build Template Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="9_template_matching.html">Template Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
@@ -83,7 +89,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../tutorial.html">Tutorial</a></li>
       <li class="breadcrumb-item active">Compute P-/S-wave travel Times</li>
       <li class="wy-breadcrumbs-aside">
@@ -205,10 +211,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -396,10 +403,32 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+<section id="Load-station-metadata">
+<h2>Load station metadata<a class="headerlink" href="#Load-station-metadata" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">NETWORK_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;network.csv&quot;</span>
+<span class="n">TT_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;tts.h5&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read network metadata</span>
+<span class="n">net</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Network</span><span class="p">(</span><span class="n">NETWORK_FILENAME</span><span class="p">)</span>
+<span class="n">net</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
 <section id="Read-the-velocity-model-from-Karabulut-et-al. 2011">
 <h2>Read the velocity model from Karabulut et al. 2011<a class="headerlink" href="#Read-the-velocity-model-from-Karabulut-et-al. 2011" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># we assume that you are running this notebook from Seismic_BPMF/notebooks/ and the velocity model</span>
@@ -410,7 +439,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>We read the velocity model with <code class="docutils literal notranslate"><span class="pre">pandas</span></code>. Not all columns of the csv files are necessary for our purpose. The velocity model is a 1D layered model and the <code class="docutils literal notranslate"><span class="pre">depth</span></code> column gives the top of each layer in meters (positive downward). The <code class="docutils literal notranslate"><span class="pre">P</span></code> and <code class="docutils literal notranslate"><span class="pre">S</span></code> columns are the wave velocities in m/s.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read the velocity model with pandas</span>
@@ -425,7 +454,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -540,7 +569,7 @@ div.rendered_html tbody tr:hover {
 <h2>Build a 3D Grid of P-/S-wave Velocities<a class="headerlink" href="#Build-a-3D-Grid-of-P-/S-wave-Velocities" title="Permalink to this heading"></a></h2>
 <p>Even though the model used here is a 1D model, <code class="docutils literal notranslate"><span class="pre">pykonal</span></code> works with a 3D model. Therefore, we first need to define the velocity model on a 3D spatial grid.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define constant to go from degrees to radians</span>
@@ -549,7 +578,7 @@ div.rendered_html tbody tr:hover {
 <span class="n">LON_MIN_DEG</span> <span class="o">=</span> <span class="mf">30.20</span>
 <span class="n">LON_MAX_DEG</span> <span class="o">=</span> <span class="mf">30.45</span>
 <span class="n">LAT_MIN_DEG</span> <span class="o">=</span> <span class="mf">40.60</span>
-<span class="n">LAT_MAX_DEG</span> <span class="o">=</span> <span class="mf">40.75</span>
+<span class="n">LAT_MAX_DEG</span> <span class="o">=</span> <span class="mf">40.80</span>
 <span class="n">DEP_MIN_KM</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span>
 <span class="n">DEP_MAX_KM</span> <span class="o">=</span> <span class="mf">30.</span>
 <span class="c1"># define the grid spacing</span>
@@ -561,8 +590,24 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+<p>All stations must be located within the travel-time grid, otherwise PyKonal returns <code class="docutils literal notranslate"><span class="pre">inf</span></code> travel times for those stations that are outside the grid.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># if nothing happens here, it means that everything is alright</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">n_stations</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">longitude</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">LON_MIN_DEG</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">longitude</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">LON_MAX_DEG</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The longitude of station </span><span class="si">{</span><span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="si">}</span><span class="s2"> is outside the grid! Make your grid bigger.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">latitude</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">LAT_MIN_DEG</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">latitude</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">LAT_MAX_DEG</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The latitude of station </span><span class="si">{</span><span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="si">}</span><span class="s2"> is outside the grid! Make your grid bigger.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">depth</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">DEP_MIN_KM</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">depth</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">DEP_MAX_KM</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The depth of station </span><span class="si">{</span><span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="si">}</span><span class="s2"> is outside the grid! Make your grid bigger.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># we will be using pykonal in spherical coordinates with radial coordinates (depth) in km</span>
@@ -570,11 +615,11 @@ div.rendered_html tbody tr:hover {
 <span class="n">velocity_model</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">1000.0</span>
 <span class="n">velocity_model</span><span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">1000.0</span>
 <span class="n">velocity_model</span><span class="p">[</span><span class="s2">&quot;S&quot;</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">1000.0</span>
-<br/></pre></div>
+</pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># to expand the 1D layered velocity model onto a 3D grid,</span>
@@ -602,7 +647,7 @@ div.rendered_html tbody tr:hover {
 <p>The spherical coordinate system used by <code class="docutils literal notranslate"><span class="pre">pykonal</span></code> specifies a point position with <span class="math notranslate nohighlight">\((r, \theta, \varphi)\)</span>: - <span class="math notranslate nohighlight">\(r\)</span>: Distance from center or Earth in km (= decreasing depth). - <span class="math notranslate nohighlight">\(\theta\)</span>: Polar angle in radians (= co-latitude or, equivalently, decreasing latitude). - <span class="math notranslate nohighlight">\(\varphi\)</span>: Azimuthal angle in radians (= longitude).</p>
 <p>Thus, the 3D grid must be built such that <span class="math notranslate nohighlight">\(r\)</span>, <span class="math notranslate nohighlight">\(\theta\)</span> and <span class="math notranslate nohighlight">\(\varphi\)</span> increase with increasing index. Axis 0 is decreasing depth, axis 1 is decreasing latitude and axis 2 is increasing longitude.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># make sure the user-specified ends of the grid are included in the arange vectors</span>
@@ -629,8 +674,8 @@ div.rendered_html tbody tr:hover {
 Increasing longitudes:  [30.2  30.21 30.22 30.23 30.24 30.25 30.26 30.27 30.28 30.29 30.3  30.31
  30.32 30.33 30.34 30.35 30.36 30.37 30.38 30.39 30.4  30.41 30.42 30.43
  30.44 30.45]
-Decreasing latitudes:  [40.75 40.74 40.73 40.72 40.71 40.7  40.69 40.68 40.67 40.66 40.65 40.64
- 40.63 40.62 40.61 40.6 ]
+Decreasing latitudes:  [40.8  40.79 40.78 40.77 40.76 40.75 40.74 40.73 40.72 40.71 40.7  40.69
+ 40.68 40.67 40.66 40.65 40.64 40.63 40.62 40.61 40.6 ]
 Decreasing depths:  [30.  29.5 29.  28.5 28.  27.5 27.  26.5 26.  25.5 25.  24.5 24.  23.5
  23.  22.5 22.  21.5 21.  20.5 20.  19.5 19.  18.5 18.  17.5 17.  16.5
  16.  15.5 15.  14.5 14.  13.5 13.  12.5 12.  11.5 11.  10.5 10.   9.5
@@ -639,7 +684,7 @@ Decreasing depths:  [30.  29.5 29.  28.5 28.  27.5 27.  26.5 26.  25.5 25.  24.5
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># use the previously defined interpolators to compute the P-/S-wave velocity</span>
@@ -668,27 +713,8 @@ Decreasing depths:  [30.  29.5 29.  28.5 28.  27.5 27.  26.5 26.  25.5 25.  24.5
 </section>
 <section id="Compute-the-P-/S-wave-travel-times">
 <h2>Compute the P-/S-wave travel times<a class="headerlink" href="#Compute-the-P-/S-wave-travel-times" title="Permalink to this heading"></a></h2>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">NETWORK_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;network.csv&quot;</span>
-<span class="n">TT_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;tts.h5&quot;</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read network metadata</span>
-<span class="n">net</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Network</span><span class="p">(</span><span class="n">NETWORK_FILENAME</span><span class="p">)</span>
-<span class="n">net</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define the origin of our grid for pykonal</span>
@@ -713,7 +739,7 @@ Min radius: 6341 km, min co-latitude: 0.86 rad, min azimuthal angle: 0.53 rad
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># store travel times in a dictionary</span>
@@ -764,14 +790,14 @@ Min radius: 6341 km, min co-latitude: 0.86 rad, min azimuthal angle: 0.53 rad
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Computing travel times: 8it [00:08,  1.06s/it]
+Computing travel times: 8it [00:08,  1.01s/it]
 </pre></div></div>
 </div>
 </section>
 <section id="Store-travel-time-table-for-backprojection">
 <h2>Store travel time table for backprojection<a class="headerlink" href="#Store-travel-time-table-for-backprojection" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># write travel-times in hdf5 file</span>
@@ -788,7 +814,7 @@ Computing travel times: 8it [00:08,  1.06s/it]
 <h2>Store travel time tables for <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code><a class="headerlink" href="#Store-travel-time-tables-for-NLLoc" title="Permalink to this heading"></a></h2>
 <p>We write the travel time tables in an adequate format for <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code> using the utility functions from <code class="docutils literal notranslate"><span class="pre">BPMF.NLLoc_utils</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># use the functions from ``</span>
@@ -818,16 +844,16 @@ The origin of the grid is: 30.2000, 40.6000, -2.000km
 Longitude spacing: 0.010deg
 Latitude spacing: 0.010deg
 Depth spacing: 0.500km
+Station DD06
+--- Phase P
+--- Phase S
 Station SAUV
 --- Phase P
 --- Phase S
-Station DE07
+Station DC06
 --- Phase P
 --- Phase S
-Station DC07
---- Phase P
---- Phase S
-Station DD06
+Station DC08
 --- Phase P
 --- Phase S
 Station SPNC
@@ -836,10 +862,10 @@ Station SPNC
 Station DE08
 --- Phase P
 --- Phase S
-Station DC08
+Station DC07
 --- Phase P
 --- Phase S
-Station DC06
+Station DE07
 --- Phase P
 --- Phase S
 Done!
@@ -848,8 +874,8 @@ Done!
 </section>
 <section id="Plot-the-travel-time-field-for-a-given-station">
 <h2>Plot the travel time field for a given station<a class="headerlink" href="#Plot-the-travel-time-field-for-a-given-station" title="Permalink to this heading"></a></h2>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartopy</span> <span class="k">as</span> <span class="nn">ctp</span>
@@ -862,16 +888,8 @@ Done!
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-ERROR 1: PROJ: proj_create_from_database: Open of /home/ebeauce/miniconda3/envs/hy7_py310/share/proj failed
-</pre></div></div>
-</div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define map parameters</span>
@@ -1039,6 +1057,7 @@ ERROR 1: PROJ: proj_create_from_database: Open of /home/ebeauce/miniconda3/envs/
         <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="p">,</span>
         <span class="n">vmin</span><span class="o">=</span><span class="n">cnorm</span><span class="o">.</span><span class="n">vmin</span><span class="p">,</span>
         <span class="n">vmax</span><span class="o">=</span><span class="n">cnorm</span><span class="o">.</span><span class="n">vmax</span><span class="p">,</span>
+        <span class="n">rasterized</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">cs_lon</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span>
         <span class="n">source_coords</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">][</span><span class="n">slice_lon</span><span class="p">],</span>
@@ -1053,6 +1072,7 @@ ERROR 1: PROJ: proj_create_from_database: Open of /home/ebeauce/miniconda3/envs/
         <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="p">,</span>
         <span class="n">vmin</span><span class="o">=</span><span class="n">cnorm</span><span class="o">.</span><span class="n">vmin</span><span class="p">,</span>
         <span class="n">vmax</span><span class="o">=</span><span class="n">cnorm</span><span class="o">.</span><span class="n">vmax</span><span class="p">,</span>
+        <span class="n">rasterized</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">cs_lat</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span>
         <span class="n">source_coords</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">][</span><span class="n">slice_lat</span><span class="p">],</span>
@@ -1104,7 +1124,119 @@ ERROR 1: PROJ: proj_create_from_database: Open of /home/ebeauce/miniconda3/envs/
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_4_travel_times_26_0.svg" src="../../_images/tutorial_notebooks_4_travel_times_26_0.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_4_travel_times_29_0.svg" src="../../_images/tutorial_notebooks_4_travel_times_29_0.svg" /></div>
+</div>
+</section>
+<section id="Bonus:-Do-you-need-a-downsampled-grid-for-efficient-earthquake-detection-(backprojection)?">
+<h2>Bonus: Do you need a downsampled grid for efficient earthquake detection (backprojection)?<a class="headerlink" href="#Bonus:-Do-you-need-a-downsampled-grid-for-efficient-earthquake-detection-(backprojection)?" title="Permalink to this heading"></a></h2>
+<p>If you want to study a large region and computed a large grid (several millions of grid points), earthquake detection with backprojection (see next notebook) will be quite slow. In fact, you might just want to keep those grid points that have significantly different moveouts to avoid losing time in redundant computations. The following cell shows how to use <code class="docutils literal notranslate"><span class="pre">BPMF.clib.find_similar_sources</span></code> to downsample the grid in a “smart” way.</p>
+<p>!! This operation does not overwrite the original grid, which is still available for the accurate earthquake location !!</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="c1"># choose the number of threads you want to limit the computation to</span>
+<span class="n">n_CPUs</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_CPUs</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">BPMF</span>
+
+<span class="c1"># travel-time phases to read</span>
+<span class="n">PHASES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">]</span>
+<span class="c1"># minimum root-mean-square time difference, in samples, below which two grid sources are considered the same</span>
+<span class="n">MIN_TIME_DIFFERENCE_SAMP</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">MIN_TIME_DIFFERENCE_SEC</span> <span class="o">=</span> <span class="n">MIN_TIME_DIFFERENCE_SAMP</span><span class="o">/</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tts</span><span class="p">,</span> <span class="n">source_coords</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">load_travel_times</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">MOVEOUTS_PATH</span><span class="p">,</span> <span class="n">TT_FILENAME</span><span class="p">),</span>
+    <span class="n">phases</span><span class="o">=</span><span class="n">PHASES</span><span class="p">,</span>
+    <span class="n">source_indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">return_coords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the &quot;moveouts&quot;, that is, an array of relative travel times. All travel times are expressed with respect to the earliest arrival.</span>
+<span class="c1"># The time delays between the earliest and subsequent phase arrivals are what matter in backprojection.</span>
+<span class="n">moveouts</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_moveout_array</span><span class="p">(</span><span class="n">tts</span><span class="p">,</span> <span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span> <span class="n">PHASES</span><span class="p">)</span>
+<span class="n">moveouts</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">moveouts</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We can now call <code class="docutils literal notranslate"><span class="pre">BPMF.clib.find_similar_sources</span></code> with the given threshold <code class="docutils literal notranslate"><span class="pre">MIN_TIME_DIFFERENCE_SEC</span></code>. This routine returns an array of booleans that has as many elements as there are points in the grid. The sources that are kept in the downsampled grid correspond to the <code class="docutils literal notranslate"><span class="pre">True</span></code> elements of the output array.</p>
+<p>The following cell should take very little time for the tutorial but it is not always the case for large-scale applications:</p>
+<p>!! The following cell can take a VERY long time for large grids (~24hours or more). This is a ONE TIME COMPUTATION that you probably want to run outside of this notebook when dealing with a large-scale problem. !!</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">redundant_sources</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">clib</span><span class="o">.</span><span class="n">find_similar_sources</span><span class="p">(</span><span class="n">moveouts</span><span class="p">,</span> <span class="n">MIN_TIME_DIFFERENCE_SEC</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+First (parallel) loop
+Second (serial) loop
+Progress: 0%
+Progress: 10%
+Progress: 20%
+Progress: 30%
+Progress: 40%
+Progress: 50%
+Progress: 60%
+Progress: 70%
+Progress: 80%
+Progress: 90%
+</pre></div></div>
+</div>
+<p>We obtain the indexes of the non-redundant sources:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sparse_grid_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">redundant_sources</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)[</span>
+    <span class="o">~</span><span class="n">redundant_sources</span>
+<span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;There are </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sparse_grid_indexes</span><span class="p">)</span><span class="si">}</span><span class="s2"> sources in the downsampled grid&quot;</span>
+      <span class="sa">f</span><span class="s2">&quot; vs </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">redundant_sources</span><span class="p">)</span><span class="si">}</span><span class="s2"> in the original grid.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+There are 1512 sources in the downsampled grid vs 35490 in the original grid.
+</pre></div></div>
+</div>
+<p>We need to save the grid source indexes that constitute the downsampled grid to be able to reconstruct this downsampled grid in the future. Here, we save <code class="docutils literal notranslate"><span class="pre">sparse_grid_indexes</span></code> in an <code class="docutils literal notranslate"><span class="pre">npy</span></code> file in the same folder where the travel times are.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">MOVEOUTS_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;sparse_grid_indexes_</span><span class="si">{</span><span class="n">MIN_TIME_DIFFERENCE_SEC</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">.npy&quot;</span>
+    <span class="p">),</span>
+    <span class="n">sparse_grid_indexes</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
 </div>
 </section>
 </section>

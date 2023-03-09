@@ -10,10 +10,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -27,11 +25,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -58,7 +60,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
       <li class="breadcrumb-item active">BPMF.utils</li>
       <li class="wy-breadcrumbs-aside">
@@ -99,7 +101,7 @@
     <span class="n">taper_alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
     <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
 <span class="sd">    X: (n x m) numpy array,</span>
@@ -229,9 +231,125 @@
     <span class="n">minimum_chunk_duration</span><span class="o">=</span><span class="mf">600.0</span><span class="p">,</span>
     <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">SR_decimals</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">decimation_method</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span>
+    <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;VEL&quot;</span><span class="p">,</span>
+    <span class="n">n_threads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Preprocesses a stream of seismic data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    stream : obspy.Stream</span>
+<span class="sd">        A stream of seismic data.</span>
+<span class="sd">    freqmin : float, optional</span>
+<span class="sd">        The minimum frequency to bandpass filter the data.</span>
+<span class="sd">    freqmax : float, optional</span>
+<span class="sd">        The maximum frequency to bandpass filter the data.</span>
+<span class="sd">    target_SR : float, optional</span>
+<span class="sd">        The target sampling rate of the data.</span>
+<span class="sd">    remove_response : bool, optional</span>
+<span class="sd">        Whether to remove instrument response from the data.</span>
+<span class="sd">    remove_sensitivity : bool, optional</span>
+<span class="sd">        Whether to remove instrument sensitivity from the data.</span>
+<span class="sd">    plot_resp : bool, optional</span>
+<span class="sd">        Whether to plot the instrument response of the data.</span>
+<span class="sd">    target_duration : float, optional</span>
+<span class="sd">        The target duration of the data.</span>
+<span class="sd">    target_starttime : obspy.UTCDateTime, optional</span>
+<span class="sd">        The start time of the target data.</span>
+<span class="sd">    target_endtime : obspy.UTCDateTime, optional</span>
+<span class="sd">        The end time of the target data.</span>
+<span class="sd">    minimum_length : float, optional</span>
+<span class="sd">        The minimum length of the data as a fraction of the target duration.</span>
+<span class="sd">    minimum_chunk_duration : float, optional</span>
+<span class="sd">        The minimum duration of each data chunk.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Whether to print verbose output during processing.</span>
+<span class="sd">    SR_decimals : int, optional</span>
+<span class="sd">        The number of decimals to round sampling rate values to.</span>
+<span class="sd">    decimation_method : str, optional</span>
+<span class="sd">        The method used for decimation.</span>
+<span class="sd">    unit : str, optional</span>
+<span class="sd">        The unit of the data.</span>
+<span class="sd">    n_threads : int, optional</span>
+<span class="sd">        The number of threads over which preprocesing is parallelized.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Other keyword arguments to pass to the function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    obspy.Stream</span>
+<span class="sd">        A preprocessed stream of seismic data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+    <span class="n">data_preprocessor</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
+            <span class="n">_preprocess_stream</span><span class="p">,</span>
+            <span class="n">freqmin</span><span class="o">=</span><span class="n">freqmin</span><span class="p">,</span>
+            <span class="n">freqmax</span><span class="o">=</span><span class="n">freqmax</span><span class="p">,</span>
+            <span class="n">target_SR</span><span class="o">=</span><span class="n">target_SR</span><span class="p">,</span>
+            <span class="n">remove_response</span><span class="o">=</span><span class="n">remove_response</span><span class="p">,</span>
+            <span class="n">remove_sensitivity</span><span class="o">=</span><span class="n">remove_sensitivity</span><span class="p">,</span>
+            <span class="n">plot_resp</span><span class="o">=</span><span class="n">plot_resp</span><span class="p">,</span>
+            <span class="n">target_duration</span><span class="o">=</span><span class="n">target_duration</span><span class="p">,</span>
+            <span class="n">target_starttime</span><span class="o">=</span><span class="n">target_starttime</span><span class="p">,</span>
+            <span class="n">target_endtime</span><span class="o">=</span><span class="n">target_endtime</span><span class="p">,</span>
+            <span class="n">minimum_length</span><span class="o">=</span><span class="n">minimum_length</span><span class="p">,</span>
+            <span class="n">minimum_chunk_duration</span><span class="o">=</span><span class="n">minimum_chunk_duration</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+            <span class="n">SR_decimals</span><span class="o">=</span><span class="n">SR_decimals</span><span class="p">,</span>
+            <span class="n">decimation_method</span><span class="o">=</span><span class="n">decimation_method</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+    <span class="k">if</span> <span class="n">n_threads</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
+        <span class="k">with</span> <span class="n">ProcessPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">n_threads</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+            <span class="c1"># we need to group traces from same channels, therefore,</span>
+            <span class="c1"># we use merge to fill gaps with masked arrays</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">merge</span><span class="p">()</span>
+            <span class="n">preprocessed_stream</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">data_preprocessor</span><span class="p">,</span> <span class="n">stream</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">preprocessed_stream</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">tr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">preprocessed_stream</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                        <span class="p">]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">preprocessed_stream</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">preprocessed_stream</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tr</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tr</span><span class="p">))</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obs</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span><span class="n">preprocessed_stream</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data_preprocessor</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_preprocess_stream</span><span class="p">(</span>
+    <span class="n">stream</span><span class="p">,</span>
+    <span class="n">freqmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">freqmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">target_SR</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">remove_response</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">remove_sensitivity</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">plot_resp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">target_duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">target_starttime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">target_endtime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">minimum_length</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span>
+    <span class="n">minimum_chunk_duration</span><span class="o">=</span><span class="mf">600.0</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">SR_decimals</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">decimation_method</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span>
     <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;VEL&quot;</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    See `preprocess_stream`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">obs</span><span class="o">.</span><span class="n">Trace</span><span class="p">):</span>
+        <span class="c1"># user gave a single trace instead of a stream</span>
+        <span class="n">stream</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
     <span class="n">preprocessed_stream</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Input data is empty!&quot;</span><span class="p">)</span>
@@ -240,46 +358,25 @@
         <span class="p">(</span><span class="n">target_starttime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">target_endtime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="p">):</span>
         <span class="n">target_duration</span> <span class="o">=</span> <span class="n">target_endtime</span> <span class="o">-</span> <span class="n">target_starttime</span>
-    <span class="c1"># start by cleaning the gaps if there are any</span>
+    <span class="c1"># find errors in sampling rate metadata</span>
+    <span class="c1"># first, round sampling rates that may be misrepresented in floating point numbers</span>
     <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">()):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Problem with </span><span class="si">{</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> (detected NaNs)!&quot;</span><span class="p">)</span>
-            <span class="k">continue</span>
-        <span class="c1"># split will lose information about start and end times</span>
-        <span class="c1"># if the start or the end is masked</span>
+        <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="n">SR_decimals</span><span class="p">)</span>
+        <span class="c1"># and remove the short chunks now to gain time</span>
+        <span class="c1"># (only works if the traces do not come with masked arrays)</span>
         <span class="n">t1</span> <span class="o">=</span> <span class="n">udt</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
         <span class="n">t2</span> <span class="o">=</span> <span class="n">udt</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">endtime</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span> <span class="o">&lt;</span> <span class="n">minimum_chunk_duration</span><span class="p">:</span>
             <span class="c1"># don&#39;t include this chunk</span>
-            <span class="k">continue</span>
-        <span class="n">tr</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-        <span class="c1"># measure gap duration</span>
-        <span class="n">gap_duration</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="k">for</span> <span class="n">gap</span> <span class="ow">in</span> <span class="n">tr</span><span class="o">.</span><span class="n">get_gaps</span><span class="p">():</span>
-            <span class="n">gap_duration</span> <span class="o">+=</span> <span class="n">gap</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">target_duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-            <span class="n">gap_duration</span> <span class="o">&gt;</span> <span class="n">minimum_length</span> <span class="o">*</span> <span class="n">target_duration</span>
-        <span class="p">):</span>
-            <span class="k">return</span> <span class="n">preprocessed_stream</span>
-        <span class="n">tr</span><span class="o">.</span><span class="n">detrend</span><span class="p">(</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span>
-        <span class="n">tr</span><span class="o">.</span><span class="n">detrend</span><span class="p">(</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
-        <span class="n">tr</span><span class="o">.</span><span class="n">taper</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cosine&quot;</span><span class="p">)</span>
-        <span class="c1"># it&#39;s now safe to fill the gaps with zeros</span>
-        <span class="n">tr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">tr</span><span class="o">.</span><span class="n">trim</span><span class="p">(</span><span class="n">starttime</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">endtime</span><span class="o">=</span><span class="n">t2</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-        <span class="n">preprocessed_stream</span> <span class="o">+=</span> <span class="n">tr</span>
-    <span class="c1"># find errors in sampling rate metadata</span>
-    <span class="c1"># first, round sampling rates that may be misrepresented in floating point numbers</span>
-    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">preprocessed_stream</span><span class="p">:</span>
-        <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="n">SR_decimals</span><span class="p">)</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>
     <span class="c1"># second, make a list of all stations in stream</span>
     <span class="n">stations</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">preprocessed_stream</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
         <span class="n">stations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span><span class="p">)</span>
     <span class="n">stations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">stations</span><span class="p">))</span>
     <span class="c1"># third, make a list of all channel types for each station</span>
     <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="n">stations</span><span class="p">:</span>
-        <span class="n">st</span> <span class="o">=</span> <span class="n">preprocessed_stream</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">station</span><span class="o">=</span><span class="n">station</span><span class="p">)</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">station</span><span class="o">=</span><span class="n">station</span><span class="p">)</span>
         <span class="n">channels</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
             <span class="n">channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -299,13 +396,55 @@
         <span class="c1"># represented sampling rate</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_sampling_rates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">ref_sampling_rate</span> <span class="o">=</span> <span class="n">unique_sampling_rates</span><span class="p">[</span><span class="n">sampling_rates_counts</span><span class="o">.</span><span class="n">argmax</span><span class="p">()]</span>
-            <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">preprocessed_stream</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">!=</span> <span class="n">ref_sampling_rate</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removing </span><span class="si">{</span><span class="n">tr</span><span class="si">}</span><span class="s2"> (target SR is </span><span class="si">{</span><span class="n">ref_sampling_rate</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-                    <span class="n">preprocessed_stream</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>
+                    <span class="n">stream</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>
+    <span class="c1"># start by cleaning the gaps if there are any</span>
+    <span class="c1"># start with a simple merge to unite data from same channels into unique</span>
+    <span class="c1"># trace but without losing information on gaps</span>
+    <span class="n">stream</span><span class="o">.</span><span class="n">merge</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">()):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Problem with </span><span class="si">{</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> (detected NaNs)!&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">T1</span> <span class="o">=</span> <span class="n">udt</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+        <span class="n">T2</span> <span class="o">=</span> <span class="n">udt</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">endtime</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+        <span class="n">trace_duration</span> <span class="o">=</span> <span class="n">T2</span> <span class="o">-</span> <span class="n">T1</span>
+        <span class="k">if</span> <span class="n">trace_duration</span> <span class="o">&lt;</span> <span class="n">minimum_length</span> <span class="o">*</span> <span class="n">target_duration</span><span class="p">:</span>
+            <span class="c1"># don&#39;t include this trace</span>
+            <span class="k">continue</span>
+        <span class="c1"># split will lose information about start and end times</span>
+        <span class="c1"># if the start or the end is masked</span>
+        <span class="n">tr</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">tr</span><span class="p">:</span>
+            <span class="n">t1</span> <span class="o">=</span> <span class="n">udt</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+            <span class="n">t2</span> <span class="o">=</span> <span class="n">udt</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">endtime</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span> <span class="o">&lt;</span> <span class="n">minimum_chunk_duration</span><span class="p">:</span>
+                <span class="c1"># don&#39;t include this chunk</span>
+                <span class="n">tr</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># all chunks were too short</span>
+            <span class="k">continue</span>
+        <span class="c1"># measure gap duration</span>
+        <span class="n">gap_duration</span> <span class="o">=</span> <span class="n">target_duration</span> <span class="o">-</span> <span class="n">trace_duration</span>
+        <span class="k">for</span> <span class="n">gap</span> <span class="ow">in</span> <span class="n">tr</span><span class="o">.</span><span class="n">get_gaps</span><span class="p">():</span>
+            <span class="n">gap_duration</span> <span class="o">+=</span> <span class="n">gap</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">target_duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">gap_duration</span> <span class="o">&gt;</span> <span class="n">minimum_length</span> <span class="o">*</span> <span class="n">target_duration</span>
+        <span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">tr</span><span class="o">.</span><span class="n">detrend</span><span class="p">(</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span>
+        <span class="n">tr</span><span class="o">.</span><span class="n">detrend</span><span class="p">(</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+        <span class="n">tr</span><span class="o">.</span><span class="n">taper</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cosine&quot;</span><span class="p">)</span>
+        <span class="c1"># it&#39;s now safe to fill the gaps with zeros</span>
+        <span class="n">tr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">tr</span><span class="o">.</span><span class="n">trim</span><span class="p">(</span><span class="n">starttime</span><span class="o">=</span><span class="n">T1</span><span class="p">,</span> <span class="n">endtime</span><span class="o">=</span><span class="n">T2</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">preprocessed_stream</span> <span class="o">+=</span> <span class="n">tr</span>
     <span class="c1"># if the trace came as separated segments without masked</span>
     <span class="c1"># elements, it is necessary to merge the stream</span>
     <span class="n">preprocessed_stream</span> <span class="o">=</span> <span class="n">preprocessed_stream</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
     <span class="c1"># delete the original data to save memory</span>
     <span class="k">del</span> <span class="n">stream</span>
     <span class="c1"># resample if necessary:</span>
@@ -322,11 +461,15 @@
                 <span class="n">min_attenuation_dB</span><span class="o">=</span><span class="mf">40.0</span><span class="p">,</span>
                 <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">sr_ratio</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="n">sr_ratio</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">sr_ratio</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="n">sr_ratio</span>
+            <span class="p">)</span> <span class="ow">and</span> <span class="n">decimation_method</span> <span class="o">==</span> <span class="s2">&quot;simple&quot;</span><span class="p">:</span>
                 <span class="c1"># tr&#39;s sampling rate is an integer</span>
                 <span class="c1"># multiple of target_SR</span>
                 <span class="c1"># do not re-filter the data</span>
                 <span class="n">tr</span><span class="o">.</span><span class="n">decimate</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">sr_ratio</span><span class="p">),</span> <span class="n">no_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">decimation_method</span> <span class="o">==</span> <span class="s2">&quot;fourier&quot;</span><span class="p">:</span>
+                <span class="n">tr</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">target_SR</span><span class="p">,</span> <span class="n">no_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">tr</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">target_SR</span><span class="p">,</span> <span class="n">no_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">sr_ratio</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -384,7 +527,7 @@
                 <span class="n">target_duration</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">preprocessed_stream</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span>
             <span class="p">)</span>
             <span class="n">preprocessed_stream</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">preprocessed_stream</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[:</span><span class="n">n_samples</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">preprocessed_stream</span></div>
+    <span class="k">return</span> <span class="n">preprocessed_stream</span>
 
 
 <span class="c1"># -------------------------------------------------</span>
@@ -393,7 +536,7 @@
 
 
 <div class="viewcode-block" id="get_moveout_array"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.get_moveout_array">[docs]</a><span class="k">def</span> <span class="nf">get_moveout_array</span><span class="p">(</span><span class="n">tts</span><span class="p">,</span> <span class="n">stations</span><span class="p">,</span> <span class="n">phases</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Format the travel times into a numpy.ndarray.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Format the travel times into a numpy.ndarray.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
@@ -422,7 +565,7 @@
 <div class="viewcode-block" id="load_travel_times"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.load_travel_times">[docs]</a><span class="k">def</span> <span class="nf">load_travel_times</span><span class="p">(</span>
     <span class="n">path</span><span class="p">,</span> <span class="n">phases</span><span class="p">,</span> <span class="n">source_indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_coords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stations</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Load the travel times from `path`.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the travel times from `path`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ------------</span>
@@ -459,8 +602,8 @@
                 <span class="k">if</span> <span class="n">source_indexes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="c1"># select a subset of the source grid</span>
                     <span class="n">source_indexes_unravelled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span>
-                            <span class="n">source_indexes</span><span class="p">,</span> <span class="n">grid_shape</span>
-                            <span class="p">)</span>
+                        <span class="n">source_indexes</span><span class="p">,</span> <span class="n">grid_shape</span>
+                    <span class="p">)</span>
                     <span class="n">selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">grid_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
                     <span class="n">selection</span><span class="p">[</span><span class="n">source_indexes_unravelled</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="n">tts</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;tt_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">][</span><span class="n">selection</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
@@ -468,9 +611,7 @@
                     <span class="n">tts</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;tt_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">][()]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">return_coords</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">source_indexes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">source_indexes_unravelled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span>
-                        <span class="n">source_indexes</span><span class="p">,</span> <span class="n">grid_shape</span>
-                        <span class="p">)</span>
+                <span class="n">source_indexes_unravelled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">source_indexes</span><span class="p">,</span> <span class="n">grid_shape</span><span class="p">)</span>
                 <span class="n">selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">grid_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
                 <span class="n">selection</span><span class="p">[</span><span class="n">source_indexes_unravelled</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">source_coords</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
@@ -507,7 +648,7 @@
     <span class="n">sampling_rate</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">,</span>
     <span class="n">wiener_filter_colsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implementation of the Singular Value Decomposition Wiener Filter (SVDWF)</span>
 <span class="sd">    described in Moreau et al 2017.</span>
 
@@ -819,7 +960,7 @@
     <span class="n">detection_waveforms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
 <span class="sd">    tid: scalar integer,</span>
@@ -928,7 +1069,7 @@
 
 
 <div class="viewcode-block" id="extract_colors_from_tree"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.extract_colors_from_tree">[docs]</a><span class="k">def</span> <span class="nf">extract_colors_from_tree</span><span class="p">(</span><span class="n">dendogram</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">color_singleton</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Routine to build the map from cluster ids to dendogram colors.</span>
 
 <span class="sd">    Parameters</span>
@@ -1000,7 +1141,7 @@
     <span class="n">color_singleton</span><span class="o">=</span><span class="s2">&quot;dimgray&quot;</span><span class="p">,</span>
     <span class="n">ax_dendogram</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find non-overlapping groups of similar templates</span>
 <span class="sd">    with the hierarchical clustering package from scipy.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1049,7 +1190,7 @@
 
 
 <div class="viewcode-block" id="round_time"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.round_time">[docs]</a><span class="k">def</span> <span class="nf">round_time</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
 <span class="sd">    t: scalar float,</span>
@@ -1073,7 +1214,7 @@
 
 
 <div class="viewcode-block" id="sec_to_samp"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.sec_to_samp">[docs]</a><span class="k">def</span> <span class="nf">sec_to_samp</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Convert seconds to samples taking into account rounding errors.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert seconds to samples taking into account rounding errors.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
@@ -1095,7 +1236,7 @@
     <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;ms&quot;</span><span class="p">,</span>
     <span class="n">unit_value</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ms&quot;</span><span class="p">:</span> <span class="mf">1.0e3</span><span class="p">,</span> <span class="s2">&quot;us&quot;</span><span class="p">:</span> <span class="mf">1.0e6</span><span class="p">,</span> <span class="s2">&quot;ns&quot;</span><span class="p">:</span> <span class="mf">1.0e9</span><span class="p">},</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute a range of datetime64.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute a range of datetime64.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ------------</span>
@@ -1127,7 +1268,7 @@
 
 
 <div class="viewcode-block" id="linear_regression"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.linear_regression">[docs]</a><span class="k">def</span> <span class="nf">linear_regression</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    cf. https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html</span>
 
 <span class="sd">    Returns</span>
@@ -1149,7 +1290,7 @@
 
 
 <div class="viewcode-block" id="weighted_linear_regression"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.weighted_linear_regression">[docs]</a><span class="k">def</span> <span class="nf">weighted_linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
 <span class="sd">    X: (n,) numpy array or list</span>
@@ -1196,7 +1337,7 @@
     <span class="n">receiver_latitudes</span><span class="p">,</span>
     <span class="n">receiver_depths</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Fast distance computation between all source points and all receivers.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fast distance computation between all source points and all receivers.</span>
 
 <span class="sd">    Use `cartopy.geodesic.Geodesic` to compute pair-wise distances.</span>
 
@@ -1256,7 +1397,7 @@
     <span class="n">trim_end</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;end&quot;</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    event_timings_str: list of array of str</span>
@@ -1343,19 +1484,19 @@
     <span class="n">component_aliases</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">],</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">],</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">]},</span>
     <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Fetch data from Obspy Stream and returns an ndarray.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch data from Obspy Stream and returns an ndarray.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
 <span class="sd">    stream: Obspy Stream instance</span>
 <span class="sd">        The Obspy Stream instance with the waveform time series.</span>
-<span class="sd">    stations: List of strings</span>
+<span class="sd">    stations: list of strings</span>
 <span class="sd">        Names of the stations to include in the output array. Define the order</span>
 <span class="sd">        of the station axis.</span>
-<span class="sd">    components: List of strings, default to [&#39;N&#39;,&#39;E&#39;,&#39;Z&#39;]</span>
+<span class="sd">    components: list of strings, default to [&#39;N&#39;,&#39;E&#39;,&#39;Z&#39;]</span>
 <span class="sd">        Names of the components to include in the output array. Define the order</span>
 <span class="sd">        of the component axis.</span>
-<span class="sd">    component_aliases: Dictionary, optional</span>
+<span class="sd">    component_aliases: dictionary, optional</span>
 <span class="sd">        Sometimes, components might be named differently than N, E, Z. This</span>
 <span class="sd">        dictionary tells the function which alternative component names can be</span>
 <span class="sd">        associated with each &quot;canonical&quot; component. For example,</span>
@@ -1461,7 +1602,7 @@
 
 
 <div class="viewcode-block" id="two_point_distance"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.two_point_distance">[docs]</a><span class="k">def</span> <span class="nf">two_point_distance</span><span class="p">(</span><span class="n">lon_1</span><span class="p">,</span> <span class="n">lat_1</span><span class="p">,</span> <span class="n">depth_1</span><span class="p">,</span> <span class="n">lon_2</span><span class="p">,</span> <span class="n">lat_2</span><span class="p">,</span> <span class="n">depth_2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute the distance between two points.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the distance between two points.</span>
 
 
 <span class="sd">    Parameters</span>
@@ -1491,6 +1632,22 @@
     <span class="n">dist</span> <span class="o">/=</span> <span class="mf">1000.0</span>  <span class="c1"># from m to km</span>
     <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dist</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">depth_1</span> <span class="o">-</span> <span class="n">depth_2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">dist</span></div>
+
+<div class="viewcode-block" id="donefun"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.donefun">[docs]</a><span class="k">def</span> <span class="nf">donefun</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Super useful function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</span>
+<span class="s2">    ⠀⠀⠀⠀⠀⠀⢀⡤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀</span>
+<span class="s2">    ⠀⠀⠀⠀⠀⢀⡏⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⣀⠴⠋⠉⠉⡆⠀⠀⠀⠀⠀</span>
+<span class="s2">    ⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠈⠉⠉⠙⠓⠚⠁⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀</span>
+<span class="s2">    ⠀⠀⠀⠀⢀⠞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣄⠀⠀⠀⠀</span>
+<span class="s2">    ⠀⠀⠀⠀⡞⠀⠀⠀⠀⠀⠶⠀⠀⠀⠀⠀⠀⠦⠀⠀⠀⠀⠀⠸⡆⠀⠀⠀</span>
+<span class="s2">    ⢠⣤⣶⣾⣧⣤⣤⣀⡀⠀⠀⠀⠀⠈⠀⠀⠀⢀⡤⠴⠶⠤⢤⡀⣧⣀⣀⠀</span>
+<span class="s2">    ⠻⠶⣾⠁⠀⠀⠀⠀⠙⣆⠀⠀⠀⠀⠀⠀⣰⠋⠀⠀⠀⠀⠀⢹⣿⣭⣽⠇</span>
+<span class="s2">    ⠀⠀⠙⠤⠴⢤⡤⠤⠤⠋⠉⠉⠉⠉⠉⠉⠉⠳⠖⠦⠤⠶⠦⠞⠁⠀⠀⠀</span>
+<span class="s2">                ALL DONE!⠀⠀⠀⠀</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

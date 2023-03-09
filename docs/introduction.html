@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Introduction &mdash; BPMF 2.0.0 documentation</title>
@@ -11,10 +11,8 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -30,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -70,7 +72,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Introduction</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/introduction.rst.txt" rel="nofollow"> View page source</a>
@@ -111,7 +113,7 @@
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this heading"></a></h2>
 <p>Fully automated workflow for earthquake detection and location with the backprojection and matched filtering methods.</p>
 <p><code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code> is available at <a class="reference external" href="https://github.com/ebeauce/Seismic_BPMF">https://github.com/ebeauce/Seismic_BPMF</a> and can be downloaded with:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git clone https://github.com/ebeauce/Seismic_BPMF.git
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ebeauce/Seismic_BPMF.git
 </pre></div>
 </div>
 </section>
@@ -131,21 +133,21 @@
 <section id="from-source">
 <h3>From source<a class="headerlink" href="#from-source" title="Permalink to this heading"></a></h3>
 <p>A simple make + whichever implementation does the trick. Possible make commands are:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make python_cpu
-<span class="gp">$ </span>make python_gpu
-<span class="gp">$ </span>pip install .
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make<span class="w"> </span>python_cpu
+<span class="gp">$ </span>make<span class="w"> </span>python_gpu
+<span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>.
 </pre></div>
 </div>
 </section>
 <section id="using-pip-recommended">
 <h3>Using pip (recommended)<a class="headerlink" href="#using-pip-recommended" title="Permalink to this heading"></a></h3>
 <p>Installation as a Python module is possible via pip (which supports clean uninstalling):</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python setup.py build_ext
-<span class="gp">$ </span>pip install .
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>setup.py<span class="w"> </span>build_ext
+<span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>.
 </pre></div>
 </div>
 <p>or simply:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip install git+https://github.com/ebeauce/Seismic_BPMF
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/ebeauce/Seismic_BPMF
 </pre></div>
 </div>
 </section>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Preprocess Seismic Data &mdash; BPMF 2.0.0 documentation</title>
@@ -11,10 +11,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -32,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -61,9 +63,11 @@
 <li class="toctree-l2"><a class="reference internal" href="3_network_file.html">Make Network File</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4_travel_times.html">Compute P-/S-wave travel Times</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5_backprojection.html">Backprojection of the Seismic Wavefield</a></li>
-<li class="toctree-l2"><a class="reference internal" href="6_build_template_database.html">Build Template Database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_template_matching.html">Template Matching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_relocate.html">Relocation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_magnitudes.html">Estimate the seismic moments and moment magnitudes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_build_template_database.html">Build Template Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="9_template_matching.html">Template Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
@@ -82,7 +86,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../tutorial.html">Tutorial</a></li>
       <li class="breadcrumb-item active">Preprocess Seismic Data</li>
       <li class="wy-breadcrumbs-aside">
@@ -204,10 +208,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -376,7 +381,7 @@ div.rendered_html tbody tr:hover {
 <h1>Preprocess Seismic Data<a class="headerlink" href="#Preprocess-Seismic-Data" title="Permalink to this heading"></a></h1>
 <p>In this notebook, we pre-process the seismic data downloaded in the previous section <code class="docutils literal notranslate"><span class="pre">1_download_data.ipynb</span></code>. This step is essential for the successful application of the detection and location workflow.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">BPMF</span>
@@ -392,7 +397,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">DATE</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">UTCDateTime</span><span class="p">(</span><span class="s2">&quot;2012-07-07&quot;</span><span class="p">)</span>
@@ -404,7 +409,7 @@ div.rendered_html tbody tr:hover {
 <h2>Build the data reader<a class="headerlink" href="#Build-the-data-reader" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">BPMF</span></code> allows any data formats to be used. The price for flexibility is to define a function that reads the data and returns <code class="docutils literal notranslate"><span class="pre">obspy.Stream</span></code>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">data_reader_mseed</span><span class="p">(</span>
@@ -419,7 +424,7 @@ div.rendered_html tbody tr:hover {
     <span class="n">data_folder</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data reader for BPMF.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data reader for BPMF.</span>
 
 <span class="sd">    This data reader is specifically designed for the folder tree convention</span>
 <span class="sd">    that we use in the tutorial. We will use the same data reader at later</span>
@@ -476,7 +481,7 @@ div.rendered_html tbody tr:hover {
 <section id="Read-the-raw-data">
 <h2>Read the raw data<a class="headerlink" href="#Read-the-raw-data" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw_traces</span> <span class="o">=</span> <span class="n">data_reader_mseed</span><span class="p">(</span><span class="n">dirpath_data</span><span class="p">,</span> <span class="n">attach_response</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_folder</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span>
@@ -484,7 +489,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">raw_traces</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="n">extended</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
@@ -499,42 +504,42 @@ div.rendered_html tbody tr:hover {
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 30 Trace(s) in Stream:
+YH.DE07..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE08..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE07..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DD06..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DD06..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC07..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.SAUV..HHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
+YH.DC08..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC08..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.SPNC..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-07T06:32:08.980000Z | 50.0 Hz, 1201450 samples
+YH.SPNC..BHN | 2012-07-07T06:44:10.000000Z - 2012-07-07T06:47:13.980000Z | 50.0 Hz, 9200 samples
+YH.SPNC..BHN | 2012-07-07T06:47:19.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 3123051 samples
+YH.DC06..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC06..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
 YH.DC06..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DD06..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE07..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE08..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE08..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC07..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.SAUV..HHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
+YH.DC07..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.SAUV..HHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
+YH.DC08..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
 YH.SPNC..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-07T06:32:06.980000Z | 50.0 Hz, 1201350 samples
 YH.SPNC..BHZ | 2012-07-07T06:44:10.000000Z - 2012-07-07T06:47:13.980000Z | 50.0 Hz, 9200 samples
 YH.SPNC..BHZ | 2012-07-07T06:47:19.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 3123051 samples
 YH.SPNC..BHE | 2012-07-07T00:00:00.000000Z - 2012-07-07T06:32:08.980000Z | 50.0 Hz, 1176450 samples
 YH.SPNC..BHE | 2012-07-07T06:44:10.000000Z - 2012-07-07T06:47:13.980000Z | 50.0 Hz, 9200 samples
 YH.SPNC..BHE | 2012-07-07T06:47:19.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 3123051 samples
-YH.DC07..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.SAUV..HHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
-YH.DC08..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC07..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.SAUV..HHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
-YH.SPNC..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-07T06:32:08.980000Z | 50.0 Hz, 1201450 samples
-YH.SPNC..BHN | 2012-07-07T06:44:10.000000Z - 2012-07-07T06:47:13.980000Z | 50.0 Hz, 9200 samples
-YH.SPNC..BHN | 2012-07-07T06:47:19.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 3123051 samples
-YH.DC08..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC07..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.SAUV..HHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
-YH.DC08..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DD06..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DD06..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE07..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE07..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE08..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC06..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC06..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE08..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE07..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE08..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DD06..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
 Channel Response
         From M/S (Velocity in Meters per Second) to COUNTS (Digital Counts)
-        Overall Sensitivity: 2.50417e+09 defined at 1.000 Hz
+        Overall Sensitivity: 2.43293e+09 defined at 1.000 Hz
         6 stages:
-                Stage 1: PolesZerosResponseStage from M/S to V, gain: 2404
-                Stage 2: CoefficientsTypeResponseStage from V to COUNTS, gain: 1.04167e+06
+                Stage 1: PolesZerosResponseStage from M/S to V, gain: 2394
+                Stage 2: CoefficientsTypeResponseStage from V to COUNTS, gain: 1.01626e+06
                 Stage 3: FIRResponseStage from COUNTS to COUNTS, gain: 1
                 Stage 4: FIRResponseStage from COUNTS to COUNTS, gain: 1
                 Stage 5: FIRResponseStage from COUNTS to COUNTS, gain: 1
@@ -546,7 +551,7 @@ Channel Response
 <h2>Preprocess the data<a class="headerlink" href="#Preprocess-the-data" title="Permalink to this heading"></a></h2>
 <p>First, we call <code class="docutils literal notranslate"><span class="pre">obspy.Stream.merge()</span></code> to group the different segments of a same channel within a single trace.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw_traces</span><span class="o">.</span><span class="n">merge</span><span class="p">()</span>
@@ -554,7 +559,7 @@ Channel Response
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -565,7 +570,7 @@ YH.SPNC..BHE | 2012-07-07T00:00:00.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 
 ...
 (22 other traces)
 ...
-YH.SPNC..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples (masked)
+YH.SAUV..HHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
 
 [Use &#34;print(Stream.__str__(extended=True))&#34; to print all Traces]
 </pre></div></div>
@@ -613,7 +618,7 @@ YH.SAUV..HHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0
 </div>
 <p>Then, we use <code class="docutils literal notranslate"><span class="pre">BPMF.utils.preprocess_stream</span></code> with the below-defined parameters (some parameters were already defined when initializing the project). We do not correct for the full instrument response, as the response is mostly flat in the frequency band of interest. However, we do correct for the instrument sensitivity so that the waveform amplitudes are in physical units [m/s].</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># preprocessing parameters</span>
@@ -628,7 +633,7 @@ YH.SAUV..HHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">preprocessed_traces</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">preprocess_stream</span><span class="p">(</span>
@@ -645,7 +650,7 @@ YH.SAUV..HHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">preprocessed_traces</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="n">extended</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
@@ -688,10 +693,10 @@ YH.SPNC..BHZ | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 
 <section id="Plot-the-preprocessed-traces">
 <h2>Plot the preprocessed traces<a class="headerlink" href="#Plot-the-preprocessed-traces" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&#39;svg&#39;]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&quot;svg&quot;]
 
 <span class="n">fig</span> <span class="o">=</span> <span class="n">preprocessed_traces</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">equal_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
@@ -742,7 +747,7 @@ The preprocessed data will be stored at: ../BPMF_data/2012/20120707/preprocessed
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Writing preprocessed data: 100%|██████████| 24/24 [00:06&lt;00:00,  3.98it/s]
+Writing preprocessed data: 100%|██████████| 24/24 [00:06&lt;00:00,  3.62it/s]
 </pre></div></div>
 </div>
 </section>

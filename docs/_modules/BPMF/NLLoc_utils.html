@@ -10,10 +10,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -27,11 +25,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -58,7 +60,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
       <li class="breadcrumb-item active">BPMF.NLLoc_utils</li>
       <li class="wy-breadcrumbs-aside">
@@ -82,7 +84,7 @@
 
 
 <div class="viewcode-block" id="load_pykonal_tts"><a class="viewcode-back" href="../../usage/api/NLLoc_utils.html#BPMF.NLLoc_utils.load_pykonal_tts">[docs]</a><span class="k">def</span> <span class="nf">load_pykonal_tts</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Load the travel-time grid computed with Pykonal.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the travel-time grid computed with Pykonal.</span>
 
 <span class="sd">    Load the travel times previously computed with Pykonal and reformat the axes</span>
 <span class="sd">    to follow NLLoc&#39;s convention.</span>
@@ -150,7 +152,7 @@
 
 
 <div class="viewcode-block" id="read_NLLoc_outputs"><a class="viewcode-back" href="../../usage/api/NLLoc_utils.html#BPMF.NLLoc_utils.read_NLLoc_outputs">[docs]</a><span class="k">def</span> <span class="nf">read_NLLoc_outputs</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Read the NLLoc output hyp file.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the NLLoc output hyp file.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
@@ -263,7 +265,7 @@
     <span class="n">output_path</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">NLLOC_INPUT_PATH</span><span class="p">,</span>
     <span class="n">basename</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">NLLOC_BASENAME</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Write the hdr and buf travel-time files for NLLoc.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write the hdr and buf travel-time files for NLLoc.</span>
 
 <span class="sd">    Write the hdr and buf NLLoc files assuming the GLOBAL mode. In this mode,</span>
 <span class="sd">    coordinates are given in geographic coordinates: longitude, latitude and</span>
@@ -340,7 +342,7 @@
 <div class="viewcode-block" id="write_NLLoc_obs"><a class="viewcode-back" href="../../usage/api/NLLoc_utils.html#BPMF.NLLoc_utils.write_NLLoc_obs">[docs]</a><span class="k">def</span> <span class="nf">write_NLLoc_obs</span><span class="p">(</span>
     <span class="n">origin_time</span><span class="p">,</span> <span class="n">picks</span><span class="p">,</span> <span class="n">stations</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">NLLOC_INPUT_PATH</span><span class="p">,</span> <span class="n">err_min</span><span class="o">=</span><span class="mf">0.04</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Write the .obs file for NLLoc.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write the .obs file for NLLoc.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
@@ -481,8 +483,13 @@
     <span class="n">method</span><span class="o">=</span><span class="s2">&quot;EDT_OT_WT_ML&quot;</span><span class="p">,</span>
     <span class="n">angle_grid</span><span class="o">=</span><span class="s2">&quot;ANGLES_NO&quot;</span><span class="p">,</span>
     <span class="n">grid</span><span class="o">=</span><span class="s2">&quot;MISFIT&quot;</span><span class="p">,</span>
+    <span class="n">n_depth_points</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Write the NLLoc control file.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write the NLLoc control file.&quot;&quot;&quot;</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;initNumCells_x&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;initNumCells_y&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;initNumCells_z&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
     <span class="n">fc</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">NLLoc_input_path</span><span class="p">,</span> <span class="n">ctrl_filename</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
     <span class="n">fc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# ---------------------------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">fc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;#    Generic control file statements    </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -499,12 +506,29 @@
     <span class="n">fc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;LOCFILES  </span><span class="si">{</span><span class="n">in_fn</span><span class="si">}</span><span class="s2">  NLLOC_OBS  </span><span class="si">{</span><span class="n">NLLoc_basename</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">out_fn</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="c1"># fc.write(&#39;LOCHYPOUT  SAVE_NLLOC_ALL  SAVE_HYPOINV_SUM\n&#39;)</span>
     <span class="n">fc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;LOCHYPOUT  SAVE_NLLOC_ALL</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">fc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;LOCSEARCH  OCT 10 10 10 </span><span class="si">{</span><span class="n">min_node_size</span><span class="si">}</span><span class="s2"> 10000 1000 1 1</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">fc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;LOCSEARCH  OCT </span><span class="si">{</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;initNumCells_x&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;initNumCells_y&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;initNumCells_z&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">min_node_size</span><span class="si">}</span><span class="s2"> 10000 1000 1 1</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
     <span class="c1"># read header file to automatically determine grid dimensions</span>
     <span class="n">fn</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">NLLoc_input_path</span><span class="p">,</span> <span class="s2">&quot;*hdr&quot;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fhdr</span><span class="p">:</span>
         <span class="n">dim</span> <span class="o">=</span> <span class="n">fhdr</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-    <span class="n">fc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;LOCGRID  &quot;</span> <span class="o">+</span> <span class="s2">&quot;  &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dim</span><span class="o">.</span><span class="n">split</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">grid</span><span class="si">}</span><span class="s2">  SAVE</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">locgrid_params</span> <span class="o">=</span> <span class="n">dim</span><span class="o">.</span><span class="n">split</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;xNum&quot;</span><span class="p">,</span> <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;yNum&quot;</span><span class="p">,</span> <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;zNum&quot;</span><span class="p">,</span> <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;xOrig&quot;</span><span class="p">,</span> <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+    <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;yOrig&quot;</span><span class="p">,</span> <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+    <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;zOrig&quot;</span><span class="p">,</span> <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">5</span><span class="p">]))</span>
+    <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dx&quot;</span><span class="p">,</span> <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+    <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dy&quot;</span><span class="p">,</span> <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">7</span><span class="p">]))</span>
+    <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dz&quot;</span><span class="p">,</span> <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">8</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">n_depth_points</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">locgrid_params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">locgrid_params</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="n">n_depth_points</span><span class="p">))</span>
+    <span class="n">fc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;LOCGRID  &quot;</span> <span class="o">+</span> <span class="s2">&quot;  &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">locgrid_params</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">grid</span><span class="si">}</span><span class="s2">  SAVE</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">fc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;LOCMETH </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2"> 5000 6 -1 -1 -1 6 -1 1</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">fc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;LOCGAU  0.2  5.0</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">fc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;LOCGAU2 0.02 0.05 10.0</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>

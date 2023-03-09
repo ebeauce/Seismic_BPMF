@@ -10,10 +10,8 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -27,11 +25,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> BPMF
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            BPMF
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -58,7 +60,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Index</li>
       <li class="wy-breadcrumbs-aside">
       </li>
@@ -93,6 +95,7 @@
  | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
+ | <a href="#Z"><strong>Z</strong></a>
  
 </div>
 <h2 id="A">A</h2>
@@ -234,10 +237,10 @@
 </li>
       <li><a href="usage/api/data_reader_examples.html#BPMF.data_reader_examples.data_reader_template">data_reader_template() (in module BPMF.data_reader_examples)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Network.datelist">datelist() (BPMF.dataset.Network method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Catalog.depth">depth (BPMF.dataset.Catalog property)</a>
 
       <ul>
@@ -247,6 +250,8 @@
       <li><a href="usage/api/dataset.html#BPMF.dataset.TemplateGroup.dir_errors">dir_errors (BPMF.dataset.TemplateGroup property)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Template.distance">distance() (BPMF.dataset.Template method)</a>
+</li>
+      <li><a href="usage/api/utils.html#BPMF.utils.donefun">donefun() (in module BPMF.utils)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -316,6 +321,8 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.get_peak_amplitudes">get_peak_amplitudes() (BPMF.dataset.Event method)</a>
+</li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Family.get_waveforms_arr">get_waveforms_arr() (BPMF.dataset.Family method)</a>
 </li>
   </ul></td>
@@ -453,12 +460,16 @@
       </ul></li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Network.n_components">n_components (BPMF.dataset.Network property)</a>
 </li>
-      <li><a href="usage/api/dataset.html#BPMF.dataset.EventGroup.n_events">n_events (BPMF.dataset.EventGroup property)</a>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Catalog.n_events">n_events (BPMF.dataset.Catalog property)</a>
+
+      <ul>
+        <li><a href="usage/api/dataset.html#BPMF.dataset.EventGroup.n_events">(BPMF.dataset.EventGroup property)</a>
 </li>
-      <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.n_phases">n_phases (BPMF.template_search.Beamformer property)</a>
-</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.n_phases">n_phases (BPMF.template_search.Beamformer property)</a>
+</li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Network.n_stations">n_stations (BPMF.dataset.Network property)</a>
 
       <ul>
@@ -495,6 +506,8 @@
         <li><a href="usage/api/dataset.html#BPMF.dataset.Stack.pick_PS_phases">(BPMF.dataset.Stack method)</a>
 </li>
       </ul></li>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.pick_PS_phases_EQTransformer">pick_PS_phases_EQTransformer() (BPMF.dataset.Event method)</a>
+</li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Event.plot">plot() (BPMF.dataset.Event method)</a>
 </li>
       <li><a href="usage/api/plotting_utils.html#BPMF.plotting_utils.plot_catalog">plot_catalog() (in module BPMF.plotting_utils)</a>
@@ -511,10 +524,10 @@
         <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.plot_detection">(BPMF.template_search.Beamformer method)</a>
 </li>
       </ul></li>
-      <li><a href="usage/api/plotting_utils.html#BPMF.plotting_utils.plot_detection_matrix">plot_detection_matrix() (in module BPMF.plotting_utils)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usage/api/plotting_utils.html#BPMF.plotting_utils.plot_detection_matrix">plot_detection_matrix() (in module BPMF.plotting_utils)</a>
+</li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.plot_likelihood">plot_likelihood() (BPMF.template_search.Beamformer method)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Catalog.plot_map">plot_map() (BPMF.dataset.Catalog method)</a>
@@ -553,6 +566,8 @@
         <li><a href="usage/api/dataset.html#BPMF.dataset.TemplateGroup.read_catalog">(BPMF.dataset.TemplateGroup method)</a>
 </li>
       </ul></li>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Catalog.read_from_dataframe">read_from_dataframe() (BPMF.dataset.Catalog class method)</a>
+</li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Catalog.read_from_detection_file">read_from_detection_file() (BPMF.dataset.Catalog class method)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Catalog.read_from_events">read_from_events() (BPMF.dataset.Catalog class method)</a>
@@ -593,7 +608,11 @@
 </li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.remove_baseline">remove_baseline() (BPMF.template_search.Beamformer method)</a>
 </li>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.remove_distant_stations">remove_distant_stations() (BPMF.dataset.Event method)</a>
+</li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.TemplateGroup.remove_multiples">remove_multiples() (BPMF.dataset.TemplateGroup method)</a>
+</li>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.remove_outlier_picks">remove_outlier_picks() (BPMF.dataset.Event method)</a>
 </li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.return_pd_series">return_pd_series() (BPMF.template_search.Beamformer method)</a>
 </li>
@@ -619,6 +638,8 @@
         <li><a href="usage/api/clib.html#BPMF.clib.select_cc_indexes">(in module BPMF.clib)</a>
 </li>
       </ul></li>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.set_arrival_times_from_moveouts">set_arrival_times_from_moveouts() (BPMF.dataset.Event method)</a>
+</li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Event.set_aux_data">set_aux_data() (BPMF.dataset.Event method)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Data.set_availability">set_availability() (BPMF.dataset.Data method)</a>
@@ -741,10 +762,14 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.update_picks">update_picks() (BPMF.dataset.Event method)</a>
+      <li><a href="usage/api/plotting_utils.html#BPMF.plotting_utils.uncertainty_ellipse">uncertainty_ellipse() (in module BPMF.plotting_utils)</a>
+</li>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.update_aux_data_database">update_aux_data_database() (BPMF.dataset.Event method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.update_picks">update_picks() (BPMF.dataset.Event method)</a>
+</li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Event.update_travel_times">update_travel_times() (BPMF.dataset.Event method)</a>
 </li>
   </ul></td>
@@ -786,6 +811,14 @@
       <li><a href="usage/api/NLLoc_utils.html#BPMF.NLLoc_utils.write_NLLoc_obs">write_NLLoc_obs() (in module BPMF.NLLoc_utils)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Template.write_summary">write_summary() (BPMF.dataset.Template method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Z">Z</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.zero_out_clipped_waveforms">zero_out_clipped_waveforms() (BPMF.dataset.Event method)</a>
 </li>
   </ul></td>
 </tr></table>
