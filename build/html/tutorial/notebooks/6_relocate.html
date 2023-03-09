@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relocation &mdash; BPMF 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Estimate the seismic moments and moment magnitudes" href="7_magnitudes.html" />
+    <link rel="prev" title="Backprojection of the Seismic Wavefield" href="5_backprojection.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../tutorial.html">Tutorial</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../general.html">Pre-requisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0_initialize_project.html">Project Initialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_download_data.html">Download Seismic Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_preprocess_data.html">Preprocess Seismic Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_network_file.html">Make Network File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_travel_times.html">Compute P-/S-wave travel Times</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_backprojection.html">Backprojection of the Seismic Wavefield</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Relocation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Load-the-metadata-of-the-events-previously-detected-with-backprojection">Load the metadata of the events previously detected with backprojection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Relocation-1:-PhaseNet-picks-and-NonLinLoc">Relocation 1: PhaseNet picks and NonLinLoc</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Automated-picking-and-relocation">Automated picking and relocation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Plot-the-new-locations">Plot the new locations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Remove-possible-multiple-detections">Remove possible multiple detections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Save-the-relocated-events">Save the relocated events</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Relocation-2-(Bonus):-Locating-and-estimating-uncertainties-with-backprojection-on-a-fine-grid">Relocation 2 (Bonus): Locating and estimating uncertainties with backprojection on a fine grid</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="7_magnitudes.html">Estimate the seismic moments and moment magnitudes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_build_template_database.html">Build Template Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="9_template_matching.html">Template Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BPMF</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../tutorial.html">Tutorial</a></li>
+      <li class="breadcrumb-item active">Relocation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/tutorial/notebooks/6_relocate.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars and line breaks on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+    white-space: pre;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="Relocation">
+<h1>Relocation<a class="headerlink" href="#Relocation" title="Permalink to this heading"></a></h1>
+<p>In the previous notebook, <code class="docutils literal notranslate"><span class="pre">5_backprojection</span></code>, we built a database of events detected with the backprojection technique. Here, we will improve the location of each of these events by using a more elaborated location technique.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="c1"># choose the number of threads you want to limit the computation to</span>
+<span class="n">n_CPUs</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_CPUs</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">BPMF</span>
+<span class="kn">import</span> <span class="nn">h5py</span> <span class="k">as</span> <span class="nn">h5</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="kn">from</span> <span class="nn">BPMF.data_reader_examples</span> <span class="kn">import</span> <span class="n">data_reader_mseed</span>
+<span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">udt</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span> <span class="k">as</span> <span class="n">give_time</span>
+
+<span class="c1"># this is necessary to limit the number of threads spawn by tf</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TF_NUM_INTRAOP_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_CPUs</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TF_NUM_INTEROP_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_CPUs</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">threading</span><span class="o">.</span><span class="n">set_inter_op_parallelism_threads</span><span class="p">(</span><span class="n">n_CPUs</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">threading</span><span class="o">.</span><span class="n">set_intra_op_parallelism_threads</span><span class="p">(</span><span class="n">n_CPUs</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">set_soft_device_placement</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">INPUT_DB_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;raw_bp.h5&quot;</span>
+<span class="n">OUTPUT_DB_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;reloc_bp.h5&quot;</span>
+<span class="n">NETWORK_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;network.csv&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">net</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Network</span><span class="p">(</span><span class="n">NETWORK_FILENAME</span><span class="p">)</span>
+<span class="n">net</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<section id="Load-the-metadata-of-the-events-previously-detected-with-backprojection">
+<h2>Load the metadata of the events previously detected with backprojection<a class="headerlink" href="#Load-the-metadata-of-the-events-previously-detected-with-backprojection" title="Permalink to this heading"></a></h2>
+<p>In the previous notebook, we used <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.write</span></code> to save the metadata of each detected event to a hdf5 database. Here, we will use <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.read_from_file</span></code> to read the metadata and build a list of <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event</span></code> instances.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">backprojection_events</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">with</span> <span class="n">h5</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">OUTPUT_PATH</span><span class="p">,</span> <span class="n">INPUT_DB_FILENAME</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fin</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Each event&#39;s metadata is stored at a &#39;subfolder&#39;. The subfolders are: </span><span class="si">{</span><span class="n">fin</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">group_id</span> <span class="ow">in</span> <span class="n">fin</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">backprojection_events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Event</span><span class="o">.</span><span class="n">read_from_file</span><span class="p">(</span>
+                <span class="n">INPUT_DB_FILENAME</span><span class="p">,</span>
+                <span class="n">db_path</span><span class="o">=</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">OUTPUT_PATH</span><span class="p">,</span>
+                <span class="n">gid</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span>
+                <span class="n">data_reader</span><span class="o">=</span><span class="n">data_reader_mseed</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Each event&#39;s metadata is stored at a &#39;subfolder&#39;. The subfolders are: &lt;KeysViewHDF5 [&#39;20120707_065604&#39;, &#39;20120707_070747&#39;, &#39;20120707_071109&#39;, &#39;20120707_071208&#39;, &#39;20120707_071427&#39;, &#39;20120707_072435&#39;, &#39;20120707_073444&#39;, &#39;20120707_081736&#39;, &#39;20120707_084844&#39;, &#39;20120707_092014&#39;, &#39;20120707_101640&#39;, &#39;20120707_104135&#39;, &#39;20120707_152615&#39;]&gt;
+In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">initial_catalog</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;origin_time&quot;</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;depth&quot;</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ev</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">):</span>
+    <span class="n">initial_catalog</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;origin_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">origin_time</span>
+    <span class="n">initial_catalog</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">longitude</span>
+    <span class="n">initial_catalog</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">latitude</span>
+    <span class="n">initial_catalog</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;depth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">depth</span>
+<span class="n">initial_catalog</span><span class="p">[</span><span class="s2">&quot;origin_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_catalog</span><span class="p">[</span><span class="s2">&quot;origin_time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;datetime64[ms]&quot;</span><span class="p">)</span>
+<span class="n">initial_catalog</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_catalog</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+<span class="n">initial_catalog</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_catalog</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+<span class="n">initial_catalog</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_catalog</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+<span class="n">initial_catalog</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>origin_time</th>
+      <th>longitude</th>
+      <th>latitude</th>
+      <th>depth</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2012-07-07 06:56:04.560</td>
+      <td>30.400000</td>
+      <td>40.770000</td>
+      <td>10.5</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2012-07-07 07:07:47.560</td>
+      <td>30.410000</td>
+      <td>40.779999</td>
+      <td>12.5</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2012-07-07 07:11:09.560</td>
+      <td>30.400000</td>
+      <td>40.770000</td>
+      <td>11.5</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2012-07-07 07:12:08.120</td>
+      <td>30.400000</td>
+      <td>40.779999</td>
+      <td>11.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2012-07-07 07:14:27.120</td>
+      <td>30.400000</td>
+      <td>40.790001</td>
+      <td>11.0</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2012-07-07 07:24:35.960</td>
+      <td>30.400000</td>
+      <td>40.779999</td>
+      <td>12.0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2012-07-07 07:34:44.440</td>
+      <td>30.440001</td>
+      <td>40.750000</td>
+      <td>7.5</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2012-07-07 08:17:36.960</td>
+      <td>30.440001</td>
+      <td>40.740002</td>
+      <td>9.5</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2012-07-07 08:48:44.880</td>
+      <td>30.440001</td>
+      <td>40.740002</td>
+      <td>-0.5</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>2012-07-07 09:20:14.360</td>
+      <td>30.400000</td>
+      <td>40.779999</td>
+      <td>11.0</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>2012-07-07 10:16:40.000</td>
+      <td>30.410000</td>
+      <td>40.799999</td>
+      <td>-2.0</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>2012-07-07 10:41:35.880</td>
+      <td>30.430000</td>
+      <td>40.770000</td>
+      <td>8.0</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>2012-07-07 15:26:15.240</td>
+      <td>30.360001</td>
+      <td>40.740002</td>
+      <td>22.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Build a <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Catalog</span></code> instance from <code class="docutils literal notranslate"><span class="pre">initial_catalog</span></code> in order to benefit from the <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Catalog</span></code> plotting methods.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">initial_catalog</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Catalog</span><span class="o">.</span><span class="n">read_from_dataframe</span><span class="p">(</span>
+    <span class="n">initial_catalog</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">initial_catalog</span><span class="o">.</span><span class="n">catalog</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>longitude</th>
+      <th>latitude</th>
+      <th>depth</th>
+      <th>origin_time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>30.400000</td>
+      <td>40.770000</td>
+      <td>10.5</td>
+      <td>2012-07-07 06:56:04.560</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>30.410000</td>
+      <td>40.779999</td>
+      <td>12.5</td>
+      <td>2012-07-07 07:07:47.560</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>30.400000</td>
+      <td>40.770000</td>
+      <td>11.5</td>
+      <td>2012-07-07 07:11:09.560</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>30.400000</td>
+      <td>40.779999</td>
+      <td>11.0</td>
+      <td>2012-07-07 07:12:08.120</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>30.400000</td>
+      <td>40.790001</td>
+      <td>11.0</td>
+      <td>2012-07-07 07:14:27.120</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>30.400000</td>
+      <td>40.779999</td>
+      <td>12.0</td>
+      <td>2012-07-07 07:24:35.960</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>30.440001</td>
+      <td>40.750000</td>
+      <td>7.5</td>
+      <td>2012-07-07 07:34:44.440</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>30.440001</td>
+      <td>40.740002</td>
+      <td>9.5</td>
+      <td>2012-07-07 08:17:36.960</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>30.440001</td>
+      <td>40.740002</td>
+      <td>-0.5</td>
+      <td>2012-07-07 08:48:44.880</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>30.400000</td>
+      <td>40.779999</td>
+      <td>11.0</td>
+      <td>2012-07-07 09:20:14.360</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>30.410000</td>
+      <td>40.799999</td>
+      <td>-2.0</td>
+      <td>2012-07-07 10:16:40.000</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>30.430000</td>
+      <td>40.770000</td>
+      <td>8.0</td>
+      <td>2012-07-07 10:41:35.880</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>30.360001</td>
+      <td>40.740002</td>
+      <td>22.0</td>
+      <td>2012-07-07 15:26:15.240</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Let’s plot the locations that the backprojection method produced.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">initial_catalog</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">network</span><span class="o">=</span><span class="n">net</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">markersize_station</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">lat_margin</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_axes</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s2">&quot;dimgrey&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mf">0.15</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_6_relocate_11_0.png" src="../../_images/tutorial_notebooks_6_relocate_11_0.png" />
+</div>
+</div>
+<p>The backprojection method offers several advantages for locating earthquakes: - Locations come for free in addition to detecting events. - The “picking” of P and S waves does not involve any single-channel threshold. - Backprojection effectively solves the detection and phase association problems at the same time.</p>
+<p>However, there is a number of cons: - The backprojection locations are just as good as the grid is. If a downsampled grid was used for computation efficiency, then the locations definitely need to be refined. - It is hard and computationally expensive to estimate uncertainties (as we will see later in this notebook).</p>
+<p>Thus, in the following, we will explore two ways to refine the initial locations.</p>
+</section>
+<section id="Relocation-1:-PhaseNet-picks-and-NonLinLoc">
+<h2>Relocation 1: PhaseNet picks and NonLinLoc<a class="headerlink" href="#Relocation-1:-PhaseNet-picks-and-NonLinLoc" title="Permalink to this heading"></a></h2>
+<p>If you have installed <code class="docutils literal notranslate"><span class="pre">PhaseNet</span></code> and <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>, you can use <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event</span></code> methods to easily relocate events with automatic picking and earthquake location. This is a two-step procedure. We first need to pick the P- and S-wave arrivals with <code class="docutils literal notranslate"><span class="pre">PhaseNet</span></code> before giving these data to <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>.</p>
+<p>We will explore, step by step, what happens to the <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event</span></code> instance when picking the phase arrivals and when relocating with <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>. First, we read short windows around the P- and S-wave arrivals, as determined by the backprojection locations.</p>
+<section id="Automated-picking-and-relocation">
+<h3>Automated picking and relocation<a class="headerlink" href="#Automated-picking-and-relocation" title="Permalink to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># event extraction parameters</span>
+
+<span class="c1"># PHASE_ON_COMP: dictionary defining which moveout we use to extract the waveform</span>
+<span class="n">PHASE_ON_COMP</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="s2">&quot;P&quot;</span><span class="p">}</span>
+<span class="c1"># OFFSET_PHASE: dictionary defining the time offset taken before a given phase</span>
+<span class="c1">#               for example OFFSET_PHASE[&quot;P&quot;] = 1.0 means that we extract the window</span>
+<span class="c1">#               1 second before the predicted P arrival time</span>
+<span class="n">OFFSET_PHASE</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;P&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="mf">4.0</span><span class="p">}</span>
+<span class="c1"># TIME_SHIFTED: boolean, if True, use moveouts to extract relevant windows</span>
+<span class="n">TIME_SHIFTED</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="c1"># DATA_FOLDER: name of the folder where the waveforms we want to use for picking are stored</span>
+<span class="n">DATA_FOLDER</span> <span class="o">=</span> <span class="s2">&quot;preprocessed_2_12&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t1</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">)):</span>
+    <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span>
+        <span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">TEMPLATE_LEN_SEC</span><span class="p">,</span>
+        <span class="n">phase_on_comp</span><span class="o">=</span><span class="n">PHASE_ON_COMP</span><span class="p">,</span>
+        <span class="n">offset_phase</span><span class="o">=</span><span class="n">OFFSET_PHASE</span><span class="p">,</span>
+        <span class="n">time_shifted</span><span class="o">=</span><span class="n">TIME_SHIFTED</span><span class="p">,</span>
+        <span class="n">data_folder</span><span class="o">=</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="n">t2</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">t2</span><span class="o">-</span><span class="n">t1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">sec to read the waveforms for all </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">)</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2"> detections.&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+3.07sec to read the waveforms for all 13 detections.
+</pre></div></div>
+</div>
+<p>Let’s plot these short windows with <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.plot</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># play with EVENT_IDX to plot different events</span>
+<span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">EVENT_IDX</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_6_relocate_17_0.png" src="../../_images/tutorial_notebooks_6_relocate_17_0.png" />
+</div>
+</div>
+<p>Now, we will use <code class="docutils literal notranslate"><span class="pre">PhaseNet</span></code> to pick the P- and S-wave arrivals. This is done with the <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.pick_PS_phases</span></code> method.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PhaseNet picking parameters</span>
+
+<span class="c1"># PhaseNet was trained for 100Hz data. Even if we saw that running PhaseNet on 25Hz data</span>
+<span class="c1"># was good for backprojection, here, picking benefits from running PhaseNet on 100Hz data.</span>
+<span class="c1"># Thus, we will upsample the waveforms before running PhaseNet.</span>
+<span class="n">PHASENET_SAMPLING_RATE_HZ</span> <span class="o">=</span> <span class="mf">100.</span>
+<span class="n">UPSAMPLING_BEFORE_PN_RELOCATION</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">PHASENET_SAMPLING_RATE_HZ</span><span class="o">/</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">)</span>
+<span class="n">DOWNSAMPLING_BEFORE_PN_RELOCATION</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1"># DURATION_SEC: the duration, in seconds, of the data stream starting at the detection time</span>
+<span class="c1">#               defined by Event.origin_time. This data stream is used for picking the P/S waves.</span>
+<span class="n">DURATION_SEC</span> <span class="o">=</span> <span class="mf">60.0</span>
+<span class="c1"># THRESHOLD_P: probability of P-wave arrival above which we declare a pick. If several picks are</span>
+<span class="c1">#              declared during the DURATION_SEC data stream, we only keep the best one. We can</span>
+<span class="c1">#              afford using a low probability threshold since we already know with some confidence</span>
+<span class="c1">#              that an earthquake is in the data stream.</span>
+<span class="n">THRESHOLD_P</span> <span class="o">=</span> <span class="mf">0.10</span>
+<span class="c1"># THRESHOLD_S: probability of S-wave arrival above which we declare a pick.</span>
+<span class="n">THRESHOLD_S</span> <span class="o">=</span> <span class="mf">0.10</span>
+<span class="c1"># DATA_FOLDER: name of the folder where the waveforms we want to use for picking are stored</span>
+<span class="n">DATA_FOLDER</span> <span class="o">=</span> <span class="s2">&quot;preprocessed_2_12&quot;</span>
+<span class="c1"># COMPONENT_ALIASES: A dictionary that defines the possible channel names to search for</span>
+<span class="c1">#                    for example, the seismometer might not be oriented and the horizontal channels</span>
+<span class="c1">#                    might be named 1 and 2, in which case we arbitrarily decide to take 1 as the &quot;N&quot; channel</span>
+<span class="c1">#                    and 2 as the &quot;E&quot; channel. This doesn&#39;t matter for picking P- and S-wave arrival times.</span>
+<span class="n">COMPONENT_ALIASES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">],</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">],</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">]}</span>
+<span class="c1"># USE_APRIORI_PICKS: boolean. This option is IMPORTANT when running BPMF in HIGH SEISMICITY CONTEXTS, like</span>
+<span class="c1">#                   during the aftershock sequence of a large earthquake. If there are many events happening</span>
+<span class="c1">#                   close to each other in time, we need to guide PhaseNet to pick the right set of picks.</span>
+<span class="c1">#                   For that, we use the predicted P- and S-wave times from backprojection to add extra weight to</span>
+<span class="c1">#                   the picks closer to those times and make it more likely to identify them as the &quot;best&quot; picks.</span>
+<span class="c1">#                   WARNING: If there are truly many events, even this trick might fail. It&#39;s because &quot;phase association&quot;</span>
+<span class="c1">#                   is an intrinsically hard problem in this case, and the picking might be hard to do automatically.</span>
+<span class="n">USE_APRIORI_PICKS</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Picking P and S wave arrivals on detection </span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># make sure the event&#39;s station list has all the stations at which</span>
+    <span class="c1"># we eventually want travel times after NLLoc&#39;s location</span>
+    <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">stations</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;U&quot;</span><span class="p">)</span>
+    <span class="c1"># the following line should only be used in a similar context as here</span>
+    <span class="c1"># it uses the moveouts from the backprojection location to define the</span>
+    <span class="c1"># P/S arrival times that we use a &quot;prior information&quot;</span>
+    <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_arrival_times_from_moveouts</span><span class="p">()</span>
+    <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">pick_PS_phases</span><span class="p">(</span>
+        <span class="n">DURATION_SEC</span><span class="p">,</span>
+        <span class="n">threshold_P</span><span class="o">=</span><span class="n">THRESHOLD_P</span><span class="p">,</span>
+        <span class="n">threshold_S</span><span class="o">=</span><span class="n">THRESHOLD_S</span><span class="p">,</span>
+        <span class="n">component_aliases</span><span class="o">=</span><span class="n">COMPONENT_ALIASES</span><span class="p">,</span>
+        <span class="n">inter_op_parallelism_threads</span><span class="o">=</span><span class="n">n_CPUs</span><span class="p">,</span>
+        <span class="n">intra_op_parallelism_threads</span><span class="o">=</span><span class="n">n_CPUs</span><span class="p">,</span>
+        <span class="n">data_folder</span><span class="o">=</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+        <span class="n">upsampling</span><span class="o">=</span><span class="n">UPSAMPLING_BEFORE_PN_RELOCATION</span><span class="p">,</span>
+        <span class="n">downsampling</span><span class="o">=</span><span class="n">DOWNSAMPLING_BEFORE_PN_RELOCATION</span><span class="p">,</span>
+        <span class="n">use_apriori_picks</span><span class="o">=</span><span class="n">USE_APRIORI_PICKS</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P and S wave arrivals on detection 0
+Make sure origin_time + moveout points at the phase arrival!
+n events: 1, n stations: 8, batch size (n events x n stations): 8
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Pred: 100%|██████████| 1/1 [00:00&lt;00:00,  4.72it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P and S wave arrivals on detection 1
+Make sure origin_time + moveout points at the phase arrival!
+n events: 1, n stations: 8, batch size (n events x n stations): 8
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Pred: 100%|██████████| 1/1 [00:00&lt;00:00,  5.44it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P and S wave arrivals on detection 2
+Make sure origin_time + moveout points at the phase arrival!
+n events: 1, n stations: 8, batch size (n events x n stations): 8
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Pred: 100%|██████████| 1/1 [00:00&lt;00:00,  5.54it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P and S wave arrivals on detection 3
+Make sure origin_time + moveout points at the phase arrival!
+n events: 1, n stations: 8, batch size (n events x n stations): 8
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Pred: 100%|██████████| 1/1 [00:00&lt;00:00,  5.56it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P and S wave arrivals on detection 4
+Make sure origin_time + moveout points at the phase arrival!
+n events: 1, n stations: 8, batch size (n events x n stations): 8
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Pred: 100%|██████████| 1/1 [00:00&lt;00:00,  5.32it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P and S wave arrivals on detection 5
+Make sure origin_time + moveout points at the phase arrival!
+n events: 1, n stations: 8, batch size (n events x n stations): 8
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Pred: 100%|██████████| 1/1 [00:00&lt;00:00,  5.69it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P and S wave arrivals on detection 6
+Make sure origin_time + moveout points at the phase arrival!
+n events: 1, n stations: 8, batch size (n events x n stations): 8
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Pred: 100%|██████████| 1/1 [00:00&lt;00:00,  5.43it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P and S wave arrivals on detection 7
+Make sure origin_time + moveout points at the phase arrival!
+n events: 1, n stations: 8, batch size (n events x n stations): 8
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Pred: 100%|██████████| 1/1 [00:00&lt;00:00,  5.54it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P and S wave arrivals on detection 8
+Make sure origin_time + moveout points at the phase arrival!
+n events: 1, n stations: 8, batch size (n events x n stations): 8
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Pred: 100%|██████████| 1/1 [00:00&lt;00:00,  5.57it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P and S wave arrivals on detection 9
+Make sure origin_time + moveout points at the phase arrival!
+n events: 1, n stations: 8, batch size (n events x n stations): 8
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Pred: 100%|██████████| 1/1 [00:00&lt;00:00,  5.37it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P and S wave arrivals on detection 10
+Make sure origin_time + moveout points at the phase arrival!
+n events: 1, n stations: 8, batch size (n events x n stations): 8
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Pred: 100%|██████████| 1/1 [00:00&lt;00:00,  5.52it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P and S wave arrivals on detection 11
+Make sure origin_time + moveout points at the phase arrival!
+n events: 1, n stations: 8, batch size (n events x n stations): 8
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Pred: 100%|██████████| 1/1 [00:00&lt;00:00,  5.65it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P and S wave arrivals on detection 12
+Make sure origin_time + moveout points at the phase arrival!
+n events: 1, n stations: 8, batch size (n events x n stations): 8
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Pred: 100%|██████████| 1/1 [00:00&lt;00:00,  5.67it/s]
+</pre></div></div>
+</div>
+<p>We are done with the automatic picking! Every instance of <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event</span></code> should now have a new attribute <code class="docutils literal notranslate"><span class="pre">picks</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[59]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">backprojection_events</span><span class="p">[</span><span class="n">EVENT_IDX</span><span class="p">]</span><span class="o">.</span><span class="n">picks</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[59]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>P_picks_sec</th>
+      <th>P_probas</th>
+      <th>P_abs_picks</th>
+      <th>S_picks_sec</th>
+      <th>S_probas</th>
+      <th>S_abs_picks</th>
+    </tr>
+    <tr>
+      <th>stations</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>DD06</th>
+      <td>21.549999</td>
+      <td>0.878727</td>
+      <td>2012-07-07T06:56:06.109999Z</td>
+      <td>23.610001</td>
+      <td>0.119207</td>
+      <td>2012-07-07T06:56:08.170001Z</td>
+    </tr>
+    <tr>
+      <th>SAUV</th>
+      <td>20.139999</td>
+      <td>0.817467</td>
+      <td>2012-07-07T06:56:04.699999Z</td>
+      <td>21.910000</td>
+      <td>0.909954</td>
+      <td>2012-07-07T06:56:06.470000Z</td>
+    </tr>
+    <tr>
+      <th>DC06</th>
+      <td>22.100000</td>
+      <td>0.909255</td>
+      <td>2012-07-07T06:56:06.660000Z</td>
+      <td>25.209999</td>
+      <td>0.776132</td>
+      <td>2012-07-07T06:56:09.769999Z</td>
+    </tr>
+    <tr>
+      <th>DC08</th>
+      <td>21.020000</td>
+      <td>0.880180</td>
+      <td>2012-07-07T06:56:05.580000Z</td>
+      <td>23.480000</td>
+      <td>0.725664</td>
+      <td>2012-07-07T06:56:08.040000Z</td>
+    </tr>
+    <tr>
+      <th>SPNC</th>
+      <td>21.049999</td>
+      <td>0.858785</td>
+      <td>2012-07-07T06:56:05.609999Z</td>
+      <td>23.719999</td>
+      <td>0.796197</td>
+      <td>2012-07-07T06:56:08.279999Z</td>
+    </tr>
+    <tr>
+      <th>DE08</th>
+      <td>19.920000</td>
+      <td>0.935872</td>
+      <td>2012-07-07T06:56:04.480000Z</td>
+      <td>21.330000</td>
+      <td>0.764561</td>
+      <td>2012-07-07T06:56:05.890000Z</td>
+    </tr>
+    <tr>
+      <th>DC07</th>
+      <td>9.970000</td>
+      <td>0.448813</td>
+      <td>2012-07-07T06:55:54.530000Z</td>
+      <td>24.650000</td>
+      <td>0.487134</td>
+      <td>2012-07-07T06:56:09.210000Z</td>
+    </tr>
+    <tr>
+      <th>DE07</th>
+      <td>20.530001</td>
+      <td>0.748022</td>
+      <td>2012-07-07T06:56:05.090001Z</td>
+      <td>22.850000</td>
+      <td>0.915531</td>
+      <td>2012-07-07T06:56:07.410000Z</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>These picks are automatically read when calling <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.plot</span></code>. Before plotting the waveforms with the newly obtained picks, let’s re-read the waveforms in the same format as before for the sake of easier visualization.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[60]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t1</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">)):</span>
+    <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span>
+        <span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">TEMPLATE_LEN_SEC</span><span class="p">,</span>
+        <span class="n">phase_on_comp</span><span class="o">=</span><span class="n">PHASE_ON_COMP</span><span class="p">,</span>
+        <span class="n">offset_phase</span><span class="o">=</span><span class="n">OFFSET_PHASE</span><span class="p">,</span>
+        <span class="n">time_shifted</span><span class="o">=</span><span class="n">TIME_SHIFTED</span><span class="p">,</span>
+        <span class="n">data_folder</span><span class="o">=</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="n">t2</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">t2</span><span class="o">-</span><span class="n">t1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">sec to read the waveforms for all </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">)</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2"> detections.&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+3.27sec to read the waveforms for all 13 detections.
+</pre></div></div>
+</div>
+<p>The following plot shows the PhaseNet picks with dashed vertical lines (blue=P-wave, red=S-wave) and the arrival times predicted by the backprojection location with solid vertical lines (purple=P-wave, orange=S-wave). See how, in this tutorial, the backprojection locations already do a good job at predicting the P- and S-wave times… given the limitations of the 1D velocity model.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[61]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># play with EVENT_IDX to plot different events</span>
+<span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">EVENT_IDX</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_6_relocate_26_0.png" src="../../_images/tutorial_notebooks_6_relocate_26_0.png" />
+</div>
+</div>
+<p>We now are all set for using our favorite location software using PhaseNet’s picks. We can use <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code> with one of <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event</span></code> methods. See <a class="reference external" href="http://alomax.free.fr/nlloc/">http://alomax.free.fr/nlloc/</a> for more info.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># location parameters</span>
+
+<span class="n">LOCATION_ROUTINE</span> <span class="o">=</span> <span class="s2">&quot;NLLoc&quot;</span>
+<span class="c1"># NLLOC_METHOD: string that defines what loss function is used by NLLoc, see http://alomax.free.fr/nlloc/ for more info.</span>
+<span class="c1">#               Using some flavor of &#39;EDT&#39; is important to obtain robust locations that are not sensitive to pick outliers.</span>
+<span class="n">NLLOC_METHOD</span> <span class="o">=</span> <span class="s2">&quot;EDT&quot;</span>
+<span class="c1"># MINIMUM_NUM_STATIONS_W_PICKS: minimum number of stations with picks to even try relocation.</span>
+<span class="n">MINIMUM_NUM_STATIONS_W_PICKS</span> <span class="o">=</span> <span class="mi">3</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[63]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ev</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">):</span>
+    <span class="c1"># before relocating, let&#39;s store the old location for book-keeping</span>
+    <span class="n">ev</span><span class="o">.</span><span class="n">set_aux_data</span><span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;backprojection_longitude&quot;</span><span class="p">:</span> <span class="n">ev</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span>
+         <span class="s2">&quot;backprojection_latitude&quot;</span><span class="p">:</span> <span class="n">ev</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
+         <span class="s2">&quot;backprojection_depth&quot;</span><span class="p">:</span> <span class="n">ev</span><span class="o">.</span><span class="n">depth</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="n">MINIMUM_NUM_STATIONS_W_PICKS</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Relocating event </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># first relocation, insensitive to outliers</span>
+        <span class="n">ev</span><span class="o">.</span><span class="n">relocate</span><span class="p">(</span>
+            <span class="n">stations</span><span class="o">=</span><span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span> <span class="n">routine</span><span class="o">=</span><span class="n">LOCATION_ROUTINE</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">NLLOC_METHOD</span><span class="p">,</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Relocating event 0
+Relocating event 1
+Relocating event 2
+Relocating event 3
+Relocating event 4
+Relocating event 5
+Relocating event 6
+Relocating event 7
+Relocating event 8
+Relocating event 9
+Relocating event 10
+Relocating event 11
+Relocating event 12
+</pre></div></div>
+</div>
+<p>Let’s plot the updated predicted times!</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># play with EVENT_IDX to plot different events</span>
+<span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">EVENT_IDX</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_6_relocate_31_0.png" src="../../_images/tutorial_notebooks_6_relocate_31_0.png" />
+</div>
+</div>
+<p>It doesn’t look like much has changed… But we now have the location uncertainties. The uncertainty information is encoded in the covariance matrix, which is stored at <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.aux_data[&quot;cov_mat&quot;]</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">ev</span> <span class="o">=</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">EVENT_IDX</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The maximum horizontal location uncertainty of event </span><span class="si">{</span><span class="n">EVENT_IDX</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">hmax_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">km.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The azimuth of the maximum horizontal uncertainty is </span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">az_hmax_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">degrees.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The mainimumhorizontal location uncertainty of event </span><span class="si">{</span><span class="n">EVENT_IDX</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">hmin_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">km.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The azimuth of the minimum horizontal uncertainty is </span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">az_hmin_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">degrees.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The maximum vertical location uncertainty is </span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">vmax_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">km.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The maximum horizontal location uncertainty of event 0 is 2.20km.
+The azimuth of the maximum horizontal uncertainty is -166.54degrees.
+The mainimumhorizontal location uncertainty of event 0 is 1.39km.
+The azimuth of the minimum horizontal uncertainty is 103.46degrees.
+The maximum vertical location uncertainty is 2.15km.
+</pre></div></div>
+</div>
+<p>Before plotting the map with the new locations, let’s make sure our locations are not unnecessarily spoiled by aberrant pick outliers. Even though we used <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>’s EDT method, which is robust to outliers, we can easily identify these aberrant outliers and remove them.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># we set a maximum tolerable difference, in percentage, between the picked time and the predicted travel time</span>
+<span class="n">MAX_TIME_DIFFERENT_PICKS_PREDICTED_PERCENT</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ev</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s2">&quot;NLLoc_reloc&quot;</span> <span class="ow">in</span> <span class="n">ev</span><span class="o">.</span><span class="n">aux_data</span><span class="p">:</span>
+        <span class="c1"># this variable was inserted into ev.aux_data if NLLoc successfully located the event</span>
+        <span class="c1"># use predicted times to remove outlier picks</span>
+        <span class="n">ev</span><span class="o">.</span><span class="n">remove_outlier_picks</span><span class="p">(</span><span class="n">max_diff_percent</span><span class="o">=</span><span class="n">MAX_TIME_DIFFERENT_PICKS_PREDICTED_PERCENT</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="n">MINIMUM_NUM_STATIONS_W_PICKS</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Relocating event </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># first relocation, insensitive to outliers</span>
+            <span class="n">ev</span><span class="o">.</span><span class="n">relocate</span><span class="p">(</span>
+                <span class="n">stations</span><span class="o">=</span><span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span> <span class="n">routine</span><span class="o">=</span><span class="n">LOCATION_ROUTINE</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">NLLOC_METHOD</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># after removing the outlier picks, not enough picks were left</span>
+            <span class="c1"># revert to backprojection location</span>
+            <span class="k">del</span> <span class="n">ev</span><span class="o">.</span><span class="n">arrival_times</span>
+            <span class="n">ev</span><span class="o">.</span><span class="n">longitude</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;backprojection_longitude&quot;</span><span class="p">]</span>
+            <span class="n">ev</span><span class="o">.</span><span class="n">latitude</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;backprojection_latitude&quot;</span><span class="p">]</span>
+            <span class="n">ev</span><span class="o">.</span><span class="n">depth</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;backprojection_depth&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Relocating event 0
+Relocating event 1
+Relocating event 2
+Relocating event 3
+Relocating event 4
+Relocating event 5
+Relocating event 6
+Relocating event 7
+Relocating event 8
+Relocating event 9
+Relocating event 10
+Relocating event 11
+Relocating event 12
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">origin_time</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Timestamp(&#39;2012-07-07 15:26:15.080000+0000&#39;, tz=&#39;UTC&#39;)
+</pre></div></div>
+</div>
+</section>
+<section id="Plot-the-new-locations">
+<h3>Plot the new locations<a class="headerlink" href="#Plot-the-new-locations" title="Permalink to this heading"></a></h3>
+<p>Just like before, we make a new instance of <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Catalog</span></code> to use the built-in plotting methods.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[68]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nlloc_catalog</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Catalog</span><span class="o">.</span><span class="n">read_from_events</span><span class="p">(</span>
+    <span class="n">backprojection_events</span><span class="p">,</span>
+    <span class="n">extra_attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;hmax_unc&quot;</span><span class="p">,</span> <span class="s2">&quot;hmin_unc&quot;</span><span class="p">,</span> <span class="s2">&quot;az_hmax_unc&quot;</span><span class="p">,</span> <span class="s2">&quot;vmax_unc&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+<span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;az_hmax_unc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;az_hmax_unc&quot;</span><span class="p">]</span><span class="o">%</span><span class="k">180</span>.
+<span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[68]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>longitude</th>
+      <th>latitude</th>
+      <th>depth</th>
+      <th>origin_time</th>
+      <th>hmax_unc</th>
+      <th>hmin_unc</th>
+      <th>az_hmax_unc</th>
+      <th>vmax_unc</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>30.402637</td>
+      <td>40.765937</td>
+      <td>10.238281</td>
+      <td>2012-07-07 06:56:02.560</td>
+      <td>2.198658</td>
+      <td>1.385187</td>
+      <td>13.463923</td>
+      <td>2.145565</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>30.408496</td>
+      <td>40.765937</td>
+      <td>10.238281</td>
+      <td>2012-07-07 07:07:45.720</td>
+      <td>1.386711</td>
+      <td>1.049999</td>
+      <td>148.121750</td>
+      <td>1.716935</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>30.418262</td>
+      <td>40.759687</td>
+      <td>11.050781</td>
+      <td>2012-07-07 07:11:07.440</td>
+      <td>1.817275</td>
+      <td>1.131353</td>
+      <td>89.391112</td>
+      <td>3.192842</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>30.404590</td>
+      <td>40.762187</td>
+      <td>10.136719</td>
+      <td>2012-07-07 07:12:06.200</td>
+      <td>1.204078</td>
+      <td>0.954942</td>
+      <td>138.520075</td>
+      <td>1.142778</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>30.411914</td>
+      <td>40.793125</td>
+      <td>11.304688</td>
+      <td>2012-07-07 07:14:25.000</td>
+      <td>1.886675</td>
+      <td>1.435720</td>
+      <td>16.901612</td>
+      <td>1.737751</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>30.397754</td>
+      <td>40.765937</td>
+      <td>10.644531</td>
+      <td>2012-07-07 07:24:34.000</td>
+      <td>1.477016</td>
+      <td>1.028668</td>
+      <td>137.014524</td>
+      <td>1.263067</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>30.409961</td>
+      <td>40.768125</td>
+      <td>10.289062</td>
+      <td>2012-07-07 07:34:42.800</td>
+      <td>2.157981</td>
+      <td>1.659802</td>
+      <td>125.916805</td>
+      <td>5.066276</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>30.413867</td>
+      <td>40.759375</td>
+      <td>9.273438</td>
+      <td>2012-07-07 08:17:35.080</td>
+      <td>1.807823</td>
+      <td>1.109721</td>
+      <td>70.558859</td>
+      <td>5.426848</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>30.445117</td>
+      <td>40.764375</td>
+      <td>8.054688</td>
+      <td>2012-07-07 08:48:43.800</td>
+      <td>2.982386</td>
+      <td>1.933982</td>
+      <td>10.443750</td>
+      <td>8.074210</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>30.402637</td>
+      <td>40.764687</td>
+      <td>10.035156</td>
+      <td>2012-07-07 09:20:12.480</td>
+      <td>1.116928</td>
+      <td>0.884104</td>
+      <td>159.472964</td>
+      <td>1.399643</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>30.316699</td>
+      <td>40.754688</td>
+      <td>0.285156</td>
+      <td>2012-07-07 10:16:39.840</td>
+      <td>3.378762</td>
+      <td>1.691182</td>
+      <td>36.227660</td>
+      <td>2.733743</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>30.421680</td>
+      <td>40.764375</td>
+      <td>9.273438</td>
+      <td>2012-07-07 10:41:34.320</td>
+      <td>1.921095</td>
+      <td>1.396241</td>
+      <td>81.876681</td>
+      <td>3.870540</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>30.294482</td>
+      <td>40.628281</td>
+      <td>-1.517578</td>
+      <td>2012-07-07 15:26:15.080</td>
+      <td>4.898208</td>
+      <td>2.005268</td>
+      <td>177.708818</td>
+      <td>3.423410</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code> locations are able to resolve the location differences between events much better than the backprojection locations. However, limits remain due to: - Errors in picks. - Approximations in velocity model (1D model whereas the area is hghly heterogeneous!). - Earthquakes are located outside the network, so large uncertainties cannot be avoided.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[69]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">network</span><span class="o">=</span><span class="n">net</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">markersize_station</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">lat_margin</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">plot_uncertainties</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_axes</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s2">&quot;dimgrey&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mf">0.15</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_6_relocate_40_0.png" src="../../_images/tutorial_notebooks_6_relocate_40_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Remove-possible-multiple-detections">
+<h2>Remove possible multiple detections<a class="headerlink" href="#Remove-possible-multiple-detections" title="Permalink to this heading"></a></h2>
+<p>The backprojection method does not have good inter-event time resolution because of the large uncertainties on the event origin times. There always exists a relatively large trade-off between the origin time and the location so it happens to detect the same event several times in a row if <code class="docutils literal notranslate"><span class="pre">MINIMUM_INTEREVENT_TIME_SEC</span></code> was not set large enough in <code class="docutils literal notranslate"><span class="pre">5_backprojection.ipynb</span></code>. After relocation <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>, it is easier to identify such multiple detections.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[70]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># the following variable should be consistent with that defined in 5_backprojection</span>
+<span class="n">MINIMUM_INTEREVENT_TIME_SEC</span> <span class="o">=</span> <span class="mf">60.</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[71]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">n_events</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">n_events</span><span class="p">):</span>
+    <span class="n">previous_ev</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">keep</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]:</span>
+        <span class="n">previous_ev</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">previous_ev</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">break</span>
+    <span class="n">dt_sec</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">origin_time</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="o">-</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">origin_time</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">dt_sec</span> <span class="o">&lt;</span> <span class="n">MINIMUM_INTEREVENT_TIME_SEC</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="s2">&quot;NLLoc_reloc&quot;</span> <span class="ow">in</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">aux_data</span>
+            <span class="ow">and</span> <span class="s2">&quot;NLLoc_reloc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span><span class="o">.</span><span class="n">aux_data</span>
+        <span class="p">):</span>
+            <span class="n">keep</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="p">(</span>
+            <span class="s2">&quot;NLLoc_reloc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">aux_data</span>
+            <span class="ow">and</span> <span class="s2">&quot;NLLoc_reloc&quot;</span> <span class="ow">in</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span><span class="o">.</span><span class="n">aux_data</span>
+        <span class="p">):</span>
+            <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">hmax_unc</span> <span class="o">&lt;</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span><span class="o">.</span><span class="n">hmax_unc</span><span class="p">:</span>
+            <span class="n">keep</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">hmax_unc</span> <span class="o">&gt;</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span><span class="o">.</span><span class="n">hmax_unc</span><span class="p">:</span>
+            <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># if both backprojection_events[i] and backprojection_events[previous_ev] were not relocated with NLLoc,</span>
+            <span class="c1"># then there origin times cannot be closer than MINIMUM_INTEREVENT_TIME_SEC</span>
+            <span class="k">continue</span>
+
+
+<span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[71]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>longitude</th>
+      <th>latitude</th>
+      <th>depth</th>
+      <th>origin_time</th>
+      <th>hmax_unc</th>
+      <th>hmin_unc</th>
+      <th>az_hmax_unc</th>
+      <th>vmax_unc</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>30.402637</td>
+      <td>40.765937</td>
+      <td>10.238281</td>
+      <td>2012-07-07 06:56:02.560</td>
+      <td>2.198658</td>
+      <td>1.385187</td>
+      <td>13.463923</td>
+      <td>2.145565</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>30.408496</td>
+      <td>40.765937</td>
+      <td>10.238281</td>
+      <td>2012-07-07 07:07:45.720</td>
+      <td>1.386711</td>
+      <td>1.049999</td>
+      <td>148.121750</td>
+      <td>1.716935</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>30.404590</td>
+      <td>40.762187</td>
+      <td>10.136719</td>
+      <td>2012-07-07 07:12:06.200</td>
+      <td>1.204078</td>
+      <td>0.954942</td>
+      <td>138.520075</td>
+      <td>1.142778</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>30.411914</td>
+      <td>40.793125</td>
+      <td>11.304688</td>
+      <td>2012-07-07 07:14:25.000</td>
+      <td>1.886675</td>
+      <td>1.435720</td>
+      <td>16.901612</td>
+      <td>1.737751</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>30.397754</td>
+      <td>40.765937</td>
+      <td>10.644531</td>
+      <td>2012-07-07 07:24:34.000</td>
+      <td>1.477016</td>
+      <td>1.028668</td>
+      <td>137.014524</td>
+      <td>1.263067</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>30.409961</td>
+      <td>40.768125</td>
+      <td>10.289062</td>
+      <td>2012-07-07 07:34:42.800</td>
+      <td>2.157981</td>
+      <td>1.659802</td>
+      <td>125.916805</td>
+      <td>5.066276</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>30.413867</td>
+      <td>40.759375</td>
+      <td>9.273438</td>
+      <td>2012-07-07 08:17:35.080</td>
+      <td>1.807823</td>
+      <td>1.109721</td>
+      <td>70.558859</td>
+      <td>5.426848</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>30.445117</td>
+      <td>40.764375</td>
+      <td>8.054688</td>
+      <td>2012-07-07 08:48:43.800</td>
+      <td>2.982386</td>
+      <td>1.933982</td>
+      <td>10.443750</td>
+      <td>8.074210</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>30.402637</td>
+      <td>40.764687</td>
+      <td>10.035156</td>
+      <td>2012-07-07 09:20:12.480</td>
+      <td>1.116928</td>
+      <td>0.884104</td>
+      <td>159.472964</td>
+      <td>1.399643</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>30.316699</td>
+      <td>40.754688</td>
+      <td>0.285156</td>
+      <td>2012-07-07 10:16:39.840</td>
+      <td>3.378762</td>
+      <td>1.691182</td>
+      <td>36.227660</td>
+      <td>2.733743</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>30.421680</td>
+      <td>40.764375</td>
+      <td>9.273438</td>
+      <td>2012-07-07 10:41:34.320</td>
+      <td>1.921095</td>
+      <td>1.396241</td>
+      <td>81.876681</td>
+      <td>3.870540</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>30.294482</td>
+      <td>40.628281</td>
+      <td>-1.517578</td>
+      <td>2012-07-07 15:26:15.080</td>
+      <td>4.898208</td>
+      <td>2.005268</td>
+      <td>177.708818</td>
+      <td>3.423410</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Save-the-relocated-events">
+<h2>Save the relocated events<a class="headerlink" href="#Save-the-relocated-events" title="Permalink to this heading"></a></h2>
+<p>Save all the events that were not identified as multiples to a hdf5 database.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[72]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ev</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+        <span class="n">ev</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">origin_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">)</span>
+        <span class="n">ev</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="n">OUTPUT_DB_FILENAME</span><span class="p">,</span>
+            <span class="n">db_path</span><span class="o">=</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">OUTPUT_PATH</span><span class="p">,</span>
+            <span class="n">gid</span><span class="o">=</span><span class="n">ev</span><span class="o">.</span><span class="n">id</span>
+            <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Relocation-2-(Bonus):-Locating-and-estimating-uncertainties-with-backprojection-on-a-fine-grid">
+<h2>Relocation 2 (Bonus): Locating and estimating uncertainties with backprojection on a fine grid<a class="headerlink" href="#Relocation-2-(Bonus):-Locating-and-estimating-uncertainties-with-backprojection-on-a-fine-grid" title="Permalink to this heading"></a></h2>
+<p>The goal of this section is to explore an alternative to the PhaseNet + NonLinLoc workflow solely based on the use backprojection. If a “sparse” grid was used for the purpose of earthquake detection, then a fine grid can be used here.</p>
+<p>In the following, we run a “vanilla” backprojection that backprojects the waveforms’ envelopes (as defined by the Hilbert transform).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[73]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PHASES: list of seismic phases to use for backprojection</span>
+<span class="n">PHASES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">]</span>
+<span class="c1"># TT_FILENAME: name of the file with the travel times</span>
+<span class="n">TT_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;tts.h5&quot;</span>
+<span class="c1"># N_MAX_STATIONS: the maximum number of stations used for stacking (e.g. the closest to a given grid point)</span>
+<span class="c1"># note: this parameter is irrelevant in this example with only 8 stations, but it is important when</span>
+<span class="c1"># using large seismic networks</span>
+<span class="n">N_MAX_STATIONS</span> <span class="o">=</span> <span class="mi">10</span>
+</pre></div>
+</div>
+</div>
+<p>For backprojection, we need to load the travel time grid and set up the <code class="docutils literal notranslate"><span class="pre">BPMF.template_search.Beamformer</span></code> instance.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[74]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># load travel times and the grid point (source) coordinates</span>
+<span class="n">tts</span><span class="p">,</span> <span class="n">source_coords</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">load_travel_times</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">MOVEOUTS_PATH</span><span class="p">,</span> <span class="n">TT_FILENAME</span><span class="p">),</span>
+    <span class="n">phases</span><span class="o">=</span><span class="n">PHASES</span><span class="p">,</span>
+    <span class="n">source_indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">return_coords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">stations</span><span class="o">=</span><span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[75]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># initialize a new beamformer because, in general, you might want to use a different</span>
+<span class="c1"># travel-time table for this beamformer (e.g. denser)</span>
+<span class="n">bf_loc</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">template_search</span><span class="o">.</span><span class="n">Beamformer</span><span class="p">(</span>
+    <span class="n">tts</span><span class="p">,</span>
+    <span class="n">source_coords</span><span class="p">,</span>
+    <span class="n">sampling_rate</span><span class="o">=</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">,</span>
+    <span class="n">phases</span><span class="o">=</span><span class="n">PHASES</span><span class="p">,</span>
+    <span class="n">remove_tt_min</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># here, we need to &quot;trick&quot; the Beamformer instance and give it something similar to the Data instance in 5_backprojection</span>
+<span class="n">bf_loc</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="c1"># attach the Network instance</span>
+<span class="n">bf_loc</span><span class="o">.</span><span class="n">set_network</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+<span class="c1"># attach weights (the waveform features are the waveforms&#39; envelopes)</span>
+<span class="n">weights_phases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">net</span><span class="o">.</span><span class="n">n_stations</span><span class="p">,</span> <span class="n">net</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">PHASES</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">weights_phases</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span> <span class="c1"># P-wave weight = 0 for horizontal components</span>
+<span class="n">weights_phases</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span> <span class="c1"># S-wave weight = 0 for vertical components</span>
+<span class="n">bf_loc</span><span class="o">.</span><span class="n">set_weights_sources</span><span class="p">(</span><span class="n">N_MAX_STATIONS</span><span class="p">)</span>
+<span class="n">bf_loc</span><span class="o">.</span><span class="n">set_weights</span><span class="p">(</span><span class="n">weights_phases</span><span class="o">=</span><span class="n">weights_phases</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[76]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># relocation parameters</span>
+<span class="n">LOCATION_ROUTINE</span> <span class="o">=</span> <span class="s2">&quot;beam&quot;</span>
+<span class="n">RESTRICTED_DOMAIN_FOR_UNC_KM</span> <span class="o">=</span> <span class="mf">100.</span>
+<span class="n">DATA_FOLDER</span> <span class="o">=</span> <span class="s2">&quot;preprocessed_2_12&quot;</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[77]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">backprojection_events</span><span class="p">[</span><span class="n">EVENT_IDX</span><span class="p">]</span><span class="o">.</span><span class="n">relocate</span><span class="p">(</span>
+    <span class="n">routine</span><span class="o">=</span><span class="n">LOCATION_ROUTINE</span><span class="p">,</span>
+    <span class="n">beamformer</span><span class="o">=</span><span class="n">bf_loc</span><span class="p">,</span>
+    <span class="n">data_folder</span><span class="o">=</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+    <span class="n">restricted_domain_side_km</span><span class="o">=</span><span class="n">RESTRICTED_DOMAIN_FOR_UNC_KM</span><span class="p">,</span>
+    <span class="n">data_reader</span><span class="o">=</span><span class="n">data_reader_mseed</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The difference between this backprojection and the “detection backprojection” of 5_backprojection is that, here, we stored the value of each beam of the 4D (x, y, z, time) grid! Below, we plot 3 slices of the (x, y, z, time=time of max beam) volume. The beams are normalized so that they are interpreted in terms of likelihod. White areas can appear for some reason that I do not fully understand (bug in matplotlib’s tricontourf?).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[78]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># when using the beam-based relocation routine, the entire grid of beams is stored in memory</span>
+<span class="n">fig_beam_reloc</span> <span class="o">=</span> <span class="n">bf_loc</span><span class="o">.</span><span class="n">plot_likelihood</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="n">likelihood</span><span class="o">=</span><span class="n">bf_loc</span><span class="o">.</span><span class="n">likelihood</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_6_relocate_54_0.png" src="../../_images/tutorial_notebooks_6_relocate_54_0.png" />
+</div>
+</div>
+<p>The current way of estimating location uncertainties with the backprojection method is to compute a weighted average distance between the maximum beam grid point (indexed by <span class="math notranslate nohighlight">\(k^*\)</span>) and all other grid points. To avoid the result to be grid-size dependent, we limit the weighted average to a restricted rectangular domain taken around the maximum beam grid point.</p>
+<div class="math notranslate nohighlight">
+\[h_{unc} = \dfrac{L_k e_{i,k^*}}{\sum_{k \in \mathcal{R}} L_k},\]</div>
+<div class="math notranslate nohighlight">
+\[v_{unc} = \dfrac{L_k \Delta d_{i,k^*}}{\sum_{k \in \mathcal{R}} L_k},\]</div>
+<p>where <span class="math notranslate nohighlight">\(e_{i,k^*}\)</span> is the epicentral distance between grid points <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(k^*\)</span> and <span class="math notranslate nohighlight">\(\Delta d_{i,k^*}\)</span> is the depth difference between grid points <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(k^*\)</span>.</p>
+<p>In this case, we assume the uncertainty ellipse to be isotropic, that is, <span class="math notranslate nohighlight">\(h_{max,unc} = h_{min,unc}\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[79]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">ev</span> <span class="o">=</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">EVENT_IDX</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The maximum horizontal location uncertainty of event </span><span class="si">{</span><span class="n">EVENT_IDX</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">hmax_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">km.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The azimuth of the maximum horizontal uncertainty is </span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">az_hmax_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">degrees.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The mainimumhorizontal location uncertainty of event </span><span class="si">{</span><span class="n">EVENT_IDX</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">hmin_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">km.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The azimuth of the minimum horizontal uncertainty is </span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">az_hmin_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">degrees.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The maximum vertical location uncertainty is </span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">vmax_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">km.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The maximum horizontal location uncertainty of event 0 is 8.82km.
+The azimuth of the maximum horizontal uncertainty is 0.00degrees.
+The mainimumhorizontal location uncertainty of event 0 is 8.82km.
+The azimuth of the minimum horizontal uncertainty is 0.00degrees.
+The maximum vertical location uncertainty is 11.89km.
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="5_backprojection.html" class="btn btn-neutral float-left" title="Backprojection of the Seismic Wavefield" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="7_magnitudes.html" class="btn btn-neutral float-right" title="Estimate the seismic moments and moment magnitudes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Eric Beauce, William B. Frank.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

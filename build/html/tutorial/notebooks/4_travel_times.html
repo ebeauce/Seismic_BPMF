@@ -1,132 +1,107 @@
-
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-
-    <title>Compute P-/S-wave travel Times &#8212; BPMF 2.0.0 documentation</title>
-    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/insipid.css" />
-
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script defer src="../../_static/insipid.js"></script>
-    <script defer src="../../_static/insipid-sidebar.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compute P-/S-wave travel Times &mdash; BPMF 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Backprojection of the Seismic Wavefield" href="5_backprojection.html" />
-    <link rel="prev" title="Make Network File" href="3_network_file.html" />
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-  </head><body>
-    <script type="text/javascript">
-        document.body.classList.add('js');
-    </script>
-    <input type="checkbox" id="sidebar-checkbox" style="display: none;">
-    <label id="overlay" for="sidebar-checkbox"></label>
-    <div class="sidebar-resize-handle"></div>
-    <script type="text/javascript">
-        try {
-            let sidebar = localStorage.getItem('sphinx-sidebar');
-            const sidebar_width = localStorage.getItem('sphinx-sidebar-width');
-            if (sidebar_width) {
-                document.documentElement.style.setProperty('--sidebar-width', sidebar_width);
-            }
-            // show sidebar on wide screen
-            if (!sidebar && window.matchMedia('(min-width: 100rem)').matches) {
-                sidebar = 'visible';
-                // NB: We don't store the value in localStorage!
-            }
-            if (sidebar === 'visible') {
-                document.getElementById('sidebar-checkbox').checked = true;
-            }
-        } catch(e) {
-            console.info(e);
-        }
-    </script>
-    <header id="topbar-placeholder">
-      <div id="topbar">
-        <div id="titlebar">
-          <div class="buttons">
-            <label for="sidebar-checkbox" id="sidebar-button" role="button" tabindex="0" aria-controls="sphinxsidebar" accesskey="M">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg>
-            </label>
-            <button id="search-button" type="button" title="Search" aria-label="Search" aria-expanded="false" aria-controls="search-form" accesskey="S">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
-            </button>
-          </div>
-          <div class="title">
-            <a class="parent" href="../../tutorial.html" accesskey="U">Tutorial</a>
-            <a class="top" href="#">Compute P-/S-wave travel Times</a>
-          </div>
-          <div class="buttons">
-            <button id="fullscreen-button" type="button" aria-hidden="true">
-              <span class="enable">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M212.686 315.314L120 408l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C10.697 480 0 469.255 0 456V344c0-21.382 25.803-32.09 40.922-16.971L72 360l92.686-92.686c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.249 6.248 6.249 16.378 0 22.627zm22.628-118.628L328 104l-32.922-31.029C279.958 57.851 290.666 32 312.048 32h112C437.303 32 448 42.745 448 56v112c0 21.382-25.803 32.09-40.922 16.971L376 152l-92.686 92.686c-6.248 6.248-16.379 6.248-22.627 0l-25.373-25.373c-6.249-6.248-6.249-16.378 0-22.627z"/></svg>
-              </span>
-              <span class="disable">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M4.686 427.314L104 328l-32.922-31.029C55.958 281.851 66.666 256 88.048 256h112C213.303 256 224 266.745 224 280v112c0 21.382-25.803 32.09-40.922 16.971L152 376l-99.314 99.314c-6.248 6.248-16.379 6.248-22.627 0L4.686 449.941c-6.248-6.248-6.248-16.379 0-22.627zM443.314 84.686L344 184l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C234.697 256 224 245.255 224 232V120c0-21.382 25.803-32.09 40.922-16.971L296 136l99.314-99.314c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.248 6.248 6.248 16.379 0 22.627z"/></svg>
-              </span>
-            </button>
-          </div>
-        </div>
-        <div id="searchbox" role="search">
-          <form id="search-form" class="search" style="display: none" action="../../search.html" method="get">
-            <input type="search" name="q" placeholder="Search ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-            <button>Go</button>
-          </form>
+    <link rel="prev" title="Make Network File" href="3_network_file.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../tutorial.html">Tutorial</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../general.html">Pre-requisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0_initialize_project.html">Project Initialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_download_data.html">Download Seismic Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_preprocess_data.html">Preprocess Seismic Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_network_file.html">Make Network File</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Compute P-/S-wave travel Times</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Load-station-metadata">Load station metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Read-the-velocity-model-from-Karabulut-et-al. 2011">Read the velocity model from Karabulut et al. 2011</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Build-a-3D-Grid-of-P-/S-wave-Velocities">Build a 3D Grid of P-/S-wave Velocities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Compute-the-P-/S-wave-travel-times">Compute the P-/S-wave travel times</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Store-travel-time-table-for-backprojection">Store travel time table for backprojection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Store-travel-time-tables-for-NLLoc">Store travel time tables for <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Plot-the-travel-time-field-for-a-given-station">Plot the travel time field for a given station</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Bonus:-Do-you-need-a-downsampled-grid-for-efficient-earthquake-detection-(backprojection)?">Bonus: Do you need a downsampled grid for efficient earthquake detection (backprojection)?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="5_backprojection.html">Backprojection of the Seismic Wavefield</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_relocate.html">Relocation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_magnitudes.html">Estimate the seismic moments and moment magnitudes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_build_template_database.html">Build Template Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="9_template_matching.html">Template Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
+</ul>
+
         </div>
       </div>
-    </header>
-    <nav>
-      <a href="3_network_file.html" class="nav-icon previous" title="previous:&#13;Make Network File" aria-label="Previous topic" accesskey="P" tabindex="-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M31.7 239l136-136c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9L127.9 256l96.4 96.4c9.4 9.4 9.4 24.6 0 33.9L201.7 409c-9.4 9.4-24.6 9.4-33.9 0l-136-136c-9.5-9.4-9.5-24.6-.1-34z"/></svg>
-      </a>
-      <a href="5_backprojection.html" class="nav-icon next" title="next:&#13;Backprojection of the Seismic Wavefield" aria-label="Next topic" accesskey="N" tabindex="-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"/></svg>
-      </a>
     </nav>
 
-    <nav class="relbar">
-      <a class="previous" href="3_network_file.html" aria-label="Previous topic" >
-        <div class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
-        </div>
-        <div class="title">
-          <span class="text">
-            <span class="direction">previous</span>
-            Make Network File
-          </span>
-        </div>
-      </a>
-      <a class="next" href="5_backprojection.html" aria-label="Next topic" >
-        <div class="title">
-          <span class="text">
-            <span class="direction">next</span>
-            Backprojection of the Seismic Wavefield
-          </span>
-        </div>
-        <div class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
-        </div>
-      </a>
-    </nav>  
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BPMF</a>
+      </nav>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
-
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../tutorial.html">Tutorial</a></li>
+      <li class="breadcrumb-item active">Compute P-/S-wave travel Times</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/tutorial/notebooks/4_travel_times.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
 <style>
 /* CSS for nbsphinx extension */
 
@@ -236,10 +211,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -381,9 +357,31 @@ div.rendered_html tbody tr:nth-child(odd) {
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
 </style>
 <section id="Compute-P-/S-wave-travel-Times">
-<h1>Compute P-/S-wave travel Times<a class="headerlink" href="#Compute-P-/S-wave-travel-Times" title="Permalink to this heading">¶</a></h1>
+<h1>Compute P-/S-wave travel Times<a class="headerlink" href="#Compute-P-/S-wave-travel-Times" title="Permalink to this heading"></a></h1>
 <p>In this notebook, we compute the table of P-/S-wave travel times from a 3D grid of potential source locations to every seismic station. This travel time table is necessary for backprojection and for earthquake location with <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code>.</p>
 <p>This tutorial uses the <code class="docutils literal notranslate"><span class="pre">pykonal</span></code> package to compute travel times in a given velocity model (see <code class="docutils literal notranslate"><span class="pre">pykonal</span></code> documentation at <a class="reference external" href="https://github.com/malcolmw/pykonal">https://github.com/malcolmw/pykonal</a>). Please acknowledge <a class="reference external" href="https://pubs.geoscienceworld.org/ssa/srl/article-abstract/91/4/2378/586804/PyKonal-A-Python-Package-for-Solving-the-Eikonal?redirectedFrom=fulltext">White et al. (2020)</a> if using <code class="docutils literal notranslate"><span class="pre">pykonal</span></code>.</p>
 <div class="nbinput nblast docutils container">
@@ -405,10 +403,32 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<section id="Read-the-velocity-model-from-Karabulut-et-al. 2011">
-<h2>Read the velocity model from Karabulut et al. 2011<a class="headerlink" href="#Read-the-velocity-model-from-Karabulut-et-al. 2011" title="Permalink to this heading">¶</a></h2>
+<section id="Load-station-metadata">
+<h2>Load station metadata<a class="headerlink" href="#Load-station-metadata" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">NETWORK_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;network.csv&quot;</span>
+<span class="n">TT_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;tts.h5&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read network metadata</span>
+<span class="n">net</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Network</span><span class="p">(</span><span class="n">NETWORK_FILENAME</span><span class="p">)</span>
+<span class="n">net</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Read-the-velocity-model-from-Karabulut-et-al. 2011">
+<h2>Read the velocity model from Karabulut et al. 2011<a class="headerlink" href="#Read-the-velocity-model-from-Karabulut-et-al. 2011" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># we assume that you are running this notebook from Seismic_BPMF/notebooks/ and the velocity model</span>
@@ -419,7 +439,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>We read the velocity model with <code class="docutils literal notranslate"><span class="pre">pandas</span></code>. Not all columns of the csv files are necessary for our purpose. The velocity model is a 1D layered model and the <code class="docutils literal notranslate"><span class="pre">depth</span></code> column gives the top of each layer in meters (positive downward). The <code class="docutils literal notranslate"><span class="pre">P</span></code> and <code class="docutils literal notranslate"><span class="pre">S</span></code> columns are the wave velocities in m/s.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read the velocity model with pandas</span>
@@ -434,7 +454,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -546,10 +566,10 @@ div.rendered_html tbody tr:hover {
 </div>
 </section>
 <section id="Build-a-3D-Grid-of-P-/S-wave-Velocities">
-<h2>Build a 3D Grid of P-/S-wave Velocities<a class="headerlink" href="#Build-a-3D-Grid-of-P-/S-wave-Velocities" title="Permalink to this heading">¶</a></h2>
+<h2>Build a 3D Grid of P-/S-wave Velocities<a class="headerlink" href="#Build-a-3D-Grid-of-P-/S-wave-Velocities" title="Permalink to this heading"></a></h2>
 <p>Even though the model used here is a 1D model, <code class="docutils literal notranslate"><span class="pre">pykonal</span></code> works with a 3D model. Therefore, we first need to define the velocity model on a 3D spatial grid.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define constant to go from degrees to radians</span>
@@ -558,7 +578,7 @@ div.rendered_html tbody tr:hover {
 <span class="n">LON_MIN_DEG</span> <span class="o">=</span> <span class="mf">30.20</span>
 <span class="n">LON_MAX_DEG</span> <span class="o">=</span> <span class="mf">30.45</span>
 <span class="n">LAT_MIN_DEG</span> <span class="o">=</span> <span class="mf">40.60</span>
-<span class="n">LAT_MAX_DEG</span> <span class="o">=</span> <span class="mf">40.75</span>
+<span class="n">LAT_MAX_DEG</span> <span class="o">=</span> <span class="mf">40.80</span>
 <span class="n">DEP_MIN_KM</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span>
 <span class="n">DEP_MAX_KM</span> <span class="o">=</span> <span class="mf">30.</span>
 <span class="c1"># define the grid spacing</span>
@@ -570,8 +590,24 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+<p>All stations must be located within the travel-time grid, otherwise PyKonal returns <code class="docutils literal notranslate"><span class="pre">inf</span></code> travel times for those stations that are outside the grid.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># if nothing happens here, it means that everything is alright</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">n_stations</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">longitude</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">LON_MIN_DEG</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">longitude</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">LON_MAX_DEG</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The longitude of station </span><span class="si">{</span><span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="si">}</span><span class="s2"> is outside the grid! Make your grid bigger.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">latitude</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">LAT_MIN_DEG</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">latitude</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">LAT_MAX_DEG</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The latitude of station </span><span class="si">{</span><span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="si">}</span><span class="s2"> is outside the grid! Make your grid bigger.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">depth</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">DEP_MIN_KM</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">depth</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">DEP_MAX_KM</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The depth of station </span><span class="si">{</span><span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="si">}</span><span class="s2"> is outside the grid! Make your grid bigger.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># we will be using pykonal in spherical coordinates with radial coordinates (depth) in km</span>
@@ -579,11 +615,11 @@ div.rendered_html tbody tr:hover {
 <span class="n">velocity_model</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">1000.0</span>
 <span class="n">velocity_model</span><span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">1000.0</span>
 <span class="n">velocity_model</span><span class="p">[</span><span class="s2">&quot;S&quot;</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">1000.0</span>
-<br/></pre></div>
+</pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># to expand the 1D layered velocity model onto a 3D grid,</span>
@@ -611,7 +647,7 @@ div.rendered_html tbody tr:hover {
 <p>The spherical coordinate system used by <code class="docutils literal notranslate"><span class="pre">pykonal</span></code> specifies a point position with <span class="math notranslate nohighlight">\((r, \theta, \varphi)\)</span>: - <span class="math notranslate nohighlight">\(r\)</span>: Distance from center or Earth in km (= decreasing depth). - <span class="math notranslate nohighlight">\(\theta\)</span>: Polar angle in radians (= co-latitude or, equivalently, decreasing latitude). - <span class="math notranslate nohighlight">\(\varphi\)</span>: Azimuthal angle in radians (= longitude).</p>
 <p>Thus, the 3D grid must be built such that <span class="math notranslate nohighlight">\(r\)</span>, <span class="math notranslate nohighlight">\(\theta\)</span> and <span class="math notranslate nohighlight">\(\varphi\)</span> increase with increasing index. Axis 0 is decreasing depth, axis 1 is decreasing latitude and axis 2 is increasing longitude.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># make sure the user-specified ends of the grid are included in the arange vectors</span>
@@ -638,8 +674,8 @@ div.rendered_html tbody tr:hover {
 Increasing longitudes:  [30.2  30.21 30.22 30.23 30.24 30.25 30.26 30.27 30.28 30.29 30.3  30.31
  30.32 30.33 30.34 30.35 30.36 30.37 30.38 30.39 30.4  30.41 30.42 30.43
  30.44 30.45]
-Decreasing latitudes:  [40.75 40.74 40.73 40.72 40.71 40.7  40.69 40.68 40.67 40.66 40.65 40.64
- 40.63 40.62 40.61 40.6 ]
+Decreasing latitudes:  [40.8  40.79 40.78 40.77 40.76 40.75 40.74 40.73 40.72 40.71 40.7  40.69
+ 40.68 40.67 40.66 40.65 40.64 40.63 40.62 40.61 40.6 ]
 Decreasing depths:  [30.  29.5 29.  28.5 28.  27.5 27.  26.5 26.  25.5 25.  24.5 24.  23.5
  23.  22.5 22.  21.5 21.  20.5 20.  19.5 19.  18.5 18.  17.5 17.  16.5
  16.  15.5 15.  14.5 14.  13.5 13.  12.5 12.  11.5 11.  10.5 10.   9.5
@@ -648,7 +684,7 @@ Decreasing depths:  [30.  29.5 29.  28.5 28.  27.5 27.  26.5 26.  25.5 25.  24.5
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># use the previously defined interpolators to compute the P-/S-wave velocity</span>
@@ -676,28 +712,9 @@ Decreasing depths:  [30.  29.5 29.  28.5 28.  27.5 27.  26.5 26.  25.5 25.  24.5
 <p>The 3D grid is ready! This piece of code can easily be adapted for using a 2D or 3D input velocity model. Keep in mind that, in most cases, even a 3D velocity model will have to be re-ordered to satisfy <code class="docutils literal notranslate"><span class="pre">pykonal</span></code> conventions.</p>
 </section>
 <section id="Compute-the-P-/S-wave-travel-times">
-<h2>Compute the P-/S-wave travel times<a class="headerlink" href="#Compute-the-P-/S-wave-travel-times" title="Permalink to this heading">¶</a></h2>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">NETWORK_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;network.csv&quot;</span>
-<span class="n">TT_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;tts.h5&quot;</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read network metadata</span>
-<span class="n">net</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Network</span><span class="p">(</span><span class="n">NETWORK_FILENAME</span><span class="p">)</span>
-<span class="n">net</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
+<h2>Compute the P-/S-wave travel times<a class="headerlink" href="#Compute-the-P-/S-wave-travel-times" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define the origin of our grid for pykonal</span>
@@ -722,7 +739,7 @@ Min radius: 6341 km, min co-latitude: 0.86 rad, min azimuthal angle: 0.53 rad
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># store travel times in a dictionary</span>
@@ -773,14 +790,14 @@ Min radius: 6341 km, min co-latitude: 0.86 rad, min azimuthal angle: 0.53 rad
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Computing travel times: 8it [00:08,  1.06s/it]
+Computing travel times: 8it [00:08,  1.01s/it]
 </pre></div></div>
 </div>
 </section>
 <section id="Store-travel-time-table-for-backprojection">
-<h2>Store travel time table for backprojection<a class="headerlink" href="#Store-travel-time-table-for-backprojection" title="Permalink to this heading">¶</a></h2>
+<h2>Store travel time table for backprojection<a class="headerlink" href="#Store-travel-time-table-for-backprojection" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># write travel-times in hdf5 file</span>
@@ -794,10 +811,10 @@ Computing travel times: 8it [00:08,  1.06s/it]
 </div>
 </section>
 <section id="Store-travel-time-tables-for-NLLoc">
-<h2>Store travel time tables for <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code><a class="headerlink" href="#Store-travel-time-tables-for-NLLoc" title="Permalink to this heading">¶</a></h2>
+<h2>Store travel time tables for <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code><a class="headerlink" href="#Store-travel-time-tables-for-NLLoc" title="Permalink to this heading"></a></h2>
 <p>We write the travel time tables in an adequate format for <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code> using the utility functions from <code class="docutils literal notranslate"><span class="pre">BPMF.NLLoc_utils</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># use the functions from ``</span>
@@ -827,16 +844,16 @@ The origin of the grid is: 30.2000, 40.6000, -2.000km
 Longitude spacing: 0.010deg
 Latitude spacing: 0.010deg
 Depth spacing: 0.500km
+Station DD06
+--- Phase P
+--- Phase S
 Station SAUV
 --- Phase P
 --- Phase S
-Station DE07
+Station DC06
 --- Phase P
 --- Phase S
-Station DC07
---- Phase P
---- Phase S
-Station DD06
+Station DC08
 --- Phase P
 --- Phase S
 Station SPNC
@@ -845,10 +862,10 @@ Station SPNC
 Station DE08
 --- Phase P
 --- Phase S
-Station DC08
+Station DC07
 --- Phase P
 --- Phase S
-Station DC06
+Station DE07
 --- Phase P
 --- Phase S
 Done!
@@ -856,9 +873,9 @@ Done!
 </div>
 </section>
 <section id="Plot-the-travel-time-field-for-a-given-station">
-<h2>Plot the travel time field for a given station<a class="headerlink" href="#Plot-the-travel-time-field-for-a-given-station" title="Permalink to this heading">¶</a></h2>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<h2>Plot the travel time field for a given station<a class="headerlink" href="#Plot-the-travel-time-field-for-a-given-station" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartopy</span> <span class="k">as</span> <span class="nn">ctp</span>
@@ -871,16 +888,8 @@ Done!
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-ERROR 1: PROJ: proj_create_from_database: Open of /home/ebeauce/miniconda3/envs/hy7_py310/share/proj failed
-</pre></div></div>
-</div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define map parameters</span>
@@ -1048,6 +1057,7 @@ ERROR 1: PROJ: proj_create_from_database: Open of /home/ebeauce/miniconda3/envs/
         <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="p">,</span>
         <span class="n">vmin</span><span class="o">=</span><span class="n">cnorm</span><span class="o">.</span><span class="n">vmin</span><span class="p">,</span>
         <span class="n">vmax</span><span class="o">=</span><span class="n">cnorm</span><span class="o">.</span><span class="n">vmax</span><span class="p">,</span>
+        <span class="n">rasterized</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">cs_lon</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span>
         <span class="n">source_coords</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">][</span><span class="n">slice_lon</span><span class="p">],</span>
@@ -1062,6 +1072,7 @@ ERROR 1: PROJ: proj_create_from_database: Open of /home/ebeauce/miniconda3/envs/
         <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="p">,</span>
         <span class="n">vmin</span><span class="o">=</span><span class="n">cnorm</span><span class="o">.</span><span class="n">vmin</span><span class="p">,</span>
         <span class="n">vmax</span><span class="o">=</span><span class="n">cnorm</span><span class="o">.</span><span class="n">vmax</span><span class="p">,</span>
+        <span class="n">rasterized</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">cs_lat</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span>
         <span class="n">source_coords</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">][</span><span class="n">slice_lat</span><span class="p">],</span>
@@ -1113,82 +1124,152 @@ ERROR 1: PROJ: proj_create_from_database: Open of /home/ebeauce/miniconda3/envs/
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_4_travel_times_26_0.svg" src="../../_images/tutorial_notebooks_4_travel_times_26_0.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_4_travel_times_29_0.svg" src="../../_images/tutorial_notebooks_4_travel_times_29_0.svg" /></div>
+</div>
+</section>
+<section id="Bonus:-Do-you-need-a-downsampled-grid-for-efficient-earthquake-detection-(backprojection)?">
+<h2>Bonus: Do you need a downsampled grid for efficient earthquake detection (backprojection)?<a class="headerlink" href="#Bonus:-Do-you-need-a-downsampled-grid-for-efficient-earthquake-detection-(backprojection)?" title="Permalink to this heading"></a></h2>
+<p>If you want to study a large region and computed a large grid (several millions of grid points), earthquake detection with backprojection (see next notebook) will be quite slow. In fact, you might just want to keep those grid points that have significantly different moveouts to avoid losing time in redundant computations. The following cell shows how to use <code class="docutils literal notranslate"><span class="pre">BPMF.clib.find_similar_sources</span></code> to downsample the grid in a “smart” way.</p>
+<p>!! This operation does not overwrite the original grid, which is still available for the accurate earthquake location !!</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="c1"># choose the number of threads you want to limit the computation to</span>
+<span class="n">n_CPUs</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_CPUs</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">BPMF</span>
+
+<span class="c1"># travel-time phases to read</span>
+<span class="n">PHASES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">]</span>
+<span class="c1"># minimum root-mean-square time difference, in samples, below which two grid sources are considered the same</span>
+<span class="n">MIN_TIME_DIFFERENCE_SAMP</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">MIN_TIME_DIFFERENCE_SEC</span> <span class="o">=</span> <span class="n">MIN_TIME_DIFFERENCE_SAMP</span><span class="o">/</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tts</span><span class="p">,</span> <span class="n">source_coords</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">load_travel_times</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">MOVEOUTS_PATH</span><span class="p">,</span> <span class="n">TT_FILENAME</span><span class="p">),</span>
+    <span class="n">phases</span><span class="o">=</span><span class="n">PHASES</span><span class="p">,</span>
+    <span class="n">source_indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">return_coords</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the &quot;moveouts&quot;, that is, an array of relative travel times. All travel times are expressed with respect to the earliest arrival.</span>
+<span class="c1"># The time delays between the earliest and subsequent phase arrivals are what matter in backprojection.</span>
+<span class="n">moveouts</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_moveout_array</span><span class="p">(</span><span class="n">tts</span><span class="p">,</span> <span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span> <span class="n">PHASES</span><span class="p">)</span>
+<span class="n">moveouts</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">moveouts</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We can now call <code class="docutils literal notranslate"><span class="pre">BPMF.clib.find_similar_sources</span></code> with the given threshold <code class="docutils literal notranslate"><span class="pre">MIN_TIME_DIFFERENCE_SEC</span></code>. This routine returns an array of booleans that has as many elements as there are points in the grid. The sources that are kept in the downsampled grid correspond to the <code class="docutils literal notranslate"><span class="pre">True</span></code> elements of the output array.</p>
+<p>The following cell should take very little time for the tutorial but it is not always the case for large-scale applications:</p>
+<p>!! The following cell can take a VERY long time for large grids (~24hours or more). This is a ONE TIME COMPUTATION that you probably want to run outside of this notebook when dealing with a large-scale problem. !!</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">redundant_sources</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">clib</span><span class="o">.</span><span class="n">find_similar_sources</span><span class="p">(</span><span class="n">moveouts</span><span class="p">,</span> <span class="n">MIN_TIME_DIFFERENCE_SEC</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+First (parallel) loop
+Second (serial) loop
+Progress: 0%
+Progress: 10%
+Progress: 20%
+Progress: 30%
+Progress: 40%
+Progress: 50%
+Progress: 60%
+Progress: 70%
+Progress: 80%
+Progress: 90%
+</pre></div></div>
+</div>
+<p>We obtain the indexes of the non-redundant sources:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sparse_grid_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">redundant_sources</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)[</span>
+    <span class="o">~</span><span class="n">redundant_sources</span>
+<span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;There are </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sparse_grid_indexes</span><span class="p">)</span><span class="si">}</span><span class="s2"> sources in the downsampled grid&quot;</span>
+      <span class="sa">f</span><span class="s2">&quot; vs </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">redundant_sources</span><span class="p">)</span><span class="si">}</span><span class="s2"> in the original grid.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+There are 1512 sources in the downsampled grid vs 35490 in the original grid.
+</pre></div></div>
+</div>
+<p>We need to save the grid source indexes that constitute the downsampled grid to be able to reconstruct this downsampled grid in the future. Here, we save <code class="docutils literal notranslate"><span class="pre">sparse_grid_indexes</span></code> in an <code class="docutils literal notranslate"><span class="pre">npy</span></code> file in the same folder where the travel times are.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">MOVEOUTS_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;sparse_grid_indexes_</span><span class="si">{</span><span class="n">MIN_TIME_DIFFERENCE_SEC</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">.npy&quot;</span>
+    <span class="p">),</span>
+    <span class="n">sparse_grid_indexes</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
 </div>
 </section>
 </section>
 
-            <div class="clearer"></div>
+
+           </div>
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-
-          <div class="sidebar-resize-handle"></div>
-
-<h3><a href="../../index.html">Table of Contents</a></h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../tutorial.html">Tutorial</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../general.html">Pre-requisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0_initialize_project.html">Project Initialization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1_download_data.html">Download Seismic Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2_preprocess_data.html">Preprocess Seismic Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3_network_file.html">Make Network File</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Compute P-/S-wave travel Times</a></li>
-<li class="toctree-l2"><a class="reference internal" href="5_backprojection.html">Backprojection of the Seismic Wavefield</a></li>
-<li class="toctree-l2"><a class="reference internal" href="6_build_template_database.html">Build Template Database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_template_matching.html">Template Matching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
-</ul>
-
-<hr class="docutils" />
-<ul>
-  <li class="toctree-l1"><a class="reference internal" href="../../genindex.html" accesskey="I">General Index</a></li>
-  <li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Python Module Index</a></li>
-</ul>
-<div id="ethical-ad-placement"></div>
-        </div>
-      </div>
-      <div class="clearer"></div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="3_network_file.html" class="btn btn-neutral float-left" title="Make Network File" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="5_backprojection.html" class="btn btn-neutral float-right" title="Backprojection of the Seismic Wavefield" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
-    <nav class="relbar">
-      <a class="previous" href="3_network_file.html" aria-label="Previous topic" >
-        <div class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
-        </div>
-        <div class="title">
-          <span class="text">
-            <span class="direction">previous</span>
-            Make Network File
-          </span>
-        </div>
-      </a>
-      <a class="next" href="5_backprojection.html" aria-label="Next topic" >
-        <div class="title">
-          <span class="text">
-            <span class="direction">next</span>
-            Backprojection of the Seismic Wavefield
-          </span>
-        </div>
-        <div class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
-        </div>
-      </a>
-    </nav>
+  <hr/>
 
-    <footer role="contentinfo">
-      &#169; Copyright 2022, Eric Beauce, William B. Frank.
-      Created using <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
-      <a class="reference external" href="https://insipid-sphinx-theme.readthedocs.io/">Insipid Theme</a>.
-<a class="reference internal" href="../../_sources/tutorial/notebooks/4_travel_times.ipynb.txt" rel="nofollow">Show Source</a>.
-    </footer>
-  </body>
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Eric Beauce, William B. Frank.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
 </html>

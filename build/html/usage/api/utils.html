@@ -1,134 +1,149 @@
-
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-
-    <title>BPMF.utils &#8212; BPMF 2.0.0 documentation</title>
-    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/insipid.css" />
-
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script defer src="../../_static/insipid.js"></script>
-    <script defer src="../../_static/insipid-sidebar.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BPMF.utils &mdash; BPMF 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="BPMF.NLLoc_utils" href="NLLoc_utils.html" />
-    <link rel="prev" title="BPMF.template_search" href="template_search.html" />
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-  </head><body>
-    <script type="text/javascript">
-        document.body.classList.add('js');
-    </script>
-    <input type="checkbox" id="sidebar-checkbox" style="display: none;">
-    <label id="overlay" for="sidebar-checkbox"></label>
-    <div class="sidebar-resize-handle"></div>
-    <script type="text/javascript">
-        try {
-            let sidebar = localStorage.getItem('sphinx-sidebar');
-            const sidebar_width = localStorage.getItem('sphinx-sidebar-width');
-            if (sidebar_width) {
-                document.documentElement.style.setProperty('--sidebar-width', sidebar_width);
-            }
-            // show sidebar on wide screen
-            if (!sidebar && window.matchMedia('(min-width: 100rem)').matches) {
-                sidebar = 'visible';
-                // NB: We don't store the value in localStorage!
-            }
-            if (sidebar === 'visible') {
-                document.getElementById('sidebar-checkbox').checked = true;
-            }
-        } catch(e) {
-            console.info(e);
-        }
-    </script>
-    <header id="topbar-placeholder">
-      <div id="topbar">
-        <div id="titlebar">
-          <div class="buttons">
-            <label for="sidebar-checkbox" id="sidebar-button" role="button" tabindex="0" aria-controls="sphinxsidebar" accesskey="M">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg>
-            </label>
-            <button id="search-button" type="button" title="Search" aria-label="Search" aria-expanded="false" aria-controls="search-form" accesskey="S">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
-            </button>
-          </div>
-          <div class="title">
-            <a class="parent" href="../api.html" accesskey="U">API</a>
-            <a class="top" href="#">BPMF.utils</a>
-          </div>
-          <div class="buttons">
-            <button id="fullscreen-button" type="button" aria-hidden="true">
-              <span class="enable">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M212.686 315.314L120 408l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C10.697 480 0 469.255 0 456V344c0-21.382 25.803-32.09 40.922-16.971L72 360l92.686-92.686c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.249 6.248 6.249 16.378 0 22.627zm22.628-118.628L328 104l-32.922-31.029C279.958 57.851 290.666 32 312.048 32h112C437.303 32 448 42.745 448 56v112c0 21.382-25.803 32.09-40.922 16.971L376 152l-92.686 92.686c-6.248 6.248-16.379 6.248-22.627 0l-25.373-25.373c-6.249-6.248-6.249-16.378 0-22.627z"/></svg>
-              </span>
-              <span class="disable">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M4.686 427.314L104 328l-32.922-31.029C55.958 281.851 66.666 256 88.048 256h112C213.303 256 224 266.745 224 280v112c0 21.382-25.803 32.09-40.922 16.971L152 376l-99.314 99.314c-6.248 6.248-16.379 6.248-22.627 0L4.686 449.941c-6.248-6.248-6.248-16.379 0-22.627zM443.314 84.686L344 184l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C234.697 256 224 245.255 224 232V120c0-21.382 25.803-32.09 40.922-16.971L296 136l99.314-99.314c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.248 6.248 6.248 16.379 0 22.627z"/></svg>
-              </span>
-            </button>
-          </div>
-        </div>
-        <div id="searchbox" role="search">
-          <form id="search-form" class="search" style="display: none" action="../../search.html" method="get">
-            <input type="search" name="q" placeholder="Search ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-            <button>Go</button>
-          </form>
+    <link rel="prev" title="BPMF.template_search" href="template_search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage.html">Usage</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="clib.html">BPMF.clib</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataset.html">BPMF.dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_reader_examples.html">BPMF.data_reader_examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="similarity_search.html">BPMF.similarity_search</a></li>
+<li class="toctree-l3"><a class="reference internal" href="template_search.html">BPMF.template_search</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">BPMF.utils</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.SVDWF"><code class="docutils literal notranslate"><span class="pre">SVDWF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.SVDWF_multiplets"><code class="docutils literal notranslate"><span class="pre">SVDWF_multiplets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.bandpass_filter"><code class="docutils literal notranslate"><span class="pre">bandpass_filter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.compute_distances"><code class="docutils literal notranslate"><span class="pre">compute_distances()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.donefun"><code class="docutils literal notranslate"><span class="pre">donefun()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.event_count"><code class="docutils literal notranslate"><span class="pre">event_count()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.extract_colors_from_tree"><code class="docutils literal notranslate"><span class="pre">extract_colors_from_tree()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.fetch_detection_waveforms"><code class="docutils literal notranslate"><span class="pre">fetch_detection_waveforms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.fetch_detection_waveforms_refilter"><code class="docutils literal notranslate"><span class="pre">fetch_detection_waveforms_refilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.find_template_clusters"><code class="docutils literal notranslate"><span class="pre">find_template_clusters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.get_moveout_array"><code class="docutils literal notranslate"><span class="pre">get_moveout_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.get_np_array"><code class="docutils literal notranslate"><span class="pre">get_np_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.linear_regression"><code class="docutils literal notranslate"><span class="pre">linear_regression()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.load_travel_times"><code class="docutils literal notranslate"><span class="pre">load_travel_times()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.lowpass_chebyshev_I"><code class="docutils literal notranslate"><span class="pre">lowpass_chebyshev_I()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.lowpass_chebyshev_II"><code class="docutils literal notranslate"><span class="pre">lowpass_chebyshev_II()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.max_norm"><code class="docutils literal notranslate"><span class="pre">max_norm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.preprocess_stream"><code class="docutils literal notranslate"><span class="pre">preprocess_stream()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.round_time"><code class="docutils literal notranslate"><span class="pre">round_time()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.running_mad"><code class="docutils literal notranslate"><span class="pre">running_mad()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.sec_to_samp"><code class="docutils literal notranslate"><span class="pre">sec_to_samp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.time_range"><code class="docutils literal notranslate"><span class="pre">time_range()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.two_point_distance"><code class="docutils literal notranslate"><span class="pre">two_point_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.weighted_linear_regression"><code class="docutils literal notranslate"><span class="pre">weighted_linear_regression()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="NLLoc_utils.html">BPMF.NLLoc_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plotting_utils.html">BPMF.ploting_utils</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
+</ul>
+
         </div>
       </div>
-    </header>
-    <nav>
-      <a href="template_search.html" class="nav-icon previous" title="previous:&#13;BPMF.template_search" aria-label="Previous topic" accesskey="P" tabindex="-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M31.7 239l136-136c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9L127.9 256l96.4 96.4c9.4 9.4 9.4 24.6 0 33.9L201.7 409c-9.4 9.4-24.6 9.4-33.9 0l-136-136c-9.5-9.4-9.5-24.6-.1-34z"/></svg>
-      </a>
-      <a href="NLLoc_utils.html" class="nav-icon next" title="next:&#13;BPMF.NLLoc_utils" aria-label="Next topic" accesskey="N" tabindex="-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"/></svg>
-      </a>
     </nav>
 
-    <nav class="relbar">
-      <a class="previous" href="template_search.html" aria-label="Previous topic" >
-        <div class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
-        </div>
-        <div class="title">
-          <span class="text">
-            <span class="direction">previous</span>
-            BPMF.template_search
-          </span>
-        </div>
-      </a>
-      <a class="next" href="NLLoc_utils.html" aria-label="Next topic" >
-        <div class="title">
-          <span class="text">
-            <span class="direction">next</span>
-            BPMF.NLLoc_utils
-          </span>
-        </div>
-        <div class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
-        </div>
-      </a>
-    </nav>  
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BPMF</a>
+      </nav>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage.html">Usage</a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
+      <li class="breadcrumb-item active">BPMF.utils</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/usage/api/utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
 <section id="module-BPMF.utils">
-<span id="bpmf-utils"></span><h1>BPMF.utils<a class="headerlink" href="#module-BPMF.utils" title="Permalink to this heading">¶</a></h1>
+<span id="bpmf-utils"></span><h1>BPMF.utils<a class="headerlink" href="#module-BPMF.utils" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.SVDWF">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">SVDWF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expl_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_singular_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wiener_filter_colsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.SVDWF" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">SVDWF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expl_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_singular_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wiener_filter_colsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#SVDWF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.SVDWF" title="Permalink to this definition"></a></dt>
 <dd><p>Implementation of the Singular Value Decomposition Wiener Filter (SVDWF)
 described in Moreau et al 2017.</p>
 <dl class="field-list simple">
@@ -154,7 +169,7 @@ time axis of the Wiener filter.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.SVDWF_multiplets">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">SVDWF_multiplets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_M</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'matched_filter_1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'template_db_1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_rms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_singular_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expl_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wiener_filter_colsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attach_raw_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detection_waveforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.SVDWF_multiplets" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">SVDWF_multiplets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_M</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'matched_filter_1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'template_db_1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_rms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_singular_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expl_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wiener_filter_colsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attach_raw_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detection_waveforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#SVDWF_multiplets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.SVDWF_multiplets" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -197,7 +212,7 @@ the attributes.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.bandpass_filter">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">bandpass_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_Nyq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.bandpass_filter" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">bandpass_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_Nyq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#bandpass_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.bandpass_filter" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -225,7 +240,7 @@ default value of 0.01 produces sharp windows.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.compute_distances">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">compute_distances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_longitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_latitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_depths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_longitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_latitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_depths</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.compute_distances" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">compute_distances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_longitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_latitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_depths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_longitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_latitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_depths</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#compute_distances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.compute_distances" title="Permalink to this definition"></a></dt>
 <dd><p>Fast distance computation between all source points and all receivers.</p>
 <p>Use <cite>cartopy.geodesic.Geodesic</cite> to compute pair-wise distances.</p>
 <dl class="field-list simple">
@@ -244,12 +259,18 @@ are located at the surface.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="BPMF.utils.donefun">
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">donefun</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#donefun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.donefun" title="Permalink to this definition"></a></dt>
+<dd><p>Super useful function.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.event_count">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">event_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_timings_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1D'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'end'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.event_count" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">event_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_timings_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1D'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'end'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#event_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.event_count" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>event_timings_str</strong> (<em>list of array of str</em>) – Timings of the events given as strings of characters.</p></li>
+<li><p><strong>event_timings_str</strong> (<em>list</em><em> of </em><em>array</em><em> of </em><em>str</em>) – Timings of the events given as strings of characters.</p></li>
 <li><p><strong>start_date</strong> (<em>str</em>) – Starting date of the event count time series.</p></li>
 <li><p><strong>end_date</strong> (<em>str</em>) – End date of the event count time series.</p></li>
 <li><p><strong>freq</strong> (<em>str</em><em>, </em><em>default to '1D'</em>) – Desired frequency of the event count time series.
@@ -278,7 +299,7 @@ use: event_count.values</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.extract_colors_from_tree">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">extract_colors_from_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dendogram</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_singleton</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.extract_colors_from_tree" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">extract_colors_from_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dendogram</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_singleton</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#extract_colors_from_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.extract_colors_from_tree" title="Permalink to this definition"></a></dt>
 <dd><p>Routine to build the map from cluster ids to dendogram colors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -306,32 +327,32 @@ is colored in ‘C0’.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.fetch_detection_waveforms">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">fetch_detection_waveforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_CC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_n_events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_rms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordering</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'correlation_coefficients'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_event_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catalog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.fetch_detection_waveforms" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">fetch_detection_waveforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_CC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_n_events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_rms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordering</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'correlation_coefficients'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_event_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catalog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#fetch_detection_waveforms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.fetch_detection_waveforms" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.fetch_detection_waveforms_refilter">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">fetch_detection_waveforms_refilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_CC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_n_events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_rms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_SR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integrate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'detection_time'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordering</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'correlation_coefficients'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">preprocess_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.fetch_detection_waveforms_refilter" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">fetch_detection_waveforms_refilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_CC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_n_events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_rms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_SR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integrate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'detection_time'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordering</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'correlation_coefficients'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">preprocess_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#fetch_detection_waveforms_refilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.fetch_detection_waveforms_refilter" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.find_template_clusters">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">find_template_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">TpGroup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'single'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'correlation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'distance'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clustering_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.33</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_singleton</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dimgray'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_dendogram</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.find_template_clusters" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">find_template_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">TpGroup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'single'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'correlation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'distance'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clustering_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.33</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_singleton</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dimgray'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_dendogram</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#find_template_clusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.find_template_clusters" title="Permalink to this definition"></a></dt>
 <dd><p>Find non-overlapping groups of similar templates
 with the hierarchical clustering package from scipy.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.get_moveout_array">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">get_moveout_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.get_moveout_array" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">get_moveout_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#get_moveout_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.get_moveout_array" title="Permalink to this definition"></a></dt>
 <dd><p>Format the travel times into a numpy.ndarray.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tts</strong> (<em>dictionary</em>) – Output of <cite>load_travel_times</cite>.</p></li>
-<li><p><strong>stations</strong> (<em>list of strings</em>) – List of station names. Determine the order in which travel times are
+<li><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em>) – List of station names. Determine the order in which travel times are
 written in the output array.</p></li>
-<li><p><strong>phases</strong> (<em>list of strings</em>) – List of seismic phases. Determine the order in which travel times are
+<li><p><strong>phases</strong> (<em>list</em><em> of </em><em>strings</em>) – List of seismic phases. Determine the order in which travel times are
 writtem in the output array.</p></li>
 </ul>
 </dd>
@@ -348,17 +369,17 @@ seconds.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.get_np_array">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">get_np_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['N',</span> <span class="pre">'E',</span> <span class="pre">'Z']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'HH'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'E':</span> <span class="pre">['E',</span> <span class="pre">'2'],</span> <span class="pre">'N':</span> <span class="pre">['N',</span> <span class="pre">'1'],</span> <span class="pre">'Z':</span> <span class="pre">['Z']}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.get_np_array" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">get_np_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['N',</span> <span class="pre">'E',</span> <span class="pre">'Z']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'HH'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'E':</span> <span class="pre">['E',</span> <span class="pre">'2'],</span> <span class="pre">'N':</span> <span class="pre">['N',</span> <span class="pre">'1'],</span> <span class="pre">'Z':</span> <span class="pre">['Z']}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#get_np_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.get_np_array" title="Permalink to this definition"></a></dt>
 <dd><p>Fetch data from Obspy Stream and returns an ndarray.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stream</strong> (<em>Obspy Stream instance</em>) – The Obspy Stream instance with the waveform time series.</p></li>
-<li><p><strong>stations</strong> (<em>List of strings</em>) – Names of the stations to include in the output array. Define the order
+<li><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em>) – Names of the stations to include in the output array. Define the order
 of the station axis.</p></li>
-<li><p><strong>components</strong> (<em>List of strings</em><em>, </em><em>default to</em><em> [</em><em>'N'</em><em>,</em><em>'E'</em><em>,</em><em>'Z'</em><em>]</em>) – Names of the components to include in the output array. Define the order
+<li><p><strong>components</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to</em><em> [</em><em>'N'</em><em>,</em><em>'E'</em><em>,</em><em>'Z'</em><em>]</em>) – Names of the components to include in the output array. Define the order
 of the component axis.</p></li>
-<li><p><strong>component_aliases</strong> (<em>Dictionary</em><em>, </em><em>optional</em>) – Sometimes, components might be named differently than N, E, Z. This
+<li><p><strong>component_aliases</strong> (<em>dictionary</em><em>, </em><em>optional</em>) – Sometimes, components might be named differently than N, E, Z. This
 dictionary tells the function which alternative component names can be
 associated with each “canonical” component. For example,
 <cite>component_aliases[‘N’] = [‘N’, ‘1’]</cite> means that the function will also
@@ -382,7 +403,7 @@ the length of the first trace.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.linear_regression">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">linear_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.linear_regression" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">linear_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#linear_regression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.linear_regression" title="Permalink to this definition"></a></dt>
 <dd><p>cf. <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -402,15 +423,16 @@ the fit</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.load_travel_times">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">load_travel_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_indexes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.load_travel_times" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">load_travel_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_indexes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#load_travel_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.load_travel_times" title="Permalink to this definition"></a></dt>
 <dd><p>Load the travel times from <cite>path</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>string</em>) – Path to the file with the travel times.</p></li>
-<li><p><strong>phases</strong> (<em>list of strings</em>) – List of the seismic phases to load.</p></li>
+<li><p><strong>phases</strong> (<em>list</em><em> of </em><em>strings</em>) – List of the seismic phases to load.</p></li>
 <li><p><strong>source_indexes</strong> (<em>(</em><em>n_sources</em><em>,</em><em>) </em><em>int numpy.ndarray</em><em>, </em><em>default to None</em>) – If not None, this is used to select a subset of sources from the grid.</p></li>
 <li><p><strong>return_coords</strong> (<em>boolean</em><em>, </em><em>default to False</em>) – If True, also return the source coordinates.</p></li>
+<li><p><strong>stations</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>default to None</em>) – If not None, only read the travel times for stations in <cite>stations</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -428,27 +450,58 @@ three (n_sources,) numpy.ndarray: <cite>source_coords[‘latitude’]</cite>,
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.lowpass_chebyshev_I">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">lowpass_chebyshev_I</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_ripple</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.lowpass_chebyshev_I" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">lowpass_chebyshev_I</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_ripple</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#lowpass_chebyshev_I"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.lowpass_chebyshev_I" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.lowpass_chebyshev_II">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">lowpass_chebyshev_II</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_attenuation_dB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.lowpass_chebyshev_II" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">lowpass_chebyshev_II</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_attenuation_dB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#lowpass_chebyshev_II"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.lowpass_chebyshev_II" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.max_norm">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">max_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.max_norm" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">max_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#max_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.max_norm" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.preprocess_stream">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">preprocess_stream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_SR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_response</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_sensitivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_resp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_starttime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_endtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'VEL'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.preprocess_stream" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">preprocess_stream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_SR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_response</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_sensitivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_resp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_starttime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_endtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_chunk_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SR_decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'VEL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#preprocess_stream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.preprocess_stream" title="Permalink to this definition"></a></dt>
+<dd><p>Preprocesses a stream of seismic data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stream</strong> (<em>obspy.Stream</em>) – A stream of seismic data.</p></li>
+<li><p><strong>freqmin</strong> (<em>float</em><em>, </em><em>optional</em>) – The minimum frequency to bandpass filter the data.</p></li>
+<li><p><strong>freqmax</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum frequency to bandpass filter the data.</p></li>
+<li><p><strong>target_SR</strong> (<em>float</em><em>, </em><em>optional</em>) – The target sampling rate of the data.</p></li>
+<li><p><strong>remove_response</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to remove instrument response from the data.</p></li>
+<li><p><strong>remove_sensitivity</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to remove instrument sensitivity from the data.</p></li>
+<li><p><strong>plot_resp</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to plot the instrument response of the data.</p></li>
+<li><p><strong>target_duration</strong> (<em>float</em><em>, </em><em>optional</em>) – The target duration of the data.</p></li>
+<li><p><strong>target_starttime</strong> (<em>obspy.UTCDateTime</em><em>, </em><em>optional</em>) – The start time of the target data.</p></li>
+<li><p><strong>target_endtime</strong> (<em>obspy.UTCDateTime</em><em>, </em><em>optional</em>) – The end time of the target data.</p></li>
+<li><p><strong>minimum_length</strong> (<em>float</em><em>, </em><em>optional</em>) – The minimum length of the data as a fraction of the target duration.</p></li>
+<li><p><strong>minimum_chunk_duration</strong> (<em>float</em><em>, </em><em>optional</em>) – The minimum duration of each data chunk.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to print verbose output during processing.</p></li>
+<li><p><strong>SR_decimals</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of decimals to round sampling rate values to.</p></li>
+<li><p><strong>decimation_method</strong> (<em>str</em><em>, </em><em>optional</em>) – The method used for decimation.</p></li>
+<li><p><strong>unit</strong> (<em>str</em><em>, </em><em>optional</em>) – The unit of the data.</p></li>
+<li><p><strong>n_threads</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of threads over which preprocesing is parallelized.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Other keyword arguments to pass to the function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A preprocessed stream of seismic data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>obspy.Stream</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.round_time">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">round_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.round_time" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">round_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#round_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.round_time" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -470,18 +523,18 @@ round the time.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.running_mad">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">running_mad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_mad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.running_mad" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">running_mad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_mad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#running_mad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.running_mad" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.sec_to_samp">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">sec_to_samp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.sec_to_samp" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">sec_to_samp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#sec_to_samp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.sec_to_samp" title="Permalink to this definition"></a></dt>
 <dd><p>Convert seconds to samples taking into account rounding errors.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.time_range">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">time_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ms'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'ms':</span> <span class="pre">1000.0,</span> <span class="pre">'ns':</span> <span class="pre">1000000000.0,</span> <span class="pre">'us':</span> <span class="pre">1000000.0}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.time_range" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">time_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ms'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'ms':</span> <span class="pre">1000.0,</span> <span class="pre">'ns':</span> <span class="pre">1000000000.0,</span> <span class="pre">'us':</span> <span class="pre">1000000.0}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#time_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.time_range" title="Permalink to this definition"></a></dt>
 <dd><p>Compute a range of datetime64.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -504,7 +557,7 @@ round the time.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.two_point_distance">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">two_point_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.two_point_distance" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">two_point_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#two_point_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.two_point_distance" title="Permalink to this definition"></a></dt>
 <dd><p>Compute the distance between two points.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -528,7 +581,7 @@ round the time.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.weighted_linear_regression">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">weighted_linear_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BPMF.utils.weighted_linear_regression" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">weighted_linear_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#weighted_linear_regression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.weighted_linear_regression" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -550,68 +603,35 @@ round the time.</p></li>
 
 </section>
 
-            <div class="clearer"></div>
+
+           </div>
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-
-          <div class="sidebar-resize-handle"></div>
-
-<h3><a href="../../index.html">Table of Contents</a></h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../usage.html">Usage</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../api.html">API</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
-</ul>
-
-<hr class="docutils" />
-<ul>
-  <li class="toctree-l1"><a class="reference internal" href="../../genindex.html" accesskey="I">General Index</a></li>
-  <li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Python Module Index</a></li>
-</ul>
-<div id="ethical-ad-placement"></div>
-        </div>
-      </div>
-      <div class="clearer"></div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="template_search.html" class="btn btn-neutral float-left" title="BPMF.template_search" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="NLLoc_utils.html" class="btn btn-neutral float-right" title="BPMF.NLLoc_utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
-    <nav class="relbar">
-      <a class="previous" href="template_search.html" aria-label="Previous topic" >
-        <div class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
-        </div>
-        <div class="title">
-          <span class="text">
-            <span class="direction">previous</span>
-            BPMF.template_search
-          </span>
-        </div>
-      </a>
-      <a class="next" href="NLLoc_utils.html" aria-label="Next topic" >
-        <div class="title">
-          <span class="text">
-            <span class="direction">next</span>
-            BPMF.NLLoc_utils
-          </span>
-        </div>
-        <div class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
-        </div>
-      </a>
-    </nav>
+  <hr/>
 
-    <footer role="contentinfo">
-      &#169; Copyright 2022, Eric Beauce, William B. Frank.
-      Created using <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
-      <a class="reference external" href="https://insipid-sphinx-theme.readthedocs.io/">Insipid Theme</a>.
-<a class="reference internal" href="../../_sources/usage/api/utils.rst.txt" rel="nofollow">Show Source</a>.
-    </footer>
-  </body>
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Eric Beauce, William B. Frank.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
 </html>

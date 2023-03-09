@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BPMF.template_search &mdash; BPMF 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BPMF</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">BPMF.template_search</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for BPMF.template_search</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">cfg</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">clib</span><span class="p">,</span> <span class="n">utils</span><span class="p">,</span> <span class="n">dataset</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">beampower</span> <span class="k">as</span> <span class="nn">bp</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">median_abs_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">median_absolute_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
+<span class="c1"># from scipy.stats import median_abs_deviation as scimad</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage.filters</span> <span class="kn">import</span> <span class="n">gaussian_filter1d</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">hilbert</span>
+
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span> <span class="k">as</span> <span class="n">give_time</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">isnan</span>
+
+<span class="kn">from</span> <span class="nn">obspy.core</span> <span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">udt</span>
+
+
+<div class="viewcode-block" id="Beamformer"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer">[docs]</a><span class="k">class</span> <span class="nc">Beamformer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for backprojecting waveform features with beamforming.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">travel_times</span><span class="p">,</span>
+        <span class="n">source_coordinates</span><span class="p">,</span>
+        <span class="n">sampling_rate</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">network</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">phases</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">remove_tt_min</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the essential attributes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        tt_filename: string, default to &#39;tts.h5&#39;</span>
+<span class="sd">            Name of the hdf5 file with travel-times.</span>
+<span class="sd">        path_tts: string, default to `cfg.MOVEOUTS_PATH`</span>
+<span class="sd">            Path to the directory with the travel-time files.</span>
+<span class="sd">        phases: list, default to [&#39;P&#39;, &#39;S&#39;]</span>
+<span class="sd">            List of seismic phases used in the computation of the network</span>
+<span class="sd">            response.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span> <span class="o">=</span> <span class="n">travel_times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">],</span>
+                    <span class="n">sr</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span> <span class="o">=</span> <span class="n">source_coordinates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_sources</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phases</span> <span class="o">=</span> <span class="n">phases</span>
+        <span class="k">if</span> <span class="n">remove_tt_min</span><span class="p">:</span>
+            <span class="c1"># find min travel-time for each source</span>
+            <span class="n">tts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">[</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">index</span>
+                    <span class="p">]</span>
+                    <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span>
+                <span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">tt_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">tts</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span> <span class="o">-=</span> <span class="n">tt_min</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_stations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;network&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to call set_network first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">n_stations</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_phases</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;phases&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to call set_phases first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">moveouts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span> <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span>
+            <span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;network&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to call set_network first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">stations</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_likelihood</span><span class="p">(</span><span class="n">beam_volume</span><span class="p">):</span>
+        <span class="n">likelihood</span> <span class="o">=</span> <span class="p">(</span><span class="n">beam_volume</span> <span class="o">-</span> <span class="n">beam_volume</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="n">beam_volume</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">beam_volume</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="c1"># likelihood is not meant to be outside [0, 1] beside numerical</span>
+        <span class="c1"># imprecisions</span>
+        <span class="n">likelihood</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">likelihood</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">likelihood</span>
+
+<div class="viewcode-block" id="Beamformer.backproject"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.backproject">[docs]</a>    <span class="k">def</span> <span class="nf">backproject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">waveform_features</span><span class="p">,</span> <span class="n">reduce</span><span class="o">=</span><span class="s2">&quot;max&quot;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Backproject the waveform features.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        --------------</span>
+<span class="sd">        waveform_features: (n_stations, n_components, n_samples) numpy.ndarray</span>
+<span class="sd">            Features of the waveform time series used for the</span>
+<span class="sd">            backprojection onto the grid of theoretical sources.</span>
+<span class="sd">        device: string, default to &#39;cpu&#39;</span>
+<span class="sd">            Either &#39;cpu&#39; or &#39;gpu&#39;, depending on the available hardware and</span>
+<span class="sd">            user&#39;s preferences.</span>
+<span class="sd">        reduce: string, default to &#39;max&#39;</span>
+<span class="sd">            Either &#39;max&#39; or &#39;none&#39;. If &#39;max&#39;, returns the maximum beam at every</span>
+<span class="sd">            time. If &#39;none&#39;, returns the full space-time beam.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;weights_phases&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to set self.weights_phases first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;weights_sources&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to set self.weights_sources first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">reduce</span> <span class="o">==</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maxbeam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxbeam_sources</span> <span class="o">=</span> <span class="n">bp</span><span class="o">.</span><span class="n">beampower</span><span class="o">.</span><span class="n">beamform</span><span class="p">(</span>
+                <span class="n">waveform_features</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">moveouts</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weights_phases</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weights_sources</span><span class="p">,</span>
+                <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+                <span class="n">reduce</span><span class="o">=</span><span class="n">reduce</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">reduce</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beam</span> <span class="o">=</span> <span class="n">bp</span><span class="o">.</span><span class="n">beampower</span><span class="o">.</span><span class="n">beamform</span><span class="p">(</span>
+                <span class="n">waveform_features</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">moveouts</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weights_phases</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weights_sources</span><span class="p">,</span>
+                <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+                <span class="n">reduce</span><span class="o">=</span><span class="n">reduce</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;reduce&#39; should be &#39;max&#39; or &#39;none&#39; but </span><span class="si">{</span><span class="n">reduce</span><span class="si">}</span><span class="s2"> was given.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beam</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Beamformer.find_detections"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.find_detections">[docs]</a>    <span class="k">def</span> <span class="nf">find_detections</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">detection_threshold</span><span class="p">,</span> <span class="n">minimum_interevent_time</span><span class="p">,</span> <span class="n">n_max_stations</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Analyze the composite network response to find detections.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        detection_threshold: scalar or (n_samples,) numpy.ndarray, float</span>
+<span class="sd">            The number of running MADs taken above the running median</span>
+<span class="sd">            to define detections.</span>
+<span class="sd">        minimum_interevent_time: scalar, float</span>
+<span class="sd">            The shortest duration, in seconds, allowed between two</span>
+<span class="sd">            consecutive detections.</span>
+<span class="sd">        n_max_stations: integer, default to None</span>
+<span class="sd">            If not None and if smaller than the total number of stations in the</span>
+<span class="sd">            network, only extract the `n_max_stations` closest stations for</span>
+<span class="sd">            each theoretical source.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -----------</span>
+<span class="sd">        detections: dictionary,</span>
+<span class="sd">            Dictionary with data and metadata of the detected earthquakes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">Stream</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">detection_threshold</span> <span class="o">=</span> <span class="n">detection_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimum_interevent_time</span> <span class="o">=</span> <span class="n">minimum_interevent_time</span>
+        <span class="n">sr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sr</span>
+        <span class="n">minimum_interevent_time</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span><span class="n">minimum_interevent_time</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">sr</span><span class="p">)</span>
+
+        <span class="c1"># select peaks</span>
+        <span class="n">peak_indexes</span> <span class="o">=</span> <span class="n">_detect_peaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxbeam</span><span class="p">,</span> <span class="n">mpd</span><span class="o">=</span><span class="n">minimum_interevent_time</span><span class="p">)</span>
+        <span class="c1"># only keep peaks above detection threshold</span>
+        <span class="n">peak_indexes</span> <span class="o">=</span> <span class="n">peak_indexes</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maxbeam</span><span class="p">[</span><span class="n">peak_indexes</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">detection_threshold</span><span class="p">[</span><span class="n">peak_indexes</span><span class="p">]</span>
+        <span class="p">]</span>
+
+        <span class="c1"># keep the largest peak for grouped detection</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_indexes</span><span class="p">)):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+                    <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">peak_indexes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">minimum_interevent_time</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                    <span class="nb">min</span><span class="p">(</span>
+                        <span class="n">peak_indexes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">minimum_interevent_time</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxbeam</span><span class="p">)</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">idx_to_update</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">peak_indexes</span> <span class="o">==</span> <span class="n">peak_indexes</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">peak_indexes</span><span class="p">[</span><span class="n">idx_to_update</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxbeam</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span> <span class="o">+</span> <span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">peak_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">peak_indexes</span><span class="p">)</span>
+
+        <span class="n">peak_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">peak_indexes</span><span class="p">)</span>
+        <span class="n">source_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxbeam_sources</span><span class="p">[</span><span class="n">peak_indexes</span><span class="p">]</span>
+
+        <span class="c1"># extract waveforms</span>
+        <span class="n">detections</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">data_path</span><span class="p">,</span> <span class="n">data_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">where</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_indexes</span><span class="p">)):</span>
+            <span class="n">src_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">source_indexes</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="n">event</span> <span class="o">=</span> <span class="n">Stream</span><span class="p">()</span>
+            <span class="n">ot_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">date</span> <span class="o">+</span> <span class="n">peak_indexes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">sr</span>
+            <span class="n">mv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moveouts</span><span class="p">[</span><span class="n">source_indexes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">/</span> <span class="n">sr</span>
+            <span class="k">if</span> <span class="n">n_max_stations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># use moveouts as a proxy for distance</span>
+                <span class="c1"># keep only the n_max_stations closest stations</span>
+                <span class="n">mv_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">mv</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])[</span><span class="n">n_max_stations</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mv_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+            <span class="n">stations_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">stations</span><span class="p">)[</span><span class="n">mv</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">mv_max</span><span class="p">]</span>
+            <span class="n">latitude</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">src_idx</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">]</span>
+            <span class="n">longitude</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">src_idx</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">src_idx</span><span class="p">,</span> <span class="s2">&quot;depth&quot;</span><span class="p">]</span>
+            <span class="n">event</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">Event</span><span class="p">(</span>
+                <span class="n">ot_i</span><span class="p">,</span>
+                <span class="n">mv</span><span class="p">,</span>
+                <span class="n">stations_in</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">,</span>
+                <span class="n">data_filename</span><span class="p">,</span>
+                <span class="n">data_path</span><span class="p">,</span>
+                <span class="n">latitude</span><span class="o">=</span><span class="n">latitude</span><span class="p">,</span>
+                <span class="n">longitude</span><span class="o">=</span><span class="n">longitude</span><span class="p">,</span>
+                <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span>
+                <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sr</span><span class="p">,</span>
+                <span class="n">data_reader</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">data_reader</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">aux_data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;maxbeam&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxbeam</span><span class="p">[</span><span class="n">peak_indexes</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;source_index&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">src_idx</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">set_aux_data</span><span class="p">(</span><span class="n">aux_data</span><span class="p">)</span>
+            <span class="n">detections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">detections</span><span class="p">)</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2"> events.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">peak_indexes</span> <span class="o">=</span> <span class="n">peak_indexes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_indexes</span> <span class="o">=</span> <span class="n">source_indexes</span>
+        <span class="k">return</span> <span class="n">detections</span><span class="p">,</span> <span class="n">peak_indexes</span><span class="p">,</span> <span class="n">source_indexes</span></div>
+
+<div class="viewcode-block" id="Beamformer.remove_baseline"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.remove_baseline">[docs]</a>    <span class="k">def</span> <span class="nf">remove_baseline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;composite&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove baseline from network response.&quot;&quot;&quot;</span>
+        <span class="c1"># convert window from seconds to samples</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">window</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
+        <span class="n">attr_baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_baseline</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">),</span> <span class="n">window</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span> <span class="o">-</span> <span class="n">attr_baseline</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Beamformer.return_pd_series"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.return_pd_series">[docs]</a>    <span class="k">def</span> <span class="nf">return_pd_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;maxbeam&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the network response as a Pandas.Series.&quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+        <span class="n">time_series</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
+        <span class="n">indexes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span>
+            <span class="n">start</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">starttime</span><span class="p">),</span>
+            <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">S&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sr</span><span class="p">),</span>
+            <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">time_series</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">pd_attr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">time_series</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">indexes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd_attr</span></div>
+
+<div class="viewcode-block" id="Beamformer.smooth_maxbeam"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.smooth_maxbeam">[docs]</a>    <span class="k">def</span> <span class="nf">smooth_maxbeam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Smooth the network response with a gaussian kernel.&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">scipy.ndimage.filters</span> <span class="kn">import</span> <span class="n">gaussian_filter1d</span>
+
+        <span class="c1"># convert window from seconds to samples</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">window</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smoothed</span> <span class="o">=</span> <span class="n">gaussian_filter1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composite</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Beamformer.set_data"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_data">[docs]</a>    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Attribute `data` to the class instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data: `dataset.Data`</span>
+<span class="sd">            Instance of `dataset.Data`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">starttime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">date</span></div>
+
+<div class="viewcode-block" id="Beamformer.set_moveouts"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_moveouts">[docs]</a>    <span class="k">def</span> <span class="nf">set_moveouts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">moveouts</span><span class="p">,</span> <span class="n">stations</span><span class="p">,</span> <span class="n">phases</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Attribute `_moveouts` to the class instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        moveouts: (n_sources, n_stations, n_phases) numpy.ndarray</span>
+<span class="sd">            The moveouts to use for backprojection.</span>
+<span class="sd">        stations: (n_stations,) list or numpy.ndarray of strings</span>
+<span class="sd">            Station names corresponding with the second axis of `moveouts`.</span>
+<span class="sd">        phases: (n_phases,) list or numpy.ndarray of strings</span>
+<span class="sd">            Phase names corresponing with the third axis of `moveouts`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moveouts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">stations</span><span class="p">,</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">phases</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stations</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">phases</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_moveouts</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span> <span class="o">=</span> <span class="n">moveouts</span><span class="p">[:,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Beamformer.set_network"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_network">[docs]</a>    <span class="k">def</span> <span class="nf">set_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Attribute `network` to the class instance.</span>
+
+<span class="sd">        `network` determines which stations are included in the computation</span>
+<span class="sd">        of the beams. All arrays with a station axis are ordered according to</span>
+<span class="sd">        `network.stations`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        network: dataset.Network instance</span>
+<span class="sd">            The Network instance with the station network information.</span>
+<span class="sd">            `network` can force the network response to be computed only on</span>
+<span class="sd">            a subset of the data stored in `data`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span></div>
+
+<div class="viewcode-block" id="Beamformer.set_source_coordinates"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_source_coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">set_source_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_coords</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Attribute `_source_coordinates` to the class instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ------------</span>
+<span class="sd">        source_coords: dictionary</span>
+<span class="sd">            Dictionary with 3 fields: &#39;latitude&#39;, &#39;longitude&#39; and &#39;depth&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_source_coordinates</span> <span class="o">=</span> <span class="n">source_coords</span></div>
+
+<div class="viewcode-block" id="Beamformer.set_weights"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_weights">[docs]</a>    <span class="k">def</span> <span class="nf">set_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights_phases</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights_sources</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the weights required by `beampower`.</span>
+
+<span class="sd">        weights_phases: (n_stations, n_channels, n_phases) np.ndarray, optional</span>
+<span class="sd">            Weight given to each station and channel for a given phase. For</span>
+<span class="sd">            example, horizontal components might be given a small or zero</span>
+<span class="sd">            weight for the P-wave stacking.</span>
+<span class="sd">        weights_sources: (n_sources, n_stations) np.ndarray, optional</span>
+<span class="sd">            Source-receiver-specific weights. For example, based on the</span>
+<span class="sd">            source-receiver distance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">weights_phases</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weights_phases</span> <span class="o">=</span> <span class="n">weights_phases</span>
+        <span class="k">if</span> <span class="n">weights_sources</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weights_sources</span> <span class="o">=</span> <span class="n">weights_sources</span></div>
+
+<div class="viewcode-block" id="Beamformer.set_weights_sources"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_weights_sources">[docs]</a>    <span class="k">def</span> <span class="nf">set_weights_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_max_stations</span><span class="p">,</span> <span class="n">n_min_stations</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set network-geometry-based weights of each source-receiver pair.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ------------</span>
+<span class="sd">        n_max_stations: scalar, int</span>
+<span class="sd">            Maximum number of stations used at each theoretical source. Only</span>
+<span class="sd">            the `n_max_stations` stations will be set a weight &gt; 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">weights_sources</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_sources</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_stations</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">set_availability</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">)</span>
+        <span class="n">operational_stations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">availability_per_sta</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">mv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moveouts</span><span class="p">[:,</span> <span class="n">operational_stations</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">n_max_stations</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">mv</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">n_max_stations</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">n_max_stations</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_stations</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">n_max_stations</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">cutoff_mv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="n">mv</span><span class="p">,</span> <span class="n">n_max_stations</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">n_max_stations</span><span class="p">],</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">weights_sources</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">moveouts</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">cutoff_mv</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">if</span> <span class="n">n_min_stations</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">n_stations_per_source</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_sources</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">weights_sources</span><span class="p">[</span><span class="n">n_stations_per_source</span> <span class="o">&lt;</span> <span class="n">n_min_stations</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights_sources</span> <span class="o">=</span> <span class="n">weights_sources</span></div>
+
+<div class="viewcode-block" id="Beamformer.weights_station_density"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.weights_station_density">[docs]</a>    <span class="k">def</span> <span class="nf">weights_station_density</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">cutoff_dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lower_percentile</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upper_percentile</span><span class="o">=</span><span class="mf">100.0</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute station weights to balance station density.</span>
+
+<span class="sd">        Areas of high station density produce stronger network responses than</span>
+<span class="sd">        areas with sparse coverage, and thus might prevent detecting earthquakes</span>
+<span class="sd">        where stations are scarcer.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        cutoff_dist: scalar float, default to None</span>
+<span class="sd">            All station pairs (i,j) are attributed a number from a gaussian</span>
+<span class="sd">            distribution with standard deviation `cutoff_dist`, in km. The</span>
+<span class="sd">            weight of station i is: `w_i = 1/(sum_j(exp(-D_ij**2/cutoff_dist**2)))`.</span>
+<span class="sd">            If None, `cutoff_dist` is set to the median interstation distance.</span>
+<span class="sd">        lower_percentile: scalar float, default to 0</span>
+<span class="sd">            If `lower_percentile &gt; 0`, the weights are clipped above the</span>
+<span class="sd">            `lower_percentile`-th percentile.</span>
+<span class="sd">        upper_percentile: scalar float, default to 100</span>
+<span class="sd">            If `upper_percentile &lt; 100`, the weights are clipped below the</span>
+<span class="sd">            `upper_percentile`-th percentile.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        weights_sta_density: (n_stations,) `numpy.ndarray`</span>
+<span class="sd">            The station density weights.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">cutoff_dist</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cutoff_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">interstation_distances</span><span class="o">.</span><span class="n">values</span><span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">interstation_distances</span><span class="o">.</span><span class="n">values</span> <span class="o">!=</span> <span class="mf">0.0</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="n">weights_sta_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">n_stations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">stations</span><span class="p">):</span>
+            <span class="n">dist_sj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">interstation_distances</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">]</span>
+            <span class="n">weights_sta_density</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">dist_sj</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">cutoff_dist</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">lower_percentile</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">weights_sta_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                <span class="n">weights_sta_density</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">weights_sta_density</span><span class="p">,</span> <span class="n">lower_percentile</span><span class="p">),</span>
+                <span class="n">weights_sta_density</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">upper_percentile</span> <span class="o">&lt;</span> <span class="mf">100.0</span><span class="p">:</span>
+            <span class="n">weights_sta_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                <span class="n">weights_sta_density</span><span class="p">,</span>
+                <span class="n">weights_sta_density</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">weights_sta_density</span><span class="p">,</span> <span class="n">upper_percentile</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">weights_sta_density</span></div>
+
+    <span class="k">def</span> <span class="nf">_baseline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute a baseline.</span>
+
+<span class="sd">        The baseline is a curve connecting the local minima. Removing the</span>
+<span class="sd">        baseline is equivalent to some kind of low-pass filtering.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_windows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="n">window</span><span class="p">))</span>
+        <span class="n">minima</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_windows</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">minima_args</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_windows</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_windows</span><span class="p">):</span>
+            <span class="n">minima_args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">window</span> <span class="o">+</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">window</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">window</span><span class="p">]</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+            <span class="n">minima</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">minima_args</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="c1"># ----------------------------------------</span>
+        <span class="c1"># --------- build interpolation ----------</span>
+        <span class="n">interpolator</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span>
+            <span class="n">minima_args</span><span class="p">,</span> <span class="n">minima</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="s2">&quot;extrapolate&quot;</span>
+        <span class="p">)</span>
+        <span class="n">bline</span> <span class="o">=</span> <span class="n">interpolator</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">bline</span>
+
+    <span class="c1"># -------------------------------------------</span>
+    <span class="c1">#       Plotting methods</span>
+    <span class="c1"># -------------------------------------------</span>
+<div class="viewcode-block" id="Beamformer.plot_maxbeam"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.plot_maxbeam">[docs]</a>    <span class="k">def</span> <span class="nf">plot_maxbeam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the composite network response.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        ax: plt.Axes, default to None</span>
+<span class="sd">            If not None, plot in this axis.</span>
+<span class="sd">        detection: dataset.Event, default to None</span>
+<span class="sd">            A dataset.Event instance of a given detection.</span>
+<span class="sd">        figsize: tuple, default to (20, 7)</span>
+<span class="sd">            Width and height of the figure, in inches.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        --------</span>
+<span class="sd">        fig: plt.Figure</span>
+<span class="sd">            The Figure instance produced by this method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.dates</span> <span class="k">as</span> <span class="nn">mdates</span>
+
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># plot the maximum beam</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span>
+                    <span class="s2">&quot;maximum_beam&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;figsize&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+                    <span class="p">)</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxbeam</span><span class="p">,</span> <span class="n">rasterized</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;rasterized&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;detection_threshold&quot;</span><span class="p">):</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">detection_threshold</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">,</span>
+                <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Detection Threshold&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">peak_indexes</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">maxbeam</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">peak_indexes</span><span class="p">],</span>
+                <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+                <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time of the day&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Maximum Beam&quot;</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s2">&quot;%H:%M&quot;</span><span class="p">))</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">detection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">detection</span><span class="o">.</span><span class="n">origin_time</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+                <span class="s2">&quot;detection&quot;</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">ot</span><span class="p">,</span> <span class="n">detection</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;maxbeam&quot;</span><span class="p">]),</span>
+                <span class="p">(</span>
+                    <span class="n">ot</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">),</span>
+                    <span class="nb">min</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">detection</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;maxbeam&quot;</span><span class="p">]),</span>
+                <span class="p">),</span>
+                <span class="n">arrowprops</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;headwidth&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;k&quot;</span><span class="p">},</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+<div class="viewcode-block" id="Beamformer.plot_detection"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.plot_detection">[docs]</a>    <span class="k">def</span> <span class="nf">plot_detection</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">detection</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+        <span class="n">component_aliases</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">],</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">],</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">]},</span>
+        <span class="n">n_stations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot a detection and the maximum beam.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        detection: dataset.Event</span>
+<span class="sd">            A dataset.Event instance of a given detection.</span>
+<span class="sd">        figsize: tuple, default to (20, 20)</span>
+<span class="sd">            Widht and height of the figure, in inches.</span>
+<span class="sd">        component_aliases: Dictionary, optional</span>
+<span class="sd">            Sometimes, components might be named differently than N, E, Z. This</span>
+<span class="sd">            dictionary tells the function which alternative component names can be</span>
+<span class="sd">            associated with each &quot;canonical&quot; component. For example,</span>
+<span class="sd">            `component_aliases[&#39;N&#39;] = [&#39;N&#39;, &#39;1&#39;]` means that the function will also</span>
+<span class="sd">            check the &#39;1&#39; component in case the &#39;N&#39; component doesn&#39;t exist.</span>
+<span class="sd">        n_stations: scalar int or None, default to None</span>
+<span class="sd">            If not None, is the number of stations to plot. The closest</span>
+<span class="sd">            stations will be plotted.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fig: plt.Figure</span>
+<span class="sd">            The Figure instance produced by this method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.dates</span> <span class="k">as</span> <span class="nn">mdates</span>
+
+        <span class="k">if</span> <span class="n">n_stations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">stations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">stations</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stations</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">detection</span><span class="o">.</span><span class="n">moveouts</span><span class="p">[</span><span class="n">detection</span><span class="o">.</span><span class="n">moveouts</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="o">.</span><span class="n">sort_values</span><span class="p">()[:</span><span class="n">n_stations</span><span class="p">]</span>
+                <span class="o">.</span><span class="n">index</span>
+            <span class="p">)</span>
+
+        <span class="n">sr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sr</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;detection_</span><span class="si">{</span><span class="n">detection</span><span class="o">.</span><span class="n">origin_time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_gridspec</span><span class="p">(</span>
+            <span class="n">nrows</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">stations</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">components</span><span class="p">),</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.35</span>
+        <span class="p">)</span>
+        <span class="n">start_times</span><span class="p">,</span> <span class="n">end_times</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">wav_axes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ax_maxbeam</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_maxbeam</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax_maxbeam</span><span class="p">,</span> <span class="n">detection</span><span class="o">=</span><span class="n">detection</span><span class="p">)</span>
+        <span class="n">ax_maxbeam</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">detection</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;maxbeam&quot;</span><span class="p">])</span>
+        <span class="n">beam</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stations</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">cp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">components</span><span class="p">):</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">2</span> <span class="o">+</span> <span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">cp_alias</span> <span class="ow">in</span> <span class="n">component_aliases</span><span class="p">[</span><span class="n">cp</span><span class="p">]:</span>
+                    <span class="n">tr</span> <span class="o">=</span> <span class="n">detection</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">station</span><span class="o">=</span><span class="n">sta</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">cp_alias</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="c1"># succesfully retrieved data</span>
+                        <span class="k">break</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">tr</span> <span class="o">=</span> <span class="n">tr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">time_range</span><span class="p">(</span>
+                    <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="p">,</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">endtime</span> <span class="o">+</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">sr</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">sr</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;ms&quot;</span>
+                <span class="p">)</span>
+                <span class="n">start_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">end_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">time</span><span class="p">[:</span> <span class="n">detection</span><span class="o">.</span><span class="n">n_samples</span><span class="p">],</span>
+                    <span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="p">[:</span> <span class="n">detection</span><span class="o">.</span><span class="n">n_samples</span><span class="p">],</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="c1"># plot the theoretical pick</span>
+                <span class="n">phase</span> <span class="o">=</span> <span class="n">detection</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;phase_on_comp</span><span class="si">{</span><span class="n">cp_alias</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="n">offset_ph</span> <span class="o">=</span> <span class="n">detection</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;offset_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span>
+                    <span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">1000.0</span> <span class="o">*</span> <span class="n">offset_ph</span><span class="p">),</span> <span class="s2">&quot;ms&quot;</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span>
+                <span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sta</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">cp_alias</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
+                <span class="n">wav_axes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">wav_axes</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">start_times</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">end_times</span><span class="p">))</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span>
+                <span class="n">mdates</span><span class="o">.</span><span class="n">ConciseDateFormatter</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_major_locator</span><span class="p">())</span>
+            <span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mf">0.06</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+<div class="viewcode-block" id="Beamformer.plot_likelihood"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.plot_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">plot_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">likelihood</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot likelihood (beam) slices at a given time.&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">cartopy.crs</span> <span class="kn">import</span> <span class="n">PlateCarree</span>
+        <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">Normalize</span>
+        <span class="kn">from</span> <span class="nn">matplotlib.cm</span> <span class="kn">import</span> <span class="n">ScalarMappable</span>
+        <span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
+
+        <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">plotting_utils</span>
+
+        <span class="k">if</span> <span class="n">time_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">src_idx</span><span class="p">,</span> <span class="n">time_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">argmax</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">likelihood</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">likelihood</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="p">[:,</span> <span class="n">time_index</span><span class="p">])</span>
+        <span class="c1"># define slices</span>
+        <span class="n">longitude</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">src_idx</span><span class="p">]</span>
+        <span class="n">latitude</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">src_idx</span><span class="p">]</span>
+        <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">src_idx</span><span class="p">]</span>
+        <span class="n">hor_slice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">depth</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">lon_slice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">latitude</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">lat_slice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">longitude</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># initialize map</span>
+        <span class="n">data_coords</span> <span class="o">=</span> <span class="n">PlateCarree</span><span class="p">()</span>
+        <span class="n">lat_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">hor_slice</span><span class="p">])</span>
+        <span class="n">lat_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">hor_slice</span><span class="p">])</span>
+        <span class="n">lon_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">hor_slice</span><span class="p">])</span>
+        <span class="n">lon_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">hor_slice</span><span class="p">])</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plotting_utils</span><span class="o">.</span><span class="n">initialize_map</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">lon_min</span><span class="p">,</span> <span class="n">lon_max</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">lat_min</span><span class="p">,</span> <span class="n">lat_max</span><span class="p">],</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+        <span class="n">mappable</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">tricontourf</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">hor_slice</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">hor_slice</span><span class="p">],</span>
+            <span class="n">likelihood</span><span class="p">[</span><span class="n">hor_slice</span><span class="p">],</span>
+            <span class="n">levels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;inferno&quot;</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">data_coords</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;v&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+            <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">data_coords</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=-</span><span class="mf">1.5</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># add slices</span>
+        <span class="n">divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+        <span class="n">ax_lon</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;50%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">axes_class</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">)</span>
+        <span class="n">ax_lat</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;50%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">axes_class</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">)</span>
+        <span class="n">projected_coords</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">transform_points</span><span class="p">(</span>
+            <span class="n">data_coords</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">lon_slice</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">lon_slice</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">ax_lon</span><span class="o">.</span><span class="n">tricontourf</span><span class="p">(</span>
+            <span class="n">projected_coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">lon_slice</span><span class="p">],</span>
+            <span class="n">likelihood</span><span class="p">[</span><span class="n">lon_slice</span><span class="p">],</span>
+            <span class="n">levels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;inferno&quot;</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">ax_lon</span><span class="o">.</span><span class="n">get_xticklabels</span><span class="p">(),</span> <span class="n">visible</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ax_lon</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+        <span class="n">ax_lon</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Depth (km)&quot;</span><span class="p">)</span>
+        <span class="n">projected_coords</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">transform_points</span><span class="p">(</span>
+            <span class="n">data_coords</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">lat_slice</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">lat_slice</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">ax_lat</span><span class="o">.</span><span class="n">tricontourf</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">lat_slice</span><span class="p">],</span>
+            <span class="n">projected_coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="n">likelihood</span><span class="p">[</span><span class="n">lat_slice</span><span class="p">],</span>
+            <span class="n">levels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;inferno&quot;</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">ax_lat</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">(),</span> <span class="n">visible</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ax_lat</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Depth (km)&quot;</span><span class="p">)</span>
+        <span class="n">cax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;3%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">axes_class</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span>
+            <span class="n">mappable</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Location Likelihood&quot;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span>
+        <span class="p">)</span>
+        <span class="n">cax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s2">&quot;top&quot;</span><span class="p">)</span>
+        <span class="n">cax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">tick_top</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+    <span class="k">def</span> <span class="nf">_rectangular_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lon0</span><span class="p">,</span> <span class="n">lat0</span><span class="p">,</span> <span class="n">side_km</span><span class="o">=</span><span class="mf">100.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a boolean array indicating which points in a given grid are inside</span>
+<span class="sd">        a rectangular domain centered at the given longitude and latitude.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lon0 : float</span>
+<span class="sd">            Longitude of the center of the domain, in degrees.</span>
+<span class="sd">        lat0 : float</span>
+<span class="sd">            Latitude of the center of the domain, in degrees.</span>
+<span class="sd">        side_km : float, optional</span>
+<span class="sd">            Length of the sides of the rectangular domain, in kilometers.</span>
+<span class="sd">            Default is 100km.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        selection : ndarray</span>
+<span class="sd">            1-D boolean array indicating which grid points are inside the domain.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This function uses the Haversine formula to compute the distances between</span>
+<span class="sd">        the center of the domain and each grid point. It assumes a spherical Earth</span>
+<span class="sd">        of radius 6371.0 km.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">R_earth_km</span> <span class="o">=</span> <span class="mf">6371.0</span>  <span class="c1"># km</span>
+        <span class="n">colat0</span> <span class="o">=</span> <span class="mf">90.0</span> <span class="o">-</span> <span class="n">lat0</span>
+        <span class="n">Rlat</span> <span class="o">=</span> <span class="n">R_earth_km</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">colat0</span><span class="p">))</span>
+        <span class="n">dist_per_lat</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">360.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">Rlat</span>
+        <span class="n">dist_per_lon</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">360.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">R_earth_km</span>
+        <span class="n">longitudes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">latitudes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">selection</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">longitudes</span> <span class="o">-</span> <span class="n">lon0</span><span class="p">)</span> <span class="o">*</span> <span class="n">dist_per_lon</span> <span class="o">&lt;</span> <span class="n">side_km</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">latitudes</span> <span class="o">-</span> <span class="n">lat0</span><span class="p">)</span> <span class="o">*</span> <span class="n">dist_per_lat</span> <span class="o">&lt;</span> <span class="n">side_km</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">selection</span>
+
+    <span class="k">def</span> <span class="nf">_compute_location_uncertainty</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">event_longitude</span><span class="p">,</span> <span class="n">event_latitude</span><span class="p">,</span> <span class="n">event_depth</span><span class="p">,</span> <span class="n">likelihood</span><span class="p">,</span> <span class="n">domain</span>
+            <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the horizontal and vertical uncertainties of an event location.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event_longitude : float</span>
+<span class="sd">            The longitude, in decimal system, of the event located with the</span>
+<span class="sd">            present Beamformer instance.</span>
+<span class="sd">        event_latitude : float</span>
+<span class="sd">            The latitude, in decimal system, of the event located with the</span>
+<span class="sd">            present Beamformer instance.</span>
+<span class="sd">        event_depth : float</span>
+<span class="sd">            The depth, in km, of the event located with the present</span>
+<span class="sd">            Beamformer instance.</span>
+<span class="sd">        likelihood : ndarray</span>
+<span class="sd">            A 1D numpy array containing the likelihood of each source location in</span>
+<span class="sd">            the beamformer domain.</span>
+<span class="sd">        domain : ndarray</span>
+<span class="sd">            A 1D numpy array containing the indices of the beamformer domain.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple</span>
+<span class="sd">            A tuple of two floats representing the horizontal and vertical</span>
+<span class="sd">            uncertainties of the event location in km, respectively.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The horizontal uncertainty is computed as the weighted average of the</span>
+<span class="sd">        distance from each source in the domain to the event location, with the</span>
+<span class="sd">        weight being the likelihood of each source. The vertical uncertainty is</span>
+<span class="sd">        computed as the weighted average of the absolute depth difference between</span>
+<span class="sd">        each source in the domain and the event depth, with the weight being the</span>
+<span class="sd">        likelihood of each source. The distance is calculated using the Geodesic</span>
+<span class="sd">        library from the Cartopy package.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">cartopy.geodesic</span> <span class="kn">import</span> <span class="n">Geodesic</span>
+        <span class="c1"># initialize the Geodesic instance</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="p">()</span>
+        <span class="n">epi_distances</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">event_longitude</span><span class="p">,</span> <span class="n">event_latitude</span><span class="p">]),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">domain</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">domain</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">pointwise_distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">epi_distances</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="o">/</span> <span class="mf">1000.0</span>
+
+        <span class="c1"># horizontal uncertainty</span>
+        <span class="n">hunc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">likelihood</span><span class="p">[</span><span class="n">domain</span><span class="p">]</span><span class="o">*</span><span class="n">pointwise_distances</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">likelihood</span><span class="p">[</span><span class="n">domain</span><span class="p">])</span>
+
+        <span class="c1"># vertical uncertainty</span>
+        <span class="n">depth_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">event_depth</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">domain</span><span class="p">])</span>
+        <span class="n">vunc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">likelihood</span><span class="p">[</span><span class="n">domain</span><span class="p">]</span><span class="o">*</span><span class="n">depth_diff</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">likelihood</span><span class="p">[</span><span class="n">domain</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">hunc</span><span class="p">,</span> <span class="n">vunc</span></div>
+
+<span class="k">def</span> <span class="nf">_detect_peaks</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="n">mph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mpd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">edge</span><span class="o">=</span><span class="s2">&quot;rising&quot;</span><span class="p">,</span>
+    <span class="n">kpsh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">valley</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect peaks in data based on their amplitude and other features.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : 1D array_like</span>
+<span class="sd">        data.</span>
+<span class="sd">    mph : {None, number}, optional (default = None)</span>
+<span class="sd">        detect peaks that are greater than minimum peak height.</span>
+<span class="sd">    mpd : positive integer, optional (default = 1)</span>
+<span class="sd">        detect peaks that are at least separated by minimum peak distance (in</span>
+<span class="sd">        number of data).</span>
+<span class="sd">    threshold : positive number, optional (default = 0)</span>
+<span class="sd">        detect peaks (valleys) that are greater (smaller) than `threshold`</span>
+<span class="sd">        in relation to their immediate neighbors.</span>
+<span class="sd">    edge : {None, &#39;rising&#39;, &#39;falling&#39;, &#39;both&#39;}, optional (default = &#39;rising&#39;)</span>
+<span class="sd">        for a flat peak, keep only the rising edge (&#39;rising&#39;), only the</span>
+<span class="sd">        falling edge (&#39;falling&#39;), both edges (&#39;both&#39;), or don&#39;t detect a</span>
+<span class="sd">        flat peak (None).</span>
+<span class="sd">    kpsh : bool, optional (default = False)</span>
+<span class="sd">        keep peaks with same height even if they are closer than `mpd`.</span>
+<span class="sd">    valley : bool, optional (default = False)</span>
+<span class="sd">        if True (1), detect valleys (local minima) instead of peaks.</span>
+<span class="sd">    show : bool, optional (default = False)</span>
+<span class="sd">        if True (1), plot data in matplotlib figure.</span>
+<span class="sd">    ax : a matplotlib.axes.Axes instance, optional (default = None).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ind : 1D array_like</span>
+<span class="sd">        indeces of the peaks in `x`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The detection of valleys instead of peaks is performed internally by simply</span>
+<span class="sd">    negating the data: `ind_valleys = detect_peaks(-x)`</span>
+
+<span class="sd">    The function can handle NaN&#39;s</span>
+
+<span class="sd">    See this IPython Notebook [1]_.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1]:http://nbviewer.ipython.org/github/demotu/BMC/blob/master/</span>
+<span class="sd">        notebooks/DetectPeaks.ipynb</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from detect_peaks import detect_peaks</span>
+<span class="sd">    &gt;&gt;&gt; x = np.random.randn(100)</span>
+<span class="sd">    &gt;&gt;&gt; x[60:81] = np.nan</span>
+<span class="sd">    &gt;&gt;&gt; # detect all peaks and plot data</span>
+<span class="sd">    &gt;&gt;&gt; ind = detect_peaks(x, show=True)</span>
+<span class="sd">    &gt;&gt;&gt; print(ind)</span>
+
+<span class="sd">    &gt;&gt;&gt; x = np.sin(2*np.pi*5*np.linspace(0, 1, 200)) + np.random.randn(200)/5</span>
+<span class="sd">    &gt;&gt;&gt; # set minimum peak height = 0 and minimum peak distance = 20</span>
+<span class="sd">    &gt;&gt;&gt; detect_peaks(x, mph=0, mpd=20, show=True)</span>
+
+<span class="sd">    &gt;&gt;&gt; x = [0, 1, 0, 2, 0, 3, 0, 2, 0, 1, 0]</span>
+<span class="sd">    &gt;&gt;&gt; # set minimum peak distance = 2</span>
+<span class="sd">    &gt;&gt;&gt; detect_peaks(x, mpd=2, show=True)</span>
+
+<span class="sd">    &gt;&gt;&gt; x = np.sin(2*np.pi*5*np.linspace(0, 1, 200)) + np.random.randn(200)/5</span>
+<span class="sd">    &gt;&gt;&gt; # detection of valleys instead of peaks</span>
+<span class="sd">    &gt;&gt;&gt; detect_peaks(x, mph=0, mpd=20, valley=True, show=True)</span>
+
+<span class="sd">    &gt;&gt;&gt; x = [0, 1, 1, 0, 1, 1, 0]</span>
+<span class="sd">    &gt;&gt;&gt; # detect both edges</span>
+<span class="sd">    &gt;&gt;&gt; detect_peaks(x, edge=&#39;both&#39;, show=True)</span>
+
+<span class="sd">    &gt;&gt;&gt; x = [-2, 1, -2, 2, 1, 1, 3, 0]</span>
+<span class="sd">    &gt;&gt;&gt; # set threshold = 2</span>
+<span class="sd">    &gt;&gt;&gt; detect_peaks(x, threshold = 2, show=True)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">valley</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span>
+    <span class="c1"># find indices of all peaks</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># handle NaN&#39;s</span>
+    <span class="n">indnan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">indnan</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="n">x</span><span class="p">[</span><span class="n">indnan</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="n">dx</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">dx</span><span class="p">))[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="n">ine</span><span class="p">,</span> <span class="n">ire</span><span class="p">,</span> <span class="n">ife</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[],</span> <span class="p">[],</span> <span class="p">[]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">edge</span><span class="p">:</span>
+        <span class="n">ine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">dx</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;rising&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+            <span class="n">ire</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">dx</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;falling&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+            <span class="n">ife</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">dx</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">ine</span><span class="p">,</span> <span class="n">ire</span><span class="p">,</span> <span class="n">ife</span><span class="p">)))</span>
+    <span class="c1"># handle NaN&#39;s</span>
+    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">indnan</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="c1"># NaN&#39;s and values close to NaN&#39;s cannot be peaks</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span>
+                <span class="n">ind</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">indnan</span><span class="p">,</span> <span class="n">indnan</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">indnan</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))),</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+    <span class="c1"># first and last values of x cannot be peaks</span>
+    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">ind</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># remove peaks &lt; minimum peak height</span>
+    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">mph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">mph</span><span class="p">]</span>
+    <span class="c1"># remove peaks - neighbors &lt; threshold</span>
+    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">threshold</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dx</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># detect small peaks closer than minimum peak distance</span>
+    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">mpd</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">])][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># sort ind by peak height</span>
+        <span class="n">idel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">idel</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="c1"># keep peaks with the same height if kpsh is True</span>
+                <span class="n">idel</span> <span class="o">=</span> <span class="n">idel</span> <span class="o">|</span> <span class="p">(</span><span class="n">ind</span> <span class="o">&gt;=</span> <span class="n">ind</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">mpd</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ind</span> <span class="o">&lt;=</span> <span class="n">ind</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">mpd</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span>
+                    <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">kpsh</span> <span class="k">else</span> <span class="kc">True</span>
+                <span class="p">)</span>
+                <span class="n">idel</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Keep current peak</span>
+        <span class="c1"># remove the small peaks and sort back the indices by their occurrence</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">ind</span><span class="p">[</span><span class="o">~</span><span class="n">idel</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">indnan</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">indnan</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">if</span> <span class="n">valley</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span>
+        <span class="n">_plot_peaks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mph</span><span class="p">,</span> <span class="n">mpd</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">valley</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ind</span>
+
+
+<span class="k">def</span> <span class="nf">_plot_peaks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mph</span><span class="p">,</span> <span class="n">mpd</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">valley</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot results of the detect_peaks function, see its help.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;matplotlib is not available.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;valley&quot;</span> <span class="k">if</span> <span class="n">valley</span> <span class="k">else</span> <span class="s2">&quot;peak&quot;</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;s&quot;</span> <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">label</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">ind</span><span class="p">,</span>
+                <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                <span class="s2">&quot;+&quot;</span><span class="p">,</span>
+                <span class="n">mfc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">mec</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+                <span class="n">mew</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">ms</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:d}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">label</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="n">framealpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">numpoints</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.02</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span> <span class="mf">1.02</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">yrange</span> <span class="o">=</span> <span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span> <span class="k">if</span> <span class="n">ymax</span> <span class="o">&gt;</span> <span class="n">ymin</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ymin</span> <span class="o">-</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">yrange</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">yrange</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Data #&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Amplitude&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;Valley detection&quot;</span> <span class="k">if</span> <span class="n">valley</span> <span class="k">else</span> <span class="s2">&quot;Peak detection&quot;</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> (mph=</span><span class="si">{}</span><span class="s2">, mpd=</span><span class="si">{:d}</span><span class="s2">, threshold=</span><span class="si">{}</span><span class="s2">, edge=&#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">mode</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">mph</span><span class="p">),</span> <span class="n">mpd</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">threshold</span><span class="p">),</span> <span class="n">edge</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># plt.grid()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="baseline"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.baseline">[docs]</a><span class="k">def</span> <span class="nf">baseline</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="n">n_windows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="n">w</span><span class="p">))</span>
+    <span class="n">minima</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_windows</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">minima_args</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_windows</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_windows</span><span class="p">):</span>
+        <span class="n">minima_args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">w</span> <span class="o">+</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">w</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+        <span class="n">minima</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">minima_args</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+    <span class="c1"># ----------------------------------------</span>
+    <span class="c1"># --------- build interpolation ----------</span>
+    <span class="n">interpolator</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span>
+        <span class="n">minima_args</span><span class="p">,</span> <span class="n">minima</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="s2">&quot;extrapolate&quot;</span>
+    <span class="p">)</span>
+    <span class="n">bline</span> <span class="o">=</span> <span class="n">interpolator</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">bline</span></div>
+
+
+<div class="viewcode-block" id="time_dependent_threshold"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.time_dependent_threshold">[docs]</a><span class="k">def</span> <span class="nf">time_dependent_threshold</span><span class="p">(</span>
+    <span class="n">network_response</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">CNR_threshold</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">N_DEV_BP_THRESHOLD</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute a time-dependent detection threshold.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    network_response: (n_samples,) numpy.ndarray, float</span>
+<span class="sd">        Composite network response on which we calculate</span>
+<span class="sd">        the detection threshold.</span>
+<span class="sd">    window: scalar, integer</span>
+<span class="sd">        Length of the sliding window, in samples, over</span>
+<span class="sd">        which we calculate the running statistics used</span>
+<span class="sd">        in the detection threshold.</span>
+<span class="sd">    overlap: scalar, float, default to 0.75</span>
+<span class="sd">        Ratio of overlap between two contiguous windows.</span>
+<span class="sd">    CNR_threshold: scalar, float, default to 10</span>
+<span class="sd">        Number of running MADs above running median that</span>
+<span class="sd">        defines the detection threshold.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    detection_threshold: (n_samples,) numpy.ndarray</span>
+<span class="sd">        Detection threshold on the network response.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">median_abs_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">median_absolute_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
+    <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+
+    <span class="c1"># calculate n_windows given window</span>
+    <span class="c1"># and overlap</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">*</span> <span class="n">window</span><span class="p">)</span>
+    <span class="n">n_windows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">network_response</span><span class="p">)</span> <span class="o">-</span> <span class="n">window</span><span class="p">)</span> <span class="o">//</span> <span class="n">shift</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">mad_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_windows</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">med_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_windows</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_windows</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_windows</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">i1</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">shift</span>
+        <span class="n">i2</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">network_response</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">i1</span> <span class="o">+</span> <span class="n">window</span><span class="p">)</span>
+        <span class="n">maxbeam_window</span> <span class="o">=</span> <span class="n">network_response</span><span class="p">[</span><span class="n">i1</span><span class="p">:</span><span class="n">i2</span><span class="p">]</span>
+        <span class="c1"># non_zero = maxbeam_window != 0</span>
+        <span class="c1"># if sum(non_zero) &lt; 3:</span>
+        <span class="c1">#    # won&#39;t be possible to calculate median</span>
+        <span class="c1">#    # and mad on that few samples</span>
+        <span class="c1">#    continue</span>
+        <span class="c1"># med_[i] = np.median(maxbeam_window[non_zero])</span>
+        <span class="c1"># mad_[i] = scimad(maxbeam_window[non_zero])</span>
+        <span class="n">med_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">maxbeam_window</span><span class="p">)</span>
+        <span class="n">mad_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">scimad</span><span class="p">(</span><span class="n">maxbeam_window</span><span class="p">)</span>
+        <span class="n">time</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">i1</span> <span class="o">+</span> <span class="n">i2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="c1"># add boundary cases manually</span>
+    <span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">mad_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">mad_</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">med_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">med_</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">network_response</span><span class="p">)</span>
+    <span class="n">mad_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">mad_</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">med_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">med_</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">med_</span> <span class="o">+</span> <span class="n">CNR_threshold</span> <span class="o">*</span> <span class="n">mad_</span>
+    <span class="n">interpolator</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span>
+        <span class="n">time</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="p">,</span>
+        <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;slinear&quot;</span><span class="p">,</span>
+        <span class="n">fill_value</span><span class="o">=</span><span class="p">(</span><span class="n">threshold</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">threshold</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">full_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">network_response</span><span class="p">))</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">interpolator</span><span class="p">(</span><span class="n">full_time</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">threshold</span></div>
+
+
+<div class="viewcode-block" id="time_dependent_threshold_pd"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.time_dependent_threshold_pd">[docs]</a><span class="k">def</span> <span class="nf">time_dependent_threshold_pd</span><span class="p">(</span><span class="n">network_response</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate a time dependent detection threshold</span>
+<span class="sd">    using the rolling function from pandas.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    network_response: numpy array,</span>
+<span class="sd">        Composite network response on which we calculate</span>
+<span class="sd">        the detection threshold.</span>
+<span class="sd">    window: scalar, integer</span>
+<span class="sd">        Length of the sliding window, in samples, over</span>
+<span class="sd">        which we calculate the running statistics used</span>
+<span class="sd">        in the detection threshold.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    detection_threshold: numpy array,</span>
+<span class="sd">        Detection threshold that will serve to select</span>
+<span class="sd">        the well backprojected events.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">network_response_pd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">network_response</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">network_response_pd</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
+    <span class="c1"># get running median and running mad</span>
+    <span class="n">run_med</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">run_mad</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">scimad</span><span class="p">)</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># combine these into a detection threshold</span>
+    <span class="n">detection_threshold</span> <span class="o">=</span> <span class="n">run_med</span> <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">N_DEV_BP_THRESHOLD</span> <span class="o">*</span> <span class="n">run_mad</span>
+    <span class="k">return</span> <span class="n">detection_threshold</span><span class="o">.</span><span class="n">values</span></div>
+
+
+<span class="c1"># ---------------------------------------------------------------</span>
+<span class="c1">#                      Detection traces</span>
+<span class="c1"># ---------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="saturated_envelopes"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.saturated_envelopes">[docs]</a><span class="k">def</span> <span class="nf">saturated_envelopes</span><span class="p">(</span><span class="n">traces</span><span class="p">,</span> <span class="n">anomaly_threshold</span><span class="o">=</span><span class="mf">1.0e-11</span><span class="p">,</span> <span class="n">max_dynamic_range</span><span class="o">=</span><span class="mf">1.0e5</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the saturated envelopes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ------------</span>
+<span class="sd">    traces: (n_stations, n_components, n_samples) numpy.ndarray</span>
+<span class="sd">        Input waveform time series.</span>
+<span class="sd">    anomaly_threshold: scalar, float, default to 1e-11</span>
+<span class="sd">        Scalar threshold below which the MAD is suspicious. It should be a very</span>
+<span class="sd">        small number if you are working on physical unit seismograms.</span>
+<span class="sd">    max_dynamic_range: scalar, float, default to 1e5</span>
+<span class="sd">        Higher cutoff on the standardized envelopes. This mitigates the</span>
+<span class="sd">        contamination of the network response by transient, undesired high</span>
+<span class="sd">        energy signals such as spikes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_stations</span><span class="p">,</span> <span class="n">n_components</span><span class="p">,</span> <span class="n">n_samples</span> <span class="o">=</span> <span class="n">traces</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">tstart</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
+    <span class="n">waveform_features</span> <span class="o">=</span> <span class="n">envelope_parallel</span><span class="p">(</span>
+        <span class="n">traces</span>
+    <span class="p">)</span>  <span class="c1"># take the upper envelope of the traces</span>
+    <span class="n">tend</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Computed the envelopes in </span><span class="si">{</span><span class="n">tend</span><span class="o">-</span><span class="n">tstart</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">sec.&quot;</span><span class="p">)</span>
+    <span class="n">data_availability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_stations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_stations</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_components</span><span class="p">):</span>
+            <span class="n">missing_samples</span> <span class="o">=</span> <span class="n">waveform_features</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="p">:]</span> <span class="o">==</span> <span class="mf">0.0</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">missing_samples</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">waveform_features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="c1"># too many samples are missing, don&#39;t use this trace</span>
+                <span class="c1"># do not increment data_availability</span>
+                <span class="n">waveform_features</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="k">continue</span>
+            <span class="n">median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">waveform_features</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="o">~</span><span class="n">missing_samples</span><span class="p">])</span>
+            <span class="n">mad</span> <span class="o">=</span> <span class="n">scimad</span><span class="p">(</span><span class="n">waveform_features</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="o">~</span><span class="n">missing_samples</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">mad</span> <span class="o">&lt;</span> <span class="n">anomaly_threshold</span><span class="p">:</span>
+                <span class="n">waveform_features</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="k">continue</span>
+            <span class="n">waveform_features</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">waveform_features</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">median</span><span class="p">)</span> <span class="o">/</span> <span class="n">mad</span>
+            <span class="n">waveform_features</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">missing_samples</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="c1"># saturate traces</span>
+            <span class="n">waveform_features</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                <span class="n">waveform_features</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="p">:],</span>
+                <span class="n">waveform_features</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="p">:],</span>
+                <span class="n">max_dynamic_range</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">data_availability</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">waveform_features</span><span class="p">,</span> <span class="n">data_availability</span></div>
+
+
+<div class="viewcode-block" id="envelope_parallel"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.envelope_parallel">[docs]</a><span class="k">def</span> <span class="nf">envelope_parallel</span><span class="p">(</span><span class="n">traces</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the envelope of traces.</span>
+
+<span class="sd">    The envelope is defined as the modulus of the complex</span>
+<span class="sd">    analytical signal (a signal whose Fourier transform only has</span>
+<span class="sd">    energy in positive frequencies).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -------------</span>
+<span class="sd">    traces: (n_stations, n_channels, n_samples) numpy.ndarray, float</span>
+<span class="sd">        The input time series.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------------</span>
+<span class="sd">    envelopes: (n_stations, n_channels, n_samples) numpy.ndarray, float</span>
+<span class="sd">        The moduli of the analytical signal of the input traces.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">concurrent.futures</span>
+
+    <span class="n">traces_reshaped</span> <span class="o">=</span> <span class="n">traces</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">traces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">with</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ProcessPoolExecutor</span><span class="p">()</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+        <span class="n">envelopes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">envelope</span><span class="p">,</span> <span class="n">traces_reshaped</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">envelopes</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">traces</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="envelope"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.envelope">[docs]</a><span class="k">def</span> <span class="nf">envelope</span><span class="p">(</span><span class="n">trace</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the envelope of trace.</span>
+
+<span class="sd">    The envelope is defined as the modulus of the complex</span>
+<span class="sd">    analytical signal (a signal whose Fourier transform only has</span>
+<span class="sd">    energy in positive frequencies).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -------------</span>
+<span class="sd">    trace: (n_samples) numpy.ndarray, float</span>
+<span class="sd">        The input time series.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------------</span>
+<span class="sd">    envelope: (n_samples) numpy.ndarray, float</span>
+<span class="sd">        The modulus of the analytical signal of the input traces.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">hilbert</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">hilbert</span><span class="p">(</span><span class="n">trace</span><span class="p">)))</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Eric Beauce, William B. Frank.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

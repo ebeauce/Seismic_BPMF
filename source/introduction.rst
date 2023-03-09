@@ -11,6 +11,14 @@ Fully automated workflow for earthquake detection and location with the backproj
 
     $ git clone https://github.com/ebeauce/Seismic_BPMF.git
 
+Reference
+---------
+
+Please, refer one of the following articles if you use BPMF for your research:
+
+  - Eric Beaucé, Robert D. van der Hilst, Michel Campillo. Microseismic Constraints on the Mechanical State of the North Anatolian Fault Zone 13 Years After the 1999 M7.4 Izmit Earthquake. *Journal of Geophysical Research: Solid Earth*. DOI: `https://doi.org/10.1029/2022JB024416 <https://doi.org/10.1029/2022JB024416>`_.
+  - Eric Beaucé, William B. Frank, Anne Paul, Michel Campillo and Robert D. van der Hilst. Systematic Detection of Clustered Seismicity Beneath the Southwestern Alps. *Journal of Geophysical Research: Solid Earth*. DOI: `https://doi.org/10.1029/2019JB018110 <https://doi.org/10.1029/2019JB018110>`_.
+
 Installation
 -------------
 
@@ -41,4 +49,3 @@ or simply:
 .. code-block:: console
 
     $ pip install git+https://github.com/ebeauce/Seismic_BPMF
-

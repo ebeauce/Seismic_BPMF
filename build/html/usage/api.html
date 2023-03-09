@@ -1,208 +1,411 @@
-
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-
-    <title>API &#8212; BPMF 2.0.0 documentation</title>
-    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/insipid.css" />
-
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script defer src="../_static/insipid.js"></script>
-    <script defer src="../_static/insipid-sidebar.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API &mdash; BPMF 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="BPMF.clib" href="api/clib.html" />
-    <link rel="prev" title="Usage" href="../usage.html" />
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-  </head><body>
-    <script type="text/javascript">
-        document.body.classList.add('js');
-    </script>
-    <input type="checkbox" id="sidebar-checkbox" style="display: none;">
-    <label id="overlay" for="sidebar-checkbox"></label>
-    <div class="sidebar-resize-handle"></div>
-    <script type="text/javascript">
-        try {
-            let sidebar = localStorage.getItem('sphinx-sidebar');
-            const sidebar_width = localStorage.getItem('sphinx-sidebar-width');
-            if (sidebar_width) {
-                document.documentElement.style.setProperty('--sidebar-width', sidebar_width);
-            }
-            // show sidebar on wide screen
-            if (!sidebar && window.matchMedia('(min-width: 100rem)').matches) {
-                sidebar = 'visible';
-                // NB: We don't store the value in localStorage!
-            }
-            if (sidebar === 'visible') {
-                document.getElementById('sidebar-checkbox').checked = true;
-            }
-        } catch(e) {
-            console.info(e);
-        }
-    </script>
-    <header id="topbar-placeholder">
-      <div id="topbar">
-        <div id="titlebar">
-          <div class="buttons">
-            <label for="sidebar-checkbox" id="sidebar-button" role="button" tabindex="0" aria-controls="sphinxsidebar" accesskey="M">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg>
-            </label>
-            <button id="search-button" type="button" title="Search" aria-label="Search" aria-expanded="false" aria-controls="search-form" accesskey="S">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
-            </button>
-          </div>
-          <div class="title">
-            <a class="parent" href="../usage.html" accesskey="U">Usage</a>
-            <a class="top" href="#">API</a>
-          </div>
-          <div class="buttons">
-            <button id="fullscreen-button" type="button" aria-hidden="true">
-              <span class="enable">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M212.686 315.314L120 408l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C10.697 480 0 469.255 0 456V344c0-21.382 25.803-32.09 40.922-16.971L72 360l92.686-92.686c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.249 6.248 6.249 16.378 0 22.627zm22.628-118.628L328 104l-32.922-31.029C279.958 57.851 290.666 32 312.048 32h112C437.303 32 448 42.745 448 56v112c0 21.382-25.803 32.09-40.922 16.971L376 152l-92.686 92.686c-6.248 6.248-16.379 6.248-22.627 0l-25.373-25.373c-6.249-6.248-6.249-16.378 0-22.627z"/></svg>
-              </span>
-              <span class="disable">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M4.686 427.314L104 328l-32.922-31.029C55.958 281.851 66.666 256 88.048 256h112C213.303 256 224 266.745 224 280v112c0 21.382-25.803 32.09-40.922 16.971L152 376l-99.314 99.314c-6.248 6.248-16.379 6.248-22.627 0L4.686 449.941c-6.248-6.248-6.248-16.379 0-22.627zM443.314 84.686L344 184l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C234.697 256 224 245.255 224 232V120c0-21.382 25.803-32.09 40.922-16.971L296 136l99.314-99.314c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.248 6.248 6.248 16.379 0 22.627z"/></svg>
-              </span>
-            </button>
-          </div>
-        </div>
-        <div id="searchbox" role="search">
-          <form id="search-form" class="search" style="display: none" action="../search.html" method="get">
-            <input type="search" name="q" placeholder="Search ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-            <button>Go</button>
-          </form>
-        </div>
-      </div>
-    </header>
-    <nav>
-      <a href="../usage.html" class="nav-icon previous" title="previous:&#13;Usage" aria-label="Previous topic" accesskey="P" tabindex="-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M31.7 239l136-136c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9L127.9 256l96.4 96.4c9.4 9.4 9.4 24.6 0 33.9L201.7 409c-9.4 9.4-24.6 9.4-33.9 0l-136-136c-9.5-9.4-9.5-24.6-.1-34z"/></svg>
-      </a>
-      <a href="api/clib.html" class="nav-icon next" title="next:&#13;BPMF.clib" aria-label="Next topic" accesskey="N" tabindex="-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"/></svg>
-      </a>
-    </nav>
+    <link rel="prev" title="Usage" href="../usage.html" /> 
+</head>
 
-    <nav class="relbar">
-      <a class="previous" href="../usage.html" aria-label="Previous topic" >
-        <div class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
-        </div>
-        <div class="title">
-          <span class="text">
-            <span class="direction">previous</span>
-            Usage
-          </span>
-        </div>
-      </a>
-      <a class="next" href="api/clib.html" aria-label="Next topic" >
-        <div class="title">
-          <span class="text">
-            <span class="direction">next</span>
-            BPMF.clib
-          </span>
-        </div>
-        <div class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
-        </div>
-      </a>
-    </nav>  
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
-<section id="api">
-<h1>API<a class="headerlink" href="#api" title="Permalink to this heading">¶</a></h1>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api/clib.html">BPMF.clib</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/dataset.html">BPMF.dataset</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/data_reader_examples.html">BPMF.data_reader_examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/similarity_search.html">BPMF.similarity_search</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/template_search.html">BPMF.template_search</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/utils.html">BPMF.utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/NLLoc_utils.html">BPMF.NLLoc_utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/plotting_utils.html">BPMF.ploting_utils</a></li>
-</ul>
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            BPMF
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
 </div>
-</section>
-
-            <div class="clearer"></div>
-          </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-
-          <div class="sidebar-resize-handle"></div>
-
-<h3><a href="../index.html">Table of Contents</a></h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../usage.html">Usage</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/clib.html">BPMF.clib</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html">BPMF.dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/data_reader_examples.html">BPMF.data_reader_examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html">BPMF.similarity_search</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html">BPMF.template_search</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/utils.html">BPMF.utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/NLLoc_utils.html">BPMF.NLLoc_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/plotting_utils.html">BPMF.ploting_utils</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../updates.html">Updates</a></li>
 </ul>
 
-<hr class="docutils" />
-<ul>
-  <li class="toctree-l1"><a class="reference internal" href="../genindex.html" accesskey="I">General Index</a></li>
-  <li class="toctree-l1"><a class="reference internal" href="../py-modindex.html">Python Module Index</a></li>
-</ul>
-<div id="ethical-ad-placement"></div>
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-
-    <nav class="relbar">
-      <a class="previous" href="../usage.html" aria-label="Previous topic" >
-        <div class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
-        </div>
-        <div class="title">
-          <span class="text">
-            <span class="direction">previous</span>
-            Usage
-          </span>
-        </div>
-      </a>
-      <a class="next" href="api/clib.html" aria-label="Next topic" >
-        <div class="title">
-          <span class="text">
-            <span class="direction">next</span>
-            BPMF.clib
-          </span>
-        </div>
-        <div class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
-        </div>
-      </a>
     </nav>
 
-    <footer role="contentinfo">
-      &#169; Copyright 2022, Eric Beauce, William B. Frank.
-      Created using <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
-      <a class="reference external" href="https://insipid-sphinx-theme.readthedocs.io/">Insipid Theme</a>.
-<a class="reference internal" href="../_sources/usage/api.rst.txt" rel="nofollow">Show Source</a>.
-    </footer>
-  </body>
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BPMF</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../usage.html">Usage</a></li>
+      <li class="breadcrumb-item active">API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="api">
+<h1>API<a class="headerlink" href="#api" title="Permalink to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/clib.html">BPMF.clib</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/clib.html#BPMF.clib.find_similar_sources"><code class="docutils literal notranslate"><span class="pre">find_similar_sources()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/clib.html#BPMF.clib.kurtosis"><code class="docutils literal notranslate"><span class="pre">kurtosis()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/clib.html#BPMF.clib.select_cc_indexes"><code class="docutils literal notranslate"><span class="pre">select_cc_indexes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/dataset.html">BPMF.dataset</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog"><code class="docutils literal notranslate"><span class="pre">Catalog</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.concatenate"><code class="docutils literal notranslate"><span class="pre">Catalog.concatenate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.depth"><code class="docutils literal notranslate"><span class="pre">Catalog.depth</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.latitude"><code class="docutils literal notranslate"><span class="pre">Catalog.latitude</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.longitude"><code class="docutils literal notranslate"><span class="pre">Catalog.longitude</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.n_events"><code class="docutils literal notranslate"><span class="pre">Catalog.n_events</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.origin_time"><code class="docutils literal notranslate"><span class="pre">Catalog.origin_time</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.plot_map"><code class="docutils literal notranslate"><span class="pre">Catalog.plot_map()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.plot_space_time"><code class="docutils literal notranslate"><span class="pre">Catalog.plot_space_time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.plot_time_statistics"><code class="docutils literal notranslate"><span class="pre">Catalog.plot_time_statistics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.read_from_dataframe"><code class="docutils literal notranslate"><span class="pre">Catalog.read_from_dataframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.read_from_detection_file"><code class="docutils literal notranslate"><span class="pre">Catalog.read_from_detection_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Catalog.read_from_events"><code class="docutils literal notranslate"><span class="pre">Catalog.read_from_events()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Data.get_np_array"><code class="docutils literal notranslate"><span class="pre">Data.get_np_array()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Data.read_waveforms"><code class="docutils literal notranslate"><span class="pre">Data.read_waveforms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Data.set_availability"><code class="docutils literal notranslate"><span class="pre">Data.set_availability()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Data.sr"><code class="docutils literal notranslate"><span class="pre">Data.sr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Data.time"><code class="docutils literal notranslate"><span class="pre">Data.time</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Data.trim_waveforms"><code class="docutils literal notranslate"><span class="pre">Data.trim_waveforms()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event"><code class="docutils literal notranslate"><span class="pre">Event</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.availability"><code class="docutils literal notranslate"><span class="pre">Event.availability</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.availability_per_cha"><code class="docutils literal notranslate"><span class="pre">Event.availability_per_cha</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.availability_per_sta"><code class="docutils literal notranslate"><span class="pre">Event.availability_per_sta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.az_hmax_unc"><code class="docutils literal notranslate"><span class="pre">Event.az_hmax_unc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.az_hmin_unc"><code class="docutils literal notranslate"><span class="pre">Event.az_hmin_unc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.get_np_array"><code class="docutils literal notranslate"><span class="pre">Event.get_np_array()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.get_peak_amplitudes"><code class="docutils literal notranslate"><span class="pre">Event.get_peak_amplitudes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.hmax_unc"><code class="docutils literal notranslate"><span class="pre">Event.hmax_unc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.hmin_unc"><code class="docutils literal notranslate"><span class="pre">Event.hmin_unc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.hor_ver_uncertainties"><code class="docutils literal notranslate"><span class="pre">Event.hor_ver_uncertainties()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.n_closest_stations"><code class="docutils literal notranslate"><span class="pre">Event.n_closest_stations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.pick_PS_phases"><code class="docutils literal notranslate"><span class="pre">Event.pick_PS_phases()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.pick_PS_phases_EQTransformer"><code class="docutils literal notranslate"><span class="pre">Event.pick_PS_phases_EQTransformer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.plot"><code class="docutils literal notranslate"><span class="pre">Event.plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.read_from_file"><code class="docutils literal notranslate"><span class="pre">Event.read_from_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.read_waveforms"><code class="docutils literal notranslate"><span class="pre">Event.read_waveforms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.relocate"><code class="docutils literal notranslate"><span class="pre">Event.relocate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.relocate_NLLoc"><code class="docutils literal notranslate"><span class="pre">Event.relocate_NLLoc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.relocate_beam"><code class="docutils literal notranslate"><span class="pre">Event.relocate_beam()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.remove_distant_stations"><code class="docutils literal notranslate"><span class="pre">Event.remove_distant_stations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.remove_outlier_picks"><code class="docutils literal notranslate"><span class="pre">Event.remove_outlier_picks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_arrival_times_from_moveouts"><code class="docutils literal notranslate"><span class="pre">Event.set_arrival_times_from_moveouts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_aux_data"><code class="docutils literal notranslate"><span class="pre">Event.set_aux_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_availability"><code class="docutils literal notranslate"><span class="pre">Event.set_availability()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_component_aliases"><code class="docutils literal notranslate"><span class="pre">Event.set_component_aliases()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_components"><code class="docutils literal notranslate"><span class="pre">Event.set_components()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_moveouts_to_empirical_times"><code class="docutils literal notranslate"><span class="pre">Event.set_moveouts_to_empirical_times()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_moveouts_to_theoretical_times"><code class="docutils literal notranslate"><span class="pre">Event.set_moveouts_to_theoretical_times()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_source_receiver_dist"><code class="docutils literal notranslate"><span class="pre">Event.set_source_receiver_dist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.source_receiver_dist"><code class="docutils literal notranslate"><span class="pre">Event.source_receiver_dist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.sr"><code class="docutils literal notranslate"><span class="pre">Event.sr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.trim_waveforms"><code class="docutils literal notranslate"><span class="pre">Event.trim_waveforms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.update_aux_data_database"><code class="docutils literal notranslate"><span class="pre">Event.update_aux_data_database()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.update_picks"><code class="docutils literal notranslate"><span class="pre">Event.update_picks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.update_travel_times"><code class="docutils literal notranslate"><span class="pre">Event.update_travel_times()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.vmax_unc"><code class="docutils literal notranslate"><span class="pre">Event.vmax_unc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.write"><code class="docutils literal notranslate"><span class="pre">Event.write()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.zero_out_clipped_waveforms"><code class="docutils literal notranslate"><span class="pre">Event.zero_out_clipped_waveforms()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/dataset.html#BPMF.dataset.EventGroup"><code class="docutils literal notranslate"><span class="pre">EventGroup</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.EventGroup.SVDWF_stack"><code class="docutils literal notranslate"><span class="pre">EventGroup.SVDWF_stack()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.EventGroup.n_events"><code class="docutils literal notranslate"><span class="pre">EventGroup.n_events</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.EventGroup.read_waveforms"><code class="docutils literal notranslate"><span class="pre">EventGroup.read_waveforms()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Family"><code class="docutils literal notranslate"><span class="pre">Family</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Family.components"><code class="docutils literal notranslate"><span class="pre">Family.components</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Family.get_moveouts_arr"><code class="docutils literal notranslate"><span class="pre">Family.get_moveouts_arr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Family.get_waveforms_arr"><code class="docutils literal notranslate"><span class="pre">Family.get_waveforms_arr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Family.moveouts_arr"><code class="docutils literal notranslate"><span class="pre">Family.moveouts_arr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Family.normalize"><code class="docutils literal notranslate"><span class="pre">Family.normalize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Family.read_waveforms"><code class="docutils literal notranslate"><span class="pre">Family.read_waveforms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Family.set_network"><code class="docutils literal notranslate"><span class="pre">Family.set_network()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Family.set_source_receiver_dist"><code class="docutils literal notranslate"><span class="pre">Family.set_source_receiver_dist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Family.stations"><code class="docutils literal notranslate"><span class="pre">Family.stations</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Family.waveforms_arr"><code class="docutils literal notranslate"><span class="pre">Family.waveforms_arr</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network"><code class="docutils literal notranslate"><span class="pre">Network</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.box"><code class="docutils literal notranslate"><span class="pre">Network.box()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.datelist"><code class="docutils literal notranslate"><span class="pre">Network.datelist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.depth"><code class="docutils literal notranslate"><span class="pre">Network.depth</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.elevation"><code class="docutils literal notranslate"><span class="pre">Network.elevation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.interstation_distances"><code class="docutils literal notranslate"><span class="pre">Network.interstation_distances</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.latitude"><code class="docutils literal notranslate"><span class="pre">Network.latitude</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.longitude"><code class="docutils literal notranslate"><span class="pre">Network.longitude</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.n_components"><code class="docutils literal notranslate"><span class="pre">Network.n_components</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.n_stations"><code class="docutils literal notranslate"><span class="pre">Network.n_stations</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.networks"><code class="docutils literal notranslate"><span class="pre">Network.networks</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.plot_map"><code class="docutils literal notranslate"><span class="pre">Network.plot_map()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.read"><code class="docutils literal notranslate"><span class="pre">Network.read()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.station_indexes"><code class="docutils literal notranslate"><span class="pre">Network.station_indexes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.stations"><code class="docutils literal notranslate"><span class="pre">Network.stations</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.stations_idx"><code class="docutils literal notranslate"><span class="pre">Network.stations_idx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Network.subset"><code class="docutils literal notranslate"><span class="pre">Network.subset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Stack"><code class="docutils literal notranslate"><span class="pre">Stack</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Stack.pick_PS_phases"><code class="docutils literal notranslate"><span class="pre">Stack.pick_PS_phases()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Stack.read_waveforms"><code class="docutils literal notranslate"><span class="pre">Stack.read_waveforms()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template"><code class="docutils literal notranslate"><span class="pre">Template</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.distance"><code class="docutils literal notranslate"><span class="pre">Template.distance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.init_from_event"><code class="docutils literal notranslate"><span class="pre">Template.init_from_event()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.moveouts_arr"><code class="docutils literal notranslate"><span class="pre">Template.moveouts_arr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.moveouts_win"><code class="docutils literal notranslate"><span class="pre">Template.moveouts_win</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.n_best_SNR_stations"><code class="docutils literal notranslate"><span class="pre">Template.n_best_SNR_stations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.plot_detection"><code class="docutils literal notranslate"><span class="pre">Template.plot_detection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.plot_recurrence_times"><code class="docutils literal notranslate"><span class="pre">Template.plot_recurrence_times()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.read_catalog"><code class="docutils literal notranslate"><span class="pre">Template.read_catalog()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.read_from_file"><code class="docutils literal notranslate"><span class="pre">Template.read_from_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.read_waveforms"><code class="docutils literal notranslate"><span class="pre">Template.read_waveforms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.template_idx"><code class="docutils literal notranslate"><span class="pre">Template.template_idx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.tid"><code class="docutils literal notranslate"><span class="pre">Template.tid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.waveforms_arr"><code class="docutils literal notranslate"><span class="pre">Template.waveforms_arr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.write"><code class="docutils literal notranslate"><span class="pre">Template.write()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.write_summary"><code class="docutils literal notranslate"><span class="pre">Template.write_summary()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup"><code class="docutils literal notranslate"><span class="pre">TemplateGroup</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.box"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.box()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.compute_dir_errors"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.compute_dir_errors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.compute_ellipsoid_dist"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.compute_ellipsoid_dist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.compute_intertemplate_cc"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.compute_intertemplate_cc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.compute_intertemplate_dist"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.compute_intertemplate_dist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.dir_errors"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.dir_errors</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.ellipsoid_dist"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.ellipsoid_dist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.intertemplate_cc"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.intertemplate_cc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.intertemplate_dist"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.intertemplate_dist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.n_best_SNR_stations"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.n_best_SNR_stations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.n_closest_stations"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.n_closest_stations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.n_templates"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.n_templates</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.network_to_template_map"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.network_to_template_map</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.plot_detection"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.plot_detection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.plot_recurrence_times"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.plot_recurrence_times()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.read_catalog"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.read_catalog()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.read_from_files"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.read_from_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.read_waveforms"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.read_waveforms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.remove_multiples"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.remove_multiples()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.TemplateGroup.set_network_to_template_map"><code class="docutils literal notranslate"><span class="pre">TemplateGroup.set_network_to_template_map()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/data_reader_examples.html">BPMF.data_reader_examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/data_reader_examples.html#BPMF.data_reader_examples.data_reader_mseed"><code class="docutils literal notranslate"><span class="pre">data_reader_mseed()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/data_reader_examples.html#BPMF.data_reader_examples.data_reader_pyasdf"><code class="docutils literal notranslate"><span class="pre">data_reader_pyasdf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/data_reader_examples.html#BPMF.data_reader_examples.data_reader_template"><code class="docutils literal notranslate"><span class="pre">data_reader_template()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/similarity_search.html">BPMF.similarity_search</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter"><code class="docutils literal notranslate"><span class="pre">MatchedFilter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.components"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.components</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.compute_cc_time_series"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.compute_cc_time_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.find_detections"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.find_detections()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.memory_cc_time_series"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.memory_cc_time_series</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.plot_cc"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.plot_cc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.plot_detection"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.plot_detection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.run_matched_filter_search"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.run_matched_filter_search()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.select_cc_indexes"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.select_cc_indexes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.set_data"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.set_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.stations"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.stations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.time_dependent_threshold"><code class="docutils literal notranslate"><span class="pre">time_dependent_threshold()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/template_search.html">BPMF.template_search</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer"><code class="docutils literal notranslate"><span class="pre">Beamformer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.backproject"><code class="docutils literal notranslate"><span class="pre">Beamformer.backproject()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.find_detections"><code class="docutils literal notranslate"><span class="pre">Beamformer.find_detections()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.moveouts"><code class="docutils literal notranslate"><span class="pre">Beamformer.moveouts</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.n_phases"><code class="docutils literal notranslate"><span class="pre">Beamformer.n_phases</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.n_stations"><code class="docutils literal notranslate"><span class="pre">Beamformer.n_stations</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.plot_detection"><code class="docutils literal notranslate"><span class="pre">Beamformer.plot_detection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.plot_likelihood"><code class="docutils literal notranslate"><span class="pre">Beamformer.plot_likelihood()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.plot_maxbeam"><code class="docutils literal notranslate"><span class="pre">Beamformer.plot_maxbeam()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.remove_baseline"><code class="docutils literal notranslate"><span class="pre">Beamformer.remove_baseline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.return_pd_series"><code class="docutils literal notranslate"><span class="pre">Beamformer.return_pd_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.set_data"><code class="docutils literal notranslate"><span class="pre">Beamformer.set_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.set_moveouts"><code class="docutils literal notranslate"><span class="pre">Beamformer.set_moveouts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.set_network"><code class="docutils literal notranslate"><span class="pre">Beamformer.set_network()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.set_source_coordinates"><code class="docutils literal notranslate"><span class="pre">Beamformer.set_source_coordinates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.set_weights"><code class="docutils literal notranslate"><span class="pre">Beamformer.set_weights()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.set_weights_sources"><code class="docutils literal notranslate"><span class="pre">Beamformer.set_weights_sources()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.smooth_maxbeam"><code class="docutils literal notranslate"><span class="pre">Beamformer.smooth_maxbeam()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.stations"><code class="docutils literal notranslate"><span class="pre">Beamformer.stations</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.weights_station_density"><code class="docutils literal notranslate"><span class="pre">Beamformer.weights_station_density()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/template_search.html#BPMF.template_search.baseline"><code class="docutils literal notranslate"><span class="pre">baseline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/template_search.html#BPMF.template_search.envelope"><code class="docutils literal notranslate"><span class="pre">envelope()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/template_search.html#BPMF.template_search.envelope_parallel"><code class="docutils literal notranslate"><span class="pre">envelope_parallel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/template_search.html#BPMF.template_search.saturated_envelopes"><code class="docutils literal notranslate"><span class="pre">saturated_envelopes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/template_search.html#BPMF.template_search.time_dependent_threshold"><code class="docutils literal notranslate"><span class="pre">time_dependent_threshold()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/template_search.html#BPMF.template_search.time_dependent_threshold_pd"><code class="docutils literal notranslate"><span class="pre">time_dependent_threshold_pd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/utils.html">BPMF.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.SVDWF"><code class="docutils literal notranslate"><span class="pre">SVDWF()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.SVDWF_multiplets"><code class="docutils literal notranslate"><span class="pre">SVDWF_multiplets()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.bandpass_filter"><code class="docutils literal notranslate"><span class="pre">bandpass_filter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.compute_distances"><code class="docutils literal notranslate"><span class="pre">compute_distances()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.donefun"><code class="docutils literal notranslate"><span class="pre">donefun()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.event_count"><code class="docutils literal notranslate"><span class="pre">event_count()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.extract_colors_from_tree"><code class="docutils literal notranslate"><span class="pre">extract_colors_from_tree()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.fetch_detection_waveforms"><code class="docutils literal notranslate"><span class="pre">fetch_detection_waveforms()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.fetch_detection_waveforms_refilter"><code class="docutils literal notranslate"><span class="pre">fetch_detection_waveforms_refilter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.find_template_clusters"><code class="docutils literal notranslate"><span class="pre">find_template_clusters()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.get_moveout_array"><code class="docutils literal notranslate"><span class="pre">get_moveout_array()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.get_np_array"><code class="docutils literal notranslate"><span class="pre">get_np_array()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.linear_regression"><code class="docutils literal notranslate"><span class="pre">linear_regression()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.load_travel_times"><code class="docutils literal notranslate"><span class="pre">load_travel_times()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.lowpass_chebyshev_I"><code class="docutils literal notranslate"><span class="pre">lowpass_chebyshev_I()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.lowpass_chebyshev_II"><code class="docutils literal notranslate"><span class="pre">lowpass_chebyshev_II()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.max_norm"><code class="docutils literal notranslate"><span class="pre">max_norm()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.preprocess_stream"><code class="docutils literal notranslate"><span class="pre">preprocess_stream()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.round_time"><code class="docutils literal notranslate"><span class="pre">round_time()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.running_mad"><code class="docutils literal notranslate"><span class="pre">running_mad()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.sec_to_samp"><code class="docutils literal notranslate"><span class="pre">sec_to_samp()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.time_range"><code class="docutils literal notranslate"><span class="pre">time_range()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.two_point_distance"><code class="docutils literal notranslate"><span class="pre">two_point_distance()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.weighted_linear_regression"><code class="docutils literal notranslate"><span class="pre">weighted_linear_regression()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/NLLoc_utils.html">BPMF.NLLoc_utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/NLLoc_utils.html#BPMF.NLLoc_utils.load_pykonal_tts"><code class="docutils literal notranslate"><span class="pre">load_pykonal_tts()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/NLLoc_utils.html#BPMF.NLLoc_utils.read_NLLoc_outputs"><code class="docutils literal notranslate"><span class="pre">read_NLLoc_outputs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/NLLoc_utils.html#BPMF.NLLoc_utils.write_NLLoc_control"><code class="docutils literal notranslate"><span class="pre">write_NLLoc_control()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/NLLoc_utils.html#BPMF.NLLoc_utils.write_NLLoc_inputs"><code class="docutils literal notranslate"><span class="pre">write_NLLoc_inputs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/NLLoc_utils.html#BPMF.NLLoc_utils.write_NLLoc_obs"><code class="docutils literal notranslate"><span class="pre">write_NLLoc_obs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/plotting_utils.html">BPMF.ploting_utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.add_scale_bar"><code class="docutils literal notranslate"><span class="pre">add_scale_bar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.initialize_map"><code class="docutils literal notranslate"><span class="pre">initialize_map()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.plot_catalog"><code class="docutils literal notranslate"><span class="pre">plot_catalog()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.plot_detection_matrix"><code class="docutils literal notranslate"><span class="pre">plot_detection_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.plot_template"><code class="docutils literal notranslate"><span class="pre">plot_template()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.uncertainty_ellipse"><code class="docutils literal notranslate"><span class="pre">uncertainty_ellipse()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../usage.html" class="btn btn-neutral float-left" title="Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api/clib.html" class="btn btn-neutral float-right" title="BPMF.clib" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Eric Beauce, William B. Frank.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
 </html>

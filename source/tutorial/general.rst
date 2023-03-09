@@ -2,8 +2,12 @@ Pre-requisites
 ==============
 
 The goal of this tutorial is to learm how to implement a full earthquake detection and location workflow with :py:data:`BPMF`.
+
 Environment
 -----------
+
+Base
+^^^^
 
 Creating the virtual environment as described here is *essential* for running the tutorial successfully. We will use the python package manager `Anaconda`, or rather its ligther version `Miniconda`. Follow the instructions here `https://docs.conda.io/en/latest/miniconda.html <https://docs.conda.io/en/latest/miniconda.html>`_ to install `Miniconda`.
 
@@ -43,11 +47,17 @@ Run the following command to install (almost) all the packages need for this tut
     $ conda install obspy numpy scipy pandas matplotlib h5py ipython jupyter cartopy
 
 
+PyKonal
+^^^^^^^
+
 Then, download Pykonal from `https://github.com/malcolmw/pykonal <https://github.com/malcolmw/pykonal>`_. Pykonal is the package we will use for computing the P- and S-wave travel times. Once downloaded and unpacked, go to Pykonal's root folder and run:
 
 .. code-block:: console
 
     $ pip install .
+
+PhaseNet
+^^^^^^^^
 
 Several important features of :py:data:`BPMF` relies on the deep neural network phase picker PhaseNet. In order to use PhaseNet, you have to install :py:data:`phasenet` from E.B.'s Github (modified version with wrapper functions to use PhaseNet from within a python script) at: `https://github.com/ebeauce/PhaseNet <https://github.com/ebeauce/PhaseNet>`_. Go to PhaseNet's root folder and run: 
 
@@ -57,6 +67,32 @@ Several important features of :py:data:`BPMF` relies on the deep neural network 
 
 This should download the package :py:data:`tensorflow` and may take some time.
 
+NonLinLoc
+^^^^^^^^^
+
+To benefit from the best location routines, you need to install the :py:data:`NLLoc` software (`http://alomax.free.fr/nlloc/ <http://alomax.free.fr/nlloc/>`_). You can download :py:data:`NLLoc` at `http://alomax.free.fr/nlloc/soft7.00/tar/NLL7.00_src.tgz <http://alomax.free.fr/nlloc/soft7.00/tar/NLL7.00_src.tgz>`_. For Unix and Mac users, I recommend doing something along the lines (modify as necessary):
+
+.. code-block:: console
+
+    $ mkdir ${HOME}/NLLoc
+    $ cd ${HOME}/NLLoc
+    $ wget http://alomax.free.fr/nlloc/soft7.00/tar/NLL7.00_src.tgz
+    $ tar -xvf archive_name
+
+And then, create a `bin` folder where `NLLoc`'s binary executable files will be stored after compilation.
+
+.. code-block:: console
+    
+    $ mkdir ${HOME}/bin
+    $ export MYBIN=${HOME}/bin/
+    $ export PATH=${MYBIN}:$PATH
+
+and add the last two lines to your `.bashrc` file (Mac users might need to do the equivalent for zsh or csh instead of bash). After that, you can run the `Makefile` from `${HOME}/NLLoc`.
+
+.. code-block:: console
+
+    $ make
+
 
 Finally, we need to install :py:data:`BPMF` to our new environment. We refer you to the :ref:`Installation` Section of the documentation.
 
@@ -64,7 +100,7 @@ Finally, we need to install :py:data:`BPMF` to our new environment. We refer you
 Running the Tutorial
 --------------------
 
-The tutorial is made of a series of Ipython notebooks that are meant to be run from 0 to 3.
+The tutorial is made of a series of Ipython notebooks that are meant to be run from 0 to 10.
 
 
 Reference

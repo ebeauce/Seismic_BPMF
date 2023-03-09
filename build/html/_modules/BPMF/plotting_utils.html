@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BPMF.plotting_utils &mdash; BPMF 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BPMF</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">BPMF.plotting_utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for BPMF.plotting_utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">cfg</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">dataset</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">Normalize</span>
+<span class="kn">from</span> <span class="nn">matplotlib.cm</span> <span class="kn">import</span> <span class="n">ScalarMappable</span>
+<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">mcolors</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
+
+<span class="kn">from</span> <span class="nn">obspy.core</span> <span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">udt</span>
+
+<span class="c1"># -------------------------------------------------------</span>
+<span class="c1">#       Many functions will disappear soon, replaced</span>
+<span class="c1">#       by plotting methods of new classes introduced in dataset.py</span>
+<span class="c1"># -------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="plot_template"><a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.plot_template">[docs]</a><span class="k">def</span> <span class="nf">plot_template</span><span class="p">(</span>
+    <span class="n">idx</span><span class="p">,</span>
+    <span class="n">db_path_T</span><span class="o">=</span><span class="s2">&quot;template_db_2/&quot;</span><span class="p">,</span>
+    <span class="n">db_path</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">INPUT_PATH</span><span class="p">,</span>
+    <span class="n">n_stations</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">stations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mv_view</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="c1"># ---------------------------</span>
+    <span class="n">font</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;family&quot;</span><span class="p">:</span> <span class="s2">&quot;sans-serif&quot;</span><span class="p">,</span> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">14</span><span class="p">}</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s2">&quot;font&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">font</span><span class="p">)</span>
+    <span class="c1"># ---------------------------</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">Template</span><span class="p">(</span>
+        <span class="s2">&quot;template</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="n">db_path_T</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="n">db_path</span><span class="p">,</span> <span class="n">attach_waveforms</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s2">&quot;loc_uncertainty&quot;</span><span class="p">):</span>
+        <span class="n">uncertainty_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;($\Delta r$ = </span><span class="si">{:.2f}</span><span class="s2"> km)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">location_uncertainty</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s2">&quot;cov_mat&quot;</span><span class="p">):</span>
+        <span class="n">uncertainty_label</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">r</span><span class="s2">&quot;($\Delta X$=</span><span class="si">{:.2f}</span><span class="s2">km, $\Delta Y$=</span><span class="si">{:.2f}</span><span class="s2">km, $\Delta Z$=</span><span class="si">{:.2f}</span><span class="s2">km)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">cov_mat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">cov_mat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">cov_mat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">uncertainty_label</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">stations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">template</span><span class="o">.</span><span class="n">subnetwork</span><span class="p">(</span><span class="n">stations</span><span class="p">)</span>
+        <span class="n">n_stations</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">stations</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># select the n_stations closest stations</span>
+        <span class="n">template</span><span class="o">.</span><span class="n">n_closest_stations</span><span class="p">(</span><span class="n">n_stations</span><span class="p">)</span>
+    <span class="n">sta</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">stations</span><span class="p">)</span>
+    <span class="n">n_stations</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">n_stations</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sta</span><span class="p">))</span>
+    <span class="c1"># sta.sort()</span>
+    <span class="n">n_components</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span>
+        <span class="s2">&quot;template_</span><span class="si">{:d}</span><span class="s2">_from_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">db_path</span> <span class="o">+</span> <span class="n">db_path_T</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">mv_view</span><span class="p">:</span>
+        <span class="n">MVs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">template</span><span class="o">.</span><span class="n">s_moveouts</span><span class="p">,</span> <span class="n">template</span><span class="o">.</span><span class="n">s_moveouts</span><span class="p">,</span> <span class="n">template</span><span class="o">.</span><span class="n">p_moveouts</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">MVs</span> <span class="o">-=</span> <span class="n">MVs</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">traces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="n">MVs</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">/</span> <span class="n">template</span><span class="o">.</span><span class="n">sampling_rate</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">traces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="o">/</span> <span class="n">template</span><span class="o">.</span><span class="n">sampling_rate</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_stations</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_components</span><span class="p">):</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">n_stations</span><span class="p">,</span> <span class="n">n_components</span><span class="p">,</span> <span class="n">s</span> <span class="o">*</span> <span class="n">n_components</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">lab</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sta</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">template</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">mv_view</span><span class="p">:</span>
+                <span class="n">id1</span> <span class="o">=</span> <span class="n">MVs</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span>
+                <span class="n">id2</span> <span class="o">=</span> <span class="n">id1</span> <span class="o">+</span> <span class="n">template</span><span class="o">.</span><span class="n">traces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">size</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">time</span><span class="p">[</span><span class="n">id1</span><span class="p">:</span><span class="n">id2</span><span class="p">],</span>
+                    <span class="n">template</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">station</span><span class="o">=</span><span class="n">sta</span><span class="p">[</span><span class="n">s</span><span class="p">])[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="n">lab</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="nb">int</span><span class="p">((</span><span class="n">id1</span> <span class="o">+</span> <span class="n">id2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)],</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="n">id1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">time</span><span class="p">,</span> <span class="n">template</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">station</span><span class="o">=</span><span class="n">sta</span><span class="p">[</span><span class="n">s</span><span class="p">])[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">lab</span>
+                <span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">((</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+                    <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper left&quot;</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">handlelength</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">borderpad</span><span class="o">=</span><span class="mf">0.0</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+                    <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">handlelength</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">borderpad</span><span class="o">=</span><span class="mf">0.0</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="n">n_stations</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">([])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">bottom</span><span class="o">=</span><span class="mf">0.07</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.94</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.04</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.12</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span>
+        <span class="s2">&quot;Template </span><span class="si">{:d}</span><span class="s2">, location: </span><span class="si">{:.2f}</span><span class="s2">$^{{\mathrm{{o}}}}$E,&quot;</span>
+        <span class="s2">&quot;</span><span class="si">{:.2f}</span><span class="s2">$^{{\mathrm{{o}}}}$N,</span><span class="si">{:.2f}</span><span class="s2">km </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">template_idx</span><span class="p">,</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span>
+            <span class="n">uncertainty_label</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="plot_detection_matrix"><a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.plot_detection_matrix">[docs]</a><span class="k">def</span> <span class="nf">plot_detection_matrix</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">datetimes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stack</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;time_min&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;time_min&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;time_max&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;time_max&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;text_offset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text_offset&quot;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;text_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text_size&quot;</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.size&quot;</span><span class="p">])</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;datetime_format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;datetime_format&quot;</span><span class="p">,</span> <span class="s2">&quot;%Y,%m,</span><span class="si">%d</span><span class="s2">--%H:%M:%S&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">datetimes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># reorder X</span>
+        <span class="n">new_order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">datetimes</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">new_order</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">datetimes</span> <span class="o">=</span> <span class="n">datetimes</span><span class="p">[</span><span class="n">new_order</span><span class="p">]</span>
+    <span class="n">n_detections</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="s2">&quot;detection_matrix&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">time_min</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;time_min&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;time_min&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">time</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">time_max</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;time_max&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;time_max&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">time</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">time</span> <span class="o">-=</span> <span class="n">time_min</span>
+    <span class="k">if</span> <span class="n">stack</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mf">2.0</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;SVDWF Stack&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_detections</span><span class="p">):</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Individual Events&quot;</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">utils</span><span class="o">.</span><span class="n">max_norm</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:])</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">datetimes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                <span class="mf">0.50</span><span class="p">,</span>
+                <span class="n">offset</span> <span class="o">+</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;text_offset&quot;</span><span class="p">],</span>
+                <span class="n">udt</span><span class="p">(</span><span class="n">datetimes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;datetime_format&quot;</span><span class="p">]),</span>
+                <span class="n">bbox</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;facecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.75</span><span class="p">},</span>
+                <span class="n">fontsize</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;text_size&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="n">offset</span> <span class="o">+=</span> <span class="mf">2.0</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Offset normalized amplitude&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">time_max</span> <span class="o">-</span> <span class="n">time_min</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mf">0.96</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.06</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="plot_catalog"><a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.plot_catalog">[docs]</a><span class="k">def</span> <span class="nf">plot_catalog</span><span class="p">(</span>
+    <span class="n">tids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">db_path_T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">db_path_M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">catalog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">remove_multiples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">scat_kwargs</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">db_path</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">INPUT_PATH</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">cmap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">colorcet</span> <span class="k">as</span> <span class="nn">cc</span>
+
+            <span class="n">cmap</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">bjy</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">cmap</span> <span class="o">=</span> <span class="s2">&quot;viridis&quot;</span>
+
+    <span class="c1"># ------------------------------------------------</span>
+    <span class="c1">#        Scattering plot kwargs</span>
+    <span class="n">scat_kwargs</span><span class="p">[</span><span class="s2">&quot;edgecolor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scat_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;edgecolor&quot;</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">)</span>
+    <span class="n">scat_kwargs</span><span class="p">[</span><span class="s2">&quot;linewidths&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scat_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;linewidths&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">scat_kwargs</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scat_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">scat_kwargs</span><span class="p">[</span><span class="s2">&quot;zorder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scat_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;zorder&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># ------------------------------------------------</span>
+
+    <span class="k">if</span> <span class="n">catalog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># if catalog is None, tids, db_path_T and db_path_M</span>
+        <span class="c1"># should be given</span>
+        <span class="c1"># ------------------</span>
+        <span class="c1"># compile detections from these templates in a single</span>
+        <span class="c1"># earthquake catalog</span>
+        <span class="n">catalog_filenames</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;multiplets</span><span class="si">{</span><span class="n">tid</span><span class="si">}</span><span class="s2">catalog.h5&quot;</span> <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">tids</span><span class="p">]</span>
+        <span class="n">AggCat</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">AggregatedCatalogs</span><span class="p">(</span>
+            <span class="n">filenames</span><span class="o">=</span><span class="n">catalog_filenames</span><span class="p">,</span> <span class="n">db_path_M</span><span class="o">=</span><span class="n">db_path_M</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="n">db_path</span>
+        <span class="p">)</span>
+        <span class="n">AggCat</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span><span class="n">items_in</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;origin_times&quot;</span><span class="p">,</span> <span class="s2">&quot;location&quot;</span><span class="p">,</span> <span class="s2">&quot;unique_events&quot;</span><span class="p">])</span>
+        <span class="n">catalog</span> <span class="o">=</span> <span class="n">AggCat</span><span class="o">.</span><span class="n">flatten_catalog</span><span class="p">(</span>
+            <span class="n">attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;origin_times&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;depth&quot;</span><span class="p">],</span>
+            <span class="n">unique_events</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">cNorm</span> <span class="o">=</span> <span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">scalar_map</span> <span class="o">=</span> <span class="n">ScalarMappable</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">cNorm</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+    <span class="n">scalar_map</span><span class="o">.</span><span class="n">set_array</span><span class="p">([])</span>
+
+    <span class="c1"># plot catalog</span>
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="s2">&quot;earthquake_catalog&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># use the user-provided axis</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:d}</span><span class="s2"> events&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;origin_times&quot;</span><span class="p">])))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Calendar Time&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Longitude&quot;</span><span class="p">)</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">udt</span><span class="p">(</span><span class="n">time</span><span class="p">))</span> <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;origin_times&quot;</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;datetime64&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">times</span><span class="p">,</span>
+        <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">],</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">scalar_map</span><span class="o">.</span><span class="n">to_rgba</span><span class="p">(</span><span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]),</span>
+        <span class="n">rasterized</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">scat_kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">times</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+    <span class="n">ax_divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+    <span class="n">cax</span> <span class="o">=</span> <span class="n">ax_divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;2%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.08</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">scalar_map</span><span class="p">,</span> <span class="n">cax</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Latitude&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<span class="c1"># ---------------------------------------------------------------</span>
+<span class="c1">#                Utils for maps</span>
+<span class="c1"># ---------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="initialize_map"><a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.initialize_map">[docs]</a><span class="k">def</span> <span class="nf">initialize_map</span><span class="p">(</span>
+    <span class="n">map_longitudes</span><span class="p">,</span>
+    <span class="n">map_latitudes</span><span class="p">,</span>
+    <span class="n">map_axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">seismic_stations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">text_size</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span>
+    <span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">topography_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">path_topo</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">faults</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">right_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">left_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">bottom_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">top_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize map instance with Cartopy.&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">cartopy</span> <span class="k">as</span> <span class="nn">ctp</span>
+
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;topo_alpha&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;topo_alpha&quot;</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;downsample_faults&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;downsample_faults&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;shaded_topo&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;shaded_topo&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;topo_cmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;topo_cmap&quot;</span><span class="p">,</span> <span class="s2">&quot;gray&quot;</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;topo_cnorm&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;topo_cnorm&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;fault_zorder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fault_zorder&quot;</span><span class="p">,</span> <span class="mf">1.01</span><span class="p">)</span>
+    <span class="n">figsize</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;figsize&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+
+    <span class="n">map_corners</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">map_longitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">map_latitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">map_longitudes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">map_latitudes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="p">]</span>
+
+    <span class="n">data_coords</span> <span class="o">=</span> <span class="n">ctp</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">map_axis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># projection = ctp.crs.PlateCarree()</span>
+        <span class="n">projection</span> <span class="o">=</span> <span class="n">ctp</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">Mercator</span><span class="p">(</span>
+            <span class="n">central_longitude</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">map_longitudes</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+            <span class="n">min_latitude</span><span class="o">=</span><span class="n">map_latitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">max_latitude</span><span class="o">=</span><span class="n">map_latitudes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;figname&quot;</span><span class="p">,</span> <span class="s2">&quot;map&quot;</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="n">map_axis</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">projection</span><span class="p">)</span>
+        <span class="n">map_axis</span><span class="o">.</span><span class="n">set_rasterization_zorder</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">map_axis</span><span class="o">.</span><span class="n">set_extent</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">map_longitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">map_longitudes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">map_latitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">map_latitudes</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+            <span class="n">crs</span><span class="o">=</span><span class="n">data_coords</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">RES</span> <span class="o">=</span> <span class="s2">&quot;10m&quot;</span>
+
+    <span class="k">if</span> <span class="n">topography_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># -----------------------</span>
+        <span class="c1"># get topography</span>
+        <span class="kn">import</span> <span class="nn">netCDF4</span>
+
+        <span class="k">with</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_topo</span><span class="p">,</span> <span class="n">topography_file</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;z&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+                <span class="n">topo</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;z&quot;</span><span class="p">][:]</span><span class="o">.</span><span class="n">data</span>
+            <span class="k">elif</span> <span class="s2">&quot;Band1&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+                <span class="n">topo</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;Band1&quot;</span><span class="p">][:]</span><span class="o">.</span><span class="n">data</span>
+            <span class="k">if</span> <span class="s2">&quot;lon&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+                <span class="n">lon_topo</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">][:]</span><span class="o">.</span><span class="n">data</span>
+            <span class="k">elif</span> <span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+                <span class="n">lon_topo</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">][:]</span><span class="o">.</span><span class="n">data</span>
+            <span class="k">if</span> <span class="s2">&quot;lat&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+                <span class="n">lat_topo</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">][:]</span><span class="o">.</span><span class="n">data</span>
+            <span class="k">elif</span> <span class="s2">&quot;y&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+                <span class="n">lat_topo</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">][:]</span><span class="o">.</span><span class="n">data</span>
+        <span class="c1"># select relevant area</span>
+        <span class="n">selected_lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">lon_topo</span> <span class="o">&gt;=</span> <span class="n">map_longitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">lon_topo</span> <span class="o">&lt;=</span> <span class="n">map_longitudes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">selected_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">lat_topo</span> <span class="o">&gt;=</span> <span class="n">map_latitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">lat_topo</span> <span class="o">&lt;=</span> <span class="n">map_latitudes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">lon_topo</span> <span class="o">=</span> <span class="n">lon_topo</span><span class="p">[</span><span class="n">selected_lon</span><span class="p">]</span>
+        <span class="n">lat_topo</span> <span class="o">=</span> <span class="n">lat_topo</span><span class="p">[</span><span class="n">selected_lat</span><span class="p">]</span>
+        <span class="n">topo</span> <span class="o">=</span> <span class="n">topo</span><span class="p">[</span><span class="n">selected_lat</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">topo</span> <span class="o">=</span> <span class="n">topo</span><span class="p">[:,</span> <span class="n">selected_lon</span><span class="p">]</span>
+        <span class="c1"># make sure to take these arrays in ascending lons and lats</span>
+        <span class="n">ascending_lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">lon_topo</span><span class="p">)</span>
+        <span class="n">ascending_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">lat_topo</span><span class="p">)</span>
+        <span class="n">lon_topo</span><span class="p">,</span> <span class="n">lat_topo</span> <span class="o">=</span> <span class="n">lon_topo</span><span class="p">[</span><span class="n">ascending_lon</span><span class="p">],</span> <span class="n">lat_topo</span><span class="p">[</span><span class="n">ascending_lat</span><span class="p">]</span>
+        <span class="n">topo</span> <span class="o">=</span> <span class="n">topo</span><span class="p">[</span><span class="n">ascending_lat</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">topo</span> <span class="o">=</span> <span class="n">topo</span><span class="p">[:,</span> <span class="n">ascending_lon</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;shaded_topo&quot;</span><span class="p">]:</span>
+            <span class="c1"># get topography gradient</span>
+            <span class="n">grad_x</span><span class="p">,</span> <span class="n">grad_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">topo</span><span class="p">)</span>
+            <span class="n">slope</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">grad_x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">grad_y</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+            <span class="n">aspect</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">grad_x</span><span class="p">,</span> <span class="n">grad_y</span><span class="p">)</span>
+            <span class="n">altitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">4.0</span>  <span class="c1"># sun angle</span>
+            <span class="n">azimuth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span>  <span class="c1"># sun direction</span>
+            <span class="n">topo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">altitude</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">slope</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">altitude</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span>
+                <span class="n">slope</span>
+            <span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">((</span><span class="n">azimuth</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">-</span> <span class="n">aspect</span><span class="p">)</span>
+        <span class="c1"># levels_topo = np.linspace(-500., topo.max(), 20)</span>
+        <span class="c1"># print(&#39;Plot the topography.&#39;)</span>
+        <span class="c1"># transform data</span>
+        <span class="c1"># fast version</span>
+        <span class="n">lon_g</span><span class="p">,</span> <span class="n">lat_g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">lon_topo</span><span class="p">,</span> <span class="n">lat_topo</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">)</span>
+        <span class="n">trans_data</span> <span class="o">=</span> <span class="n">map_axis</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">transform_points</span><span class="p">(</span>
+            <span class="n">data_coords</span><span class="p">,</span> <span class="n">lon_g</span><span class="p">,</span> <span class="n">lat_g</span><span class="p">,</span> <span class="n">topo</span>
+        <span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">trans_data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">trans_data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">trans_data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">map_axis</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+            <span class="n">Z</span><span class="p">,</span>
+            <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">X</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">Y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">Y</span><span class="o">.</span><span class="n">max</span><span class="p">()],</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;topo_cmap&quot;</span><span class="p">],</span>
+            <span class="n">norm</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;topo_cnorm&quot;</span><span class="p">],</span>
+            <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;topo_alpha&quot;</span><span class="p">],</span>
+            <span class="n">interpolation</span><span class="o">=</span><span class="s2">&quot;bilinear&quot;</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ------------ DRAW MERIDIANS AND PARALLELS --------------</span>
+    <span class="n">LON0</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">map_longitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+    <span class="n">LON1</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">map_longitudes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+    <span class="c1"># lon_ticks = np.arange(map_longitudes[0], map_longitudes[1]+0.5, 0.5)</span>
+    <span class="n">lon_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">LON0</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">LON1</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">LAT0</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">map_latitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+    <span class="n">LAT1</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">map_latitudes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+    <span class="c1"># lat_ticks = np.arange(map_latitudes[0], map_latitudes[1]+0.5, 0.5)</span>
+    <span class="n">lat_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">LAT0</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">LAT1</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="c1"># --------------------------------------------------------</span>
+
+    <span class="c1"># ----------- DRAW BORDERS -------------</span>
+    <span class="n">brds</span> <span class="o">=</span> <span class="n">ctp</span><span class="o">.</span><span class="n">feature</span><span class="o">.</span><span class="n">BORDERS</span>
+    <span class="c1"># --------------------------------------</span>
+
+    <span class="n">gl</span> <span class="o">=</span> <span class="n">map_axis</span><span class="o">.</span><span class="n">gridlines</span><span class="p">(</span>
+        <span class="n">draw_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span>
+    <span class="p">)</span>
+    <span class="n">gl</span><span class="o">.</span><span class="n">right_labels</span> <span class="o">=</span> <span class="n">right_labels</span>
+    <span class="n">gl</span><span class="o">.</span><span class="n">left_labels</span> <span class="o">=</span> <span class="n">left_labels</span>
+    <span class="n">gl</span><span class="o">.</span><span class="n">top_labels</span> <span class="o">=</span> <span class="n">top_labels</span>
+    <span class="n">gl</span><span class="o">.</span><span class="n">bottom_labels</span> <span class="o">=</span> <span class="n">bottom_labels</span>
+
+    <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;coastlines&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="c1"># print(&#39;Add coast lines.&#39;)</span>
+        <span class="n">map_axis</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span>
+            <span class="n">ctp</span><span class="o">.</span><span class="n">feature</span><span class="o">.</span><span class="n">GSHHSFeature</span><span class="p">(</span>
+                <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;full&quot;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;coastline_levels&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">zorder</span><span class="o">=</span><span class="mf">0.49</span>
+            <span class="p">)</span>
+        <span class="p">)</span>  <span class="c1"># , rasterized=True))</span>
+    <span class="c1"># comment this to save time on plotting high-resolution oceans</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;oceans&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">oceans</span> <span class="o">=</span> <span class="n">ctp</span><span class="o">.</span><span class="n">feature</span><span class="o">.</span><span class="n">OCEAN</span>
+        <span class="n">map_axis</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span>
+            <span class="n">ctp</span><span class="o">.</span><span class="n">feature</span><span class="o">.</span><span class="n">NaturalEarthFeature</span><span class="p">(</span>
+                <span class="n">category</span><span class="o">=</span><span class="n">oceans</span><span class="o">.</span><span class="n">category</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">oceans</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;10m&quot;</span><span class="p">,</span>
+                <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;#0076b482&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">faults</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">map_axis</span><span class="o">.</span><span class="n">add_geometries</span><span class="p">(</span>
+            <span class="n">faults</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="n">data_coords</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span>
+        <span class="p">)</span>
+    <span class="c1"># plot optional elements</span>
+    <span class="n">props</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round&quot;</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.2</span>
+    <span class="p">)</span>
+
+    <span class="c1"># plot seismic stations</span>
+    <span class="k">if</span> <span class="n">seismic_stations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># print(&#39;Add seismic stations.&#39;)</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seismic_stations</span><span class="p">[</span><span class="s2">&quot;stations&quot;</span><span class="p">])):</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">seismic_stations</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">map_longitudes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">seismic_stations</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">map_longitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">seismic_stations</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">map_latitudes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">seismic_stations</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">map_latitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">map_axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">seismic_stations</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">],</span>
+                <span class="n">seismic_stations</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">],</span>
+                <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;v&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+                <span class="n">markersize</span><span class="o">=</span><span class="n">markersize</span><span class="p">,</span>
+                <span class="n">transform</span><span class="o">=</span><span class="n">data_coords</span><span class="p">,</span>
+                <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">seismic_stations</span><span class="p">[</span><span class="s2">&quot;stations&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">map_axis</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                    <span class="n">seismic_stations</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.02</span><span class="p">,</span>
+                    <span class="n">seismic_stations</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">],</span>
+                    <span class="n">seismic_stations</span><span class="p">[</span><span class="s2">&quot;stations&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">],</span>
+                    <span class="n">fontsize</span><span class="o">=</span><span class="n">text_size</span><span class="p">,</span>
+                    <span class="n">transform</span><span class="o">=</span><span class="n">data_coords</span><span class="p">,</span>
+                    <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                    <span class="n">bbox</span><span class="o">=</span><span class="n">props</span><span class="p">,</span>
+                <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">map_axis</span></div>
+
+
+<div class="viewcode-block" id="add_scale_bar"><a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.add_scale_bar">[docs]</a><span class="k">def</span> <span class="nf">add_scale_bar</span><span class="p">(</span>
+    <span class="n">ax</span><span class="p">,</span> <span class="n">x_start</span><span class="p">,</span> <span class="n">y_start</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">source_crs</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;longitudinal&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    ax: GeoAxes instance</span>
+<span class="sd">        The axis on which we want to add a scale bar.</span>
+<span class="sd">    x_start: float</span>
+<span class="sd">        The x coordinate of the left end of the scale bar,</span>
+<span class="sd">        given in the axis coordinate system, i.e. from 0 to 1.</span>
+<span class="sd">    y_start: float</span>
+<span class="sd">        The y coordinate of the left end of the scale bar,</span>
+<span class="sd">        given in the axis coordinate system, i.e. from 0 to 1.</span>
+<span class="sd">    distance: float</span>
+<span class="sd">        The distance covered by the scale bar, in km.</span>
+<span class="sd">    source_crs: cartopy.crs</span>
+<span class="sd">        The coordinate system in which the data are written.</span>
+<span class="sd">    orientation: string, default to &#39;longitudinal&#39;</span>
+<span class="sd">        Either &#39;longitudinal&#39; or &#39;latitudinal&#39;. Determine the orientation</span>
+<span class="sd">        of the scale bar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">cartopy.geodesic</span> <span class="kn">import</span> <span class="n">Geodesic</span>
+    <span class="kn">from</span> <span class="nn">cartopy.crs</span> <span class="kn">import</span> <span class="n">PlateCarree</span>
+
+    <span class="n">G</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="p">()</span>
+
+    <span class="c1"># default values</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;lw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lw&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">)</span>
+
+    <span class="n">data_coords</span> <span class="o">=</span> <span class="n">PlateCarree</span><span class="p">()</span>
+    <span class="c1"># transform the axis coordinates into display coordinates</span>
+    <span class="n">display</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="o">.</span><span class="n">transform</span><span class="p">([</span><span class="n">x_start</span><span class="p">,</span> <span class="n">y_start</span><span class="p">])</span>
+    <span class="c1"># take display coordinates into data coordinates</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">transData</span><span class="o">.</span><span class="n">inverted</span><span class="p">()</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">display</span><span class="p">)</span>
+    <span class="c1"># take data coordinates into lon/lat</span>
+    <span class="n">lon_start</span><span class="p">,</span> <span class="n">lat_start</span> <span class="o">=</span> <span class="n">data_coords</span><span class="o">.</span><span class="n">transform_point</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">source_crs</span><span class="p">)</span>
+    <span class="c1"># get the coordinates of the end of the scale bar</span>
+    <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;latitudinal&quot;</span><span class="p">:</span>
+        <span class="n">lon_end</span><span class="p">,</span> <span class="n">lat_end</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
+            <span class="n">G</span><span class="o">.</span><span class="n">direct</span><span class="p">([</span><span class="n">lon_start</span><span class="p">,</span> <span class="n">lat_start</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1000.0</span> <span class="o">*</span> <span class="n">distance</span><span class="p">)</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;longitudinal&quot;</span><span class="p">:</span>
+        <span class="c1"># first, compute distance a function of longitude at</span>
+        <span class="c1"># the given latitude lat_start</span>
+        <span class="n">dist_per_lon</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">longitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lon_start</span><span class="p">,</span> <span class="n">lon_start</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">longitudes</span><span class="p">)):</span>
+            <span class="n">dist_per_lon</span> <span class="o">+=</span> <span class="n">utils</span><span class="o">.</span><span class="n">two_point_distance</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">longitudes</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">180.0</span><span class="p">)</span> <span class="o">%</span> <span class="mf">360.0</span> <span class="o">-</span> <span class="mf">180.0</span><span class="p">,</span>
+                <span class="n">lat_start</span><span class="p">,</span>
+                <span class="mf">0.0</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">longitudes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mf">180.0</span><span class="p">)</span> <span class="o">%</span> <span class="mf">360.0</span> <span class="o">-</span> <span class="mf">180.0</span><span class="p">,</span>
+                <span class="n">lat_start</span><span class="p">,</span>
+                <span class="mf">0.0</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">lon_end</span> <span class="o">=</span> <span class="p">((</span><span class="n">lon_start</span> <span class="o">+</span> <span class="n">distance</span> <span class="o">/</span> <span class="n">dist_per_lon</span><span class="p">)</span> <span class="o">+</span> <span class="mf">180.0</span><span class="p">)</span> <span class="o">%</span> <span class="mf">360.0</span> <span class="o">-</span> <span class="mf">180.0</span>
+        <span class="n">lat_end</span> <span class="o">=</span> <span class="n">lat_start</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;`orientation` should be &#39;longitudinal&#39; or &#39;latitudinal&#39;.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">lon_start</span><span class="p">,</span> <span class="n">lon_end</span><span class="p">],</span> <span class="p">[</span><span class="n">lat_start</span><span class="p">,</span> <span class="n">lat_end</span><span class="p">],</span> <span class="n">transform</span><span class="o">=</span><span class="n">data_coords</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">lon_start</span> <span class="o">+</span> <span class="n">lon_end</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">lat_start</span> <span class="o">+</span> <span class="n">lat_end</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">0.001</span><span class="p">,</span>
+        <span class="s2">&quot;</span><span class="si">{:.0f}</span><span class="s2">km&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">distance</span><span class="p">),</span>
+        <span class="n">transform</span><span class="o">=</span><span class="n">data_coords</span><span class="p">,</span>
+        <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+        <span class="n">va</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span></div>
+
+<div class="viewcode-block" id="uncertainty_ellipse"><a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.uncertainty_ellipse">[docs]</a><span class="k">def</span> <span class="nf">uncertainty_ellipse</span><span class="p">(</span>
+        <span class="n">hmax_uncertainty_km</span><span class="p">,</span>
+        <span class="n">hmin_uncertainty_km</span><span class="p">,</span>
+        <span class="n">hmax_azimuth_deg</span><span class="p">,</span>
+        <span class="n">longitude_center</span><span class="p">,</span>
+        <span class="n">latitude_center</span><span class="p">,</span>
+        <span class="n">num_points</span><span class="o">=</span><span class="mi">100</span>
+        <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a set of longitude and latitude points that describe the uncertainty ellipse.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    hmax_uncertainty_km : float</span>
+<span class="sd">        The length of the major axis of the uncertainty ellipse in kilometers.</span>
+<span class="sd">    hmin_uncertainty_km : float</span>
+<span class="sd">        The length of the minor axis of the uncertainty ellipse in kilometers.</span>
+<span class="sd">    hmax_azimuth_deg : float</span>
+<span class="sd">        The azimuth angle of the major axis of the uncertainty ellipse in degrees.</span>
+<span class="sd">    longitude_center : float</span>
+<span class="sd">        The longitude coordinate of the center point of the ellipse.</span>
+<span class="sd">    latitude_center : float</span>
+<span class="sd">        The latitude coordinate of the center point of the ellipse.</span>
+<span class="sd">    num_points : int, optional</span>
+<span class="sd">        The number of points used to describe the ellipse, default is 100.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    longitude_ellipse : numpy.ndarray</span>
+<span class="sd">        The longitude coordinates of the points that make up the uncertainty ellipse.</span>
+<span class="sd">    latitude_ellipse : numpy.ndarray</span>
+<span class="sd">        The latitude coordinates of the points that make up the uncertainty ellipse.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">cartopy.geodesic</span> <span class="kn">import</span> <span class="n">Geodesic</span>
+
+    <span class="n">azimuths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">360.</span><span class="p">,</span> <span class="n">num_points</span><span class="p">)</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">azimuths</span> <span class="o">-</span> <span class="n">hmax_azimuth_deg</span><span class="p">))</span>
+    <span class="c1"># ellipse formula</span>
+    <span class="n">eccentricity_pow2</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="p">(</span><span class="n">hmin_uncertainty_km</span> <span class="o">/</span> <span class="n">hmax_uncertainty_km</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">ellipse_m</span> <span class="o">=</span> <span class="n">hmin_uncertainty_km</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">eccentricity_pow2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># ray shooting with Geodesic</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="p">()</span>
+    <span class="n">longitude_ellipse</span><span class="p">,</span> <span class="n">latitude_ellipse</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">direct</span><span class="p">([</span><span class="n">longitude_center</span><span class="p">,</span> <span class="n">latitude_center</span><span class="p">],</span> <span class="n">azimuths</span><span class="p">,</span> <span class="mf">1000.</span> <span class="o">*</span> <span class="n">ellipse_m</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="n">longitude_ellipse</span><span class="p">,</span> <span class="n">latitude_ellipse</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Eric Beauce, William B. Frank.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
