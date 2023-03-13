@@ -2161,8 +2161,15 @@ class Event(object):
                     self.arrival_times.loc[station, f"{ph.upper()}_abs_arrival_times"]
                 ) - udt(self.origin_time)
 
-    def update_aux_data_database(self):
+    def update_aux_data_database(self, overwrite=False):
         """Add the new elements of `self.aux_data` that are not in the database.
+
+        Parameters
+        -----------
+
+        overwrite : boolean, optional
+            If True, will overwrite existing data. Otherwise, does not do
+            anything.
         """
         if not hasattr(self, "path_database"):
             print("It looks like you create this Event instance from scratch...")
@@ -2180,9 +2187,12 @@ class Event(object):
                 if hasattr(self, "hdf5_gid"):
                     fdb = fdb[self.hdf5_gid]
                 for key in self.aux_data:
-                    if key in fdb["aux_data"]:
+                    if key in fdb["aux_data"] and not overwrite:
                         # already exists
                         continue
+                    elif key in fdb["aux_data"] and overwrite:
+                        # overwrite it
+                        del fdb["aux_data"]
                     fdb["aux_data"].create_dataset(
                             key, data=self.aux_data[key]
                             )
