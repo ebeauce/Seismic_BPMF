@@ -9,6 +9,7 @@ str_parameters = [
             "NLLOC_INPUT_PATH",
             "NLLOC_OUTPUT_PATH",
             "NLLOC_BASENAME",
+            "PARAMETER_FILE",
         ]
 float_parameters = [
             "MIN_FREQ_HZ",
