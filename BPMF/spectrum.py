@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -127,6 +128,10 @@ class Spectrum:
             masked_spectra.append(
                 np.ma.masked_array(data=amplitude_spectrum, mask=mask)
             )
+        if len(masked_spectra) == 0:
+            # there seems to be cases when to spectra were in signal_spectrum??
+            print(f"No spectra found in {phase}_spectrum")
+            return
         masked_spectra = np.ma.asarray(masked_spectra)
         # count the number of channels that satisfied the SNR criterion
         num_valid_channels = np.sum(~masked_spectra.mask, axis=0)
@@ -298,7 +303,7 @@ class Spectrum:
                 mod, x, y, p0=p0, bounds=bounds, sigma=inverse_weights
             )
             self.inversion_success = True
-        except RuntimeError:
+        except (RuntimeError, ValueError):
             self.inversion_success = False
             return
         # check whether the low-frequency plateau was well constrained
@@ -530,3 +535,180 @@ def fc_circular_crack(
     vr = vr_vs_ratio * vs_m_per_s
     corner_frequency = (constant * vr) / (2.0 * np.pi * crack_radius)
     return corner_frequency
+
+
+# workflow function
+def compute_moment_magnitude(
+    event,
+    mag_params,
+    plot_above_Mw=100.0,
+    plot_above_random=1.0,
+    path_figures="",
+    plot=False,
+    figsize=(8, 8),
+):
+    """ """
+    event.set_moveouts_to_theoretical_times()
+    event.set_moveouts_to_empirical_times()
+
+    # ---------------------------------------------------------------
+    #                 extract waveforms
+    # first, read short extract before signal as an estimate of noise
+    event.read_waveforms(
+        mag_params["DURATION_SEC"],
+        time_shifted=False,
+        data_folder=mag_params["DATA_FOLDER"],
+        offset_ot=mag_params["OFFSET_OT_SEC_NOISE"],
+        attach_response=mag_params["ATTACH_RESPONSE"],
+    )
+    noise = event.traces.copy()
+    noise.remove_sensitivity()
+    # then, read signal
+    event.read_waveforms(
+        mag_params["DURATION_SEC"],
+        phase_on_comp=mag_params["PHASE_ON_COMP_P"],
+        offset_phase=mag_params["OFFSET_PHASE"],
+        time_shifted=mag_params["TIME_SHIFTED"],
+        data_folder=mag_params["DATA_FOLDER"],
+        attach_response=mag_params["ATTACH_RESPONSE"],
+    )
+    event.traces.remove_sensitivity()
+    event.zero_out_clipped_waveforms(kurtosis_threshold=-1)
+    p_wave = event.traces.copy()
+
+    event.read_waveforms(
+        mag_params["DURATION_SEC"],
+        phase_on_comp=mag_params["PHASE_ON_COMP_S"],
+        offset_phase=mag_params["OFFSET_PHASE"],
+        time_shifted=mag_params["TIME_SHIFTED"],
+        data_folder=mag_params["DATA_FOLDER"],
+        attach_response=mag_params["ATTACH_RESPONSE"],
+    )
+    event.traces.remove_sensitivity()
+    event.zero_out_clipped_waveforms(kurtosis_threshold=-1)
+    s_wave = event.traces.copy()
+
+    # -----------------------------------------------------------
+    spectrum = Spectrum(event=event)
+    spectrum.compute_spectrum(noise, "noise")
+    spectrum.compute_spectrum(p_wave, "p")
+    spectrum.compute_spectrum(s_wave, "s")
+
+    spectrum.set_target_frequencies(
+        mag_params["FREQ_MIN_HZ"], mag_params["FREQ_MAX_HZ"], mag_params["NUM_FREQS"]
+    )
+    spectrum.resample(spectrum.frequencies, spectrum.phases)
+    spectrum.compute_signal_to_noise_ratio("p")
+    spectrum.compute_signal_to_noise_ratio("s")
+
+    # from Ford et al 2008, BSSA
+    Q = mag_params["Q_1HZ"] * np.power(
+        spectrum.frequencies, mag_params["ATTENUATION_N"]
+    )
+    spectrum.attenuation_Q_model(Q, spectrum.frequencies)
+    spectrum.compute_correction_factor(
+        mag_params["RHO_KGM3"],
+        mag_params["VP_MS"],
+        mag_params["VS_MS"],
+    )
+
+    source_parameters = {}
+    for phase_for_mag in ["p", "s"]:
+        spectrum.compute_network_average_spectrum(
+            phase_for_mag,
+            mag_params["SNR_THRESHOLD"],
+            min_num_valid_channels_per_freq_bin=mag_params[
+                "MIN_NUM_VALID_CHANNELS_PER_FREQ_BIN"
+            ],
+        )
+        spectrum.integrate(phase_for_mag, average=True)
+        spectrum.fit_average_spectrum(
+            phase_for_mag,
+            model=mag_params["SPECTRAL_MODEL"],
+            min_fraction_valid_points_below_fc=mag_params[
+                "MIN_FRACTION_VALID_POINTS_BELOW_FC"
+            ],
+            weighted=mag_params["NUM_CHANNEL_WEIGHTED_FIT"],
+        )
+        if spectrum.inversion_success:
+            rel_M0_err = 100.0 * spectrum.M0_err / spectrum.M0
+            rel_fc_err = 100.0 * spectrum.fc_err / spectrum.fc
+            if (
+                rel_M0_err > mag_params["MAX_REL_M0_ERR_PCT"]
+                or spectrum.fc < 0.0
+                or spectrum.fc > mag_params["MAX_REL_FC_ERR_PCT"]
+            ):
+                continue
+            print(f"Relative error on M0: {rel_M0_err}%")
+            print(f"Relative error on fc: {rel_fc_err}%")
+            # event.set_aux_data({f"Mw_{phase_for_mag}": spectrum.Mw})
+            figtitle = (
+                f"{event.origin_time.strftime('%Y-%m-%dT%H:%M:%S')}: "
+                f"{event.latitude:.3f}"
+                "\u00b0"
+                f"N, {event.longitude:.3f}"
+                "\u00b0"
+                f"E, {event.depth:.1f}km, "
+                r"$\Delta M_0 / M_0=$"
+                f"{rel_M0_err:.1f}%, "
+                r"$\Delta f_c / f_c=$"
+                f"{rel_fc_err:.1f}%"
+            )
+            source_parameters[f"M0_{phase_for_mag}"] = spectrum.M0
+            source_parameters[f"Mw_{phase_for_mag}"] = spectrum.Mw
+            source_parameters[f"fc_{phase_for_mag}"] = spectrum.fc
+            source_parameters[f"M0_err_{phase_for_mag}"] = spectrum.M0_err
+            source_parameters[f"fc_err_{phase_for_mag}"] = spectrum.fc_err
+            if (
+                plot
+                and (spectrum.Mw > plot_above_Mw)
+                or np.random.random() > plot_above_random
+            ):
+                fig = spectrum.plot_average_spectrum(
+                    phase_for_mag,
+                    plot_fit=True,
+                    figname=f"{phase_for_mag}_spectrum_{event.id}",
+                    figsize=figsize,
+                    figtitle=figtitle,
+                    plot_std=True,
+                    plot_num_valid_channels=True,
+                )
+                fig.savefig(
+                    os.path.join(path_figures, fig._label + ".png"),
+                    format="png",
+                    bbox_inches="tight",
+                )
+                plt.close(fig)
+
+    Mw_exists = False
+    norm = 0.0
+    Mw = 0.0
+    Mw_err = 0.0
+    for ph in ["p", "s"]:
+        if f"Mw_{ph}" in source_parameters:
+            Mw += source_parameters[f"Mw_{ph}"]
+            Mw_err += (
+                2.0
+                / 3.0
+                * source_parameters[f"M0_err_{ph}"]
+                / source_parameters[f"M0_{ph}"]
+            )
+            norm += 1
+            Mw_exists = True
+    if Mw_exists:
+        Mw /= norm
+        Mw_err /= norm
+        source_parameters["Mw"] = Mw
+        source_parameters["Mw_err"] = Mw_err
+    else:
+        Mw = np.nan
+        Mw_err = np.nan
+
+    if Mw_exists:
+        print(f"The P-S averaged moment magnitude is {Mw:.2f} +/- {Mw_err:.2f}")
+        source_parameters["Mw"] = Mw
+        source_parameters["Mw_err"] = Mw_err
+
+    event.set_aux_data(source_parameters)
+
+    return event, spectrum
