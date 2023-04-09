@@ -132,7 +132,13 @@ class Spectrum:
             # there seems to be cases when to spectra were in signal_spectrum??
             print(f"No spectra found in {phase}_spectrum")
             return
-        masked_spectra = np.ma.asarray(masked_spectra)
+        # it looks like we need this explicit definition of the mask
+        # otherwise the mask can be converted to a single boolean when
+        # all elements are False
+        masked_spectra = np.ma.masked_array(
+                data=np.stack((arr.data for arr in masked_spectra), axis=0),
+                mask=np.stack((arr.mask for arr in masked_spectra), axis=0),
+                )
         # count the number of channels that satisfied the SNR criterion
         num_valid_channels = np.sum(~masked_spectra.mask, axis=0)
         # discard the frequency bins for which the minimum number
@@ -639,8 +645,8 @@ def compute_moment_magnitude(
                 or spectrum.fc > mag_params["MAX_REL_FC_ERR_PCT"]
             ):
                 continue
-            print(f"Relative error on M0: {rel_M0_err}%")
-            print(f"Relative error on fc: {rel_fc_err}%")
+            print(f"Relative error on M0: {rel_M0_err:.2f}%")
+            print(f"Relative error on fc: {rel_fc_err:.2f}%")
             # event.set_aux_data({f"Mw_{phase_for_mag}": spectrum.Mw})
             figtitle = (
                 f"{event.origin_time.strftime('%Y-%m-%dT%H:%M:%S')}: "
