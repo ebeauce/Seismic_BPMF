@@ -2179,7 +2179,7 @@ class Event(object):
         while os.path.isfile(lock_file):
             # another process is already writing in this file
             # wait a bit a check again
-            sleep(1.0)
+            sleep(0.1 + np.random.random())
         # create empty lock file
         open(lock_file, "w").close()
         try:
@@ -2202,6 +2202,112 @@ class Event(object):
         # remove lock file
         os.remove(lock_file)
 
+    def _write(
+        self,
+        db_filename,
+        db_path=cfg.OUTPUT_PATH,
+        save_waveforms=False,
+        gid=None,
+        hdf5_file=None,
+    ):
+        """See `Event.write`.
+        """
+        output_where = os.path.join(db_path, db_filename)
+        attributes = [
+            "origin_time",
+            "latitude",
+            "longitude",
+            "depth",
+            "moveouts",
+            "stations",
+            "components",
+            "phases",
+            "where",
+            "sampling_rate",
+        ]
+        # moveouts' indexes may have been re-ordered
+        # because writing moveouts as an array will forget about the current
+        # row indexes and assume that they are in the same order as
+        # self.stations, it is critical to make sure this is true
+        self.moveouts = self.moveouts.loc[self.stations]
+        if hdf5_file is None:
+            hdf5_file = h5.File(output_where, mode="a")
+            close_file = True
+        else:
+            close_file = False
+        if gid is not None:
+            if gid in hdf5_file:
+                # overwrite existing detection with same id
+                print(
+                    f"Found existing event {gid} in {output_where}. Overwrite it."
+                )
+                del hdf5_file[gid]
+            hdf5_file.create_group(gid)
+            f = hdf5_file[gid]
+        else:
+            f = hdf5_file
+        for attr in attributes:
+            if not hasattr(self, attr):
+                continue
+            attr_ = getattr(self, attr)
+            if attr == "origin_time":
+                attr_ = str(attr_)
+            if isinstance(attr_, list):
+                attr_ = np.asarray(attr_)
+            if isinstance(attr_, np.ndarray) and (
+                attr_.dtype.kind == np.dtype("U").kind
+            ):
+                attr_ = attr_.astype("S")
+            f.create_dataset(attr, data=attr_)
+        if hasattr(self, "aux_data"):
+            f.create_group("aux_data")
+            for key in self.aux_data.keys():
+                f["aux_data"].create_dataset(key, data=self.aux_data[key])
+        if hasattr(self, "picks"):
+            f.create_group("picks")
+            f["picks"].create_dataset(
+                "stations", data=np.asarray(self.picks.index).astype("S")
+            )
+            for column in self.picks.columns:
+                data = self.picks[column]
+                if data.dtype.kind == "M":
+                    # pandas datetime format
+                    data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
+                if data.dtype == np.dtype("O"):
+                    data = data.astype("S")
+                f["picks"].create_dataset(column, data=data)
+        if hasattr(self, "arrival_times"):
+            f.create_group("arrival_times")
+            f["arrival_times"].create_dataset(
+                "stations", data=np.asarray(self.arrival_times.index).astype("S")
+            )
+            for column in self.arrival_times.columns:
+                data = self.arrival_times[column]
+                if data.dtype.kind == "M":
+                    # pandas datetime format
+                    data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
+                if data.dtype == np.dtype("O"):
+                    data = data.astype("S")
+                f["arrival_times"].create_dataset(column, data=data)
+        if save_waveforms:
+            if hasattr(self, "traces"):
+                f.create_group("waveforms")
+                for tr in self.traces:
+                    sta = tr.stats.station
+                    cha = tr.stats.channel
+                    if sta not in f["waveforms"]:
+                        f["waveforms"].create_group(sta)
+                    if cha in f["waveforms"][sta]:
+                        print(f"{sta}.{cha} already exists!")
+                    else:
+                        f["waveforms"][sta].create_dataset(cha, data=tr.data)
+            else:
+                print(
+                    "You are trying to save the waveforms whereas you did"
+                    " not read them!"
+                )
+        if close_file:
+            hdf5_file.close()
 
     def write(
         self,
@@ -2228,115 +2334,153 @@ class Event(object):
             If not None, is an opened file pointing directly at the subfolder of
             interest.
         """
-        output_where = os.path.join(db_path, db_filename)
-        attributes = [
-            "origin_time",
-            "latitude",
-            "longitude",
-            "depth",
-            "moveouts",
-            "stations",
-            "components",
-            "phases",
-            "where",
-            "sampling_rate",
-        ]
-        # moveouts' indexes may have been re-ordered
-        # because writing moveouts as an array will forget about the current
-        # row indexes and assume that they are in the same order as
-        # self.stations, it is critical to make sure this is true
-        self.moveouts = self.moveouts.loc[self.stations]
-        lock_file = output_where + ".lock"
-        while os.path.isfile(lock_file):
-            # another process is already writing in this file
-            # wait a bit a check again
-            sleep(1.0)
-        # create empty lock file
-        open(lock_file, "w").close()
-        try:
-            if hdf5_file is None:
-                hdf5_file = h5.File(output_where, mode="a")
-                close_file = True
-            else:
-                close_file = False
-            if gid is not None:
-                if gid in hdf5_file:
-                    # overwrite existing detection with same id
-                    print(
-                        f"Found existing event {gid} in {output_where}. Overwrite it."
-                    )
-                    del hdf5_file[gid]
-                hdf5_file.create_group(gid)
-                f = hdf5_file[gid]
-            else:
-                f = hdf5_file
-            for attr in attributes:
-                if not hasattr(self, attr):
-                    continue
-                attr_ = getattr(self, attr)
-                if attr == "origin_time":
-                    attr_ = str(attr_)
-                if isinstance(attr_, list):
-                    attr_ = np.asarray(attr_)
-                if isinstance(attr_, np.ndarray) and (
-                    attr_.dtype.kind == np.dtype("U").kind
-                ):
-                    attr_ = attr_.astype("S")
-                f.create_dataset(attr, data=attr_)
-            if hasattr(self, "aux_data"):
-                f.create_group("aux_data")
-                for key in self.aux_data.keys():
-                    f["aux_data"].create_dataset(key, data=self.aux_data[key])
-            if hasattr(self, "picks"):
-                f.create_group("picks")
-                f["picks"].create_dataset(
-                    "stations", data=np.asarray(self.picks.index).astype("S")
+        from functools import partial
+        func = partial(
+                self._write,
+                db_path="",
+                save_waveforms=save_waveforms,
+                gid=gid,
+                hdf5_file=hdf5_file
                 )
-                for column in self.picks.columns:
-                    data = self.picks[column]
-                    if data.dtype.kind == "M":
-                        # pandas datetime format
-                        data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
-                    if data.dtype == np.dtype("O"):
-                        data = data.astype("S")
-                    f["picks"].create_dataset(column, data=data)
-            if hasattr(self, "arrival_times"):
-                f.create_group("arrival_times")
-                f["arrival_times"].create_dataset(
-                    "stations", data=np.asarray(self.arrival_times.index).astype("S")
+        utils.read_write_waiting_list(
+                func, os.path.join(db_path, db_filename)
                 )
-                for column in self.arrival_times.columns:
-                    data = self.arrival_times[column]
-                    if data.dtype.kind == "M":
-                        # pandas datetime format
-                        data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
-                    if data.dtype == np.dtype("O"):
-                        data = data.astype("S")
-                    f["arrival_times"].create_dataset(column, data=data)
-            if save_waveforms:
-                if hasattr(self, "traces"):
-                    f.create_group("waveforms")
-                    for tr in self.traces:
-                        sta = tr.stats.station
-                        cha = tr.stats.channel
-                        if sta not in f["waveforms"]:
-                            f["waveforms"].create_group(sta)
-                        if cha in f["waveforms"][sta]:
-                            print(f"{sta}.{cha} already exists!")
-                        else:
-                            f["waveforms"][sta].create_dataset(cha, data=tr.data)
-                else:
-                    print(
-                        "You are trying to save the waveforms whereas you did"
-                        " not read them!"
-                    )
-            if close_file:
-                hdf5_file.close()
-        except Exception as e:
-            os.remove(lock_file)
-            raise (e)
-        # remove lock file
-        os.remove(lock_file)
+
+
+    #def write(
+    #    self,
+    #    db_filename,
+    #    db_path=cfg.OUTPUT_PATH,
+    #    save_waveforms=False,
+    #    gid=None,
+    #    hdf5_file=None,
+    #):
+    #    """Write to hdf5 file.
+
+    #    Parameters
+    #    ------------
+    #    db_filename: string
+    #        Name of the hdf5 file storing the event information.
+    #    db_path: string, default to `cfg.OUTPUT_PATH`
+    #        Name of the directory with `db_filename`.
+    #    save_waveforms: boolean, default to False
+    #        If True, save the waveforms.
+    #    gid: string, default to None
+    #        Name of the hdf5 group where Event will be stored. If `gid=None`
+    #        then Event is directly stored at the root.
+    #    hdf5_file: `h5py.File`, default to None
+    #        If not None, is an opened file pointing directly at the subfolder of
+    #        interest.
+    #    """
+    #    output_where = os.path.join(db_path, db_filename)
+    #    attributes = [
+    #        "origin_time",
+    #        "latitude",
+    #        "longitude",
+    #        "depth",
+    #        "moveouts",
+    #        "stations",
+    #        "components",
+    #        "phases",
+    #        "where",
+    #        "sampling_rate",
+    #    ]
+    #    # moveouts' indexes may have been re-ordered
+    #    # because writing moveouts as an array will forget about the current
+    #    # row indexes and assume that they are in the same order as
+    #    # self.stations, it is critical to make sure this is true
+    #    self.moveouts = self.moveouts.loc[self.stations]
+    #    lock_file = output_where + ".lock"
+    #    while os.path.isfile(lock_file):
+    #        # another process is already writing in this file
+    #        # wait a bit a check again
+    #        sleep(1.0)
+    #    # create empty lock file
+    #    open(lock_file, "w").close()
+    #    try:
+    #        if hdf5_file is None:
+    #            hdf5_file = h5.File(output_where, mode="a")
+    #            close_file = True
+    #        else:
+    #            close_file = False
+    #        if gid is not None:
+    #            if gid in hdf5_file:
+    #                # overwrite existing detection with same id
+    #                print(
+    #                    f"Found existing event {gid} in {output_where}. Overwrite it."
+    #                )
+    #                del hdf5_file[gid]
+    #            hdf5_file.create_group(gid)
+    #            f = hdf5_file[gid]
+    #        else:
+    #            f = hdf5_file
+    #        for attr in attributes:
+    #            if not hasattr(self, attr):
+    #                continue
+    #            attr_ = getattr(self, attr)
+    #            if attr == "origin_time":
+    #                attr_ = str(attr_)
+    #            if isinstance(attr_, list):
+    #                attr_ = np.asarray(attr_)
+    #            if isinstance(attr_, np.ndarray) and (
+    #                attr_.dtype.kind == np.dtype("U").kind
+    #            ):
+    #                attr_ = attr_.astype("S")
+    #            f.create_dataset(attr, data=attr_)
+    #        if hasattr(self, "aux_data"):
+    #            f.create_group("aux_data")
+    #            for key in self.aux_data.keys():
+    #                f["aux_data"].create_dataset(key, data=self.aux_data[key])
+    #        if hasattr(self, "picks"):
+    #            f.create_group("picks")
+    #            f["picks"].create_dataset(
+    #                "stations", data=np.asarray(self.picks.index).astype("S")
+    #            )
+    #            for column in self.picks.columns:
+    #                data = self.picks[column]
+    #                if data.dtype.kind == "M":
+    #                    # pandas datetime format
+    #                    data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
+    #                if data.dtype == np.dtype("O"):
+    #                    data = data.astype("S")
+    #                f["picks"].create_dataset(column, data=data)
+    #        if hasattr(self, "arrival_times"):
+    #            f.create_group("arrival_times")
+    #            f["arrival_times"].create_dataset(
+    #                "stations", data=np.asarray(self.arrival_times.index).astype("S")
+    #            )
+    #            for column in self.arrival_times.columns:
+    #                data = self.arrival_times[column]
+    #                if data.dtype.kind == "M":
+    #                    # pandas datetime format
+    #                    data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
+    #                if data.dtype == np.dtype("O"):
+    #                    data = data.astype("S")
+    #                f["arrival_times"].create_dataset(column, data=data)
+    #        if save_waveforms:
+    #            if hasattr(self, "traces"):
+    #                f.create_group("waveforms")
+    #                for tr in self.traces:
+    #                    sta = tr.stats.station
+    #                    cha = tr.stats.channel
+    #                    if sta not in f["waveforms"]:
+    #                        f["waveforms"].create_group(sta)
+    #                    if cha in f["waveforms"][sta]:
+    #                        print(f"{sta}.{cha} already exists!")
+    #                    else:
+    #                        f["waveforms"][sta].create_dataset(cha, data=tr.data)
+    #            else:
+    #                print(
+    #                    "You are trying to save the waveforms whereas you did"
+    #                    " not read them!"
+    #                )
+    #        if close_file:
+    #            hdf5_file.close()
+    #    except Exception as e:
+    #        os.remove(lock_file)
+    #        raise (e)
+    #    # remove lock file
+    #    os.remove(lock_file)
 
     # -----------------------------------------------------------
     #            plotting method(s)
