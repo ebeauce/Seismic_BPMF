@@ -3695,7 +3695,7 @@ class TemplateGroup(Family):
             compute_from_scratch = True
         if compute_from_scratch:
             # compute from scratch
-            self.n_closest_stations(n_stations)
+            #self.n_closest_stations(n_stations)
             print("Computing the similarity matrix...")
             # format arrays for FMF
             data_arr = self.waveforms_arr.copy()
@@ -3704,14 +3704,33 @@ class TemplateGroup(Family):
             intertp_cc = np.zeros(
                 (self.n_templates, self.n_templates), dtype=np.float32
             )
-            n_stations, n_components = moveouts_arr.shape[1:]
+            n_network_stations, n_components = moveouts_arr.shape[1:]
             # use FMF on one template at a time against all others
             for t, template in tqdm(
                 enumerate(self.templates), desc="Inter-tp CC", disable=disable
             ):
-                # print(f'--- {t} / {self.n_templates} ---')
                 weights = np.zeros(template_arr.shape[:-1], dtype=np.float32)
-                weights[:, self.network_to_template_map[t, ...]] = 1.0
+                # select the `n_stations` closest stations
+                # apply similar approach than Event.n_closest_stations
+                station_pool = template.network_stations[template.availability]
+                closest_stations = (
+                        template.source_receiver_dist\
+                                .loc[station_pool].sort_values().index[:n_stations]
+                        )
+                # make sure we return a n_stations-vector
+                if len(closest_stations) < n_stations:
+                    missing = n_stations - len(closest_stations)
+                    closest_stations = np.hstack(
+                        (
+                            closest_stations,
+                            template.source_receiver_dist.drop(closest_stations, axis="rows")
+                            .sort_values()
+                            .index[:missing],
+                        )
+                    )
+                for s, sta in enumerate(template.network_stations):
+                    if sta in closest_stations:
+                        weights[:, s, :] = 1.0
                 weights /= np.sum(weights, axis=(1, 2), keepdims=True)
                 above_thrs = self.ellipsoid_dist[self.tids[t]] > distance_threshold
                 weights[above_thrs, ...] = 0.0
