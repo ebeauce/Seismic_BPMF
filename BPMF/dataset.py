@@ -1563,6 +1563,7 @@ class Event(object):
         time_shifted=True,
         offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
         data_reader=None,
+        n_threads=1,
         **reader_kwargs,
     ):
         """Read waveform data (Event class).
@@ -1599,6 +1600,9 @@ class Event(object):
         """
         # from pyasdf import ASDFDataSet
         from obspy import Stream
+        from functools import partial
+        if n_threads != 1:
+            from concurrent.futures import ThreadPoolExecutor
 
         if data_reader is None:
             data_reader = self.data_reader
@@ -1608,6 +1612,7 @@ class Event(object):
         self.traces = Stream()
         self.duration = duration
         self.n_samples = utils.sec_to_samp(self.duration, sr=self.sr)
+        reading_task_list = []
         for sta in self.stations:
             for comp in self.components:
                 ph = phase_on_comp[comp]
@@ -1620,14 +1625,41 @@ class Event(object):
                 else:
                     pick = self.origin_time - offset_ot
                 for cp_alias in component_aliases[comp]:
-                    self.traces += data_reader(
-                        self.where,
-                        station=sta,
-                        channel=cp_alias,
-                        starttime=pick,
-                        endtime=pick + duration,
-                        **reader_kwargs,
-                    )
+                    reading_task_list.append(
+                            partial(
+                                data_reader,
+                                where=self.where,
+                                station=sta,
+                                channel=cp_alias,
+                                starttime=pick,
+                                endtime=pick + duration,
+                                **reader_kwargs,
+                                )
+                            )
+                    #self.traces += data_reader(
+                    #    self.where,
+                    #    station=sta,
+                    #    channel=cp_alias,
+                    #    starttime=pick,
+                    #    endtime=pick + duration,
+                    #    **reader_kwargs,
+                    #)
+        if n_threads != 1:
+            if n_threads in [0, None, "all"]:
+                # n_threads = None means use all CPUs
+                n_threads = None
+            with ThreadPoolExecutor(max_workers=n_threads) as executor:
+                traces_ = list(
+                        executor.map(
+                            lambda i: reading_task_list[i](),
+                            range(len(reading_task_list))
+                            )
+                        )
+            for tr in traces_:
+                self.traces += tr
+        else:
+            for task in reading_task_list:
+                self.traces += task()
         for ph in offset_phase.keys():
             self.set_aux_data({f"offset_{ph.upper()}": offset_phase[ph]})
         for comp in phase_on_comp.keys():
