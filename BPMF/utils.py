@@ -4,6 +4,7 @@ import glob
 import numpy as np
 import h5py as h5
 import pandas as pd
+import pathlib
 
 import obspy as obs
 from obspy.core import UTCDateTime as udt
@@ -1574,3 +1575,91 @@ def donefun():
     ⠀⠀⠙⠤⠴⢤⡤⠤⠤⠋⠉⠉⠉⠉⠉⠉⠉⠳⠖⠦⠤⠶⠦⠞⠁⠀⠀⠀
                 ALL DONE!⠀⠀⠀⠀
     """)
+
+def write_lock_file(path, check=False, flush=False):
+    if check:
+        assert os.path.isfile(path) is False, f"Lock file {path} already exists!"
+    if not flush:
+        open(path, "w").close()
+    else:
+        f = open(path, "w")
+        f.flush()
+        os.fsync(f.fileno())
+        f.close()
+
+def read_write_waiting_list(func, path, unit_wait_time=0.2):
+    """Read/write queue to avoid conflicts between jobs.
+    """
+    from time import sleep
+    path_no_ext, _ = os.path.splitext(path)
+    while True:
+        try:
+            path_lock = path_no_ext + "_lock"
+            path_wait = path_no_ext + "_waiting_list"
+            sleep(unit_wait_time * np.random.random())
+            waiting_list_position = len(glob.glob(path_wait + "*"))
+            waiting_list_ticket = f"{path_wait}{waiting_list_position:d}"
+            while True:
+                try:
+                    # take place in waiting list by creating empty file
+                    write_lock_file(waiting_list_ticket, check=True)
+                    break
+                except AssertionError:
+                    # several jobs trying to create the same ticket?
+                    # randomness will solve the conflict
+                    waiting_list_position += np.random.randint(5)
+                    waiting_list_ticket = f"{path_wait}{waiting_list_position:d}"
+            next_place_ticket = f"{path_wait}{waiting_list_position-1:d}"
+            #print(f"1: Created {os.path.basename(waiting_list_ticket)}")
+            while True:
+                #sleep(unit_wait_time * np.random.random())
+                if (waiting_list_position == 0):
+                    # is first in the waiting list!
+                    if not os.path.isfile(path_lock):
+                        # first, create lock file
+                        write_lock_file(path_lock, flush=True)
+                        #print(f"2: Created {os.path.basename(path_lock)}")
+                        # then, free the waiting list position #0
+                        pathlib.Path(waiting_list_ticket).unlink()
+                        #print(f"2: Deleted {os.path.basename(waiting_list_ticket)}")
+                        # now the process can proceed with the reading or writing
+                        break
+                    else:
+                        # wait a bit
+                        sleep(unit_wait_time * np.random.random())
+                elif not os.path.isfile(next_place_ticket):
+                    # front place in the waiting list was freed!
+                    # first, create new ticket at the new position
+                    write_lock_file(next_place_ticket)
+                    #print(f"3: Created {os.path.basename(next_place_ticket)}")
+                    # then, free previous place in the waiting list
+                    pathlib.Path(waiting_list_ticket).unlink()
+                    #print(f"3: Deleted {os.path.basename(waiting_list_ticket)}")
+                    # update place in waiting list
+                    waiting_list_position -= 1
+                    # update ticket names
+                    waiting_list_ticket = f"{path_wait}{waiting_list_position:d}"
+                    next_place_ticket = f"{path_wait}{waiting_list_position-1:d}"
+                    # and wait for its turn
+                    sleep(unit_wait_time * np.random.random())
+                else:
+                    # waiting list didn't change, just wait
+                    sleep(unit_wait_time * np.random.random())
+            # start reading/writing
+            try:
+                func(path)
+            except Exception as e:
+                pathlib.Path(path_lock).unlink()
+                raise(e)
+            pathlib.Path(path_lock).unlink()
+            break
+            # done!
+        except FileNotFoundError:
+            print("4: Concurent error, reset queue "
+                  f"(last ticket was {waiting_list_ticket})")
+            if waiting_list_position == 0:
+                print(os.path.isfile(path_lock))
+                pathlib.Path(path_lock).unlink()
+            continue
+
+

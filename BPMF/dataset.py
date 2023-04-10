@@ -1563,42 +1563,50 @@ class Event(object):
         time_shifted=True,
         offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
         data_reader=None,
+        n_threads=1,
         **reader_kwargs,
     ):
         """Read waveform data (Event class).
 
         Parameters
         -----------
-        duration: scalar float
+        duration : float
             Duration, in seconds, of the extracted time windows.
-        phase_on_comp: dictionary, optional
+        phase_on_comp : dictionary, optional
             Dictionary defining which seismic phase is extracted on each
             component. For example, phase_on_comp['N'] gives the phase that is
             extracted on the north component.
-        component_aliases: Dictionary
+        component_aliases : dictionary, optional
             Each entry of the dictionary is a list of strings.
             `component_aliases[comp]` is the list of all aliases used for
             the same component 'comp'. For example, `component_aliases['N'] =
             ['N', '1']` means that both the 'N' and '1' channels will be mapped
             to the Event's 'N' channel.
-        offset_phase: dictionary, optional
+        offset_phase : dictionary, optional
             Dictionary defining when the time window starts with respect to the
             pick. A positive offset means the window starts before the pick. Not
             used if `time_shifted` is False.
-        time_shifted: boolean, default to True
-            If True, the moveouts are used to extract time windows from specific
+        time_shifted : boolean, optional
+            If True (default), the moveouts are used to extract time windows from specific
             seismic phases. If False, windows are simply extracted with respect to
             the origin time.
-        offset_ot: scalar float, default to `cfg.BUFFER_EXTRACTED_EVENTS_SEC`
+        offset_ot : float, optional
             Only used if `time_shifted` is False. Time, in seconds, taken before
-            `origin_time`.
-        data_reader: function, default to None
+            `origin_time`. Default to `cfg.BUFFER_EXTRACTED_EVENTS_SEC`.
+        data_reader : func, optional
             Function that takes a path and optional key-word arguments to read
-            data from this path and returns an `obspy.Stream` instance. If None,
-            use `self.data_reader` and return None if `self.data_reader=None`.
+            data from this path and returns an `obspy.Stream` instance. If None
+            (default), this function uses `self.data_reader` and returns
+            None if `self.data_reader=None`.
+        n_threads : int, optional
+            The number of threads used to parallelize reading. Default is 1
+            (sequential reading). 
         """
         # from pyasdf import ASDFDataSet
         from obspy import Stream
+        from functools import partial
+        if n_threads != 1:
+            from concurrent.futures import ThreadPoolExecutor
 
         if data_reader is None:
             data_reader = self.data_reader
@@ -1608,6 +1616,7 @@ class Event(object):
         self.traces = Stream()
         self.duration = duration
         self.n_samples = utils.sec_to_samp(self.duration, sr=self.sr)
+        reading_task_list = []
         for sta in self.stations:
             for comp in self.components:
                 ph = phase_on_comp[comp]
@@ -1620,14 +1629,33 @@ class Event(object):
                 else:
                     pick = self.origin_time - offset_ot
                 for cp_alias in component_aliases[comp]:
-                    self.traces += data_reader(
-                        self.where,
-                        station=sta,
-                        channel=cp_alias,
-                        starttime=pick,
-                        endtime=pick + duration,
-                        **reader_kwargs,
-                    )
+                    reading_task_list.append(
+                            partial(
+                                data_reader,
+                                where=self.where,
+                                station=sta,
+                                channel=cp_alias,
+                                starttime=pick,
+                                endtime=pick + duration,
+                                **reader_kwargs,
+                                )
+                            )
+        if n_threads != 1:
+            if n_threads in [0, None, "all"]:
+                # n_threads = None means use all CPUs
+                n_threads = None
+            with ThreadPoolExecutor(max_workers=n_threads) as executor:
+                traces_ = list(
+                        executor.map(
+                            lambda i: reading_task_list[i](),
+                            range(len(reading_task_list))
+                            )
+                        )
+            for tr in traces_:
+                self.traces += tr
+        else:
+            for task in reading_task_list:
+                self.traces += task()
         for ph in offset_phase.keys():
             self.set_aux_data({f"offset_{ph.upper()}": offset_phase[ph]})
         for comp in phase_on_comp.keys():
@@ -1647,9 +1675,11 @@ class Event(object):
 
         Parameters
         ----------
-        routine: string, default to 'NLLoc'
-            Method used for relocation. 'NLLoc' calls `relocated_NLLoc` and
-            requires `self` to have the attribute `picks`.
+        routine : string, optional
+            Method used for relocation.
+                - 'NLLoc' calls `relocate_NLLoc` and
+                requires `self` to have the attribute `picks`.
+                - 'beam' calls `relocated_beam`.
         """
         if routine.lower() == "nlloc":
             self.relocate_NLLoc(**kwargs)
@@ -1668,7 +1698,45 @@ class Event(object):
         device="cpu",
         **kwargs,
     ):
-        """ """
+        """ 
+        Parameters
+        ----------
+        beamformer : `BPMF.template_search.Beamformer`
+            Beamformer instance used for backprojection.
+        duration : float, optional
+            Duration, in seconds, of the extracted time windows. Default is
+            60sec.
+        offset_ot : float, optional
+            Only used if `time_shifted` is False. Time, in seconds, taken before
+            `origin_time`. Default to `cfg.BUFFER_EXTRACTED_EVENTS_SEC`.
+        phase_on_comp : dictionary, optional
+            Dictionary defining which seismic phase is extracted on each
+            component. For example, phase_on_comp['N'] gives the phase that is
+            extracted on the north component.
+        component_aliases : dictionary, optional
+            Each entry of the dictionary is a list of strings.
+            `component_aliases[comp]` is the list of all aliases used for
+            the same component 'comp'. For example, `component_aliases['N'] =
+            ['N', '1']` means that both the 'N' and '1' channels will be mapped
+            to the Event's 'N' channel.
+        offset_phase : dictionary, optional
+            Dictionary defining when the time window starts with respect to the
+            pick. A positive offset means the window starts before the pick. Not
+            used if `time_shifted` is False.
+        waveform_features : numpy.ndarray, optional
+            If not None (default), it must be a `(num_stations, num_channels,
+            num_time_samples)` numpy.ndarray. This array contains the waveform
+            features, or characteristic functions, that are backprojected onto
+            the grid of theoretical seismic sources.
+        restricted_domain_side_km : float, optional
+            Location uncertainties are computed on the full 3D beam at the time
+            when the 4D beam achieves its maximum over the `duration` seconds.
+            To avoid having grid-size-dependent uncertainties, it is useful
+            to truncate the domain around the location of the max beam. This
+            variable controls the size of the truncated domain.
+        device : string, optional
+            Either 'cpu' (default) or 'gpu'.
+        """
         from .template_search import Beamformer, envelope
 
         if kwargs.get("read_waveforms", True):
@@ -2161,8 +2229,15 @@ class Event(object):
                     self.arrival_times.loc[station, f"{ph.upper()}_abs_arrival_times"]
                 ) - udt(self.origin_time)
 
-    def update_aux_data_database(self):
+    def update_aux_data_database(self, overwrite=False):
         """Add the new elements of `self.aux_data` that are not in the database.
+
+        Parameters
+        -----------
+
+        overwrite : boolean, optional
+            If True, will overwrite existing data. Otherwise, does not do
+            anything.
         """
         if not hasattr(self, "path_database"):
             print("It looks like you create this Event instance from scratch...")
@@ -2172,7 +2247,7 @@ class Event(object):
         while os.path.isfile(lock_file):
             # another process is already writing in this file
             # wait a bit a check again
-            sleep(1.0)
+            sleep(0.1 + np.random.random())
         # create empty lock file
         open(lock_file, "w").close()
         try:
@@ -2180,9 +2255,12 @@ class Event(object):
                 if hasattr(self, "hdf5_gid"):
                     fdb = fdb[self.hdf5_gid]
                 for key in self.aux_data:
-                    if key in fdb["aux_data"]:
+                    if key in fdb["aux_data"] and not overwrite:
                         # already exists
                         continue
+                    elif key in fdb["aux_data"] and overwrite:
+                        # overwrite it
+                        del fdb["aux_data"]
                     fdb["aux_data"].create_dataset(
                             key, data=self.aux_data[key]
                             )
@@ -2192,6 +2270,112 @@ class Event(object):
         # remove lock file
         os.remove(lock_file)
 
+    def _write(
+        self,
+        db_filename,
+        db_path=cfg.OUTPUT_PATH,
+        save_waveforms=False,
+        gid=None,
+        hdf5_file=None,
+    ):
+        """See `Event.write`.
+        """
+        output_where = os.path.join(db_path, db_filename)
+        attributes = [
+            "origin_time",
+            "latitude",
+            "longitude",
+            "depth",
+            "moveouts",
+            "stations",
+            "components",
+            "phases",
+            "where",
+            "sampling_rate",
+        ]
+        # moveouts' indexes may have been re-ordered
+        # because writing moveouts as an array will forget about the current
+        # row indexes and assume that they are in the same order as
+        # self.stations, it is critical to make sure this is true
+        self.moveouts = self.moveouts.loc[self.stations]
+        if hdf5_file is None:
+            hdf5_file = h5.File(output_where, mode="a")
+            close_file = True
+        else:
+            close_file = False
+        if gid is not None:
+            if gid in hdf5_file:
+                # overwrite existing detection with same id
+                print(
+                    f"Found existing event {gid} in {output_where}. Overwrite it."
+                )
+                del hdf5_file[gid]
+            hdf5_file.create_group(gid)
+            f = hdf5_file[gid]
+        else:
+            f = hdf5_file
+        for attr in attributes:
+            if not hasattr(self, attr):
+                continue
+            attr_ = getattr(self, attr)
+            if attr == "origin_time":
+                attr_ = str(attr_)
+            if isinstance(attr_, list):
+                attr_ = np.asarray(attr_)
+            if isinstance(attr_, np.ndarray) and (
+                attr_.dtype.kind == np.dtype("U").kind
+            ):
+                attr_ = attr_.astype("S")
+            f.create_dataset(attr, data=attr_)
+        if hasattr(self, "aux_data"):
+            f.create_group("aux_data")
+            for key in self.aux_data.keys():
+                f["aux_data"].create_dataset(key, data=self.aux_data[key])
+        if hasattr(self, "picks"):
+            f.create_group("picks")
+            f["picks"].create_dataset(
+                "stations", data=np.asarray(self.picks.index).astype("S")
+            )
+            for column in self.picks.columns:
+                data = self.picks[column]
+                if data.dtype.kind == "M":
+                    # pandas datetime format
+                    data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
+                if data.dtype == np.dtype("O"):
+                    data = data.astype("S")
+                f["picks"].create_dataset(column, data=data)
+        if hasattr(self, "arrival_times"):
+            f.create_group("arrival_times")
+            f["arrival_times"].create_dataset(
+                "stations", data=np.asarray(self.arrival_times.index).astype("S")
+            )
+            for column in self.arrival_times.columns:
+                data = self.arrival_times[column]
+                if data.dtype.kind == "M":
+                    # pandas datetime format
+                    data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
+                if data.dtype == np.dtype("O"):
+                    data = data.astype("S")
+                f["arrival_times"].create_dataset(column, data=data)
+        if save_waveforms:
+            if hasattr(self, "traces"):
+                f.create_group("waveforms")
+                for tr in self.traces:
+                    sta = tr.stats.station
+                    cha = tr.stats.channel
+                    if sta not in f["waveforms"]:
+                        f["waveforms"].create_group(sta)
+                    if cha in f["waveforms"][sta]:
+                        print(f"{sta}.{cha} already exists!")
+                    else:
+                        f["waveforms"][sta].create_dataset(cha, data=tr.data)
+            else:
+                print(
+                    "You are trying to save the waveforms whereas you did"
+                    " not read them!"
+                )
+        if close_file:
+            hdf5_file.close()
 
     def write(
         self,
@@ -2218,115 +2402,153 @@ class Event(object):
             If not None, is an opened file pointing directly at the subfolder of
             interest.
         """
-        output_where = os.path.join(db_path, db_filename)
-        attributes = [
-            "origin_time",
-            "latitude",
-            "longitude",
-            "depth",
-            "moveouts",
-            "stations",
-            "components",
-            "phases",
-            "where",
-            "sampling_rate",
-        ]
-        # moveouts' indexes may have been re-ordered
-        # because writing moveouts as an array will forget about the current
-        # row indexes and assume that they are in the same order as
-        # self.stations, it is critical to make sure this is true
-        self.moveouts = self.moveouts.loc[self.stations]
-        lock_file = output_where + ".lock"
-        while os.path.isfile(lock_file):
-            # another process is already writing in this file
-            # wait a bit a check again
-            sleep(1.0)
-        # create empty lock file
-        open(lock_file, "w").close()
-        try:
-            if hdf5_file is None:
-                hdf5_file = h5.File(output_where, mode="a")
-                close_file = True
-            else:
-                close_file = False
-            if gid is not None:
-                if gid in hdf5_file:
-                    # overwrite existing detection with same id
-                    print(
-                        f"Found existing event {gid} in {output_where}. Overwrite it."
-                    )
-                    del hdf5_file[gid]
-                hdf5_file.create_group(gid)
-                f = hdf5_file[gid]
-            else:
-                f = hdf5_file
-            for attr in attributes:
-                if not hasattr(self, attr):
-                    continue
-                attr_ = getattr(self, attr)
-                if attr == "origin_time":
-                    attr_ = str(attr_)
-                if isinstance(attr_, list):
-                    attr_ = np.asarray(attr_)
-                if isinstance(attr_, np.ndarray) and (
-                    attr_.dtype.kind == np.dtype("U").kind
-                ):
-                    attr_ = attr_.astype("S")
-                f.create_dataset(attr, data=attr_)
-            if hasattr(self, "aux_data"):
-                f.create_group("aux_data")
-                for key in self.aux_data.keys():
-                    f["aux_data"].create_dataset(key, data=self.aux_data[key])
-            if hasattr(self, "picks"):
-                f.create_group("picks")
-                f["picks"].create_dataset(
-                    "stations", data=np.asarray(self.picks.index).astype("S")
+        from functools import partial
+        func = partial(
+                self._write,
+                db_path="",
+                save_waveforms=save_waveforms,
+                gid=gid,
+                hdf5_file=hdf5_file
                 )
-                for column in self.picks.columns:
-                    data = self.picks[column]
-                    if data.dtype.kind == "M":
-                        # pandas datetime format
-                        data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
-                    if data.dtype == np.dtype("O"):
-                        data = data.astype("S")
-                    f["picks"].create_dataset(column, data=data)
-            if hasattr(self, "arrival_times"):
-                f.create_group("arrival_times")
-                f["arrival_times"].create_dataset(
-                    "stations", data=np.asarray(self.arrival_times.index).astype("S")
+        utils.read_write_waiting_list(
+                func, os.path.join(db_path, db_filename)
                 )
-                for column in self.arrival_times.columns:
-                    data = self.arrival_times[column]
-                    if data.dtype.kind == "M":
-                        # pandas datetime format
-                        data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
-                    if data.dtype == np.dtype("O"):
-                        data = data.astype("S")
-                    f["arrival_times"].create_dataset(column, data=data)
-            if save_waveforms:
-                if hasattr(self, "traces"):
-                    f.create_group("waveforms")
-                    for tr in self.traces:
-                        sta = tr.stats.station
-                        cha = tr.stats.channel
-                        if sta not in f["waveforms"]:
-                            f["waveforms"].create_group(sta)
-                        if cha in f["waveforms"][sta]:
-                            print(f"{sta}.{cha} already exists!")
-                        else:
-                            f["waveforms"][sta].create_dataset(cha, data=tr.data)
-                else:
-                    print(
-                        "You are trying to save the waveforms whereas you did"
-                        " not read them!"
-                    )
-            if close_file:
-                hdf5_file.close()
-        except Exception as e:
-            os.remove(lock_file)
-            raise (e)
-        # remove lock file
-        os.remove(lock_file)
+
+
+    #def write(
+    #    self,
+    #    db_filename,
+    #    db_path=cfg.OUTPUT_PATH,
+    #    save_waveforms=False,
+    #    gid=None,
+    #    hdf5_file=None,
+    #):
+    #    """Write to hdf5 file.
+
+    #    Parameters
+    #    ------------
+    #    db_filename: string
+    #        Name of the hdf5 file storing the event information.
+    #    db_path: string, default to `cfg.OUTPUT_PATH`
+    #        Name of the directory with `db_filename`.
+    #    save_waveforms: boolean, default to False
+    #        If True, save the waveforms.
+    #    gid: string, default to None
+    #        Name of the hdf5 group where Event will be stored. If `gid=None`
+    #        then Event is directly stored at the root.
+    #    hdf5_file: `h5py.File`, default to None
+    #        If not None, is an opened file pointing directly at the subfolder of
+    #        interest.
+    #    """
+    #    output_where = os.path.join(db_path, db_filename)
+    #    attributes = [
+    #        "origin_time",
+    #        "latitude",
+    #        "longitude",
+    #        "depth",
+    #        "moveouts",
+    #        "stations",
+    #        "components",
+    #        "phases",
+    #        "where",
+    #        "sampling_rate",
+    #    ]
+    #    # moveouts' indexes may have been re-ordered
+    #    # because writing moveouts as an array will forget about the current
+    #    # row indexes and assume that they are in the same order as
+    #    # self.stations, it is critical to make sure this is true
+    #    self.moveouts = self.moveouts.loc[self.stations]
+    #    lock_file = output_where + ".lock"
+    #    while os.path.isfile(lock_file):
+    #        # another process is already writing in this file
+    #        # wait a bit a check again
+    #        sleep(1.0)
+    #    # create empty lock file
+    #    open(lock_file, "w").close()
+    #    try:
+    #        if hdf5_file is None:
+    #            hdf5_file = h5.File(output_where, mode="a")
+    #            close_file = True
+    #        else:
+    #            close_file = False
+    #        if gid is not None:
+    #            if gid in hdf5_file:
+    #                # overwrite existing detection with same id
+    #                print(
+    #                    f"Found existing event {gid} in {output_where}. Overwrite it."
+    #                )
+    #                del hdf5_file[gid]
+    #            hdf5_file.create_group(gid)
+    #            f = hdf5_file[gid]
+    #        else:
+    #            f = hdf5_file
+    #        for attr in attributes:
+    #            if not hasattr(self, attr):
+    #                continue
+    #            attr_ = getattr(self, attr)
+    #            if attr == "origin_time":
+    #                attr_ = str(attr_)
+    #            if isinstance(attr_, list):
+    #                attr_ = np.asarray(attr_)
+    #            if isinstance(attr_, np.ndarray) and (
+    #                attr_.dtype.kind == np.dtype("U").kind
+    #            ):
+    #                attr_ = attr_.astype("S")
+    #            f.create_dataset(attr, data=attr_)
+    #        if hasattr(self, "aux_data"):
+    #            f.create_group("aux_data")
+    #            for key in self.aux_data.keys():
+    #                f["aux_data"].create_dataset(key, data=self.aux_data[key])
+    #        if hasattr(self, "picks"):
+    #            f.create_group("picks")
+    #            f["picks"].create_dataset(
+    #                "stations", data=np.asarray(self.picks.index).astype("S")
+    #            )
+    #            for column in self.picks.columns:
+    #                data = self.picks[column]
+    #                if data.dtype.kind == "M":
+    #                    # pandas datetime format
+    #                    data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
+    #                if data.dtype == np.dtype("O"):
+    #                    data = data.astype("S")
+    #                f["picks"].create_dataset(column, data=data)
+    #        if hasattr(self, "arrival_times"):
+    #            f.create_group("arrival_times")
+    #            f["arrival_times"].create_dataset(
+    #                "stations", data=np.asarray(self.arrival_times.index).astype("S")
+    #            )
+    #            for column in self.arrival_times.columns:
+    #                data = self.arrival_times[column]
+    #                if data.dtype.kind == "M":
+    #                    # pandas datetime format
+    #                    data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
+    #                if data.dtype == np.dtype("O"):
+    #                    data = data.astype("S")
+    #                f["arrival_times"].create_dataset(column, data=data)
+    #        if save_waveforms:
+    #            if hasattr(self, "traces"):
+    #                f.create_group("waveforms")
+    #                for tr in self.traces:
+    #                    sta = tr.stats.station
+    #                    cha = tr.stats.channel
+    #                    if sta not in f["waveforms"]:
+    #                        f["waveforms"].create_group(sta)
+    #                    if cha in f["waveforms"][sta]:
+    #                        print(f"{sta}.{cha} already exists!")
+    #                    else:
+    #                        f["waveforms"][sta].create_dataset(cha, data=tr.data)
+    #            else:
+    #                print(
+    #                    "You are trying to save the waveforms whereas you did"
+    #                    " not read them!"
+    #                )
+    #        if close_file:
+    #            hdf5_file.close()
+    #    except Exception as e:
+    #        os.remove(lock_file)
+    #        raise (e)
+    #    # remove lock file
+    #    os.remove(lock_file)
 
     # -----------------------------------------------------------
     #            plotting method(s)
@@ -3526,7 +3748,7 @@ class TemplateGroup(Family):
         # try reading the inter-template CC from db
         db_path, db_filename = os.path.split(self.templates[0].where)
         cc_fn = os.path.join(db_path, "intertp_cc.h5")
-        if os.path.isfile(cc_fn):
+        if not compute_from_scratch and os.path.isfile(cc_fn):
             _intertemplate_cc = self._read_intertp_cc(cc_fn)
             if (
                 len(np.intersect1d(self.tids, np.int32(_intertemplate_cc.index)))
@@ -3537,11 +3759,9 @@ class TemplateGroup(Family):
                 print(f"Read inter-template CCs from {cc_fn}.")
             else:
                 compute_from_scratch = True
-        else:
-            compute_from_scratch = True
         if compute_from_scratch:
             # compute from scratch
-            self.n_closest_stations(n_stations)
+            #self.n_closest_stations(n_stations)
             print("Computing the similarity matrix...")
             # format arrays for FMF
             data_arr = self.waveforms_arr.copy()
@@ -3550,14 +3770,35 @@ class TemplateGroup(Family):
             intertp_cc = np.zeros(
                 (self.n_templates, self.n_templates), dtype=np.float32
             )
-            n_stations, n_components = moveouts_arr.shape[1:]
+            n_network_stations, n_components = moveouts_arr.shape[1:]
             # use FMF on one template at a time against all others
             for t, template in tqdm(
                 enumerate(self.templates), desc="Inter-tp CC", disable=disable
             ):
-                # print(f'--- {t} / {self.n_templates} ---')
                 weights = np.zeros(template_arr.shape[:-1], dtype=np.float32)
-                weights[:, self.network_to_template_map[t, ...]] = 1.0
+                # select the `n_stations` closest stations
+                # apply similar approach than Event.n_closest_stations
+                station_pool = template.network_stations[template.availability]
+                closest_stations = (
+                        template.source_receiver_dist\
+                                .loc[station_pool].sort_values().index[:n_stations]
+                        )
+                # make sure we return a n_stations-vector
+                if len(closest_stations) < n_stations:
+                    missing = n_stations - len(closest_stations)
+                    closest_stations = np.hstack(
+                        (
+                            closest_stations,
+                            template.source_receiver_dist.drop(closest_stations, axis="rows")
+                            .sort_values()
+                            .index[:missing],
+                        )
+                    )
+                for s, sta in enumerate(template.network_stations):
+                    if sta in closest_stations:
+                        weights[:, s, :] = np.int32(
+                                template.availability_per_cha.loc[sta].values
+                                )
                 weights /= np.sum(weights, axis=(1, 2), keepdims=True)
                 above_thrs = self.ellipsoid_dist[self.tids[t]] > distance_threshold
                 weights[above_thrs, ...] = 0.0
@@ -3619,7 +3860,7 @@ class TemplateGroup(Family):
             intertp_cc = f["intertp_cc"][()]
         return pd.DataFrame(index=tids, columns=tids, data=intertp_cc)
 
-    def read_waveforms(self, progress=False):
+    def read_waveforms(self, n_threads=1, progress=False):
         """
         Parameters
         ----------
@@ -3627,8 +3868,23 @@ class TemplateGroup(Family):
             If True, print progress bar with `tqdm`.
         """
         disable = np.bitwise_not(progress)
-        for tp in tqdm(self.templates, desc="Reading waveforms", disable=disable):
-            tp.read_waveforms(stations=self.stations, components=self.components)
+        if n_threads != 1:
+            from concurrent.futures import ThreadPoolExecutor
+            # cannot use tqdm with parallel execution
+            disable = True
+            if n_threads in [0, None, "all"]:
+                # n_threads = None means use all CPUs
+                n_threads = None
+            with ThreadPoolExecutor(max_workers=n_threads) as executor:
+                executor.map(
+                        lambda tp: tp.read_waveforms(
+                            stations=self.stations, components=self.components
+                            ),
+                        self.templates
+                        )
+        else:
+            for tp in tqdm(self.templates, desc="Reading waveforms", disable=disable):
+                tp.read_waveforms(stations=self.stations, components=self.components)
         self._remember("read_waveforms")
 
     def set_network_to_template_map(self):
