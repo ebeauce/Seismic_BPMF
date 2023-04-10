@@ -52,7 +52,6 @@ BPMF v1.0.1, than you can find at
 - [ ] Use Seisbench for the easier interfacing of ML pickers.
 - [ ] Convert `moveouts` and `weights` to xarray-like objects with explicit
   indexing using station names? 
-- [ ] Update notebooks and doc.
 
 ## Contact
 Questions? Contact me at:<br/>
