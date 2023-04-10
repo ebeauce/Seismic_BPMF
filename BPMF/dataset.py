@@ -3796,7 +3796,9 @@ class TemplateGroup(Family):
                     )
                 for s, sta in enumerate(template.network_stations):
                     if sta in closest_stations:
-                        weights[:, s, :] = 1.0
+                        weights[:, s, :] = np.int32(
+                                template.availability_per_cha.loc[sta].values
+                                )
                 weights /= np.sum(weights, axis=(1, 2), keepdims=True)
                 above_thrs = self.ellipsoid_dist[self.tids[t]] > distance_threshold
                 weights[above_thrs, ...] = 0.0
@@ -3867,6 +3869,7 @@ class TemplateGroup(Family):
         """
         disable = np.bitwise_not(progress)
         if n_threads != 1:
+            from concurrent.futures import ThreadPoolExecutor
             # cannot use tqdm with parallel execution
             disable = True
             if n_threads in [0, None, "all"]:
