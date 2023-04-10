@@ -1570,33 +1570,37 @@ class Event(object):
 
         Parameters
         -----------
-        duration: scalar float
+        duration : float
             Duration, in seconds, of the extracted time windows.
-        phase_on_comp: dictionary, optional
+        phase_on_comp : dictionary, optional
             Dictionary defining which seismic phase is extracted on each
             component. For example, phase_on_comp['N'] gives the phase that is
             extracted on the north component.
-        component_aliases: Dictionary
+        component_aliases : dictionary, optional
             Each entry of the dictionary is a list of strings.
             `component_aliases[comp]` is the list of all aliases used for
             the same component 'comp'. For example, `component_aliases['N'] =
             ['N', '1']` means that both the 'N' and '1' channels will be mapped
             to the Event's 'N' channel.
-        offset_phase: dictionary, optional
+        offset_phase : dictionary, optional
             Dictionary defining when the time window starts with respect to the
             pick. A positive offset means the window starts before the pick. Not
             used if `time_shifted` is False.
-        time_shifted: boolean, default to True
-            If True, the moveouts are used to extract time windows from specific
+        time_shifted : boolean, optional
+            If True (default), the moveouts are used to extract time windows from specific
             seismic phases. If False, windows are simply extracted with respect to
             the origin time.
-        offset_ot: scalar float, default to `cfg.BUFFER_EXTRACTED_EVENTS_SEC`
+        offset_ot : float, optional
             Only used if `time_shifted` is False. Time, in seconds, taken before
-            `origin_time`.
-        data_reader: function, default to None
+            `origin_time`. Default to `cfg.BUFFER_EXTRACTED_EVENTS_SEC`.
+        data_reader : func, optional
             Function that takes a path and optional key-word arguments to read
-            data from this path and returns an `obspy.Stream` instance. If None,
-            use `self.data_reader` and return None if `self.data_reader=None`.
+            data from this path and returns an `obspy.Stream` instance. If None
+            (default), this function uses `self.data_reader` and returns
+            None if `self.data_reader=None`.
+        n_threads : int, optional
+            The number of threads used to parallelize reading. Default is 1
+            (sequential reading). 
         """
         # from pyasdf import ASDFDataSet
         from obspy import Stream
@@ -1671,9 +1675,11 @@ class Event(object):
 
         Parameters
         ----------
-        routine: string, default to 'NLLoc'
-            Method used for relocation. 'NLLoc' calls `relocated_NLLoc` and
-            requires `self` to have the attribute `picks`.
+        routine : string, optional
+            Method used for relocation.
+                - 'NLLoc' calls `relocate_NLLoc` and
+                requires `self` to have the attribute `picks`.
+                - 'beam' calls `relocated_beam`.
         """
         if routine.lower() == "nlloc":
             self.relocate_NLLoc(**kwargs)
@@ -1692,7 +1698,45 @@ class Event(object):
         device="cpu",
         **kwargs,
     ):
-        """ """
+        """ 
+        Parameters
+        ----------
+        beamformer : `BPMF.template_search.Beamformer`
+            Beamformer instance used for backprojection.
+        duration : float, optional
+            Duration, in seconds, of the extracted time windows. Default is
+            60sec.
+        offset_ot : float, optional
+            Only used if `time_shifted` is False. Time, in seconds, taken before
+            `origin_time`. Default to `cfg.BUFFER_EXTRACTED_EVENTS_SEC`.
+        phase_on_comp : dictionary, optional
+            Dictionary defining which seismic phase is extracted on each
+            component. For example, phase_on_comp['N'] gives the phase that is
+            extracted on the north component.
+        component_aliases : dictionary, optional
+            Each entry of the dictionary is a list of strings.
+            `component_aliases[comp]` is the list of all aliases used for
+            the same component 'comp'. For example, `component_aliases['N'] =
+            ['N', '1']` means that both the 'N' and '1' channels will be mapped
+            to the Event's 'N' channel.
+        offset_phase : dictionary, optional
+            Dictionary defining when the time window starts with respect to the
+            pick. A positive offset means the window starts before the pick. Not
+            used if `time_shifted` is False.
+        waveform_features : numpy.ndarray, optional
+            If not None (default), it must be a `(num_stations, num_channels,
+            num_time_samples)` numpy.ndarray. This array contains the waveform
+            features, or characteristic functions, that are backprojected onto
+            the grid of theoretical seismic sources.
+        restricted_domain_side_km : float, optional
+            Location uncertainties are computed on the full 3D beam at the time
+            when the 4D beam achieves its maximum over the `duration` seconds.
+            To avoid having grid-size-dependent uncertainties, it is useful
+            to truncate the domain around the location of the max beam. This
+            variable controls the size of the truncated domain.
+        device : string, optional
+            Either 'cpu' (default) or 'gpu'.
+        """
         from .template_search import Beamformer, envelope
 
         if kwargs.get("read_waveforms", True):
@@ -3704,7 +3748,7 @@ class TemplateGroup(Family):
         # try reading the inter-template CC from db
         db_path, db_filename = os.path.split(self.templates[0].where)
         cc_fn = os.path.join(db_path, "intertp_cc.h5")
-        if os.path.isfile(cc_fn):
+        if not compute_from_scratch and os.path.isfile(cc_fn):
             _intertemplate_cc = self._read_intertp_cc(cc_fn)
             if (
                 len(np.intersect1d(self.tids, np.int32(_intertemplate_cc.index)))
@@ -3715,8 +3759,6 @@ class TemplateGroup(Family):
                 print(f"Read inter-template CCs from {cc_fn}.")
             else:
                 compute_from_scratch = True
-        else:
-            compute_from_scratch = True
         if compute_from_scratch:
             # compute from scratch
             #self.n_closest_stations(n_stations)
@@ -3816,7 +3858,7 @@ class TemplateGroup(Family):
             intertp_cc = f["intertp_cc"][()]
         return pd.DataFrame(index=tids, columns=tids, data=intertp_cc)
 
-    def read_waveforms(self, progress=False):
+    def read_waveforms(self, n_threads=1, progress=False):
         """
         Parameters
         ----------
@@ -3824,8 +3866,22 @@ class TemplateGroup(Family):
             If True, print progress bar with `tqdm`.
         """
         disable = np.bitwise_not(progress)
-        for tp in tqdm(self.templates, desc="Reading waveforms", disable=disable):
-            tp.read_waveforms(stations=self.stations, components=self.components)
+        if n_threads != 1:
+            # cannot use tqdm with parallel execution
+            disable = True
+            if n_threads in [0, None, "all"]:
+                # n_threads = None means use all CPUs
+                n_threads = None
+            with ThreadPoolExecutor(max_workers=n_threads) as executor:
+                executor.map(
+                        lambda tp: tp.read_waveforms(
+                            stations=self.stations, components=self.components
+                            ),
+                        self.templates
+                        )
+        else:
+            for tp in tqdm(self.templates, desc="Reading waveforms", disable=disable):
+                tp.read_waveforms(stations=self.stations, components=self.components)
         self._remember("read_waveforms")
 
     def set_network_to_template_map(self):
