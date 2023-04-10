@@ -1636,14 +1636,6 @@ class Event(object):
                                 **reader_kwargs,
                                 )
                             )
-                    #self.traces += data_reader(
-                    #    self.where,
-                    #    station=sta,
-                    #    channel=cp_alias,
-                    #    starttime=pick,
-                    #    endtime=pick + duration,
-                    #    **reader_kwargs,
-                    #)
         if n_threads != 1:
             if n_threads in [0, None, "all"]:
                 # n_threads = None means use all CPUs
