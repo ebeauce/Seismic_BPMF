@@ -136,8 +136,8 @@ class Spectrum:
         # otherwise the mask can be converted to a single boolean when
         # all elements are False
         masked_spectra = np.ma.masked_array(
-                data=np.stack((arr.data for arr in masked_spectra), axis=0),
-                mask=np.stack((arr.mask for arr in masked_spectra), axis=0),
+                data=np.stack([arr.data for arr in masked_spectra], axis=0),
+                mask=np.stack([arr.mask for arr in masked_spectra], axis=0),
                 )
         # count the number of channels that satisfied the SNR criterion
         num_valid_channels = np.sum(~masked_spectra.mask, axis=0)
