@@ -1143,7 +1143,7 @@ class Event(object):
     @property
     def source_receiver_dist(self):
         if hasattr(self, "_source_receiver_dist"):
-            return self._source_receiver_dist
+            return self._source_receiver_dist[self.stations]
         else:
             print(
                 "You need to set source_receiver_dist before."
