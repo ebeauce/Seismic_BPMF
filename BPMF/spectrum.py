@@ -93,6 +93,7 @@ class Spectrum:
         correct_propagation=True,
         average_log=True,
         min_num_valid_channels_per_freq_bin=0,
+        max_relative_distance_err_pct=25.,
     ):
         phase = phase.lower()
         assert phase in ["p", "s"], "phase should be 'p' or 's'"
@@ -109,6 +110,16 @@ class Spectrum:
         signal_spectrum = getattr(self, f"{phase}_spectrum")
         snr_spectrum = getattr(self, f"snr_{phase}_spectrum")
         for trid in signal_spectrum:
+            if (
+                    signal_spectrum[trid]["relative_distance_err_pct"]
+                    >
+                    max_relative_distance_err_pct
+                    ):
+                print(f"Source-receiver distance relative error is too high: "
+                        f"{signal_spectrum[trid]['relative_distance_err_pct']:.2f}")
+                # the location uncertainty implies too much error
+                # on this station, skip it
+                continue
             mask = snr_spectrum[trid]["snr"] < snr_threshold
             amplitude_spectrum = signal_spectrum[trid]["fft"].copy()
             if correct_propagation:
@@ -131,6 +142,7 @@ class Spectrum:
         if len(masked_spectra) == 0:
             # there seems to be cases when to spectra were in signal_spectrum??
             print(f"No spectra found in {phase}_spectrum")
+            self.average_spectra = []
             return
         # it looks like we need this explicit definition of the mask
         # otherwise the mask can be converted to a single boolean when
@@ -193,6 +205,14 @@ class Spectrum:
                 * tr.stats.delta
             )
             spectrum[tr.id]["freq"] = np.fft.rfftfreq(tr.stats.npts, d=tr.stats.delta)
+            max_err = np.sqrt(
+                    self.event.hmax_unc**2 + self.event.vmax_unc**2
+                    )
+            spectrum[tr.id]["relative_distance_err_pct"] = 100. * (
+                    max_err
+                    /
+                    self.event.source_receiver_dist.loc[tr.stats.station]
+                    )
         setattr(self, f"{phase.lower()}_spectrum", spectrum)
         if hasattr(self, "phases"):
             self.phases.append(phase)
@@ -262,6 +282,7 @@ class Spectrum:
         model="brune",
         log=True,
         min_fraction_valid_points_below_fc=0.50,
+        min_fraction_points_below_fc=0.10,
         weighted=False,
     ):
         """Fit average displacement spectrum with model."""
@@ -315,7 +336,7 @@ class Spectrum:
         # check whether the low-frequency plateau was well constrained
         npts_below_fc = np.sum(spectrum["freq"] < popt[1])
         npts_valid_below_fc = np.sum(x < popt[1])
-        if npts_below_fc <= int(0.05 * len(spectrum["freq"])):
+        if npts_below_fc <= int(min_fraction_points_below_fc * len(spectrum["freq"])):
             self.inversion_success = False
             return
         if (
@@ -550,12 +571,14 @@ def compute_moment_magnitude(
     plot_above_Mw=100.0,
     plot_above_random=1.0,
     path_figures="",
+    phases=["p", "s"],
     plot=False,
     figsize=(8, 8),
 ):
     """ """
     event.set_moveouts_to_theoretical_times()
     event.set_moveouts_to_empirical_times()
+    spectrum = Spectrum(event=event)
 
     # ---------------------------------------------------------------
     #                 extract waveforms
@@ -569,43 +592,42 @@ def compute_moment_magnitude(
     )
     noise = event.traces.copy()
     noise.remove_sensitivity()
+    spectrum.compute_spectrum(noise, "noise")
     # then, read signal
-    event.read_waveforms(
-        mag_params["DURATION_SEC"],
-        phase_on_comp=mag_params["PHASE_ON_COMP_P"],
-        offset_phase=mag_params["OFFSET_PHASE"],
-        time_shifted=mag_params["TIME_SHIFTED"],
-        data_folder=mag_params["DATA_FOLDER"],
-        attach_response=mag_params["ATTACH_RESPONSE"],
-    )
-    event.traces.remove_sensitivity()
-    event.zero_out_clipped_waveforms(kurtosis_threshold=-1)
-    p_wave = event.traces.copy()
-
-    event.read_waveforms(
-        mag_params["DURATION_SEC"],
-        phase_on_comp=mag_params["PHASE_ON_COMP_S"],
-        offset_phase=mag_params["OFFSET_PHASE"],
-        time_shifted=mag_params["TIME_SHIFTED"],
-        data_folder=mag_params["DATA_FOLDER"],
-        attach_response=mag_params["ATTACH_RESPONSE"],
-    )
-    event.traces.remove_sensitivity()
-    event.zero_out_clipped_waveforms(kurtosis_threshold=-1)
-    s_wave = event.traces.copy()
+    if "p" in phases:
+        event.read_waveforms(
+            mag_params["DURATION_SEC"],
+            phase_on_comp=mag_params["PHASE_ON_COMP_P"],
+            offset_phase=mag_params["OFFSET_PHASE"],
+            time_shifted=mag_params["TIME_SHIFTED"],
+            data_folder=mag_params["DATA_FOLDER"],
+            attach_response=mag_params["ATTACH_RESPONSE"],
+        )
+        event.traces.remove_sensitivity()
+        event.zero_out_clipped_waveforms(kurtosis_threshold=-1)
+        p_wave = event.traces.copy()
+        spectrum.compute_spectrum(p_wave, "p")
+    if "s" in phases:
+        event.read_waveforms(
+            mag_params["DURATION_SEC"],
+            phase_on_comp=mag_params["PHASE_ON_COMP_S"],
+            offset_phase=mag_params["OFFSET_PHASE"],
+            time_shifted=mag_params["TIME_SHIFTED"],
+            data_folder=mag_params["DATA_FOLDER"],
+            attach_response=mag_params["ATTACH_RESPONSE"],
+        )
+        event.traces.remove_sensitivity()
+        event.zero_out_clipped_waveforms(kurtosis_threshold=-1)
+        s_wave = event.traces.copy()
+        spectrum.compute_spectrum(s_wave, "s")
 
     # -----------------------------------------------------------
-    spectrum = Spectrum(event=event)
-    spectrum.compute_spectrum(noise, "noise")
-    spectrum.compute_spectrum(p_wave, "p")
-    spectrum.compute_spectrum(s_wave, "s")
-
     spectrum.set_target_frequencies(
         mag_params["FREQ_MIN_HZ"], mag_params["FREQ_MAX_HZ"], mag_params["NUM_FREQS"]
     )
     spectrum.resample(spectrum.frequencies, spectrum.phases)
-    spectrum.compute_signal_to_noise_ratio("p")
-    spectrum.compute_signal_to_noise_ratio("s")
+    for ph in phases:
+        spectrum.compute_signal_to_noise_ratio(ph)
 
     # from Ford et al 2008, BSSA
     Q = mag_params["Q_1HZ"] * np.power(
@@ -619,14 +641,17 @@ def compute_moment_magnitude(
     )
 
     source_parameters = {}
-    for phase_for_mag in ["p", "s"]:
+    for phase_for_mag in phases:
         spectrum.compute_network_average_spectrum(
             phase_for_mag,
             mag_params["SNR_THRESHOLD"],
             min_num_valid_channels_per_freq_bin=mag_params[
                 "MIN_NUM_VALID_CHANNELS_PER_FREQ_BIN"
             ],
+            max_relative_distance_err_pct=mag_params["MAX_RELATIVE_DISTANCE_ERR_PCT"]
         )
+        if not phase_for_mag in spectrum.average_spectra:
+            continue
         spectrum.integrate(phase_for_mag, average=True)
         spectrum.fit_average_spectrum(
             phase_for_mag,
