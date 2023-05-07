@@ -1110,8 +1110,8 @@ class Event(object):
     def hmin_unc(self):
         if hasattr(self, "_hmin_unc"):
             return self._hmin_unc
-        elif hasattr(self, "aux_data") and "hmax_unc" in self.aux_data:
-            return self.aux_data["hmax_unc"]
+        elif hasattr(self, "aux_data") and "hmin_unc" in self.aux_data:
+            return self.aux_data["hmin_unc"]
         else:
             self.hor_ver_uncertainties()
             return self._hmin_unc
@@ -1120,6 +1120,8 @@ class Event(object):
     def vmax_unc(self):
         if hasattr(self, "_vmax_unc"):
             return self._vmax_unc
+        elif hasattr(self, "aux_data") and "vmax_unc" in self.aux_data:
+            return self.aux_data["vmax_unc"]
         else:
             self.hor_ver_uncertainties()
             return self._vmax_unc
@@ -1193,7 +1195,9 @@ class Event(object):
             waveform amplitude on each channel.
         """
         waveforms = self.get_np_array(stations, components=components)
-        peak_amplitudes = np.max(waveforms, axis=-1)
+        peak_amplitudes = np.max(
+                np.abs(waveforms - np.mean(waveforms, axis=-1, keepdims=True)), axis=-1
+                )
         return peak_amplitudes
 
 
