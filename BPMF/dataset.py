@@ -1130,6 +1130,8 @@ class Event(object):
     def az_hmax_unc(self):
         if hasattr(self, "_az_hmax_unc"):
             return self._az_hmax_unc
+        elif hasattr(self, "aux_data") and "az_hmax_unc" in self.aux_data:
+            return self.aux_data["az_hmax_unc"]
         else:
             self.hor_ver_uncertainties()
             return self._az_hmax_unc
@@ -1138,6 +1140,8 @@ class Event(object):
     def az_hmin_unc(self):
         if hasattr(self, "_az_hmin_unc"):
             return self._az_hmin_unc
+        elif hasattr(self, "aux_data") and "az_hmin_unc" in self.aux_data:
+            return self.aux_data["az_hmin_unc"]
         else:
             self.hor_ver_uncertainties()
             return self._az_hmin_unc
