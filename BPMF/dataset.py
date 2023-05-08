@@ -1664,6 +1664,11 @@ class Event(object):
         else:
             for task in reading_task_list:
                 self.traces += task()
+        if reader_kwargs.get("attach_response", False):
+            # remove traces for which we could not find the instrument response
+            for tr in self.traces:
+                if "response" not in tr.stats:
+                    self.traces.remove(tr)
         for ph in offset_phase.keys():
             self.set_aux_data({f"offset_{ph.upper()}": offset_phase[ph]})
         for comp in phase_on_comp.keys():
