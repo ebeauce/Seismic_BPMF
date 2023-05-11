@@ -2121,11 +2121,15 @@ class Event(object):
         )
         for ph in self.phases:
             ph = ph.upper()
-            field = f"{ph}_abs_arrival_times"
+            field1 = f"{ph}_abs_arrival_times"
+            field2 = f"{ph}_tt_sec"
             for sta in self.moveouts.index:
-                self.arrival_times.loc[sta, field] = (
+                self.arrival_times.loc[sta, field1] = (
                     self.origin_time + self.moveouts.loc[sta, f"moveouts_{ph}"]
                 )
+                self.arrival_times.loc[sta, field2] = (
+                        self.moveouts.loc[sta, f"moveouts_{ph}"]
+                        )
 
     def set_moveouts_to_empirical_times(self):
         """Set moveouts equal to picks, if available."""
