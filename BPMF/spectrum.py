@@ -23,9 +23,12 @@ class Spectrum:
 
     def compute_correction_factor(
         self,
-        rho,
-        vp,
-        vs,
+        rho_source,
+        rho_receiver,
+        vp_source,
+        vp_receiver,
+        vs_source,
+        vs_receiver,
         radiation_S=np.sqrt(2.0 / 5.0),
         radiation_P=np.sqrt(4.0 / 15.0),
     ):
@@ -67,7 +70,17 @@ class Spectrum:
         for sta in self.event.source_receiver_dist.index:
             r_m = 1000.0 * self.event.source_receiver_dist.loc[sta]
             tt_s = self.event.arrival_times.loc[sta, "S_tt_sec"]
-            corr_s = 2.0 * rho * vs**3 * r_m / radiation_S
+            #corr_s = 2.0 * rho * vs**3 * r_m / radiation_S
+            #corr_s = 4.0 * np.pi * rho * vs**3 * r_m / radiation_S
+            corr_s = (
+                    4.0 * np.pi
+                    *
+                    np.sqrt(rho_receiver) * np.sqrt(rho_source)
+                    *
+                    np.sqrt(vs_receiver) * vs_source**(5./2.)
+                    *
+                    r_m / radiation_S
+                    )
             correction_factor.loc[sta, f"correction_S"] = corr_s
             if hasattr(self, "attenuation_model"):
                 attenuation_factor.loc[sta, f"attenuation_S"] = lambda freq: np.exp(
@@ -76,7 +89,17 @@ class Spectrum:
             else:
                 attenuation_factor.loc[sta, f"attenuation_S"] = None
             tt_p = self.event.arrival_times.loc[sta, "P_tt_sec"]
-            corr_p = 2.0 * rho * vp**3 * r_m / radiation_P
+            #corr_p = 2.0 * rho * vp**3 * r_m / radiation_P
+            #corr_p = 4.0 * np.pi * rho * vp**3 * r_m / radiation_P
+            corr_p = (
+                    4.0 * np.pi
+                    *
+                    np.sqrt(rho_receiver) * np.sqrt(rho_source)
+                    *
+                    np.sqrt(vp_receiver) * vp_source**(5./2.)
+                    *
+                    r_m / radiation_P
+                    )
             correction_factor.loc[sta, f"correction_P"] = corr_p
             if hasattr(self, "attenuation_model"):
                 attenuation_factor.loc[sta, f"attenuation_P"] = lambda freq: np.exp(
@@ -349,6 +372,7 @@ class Spectrum:
         min_fraction_valid_points_below_fc=0.10,
         min_fraction_valid_points=0.50,
         weighted=False,
+        **kwargs
     ):
         """Fit average displacement spectrum with model."""
         from scipy.optimize import curve_fit
@@ -397,7 +421,7 @@ class Spectrum:
         bounds = (np.array([0.0, 0.0]), np.array([np.inf, np.inf]))
         try:
             popt, pcov = curve_fit(
-                mod, x, y, p0=p0, bounds=bounds, sigma=inverse_weights
+                mod, x, y, p0=p0, bounds=bounds, sigma=inverse_weights, **kwargs
             )
             self.inversion_success = True
         except (RuntimeError, ValueError):
@@ -735,9 +759,12 @@ def compute_moment_magnitude(
     )
     spectrum.attenuation_Q_model(Q, spectrum.frequencies)
     spectrum.compute_correction_factor(
-        mag_params["RHO_KGM3"],
-        mag_params["VP_MS"],
-        mag_params["VS_MS"],
+        mag_params["RHO_SOURCE_KGM3"],
+        mag_params["RHO_RECEIVER_KGM3"],
+        mag_params["VP_SOURCE_MS"],
+        mag_params["VP_RECEIVER_MS"],
+        mag_params["VS_SOURCE_MS"],
+        mag_params["VS_RECEIVER_MS"],
     )
 
     source_parameters = {}
