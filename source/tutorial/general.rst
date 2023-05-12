@@ -44,7 +44,38 @@ Run the following command to install (almost) all the packages need for this tut
 
 .. code-block:: console
 
-    $ conda install obspy numpy scipy pandas matplotlib h5py ipython jupyter cartopy
+    $ conda install obspy numpy scipy pandas matplotlib h5py ipython jupyter cartopy colorcet
+
+Beampower
+^^^^^^^^^
+
+:py:data:`beampower` is our package with C and CUDA-C routines for
+backprojection wrapped in Python code. You can download and install
+:py:data:`beampower` with:
+
+.. code-block:: console
+
+   $ pip install git+https://github.com/ebeauce/beampower
+
+Note: You might have to modify the `Makefile` depending on your compilers. See
+`https://ebeauce.github.io/beampower/introduction.html#installation
+<https://ebeauce.github.io/beampower/introduction.html#installation>`_ for more
+information.
+
+Fast Matched Filter
+^^^^^^^^^^^^^^^^^^^
+
+:py:data:`fastmatchedfilter` is our package with C and CUDA-C routines for
+template matching wrappedin Python code. You can download and install
+:py:data:`fastmatchedfilter`:
+
+.. code-block:: console
+
+   $ pip install git+https://github.com/beridel/fast_matched_filter
+
+Note: You might have to modify the `Makefile` depending on your compilers. See `https://ebeauce.github.io/FMF_documentation/introduction.html#installation
+<https://ebeauce.github.io/FMF_documentation/introduction.html#installation>`_
+for more information.
 
 
 PyKonal
