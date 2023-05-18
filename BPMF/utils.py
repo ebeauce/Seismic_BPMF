@@ -211,27 +211,29 @@ def preprocess_stream(
         A preprocessed stream of seismic data.
     """
     from functools import partial
+
     data_preprocessor = partial(
-            _preprocess_stream,
-            freqmin=freqmin,
-            freqmax=freqmax,
-            target_SR=target_SR,
-            remove_response=remove_response,
-            remove_sensitivity=remove_sensitivity,
-            plot_resp=plot_resp,
-            target_duration=target_duration,
-            target_starttime=target_starttime,
-            target_endtime=target_endtime,
-            minimum_length=minimum_length,
-            minimum_chunk_duration=minimum_chunk_duration,
-            verbose=verbose,
-            SR_decimals=SR_decimals,
-            decimation_method=decimation_method,
-            unit=unit,
-            **kwargs
-            )
+        _preprocess_stream,
+        freqmin=freqmin,
+        freqmax=freqmax,
+        target_SR=target_SR,
+        remove_response=remove_response,
+        remove_sensitivity=remove_sensitivity,
+        plot_resp=plot_resp,
+        target_duration=target_duration,
+        target_starttime=target_starttime,
+        target_endtime=target_endtime,
+        minimum_length=minimum_length,
+        minimum_chunk_duration=minimum_chunk_duration,
+        verbose=verbose,
+        SR_decimals=SR_decimals,
+        decimation_method=decimation_method,
+        unit=unit,
+        **kwargs,
+    )
     if n_threads != 1:
         from concurrent.futures import ProcessPoolExecutor
+
         with ProcessPoolExecutor(max_workers=n_threads) as executor:
             # we need to group traces from same channels, therefore,
             # we use merge to fill gaps with masked arrays
@@ -239,8 +241,8 @@ def preprocess_stream(
             preprocessed_stream = list(executor.map(data_preprocessor, stream))
             try:
                 preprocessed_stream = [
-                        tr[0] for tr in preprocessed_stream if len(tr) > 0
-                        ]
+                    tr[0] for tr in preprocessed_stream if len(tr) > 0
+                ]
             except Exception as e:
                 print(e)
                 print(preprocessed_stream)
@@ -676,7 +678,6 @@ def fetch_detection_waveforms(
     unique_events=False,
     catalog=None,
 ):
-
     from itertools import groupby
     from operator import itemgetter
 
@@ -770,7 +771,6 @@ def fetch_detection_waveforms_refilter(
     flip_order=True,
     **preprocess_kwargs,
 ):
-
     # sys.path.append(os.path.join(cfg.base, 'earthquake_location_eb'))
     # import relocation_utils
     from . import event_extraction
@@ -886,7 +886,6 @@ def SVDWF_multiplets(
     attach_raw_data=False,
     detection_waveforms=None,
 ):
-
     """
     Parameters
     -----------
@@ -1560,11 +1559,13 @@ def two_point_distance(lon_1, lat_1, depth_1, lon_2, lat_2, depth_2):
     dist = np.sqrt(dist**2 + (depth_1 - depth_2) ** 2)
     return dist
 
+
 def donefun():
     """
     Super useful function.
     """
-    print("""⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+    print(
+        """⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
     ⠀⠀⠀⠀⠀⠀⢀⡤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀
     ⠀⠀⠀⠀⠀⢀⡏⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⣀⠴⠋⠉⠉⡆⠀⠀⠀⠀⠀
     ⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠈⠉⠉⠙⠓⠚⠁⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀
@@ -1574,7 +1575,9 @@ def donefun():
     ⠻⠶⣾⠁⠀⠀⠀⠀⠙⣆⠀⠀⠀⠀⠀⠀⣰⠋⠀⠀⠀⠀⠀⢹⣿⣭⣽⠇
     ⠀⠀⠙⠤⠴⢤⡤⠤⠤⠋⠉⠉⠉⠉⠉⠉⠉⠳⠖⠦⠤⠶⠦⠞⠁⠀⠀⠀
                 ALL DONE!⠀⠀⠀⠀
-    """)
+    """
+    )
+
 
 def write_lock_file(path, check=False, flush=False):
     if check:
@@ -1587,10 +1590,11 @@ def write_lock_file(path, check=False, flush=False):
         os.fsync(f.fileno())
         f.close()
 
+
 def read_write_waiting_list(func, path, unit_wait_time=0.2):
-    """Read/write queue to avoid conflicts between jobs.
-    """
+    """Read/write queue to avoid conflicts between jobs."""
     from time import sleep
+
     path_no_ext, _ = os.path.splitext(path)
     while True:
         try:
@@ -1610,18 +1614,18 @@ def read_write_waiting_list(func, path, unit_wait_time=0.2):
                     waiting_list_position += np.random.randint(5)
                     waiting_list_ticket = f"{path_wait}{waiting_list_position:d}"
             next_place_ticket = f"{path_wait}{waiting_list_position-1:d}"
-            #print(f"1: Created {os.path.basename(waiting_list_ticket)}")
+            # print(f"1: Created {os.path.basename(waiting_list_ticket)}")
             while True:
-                #sleep(unit_wait_time * np.random.random())
-                if (waiting_list_position == 0):
+                # sleep(unit_wait_time * np.random.random())
+                if waiting_list_position == 0:
                     # is first in the waiting list!
                     if not os.path.isfile(path_lock):
                         # first, create lock file
                         write_lock_file(path_lock, flush=True)
-                        #print(f"2: Created {os.path.basename(path_lock)}")
+                        # print(f"2: Created {os.path.basename(path_lock)}")
                         # then, free the waiting list position #0
                         pathlib.Path(waiting_list_ticket).unlink()
-                        #print(f"2: Deleted {os.path.basename(waiting_list_ticket)}")
+                        # print(f"2: Deleted {os.path.basename(waiting_list_ticket)}")
                         # now the process can proceed with the reading or writing
                         break
                     else:
@@ -1631,10 +1635,10 @@ def read_write_waiting_list(func, path, unit_wait_time=0.2):
                     # front place in the waiting list was freed!
                     # first, create new ticket at the new position
                     write_lock_file(next_place_ticket)
-                    #print(f"3: Created {os.path.basename(next_place_ticket)}")
+                    # print(f"3: Created {os.path.basename(next_place_ticket)}")
                     # then, free previous place in the waiting list
                     pathlib.Path(waiting_list_ticket).unlink()
-                    #print(f"3: Deleted {os.path.basename(waiting_list_ticket)}")
+                    # print(f"3: Deleted {os.path.basename(waiting_list_ticket)}")
                     # update place in waiting list
                     waiting_list_position -= 1
                     # update ticket names
@@ -1650,16 +1654,89 @@ def read_write_waiting_list(func, path, unit_wait_time=0.2):
                 func(path)
             except Exception as e:
                 pathlib.Path(path_lock).unlink()
-                raise(e)
+                raise (e)
             pathlib.Path(path_lock).unlink()
             break
             # done!
         except FileNotFoundError:
-            print("4: Concurent error, reset queue "
-                  f"(last ticket was {waiting_list_ticket})")
+            print(
+                "4: Concurent error, reset queue "
+                f"(last ticket was {waiting_list_ticket})"
+            )
             if waiting_list_position == 0:
                 print(os.path.isfile(path_lock))
                 pathlib.Path(path_lock).unlink()
             continue
 
 
+def normalize_batch(seismogram, normalization_window_sample=3000):
+    """Apply Z-score normalization in running windows.
+
+    Following Zhu et al. 2019, this function applied Z-score
+    normalization in running windows with length `normalization_window_sample`.
+
+    Parameters
+    -----------
+    seismogram : numpy.ndarray
+        Three-component seismograms. `seismogram` has shape
+        (num_traces, num_channels=3, num_time_samples).
+    normalization_window_sample : integer, optional
+        The window length, in samples, over which normalization is applied.
+        Default is 3000 (like in Zhu et al. 2019).
+
+    Returns
+    --------
+    normalized_seismogram : numpy.ndarray
+        Normalized seismogram with same shape as `seismogram`.
+    """
+    from scipy.interpolate import interp1d
+
+    shift = normalization_window_sample // 2
+    num_stations, num_channels, num_time_samples = seismogram.shape
+
+    # std in sliding windows
+    seismogram_pad = np.pad(
+        seismogram, ((0, 0), (0, 0), (shift, shift)), mode="reflect"
+    )
+    # time = np.arange(0, num_time_samples, shift, dtype=np.int32)
+    seismogram_view = np.lib.stride_tricks.sliding_window_view(
+        seismogram_pad, normalization_window_sample, axis=-1
+    )[:, :, ::shift, :]
+    sliding_std = np.std(seismogram_view, axis=-1)
+    sliding_mean = np.mean(seismogram_view, axis=-1)
+
+    # time at centers of sliding windows
+    num_sliding_windows = seismogram_view.shape[2]
+    time = np.linspace(shift, num_time_samples - shift, num_sliding_windows)
+
+    sliding_std[:, :, -1], sliding_mean[:, :, -1] = (
+        sliding_std[:, :, -2],
+        sliding_mean[:, :, -2],
+    )
+    sliding_std[:, :, 0], sliding_mean[:, :, 0] = (
+        sliding_std[:, :, 1],
+        sliding_mean[:, :, 1],
+    )
+    sliding_std[sliding_std == 0] = 1
+
+    # normalize data with sliding std and mean
+    t_interp = np.arange(num_time_samples)
+    std_interp = interp1d(
+        time,
+        sliding_std,
+        axis=-1,
+        kind="slinear",
+        bounds_error=False,
+        fill_value=(sliding_std[..., 0], sliding_std[..., -1]),
+    )(t_interp)
+    mean_interp = interp1d(
+        time,
+        sliding_mean,
+        axis=-1,
+        kind="slinear",
+        bounds_error=False,
+        fill_value=(sliding_mean[..., 0], sliding_mean[..., -1]),
+    )(t_interp)
+    seismogram = (seismogram - mean_interp) / std_interp
+
+    return seismogram
