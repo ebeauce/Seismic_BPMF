@@ -475,6 +475,7 @@ class Catalog(object):
         depth_max=20.0,
         network=None,
         plot_uncertainties=False,
+        depth_colorbar=True,
         **kwargs,
     ):
         """Plot epicenters on map.
@@ -494,6 +495,8 @@ class Catalog(object):
             If provided, use information in `network` to plot the stations.
         plot_uncertainties : boolean, default to False
             If True, plot the location uncertainty ellipses.
+        depth_colorbar : boolean, default to True
+            If True, plot the depth colorbar on the left.
 
         Returns
         ----------
@@ -603,9 +606,10 @@ class Catalog(object):
                 transform=data_coords,
             )
         ax.legend(loc="lower right")
-        ax_divider = make_axes_locatable(ax)
-        cax = ax_divider.append_axes("right", size="2%", pad=0.08, axes_class=plt.Axes)
-        plt.colorbar(scalar_map, cax, orientation="vertical", label="Depth (km)")
+        if depth_colorbar:
+            ax_divider = make_axes_locatable(ax)
+            cax = ax_divider.append_axes("right", size="2%", pad=0.08, axes_class=plt.Axes)
+            plt.colorbar(scalar_map, cax, orientation="vertical", label="Depth (km)")
         return ax.get_figure()
 
     def plot_space_time(
@@ -1442,6 +1446,8 @@ class Event(object):
         downsampling=1,
         use_apriori_picks=False,
         search_win_sec=2.0,
+        ml_model=None,
+        ml_model_name="original",
         **kwargs,
     ):
         """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
@@ -1481,7 +1487,15 @@ class Event(object):
         downsampling: scalar integer, default to 1
             Downsampling factor applied before calling PhaseNet.
         """
-        from phasenet import wrapper as PN
+        from torch import no_grad, from_numpy
+
+        if ml_model is None:
+            import seisbench.models as sbm
+            ml_model = sbm.PhaseNet.from_pretrained(ml_model_name)
+            ml_model.eval()
+
+        ml_p_index = kwargs.get("ml_P_index", 1)
+        ml_s_index = kwargs.get("ml_S_index", 2)
 
         if kwargs.get("read_waveforms", True):
             # read waveforms in picking mode, i.e. with `time_shifted`=False
@@ -1501,16 +1515,34 @@ class Event(object):
             # momentarily update samping_rate
             sampling_rate0 = float(self.sampling_rate)
             self.sampling_rate = self.sr * upsampling / downsampling
-        # call PhaseNet
-        PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
-            data_arr[np.newaxis, ...],
-            self.stations,
-            mini_batch_size=mini_batch_size,
-            format="ram",
-            threshold_P=threshold_P,
-            threshold_S=threshold_S,
-            **kwargs,
-        )
+        data_arr_n = utils.normalize_batch(data_arr)
+        closest_pow2 = int(np.log2(data_arr_n.shape[-1])) + 1
+        diff = 2**closest_pow2 - data_arr_n.shape[-1]
+        left = diff//2
+        right = diff//2 + diff%2
+        data_arr_n = np.pad(
+                data_arr_n,
+                ((0, 0), (0, 0), (left, right)),
+                mode="reflect"
+                )
+        with no_grad():
+            ml_probas = ml_model(
+                    from_numpy(data_arr_n).float()
+                    )
+            ml_probas = ml_probas.detach().numpy()
+        # find picks and sotre in dictionaries
+        picks = {}
+        picks["P_picks"] = {}
+        picks["P_proba"] = {}
+        picks["S_picks"] = {}
+        picks["S_proba"] = {}
+        for s, sta in enumerate(self.stations):
+            picks["P_proba"][sta], picks["P_picks"][sta] = utils.trigger_picks(
+                    ml_probas[s, ml_p_index, left:-right], threshold_P, 
+                    )
+            picks["S_proba"][sta], picks["S_picks"][sta] = utils.trigger_picks(
+                    ml_probas[s, ml_s_index, left:-right], threshold_S, 
+                    )
         if use_apriori_picks and hasattr(self, "arrival_times"):
             columns = []
             if "P" in self.phases:
@@ -1530,13 +1562,11 @@ class Event(object):
         # only used if use_apriori_picks is True
         search_win_samp = utils.sec_to_samp(search_win_sec, sr=self.sampling_rate)
         # keep best P- and S-wave pick on each 3-comp seismogram
-        PhaseNet_picks = PN.get_picks(
-            PhaseNet_picks,
+        picks = utils.get_picks(
+            picks,
             prior_knowledge=prior_knowledge,
             search_win_samp=search_win_samp,
         )
-        # add picks to auxiliary data
-        # self.set_aux_data(PhaseNet_picks)
         # format picks in pandas DataFrame
         pandas_picks = {"stations": self.stations}
         for ph in ["P", "S"]:
@@ -1544,9 +1574,9 @@ class Event(object):
             proba_picks = np.zeros(len(self.stations), dtype=np.float32)
             abs_picks = np.zeros(len(self.stations), dtype=object)
             for s, sta in enumerate(self.stations):
-                if sta in PhaseNet_picks[f"{ph}_picks"].keys():
-                    rel_picks_sec[s] = PhaseNet_picks[f"{ph}_picks"][sta][0] / self.sr
-                    proba_picks[s] = PhaseNet_picks[f"{ph}_proba"][sta][0]
+                if sta in picks[f"{ph}_picks"].keys():
+                    rel_picks_sec[s] = picks[f"{ph}_picks"][sta][0] / self.sr
+                    proba_picks[s] = picks[f"{ph}_proba"][sta][0]
                     if proba_picks[s] > 0.0:
                         abs_picks[s] = (
                             self.traces.select(station=sta)[0].stats.starttime
@@ -4365,6 +4395,8 @@ class Stack(Event):
         central="mean",
         upsampling=1,
         downsampling=1,
+        ml_model_name="original",
+        ml_model=None,
         **kwargs,
     ):
         """Use PhaseNet (Zhu et al., 2019) to pick P and S waves.
@@ -4406,7 +4438,10 @@ class Stack(Event):
             The pick is either taken as the mean or the mode of the empirical
             distribution of picks.
         """
-        from phasenet import wrapper as PN
+        if ml_model is None:
+            import seisbench.models as sbm
+            ml_model = sbm.PhaseNet.from_pretrained(ml_model_name)
+            ml_model.eval()
 
         # read waveforms in "picking" mode
         self.read_waveforms(
