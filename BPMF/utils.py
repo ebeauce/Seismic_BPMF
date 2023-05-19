@@ -1257,21 +1257,49 @@ def weighted_linear_regression(X, Y, W=None):
 # -------------------------------------------------
 
 def cov_mat_intersection(cov_mat, axis1=0, axis2=1):
-    # X: west, Y: south, Z: downward
+    """Compute intersection between covariance matrix and plane.
+
+    Note that we assume the following coordinate system:
+    - X: westward
+    - Y: southward
+    - Z: upward
+
+    Parameters
+    ----------
+    cov_mat : numpy.ndarray
+        The (3x3) covariance matrix returned by Event.relocate(method='NLLoc').
+    axis1 : integer, optional
+        Index of the first axis defining the intersecting plane.
+    axis2 : integer, optional
+        Index of the second axis defining the intersecting plane.
+
+    Returns
+    -------
+    max_unc : float
+        Maximum uncertainty, in km, of the intersected covariance matrix.
+    min_unc : float
+        Minimum uncertainty, in km, of the intersected covariance matrix.
+    az_max : float
+        "Azimuth", that is, angle from `axis2` of maximum uncertainty.
+    az_min : float
+        "Azimuth", that is, angle from `axis2` of minimum uncertainty.
+    """
+    # X: west, Y: south, Z: upward
     s_68_3df = 3.52
     s_68_2df = 2.28
     # eigendecomposition of restricted matrix
     indexes = np.array([axis1, axis2])
-    w, v = np.linalg.eigh(cov_mat[indexes, indexes])
+    w, v = np.linalg.eigh(cov_mat[indexes, :][:, indexes])
     semi_axis_length = np.sqrt(s_68_2df * w)
     max_unc = np.max(semi_axis_length)
     min_unc = np.min(semi_axis_length)
     max_dir = v[:, w.argmax()]
     min_dir = v[:, w.argmin()]
-    # "azimuth" is angle between axis 1 and ellipse's semi-axis
+    # "azimuth" is angle between `axis2` (`max_dir[1]`) and ellipse's semi-axis
     az_max = np.arctan2(max_dir[0], max_dir[1]) * 180.0 / np.pi
     az_min = (az_max + 90.) % 360.
     return max_unc, min_unc, az_max, az_min
+
 
 def compute_distances(
     source_longitudes,
