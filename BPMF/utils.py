@@ -324,10 +324,12 @@ def _preprocess_stream(
         # if more than one sampling rate, remove the traces with the least
         # represented sampling rate
         if len(unique_sampling_rates) > 1:
-            ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
+            if sampling_rates_counts[unique_sampling_rates.argmax()] >= 3:
+                ref_sampling_rate = unique_sampling_rates.max()
+            else:
+                ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
             for tr in stream:
                 if tr.stats.sampling_rate != ref_sampling_rate:
-                    print(f"Removing {tr} (target SR is {ref_sampling_rate})")
                     stream.remove(tr)
     # start by cleaning the gaps if there are any
     # start with a simple merge to unite data from same channels into unique
@@ -1254,6 +1256,22 @@ def weighted_linear_regression(X, Y, W=None):
 #             Others
 # -------------------------------------------------
 
+def cov_mat_intersection(cov_mat, axis1=0, axis2=1):
+    # X: west, Y: south, Z: downward
+    s_68_3df = 3.52
+    s_68_2df = 2.28
+    # eigendecomposition of restricted matrix
+    indexes = np.array([axis1, axis2])
+    w, v = np.linalg.eigh(cov_mat[indexes, indexes])
+    semi_axis_length = np.sqrt(s_68_2df * w)
+    max_unc = np.max(semi_axis_length)
+    min_unc = np.min(semi_axis_length)
+    max_dir = v[:, w.argmax()]
+    min_dir = v[:, w.argmin()]
+    # "azimuth" is angle between axis 1 and ellipse's semi-axis
+    az_max = np.arctan2(max_dir[0], max_dir[1]) * 180.0 / np.pi
+    az_min = (az_max + 90.) % 360.
+    return max_unc, min_unc, az_max, az_min
 
 def compute_distances(
     source_longitudes,

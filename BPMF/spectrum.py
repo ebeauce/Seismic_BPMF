@@ -870,3 +870,5 @@ def compute_moment_magnitude(
     event.set_aux_data(source_parameters)
 
     return event, spectrum
+
+
