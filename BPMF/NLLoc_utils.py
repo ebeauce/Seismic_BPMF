@@ -135,8 +135,9 @@ def read_NLLoc_outputs(filename, path):
             uncertainty_info = line[:-1].split()
             break
     # warning! The covariance matrix is expressed
-    # in a LEFT HANDED system (make sure to define
-    # rotations accordingly!)
+    # in a LEFT HANDED system 
+    # for a RIGHT HANDED system, we reverse Z-axis
+    # which is initially pointing downward
     cov_mat = np.zeros((3, 3), dtype=np.float32)
     cov_mat[0, 0] = float(uncertainty_info[8])  # cov XX
     cov_mat[0, 1] = float(uncertainty_info[10])  # cov XY
@@ -144,6 +145,8 @@ def read_NLLoc_outputs(filename, path):
     cov_mat[1, 1] = float(uncertainty_info[14])  # cov YY
     cov_mat[1, 2] = float(uncertainty_info[16])  # cov YZ
     cov_mat[2, 2] = float(uncertainty_info[18])  # cov ZZ
+    cov_mat[2, :] *= -1.
+    cov_mat[:, 2] *= -1.
     # symmetrical matrix:
     hypocenter["cov_mat"] = cov_mat + cov_mat.T - np.diag(cov_mat.diagonal())
     # read until relevant line
