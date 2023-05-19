@@ -663,7 +663,7 @@ class Beamformer(object):
             self.source_coordinates["longitude"].iloc[hor_slice],
             self.source_coordinates["latitude"].iloc[hor_slice],
             likelihood[hor_slice],
-            levels=np.linspace(0.0, 1.0, 10),
+            levels=np.linspace(-0.001, 1.001, 10),
             cmap="inferno",
             alpha=0.50,
             transform=data_coords,
