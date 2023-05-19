@@ -1286,6 +1286,7 @@ class Event(object):
         self._hmax_unc = hmax_unc
         self._hmin_unc = hmin_unc
         self._vmax_unc = np.max(vertical_unc)
+        self._pl_vmax_unc = np.rad2deg(np.arccos(v[2, vertical_unc.argmax()]))
         self._az_hmax_unc = az_hmax
         self._az_hmin_unc = az_hmin
 
