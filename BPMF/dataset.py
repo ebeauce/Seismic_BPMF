@@ -1151,6 +1151,16 @@ class Event(object):
             return self._az_hmin_unc
 
     @property
+    def pl_vmax_unc(self):
+        if hasattr(self, "_pl_vmax_unc"):
+            return self._pl_vmax_unc
+        elif hasattr(self, "aux_data") and "pl_vmax_unc" in self.aux_data:
+            return self.aux_data["pl_vmax_unc"]
+        else:
+            self.hor_ver_uncertainties()
+            return self._pl_vmax_unc
+
+    @property
     def source_receiver_dist(self):
         if hasattr(self, "_source_receiver_dist"):
             return self._source_receiver_dist[self.stations]
@@ -1287,6 +1297,7 @@ class Event(object):
         self._hmin_unc = hmin_unc
         self._vmax_unc = np.max(vertical_unc)
         self._pl_vmax_unc = np.rad2deg(np.arccos(v[2, vertical_unc.argmax()]))
+        self._pl_vmax_unc = min(self._pl_vmax_unc, 180. - self._pl_vmax_unc)
         self._az_hmax_unc = az_hmax
         self._az_hmin_unc = az_hmin
 
