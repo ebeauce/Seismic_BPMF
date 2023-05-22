@@ -439,13 +439,16 @@ class Catalog(object):
     # ---------------------------------------------------------
     #                  Plotting methods
     # ---------------------------------------------------------
-    def plot_time_statistics(self, figsize=(16, 7), **kwargs):
+    def plot_time_statistics(self, UTC_local_corr=0., figsize=(16, 7), **kwargs):
         """Plot the histograms of time of the day and day of the week.
 
         Parameters
         ------------
         figsize: tuple of floats, default to (16, 7)
             Size, in inches, of the figure (width, height).
+        UTC_local_corr : float, optional
+            Apply UTC to local time correction such that:
+                `local_hour = UTC_hour + UTC_local_corr`
 
         Returns
         ---------
@@ -462,7 +465,8 @@ class Catalog(object):
         axes[0].set_xlabel("Day of the Week")
         axes[0].set_ylabel("Event Count")
 
-        self.catalog["origin_time"].dt.hour.hist(bins=np.arange(25), ax=axes[1])
+        ((self.catalog["origin_time"].dt.hour + UTC_local_corr)%24)\
+                .hist(bins=np.arange(25), ax=axes[1])
         axes[1].set_xlabel("Hour of the Day")
         axes[1].set_ylabel("Event Count")
         return fig
