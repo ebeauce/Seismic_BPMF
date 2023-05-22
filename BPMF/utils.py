@@ -1572,6 +1572,31 @@ def running_mad(time_series, window, n_mad=10.0, overlap=0.75):
     running_stat = interpolator(full_time)
     return running_stat
 
+def two_point_epicentral_distance(lon_1, lat_1, lon_2, lat_2):
+    """Compute the distance between two points.
+
+
+    Parameters
+    -----------
+    lon_1: scalar, float
+        Longitude of Point 1.
+    lat_1: scalar, float
+        Latitude of Point 1.
+    lon_2: scalar, float
+        Longitude of Point 2.
+    lat_2: scalar, float
+        Latitude of Point 2.
+
+    Returns
+    ---------
+    dist: scalar, float
+        Distance between Point 1 and Point 2 in kilometers.
+    """
+    from obspy.geodetics.base import calc_vincenty_inverse
+
+    dist, az, baz = calc_vincenty_inverse(lat_1, lon_1, lat_2, lon_2)
+    dist /= 1000.0  # from m to km
+    return dist
 
 def two_point_distance(lon_1, lat_1, depth_1, lon_2, lat_2, depth_2):
     """Compute the distance between two points.
