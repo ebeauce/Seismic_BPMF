@@ -90,13 +90,13 @@ Then, download Pykonal from `https://github.com/malcolmw/pykonal <https://github
 PhaseNet
 ^^^^^^^^
 
-Several important features of :py:data:`BPMF` relies on the deep neural network phase picker PhaseNet. In order to use PhaseNet, you have to install :py:data:`phasenet` from E.B.'s Github (modified version with wrapper functions to use PhaseNet from within a python script) at: `https://github.com/ebeauce/PhaseNet <https://github.com/ebeauce/PhaseNet>`_. Go to PhaseNet's root folder and run: 
+Several important features of :py:data:`BPMF` relies on the deep neural network phase picker PhaseNet. In order to use PhaseNet, you have to install :py:data:`seisbench` (`https://github.com/seisbench/seisbench <https://github.com/seisbench/seisbench>`_), a convenient python package to run the most popular machine learning earthquake pickers/detectors. Simply run: 
 
 .. code-block:: console
 
-    $ pip install .
+    $ pip install seisbench
 
-This should download the package :py:data:`tensorflow` and may take some time.
+This should download the package :py:data:`torch`.
 
 NonLinLoc
 ^^^^^^^^^
