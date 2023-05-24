@@ -281,7 +281,8 @@ def _preprocess_stream(
         stream = obs.Stream(stream)
     preprocessed_stream = obs.Stream()
     if len(stream) == 0:
-        print("Input data is empty!")
+        if verbose:
+            print("Input data is empty!")
         return preprocessed_stream
     if (target_duration is None) and (
         (target_starttime is not None) and target_endtime is not None
@@ -298,6 +299,10 @@ def _preprocess_stream(
         if t2 - t1 < minimum_chunk_duration:
             # don't include this chunk
             stream.remove(tr)
+    if len(stream) == 0:
+        if verbose:
+            print("Removed all traces because they were too short.")
+        return preprocessed_stream
     # second, make a list of all stations in stream
     stations = []
     for tr in stream:
@@ -330,20 +335,26 @@ def _preprocess_stream(
                 ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
             for tr in stream:
                 if tr.stats.sampling_rate != ref_sampling_rate:
+                    if verbose:
+                        print(f"Removing {tr.id} because not desired sampling rate.")
                     stream.remove(tr)
     # start by cleaning the gaps if there are any
     # start with a simple merge to unite data from same channels into unique
     # trace but without losing information on gaps
     stream.merge()
     for tr in stream:
+        trace_id = tr.id
         if np.isnan(tr.data.max()):
-            print(f"Problem with {tr.id} (detected NaNs)!")
+            if verbose:
+                print(f"Problem with {tr.id} (detected NaNs)!")
             continue
         T1 = udt(tr.stats.starttime.timestamp)
         T2 = udt(tr.stats.endtime.timestamp)
         trace_duration = T2 - T1
         if trace_duration < minimum_length * target_duration:
             # don't include this trace
+            if verbose:
+                print(f"Too much gap duration on {trace_id}.")
             continue
         # split will lose information about start and end times
         # if the start or the end is masked
@@ -356,6 +367,8 @@ def _preprocess_stream(
                 tr.remove(chunk)
         if len(tr) == 0:
             # all chunks were too short
+            if verbose:
+                print(f"All chunks within {trace_id} were too short.")
             continue
         # measure gap duration
         gap_duration = target_duration - trace_duration
@@ -364,6 +377,8 @@ def _preprocess_stream(
         if (target_duration is not None) and (
             gap_duration > minimum_length * target_duration
         ):
+            if verbose:
+                print(f"Too much gap duration on {trace_id}.")
             continue
         tr.detrend("constant")
         tr.detrend("linear")
@@ -405,7 +420,7 @@ def _preprocess_stream(
                 tr.resample(target_SR, no_filter=True)
         elif sr_ratio < 1:
             if verbose:
-                print("Sampling rate is too high!")
+                print("Sampling rate is too high on {tr.id}.")
                 print(tr)
             preprocessed_stream.remove(tr)
             continue
