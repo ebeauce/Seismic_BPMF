@@ -587,7 +587,9 @@ class Beamformer(object):
         wav_axes = []
         ax_maxbeam = fig.add_subplot(grid[:2, :])
         self.plot_maxbeam(ax=ax_maxbeam, detection=detection)
-        ax_maxbeam.set_ylim(-0.5, 2.0 * detection.aux_data["maxbeam"])
+        ax_maxbeam.set_ylim(
+                max(-0.5, ax_maxbeam.get_ylim()[0]), 2.0 * detection.aux_data["maxbeam"]
+                )
         beam = 0.0
         for s, sta in enumerate(stations):
             for c, cp in enumerate(self.network.components):
@@ -663,7 +665,7 @@ class Beamformer(object):
             self.source_coordinates["longitude"].iloc[hor_slice],
             self.source_coordinates["latitude"].iloc[hor_slice],
             likelihood[hor_slice],
-            levels=np.linspace(-0.001, 1.001, 10),
+            levels=np.linspace(0., 1.0, 10),
             cmap="inferno",
             alpha=0.50,
             transform=data_coords,
