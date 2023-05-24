@@ -543,7 +543,8 @@ def uncertainty_ellipse(
         num_points=100
         ):
     """
-    Compute a set of longitude and latitude points that describe the uncertainty ellipse.
+    Compute a set of longitude and latitude points that describe the uncertainty
+    ellipse in the horizontal plane.
 
     Parameters
     ----------
@@ -573,10 +574,91 @@ def uncertainty_ellipse(
     theta = np.deg2rad(-(azimuths - hmax_azimuth_deg))
     # ellipse formula
     eccentricity_pow2 = 1. - (hmin_uncertainty_km / hmax_uncertainty_km)**2
-    ellipse_m = hmin_uncertainty_km / np.sqrt(1. - eccentricity_pow2 * np.cos(theta)**2)
+    ellipse_km = hmin_uncertainty_km / np.sqrt(1. - eccentricity_pow2 * np.cos(theta)**2)
     # ray shooting with Geodesic
     G = Geodesic()
     longitude_ellipse, latitude_ellipse, _ = np.asarray(
-        G.direct([longitude_center, latitude_center], azimuths, 1000. * ellipse_m)
+        G.direct([longitude_center, latitude_center], azimuths, 1000. * ellipse_km)
     ).T
     return longitude_ellipse, latitude_ellipse
+
+def vertical_uncertainty_ellipse(
+        cov_mat, longitude_center, latitude_center, depth_center,
+        horizontal_direction="longitude", num_points=100
+        ):
+    """
+    Compute a set of longitude and latitude points that describe the uncertainty
+    ellipse in the vertical plane.
+
+    Parameters
+    -----------
+    cov_mat : numpy.ndarray
+        The (3x3) covariance matrix returned by Event.relocate(method='NLLoc').
+    longitude_center : float
+        The longitude coordinate of the center point of the ellipse.
+    latitude_center : float
+        The latitude coordinate of the center point of the ellipse.
+    depth_center : float
+        The depth, in km, of the center point of the ellipse.
+    horizontal_direction : str, optional
+        Either 'longitude' or 'latitude'. Define the x-coordinate of the plane.
+    num_points : int, optional
+        The number of points used to describe the ellipse, default is 100.
+
+    Returns
+    -------
+    longitude_ellipse : numpy.ndarray
+        The longitude coordinates of the points that make up the uncertainty ellipse.
+    latitude_ellipse : numpy.ndarray
+        The latitude coordinates of the points that make up the uncertainty ellipse.
+    depth_ellipse : numpy.ndarray
+        The depth, in km, of the points that make up the uncertainty ellipse.
+    """
+
+    from cartopy.geodesic import Geodesic
+
+    # ray shooting with Geodesic
+    G = Geodesic()
+    phis = np.linspace(0., 360., num_points)
+    
+    if horizontal_direction == "longitude":
+        # az_max_edg is angle between vertical axis and  
+        max_unc_km, min_unc_km, phi_max_deg, phi_min_deg = utils.cov_mat_intersection(
+                cov_mat, axis1=0, axis2=2
+                )
+        theta = np.deg2rad((phis - phi_max_deg))
+        # ellipse formula
+        eccentricity_pow2 = 1. - (min_unc_km / max_unc_km)**2
+        ellipse_km = min_unc_km / np.sqrt(1. - eccentricity_pow2 * np.cos(theta)**2)
+        # this is the ellipse depth
+        depth_ellipse = depth_center - ellipse_km * np.cos(np.deg2rad(phis))
+        # this is the ray length
+        ellipse_horizontal_km = ellipse_km * np.sin(np.deg2rad(phis))
+        # this is the ray azimuth
+        ray_azimuth = 270.
+    elif horizontal_direction == "latitude":
+        max_unc_km, min_unc_km, phi_max_deg, phi_min_deg = utils.cov_mat_intersection(
+                cov_mat, axis1=1, axis2=2
+                )
+        theta = np.deg2rad((phis - phi_max_deg))
+        # ellipse formula
+        eccentricity_pow2 = 1. - (min_unc_km / max_unc_km)**2
+        ellipse_km = min_unc_km / np.sqrt(1. - eccentricity_pow2 * np.cos(theta)**2)
+        # this is the ellipse depth
+        depth_ellipse = depth_center - ellipse_km * np.cos(np.deg2rad(phis))
+        # this is the ray length
+        ellipse_horizontal_km = ellipse_km * np.sin(np.deg2rad(phis))
+        # this is the ray azimuth
+        ray_azimuth = 180.
+    else:
+        print(
+                "horizontal_direction should be either of 'longitude' or 'latitude'."
+        )
+    longitude_ellipse, latitude_ellipse, _ = np.asarray(
+        G.direct(
+            [longitude_center, latitude_center],
+            ray_azimuth,
+            1000. * ellipse_horizontal_km
+            )
+    ).T
+    return longitude_ellipse, latitude_ellipse, depth_ellipse

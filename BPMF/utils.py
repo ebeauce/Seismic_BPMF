@@ -211,27 +211,29 @@ def preprocess_stream(
         A preprocessed stream of seismic data.
     """
     from functools import partial
+
     data_preprocessor = partial(
-            _preprocess_stream,
-            freqmin=freqmin,
-            freqmax=freqmax,
-            target_SR=target_SR,
-            remove_response=remove_response,
-            remove_sensitivity=remove_sensitivity,
-            plot_resp=plot_resp,
-            target_duration=target_duration,
-            target_starttime=target_starttime,
-            target_endtime=target_endtime,
-            minimum_length=minimum_length,
-            minimum_chunk_duration=minimum_chunk_duration,
-            verbose=verbose,
-            SR_decimals=SR_decimals,
-            decimation_method=decimation_method,
-            unit=unit,
-            **kwargs
-            )
+        _preprocess_stream,
+        freqmin=freqmin,
+        freqmax=freqmax,
+        target_SR=target_SR,
+        remove_response=remove_response,
+        remove_sensitivity=remove_sensitivity,
+        plot_resp=plot_resp,
+        target_duration=target_duration,
+        target_starttime=target_starttime,
+        target_endtime=target_endtime,
+        minimum_length=minimum_length,
+        minimum_chunk_duration=minimum_chunk_duration,
+        verbose=verbose,
+        SR_decimals=SR_decimals,
+        decimation_method=decimation_method,
+        unit=unit,
+        **kwargs,
+    )
     if n_threads != 1:
         from concurrent.futures import ProcessPoolExecutor
+
         with ProcessPoolExecutor(max_workers=n_threads) as executor:
             # we need to group traces from same channels, therefore,
             # we use merge to fill gaps with masked arrays
@@ -239,8 +241,8 @@ def preprocess_stream(
             preprocessed_stream = list(executor.map(data_preprocessor, stream))
             try:
                 preprocessed_stream = [
-                        tr[0] for tr in preprocessed_stream if len(tr) > 0
-                        ]
+                    tr[0] for tr in preprocessed_stream if len(tr) > 0
+                ]
             except Exception as e:
                 print(e)
                 print(preprocessed_stream)
@@ -279,7 +281,8 @@ def _preprocess_stream(
         stream = obs.Stream(stream)
     preprocessed_stream = obs.Stream()
     if len(stream) == 0:
-        print("Input data is empty!")
+        if verbose:
+            print("Input data is empty!")
         return preprocessed_stream
     if (target_duration is None) and (
         (target_starttime is not None) and target_endtime is not None
@@ -296,6 +299,10 @@ def _preprocess_stream(
         if t2 - t1 < minimum_chunk_duration:
             # don't include this chunk
             stream.remove(tr)
+    if len(stream) == 0:
+        if verbose:
+            print("Removed all traces because they were too short.")
+        return preprocessed_stream
     # second, make a list of all stations in stream
     stations = []
     for tr in stream:
@@ -322,24 +329,32 @@ def _preprocess_stream(
         # if more than one sampling rate, remove the traces with the least
         # represented sampling rate
         if len(unique_sampling_rates) > 1:
-            ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
+            if sampling_rates_counts[unique_sampling_rates.argmax()] >= 3:
+                ref_sampling_rate = unique_sampling_rates.max()
+            else:
+                ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
             for tr in stream:
                 if tr.stats.sampling_rate != ref_sampling_rate:
-                    print(f"Removing {tr} (target SR is {ref_sampling_rate})")
+                    if verbose:
+                        print(f"Removing {tr.id} because not desired sampling rate.")
                     stream.remove(tr)
     # start by cleaning the gaps if there are any
     # start with a simple merge to unite data from same channels into unique
     # trace but without losing information on gaps
     stream.merge()
     for tr in stream:
+        trace_id = tr.id
         if np.isnan(tr.data.max()):
-            print(f"Problem with {tr.id} (detected NaNs)!")
+            if verbose:
+                print(f"Problem with {tr.id} (detected NaNs)!")
             continue
         T1 = udt(tr.stats.starttime.timestamp)
         T2 = udt(tr.stats.endtime.timestamp)
         trace_duration = T2 - T1
         if trace_duration < minimum_length * target_duration:
             # don't include this trace
+            if verbose:
+                print(f"Too much gap duration on {trace_id}.")
             continue
         # split will lose information about start and end times
         # if the start or the end is masked
@@ -352,6 +367,8 @@ def _preprocess_stream(
                 tr.remove(chunk)
         if len(tr) == 0:
             # all chunks were too short
+            if verbose:
+                print(f"All chunks within {trace_id} were too short.")
             continue
         # measure gap duration
         gap_duration = target_duration - trace_duration
@@ -360,6 +377,8 @@ def _preprocess_stream(
         if (target_duration is not None) and (
             gap_duration > minimum_length * target_duration
         ):
+            if verbose:
+                print(f"Too much gap duration on {trace_id}.")
             continue
         tr.detrend("constant")
         tr.detrend("linear")
@@ -401,7 +420,7 @@ def _preprocess_stream(
                 tr.resample(target_SR, no_filter=True)
         elif sr_ratio < 1:
             if verbose:
-                print("Sampling rate is too high!")
+                print("Sampling rate is too high on {tr.id}.")
                 print(tr)
             preprocessed_stream.remove(tr)
             continue
@@ -676,7 +695,6 @@ def fetch_detection_waveforms(
     unique_events=False,
     catalog=None,
 ):
-
     from itertools import groupby
     from operator import itemgetter
 
@@ -770,7 +788,6 @@ def fetch_detection_waveforms_refilter(
     flip_order=True,
     **preprocess_kwargs,
 ):
-
     # sys.path.append(os.path.join(cfg.base, 'earthquake_location_eb'))
     # import relocation_utils
     from . import event_extraction
@@ -886,7 +903,6 @@ def SVDWF_multiplets(
     attach_raw_data=False,
     detection_waveforms=None,
 ):
-
     """
     Parameters
     -----------
@@ -1255,6 +1271,50 @@ def weighted_linear_regression(X, Y, W=None):
 #             Others
 # -------------------------------------------------
 
+def cov_mat_intersection(cov_mat, axis1=0, axis2=1):
+    """Compute intersection between covariance matrix and plane.
+
+    Note that we assume the following coordinate system:
+    - X: westward
+    - Y: southward
+    - Z: upward
+
+    Parameters
+    ----------
+    cov_mat : numpy.ndarray
+        The (3x3) covariance matrix returned by Event.relocate(method='NLLoc').
+    axis1 : integer, optional
+        Index of the first axis defining the intersecting plane.
+    axis2 : integer, optional
+        Index of the second axis defining the intersecting plane.
+
+    Returns
+    -------
+    max_unc : float
+        Maximum uncertainty, in km, of the intersected covariance matrix.
+    min_unc : float
+        Minimum uncertainty, in km, of the intersected covariance matrix.
+    az_max : float
+        "Azimuth", that is, angle from `axis2` of maximum uncertainty.
+    az_min : float
+        "Azimuth", that is, angle from `axis2` of minimum uncertainty.
+    """
+    # X: west, Y: south, Z: upward
+    s_68_3df = 3.52
+    s_68_2df = 2.28
+    # eigendecomposition of restricted matrix
+    indexes = np.array([axis1, axis2])
+    w, v = np.linalg.eigh(cov_mat[indexes, :][:, indexes])
+    semi_axis_length = np.sqrt(s_68_2df * w)
+    max_unc = np.max(semi_axis_length)
+    min_unc = np.min(semi_axis_length)
+    max_dir = v[:, w.argmax()]
+    min_dir = v[:, w.argmin()]
+    # "azimuth" is angle between `axis2` (`max_dir[1]`) and ellipse's semi-axis
+    az_max = np.arctan2(max_dir[0], max_dir[1]) * 180.0 / np.pi
+    az_min = (az_max + 90.) % 360.
+    return max_unc, min_unc, az_max, az_min
+
 
 def compute_distances(
     source_longitudes,
@@ -1527,6 +1587,31 @@ def running_mad(time_series, window, n_mad=10.0, overlap=0.75):
     running_stat = interpolator(full_time)
     return running_stat
 
+def two_point_epicentral_distance(lon_1, lat_1, lon_2, lat_2):
+    """Compute the distance between two points.
+
+
+    Parameters
+    -----------
+    lon_1: scalar, float
+        Longitude of Point 1.
+    lat_1: scalar, float
+        Latitude of Point 1.
+    lon_2: scalar, float
+        Longitude of Point 2.
+    lat_2: scalar, float
+        Latitude of Point 2.
+
+    Returns
+    ---------
+    dist: scalar, float
+        Distance between Point 1 and Point 2 in kilometers.
+    """
+    from obspy.geodetics.base import calc_vincenty_inverse
+
+    dist, az, baz = calc_vincenty_inverse(lat_1, lon_1, lat_2, lon_2)
+    dist /= 1000.0  # from m to km
+    return dist
 
 def two_point_distance(lon_1, lat_1, depth_1, lon_2, lat_2, depth_2):
     """Compute the distance between two points.
@@ -1560,11 +1645,13 @@ def two_point_distance(lon_1, lat_1, depth_1, lon_2, lat_2, depth_2):
     dist = np.sqrt(dist**2 + (depth_1 - depth_2) ** 2)
     return dist
 
+
 def donefun():
     """
     Super useful function.
     """
-    print("""⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+    print(
+        """⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
     ⠀⠀⠀⠀⠀⠀⢀⡤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀
     ⠀⠀⠀⠀⠀⢀⡏⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⣀⠴⠋⠉⠉⡆⠀⠀⠀⠀⠀
     ⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠈⠉⠉⠙⠓⠚⠁⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀
@@ -1574,7 +1661,9 @@ def donefun():
     ⠻⠶⣾⠁⠀⠀⠀⠀⠙⣆⠀⠀⠀⠀⠀⠀⣰⠋⠀⠀⠀⠀⠀⢹⣿⣭⣽⠇
     ⠀⠀⠙⠤⠴⢤⡤⠤⠤⠋⠉⠉⠉⠉⠉⠉⠉⠳⠖⠦⠤⠶⠦⠞⠁⠀⠀⠀
                 ALL DONE!⠀⠀⠀⠀
-    """)
+    """
+    )
+
 
 def write_lock_file(path, check=False, flush=False):
     if check:
@@ -1587,10 +1676,11 @@ def write_lock_file(path, check=False, flush=False):
         os.fsync(f.fileno())
         f.close()
 
+
 def read_write_waiting_list(func, path, unit_wait_time=0.2):
-    """Read/write queue to avoid conflicts between jobs.
-    """
+    """Read/write queue to avoid conflicts between jobs."""
     from time import sleep
+
     path_no_ext, _ = os.path.splitext(path)
     while True:
         try:
@@ -1610,18 +1700,18 @@ def read_write_waiting_list(func, path, unit_wait_time=0.2):
                     waiting_list_position += np.random.randint(5)
                     waiting_list_ticket = f"{path_wait}{waiting_list_position:d}"
             next_place_ticket = f"{path_wait}{waiting_list_position-1:d}"
-            #print(f"1: Created {os.path.basename(waiting_list_ticket)}")
+            # print(f"1: Created {os.path.basename(waiting_list_ticket)}")
             while True:
-                #sleep(unit_wait_time * np.random.random())
-                if (waiting_list_position == 0):
+                # sleep(unit_wait_time * np.random.random())
+                if waiting_list_position == 0:
                     # is first in the waiting list!
                     if not os.path.isfile(path_lock):
                         # first, create lock file
                         write_lock_file(path_lock, flush=True)
-                        #print(f"2: Created {os.path.basename(path_lock)}")
+                        # print(f"2: Created {os.path.basename(path_lock)}")
                         # then, free the waiting list position #0
                         pathlib.Path(waiting_list_ticket).unlink()
-                        #print(f"2: Deleted {os.path.basename(waiting_list_ticket)}")
+                        # print(f"2: Deleted {os.path.basename(waiting_list_ticket)}")
                         # now the process can proceed with the reading or writing
                         break
                     else:
@@ -1631,10 +1721,10 @@ def read_write_waiting_list(func, path, unit_wait_time=0.2):
                     # front place in the waiting list was freed!
                     # first, create new ticket at the new position
                     write_lock_file(next_place_ticket)
-                    #print(f"3: Created {os.path.basename(next_place_ticket)}")
+                    # print(f"3: Created {os.path.basename(next_place_ticket)}")
                     # then, free previous place in the waiting list
                     pathlib.Path(waiting_list_ticket).unlink()
-                    #print(f"3: Deleted {os.path.basename(waiting_list_ticket)}")
+                    # print(f"3: Deleted {os.path.basename(waiting_list_ticket)}")
                     # update place in waiting list
                     waiting_list_position -= 1
                     # update ticket names
@@ -1650,16 +1740,373 @@ def read_write_waiting_list(func, path, unit_wait_time=0.2):
                 func(path)
             except Exception as e:
                 pathlib.Path(path_lock).unlink()
-                raise(e)
+                raise (e)
             pathlib.Path(path_lock).unlink()
             break
             # done!
         except FileNotFoundError:
-            print("4: Concurent error, reset queue "
-                  f"(last ticket was {waiting_list_ticket})")
+            print(
+                "4: Concurent error, reset queue "
+                f"(last ticket was {waiting_list_ticket})"
+            )
             if waiting_list_position == 0:
                 print(os.path.isfile(path_lock))
                 pathlib.Path(path_lock).unlink()
             continue
 
+# =======================================================
+#         routines for automatic picking
+# =======================================================
+
+
+def normalize_batch(seismogram, normalization_window_sample=3000):
+    """Apply Z-score normalization in running windows.
+
+    Following Zhu et al. 2019, this function applied Z-score
+    normalization in running windows with length `normalization_window_sample`.
+
+    Parameters
+    -----------
+    seismogram : numpy.ndarray
+        Three-component seismograms. `seismogram` has shape
+        (num_traces, num_channels=3, num_time_samples).
+    normalization_window_sample : integer, optional
+        The window length, in samples, over which normalization is applied.
+        Default is 3000 (like in Zhu et al. 2019).
+
+    Returns
+    --------
+    normalized_seismogram : numpy.ndarray
+        Normalized seismogram with same shape as `seismogram`.
+    """
+    from scipy.interpolate import interp1d
+
+    shift = normalization_window_sample // 2
+    num_stations, num_channels, num_time_samples = seismogram.shape
+
+    # std in sliding windows
+    seismogram_pad = np.pad(
+        seismogram, ((0, 0), (0, 0), (shift, shift)), mode="reflect"
+    )
+    # time = np.arange(0, num_time_samples, shift, dtype=np.int32)
+    seismogram_view = np.lib.stride_tricks.sliding_window_view(
+        seismogram_pad, normalization_window_sample, axis=-1
+    )[:, :, ::shift, :]
+    sliding_std = np.std(seismogram_view, axis=-1)
+    sliding_mean = np.mean(seismogram_view, axis=-1)
+
+    # time at centers of sliding windows
+    num_sliding_windows = seismogram_view.shape[2]
+    time = np.linspace(shift, num_time_samples - shift, num_sliding_windows)
+
+    sliding_std[:, :, -1], sliding_mean[:, :, -1] = (
+        sliding_std[:, :, -2],
+        sliding_mean[:, :, -2],
+    )
+    sliding_std[:, :, 0], sliding_mean[:, :, 0] = (
+        sliding_std[:, :, 1],
+        sliding_mean[:, :, 1],
+    )
+    sliding_std[sliding_std == 0] = 1
+
+    # normalize data with sliding std and mean
+    t_interp = np.arange(num_time_samples)
+    std_interp = np.stack(
+            tuple(np.interp(
+                t_interp, time, sld_std, left=sld_std[0], right=sld_std[-1]
+                )
+                for sld_std in sliding_std.reshape(-1, sliding_std.shape[-1])
+                ),
+            axis=0
+            ).reshape(
+                    sliding_std.shape[:-1] + (len(t_interp),)
+                    )
+    mean_interp = np.stack(
+            tuple(np.interp(
+                t_interp, time, m_std, left=m_std[0], right=m_std[-1]
+                )
+                for m_std in sliding_mean.reshape(-1, sliding_mean.shape[-1])
+                ),
+            axis=0
+            ).reshape(
+                    sliding_mean.shape[:-1] + (len(t_interp),)
+                    )
+
+    seismogram = (seismogram - mean_interp) / std_interp
+
+    return seismogram
+
+def trigger_picks(
+        probability,
+        threshold,
+        minimum_peak_distance_samp=int(1. * cfg.SAMPLING_RATE_HZ)
+        ):
+    """
+    Parameters
+    ----------
+    probability : 1D array_like
+    threshold : float
+    minimum_peak_distance_samp : integer
+
+    Returns
+    -------
+    probability_at_peak : 1D array_like
+    peak_indexes : 1D array_like
+    """
+    peak_indexes = _detect_peaks(
+            probability, mph=threshold, mpd=minimum_peak_distance_samp
+            )
+    return (
+            np.atleast_1d(probability[peak_indexes]),
+            np.atleast_1d(peak_indexes)
+            )
+
+def get_picks(
+        picks,
+        buffer_length=int(2. * cfg.SAMPLING_RATE_HZ),
+        prior_knowledge=None,
+        search_win_samp=int(4. * cfg.SAMPLING_RATE_HZ)
+        ):
+
+    """Select a single P- and S-pick on each 3-comp seismogram.
+    
+    Parameters
+    ----------
+    picks: dictionary
+        Dictionary returned by `automatic_picking`.
+    buffer_length: scalar int, optional
+        Picks that are before this buffer length, in samples, are discarded.
+    prior_knowledge: pandas.DataFrame, optional
+        If given, picks that are closer to the a priori pick
+        (for example, given by a preliminary location) will be given
+        a larger weight and will be more likely to be selected. In practice,
+        pick probabilities are multiplied by gaussian weights and the highest
+        modified pick probability is selected.
+    search_win_samp: scalar int, optional
+        Standard deviation, in samples, used in the gaussian weights.
+    """
+    for st in picks["P_picks"].keys():
+        if prior_knowledge is not None:
+            prior_P = prior_knowledge.loc[st, "P"]
+            prior_S = prior_knowledge.loc[st, "S"]
+        #for n in range(len(picks["P_picks"][st])):
+        # ----------------
+        # remove picks from the buffer length
+        valid_P_picks = picks["P_picks"][st] > int(buffer_length)
+        valid_S_picks = picks["S_picks"][st] > int(buffer_length)
+        picks["P_picks"][st] = picks["P_picks"][st][valid_P_picks]
+        picks["S_picks"][st] = picks["S_picks"][st][valid_S_picks]
+        picks["P_proba"][st] = picks["P_proba"][st][valid_P_picks]
+        picks["S_proba"][st] = picks["S_proba"][st][valid_S_picks]
+        search_S_pick = True
+        search_P_pick = True
+        if len(picks["S_picks"][st]) == 0:
+            # if no valid S pick: fill in with nan
+            picks["S_picks"][st] = np.nan
+            picks["S_proba"][st] = np.nan
+            search_S_pick = False
+        if len(picks["P_picks"][st]) == 0:
+            # if no valid P pick: fill in with nan
+            picks["P_picks"][st] = np.nan
+            picks["P_proba"][st] = np.nan
+            search_P_pick = False
+        if search_S_pick:
+            if prior_knowledge is None:
+                # take only the highest probability trigger
+                best_S_trigger = picks["S_proba"][st].argmax()
+            else:
+                # use a priori picks
+                tapered_S_probas = (
+                        picks["S_proba"][st]
+                        *
+                        np.exp(
+                            -(picks["S_picks"][st] - prior_S)**2/(2.*search_win_samp**2)
+                            )
+                        )
+                best_S_trigger = tapered_S_probas.argmax()
+            picks["S_picks"][st] = picks["S_picks"][st][best_S_trigger]
+            picks["S_proba"][st] = picks["S_proba"][st][best_S_trigger]
+            # update P picks: keep only those that are before the best S pick
+            if search_P_pick:
+                valid_P_picks = picks["P_picks"][st] < picks["S_picks"][st]
+                picks["P_picks"][st] = picks["P_picks"][st][valid_P_picks]
+                picks["P_proba"][st] = picks["P_proba"][st][valid_P_picks]
+                if len(picks["P_picks"][st]) == 0:
+                    # if no valid P pick: fill in with nan
+                    picks["P_picks"][st] = np.nan
+                    picks["P_proba"][st] = np.nan
+                    search_P_pick = False
+        if search_P_pick:
+            if prior_knowledge is None:
+                # take only the highest probability trigger
+                best_P_trigger = picks["P_proba"][st].argmax()
+            else:
+                # use a priori picks
+                tapered_P_probas = (
+                        picks["P_proba"][st]
+                        *
+                        np.exp(
+                            -(picks["P_picks"][st] - prior_P)**2/(2.*search_win_samp**2)
+                            )
+                        )
+                best_P_trigger = tapered_P_probas.argmax()
+            picks["P_picks"][st] = picks["P_picks"][st][best_P_trigger]
+            picks["P_proba"][st] = picks["P_proba"][st][best_P_trigger]
+        # convert picks to float to allow NaNs
+        picks["P_picks"][st] = np.atleast_1d(np.float32(picks["P_picks"][st]))
+        picks["S_picks"][st] = np.atleast_1d(np.float32(picks["S_picks"][st]))
+        picks["P_proba"][st] = np.atleast_1d(np.float32(picks["P_proba"][st]))
+        picks["S_proba"][st] = np.atleast_1d(np.float32(picks["S_proba"][st]))
+    return picks
+
+def _detect_peaks(
+    x,
+    mph=None,
+    mpd=1,
+    threshold=0,
+    edge="rising",
+    kpsh=False,
+    valley=False,
+    show=False,
+    ax=None,
+):
+
+    """Detect peaks in data based on their amplitude and other features.
+
+    Parameters
+    ----------
+    x : 1D array_like
+        data.
+    mph : {None, number}, optional (default = None)
+        detect peaks that are greater than minimum peak height.
+    mpd : positive integer, optional (default = 1)
+        detect peaks that are at least separated by minimum peak distance (in
+        number of data).
+    threshold : positive number, optional (default = 0)
+        detect peaks (valleys) that are greater (smaller) than `threshold`
+        in relation to their immediate neighbors.
+    edge : {None, 'rising', 'falling', 'both'}, optional (default = 'rising')
+        for a flat peak, keep only the rising edge ('rising'), only the
+        falling edge ('falling'), both edges ('both'), or don't detect a
+        flat peak (None).
+    kpsh : bool, optional (default = False)
+        keep peaks with same height even if they are closer than `mpd`.
+    valley : bool, optional (default = False)
+        if True (1), detect valleys (local minima) instead of peaks.
+    show : bool, optional (default = False)
+        if True (1), plot data in matplotlib figure.
+    ax : a matplotlib.axes.Axes instance, optional (default = None).
+
+    Returns
+    -------
+    ind : 1D array_like
+        indeces of the peaks in `x`.
+
+    Notes
+    -----
+    The detection of valleys instead of peaks is performed internally by simply
+    negating the data: `ind_valleys = detect_peaks(-x)`
+
+    The function can handle NaN's
+
+    See this IPython Notebook [1]_.
+
+    References
+    ----------
+    .. [1]:http://nbviewer.ipython.org/github/demotu/BMC/blob/master/
+        notebooks/DetectPeaks.ipynb
+
+    Examples
+    --------
+    >>> from detect_peaks import detect_peaks
+    >>> x = np.random.randn(100)
+    >>> x[60:81] = np.nan
+    >>> # detect all peaks and plot data
+    >>> ind = detect_peaks(x, show=True)
+    >>> print(ind)
+
+    >>> x = np.sin(2*np.pi*5*np.linspace(0, 1, 200)) + np.random.randn(200)/5
+    >>> # set minimum peak height = 0 and minimum peak distance = 20
+    >>> detect_peaks(x, mph=0, mpd=20, show=True)
+
+    >>> x = [0, 1, 0, 2, 0, 3, 0, 2, 0, 1, 0]
+    >>> # set minimum peak distance = 2
+    >>> detect_peaks(x, mpd=2, show=True)
+
+    >>> x = np.sin(2*np.pi*5*np.linspace(0, 1, 200)) + np.random.randn(200)/5
+    >>> # detection of valleys instead of peaks
+    >>> detect_peaks(x, mph=0, mpd=20, valley=True, show=True)
+
+    >>> x = [0, 1, 1, 0, 1, 1, 0]
+    >>> # detect both edges
+    >>> detect_peaks(x, edge='both', show=True)
+
+    >>> x = [-2, 1, -2, 2, 1, 1, 3, 0]
+    >>> # set threshold = 2
+    >>> detect_peaks(x, threshold = 2, show=True)
+    """
+
+    x = np.atleast_1d(x).astype("float64")
+    if x.size < 3:
+        return np.array([], dtype=int)
+    if valley:
+        x = -x
+    # find indices of all peaks
+    dx = x[1:] - x[:-1]
+    # handle NaN's
+    indnan = np.where(np.isnan(x))[0]
+    if indnan.size:
+        x[indnan] = np.inf
+        dx[np.where(np.isnan(dx))[0]] = np.inf
+    ine, ire, ife = np.array([[], [], []], dtype=int)
+    if not edge:
+        ine = np.where((np.hstack((dx, 0)) < 0) & (np.hstack((0, dx)) > 0))[0]
+    else:
+        if edge.lower() in ["rising", "both"]:
+            ire = np.where((np.hstack((dx, 0)) <= 0) & (np.hstack((0, dx)) > 0))[0]
+        if edge.lower() in ["falling", "both"]:
+            ife = np.where((np.hstack((dx, 0)) < 0) & (np.hstack((0, dx)) >= 0))[0]
+    ind = np.unique(np.hstack((ine, ire, ife)))
+    # handle NaN's
+    if ind.size and indnan.size:
+        # NaN's and values close to NaN's cannot be peaks
+        ind = ind[
+            np.in1d(
+                ind, np.unique(np.hstack((indnan, indnan - 1, indnan + 1))), invert=True
+            )
+        ]
+    # first and last values of x cannot be peaks
+    if ind.size and ind[0] == 0:
+        ind = ind[1:]
+    if ind.size and ind[-1] == x.size - 1:
+        ind = ind[:-1]
+    # remove peaks < minimum peak height
+    if ind.size and mph is not None:
+        ind = ind[x[ind] >= mph]
+    # remove peaks - neighbors < threshold
+    if ind.size and threshold > 0:
+        dx = np.min(np.vstack([x[ind] - x[ind - 1], x[ind] - x[ind + 1]]), axis=0)
+        ind = np.delete(ind, np.where(dx < threshold)[0])
+    # detect small peaks closer than minimum peak distance
+    if ind.size and mpd > 1:
+        ind = ind[np.argsort(x[ind])][::-1]  # sort ind by peak height
+        idel = np.zeros(ind.size, dtype=bool)
+        for i in range(ind.size):
+            if not idel[i]:
+                # keep peaks with the same height if kpsh is True
+                idel = idel | (ind >= ind[i] - mpd) & (ind <= ind[i] + mpd) & (
+                    x[ind[i]] > x[ind] if kpsh else True
+                )
+                idel[i] = 0  # Keep current peak
+        # remove the small peaks and sort back the indices by their occurrence
+        ind = np.sort(ind[~idel])
+
+    if show:
+        if indnan.size:
+            x[indnan] = np.nan
+        if valley:
+            x = -x
+        _plot_peaks(x, mph, mpd, threshold, edge, valley, ax, ind)
+
+    return ind
 

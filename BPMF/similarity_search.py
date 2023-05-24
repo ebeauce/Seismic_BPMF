@@ -323,8 +323,8 @@ class MatchedFilter(object):
             weights_arr /= norm
             # insufficient data
             invalid = (
-                np.sum((weights_arr != 0.0), axis=(1, 2)) <= self.min_channels
-            ) | (np.sum(np.sum(weights_arr, axis=2) > 0.0, axis=1) <= self.min_stations)
+                np.sum((weights_arr != 0.0), axis=(1, 2)) < self.min_channels
+            ) | (np.sum(np.sum(weights_arr, axis=2) > 0.0, axis=1) < self.min_stations)
             weights_arr[invalid] = 0.0
         self.weights_arr = weights_arr
         # ----------------------------------------------

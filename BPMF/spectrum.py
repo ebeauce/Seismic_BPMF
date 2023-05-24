@@ -6,8 +6,10 @@ import scipy.signal as scisig
 
 
 class Spectrum:
-    def __init__(self, event=None):
+    def __init__(self, event=None, frequency_bands=None):
         self.event = event
+        if frequency_bands is not None:
+            self.set_frequency_bands(frequency_bands)
 
     def attenuation_Q_model(self, Q, frequencies):
         from scipy.interpolate import interp1d
@@ -21,9 +23,12 @@ class Spectrum:
 
     def compute_correction_factor(
         self,
-        rho,
-        vp,
-        vs,
+        rho_source,
+        rho_receiver,
+        vp_source,
+        vp_receiver,
+        vs_source,
+        vs_receiver,
         radiation_S=np.sqrt(2.0 / 5.0),
         radiation_P=np.sqrt(4.0 / 15.0),
     ):
@@ -65,7 +70,17 @@ class Spectrum:
         for sta in self.event.source_receiver_dist.index:
             r_m = 1000.0 * self.event.source_receiver_dist.loc[sta]
             tt_s = self.event.arrival_times.loc[sta, "S_tt_sec"]
-            corr_s = 2.0 * rho * vs**3 * r_m / radiation_S
+            #corr_s = 2.0 * rho * vs**3 * r_m / radiation_S
+            #corr_s = 4.0 * np.pi * rho * vs**3 * r_m / radiation_S
+            corr_s = (
+                    4.0 * np.pi
+                    *
+                    np.sqrt(rho_receiver) * np.sqrt(rho_source)
+                    *
+                    np.sqrt(vs_receiver) * vs_source**(5./2.)
+                    *
+                    r_m / radiation_S
+                    )
             correction_factor.loc[sta, f"correction_S"] = corr_s
             if hasattr(self, "attenuation_model"):
                 attenuation_factor.loc[sta, f"attenuation_S"] = lambda freq: np.exp(
@@ -74,7 +89,17 @@ class Spectrum:
             else:
                 attenuation_factor.loc[sta, f"attenuation_S"] = None
             tt_p = self.event.arrival_times.loc[sta, "P_tt_sec"]
-            corr_p = 2.0 * rho * vp**3 * r_m / radiation_P
+            #corr_p = 2.0 * rho * vp**3 * r_m / radiation_P
+            #corr_p = 4.0 * np.pi * rho * vp**3 * r_m / radiation_P
+            corr_p = (
+                    4.0 * np.pi
+                    *
+                    np.sqrt(rho_receiver) * np.sqrt(rho_source)
+                    *
+                    np.sqrt(vp_receiver) * vp_source**(5./2.)
+                    *
+                    r_m / radiation_P
+                    )
             correction_factor.loc[sta, f"correction_P"] = corr_p
             if hasattr(self, "attenuation_model"):
                 attenuation_factor.loc[sta, f"attenuation_P"] = lambda freq: np.exp(
@@ -93,6 +118,8 @@ class Spectrum:
         correct_propagation=True,
         average_log=True,
         min_num_valid_channels_per_freq_bin=0,
+        max_relative_distance_err_pct=25.,
+        verbose=0,
     ):
         phase = phase.lower()
         assert phase in ["p", "s"], "phase should be 'p' or 's'"
@@ -109,8 +136,19 @@ class Spectrum:
         signal_spectrum = getattr(self, f"{phase}_spectrum")
         snr_spectrum = getattr(self, f"snr_{phase}_spectrum")
         for trid in signal_spectrum:
+            if (
+                    signal_spectrum[trid]["relative_distance_err_pct"]
+                    >
+                    max_relative_distance_err_pct
+                    ):
+                if verbose > 0:
+                    print(f"Source-receiver distance relative error is too high: "
+                          f"{signal_spectrum[trid]['relative_distance_err_pct']:.2f}")
+                # the location uncertainty implies too much error
+                # on this station, skip it
+                continue
             mask = snr_spectrum[trid]["snr"] < snr_threshold
-            amplitude_spectrum = signal_spectrum[trid]["fft"].copy()
+            amplitude_spectrum = signal_spectrum[trid]["spectrum"].copy()
             if correct_propagation:
                 sta = trid.split(".")[1]
                 amplitude_spectrum *= self.correction_factor.loc[
@@ -130,14 +168,16 @@ class Spectrum:
             )
         if len(masked_spectra) == 0:
             # there seems to be cases when to spectra were in signal_spectrum??
-            print(f"No spectra found in {phase}_spectrum")
+            if verbose > 0:
+                print(f"No spectra found in {phase}_spectrum")
+            self.average_spectra = []
             return
         # it looks like we need this explicit definition of the mask
         # otherwise the mask can be converted to a single boolean when
         # all elements are False
         masked_spectra = np.ma.masked_array(
-                data=np.stack((arr.data for arr in masked_spectra), axis=0),
-                mask=np.stack((arr.mask for arr in masked_spectra), axis=0),
+                data=np.stack([arr.data for arr in masked_spectra], axis=0),
+                mask=np.stack([arr.mask for arr in masked_spectra], axis=0),
                 )
         # count the number of channels that satisfied the SNR criterion
         num_valid_channels = np.sum(~masked_spectra.mask, axis=0)
@@ -146,11 +186,17 @@ class Spectrum:
         discarded_freq_bins = num_valid_channels < min_num_valid_channels_per_freq_bin
         masked_spectra.mask[:, discarded_freq_bins] = True
         # compute average spectrum without masked elements
+        mask = masked_spectra.mask.copy()
         if average_log:
             log10_masked_spectra = np.ma.log10(masked_spectra)
-            average_spectrum = np.ma.power(
-                10.0, np.ma.mean(log10_masked_spectra, axis=0)
-            )
+            #average_spectrum = np.ma.power(
+            #    10.0, np.ma.mean(log10_masked_spectra, axis=0)
+            #)
+            # another mysterious feature of numpy....
+            # need to use exp to propagate mask correctly
+            average_spectrum = np.exp(
+                    np.ma.mean(log10_masked_spectra, axis=0) * np.log(10.)
+                    )
             std_spectrum = np.ma.std(log10_masked_spectra, axis=0)
         else:
             average_spectrum = np.ma.mean(masked_spectra, axis=0)
@@ -160,7 +206,7 @@ class Spectrum:
             self,
             f"average_{phase}_spectrum",
             {
-                "fft": average_spectrum,
+                "spectrum": average_spectrum,
                 "std": std_spectrum,
                 "num_valid_channels": num_valid_channels,
                 "spectra": masked_spectra,
@@ -175,6 +221,60 @@ class Spectrum:
             self.average_spectra.append(phase)
             self.average_spectra = list(set(self.average_spectra))
 
+    def compute_multi_band_spectrum(
+            self, traces, phase, buffer_seconds, **kwargs
+            ):
+        """Compute spectrum from max amplitude in multiple 1-octave frequency bands.
+
+        """
+        assert phase.lower() in (
+            "noise",
+            "p",
+            "s",
+        ), "phase should be 'noise', 'p' or 's'."
+        assert hasattr(self, "frequency_bands"),\
+                "Attribute `frequency_bands` is required for this method."
+        num_freqs = len(self.frequency_bands)
+        spectrum = {}
+        for tr in traces:
+            buffer_samples = int(buffer_seconds * tr.stats.sampling_rate)
+            spectrum[tr.id] = {}
+            spectrum[tr.id]["spectrum"] = np.zeros(num_freqs, dtype=np.float32)
+            spectrum[tr.id]["freq"] = np.zeros(num_freqs, dtype=np.float32)
+            for i, band in enumerate(self.frequency_bands):
+                bandwidth = self.frequency_bands[band][1] - self.frequency_bands[band][0]
+                center_freq = 0.5 * (
+                        self.frequency_bands[band][0] + self.frequency_bands[band][1]
+                        )
+                tr_band = tr.copy()
+                tr_band.filter(
+                        "bandpass",
+                        freqmin=self.frequency_bands[band][0],
+                        freqmax=self.frequency_bands[band][1],
+                        corners=kwargs.get("corners", 4),
+                        zerophase=True
+                        )
+                trimmed_tr = tr_band.data[buffer_samples:-buffer_samples]
+                if len(trimmed_tr) == 0:
+                    # gap in data?
+                    continue
+                max_amp = np.max(np.abs(trimmed_tr)) / bandwidth
+                spectrum[tr.id]["spectrum"][i] = max_amp
+                spectrum[tr.id]["freq"][i] = center_freq
+            max_err = np.sqrt(
+                    self.event.hmax_unc**2 + self.event.vmax_unc**2
+                    )
+            spectrum[tr.id]["relative_distance_err_pct"] = 100. * (
+                    max_err
+                    /
+                    self.event.source_receiver_dist.loc[tr.stats.station]
+                    )
+        setattr(self, f"{phase.lower()}_spectrum", spectrum)
+        if hasattr(self, "phases"):
+            self.phases.append(phase)
+        else:
+            self.phases = [phase]
+
     def compute_spectrum(self, traces, phase, taper=None, **taper_kwargs):
         """ """
         assert phase.lower() in (
@@ -188,11 +288,19 @@ class Spectrum:
         spectrum = {}
         for tr in traces:
             spectrum[tr.id] = {}
-            spectrum[tr.id]["fft"] = (
+            spectrum[tr.id]["spectrum"] = (
                 np.fft.rfft(tr.data * taper(tr.stats.npts, **taper_kwargs))
                 * tr.stats.delta
             )
             spectrum[tr.id]["freq"] = np.fft.rfftfreq(tr.stats.npts, d=tr.stats.delta)
+            max_err = np.sqrt(
+                    self.event.hmax_unc**2 + self.event.vmax_unc**2
+                    )
+            spectrum[tr.id]["relative_distance_err_pct"] = 100. * (
+                    max_err
+                    /
+                    self.event.source_receiver_dist.loc[tr.stats.station]
+                    )
         setattr(self, f"{phase.lower()}_spectrum", spectrum)
         if hasattr(self, "phases"):
             self.phases.append(phase)
@@ -210,12 +318,12 @@ class Spectrum:
         for trid in signal_spectrum:
             snr[trid] = {}
             if trid in noise_spectrum:
-                snr_ = np.abs(signal_spectrum[trid]["fft"]) / np.abs(
-                    noise_spectrum[trid]["fft"]
+                snr_ = np.abs(signal_spectrum[trid]["spectrum"]) / np.abs(
+                    noise_spectrum[trid]["spectrum"]
                 )
             else:
                 # no noise spectrum, probably because of gap
-                snr_ = np.zeros(len(signal_spectrum[trid]["fft"]), dtype=np.float32)
+                snr_ = np.zeros(len(signal_spectrum[trid]["spectrum"]), dtype=np.float32)
             snr[trid]["snr"] = snr_
             snr[trid]["freq"] = signal_spectrum[trid]["freq"]
         setattr(self, f"snr_{phase}_spectrum", snr)
@@ -226,8 +334,8 @@ class Spectrum:
             assert (
                 phase in self.average_spectra
             ), f"You need to compute the average {phase} spectrum first."
-            getattr(self, f"average_{phase}_spectrum")["fft"] = (
-                getattr(self, f"average_{phase}_spectrum")["fft"]
+            getattr(self, f"average_{phase}_spectrum")["spectrum"] = (
+                getattr(self, f"average_{phase}_spectrum")["spectrum"]
                 / getattr(self, f"average_{phase}_spectrum")["freq"]
             )
         else:
@@ -236,7 +344,7 @@ class Spectrum:
             ), f"You need to compute the {phase} spectrum first."
             spectrum = getattr(self, f"{phase}_spectrum")
             for trid in spectrum:
-                spectrum[trid]["fft"] /= spectrum[trid]["freq"]
+                spectrum[trid]["spectrum"] /= spectrum[trid]["freq"]
 
     def differentiate(self, phase, average=True):
         phase = phase.lower()
@@ -244,8 +352,8 @@ class Spectrum:
             assert (
                 phase in self.average_spectra
             ), f"You need to compute the average {phase} spectrum first."
-            getattr(self, f"average_{phase}_spectrum")["fft"] = (
-                getattr(self, f"average_{phase}_spectrum")["fft"]
+            getattr(self, f"average_{phase}_spectrum")["spectrum"] = (
+                getattr(self, f"average_{phase}_spectrum")["spectrum"]
                 * getattr(self, f"average_{phase}_spectrum")["freq"]
             )
         else:
@@ -254,15 +362,17 @@ class Spectrum:
             ), f"You need to compute the {phase} spectrum first."
             spectrum = getattr(self, f"{phase}_spectrum")
             for trid in spectrum:
-                spectrum[trid]["fft"] *= spectrum[trid]["freq"]
+                spectrum[trid]["spectrum"] *= spectrum[trid]["freq"]
 
     def fit_average_spectrum(
         self,
         phase,
         model="brune",
         log=True,
-        min_fraction_valid_points_below_fc=0.50,
+        min_fraction_valid_points_below_fc=0.10,
+        min_fraction_valid_points=0.50,
         weighted=False,
+        **kwargs
     ):
         """Fit average displacement spectrum with model."""
         from scipy.optimize import curve_fit
@@ -273,55 +383,65 @@ class Spectrum:
             phase in self.average_spectra
         ), f"You need to compute the average {phase} spectrum first."
         spectrum = getattr(self, f"average_{phase}_spectrum")
-        if np.sum(~spectrum["fft"].mask) == 0:
+        if np.sum(~spectrum["spectrum"].mask) == 0:
             print("Spectrum is below SNR threshold everywhere, cannot fit it.")
             self.inversion_success = False
             return
-        omega0_first_guess = spectrum["fft"].data[~spectrum["fft"].mask][0]
+        valid_fraction = np.sum(~spectrum["spectrum"].mask) / float(len(spectrum["spectrum"]))
+        if valid_fraction < min_fraction_valid_points:
+            print(f"Not enough valid points! (Only {100.*valid_fraction:.2f}%)")
+            self.inversion_success = False
+            return
+        omega0_first_guess = spectrum["spectrum"].data[~spectrum["spectrum"].mask][0]
         fc_first_guess = fc_circular_crack(moment_to_magnitude(omega0_first_guess))
         standardized_num_valid_channels = (
             spectrum["num_valid_channels"] - spectrum["num_valid_channels"].mean()
-        ) / np.std(spectrum["num_valid_channels"])
+        ) / spectrum["num_valid_channels"].mean()
         sigmoid_weights = 1.0 / (1.0 + np.exp(-standardized_num_valid_channels))
         if model == "brune":
             mod = brune
         elif model == "boatwright":
             mod = boatwright
         if log:
-            obs = np.log10(spectrum["fft"].data)
+            obs = np.log10(spectrum["spectrum"].data)
         else:
-            obs = spectrum["fft"].data
+            obs = spectrum["spectrum"].data
         # misfit = (
         #        lambda f, omega0, fc:
         #        weights * (obs - mod(f, omega0, fc, log=log))
         #        )
         mod = partial(mod, log=log)
-        y = obs[~spectrum["fft"].mask]
-        x = spectrum["freq"][~spectrum["fft"].mask]
+        y = obs[~spectrum["spectrum"].mask]
+        x = spectrum["freq"][~spectrum["spectrum"].mask]
         if weighted:
-            inverse_weights = 1.0 / sigmoid_weights[~spectrum["fft"].mask]
+            inverse_weights = 1.0 / sigmoid_weights[~spectrum["spectrum"].mask]
         else:
             inverse_weights = None
         p0 = np.array([omega0_first_guess, fc_first_guess])
         bounds = (np.array([0.0, 0.0]), np.array([np.inf, np.inf]))
         try:
             popt, pcov = curve_fit(
-                mod, x, y, p0=p0, bounds=bounds, sigma=inverse_weights
+                mod, x, y, p0=p0, bounds=bounds, sigma=inverse_weights, **kwargs
             )
             self.inversion_success = True
         except (RuntimeError, ValueError):
+            print("Inversion (scipy.optimize.cuve_fit) failed.")
             self.inversion_success = False
             return
         # check whether the low-frequency plateau was well constrained
-        npts_below_fc = np.sum(spectrum["freq"] < popt[1])
+        #npts_below_fc = np.sum(spectrum["freq"] < popt[1])
         npts_valid_below_fc = np.sum(x < popt[1])
-        if npts_below_fc <= int(0.05 * len(spectrum["freq"])):
-            self.inversion_success = False
-            return
+        #if npts_below_fc <= int(min_fraction_points_below_fc * len(spectrum["freq"])):
+        #    self.inversion_success = False
+        #    print("Not enough points below corner frequency "
+        #         f"(only {100.*(npts_below_fc/float(len(spectrum['freq'])))}%)")
+        #    return
         if (
-            float(npts_valid_below_fc) / float(npts_below_fc)
+            float(npts_valid_below_fc) / float(len(spectrum["freq"]))
         ) < min_fraction_valid_points_below_fc:
             self.inversion_success = False
+            print("Not enough valid points below corner frequency "
+                 f"(only {100.*(npts_valid_below_fc/float(len(spectrum['freq'])))}%)")
             return
         perr = np.sqrt(np.diag(pcov))
         self.M0 = popt[0]
@@ -341,12 +461,20 @@ class Spectrum:
                 continue
             spectrum = getattr(self, f"{ph}_spectrum")
             for trid in spectrum:
-                spectrum[trid]["fft"] = np.interp(
+                spectrum[trid]["spectrum"] = np.interp(
                     new_frequencies,
                     spectrum[trid]["freq"],
-                    np.abs(spectrum[trid]["fft"]),
+                    np.abs(spectrum[trid]["spectrum"]),
                 )
                 spectrum[trid]["freq"] = new_frequencies
+
+    def set_frequency_bands(self, frequency_bands):
+        self.frequency_bands = frequency_bands
+        self.frequencies = np.zeros(len(self.frequency_bands), dtype=np.float32)
+        for i, band in enumerate(self.frequency_bands):
+            self.frequencies[i] = 0.5 * (
+                    self.frequency_bands[band][0] + self.frequency_bands[band][1]
+                    )
 
     def set_target_frequencies(self, freq_min, freq_max, num_points):
         self.frequencies = np.logspace(
@@ -378,7 +506,7 @@ class Spectrum:
                 print(f"Attribute {ph}_spectrum does not exist.")
                 continue
             spectrum = getattr(self, f"average_{ph}_spectrum")
-            fft = spectrum["fft"]
+            fft = spectrum["spectrum"]
             freq = spectrum["freq"]
             amplitude_spec = np.abs(fft)
             ax.plot(
@@ -462,7 +590,7 @@ class Spectrum:
             target_tr_id = f"*.{station}.*.*{component}"
             selected_ids = fnmatch.filter(trace_ids, target_tr_id)
             for trid in selected_ids:
-                fft = spectrum[trid]["fft"]
+                fft = spectrum[trid]["spectrum"]
                 freq = spectrum[trid]["freq"]
                 amplitude_spec = np.abs(fft)
                 if correct_propagation and ph in ["p", "s"]:
@@ -542,6 +670,23 @@ def fc_circular_crack(
     corner_frequency = (constant * vr) / (2.0 * np.pi * crack_radius)
     return corner_frequency
 
+def stress_drop_circular_crack(
+        Mw, fc, phase="p", vs_m_per_s=3500.0, vr_vs_ratio=0.9
+        ):
+    """
+    """
+    phase = phase.lower()
+    assert phase in ["p", "s"], "phase should 'p' or 's'."
+    M0 = magnitude_to_moment(Mw)
+    if phase == "p":
+        constant = 2.23
+    elif phase == "s":
+        constant = 1.47
+    vr = vr_vs_ratio * vs_m_per_s
+    crack_radius = constant * vr / (2. * np.pi * fc)
+    stress_drop = 7. / 16. * M0 / crack_radius**3
+    return stress_drop
+
 
 # workflow function
 def compute_moment_magnitude(
@@ -550,12 +695,14 @@ def compute_moment_magnitude(
     plot_above_Mw=100.0,
     plot_above_random=1.0,
     path_figures="",
+    phases=["p", "s"],
     plot=False,
     figsize=(8, 8),
 ):
     """ """
     event.set_moveouts_to_theoretical_times()
     event.set_moveouts_to_empirical_times()
+    spectrum = Spectrum(event=event)
 
     # ---------------------------------------------------------------
     #                 extract waveforms
@@ -569,43 +716,42 @@ def compute_moment_magnitude(
     )
     noise = event.traces.copy()
     noise.remove_sensitivity()
+    spectrum.compute_spectrum(noise, "noise")
     # then, read signal
-    event.read_waveforms(
-        mag_params["DURATION_SEC"],
-        phase_on_comp=mag_params["PHASE_ON_COMP_P"],
-        offset_phase=mag_params["OFFSET_PHASE"],
-        time_shifted=mag_params["TIME_SHIFTED"],
-        data_folder=mag_params["DATA_FOLDER"],
-        attach_response=mag_params["ATTACH_RESPONSE"],
-    )
-    event.traces.remove_sensitivity()
-    event.zero_out_clipped_waveforms(kurtosis_threshold=-1)
-    p_wave = event.traces.copy()
-
-    event.read_waveforms(
-        mag_params["DURATION_SEC"],
-        phase_on_comp=mag_params["PHASE_ON_COMP_S"],
-        offset_phase=mag_params["OFFSET_PHASE"],
-        time_shifted=mag_params["TIME_SHIFTED"],
-        data_folder=mag_params["DATA_FOLDER"],
-        attach_response=mag_params["ATTACH_RESPONSE"],
-    )
-    event.traces.remove_sensitivity()
-    event.zero_out_clipped_waveforms(kurtosis_threshold=-1)
-    s_wave = event.traces.copy()
+    if "p" in phases:
+        event.read_waveforms(
+            mag_params["DURATION_SEC"],
+            phase_on_comp=mag_params["PHASE_ON_COMP_P"],
+            offset_phase=mag_params["OFFSET_PHASE"],
+            time_shifted=mag_params["TIME_SHIFTED"],
+            data_folder=mag_params["DATA_FOLDER"],
+            attach_response=mag_params["ATTACH_RESPONSE"],
+        )
+        event.traces.remove_sensitivity()
+        event.zero_out_clipped_waveforms(kurtosis_threshold=-1)
+        p_wave = event.traces.copy()
+        spectrum.compute_spectrum(p_wave, "p")
+    if "s" in phases:
+        event.read_waveforms(
+            mag_params["DURATION_SEC"],
+            phase_on_comp=mag_params["PHASE_ON_COMP_S"],
+            offset_phase=mag_params["OFFSET_PHASE"],
+            time_shifted=mag_params["TIME_SHIFTED"],
+            data_folder=mag_params["DATA_FOLDER"],
+            attach_response=mag_params["ATTACH_RESPONSE"],
+        )
+        event.traces.remove_sensitivity()
+        event.zero_out_clipped_waveforms(kurtosis_threshold=-1)
+        s_wave = event.traces.copy()
+        spectrum.compute_spectrum(s_wave, "s")
 
     # -----------------------------------------------------------
-    spectrum = Spectrum(event=event)
-    spectrum.compute_spectrum(noise, "noise")
-    spectrum.compute_spectrum(p_wave, "p")
-    spectrum.compute_spectrum(s_wave, "s")
-
     spectrum.set_target_frequencies(
         mag_params["FREQ_MIN_HZ"], mag_params["FREQ_MAX_HZ"], mag_params["NUM_FREQS"]
     )
     spectrum.resample(spectrum.frequencies, spectrum.phases)
-    spectrum.compute_signal_to_noise_ratio("p")
-    spectrum.compute_signal_to_noise_ratio("s")
+    for ph in phases:
+        spectrum.compute_signal_to_noise_ratio(ph)
 
     # from Ford et al 2008, BSSA
     Q = mag_params["Q_1HZ"] * np.power(
@@ -613,20 +759,26 @@ def compute_moment_magnitude(
     )
     spectrum.attenuation_Q_model(Q, spectrum.frequencies)
     spectrum.compute_correction_factor(
-        mag_params["RHO_KGM3"],
-        mag_params["VP_MS"],
-        mag_params["VS_MS"],
+        mag_params["RHO_SOURCE_KGM3"],
+        mag_params["RHO_RECEIVER_KGM3"],
+        mag_params["VP_SOURCE_MS"],
+        mag_params["VP_RECEIVER_MS"],
+        mag_params["VS_SOURCE_MS"],
+        mag_params["VS_RECEIVER_MS"],
     )
 
     source_parameters = {}
-    for phase_for_mag in ["p", "s"]:
+    for phase_for_mag in phases:
         spectrum.compute_network_average_spectrum(
             phase_for_mag,
             mag_params["SNR_THRESHOLD"],
             min_num_valid_channels_per_freq_bin=mag_params[
                 "MIN_NUM_VALID_CHANNELS_PER_FREQ_BIN"
             ],
+            max_relative_distance_err_pct=mag_params["MAX_RELATIVE_DISTANCE_ERR_PCT"]
         )
+        if not phase_for_mag in spectrum.average_spectra:
+            continue
         spectrum.integrate(phase_for_mag, average=True)
         spectrum.fit_average_spectrum(
             phase_for_mag,
@@ -718,3 +870,5 @@ def compute_moment_magnitude(
     event.set_aux_data(source_parameters)
 
     return event, spectrum
+
+
