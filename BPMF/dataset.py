@@ -1798,7 +1798,7 @@ class Event(object):
         """
         from .template_search import Beamformer, envelope
 
-        if kwargs.get("read_waveforms", True):
+        if kwargs.get("read_waveforms", True) and waveform_features is None:
             # read waveforms in picking mode, i.e. with `time_shifted`=False
             self.read_waveforms(
                 duration,
@@ -2478,141 +2478,6 @@ class Event(object):
                 )
 
 
-    #def write(
-    #    self,
-    #    db_filename,
-    #    db_path=cfg.OUTPUT_PATH,
-    #    save_waveforms=False,
-    #    gid=None,
-    #    hdf5_file=None,
-    #):
-    #    """Write to hdf5 file.
-
-    #    Parameters
-    #    ------------
-    #    db_filename: string
-    #        Name of the hdf5 file storing the event information.
-    #    db_path: string, default to `cfg.OUTPUT_PATH`
-    #        Name of the directory with `db_filename`.
-    #    save_waveforms: boolean, default to False
-    #        If True, save the waveforms.
-    #    gid: string, default to None
-    #        Name of the hdf5 group where Event will be stored. If `gid=None`
-    #        then Event is directly stored at the root.
-    #    hdf5_file: `h5py.File`, default to None
-    #        If not None, is an opened file pointing directly at the subfolder of
-    #        interest.
-    #    """
-    #    output_where = os.path.join(db_path, db_filename)
-    #    attributes = [
-    #        "origin_time",
-    #        "latitude",
-    #        "longitude",
-    #        "depth",
-    #        "moveouts",
-    #        "stations",
-    #        "components",
-    #        "phases",
-    #        "where",
-    #        "sampling_rate",
-    #    ]
-    #    # moveouts' indexes may have been re-ordered
-    #    # because writing moveouts as an array will forget about the current
-    #    # row indexes and assume that they are in the same order as
-    #    # self.stations, it is critical to make sure this is true
-    #    self.moveouts = self.moveouts.loc[self.stations]
-    #    lock_file = output_where + ".lock"
-    #    while os.path.isfile(lock_file):
-    #        # another process is already writing in this file
-    #        # wait a bit a check again
-    #        sleep(1.0)
-    #    # create empty lock file
-    #    open(lock_file, "w").close()
-    #    try:
-    #        if hdf5_file is None:
-    #            hdf5_file = h5.File(output_where, mode="a")
-    #            close_file = True
-    #        else:
-    #            close_file = False
-    #        if gid is not None:
-    #            if gid in hdf5_file:
-    #                # overwrite existing detection with same id
-    #                print(
-    #                    f"Found existing event {gid} in {output_where}. Overwrite it."
-    #                )
-    #                del hdf5_file[gid]
-    #            hdf5_file.create_group(gid)
-    #            f = hdf5_file[gid]
-    #        else:
-    #            f = hdf5_file
-    #        for attr in attributes:
-    #            if not hasattr(self, attr):
-    #                continue
-    #            attr_ = getattr(self, attr)
-    #            if attr == "origin_time":
-    #                attr_ = str(attr_)
-    #            if isinstance(attr_, list):
-    #                attr_ = np.asarray(attr_)
-    #            if isinstance(attr_, np.ndarray) and (
-    #                attr_.dtype.kind == np.dtype("U").kind
-    #            ):
-    #                attr_ = attr_.astype("S")
-    #            f.create_dataset(attr, data=attr_)
-    #        if hasattr(self, "aux_data"):
-    #            f.create_group("aux_data")
-    #            for key in self.aux_data.keys():
-    #                f["aux_data"].create_dataset(key, data=self.aux_data[key])
-    #        if hasattr(self, "picks"):
-    #            f.create_group("picks")
-    #            f["picks"].create_dataset(
-    #                "stations", data=np.asarray(self.picks.index).astype("S")
-    #            )
-    #            for column in self.picks.columns:
-    #                data = self.picks[column]
-    #                if data.dtype.kind == "M":
-    #                    # pandas datetime format
-    #                    data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
-    #                if data.dtype == np.dtype("O"):
-    #                    data = data.astype("S")
-    #                f["picks"].create_dataset(column, data=data)
-    #        if hasattr(self, "arrival_times"):
-    #            f.create_group("arrival_times")
-    #            f["arrival_times"].create_dataset(
-    #                "stations", data=np.asarray(self.arrival_times.index).astype("S")
-    #            )
-    #            for column in self.arrival_times.columns:
-    #                data = self.arrival_times[column]
-    #                if data.dtype.kind == "M":
-    #                    # pandas datetime format
-    #                    data = data.dt.strftime("%Y-%m-%d %H:%M:%S.%f %z")
-    #                if data.dtype == np.dtype("O"):
-    #                    data = data.astype("S")
-    #                f["arrival_times"].create_dataset(column, data=data)
-    #        if save_waveforms:
-    #            if hasattr(self, "traces"):
-    #                f.create_group("waveforms")
-    #                for tr in self.traces:
-    #                    sta = tr.stats.station
-    #                    cha = tr.stats.channel
-    #                    if sta not in f["waveforms"]:
-    #                        f["waveforms"].create_group(sta)
-    #                    if cha in f["waveforms"][sta]:
-    #                        print(f"{sta}.{cha} already exists!")
-    #                    else:
-    #                        f["waveforms"][sta].create_dataset(cha, data=tr.data)
-    #            else:
-    #                print(
-    #                    "You are trying to save the waveforms whereas you did"
-    #                    " not read them!"
-    #                )
-    #        if close_file:
-    #            hdf5_file.close()
-    #    except Exception as e:
-    #        os.remove(lock_file)
-    #        raise (e)
-    #    # remove lock file
-    #    os.remove(lock_file)
-
     # -----------------------------------------------------------
     #            plotting method(s)
     # -----------------------------------------------------------
@@ -2674,13 +2539,21 @@ class Event(object):
                 if hasattr(self, "picks") and (
                     sta in self.picks["P_abs_picks"].dropna().index
                 ):
-                    P_pick = np.datetime64(self.picks.loc[sta]["P_abs_picks"])
-                    axes[s, c].axvline(P_pick, color="C0", lw=1.00, ls="--")
+                    for P_pick in np.atleast_1d(self.picks.loc[sta]["P_abs_picks"]):
+                        axes[s, c].axvline(
+                                np.datetime64(P_pick), color="C0", lw=1.00, ls="--"
+                                )
+                    #P_pick = np.datetime64(self.picks.loc[sta]["P_abs_picks"])
+                    #axes[s, c].axvline(P_pick, color="C0", lw=1.00, ls="--")
                 if hasattr(self, "picks") and (
                     sta in self.picks["S_abs_picks"].dropna().index
                 ):
-                    S_pick = np.datetime64(self.picks.loc[sta]["S_abs_picks"])
-                    axes[s, c].axvline(S_pick, color="C3", lw=1.00, ls="--")
+                    for S_pick in np.atleast_1d(self.picks.loc[sta]["S_abs_picks"]):
+                        axes[s, c].axvline(
+                                np.datetime64(S_pick), color="C3", lw=1.00, ls="--"
+                                )
+                    #S_pick = np.datetime64(self.picks.loc[sta]["S_abs_picks"])
+                    #axes[s, c].axvline(S_pick, color="C3", lw=1.00, ls="--")
                 # plot the theoretical arrival times
                 if hasattr(self, "arrival_times") and (sta in self.arrival_times.index):
                     P_pick = np.datetime64(
@@ -3185,9 +3058,14 @@ class Template(Event):
             **kwargs,
         )
         fig = event.plot(**kwargs)
+        if kwargs.get("stations", None) is None:
+            stations = event.stations
+        else:
+            stations = kwargs.get("stations", None)
+        #stations = event.stations
         axes = fig.get_axes()
         cc, n_channels = 0.0, 0
-        for s, sta in enumerate(event.stations):
+        for s, sta in enumerate(stations):
             for c, cp in enumerate(event.components):
                 for cp_alias in event.component_aliases[cp]:
                     tr = self.traces.select(station=sta, component=cp_alias)
@@ -3431,11 +3309,12 @@ class EventGroup(Family):
         return len(self.events)
 
     # methods
-    def read_waveforms(self, duration, tag, time_shifted=False, **kwargs):
+    def read_waveforms(self, duration, time_shifted=False, progress=False, **kwargs):
         """Call `dataset.Event.read_waveform` with each event."""
         self.time_shifted = time_shifted
-        for ev in self.events:
-            ev.read_waveforms(duration, tag, time_shifted=time_shifted, **kwargs)
+        disable = np.bitwise_not(progress)
+        for ev in tqdm(self.events, desc="Reading event waveforms", disable=disable):
+            ev.read_waveforms(duration, time_shifted=time_shifted, **kwargs)
         self._remember("read_waveforms")
 
     def SVDWF_stack(
@@ -4399,7 +4278,7 @@ class Stack(Event):
         self.set_aux_data(aux_data)
         self.set_availability(stations=self.stations)
 
-    def pick_PS_phases(
+    def pick_PS_phases_family_mode(
         self,
         duration,
         threshold_P=0.60,
@@ -4454,10 +4333,15 @@ class Stack(Event):
             The pick is either taken as the mean or the mode of the empirical
             distribution of picks.
         """
+        from torch import no_grad, from_numpy
+
         if ml_model is None:
             import seisbench.models as sbm
             ml_model = sbm.PhaseNet.from_pretrained(ml_model_name)
             ml_model.eval()
+
+        ml_p_index = kwargs.get("ml_P_index", 1)
+        ml_s_index = kwargs.get("ml_S_index", 2)
 
         # read waveforms in "picking" mode
         self.read_waveforms(
@@ -4479,41 +4363,109 @@ class Stack(Event):
                 # momentarily update samping_rate
                 sampling_rate0 = float(self.sampling_rate)
                 self.sampling_rate = self.sr * upsampling / downsampling
-            # call PhaseNet
-            PhaseNet_probas, PhaseNet_picks = PN.automatic_picking(
-                data_arr,
-                self.stations,
-                mini_batch_size=mini_batch_size,
-                format="ram",
-                threshold_P=threshold_P,
-                threshold_S=threshold_S,
-                **kwargs,
-            )
-            PhaseNet_picks = PN.get_all_picks(PhaseNet_picks)
-            PhaseNet_picks = PN.fit_probability_density(PhaseNet_picks)
-            PhaseNet_picks = PN.select_picks_family(
-                PhaseNet_picks, n_threshold, err_threshold, central=central
-            )
+            num_events, num_stations = data_arr.shape[:2]
+            num_traces = num_events * num_stations
+            data_arr_n = utils.normalize_batch(
+                    data_arr.reshape(num_traces, data_arr.shape[2], data_arr.shape[3])
+                    )
+            closest_pow2 = int(np.log2(data_arr_n.shape[-1])) + 1
+            diff = 2**closest_pow2 - data_arr_n.shape[-1]
+            left = diff//2
+            right = diff//2 + diff%2
+            data_arr_n = np.pad(
+                    data_arr_n,
+                    ((0, 0), (0, 0), (left, right)),
+                    mode="reflect"
+                    )
+            with no_grad():
+                ml_probas = ml_model(
+                        from_numpy(data_arr_n).float()
+                        )
+                ml_probas = ml_probas.detach().numpy()
+            # find picks and sotre in dictionaries
+            picks = {}
+            picks["P_picks"] = {}
+            picks["P_proba"] = {}
+            picks["S_picks"] = {}
+            picks["S_proba"] = {}
+            for s, sta in enumerate(self.stations):
+                picks["P_proba"][sta], picks["P_picks"][sta] = [], []
+                picks["S_proba"][sta], picks["S_picks"][sta] = [], []
+                for n in range(num_events):
+                    tr_idx = s * num_events + n
+                    P_proba, P_pick = utils.trigger_picks(
+                            ml_probas[tr_idx, ml_p_index, left:-right], threshold_P, 
+                            )
+                    picks["P_proba"][sta].append(P_proba)
+                    picks["P_picks"][sta].append(P_pick)
+                    S_proba, S_pick = utils.trigger_picks(
+                            ml_probas[tr_idx, ml_s_index, left:-right], threshold_S, 
+                            )
+                    picks["S_proba"][sta].append(S_proba)
+                    picks["S_picks"][sta].append(S_pick)
+                picks["P_proba"][sta] = np.atleast_1d(
+                        np.hstack(picks["P_proba"][sta])
+                        )
+                picks["S_proba"][sta] = np.atleast_1d(
+                        np.hstack(picks["S_proba"][sta])
+                        )
+                picks["P_picks"][sta] = np.atleast_1d(
+                        np.hstack(picks["P_picks"][sta])
+                        )
+                picks["S_picks"][sta] = np.atleast_1d(
+                        np.hstack(picks["S_picks"][sta])
+                        )
+
+            #if use_apriori_picks and hasattr(self, "arrival_times"):
+            #    columns = []
+            #    if "P" in self.phases:
+            #        columns.append("P")
+            #    if "S" in self.phases:
+            #        columns.append("S")
+            #    prior_knowledge = pd.DataFrame(columns=columns)
+            #    for sta in self.stations:
+            #        for ph in prior_knowledge.columns:
+            #            prior_knowledge.loc[sta, ph] = utils.sec_to_samp(
+            #                udt(self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"])
+            #                - self.origin_time,
+            #                sr=self.sampling_rate,
+            #            )
+            #else:
+            #    prior_knowledge = None
+            ## only used if use_apriori_picks is True
+            #search_win_samp = utils.sec_to_samp(search_win_sec, sr=self.sampling_rate)
+            ## keep best P- and S-wave pick on each 3-comp seismogram
+            #picks = utils.get_picks(
+            #    picks,
+            #    prior_knowledge=prior_knowledge,
+            #    search_win_samp=search_win_samp,
+            #)
+
             # format picks in pandas DataFrame
             pandas_picks = {"stations": self.stations}
             for ph in ["P", "S"]:
-                rel_picks_sec = np.zeros(len(self.stations), dtype=np.float32)
-                err_picks = np.zeros(len(self.stations), dtype=np.float32)
+                rel_picks_sec = np.zeros(len(self.stations), dtype=object)
+                proba_picks = np.zeros(len(self.stations), dtype=object)
                 abs_picks = np.zeros(len(self.stations), dtype=object)
                 for s, sta in enumerate(self.stations):
-                    if sta in PhaseNet_picks[f"{ph}_picks"].keys():
-                        rel_picks_sec[s] = PhaseNet_picks[f"{ph}_picks"][sta] / self.sr
-                        err_picks[s] = PhaseNet_picks[f"{ph}_err"][sta] / self.sr
-                        abs_picks[s] = (
-                            self.traces.select(station=sta)[0].stats.starttime
-                            + rel_picks_sec[s]
-                        )
+                    if sta in picks[f"{ph}_picks"].keys():
+                        rel_picks_sec[s] = np.float32(picks[f"{ph}_picks"][sta]) / self.sr
+                        proba_picks[s] = np.float32(picks[f"{ph}_proba"][sta])
+                        abs_picks[s] = np.asarray([
+                            np.datetime64(
+                                self.traces.select(station=sta)[0].stats.starttime
+                                +
+                                rel_pick,
+                                "ms"
+                                ) for rel_pick in rel_picks_sec[s]
+                        ])
                 pandas_picks[f"{ph}_picks_sec"] = rel_picks_sec
-                pandas_picks[f"{ph}_err"] = err_picks
+                pandas_picks[f"{ph}_probas"] = proba_picks
                 pandas_picks[f"{ph}_abs_picks"] = abs_picks
+
             self.picks = pd.DataFrame(pandas_picks)
             self.picks.set_index("stations", inplace=True)
-            self.picks.replace(0.0, np.nan, inplace=True)
+            #self.picks.replace(0.0, np.nan, inplace=True)
             if upsampling > 1 or downsampling > 1:
                 # reset the sampling rate to initial value
                 self.sampling_rate = sampling_rate0
