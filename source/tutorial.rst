@@ -13,8 +13,8 @@ Tutorial
    tutorial/notebooks/4_travel_times
    tutorial/notebooks/5_backprojection
    tutorial/notebooks/6_relocate
-   tutorial/notebooks/7_magnitudes
-   tutorial/notebooks/8_build_template_database
-   tutorial/notebooks/9_template_matching
-   tutorial/notebooks/10_build_earthquake_catalog
+   tutorial/notebooks/7_build_template_database
+   tutorial/notebooks/8_template_matching
+   tutorial/notebooks/9_build_earthquake_catalog
+   tutorial/notebooks/10_magnitudes
 

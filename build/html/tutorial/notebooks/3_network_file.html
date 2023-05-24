@@ -61,10 +61,10 @@
 <li class="toctree-l2"><a class="reference internal" href="4_travel_times.html">Compute P-/S-wave travel Times</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5_backprojection.html">Backprojection of the Seismic Wavefield</a></li>
 <li class="toctree-l2"><a class="reference internal" href="6_relocate.html">Relocation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_magnitudes.html">Estimate the seismic moments and moment magnitudes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_build_template_database.html">Build Template Database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="9_template_matching.html">Template Matching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="10_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_build_template_database.html">Build Template Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_template_matching.html">Template Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="9_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html">Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
@@ -413,8 +413,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># we check the station metadata and data availability between START_DATE and END_DATE</span>
 <span class="c1"># these also define the start and end of the experiment</span>
-<span class="n">START_DATE</span> <span class="o">=</span> <span class="s2">&quot;2012-07-07&quot;</span>
-<span class="n">END_DATE</span> <span class="o">=</span> <span class="s2">&quot;2012-07-07&quot;</span>
+<span class="n">START_DATE</span> <span class="o">=</span> <span class="s2">&quot;2012-07-26&quot;</span>
+<span class="n">END_DATE</span> <span class="o">=</span> <span class="s2">&quot;2012-07-26&quot;</span>
 <span class="n">datelist</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">START_DATE</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">END_DATE</span><span class="p">)</span>
 <span class="n">datelist</span>
 </pre></div>
@@ -426,7 +426,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-DatetimeIndex([&#39;2012-07-07&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;D&#39;)
+DatetimeIndex([&#39;2012-07-26&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;D&#39;)
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -533,28 +533,20 @@ DatetimeIndex([&#39;2012-07-07&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
       <td>182.0</td>
     </tr>
     <tr>
-      <th>YH.SAUV</th>
-      <td>YH</td>
-      <td>SAUV</td>
-      <td>30.3272</td>
-      <td>40.7402</td>
-      <td>170.0</td>
-    </tr>
-    <tr>
-      <th>YH.DC06</th>
-      <td>YH</td>
-      <td>DC06</td>
-      <td>30.265751</td>
-      <td>40.616718</td>
-      <td>555.0</td>
-    </tr>
-    <tr>
       <th>YH.DC08</th>
       <td>YH</td>
       <td>DC08</td>
       <td>30.25013</td>
       <td>40.744438</td>
       <td>162.0</td>
+    </tr>
+    <tr>
+      <th>YH.DE08</th>
+      <td>YH</td>
+      <td>DE08</td>
+      <td>30.406469</td>
+      <td>40.748562</td>
+      <td>31.0</td>
     </tr>
     <tr>
       <th>YH.SPNC</th>
@@ -565,12 +557,20 @@ DatetimeIndex([&#39;2012-07-07&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
       <td>190.0</td>
     </tr>
     <tr>
-      <th>YH.DE08</th>
+      <th>YH.DC06</th>
       <td>YH</td>
-      <td>DE08</td>
-      <td>30.406469</td>
-      <td>40.748562</td>
-      <td>31.0</td>
+      <td>DC06</td>
+      <td>30.265751</td>
+      <td>40.616718</td>
+      <td>555.0</td>
+    </tr>
+    <tr>
+      <th>YH.SAUV</th>
+      <td>YH</td>
+      <td>SAUV</td>
+      <td>30.3272</td>
+      <td>40.7402</td>
+      <td>170.0</td>
     </tr>
     <tr>
       <th>YH.DC07</th>
@@ -624,18 +624,18 @@ DatetimeIndex([&#39;2012-07-07&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
     <tr style="text-align: right;">
       <th></th>
       <th>YH.DD06</th>
-      <th>YH.SAUV</th>
-      <th>YH.DC06</th>
       <th>YH.DC08</th>
-      <th>YH.SPNC</th>
       <th>YH.DE08</th>
+      <th>YH.SPNC</th>
+      <th>YH.DC06</th>
+      <th>YH.SAUV</th>
       <th>YH.DC07</th>
       <th>YH.DE07</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>2012-07-07</th>
+      <th>2012-07-26</th>
       <td>3.0</td>
       <td>3.0</td>
       <td>3.0</td>
@@ -715,11 +715,11 @@ DatetimeIndex([&#39;2012-07-07&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
 <div class="highlight"><pre>
 stations
 DD06    DD06
-SAUV    SAUV
-DC06    DC06
 DC08    DC08
-SPNC    SPNC
 DE08    DE08
+SPNC    SPNC
+DC06    DC06
+SAUV    SAUV
 DC07    DC07
 DE07    DE07
 Name: stations, dtype: object
@@ -758,11 +758,11 @@ Name: stations, dtype: object
     <tr style="text-align: right;">
       <th>stations</th>
       <th>DD06</th>
-      <th>SAUV</th>
-      <th>DC06</th>
       <th>DC08</th>
-      <th>SPNC</th>
       <th>DE08</th>
+      <th>SPNC</th>
+      <th>DC06</th>
+      <th>SAUV</th>
       <th>DC07</th>
       <th>DE07</th>
     </tr>
@@ -782,88 +782,88 @@ Name: stations, dtype: object
     <tr>
       <th>DD06</th>
       <td>0.000000</td>
-      <td>12.978986</td>
-      <td>4.507919</td>
       <td>14.591825</td>
-      <td>6.982891</td>
       <td>15.774078</td>
+      <td>6.982891</td>
+      <td>4.507919</td>
+      <td>12.978986</td>
       <td>8.015674</td>
       <td>10.079368</td>
     </tr>
     <tr>
-      <th>SAUV</th>
-      <td>12.979910</td>
-      <td>0.000000</td>
-      <td>14.676627</td>
-      <td>6.525864</td>
-      <td>6.228594</td>
-      <td>6.748812</td>
-      <td>10.842688</td>
-      <td>9.790711</td>
-    </tr>
-    <tr>
-      <th>DC06</th>
-      <td>4.424402</td>
-      <td>14.650371</td>
-      <td>0.000000</td>
-      <td>14.230564</td>
-      <td>8.472197</td>
-      <td>18.850665</td>
-      <td>5.904608</td>
-      <td>14.155945</td>
-    </tr>
-    <tr>
       <th>DC08</th>
       <td>14.593195</td>
-      <td>6.527089</td>
-      <td>14.258154</td>
       <td>0.000000</td>
-      <td>8.142368</td>
       <td>13.206857</td>
+      <td>8.142368</td>
+      <td>14.258154</td>
+      <td>6.527089</td>
       <td>8.616882</td>
       <td>15.415829</td>
     </tr>
     <tr>
-      <th>SPNC</th>
-      <td>6.981746</td>
-      <td>6.225382</td>
-      <td>8.515170</td>
-      <td>8.138928</td>
-      <td>0.000000</td>
-      <td>10.812369</td>
-      <td>5.970570</td>
-      <td>8.747317</td>
-    </tr>
-    <tr>
       <th>DE08</th>
       <td>15.783648</td>
-      <td>6.769376</td>
-      <td>18.878441</td>
       <td>13.216772</td>
-      <td>10.827065</td>
       <td>0.000000</td>
+      <td>10.827065</td>
+      <td>18.878441</td>
+      <td>6.769376</td>
       <td>16.576421</td>
       <td>7.663916</td>
     </tr>
     <tr>
+      <th>SPNC</th>
+      <td>6.981746</td>
+      <td>8.138928</td>
+      <td>10.812369</td>
+      <td>0.000000</td>
+      <td>8.515170</td>
+      <td>6.225382</td>
+      <td>5.970570</td>
+      <td>8.747317</td>
+    </tr>
+    <tr>
+      <th>DC06</th>
+      <td>4.424402</td>
+      <td>14.230564</td>
+      <td>18.850665</td>
+      <td>8.472197</td>
+      <td>0.000000</td>
+      <td>14.650371</td>
+      <td>5.904608</td>
+      <td>14.155945</td>
+    </tr>
+    <tr>
+      <th>SAUV</th>
+      <td>12.979910</td>
+      <td>6.525864</td>
+      <td>6.748812</td>
+      <td>6.228594</td>
+      <td>14.676627</td>
+      <td>0.000000</td>
+      <td>10.842688</td>
+      <td>9.790711</td>
+    </tr>
+    <tr>
       <th>DC07</th>
       <td>8.017919</td>
-      <td>10.843241</td>
-      <td>5.970460</td>
       <td>8.616650</td>
-      <td>5.974924</td>
       <td>16.568395</td>
+      <td>5.974924</td>
+      <td>5.970460</td>
+      <td>10.843241</td>
       <td>0.000000</td>
       <td>14.383684</td>
     </tr>
     <tr>
       <th>DE07</th>
       <td>10.093446</td>
-      <td>9.803980</td>
-      <td>14.192278</td>
       <td>15.423741</td>
-      <td>8.764449</td>
       <td>7.662741</td>
+      <td>8.764449</td>
+      <td>14.192278</td>
+      <td>9.803980</td>
       <td>14.392302</td>
       <td>0.000000</td>
     </tr>
@@ -872,12 +872,12 @@ Name: stations, dtype: object
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&quot;svg&quot;]
 
-<span class="c1"># plot a simple map of station locations</span>
+<span class="c1"># plot a simple map with the station locations</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">plot_map</span><span class="p">()</span>
 </pre></div>
 </div>

@@ -64,10 +64,10 @@
 <li class="toctree-l2"><a class="reference internal" href="4_travel_times.html">Compute P-/S-wave travel Times</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5_backprojection.html">Backprojection of the Seismic Wavefield</a></li>
 <li class="toctree-l2"><a class="reference internal" href="6_relocate.html">Relocation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_magnitudes.html">Estimate the seismic moments and moment magnitudes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_build_template_database.html">Build Template Database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="9_template_matching.html">Template Matching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="10_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_build_template_database.html">Build Template Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_template_matching.html">Template Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="9_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html">Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
@@ -400,7 +400,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">DATE</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">UTCDateTime</span><span class="p">(</span><span class="s2">&quot;2012-07-07&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">DATE</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">UTCDateTime</span><span class="p">(</span><span class="s2">&quot;2012-07-26&quot;</span><span class="p">)</span>
 <span class="n">dirpath_data</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">INPUT_PATH</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">DATE</span><span class="o">.</span><span class="n">year</span><span class="p">),</span> <span class="n">DATE</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -503,43 +503,37 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-30 Trace(s) in Stream:
-YH.DE07..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE08..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE07..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DD06..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DD06..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC07..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.SAUV..HHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
-YH.DC08..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC08..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.SPNC..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-07T06:32:08.980000Z | 50.0 Hz, 1201450 samples
-YH.SPNC..BHN | 2012-07-07T06:44:10.000000Z - 2012-07-07T06:47:13.980000Z | 50.0 Hz, 9200 samples
-YH.SPNC..BHN | 2012-07-07T06:47:19.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 3123051 samples
-YH.DC06..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC06..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC06..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC07..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.SAUV..HHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
-YH.DC07..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.SAUV..HHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
-YH.DC08..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.SPNC..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-07T06:32:06.980000Z | 50.0 Hz, 1201350 samples
-YH.SPNC..BHZ | 2012-07-07T06:44:10.000000Z - 2012-07-07T06:47:13.980000Z | 50.0 Hz, 9200 samples
-YH.SPNC..BHZ | 2012-07-07T06:47:19.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 3123051 samples
-YH.SPNC..BHE | 2012-07-07T00:00:00.000000Z - 2012-07-07T06:32:08.980000Z | 50.0 Hz, 1176450 samples
-YH.SPNC..BHE | 2012-07-07T06:44:10.000000Z - 2012-07-07T06:47:13.980000Z | 50.0 Hz, 9200 samples
-YH.SPNC..BHE | 2012-07-07T06:47:19.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 3123051 samples
-YH.DE08..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE07..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE08..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DD06..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+24 Trace(s) in Stream:
+YH.DC06..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.SPNC..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.SPNC..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC07..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.SAUV..HHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 100.0 Hz, 8740001 samples
+YH.DC07..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.SAUV..HHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 100.0 Hz, 8740001 samples
+YH.DC08..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DD06..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE08..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE07..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE08..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DD06..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DD06..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE07..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE08..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE07..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.SPNC..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC07..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.SAUV..HHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 100.0 Hz, 8740001 samples
+YH.DC08..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC08..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC06..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC06..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
 Channel Response
         From M/S (Velocity in Meters per Second) to COUNTS (Digital Counts)
-        Overall Sensitivity: 2.43293e+09 defined at 1.000 Hz
+        Overall Sensitivity: 2.50417e+09 defined at 1.000 Hz
         6 stages:
-                Stage 1: PolesZerosResponseStage from M/S to V, gain: 2394
-                Stage 2: CoefficientsTypeResponseStage from V to COUNTS, gain: 1.01626e+06
+                Stage 1: PolesZerosResponseStage from M/S to V, gain: 2404
+                Stage 2: CoefficientsTypeResponseStage from V to COUNTS, gain: 1.04167e+06
                 Stage 3: FIRResponseStage from COUNTS to COUNTS, gain: 1
                 Stage 4: FIRResponseStage from COUNTS to COUNTS, gain: 1
                 Stage 5: FIRResponseStage from COUNTS to COUNTS, gain: 1
@@ -566,11 +560,11 @@ Channel Response
 <div class="highlight"><pre>
 24 Trace(s) in Stream:
 
-YH.SPNC..BHE | 2012-07-07T00:00:00.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4345001 samples (masked)
+YH.DC06..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
 ...
 (22 other traces)
 ...
-YH.SAUV..HHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
+YH.SPNC..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
 
 [Use &#34;print(Stream.__str__(extended=True))&#34; to print all Traces]
 </pre></div></div>
@@ -590,30 +584,30 @@ YH.SAUV..HHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 24 Trace(s) in Stream:
-YH.SPNC..BHE | 2012-07-07T00:00:00.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4345001 samples (masked)
-YH.SPNC..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples (masked)
-YH.SPNC..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples (masked)
-YH.DC06..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC06..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC06..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC07..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC07..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC07..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC08..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC08..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DC08..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DD06..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DD06..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DD06..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE07..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE07..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE07..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE08..BHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE08..BHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.DE08..BHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 50.0 Hz, 4370001 samples
-YH.SAUV..HHE | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
-YH.SAUV..HHN | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
-YH.SAUV..HHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0 Hz, 8740001 samples
+YH.DC06..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC06..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC06..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC07..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC07..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC07..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC08..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC08..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DC08..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DD06..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DD06..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DD06..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE07..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE07..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE07..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE08..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE08..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE08..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.SAUV..HHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 100.0 Hz, 8740001 samples
+YH.SAUV..HHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 100.0 Hz, 8740001 samples
+YH.SAUV..HHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 100.0 Hz, 8740001 samples
+YH.SPNC..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.SPNC..BHN | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.SPNC..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
 </pre></div></div>
 </div>
 <p>Then, we use <code class="docutils literal notranslate"><span class="pre">BPMF.utils.preprocess_stream</span></code> with the below-defined parameters (some parameters were already defined when initializing the project). We do not correct for the full instrument response, as the response is mostly flat in the frequency band of interest. However, we do correct for the instrument sensitivity so that the waveform amplitudes are in physical units [m/s].</p>
@@ -663,30 +657,30 @@ YH.SAUV..HHZ | 2012-07-06T23:51:40.000000Z - 2012-07-08T00:08:20.000000Z | 100.0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 24 Trace(s) in Stream:
-YH.DC06..BHE | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DC06..BHN | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DC06..BHZ | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DC07..BHE | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DC07..BHN | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DC07..BHZ | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DC08..BHE | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DC08..BHN | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DC08..BHZ | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DD06..BHE | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DD06..BHN | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DD06..BHZ | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DE07..BHE | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DE07..BHN | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DE07..BHZ | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DE08..BHE | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DE08..BHN | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.DE08..BHZ | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.SAUV..HHE | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.SAUV..HHN | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.SAUV..HHZ | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.SPNC..BHE | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.SPNC..BHN | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
-YH.SPNC..BHZ | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DC06..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DC06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DC06..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DC07..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DC07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DC07..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DC08..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DC08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DC08..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DD06..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DD06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DD06..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DE07..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DE07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DE07..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DE08..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DE08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.DE08..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.SAUV..HHE | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.SAUV..HHN | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.SAUV..HHZ | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.SPNC..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.SPNC..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
+YH.SPNC..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-26T23:59:59.960000Z | 25.0 Hz, 2160000 samples
 </pre></div></div>
 </div>
 </section>
@@ -728,7 +722,7 @@ YH.SPNC..BHZ | 2012-07-07T00:00:00.000000Z - 2012-07-07T23:59:59.960000Z | 25.0 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The preprocessed data will be stored at: ../BPMF_data/2012/20120707/preprocessed_2_12
+The preprocessed data will be stored at: ../BPMF_data/2012/20120726/preprocessed_2_12
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -747,7 +741,7 @@ The preprocessed data will be stored at: ../BPMF_data/2012/20120707/preprocessed
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Writing preprocessed data: 100%|██████████| 24/24 [00:06&lt;00:00,  3.62it/s]
+Writing preprocessed data: 100%|██████████| 24/24 [00:06&lt;00:00,  3.93it/s]
 </pre></div></div>
 </div>
 </section>

@@ -513,13 +513,16 @@
     <span class="c1"># ---------------------------------------------------------</span>
     <span class="c1">#                  Plotting methods</span>
     <span class="c1"># ---------------------------------------------------------</span>
-<div class="viewcode-block" id="Catalog.plot_time_statistics"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Catalog.plot_time_statistics">[docs]</a>    <span class="k">def</span> <span class="nf">plot_time_statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Catalog.plot_time_statistics"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Catalog.plot_time_statistics">[docs]</a>    <span class="k">def</span> <span class="nf">plot_time_statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">UTC_local_corr</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the histograms of time of the day and day of the week.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ------------</span>
 <span class="sd">        figsize: tuple of floats, default to (16, 7)</span>
 <span class="sd">            Size, in inches, of the figure (width, height).</span>
+<span class="sd">        UTC_local_corr : float, optional</span>
+<span class="sd">            Apply UTC to local time correction such that:</span>
+<span class="sd">                `local_hour = UTC_hour + UTC_local_corr`</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        ---------</span>
@@ -536,7 +539,8 @@
         <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Day of the Week&quot;</span><span class="p">)</span>
         <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Event Count&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;origin_time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">hour</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">25</span><span class="p">),</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;origin_time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">hour</span> <span class="o">+</span> <span class="n">UTC_local_corr</span><span class="p">)</span><span class="o">%</span><span class="mi">24</span><span class="p">)</span>\
+                <span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">25</span><span class="p">),</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Hour of the Day&quot;</span><span class="p">)</span>
         <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Event Count&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">fig</span></div>
@@ -549,6 +553,7 @@
         <span class="n">depth_max</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span>
         <span class="n">network</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">plot_uncertainties</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">depth_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot epicenters on map.</span>
@@ -568,6 +573,8 @@
 <span class="sd">            If provided, use information in `network` to plot the stations.</span>
 <span class="sd">        plot_uncertainties : boolean, default to False</span>
 <span class="sd">            If True, plot the location uncertainty ellipses.</span>
+<span class="sd">        depth_colorbar : boolean, default to True</span>
+<span class="sd">            If True, plot the depth colorbar on the left.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        ----------</span>
@@ -677,9 +684,10 @@
                 <span class="n">transform</span><span class="o">=</span><span class="n">data_coords</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower right&quot;</span><span class="p">)</span>
-        <span class="n">ax_divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
-        <span class="n">cax</span> <span class="o">=</span> <span class="n">ax_divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;2%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">axes_class</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">scalar_map</span><span class="p">,</span> <span class="n">cax</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Depth (km)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">depth_colorbar</span><span class="p">:</span>
+            <span class="n">ax_divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+            <span class="n">cax</span> <span class="o">=</span> <span class="n">ax_divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;2%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">axes_class</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">scalar_map</span><span class="p">,</span> <span class="n">cax</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Depth (km)&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Catalog.plot_space_time"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Catalog.plot_space_time">[docs]</a>    <span class="k">def</span> <span class="nf">plot_space_time</span><span class="p">(</span>
@@ -1184,8 +1192,8 @@
     <span class="k">def</span> <span class="nf">hmin_unc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_hmin_unc&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hmin_unc</span>
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;aux_data&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;hmax_unc&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;hmax_unc&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;aux_data&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;hmin_unc&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;hmin_unc&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hor_ver_uncertainties</span><span class="p">()</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hmin_unc</span>
@@ -1194,6 +1202,8 @@
     <span class="k">def</span> <span class="nf">vmax_unc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_vmax_unc&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vmax_unc</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;aux_data&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;vmax_unc&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;vmax_unc&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hor_ver_uncertainties</span><span class="p">()</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vmax_unc</span>
@@ -1202,6 +1212,8 @@
     <span class="k">def</span> <span class="nf">az_hmax_unc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_az_hmax_unc&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_az_hmax_unc</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;aux_data&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;az_hmax_unc&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;az_hmax_unc&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hor_ver_uncertainties</span><span class="p">()</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_az_hmax_unc</span>
@@ -1210,14 +1222,26 @@
     <span class="k">def</span> <span class="nf">az_hmin_unc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_az_hmin_unc&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_az_hmin_unc</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;aux_data&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;az_hmin_unc&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;az_hmin_unc&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hor_ver_uncertainties</span><span class="p">()</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_az_hmin_unc</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pl_vmax_unc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_pl_vmax_unc&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pl_vmax_unc</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;aux_data&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;pl_vmax_unc&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;pl_vmax_unc&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hor_ver_uncertainties</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pl_vmax_unc</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_receiver_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_source_receiver_dist&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_receiver_dist</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_receiver_dist</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span>
                 <span class="s2">&quot;You need to set source_receiver_dist before.&quot;</span>
@@ -1267,7 +1291,9 @@
 <span class="sd">            waveform amplitude on each channel.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">waveforms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_np_array</span><span class="p">(</span><span class="n">stations</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="n">components</span><span class="p">)</span>
-        <span class="n">peak_amplitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">waveforms</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">peak_amplitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">waveforms</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">waveforms</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+                <span class="p">)</span>
         <span class="k">return</span> <span class="n">peak_amplitudes</span></div>
 
 
@@ -1348,6 +1374,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_hmax_unc</span> <span class="o">=</span> <span class="n">hmax_unc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hmin_unc</span> <span class="o">=</span> <span class="n">hmin_unc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vmax_unc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">vertical_unc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pl_vmax_unc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="n">vertical_unc</span><span class="o">.</span><span class="n">argmax</span><span class="p">()]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pl_vmax_unc</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pl_vmax_unc</span><span class="p">,</span> <span class="mf">180.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pl_vmax_unc</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_az_hmax_unc</span> <span class="o">=</span> <span class="n">az_hmax</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_az_hmin_unc</span> <span class="o">=</span> <span class="n">az_hmin</span></div>
 
@@ -1508,6 +1536,8 @@
         <span class="n">downsampling</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">use_apriori_picks</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">search_win_sec</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+        <span class="n">ml_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ml_model_name</span><span class="o">=</span><span class="s2">&quot;original&quot;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).</span>
@@ -1547,7 +1577,15 @@
 <span class="sd">        downsampling: scalar integer, default to 1</span>
 <span class="sd">            Downsampling factor applied before calling PhaseNet.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">phasenet</span> <span class="kn">import</span> <span class="n">wrapper</span> <span class="k">as</span> <span class="n">PN</span>
+        <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">no_grad</span><span class="p">,</span> <span class="n">from_numpy</span>
+
+        <span class="k">if</span> <span class="n">ml_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">seisbench.models</span> <span class="k">as</span> <span class="nn">sbm</span>
+            <span class="n">ml_model</span> <span class="o">=</span> <span class="n">sbm</span><span class="o">.</span><span class="n">PhaseNet</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">ml_model_name</span><span class="p">)</span>
+            <span class="n">ml_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+        <span class="n">ml_p_index</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ml_P_index&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">ml_s_index</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ml_S_index&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;read_waveforms&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
             <span class="c1"># read waveforms in picking mode, i.e. with `time_shifted`=False</span>
@@ -1567,16 +1605,34 @@
             <span class="c1"># momentarily update samping_rate</span>
             <span class="n">sampling_rate0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sr</span> <span class="o">*</span> <span class="n">upsampling</span> <span class="o">/</span> <span class="n">downsampling</span>
-        <span class="c1"># call PhaseNet</span>
-        <span class="n">PhaseNet_probas</span><span class="p">,</span> <span class="n">PhaseNet_picks</span> <span class="o">=</span> <span class="n">PN</span><span class="o">.</span><span class="n">automatic_picking</span><span class="p">(</span>
-            <span class="n">data_arr</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span>
-            <span class="n">mini_batch_size</span><span class="o">=</span><span class="n">mini_batch_size</span><span class="p">,</span>
-            <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;ram&quot;</span><span class="p">,</span>
-            <span class="n">threshold_P</span><span class="o">=</span><span class="n">threshold_P</span><span class="p">,</span>
-            <span class="n">threshold_S</span><span class="o">=</span><span class="n">threshold_S</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">data_arr_n</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">normalize_batch</span><span class="p">(</span><span class="n">data_arr</span><span class="p">)</span>
+        <span class="n">closest_pow2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">data_arr_n</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">closest_pow2</span> <span class="o">-</span> <span class="n">data_arr_n</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">diff</span><span class="o">//</span><span class="mi">2</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">diff</span><span class="o">//</span><span class="mi">2</span> <span class="o">+</span> <span class="n">diff</span><span class="o">%</span><span class="mi">2</span>
+        <span class="n">data_arr_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+                <span class="n">data_arr_n</span><span class="p">,</span>
+                <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)),</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;reflect&quot;</span>
+                <span class="p">)</span>
+        <span class="k">with</span> <span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">ml_probas</span> <span class="o">=</span> <span class="n">ml_model</span><span class="p">(</span>
+                    <span class="n">from_numpy</span><span class="p">(</span><span class="n">data_arr_n</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+                    <span class="p">)</span>
+            <span class="n">ml_probas</span> <span class="o">=</span> <span class="n">ml_probas</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="c1"># find picks and sotre in dictionaries</span>
+        <span class="n">picks</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">):</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">],</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">trigger_picks</span><span class="p">(</span>
+                    <span class="n">ml_probas</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">ml_p_index</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span><span class="o">-</span><span class="n">right</span><span class="p">],</span> <span class="n">threshold_P</span><span class="p">,</span> 
+                    <span class="p">)</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">],</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">trigger_picks</span><span class="p">(</span>
+                    <span class="n">ml_probas</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">ml_s_index</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span><span class="o">-</span><span class="n">right</span><span class="p">],</span> <span class="n">threshold_S</span><span class="p">,</span> 
+                    <span class="p">)</span>
         <span class="k">if</span> <span class="n">use_apriori_picks</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;arrival_times&quot;</span><span class="p">):</span>
             <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">if</span> <span class="s2">&quot;P&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">:</span>
@@ -1596,13 +1652,11 @@
         <span class="c1"># only used if use_apriori_picks is True</span>
         <span class="n">search_win_samp</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span><span class="n">search_win_sec</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
         <span class="c1"># keep best P- and S-wave pick on each 3-comp seismogram</span>
-        <span class="n">PhaseNet_picks</span> <span class="o">=</span> <span class="n">PN</span><span class="o">.</span><span class="n">get_picks</span><span class="p">(</span>
-            <span class="n">PhaseNet_picks</span><span class="p">,</span>
+        <span class="n">picks</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_picks</span><span class="p">(</span>
+            <span class="n">picks</span><span class="p">,</span>
             <span class="n">prior_knowledge</span><span class="o">=</span><span class="n">prior_knowledge</span><span class="p">,</span>
             <span class="n">search_win_samp</span><span class="o">=</span><span class="n">search_win_samp</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="c1"># add picks to auxiliary data</span>
-        <span class="c1"># self.set_aux_data(PhaseNet_picks)</span>
         <span class="c1"># format picks in pandas DataFrame</span>
         <span class="n">pandas_picks</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;stations&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">}</span>
         <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">]:</span>
@@ -1610,9 +1664,9 @@
             <span class="n">proba_picks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
             <span class="n">abs_picks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">sta</span> <span class="ow">in</span> <span class="n">PhaseNet_picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_picks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">rel_picks_sec</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">PhaseNet_picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sr</span>
-                    <span class="n">proba_picks</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">PhaseNet_picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_proba&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">sta</span> <span class="ow">in</span> <span class="n">picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_picks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">rel_picks_sec</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sr</span>
+                    <span class="n">proba_picks</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_proba&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                     <span class="k">if</span> <span class="n">proba_picks</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
                         <span class="n">abs_picks</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">station</span><span class="o">=</span><span class="n">sta</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span>
@@ -1637,42 +1691,50 @@
         <span class="n">time_shifted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">offset_ot</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">BUFFER_EXTRACTED_EVENTS_SEC</span><span class="p">,</span>
         <span class="n">data_reader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_threads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="o">**</span><span class="n">reader_kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read waveform data (Event class).</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        -----------</span>
-<span class="sd">        duration: scalar float</span>
+<span class="sd">        duration : float</span>
 <span class="sd">            Duration, in seconds, of the extracted time windows.</span>
-<span class="sd">        phase_on_comp: dictionary, optional</span>
+<span class="sd">        phase_on_comp : dictionary, optional</span>
 <span class="sd">            Dictionary defining which seismic phase is extracted on each</span>
 <span class="sd">            component. For example, phase_on_comp[&#39;N&#39;] gives the phase that is</span>
 <span class="sd">            extracted on the north component.</span>
-<span class="sd">        component_aliases: Dictionary</span>
+<span class="sd">        component_aliases : dictionary, optional</span>
 <span class="sd">            Each entry of the dictionary is a list of strings.</span>
 <span class="sd">            `component_aliases[comp]` is the list of all aliases used for</span>
 <span class="sd">            the same component &#39;comp&#39;. For example, `component_aliases[&#39;N&#39;] =</span>
 <span class="sd">            [&#39;N&#39;, &#39;1&#39;]` means that both the &#39;N&#39; and &#39;1&#39; channels will be mapped</span>
 <span class="sd">            to the Event&#39;s &#39;N&#39; channel.</span>
-<span class="sd">        offset_phase: dictionary, optional</span>
+<span class="sd">        offset_phase : dictionary, optional</span>
 <span class="sd">            Dictionary defining when the time window starts with respect to the</span>
 <span class="sd">            pick. A positive offset means the window starts before the pick. Not</span>
 <span class="sd">            used if `time_shifted` is False.</span>
-<span class="sd">        time_shifted: boolean, default to True</span>
-<span class="sd">            If True, the moveouts are used to extract time windows from specific</span>
+<span class="sd">        time_shifted : boolean, optional</span>
+<span class="sd">            If True (default), the moveouts are used to extract time windows from specific</span>
 <span class="sd">            seismic phases. If False, windows are simply extracted with respect to</span>
 <span class="sd">            the origin time.</span>
-<span class="sd">        offset_ot: scalar float, default to `cfg.BUFFER_EXTRACTED_EVENTS_SEC`</span>
+<span class="sd">        offset_ot : float, optional</span>
 <span class="sd">            Only used if `time_shifted` is False. Time, in seconds, taken before</span>
-<span class="sd">            `origin_time`.</span>
-<span class="sd">        data_reader: function, default to None</span>
+<span class="sd">            `origin_time`. Default to `cfg.BUFFER_EXTRACTED_EVENTS_SEC`.</span>
+<span class="sd">        data_reader : func, optional</span>
 <span class="sd">            Function that takes a path and optional key-word arguments to read</span>
-<span class="sd">            data from this path and returns an `obspy.Stream` instance. If None,</span>
-<span class="sd">            use `self.data_reader` and return None if `self.data_reader=None`.</span>
+<span class="sd">            data from this path and returns an `obspy.Stream` instance. If None</span>
+<span class="sd">            (default), this function uses `self.data_reader` and returns</span>
+<span class="sd">            None if `self.data_reader=None`.</span>
+<span class="sd">        n_threads : int, optional</span>
+<span class="sd">            The number of threads used to parallelize reading. Default is 1</span>
+<span class="sd">            (sequential reading). </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># from pyasdf import ASDFDataSet</span>
         <span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">Stream</span>
+        <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+        <span class="k">if</span> <span class="n">n_threads</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
 
         <span class="k">if</span> <span class="n">data_reader</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data_reader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_reader</span>
@@ -1682,6 +1744,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">=</span> <span class="n">Stream</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">duration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sr</span><span class="p">)</span>
+        <span class="n">reading_task_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
                 <span class="n">ph</span> <span class="o">=</span> <span class="n">phase_on_comp</span><span class="p">[</span><span class="n">comp</span><span class="p">]</span>
@@ -1694,14 +1757,38 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">pick</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin_time</span> <span class="o">-</span> <span class="n">offset_ot</span>
                 <span class="k">for</span> <span class="n">cp_alias</span> <span class="ow">in</span> <span class="n">component_aliases</span><span class="p">[</span><span class="n">comp</span><span class="p">]:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">+=</span> <span class="n">data_reader</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">where</span><span class="p">,</span>
-                        <span class="n">station</span><span class="o">=</span><span class="n">sta</span><span class="p">,</span>
-                        <span class="n">channel</span><span class="o">=</span><span class="n">cp_alias</span><span class="p">,</span>
-                        <span class="n">starttime</span><span class="o">=</span><span class="n">pick</span><span class="p">,</span>
-                        <span class="n">endtime</span><span class="o">=</span><span class="n">pick</span> <span class="o">+</span> <span class="n">duration</span><span class="p">,</span>
-                        <span class="o">**</span><span class="n">reader_kwargs</span><span class="p">,</span>
-                    <span class="p">)</span>
+                    <span class="n">reading_task_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">partial</span><span class="p">(</span>
+                                <span class="n">data_reader</span><span class="p">,</span>
+                                <span class="n">where</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">where</span><span class="p">,</span>
+                                <span class="n">station</span><span class="o">=</span><span class="n">sta</span><span class="p">,</span>
+                                <span class="n">channel</span><span class="o">=</span><span class="n">cp_alias</span><span class="p">,</span>
+                                <span class="n">starttime</span><span class="o">=</span><span class="n">pick</span><span class="p">,</span>
+                                <span class="n">endtime</span><span class="o">=</span><span class="n">pick</span> <span class="o">+</span> <span class="n">duration</span><span class="p">,</span>
+                                <span class="o">**</span><span class="n">reader_kwargs</span><span class="p">,</span>
+                                <span class="p">)</span>
+                            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">n_threads</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">n_threads</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">]:</span>
+                <span class="c1"># n_threads = None means use all CPUs</span>
+                <span class="n">n_threads</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">n_threads</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+                <span class="n">traces_</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                        <span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+                            <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">reading_task_list</span><span class="p">[</span><span class="n">i</span><span class="p">](),</span>
+                            <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reading_task_list</span><span class="p">))</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+            <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">traces_</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">+=</span> <span class="n">tr</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">reading_task_list</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">+=</span> <span class="n">task</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">reader_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;attach_response&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="c1"># remove traces for which we could not find the instrument response</span>
+            <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;response&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">offset_phase</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_aux_data</span><span class="p">({</span><span class="sa">f</span><span class="s2">&quot;offset_</span><span class="si">{</span><span class="n">ph</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">offset_phase</span><span class="p">[</span><span class="n">ph</span><span class="p">]})</span>
         <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">phase_on_comp</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -1721,9 +1808,11 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        routine: string, default to &#39;NLLoc&#39;</span>
-<span class="sd">            Method used for relocation. &#39;NLLoc&#39; calls `relocated_NLLoc` and</span>
-<span class="sd">            requires `self` to have the attribute `picks`.</span>
+<span class="sd">        routine : string, optional</span>
+<span class="sd">            Method used for relocation.</span>
+<span class="sd">                - &#39;NLLoc&#39; calls `relocate_NLLoc` and</span>
+<span class="sd">                requires `self` to have the attribute `picks`.</span>
+<span class="sd">                - &#39;beam&#39; calls `relocated_beam`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">routine</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;nlloc&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">relocate_NLLoc</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -1742,10 +1831,48 @@
         <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        beamformer : `BPMF.template_search.Beamformer`</span>
+<span class="sd">            Beamformer instance used for backprojection.</span>
+<span class="sd">        duration : float, optional</span>
+<span class="sd">            Duration, in seconds, of the extracted time windows. Default is</span>
+<span class="sd">            60sec.</span>
+<span class="sd">        offset_ot : float, optional</span>
+<span class="sd">            Only used if `time_shifted` is False. Time, in seconds, taken before</span>
+<span class="sd">            `origin_time`. Default to `cfg.BUFFER_EXTRACTED_EVENTS_SEC`.</span>
+<span class="sd">        phase_on_comp : dictionary, optional</span>
+<span class="sd">            Dictionary defining which seismic phase is extracted on each</span>
+<span class="sd">            component. For example, phase_on_comp[&#39;N&#39;] gives the phase that is</span>
+<span class="sd">            extracted on the north component.</span>
+<span class="sd">        component_aliases : dictionary, optional</span>
+<span class="sd">            Each entry of the dictionary is a list of strings.</span>
+<span class="sd">            `component_aliases[comp]` is the list of all aliases used for</span>
+<span class="sd">            the same component &#39;comp&#39;. For example, `component_aliases[&#39;N&#39;] =</span>
+<span class="sd">            [&#39;N&#39;, &#39;1&#39;]` means that both the &#39;N&#39; and &#39;1&#39; channels will be mapped</span>
+<span class="sd">            to the Event&#39;s &#39;N&#39; channel.</span>
+<span class="sd">        offset_phase : dictionary, optional</span>
+<span class="sd">            Dictionary defining when the time window starts with respect to the</span>
+<span class="sd">            pick. A positive offset means the window starts before the pick. Not</span>
+<span class="sd">            used if `time_shifted` is False.</span>
+<span class="sd">        waveform_features : numpy.ndarray, optional</span>
+<span class="sd">            If not None (default), it must be a `(num_stations, num_channels,</span>
+<span class="sd">            num_time_samples)` numpy.ndarray. This array contains the waveform</span>
+<span class="sd">            features, or characteristic functions, that are backprojected onto</span>
+<span class="sd">            the grid of theoretical seismic sources.</span>
+<span class="sd">        restricted_domain_side_km : float, optional</span>
+<span class="sd">            Location uncertainties are computed on the full 3D beam at the time</span>
+<span class="sd">            when the 4D beam achieves its maximum over the `duration` seconds.</span>
+<span class="sd">            To avoid having grid-size-dependent uncertainties, it is useful</span>
+<span class="sd">            to truncate the domain around the location of the max beam. This</span>
+<span class="sd">            variable controls the size of the truncated domain.</span>
+<span class="sd">        device : string, optional</span>
+<span class="sd">            Either &#39;cpu&#39; (default) or &#39;gpu&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">.template_search</span> <span class="kn">import</span> <span class="n">Beamformer</span><span class="p">,</span> <span class="n">envelope</span>
 
-        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;read_waveforms&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;read_waveforms&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="ow">and</span> <span class="n">waveform_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># read waveforms in picking mode, i.e. with `time_shifted`=False</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span>
                 <span class="n">duration</span><span class="p">,</span>
@@ -2114,11 +2241,15 @@
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">:</span>
             <span class="n">ph</span> <span class="o">=</span> <span class="n">ph</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-            <span class="n">field</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_abs_arrival_times&quot;</span>
+            <span class="n">field1</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_abs_arrival_times&quot;</span>
+            <span class="n">field2</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_tt_sec&quot;</span>
             <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">moveouts</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">field1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">origin_time</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">moveouts</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;moveouts_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
-                <span class="p">)</span></div>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">field2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">moveouts</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;moveouts_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+                        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Event.set_moveouts_to_empirical_times"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Event.set_moveouts_to_empirical_times">[docs]</a>    <span class="k">def</span> <span class="nf">set_moveouts_to_empirical_times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set moveouts equal to picks, if available.&quot;&quot;&quot;</span>
@@ -2235,8 +2366,15 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">station</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">_abs_arrival_times&quot;</span><span class="p">]</span>
                 <span class="p">)</span> <span class="o">-</span> <span class="n">udt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">origin_time</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Event.update_aux_data_database"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Event.update_aux_data_database">[docs]</a>    <span class="k">def</span> <span class="nf">update_aux_data_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Event.update_aux_data_database"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Event.update_aux_data_database">[docs]</a>    <span class="k">def</span> <span class="nf">update_aux_data_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add the new elements of `self.aux_data` that are not in the database.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+
+<span class="sd">        overwrite : boolean, optional</span>
+<span class="sd">            If True, will overwrite existing data. Otherwise, does not do</span>
+<span class="sd">            anything.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;path_database&quot;</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;It looks like you create this Event instance from scratch...&quot;</span><span class="p">)</span>
@@ -2246,7 +2384,7 @@
         <span class="k">while</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">lock_file</span><span class="p">):</span>
             <span class="c1"># another process is already writing in this file</span>
             <span class="c1"># wait a bit a check again</span>
-            <span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">())</span>
         <span class="c1"># create empty lock file</span>
         <span class="nb">open</span><span class="p">(</span><span class="n">lock_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
@@ -2254,9 +2392,12 @@
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;hdf5_gid&quot;</span><span class="p">):</span>
                     <span class="n">fdb</span> <span class="o">=</span> <span class="n">fdb</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">hdf5_gid</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">fdb</span><span class="p">[</span><span class="s2">&quot;aux_data&quot;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">fdb</span><span class="p">[</span><span class="s2">&quot;aux_data&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
                         <span class="c1"># already exists</span>
                         <span class="k">continue</span>
+                    <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">fdb</span><span class="p">[</span><span class="s2">&quot;aux_data&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">overwrite</span><span class="p">:</span>
+                        <span class="c1"># overwrite it</span>
+                        <span class="k">del</span> <span class="n">fdb</span><span class="p">[</span><span class="s2">&quot;aux_data&quot;</span><span class="p">]</span>
                     <span class="n">fdb</span><span class="p">[</span><span class="s2">&quot;aux_data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
                             <span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
                             <span class="p">)</span>
@@ -2266,6 +2407,112 @@
         <span class="c1"># remove lock file</span>
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">lock_file</span><span class="p">)</span></div>
 
+    <span class="k">def</span> <span class="nf">_write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">db_filename</span><span class="p">,</span>
+        <span class="n">db_path</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">OUTPUT_PATH</span><span class="p">,</span>
+        <span class="n">save_waveforms</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">gid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">hdf5_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;See `Event.write`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output_where</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db_path</span><span class="p">,</span> <span class="n">db_filename</span><span class="p">)</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;origin_time&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;latitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;longitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;depth&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;moveouts&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;stations&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;components&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;phases&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;where&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sampling_rate&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="c1"># moveouts&#39; indexes may have been re-ordered</span>
+        <span class="c1"># because writing moveouts as an array will forget about the current</span>
+        <span class="c1"># row indexes and assume that they are in the same order as</span>
+        <span class="c1"># self.stations, it is critical to make sure this is true</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveouts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moveouts</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">hdf5_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">hdf5_file</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">output_where</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">)</span>
+            <span class="n">close_file</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">close_file</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">gid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">gid</span> <span class="ow">in</span> <span class="n">hdf5_file</span><span class="p">:</span>
+                <span class="c1"># overwrite existing detection with same id</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Found existing event </span><span class="si">{</span><span class="n">gid</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">output_where</span><span class="si">}</span><span class="s2">. Overwrite it.&quot;</span>
+                <span class="p">)</span>
+                <span class="k">del</span> <span class="n">hdf5_file</span><span class="p">[</span><span class="n">gid</span><span class="p">]</span>
+            <span class="n">hdf5_file</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">hdf5_file</span><span class="p">[</span><span class="n">gid</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">hdf5_file</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">attr_</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">attr</span> <span class="o">==</span> <span class="s2">&quot;origin_time&quot;</span><span class="p">:</span>
+                <span class="n">attr_</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">attr_</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr_</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">attr_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">attr_</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr_</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">attr_</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;U&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">kind</span>
+            <span class="p">):</span>
+                <span class="n">attr_</span> <span class="o">=</span> <span class="n">attr_</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">attr_</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;aux_data&quot;</span><span class="p">):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;aux_data&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">f</span><span class="p">[</span><span class="s2">&quot;aux_data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;picks&quot;</span><span class="p">):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;picks&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="p">[</span><span class="s2">&quot;picks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
+                <span class="s2">&quot;stations&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;M&quot;</span><span class="p">:</span>
+                    <span class="c1"># pandas datetime format</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S.</span><span class="si">%f</span><span class="s2"> %z&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">):</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
+                <span class="n">f</span><span class="p">[</span><span class="s2">&quot;picks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;arrival_times&quot;</span><span class="p">):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;arrival_times&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="p">[</span><span class="s2">&quot;arrival_times&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
+                <span class="s2">&quot;stations&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;M&quot;</span><span class="p">:</span>
+                    <span class="c1"># pandas datetime format</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S.</span><span class="si">%f</span><span class="s2"> %z&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">):</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
+                <span class="n">f</span><span class="p">[</span><span class="s2">&quot;arrival_times&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_waveforms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;traces&quot;</span><span class="p">):</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;waveforms&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">:</span>
+                    <span class="n">sta</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span>
+                    <span class="n">cha</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span>
+                    <span class="k">if</span> <span class="n">sta</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;waveforms&quot;</span><span class="p">]:</span>
+                        <span class="n">f</span><span class="p">[</span><span class="s2">&quot;waveforms&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">sta</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">cha</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;waveforms&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sta</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">cha</span><span class="si">}</span><span class="s2"> already exists!&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">f</span><span class="p">[</span><span class="s2">&quot;waveforms&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">cha</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;You are trying to save the waveforms whereas you did&quot;</span>
+                    <span class="s2">&quot; not read them!&quot;</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="n">close_file</span><span class="p">:</span>
+            <span class="n">hdf5_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Event.write"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Event.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -2292,115 +2539,18 @@
 <span class="sd">            If not None, is an opened file pointing directly at the subfolder of</span>
 <span class="sd">            interest.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">output_where</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db_path</span><span class="p">,</span> <span class="n">db_filename</span><span class="p">)</span>
-        <span class="n">attributes</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">&quot;origin_time&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;latitude&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;longitude&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;depth&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;moveouts&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;stations&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;components&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;phases&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;where&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;sampling_rate&quot;</span><span class="p">,</span>
-        <span class="p">]</span>
-        <span class="c1"># moveouts&#39; indexes may have been re-ordered</span>
-        <span class="c1"># because writing moveouts as an array will forget about the current</span>
-        <span class="c1"># row indexes and assume that they are in the same order as</span>
-        <span class="c1"># self.stations, it is critical to make sure this is true</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">moveouts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moveouts</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">]</span>
-        <span class="n">lock_file</span> <span class="o">=</span> <span class="n">output_where</span> <span class="o">+</span> <span class="s2">&quot;.lock&quot;</span>
-        <span class="k">while</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">lock_file</span><span class="p">):</span>
-            <span class="c1"># another process is already writing in this file</span>
-            <span class="c1"># wait a bit a check again</span>
-            <span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="c1"># create empty lock file</span>
-        <span class="nb">open</span><span class="p">(</span><span class="n">lock_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">hdf5_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">hdf5_file</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">output_where</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">)</span>
-                <span class="n">close_file</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">close_file</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="n">gid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">gid</span> <span class="ow">in</span> <span class="n">hdf5_file</span><span class="p">:</span>
-                    <span class="c1"># overwrite existing detection with same id</span>
-                    <span class="nb">print</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Found existing event </span><span class="si">{</span><span class="n">gid</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">output_where</span><span class="si">}</span><span class="s2">. Overwrite it.&quot;</span>
-                    <span class="p">)</span>
-                    <span class="k">del</span> <span class="n">hdf5_file</span><span class="p">[</span><span class="n">gid</span><span class="p">]</span>
-                <span class="n">hdf5_file</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span>
-                <span class="n">f</span> <span class="o">=</span> <span class="n">hdf5_file</span><span class="p">[</span><span class="n">gid</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">f</span> <span class="o">=</span> <span class="n">hdf5_file</span>
-            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
-                    <span class="k">continue</span>
-                <span class="n">attr_</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">attr</span> <span class="o">==</span> <span class="s2">&quot;origin_time&quot;</span><span class="p">:</span>
-                    <span class="n">attr_</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">attr_</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr_</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                    <span class="n">attr_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">attr_</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr_</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-                    <span class="n">attr_</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;U&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">kind</span>
-                <span class="p">):</span>
-                    <span class="n">attr_</span> <span class="o">=</span> <span class="n">attr_</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">attr_</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;aux_data&quot;</span><span class="p">):</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;aux_data&quot;</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">f</span><span class="p">[</span><span class="s2">&quot;aux_data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;picks&quot;</span><span class="p">):</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;picks&quot;</span><span class="p">)</span>
-                <span class="n">f</span><span class="p">[</span><span class="s2">&quot;picks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
-                    <span class="s2">&quot;stations&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">,</span>
+                <span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">save_waveforms</span><span class="o">=</span><span class="n">save_waveforms</span><span class="p">,</span>
+                <span class="n">gid</span><span class="o">=</span><span class="n">gid</span><span class="p">,</span>
+                <span class="n">hdf5_file</span><span class="o">=</span><span class="n">hdf5_file</span>
                 <span class="p">)</span>
-                <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;M&quot;</span><span class="p">:</span>
-                        <span class="c1"># pandas datetime format</span>
-                        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S.</span><span class="si">%f</span><span class="s2"> %z&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">):</span>
-                        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
-                    <span class="n">f</span><span class="p">[</span><span class="s2">&quot;picks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;arrival_times&quot;</span><span class="p">):</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;arrival_times&quot;</span><span class="p">)</span>
-                <span class="n">f</span><span class="p">[</span><span class="s2">&quot;arrival_times&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
-                    <span class="s2">&quot;stations&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;M&quot;</span><span class="p">:</span>
-                        <span class="c1"># pandas datetime format</span>
-                        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S.</span><span class="si">%f</span><span class="s2"> %z&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">):</span>
-                        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
-                    <span class="n">f</span><span class="p">[</span><span class="s2">&quot;arrival_times&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">save_waveforms</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;traces&quot;</span><span class="p">):</span>
-                    <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;waveforms&quot;</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">:</span>
-                        <span class="n">sta</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span>
-                        <span class="n">cha</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span>
-                        <span class="k">if</span> <span class="n">sta</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;waveforms&quot;</span><span class="p">]:</span>
-                            <span class="n">f</span><span class="p">[</span><span class="s2">&quot;waveforms&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">sta</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">cha</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;waveforms&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]:</span>
-                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sta</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">cha</span><span class="si">}</span><span class="s2"> already exists!&quot;</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">f</span><span class="p">[</span><span class="s2">&quot;waveforms&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">cha</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span>
-                        <span class="s2">&quot;You are trying to save the waveforms whereas you did&quot;</span>
-                        <span class="s2">&quot; not read them!&quot;</span>
-                    <span class="p">)</span>
-            <span class="k">if</span> <span class="n">close_file</span><span class="p">:</span>
-                <span class="n">hdf5_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">lock_file</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="p">(</span><span class="n">e</span><span class="p">)</span>
-        <span class="c1"># remove lock file</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">lock_file</span><span class="p">)</span></div>
+        <span class="n">utils</span><span class="o">.</span><span class="n">read_write_waiting_list</span><span class="p">(</span>
+                <span class="n">func</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db_path</span><span class="p">,</span> <span class="n">db_filename</span><span class="p">)</span>
+                <span class="p">)</span></div>
+
 
     <span class="c1"># -----------------------------------------------------------</span>
     <span class="c1">#            plotting method(s)</span>
@@ -2463,13 +2613,21 @@
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;picks&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
                     <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_abs_picks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
                 <span class="p">):</span>
-                    <span class="n">P_pick</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">][</span><span class="s2">&quot;P_abs_picks&quot;</span><span class="p">])</span>
-                    <span class="n">axes</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">P_pick</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.00</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">P_pick</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">][</span><span class="s2">&quot;P_abs_picks&quot;</span><span class="p">]):</span>
+                        <span class="n">axes</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">P_pick</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.00</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span>
+                                <span class="p">)</span>
+                    <span class="c1">#P_pick = np.datetime64(self.picks.loc[sta][&quot;P_abs_picks&quot;])</span>
+                    <span class="c1">#axes[s, c].axvline(P_pick, color=&quot;C0&quot;, lw=1.00, ls=&quot;--&quot;)</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;picks&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
                     <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_abs_picks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
                 <span class="p">):</span>
-                    <span class="n">S_pick</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">][</span><span class="s2">&quot;S_abs_picks&quot;</span><span class="p">])</span>
-                    <span class="n">axes</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">S_pick</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.00</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">S_pick</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">][</span><span class="s2">&quot;S_abs_picks&quot;</span><span class="p">]):</span>
+                        <span class="n">axes</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">S_pick</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.00</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span>
+                                <span class="p">)</span>
+                    <span class="c1">#S_pick = np.datetime64(self.picks.loc[sta][&quot;S_abs_picks&quot;])</span>
+                    <span class="c1">#axes[s, c].axvline(S_pick, color=&quot;C3&quot;, lw=1.00, ls=&quot;--&quot;)</span>
                 <span class="c1"># plot the theoretical arrival times</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;arrival_times&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
                     <span class="n">P_pick</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span>
@@ -2974,9 +3132,14 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stations&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">stations</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">stations</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stations</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stations&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1">#stations = event.stations</span>
         <span class="n">axes</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_axes</span><span class="p">()</span>
         <span class="n">cc</span><span class="p">,</span> <span class="n">n_channels</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">stations</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stations</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">cp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">components</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">cp_alias</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">component_aliases</span><span class="p">[</span><span class="n">cp</span><span class="p">]:</span>
                     <span class="n">tr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">station</span><span class="o">=</span><span class="n">sta</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">cp_alias</span><span class="p">)</span>
@@ -3054,7 +3217,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call `read_catalog` first.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="n">rt</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">origin_time</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">origin_time</span><span class="o">.</span><span class="n">values</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">origin_time</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">origin_time</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="p">)</span> <span class="o">/</span> <span class="mf">1.0e9</span>  <span class="c1"># in sec</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">origin_time</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">rt</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">annotate_axes</span><span class="p">:</span>
@@ -3220,11 +3383,12 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">)</span>
 
     <span class="c1"># methods</span>
-<div class="viewcode-block" id="EventGroup.read_waveforms"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.EventGroup.read_waveforms">[docs]</a>    <span class="k">def</span> <span class="nf">read_waveforms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">time_shifted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="EventGroup.read_waveforms"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.EventGroup.read_waveforms">[docs]</a>    <span class="k">def</span> <span class="nf">read_waveforms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">time_shifted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Call `dataset.Event.read_waveform` with each event.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_shifted</span> <span class="o">=</span> <span class="n">time_shifted</span>
-        <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">:</span>
-            <span class="n">ev</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">time_shifted</span><span class="o">=</span><span class="n">time_shifted</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">disable</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bitwise_not</span><span class="p">(</span><span class="n">progress</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Reading event waveforms&quot;</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="n">disable</span><span class="p">):</span>
+            <span class="n">ev</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">time_shifted</span><span class="o">=</span><span class="n">time_shifted</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_remember</span><span class="p">(</span><span class="s2">&quot;read_waveforms&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="EventGroup.SVDWF_stack"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.EventGroup.SVDWF_stack">[docs]</a>    <span class="k">def</span> <span class="nf">SVDWF_stack</span><span class="p">(</span>
@@ -3600,7 +3764,7 @@
         <span class="c1"># try reading the inter-template CC from db</span>
         <span class="n">db_path</span><span class="p">,</span> <span class="n">db_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">)</span>
         <span class="n">cc_fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db_path</span><span class="p">,</span> <span class="s2">&quot;intertp_cc.h5&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cc_fn</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">compute_from_scratch</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cc_fn</span><span class="p">):</span>
             <span class="n">_intertemplate_cc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_intertp_cc</span><span class="p">(</span><span class="n">cc_fn</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tids</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">_intertemplate_cc</span><span class="o">.</span><span class="n">index</span><span class="p">)))</span>
@@ -3615,7 +3779,7 @@
             <span class="n">compute_from_scratch</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="n">compute_from_scratch</span><span class="p">:</span>
             <span class="c1"># compute from scratch</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_closest_stations</span><span class="p">(</span><span class="n">n_stations</span><span class="p">)</span>
+            <span class="c1">#self.n_closest_stations(n_stations)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing the similarity matrix...&quot;</span><span class="p">)</span>
             <span class="c1"># format arrays for FMF</span>
             <span class="n">data_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waveforms_arr</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -3624,14 +3788,35 @@
             <span class="n">intertp_cc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_templates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_templates</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
             <span class="p">)</span>
-            <span class="n">n_stations</span><span class="p">,</span> <span class="n">n_components</span> <span class="o">=</span> <span class="n">moveouts_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">n_network_stations</span><span class="p">,</span> <span class="n">n_components</span> <span class="o">=</span> <span class="n">moveouts_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
             <span class="c1"># use FMF on one template at a time against all others</span>
             <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">template</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
                 <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Inter-tp CC&quot;</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="n">disable</span>
             <span class="p">):</span>
-                <span class="c1"># print(f&#39;--- {t} / {self.n_templates} ---&#39;)</span>
                 <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">template_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-                <span class="n">weights</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_to_template_map</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="c1"># select the `n_stations` closest stations</span>
+                <span class="c1"># apply similar approach than Event.n_closest_stations</span>
+                <span class="n">station_pool</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">network_stations</span><span class="p">[</span><span class="n">template</span><span class="o">.</span><span class="n">availability</span><span class="p">]</span>
+                <span class="n">closest_stations</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">template</span><span class="o">.</span><span class="n">source_receiver_dist</span>\
+                                <span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">station_pool</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">[:</span><span class="n">n_stations</span><span class="p">]</span>
+                        <span class="p">)</span>
+                <span class="c1"># make sure we return a n_stations-vector</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">closest_stations</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">n_stations</span><span class="p">:</span>
+                    <span class="n">missing</span> <span class="o">=</span> <span class="n">n_stations</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">closest_stations</span><span class="p">)</span>
+                    <span class="n">closest_stations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="n">closest_stations</span><span class="p">,</span>
+                            <span class="n">template</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">closest_stations</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;rows&quot;</span><span class="p">)</span>
+                            <span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
+                            <span class="o">.</span><span class="n">index</span><span class="p">[:</span><span class="n">missing</span><span class="p">],</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">network_stations</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">sta</span> <span class="ow">in</span> <span class="n">closest_stations</span><span class="p">:</span>
+                        <span class="n">weights</span><span class="p">[:,</span> <span class="n">s</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span>
+                                <span class="n">template</span><span class="o">.</span><span class="n">availability_per_cha</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                                <span class="p">)</span>
                 <span class="n">weights</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">above_thrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ellipsoid_dist</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tids</span><span class="p">[</span><span class="n">t</span><span class="p">]]</span> <span class="o">&gt;</span> <span class="n">distance_threshold</span>
                 <span class="n">weights</span><span class="p">[</span><span class="n">above_thrs</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -3693,7 +3878,7 @@
             <span class="n">intertp_cc</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;intertp_cc&quot;</span><span class="p">][()]</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">tids</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">tids</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">intertp_cc</span><span class="p">)</span>
 
-<div class="viewcode-block" id="TemplateGroup.read_waveforms"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.TemplateGroup.read_waveforms">[docs]</a>    <span class="k">def</span> <span class="nf">read_waveforms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="TemplateGroup.read_waveforms"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.TemplateGroup.read_waveforms">[docs]</a>    <span class="k">def</span> <span class="nf">read_waveforms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -3701,8 +3886,23 @@
 <span class="sd">            If True, print progress bar with `tqdm`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">disable</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bitwise_not</span><span class="p">(</span><span class="n">progress</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Reading waveforms&quot;</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="n">disable</span><span class="p">):</span>
-            <span class="n">tp</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span><span class="n">stations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n_threads</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
+            <span class="c1"># cannot use tqdm with parallel execution</span>
+            <span class="n">disable</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">n_threads</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">]:</span>
+                <span class="c1"># n_threads = None means use all CPUs</span>
+                <span class="n">n_threads</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">n_threads</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+                <span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+                        <span class="k">lambda</span> <span class="n">tp</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span>
+                            <span class="n">stations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">components</span>
+                            <span class="p">),</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">templates</span>
+                        <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Reading waveforms&quot;</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="n">disable</span><span class="p">):</span>
+                <span class="n">tp</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span><span class="n">stations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_remember</span><span class="p">(</span><span class="s2">&quot;read_waveforms&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TemplateGroup.set_network_to_template_map"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.TemplateGroup.set_network_to_template_map">[docs]</a>    <span class="k">def</span> <span class="nf">set_network_to_template_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -3854,14 +4054,17 @@
         <span class="p">)</span>
         <span class="c1"># alias:</span>
         <span class="n">catalog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">similarity_criterion</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_intertemplate_cc&quot;</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">similarity_criterion</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_intertemplate_cc&quot;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m here!&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">compute_intertemplate_cc</span><span class="p">(</span>
                     <span class="n">distance_threshold</span><span class="o">=</span><span class="n">distance_criterion</span><span class="p">,</span>
                     <span class="n">n_stations</span><span class="o">=</span><span class="n">n_closest_stations</span><span class="p">,</span>
                     <span class="n">max_lag</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_lag&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
                     <span class="n">device</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="s2">&quot;cpu&quot;</span><span class="p">),</span>
                 <span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;What about </span><span class="si">{</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;_intertemplate_cc&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="c1"># -----------------------------------</span>
         <span class="n">t1</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Searching for events detected by multiple templates&quot;</span><span class="p">)</span>
@@ -4154,7 +4357,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">set_aux_data</span><span class="p">(</span><span class="n">aux_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_availability</span><span class="p">(</span><span class="n">stations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Stack.pick_PS_phases"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Stack.pick_PS_phases">[docs]</a>    <span class="k">def</span> <span class="nf">pick_PS_phases</span><span class="p">(</span>
+<div class="viewcode-block" id="Stack.pick_PS_phases_family_mode"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Stack.pick_PS_phases_family_mode">[docs]</a>    <span class="k">def</span> <span class="nf">pick_PS_phases_family_mode</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">duration</span><span class="p">,</span>
         <span class="n">threshold_P</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>
@@ -4166,6 +4369,8 @@
         <span class="n">central</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span>
         <span class="n">upsampling</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">downsampling</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">ml_model_name</span><span class="o">=</span><span class="s2">&quot;original&quot;</span><span class="p">,</span>
+        <span class="n">ml_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Use PhaseNet (Zhu et al., 2019) to pick P and S waves.</span>
@@ -4207,7 +4412,15 @@
 <span class="sd">            The pick is either taken as the mean or the mode of the empirical</span>
 <span class="sd">            distribution of picks.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">phasenet</span> <span class="kn">import</span> <span class="n">wrapper</span> <span class="k">as</span> <span class="n">PN</span>
+        <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">no_grad</span><span class="p">,</span> <span class="n">from_numpy</span>
+
+        <span class="k">if</span> <span class="n">ml_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">seisbench.models</span> <span class="k">as</span> <span class="nn">sbm</span>
+            <span class="n">ml_model</span> <span class="o">=</span> <span class="n">sbm</span><span class="o">.</span><span class="n">PhaseNet</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">ml_model_name</span><span class="p">)</span>
+            <span class="n">ml_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+        <span class="n">ml_p_index</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ml_P_index&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">ml_s_index</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ml_S_index&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="c1"># read waveforms in &quot;picking&quot; mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span>
@@ -4229,41 +4442,109 @@
                 <span class="c1"># momentarily update samping_rate</span>
                 <span class="n">sampling_rate0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sr</span> <span class="o">*</span> <span class="n">upsampling</span> <span class="o">/</span> <span class="n">downsampling</span>
-            <span class="c1"># call PhaseNet</span>
-            <span class="n">PhaseNet_probas</span><span class="p">,</span> <span class="n">PhaseNet_picks</span> <span class="o">=</span> <span class="n">PN</span><span class="o">.</span><span class="n">automatic_picking</span><span class="p">(</span>
-                <span class="n">data_arr</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span>
-                <span class="n">mini_batch_size</span><span class="o">=</span><span class="n">mini_batch_size</span><span class="p">,</span>
-                <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;ram&quot;</span><span class="p">,</span>
-                <span class="n">threshold_P</span><span class="o">=</span><span class="n">threshold_P</span><span class="p">,</span>
-                <span class="n">threshold_S</span><span class="o">=</span><span class="n">threshold_S</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">PhaseNet_picks</span> <span class="o">=</span> <span class="n">PN</span><span class="o">.</span><span class="n">get_all_picks</span><span class="p">(</span><span class="n">PhaseNet_picks</span><span class="p">)</span>
-            <span class="n">PhaseNet_picks</span> <span class="o">=</span> <span class="n">PN</span><span class="o">.</span><span class="n">fit_probability_density</span><span class="p">(</span><span class="n">PhaseNet_picks</span><span class="p">)</span>
-            <span class="n">PhaseNet_picks</span> <span class="o">=</span> <span class="n">PN</span><span class="o">.</span><span class="n">select_picks_family</span><span class="p">(</span>
-                <span class="n">PhaseNet_picks</span><span class="p">,</span> <span class="n">n_threshold</span><span class="p">,</span> <span class="n">err_threshold</span><span class="p">,</span> <span class="n">central</span><span class="o">=</span><span class="n">central</span>
-            <span class="p">)</span>
+            <span class="n">num_events</span><span class="p">,</span> <span class="n">num_stations</span> <span class="o">=</span> <span class="n">data_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">num_traces</span> <span class="o">=</span> <span class="n">num_events</span> <span class="o">*</span> <span class="n">num_stations</span>
+            <span class="n">data_arr_n</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">normalize_batch</span><span class="p">(</span>
+                    <span class="n">data_arr</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">num_traces</span><span class="p">,</span> <span class="n">data_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">data_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                    <span class="p">)</span>
+            <span class="n">closest_pow2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">data_arr_n</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">diff</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">closest_pow2</span> <span class="o">-</span> <span class="n">data_arr_n</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">diff</span><span class="o">//</span><span class="mi">2</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">diff</span><span class="o">//</span><span class="mi">2</span> <span class="o">+</span> <span class="n">diff</span><span class="o">%</span><span class="mi">2</span>
+            <span class="n">data_arr_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+                    <span class="n">data_arr_n</span><span class="p">,</span>
+                    <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)),</span>
+                    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;reflect&quot;</span>
+                    <span class="p">)</span>
+            <span class="k">with</span> <span class="n">no_grad</span><span class="p">():</span>
+                <span class="n">ml_probas</span> <span class="o">=</span> <span class="n">ml_model</span><span class="p">(</span>
+                        <span class="n">from_numpy</span><span class="p">(</span><span class="n">data_arr_n</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+                        <span class="p">)</span>
+                <span class="n">ml_probas</span> <span class="o">=</span> <span class="n">ml_probas</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="c1"># find picks and sotre in dictionaries</span>
+            <span class="n">picks</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">):</span>
+                <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">],</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+                <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">],</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_events</span><span class="p">):</span>
+                    <span class="n">tr_idx</span> <span class="o">=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">num_events</span> <span class="o">+</span> <span class="n">n</span>
+                    <span class="n">P_proba</span><span class="p">,</span> <span class="n">P_pick</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">trigger_picks</span><span class="p">(</span>
+                            <span class="n">ml_probas</span><span class="p">[</span><span class="n">tr_idx</span><span class="p">,</span> <span class="n">ml_p_index</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span><span class="o">-</span><span class="n">right</span><span class="p">],</span> <span class="n">threshold_P</span><span class="p">,</span> 
+                            <span class="p">)</span>
+                    <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">P_proba</span><span class="p">)</span>
+                    <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">P_pick</span><span class="p">)</span>
+                    <span class="n">S_proba</span><span class="p">,</span> <span class="n">S_pick</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">trigger_picks</span><span class="p">(</span>
+                            <span class="n">ml_probas</span><span class="p">[</span><span class="n">tr_idx</span><span class="p">,</span> <span class="n">ml_s_index</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span><span class="o">-</span><span class="n">right</span><span class="p">],</span> <span class="n">threshold_S</span><span class="p">,</span> 
+                            <span class="p">)</span>
+                    <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">S_proba</span><span class="p">)</span>
+                    <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">S_pick</span><span class="p">)</span>
+                <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">])</span>
+                        <span class="p">)</span>
+                <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">])</span>
+                        <span class="p">)</span>
+                <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">])</span>
+                        <span class="p">)</span>
+                <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">])</span>
+                        <span class="p">)</span>
+
+            <span class="c1">#if use_apriori_picks and hasattr(self, &quot;arrival_times&quot;):</span>
+            <span class="c1">#    columns = []</span>
+            <span class="c1">#    if &quot;P&quot; in self.phases:</span>
+            <span class="c1">#        columns.append(&quot;P&quot;)</span>
+            <span class="c1">#    if &quot;S&quot; in self.phases:</span>
+            <span class="c1">#        columns.append(&quot;S&quot;)</span>
+            <span class="c1">#    prior_knowledge = pd.DataFrame(columns=columns)</span>
+            <span class="c1">#    for sta in self.stations:</span>
+            <span class="c1">#        for ph in prior_knowledge.columns:</span>
+            <span class="c1">#            prior_knowledge.loc[sta, ph] = utils.sec_to_samp(</span>
+            <span class="c1">#                udt(self.arrival_times.loc[sta, f&quot;{ph}_abs_arrival_times&quot;])</span>
+            <span class="c1">#                - self.origin_time,</span>
+            <span class="c1">#                sr=self.sampling_rate,</span>
+            <span class="c1">#            )</span>
+            <span class="c1">#else:</span>
+            <span class="c1">#    prior_knowledge = None</span>
+            <span class="c1">## only used if use_apriori_picks is True</span>
+            <span class="c1">#search_win_samp = utils.sec_to_samp(search_win_sec, sr=self.sampling_rate)</span>
+            <span class="c1">## keep best P- and S-wave pick on each 3-comp seismogram</span>
+            <span class="c1">#picks = utils.get_picks(</span>
+            <span class="c1">#    picks,</span>
+            <span class="c1">#    prior_knowledge=prior_knowledge,</span>
+            <span class="c1">#    search_win_samp=search_win_samp,</span>
+            <span class="c1">#)</span>
+
             <span class="c1"># format picks in pandas DataFrame</span>
             <span class="n">pandas_picks</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;stations&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">}</span>
             <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">]:</span>
-                <span class="n">rel_picks_sec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-                <span class="n">err_picks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                <span class="n">rel_picks_sec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+                <span class="n">proba_picks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
                 <span class="n">abs_picks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">sta</span> <span class="ow">in</span> <span class="n">PhaseNet_picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_picks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                        <span class="n">rel_picks_sec</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">PhaseNet_picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sr</span>
-                        <span class="n">err_picks</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">PhaseNet_picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_err&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sr</span>
-                        <span class="n">abs_picks</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">station</span><span class="o">=</span><span class="n">sta</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span>
-                            <span class="o">+</span> <span class="n">rel_picks_sec</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
-                        <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">sta</span> <span class="ow">in</span> <span class="n">picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_picks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">rel_picks_sec</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_picks&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">])</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sr</span>
+                        <span class="n">proba_picks</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_proba&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">])</span>
+                        <span class="n">abs_picks</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">station</span><span class="o">=</span><span class="n">sta</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span>
+                                <span class="o">+</span>
+                                <span class="n">rel_pick</span><span class="p">,</span>
+                                <span class="s2">&quot;ms&quot;</span>
+                                <span class="p">)</span> <span class="k">for</span> <span class="n">rel_pick</span> <span class="ow">in</span> <span class="n">rel_picks_sec</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+                        <span class="p">])</span>
                 <span class="n">pandas_picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_picks_sec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rel_picks_sec</span>
-                <span class="n">pandas_picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_err&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">err_picks</span>
+                <span class="n">pandas_picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_probas&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">proba_picks</span>
                 <span class="n">pandas_picks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_abs_picks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_picks</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">picks</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">pandas_picks</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;stations&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1">#self.picks.replace(0.0, np.nan, inplace=True)</span>
             <span class="k">if</span> <span class="n">upsampling</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">downsampling</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># reset the sampling rate to initial value</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">sampling_rate0</span>

@@ -55,10 +55,10 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/4_travel_times.html">Compute P-/S-wave travel Times</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/5_backprojection.html">Backprojection of the Seismic Wavefield</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/6_relocate.html">Relocation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_magnitudes.html">Estimate the seismic moments and moment magnitudes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_build_template_database.html">Build Template Database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/9_template_matching.html">Template Matching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_build_template_database.html">Build Template Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_template_matching.html">Template Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/9_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_magnitudes.html">Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="updates.html">Updates</a></li>
@@ -134,7 +134,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/notebooks/1_download_data.html">Download Seismic Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/1_download_data.html#Defining-the-Data-Path">Defining the Data Path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/1_download_data.html#Defining-and-Initializing-the-Data-Folder-Architecture">Defining and Initializing the Data Folder Architecture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/1_download_data.html#Data-Selection">Data Selection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/1_download_data.html#Download-the-Data">Download the Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/1_download_data.html#Cleanup-the-Downloaded-Data">Cleanup the Downloaded Data</a></li>
@@ -187,36 +187,39 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/6_relocate.html#Relocation-2-(Bonus):-Locating-and-estimating-uncertainties-with-backprojection-on-a-fine-grid">Relocation 2 (Bonus): Locating and estimating uncertainties with backprojection on a fine grid</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/notebooks/7_magnitudes.html">Estimate the seismic moments and moment magnitudes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_magnitudes.html#References">References</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_magnitudes.html#Load-the-metadata-of-the-previously-detected-events">Load the metadata of the previously detected events</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_magnitudes.html#Example-with-a-single-event">Example with a single event</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_magnitudes.html#Repeat-the-same-processing-for-every-event">Repeat the same processing for every event</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_magnitudes.html#Save-the-final-backprojection-catalog!">Save the final backprojection catalog!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/notebooks/7_build_template_database.html">Build Template Database</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_build_template_database.html#Read-the-database-of-detected-events">Read the database of detected events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_build_template_database.html#Remove-redundant-templates">Remove redundant templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_build_template_database.html#Plot-the-similar-templates">Plot the similar templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/7_build_template_database.html#Save-the-non-redundant-templates-in-a-database">Save the non-redundant templates in a database</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/notebooks/8_build_template_database.html">Build Template Database</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_build_template_database.html#Read-the-database-of-detected-events">Read the database of detected events</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_build_template_database.html#Remove-redundant-templates">Remove redundant templates</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_build_template_database.html#Plot-the-similar-templates">Plot the similar templates</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_build_template_database.html#Save-the-non-redundant-templates-in-a-database">Save the non-redundant templates in a database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/notebooks/8_template_matching.html">Template Matching</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_template_matching.html#Read-the-template-database">Read the template database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_template_matching.html#Initialize-the-BPMF.similarity_search.MatchedFilter-instance.">Initialize the <code class="docutils literal notranslate"><span class="pre">BPMF.similarity_search.MatchedFilter</span></code> instance.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_template_matching.html#Load-the-data">Load the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_template_matching.html#Run-the-matched-filter-search">Run the matched-filter search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_template_matching.html#Plot-the-detected-events">Plot the detected events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/8_template_matching.html#Save-the-detected-events-to-database">Save the detected events to database</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/notebooks/9_template_matching.html">Template Matching</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/9_template_matching.html#Read-the-template-database">Read the template database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/9_template_matching.html#Initialize-the-BPMF.similarity_search.MatchedFilter-instance.">Initialize the <code class="docutils literal notranslate"><span class="pre">BPMF.similarity_search.MatchedFilter</span></code> instance.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/9_template_matching.html#Load-the-data">Load the data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/9_template_matching.html#Run-the-matched-filter-search">Run the matched-filter search</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/9_template_matching.html#Plot-the-detected-events">Plot the detected events</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/9_template_matching.html#Save-the-detected-events-to-database">Save the detected events to database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/notebooks/9_build_earthquake_catalog.html">Build Earthquake Catalog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/9_build_earthquake_catalog.html#Read-the-detected-events’-metadata-for-each-template">Read the detected events’ metadata for each template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/9_build_earthquake_catalog.html#Remove-the-multiple-detections">Remove the multiple detections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/9_build_earthquake_catalog.html#Bonus:-Relocate-each-events">Bonus: Relocate each events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/9_build_earthquake_catalog.html#Assemble-the-backprojection-and-template-matching-catalog">Assemble the backprojection and template matching catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/9_build_earthquake_catalog.html#Save-final-catalog">Save final catalog</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/notebooks/10_build_earthquake_catalog.html">Build Earthquake Catalog</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_build_earthquake_catalog.html#Read-the-detected-events’-metadata-for-each-template">Read the detected events’ metadata for each template</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_build_earthquake_catalog.html#Remove-the-multiple-detections">Remove the multiple detections</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_build_earthquake_catalog.html#Bonus:-Relocate-each-events">Bonus: Relocate each events</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_build_earthquake_catalog.html#Assemble-the-backprojection-and-template-matching-catalog">Assemble the backprojection and template matching catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_build_earthquake_catalog.html#Compute-earthquake-magnitudes">Compute earthquake magnitudes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/notebooks/10_magnitudes.html">Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_magnitudes.html#Introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_magnitudes.html#Moment-Magnitude-M_w">Moment Magnitude <span class="math notranslate nohighlight">\(M_w\)</span></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_magnitudes.html#Local-Magnitude-M_L">Local Magnitude <span class="math notranslate nohighlight">\(M_L\)</span></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_magnitudes.html#References">References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_magnitudes.html#Load-the-metadata-of-the-previously-detected-events">Load the metadata of the previously detected events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_magnitudes.html#Example-with-a-single-event">Example with a single event</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_magnitudes.html#Repeat-the-same-processing-for-every-event">Repeat the same processing for every event</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/notebooks/10_magnitudes.html#To-be-continued…">To be continued…</a></li>
 </ul>
 </li>
 </ul>
