@@ -3701,6 +3701,8 @@ class TemplateGroup(Family):
                 print(f"Read inter-template CCs from {cc_fn}.")
             else:
                 compute_from_scratch = True
+        else:
+            compute_from_scratch = True
         if compute_from_scratch:
             # compute from scratch
             #self.n_closest_stations(n_stations)
@@ -3978,14 +3980,17 @@ class TemplateGroup(Family):
         )
         # alias:
         catalog = self.catalog.catalog
+        print(similarity_criterion > -1.0, hasattr(self, "_intertemplate_cc"))
         if similarity_criterion > -1.0:
             if not hasattr(self, "_intertemplate_cc"):
+                print("I'm here!")
                 self.compute_intertemplate_cc(
                     distance_threshold=distance_criterion,
                     n_stations=n_closest_stations,
                     max_lag=kwargs.get("max_lag", 10),
                     device=kwargs.get("device", "cpu"),
                 )
+                print(f"What about {hasattr(self, '_intertemplate_cc')}")
         # -----------------------------------
         t1 = give_time()
         print("Searching for events detected by multiple templates")
