@@ -26,59 +26,257 @@ from math import isnan
 from obspy.core import UTCDateTime as udt
 
 
+class TravelTimes(object):
+    """Class for handling travel time tables. 
+    """
+    def __init__(
+            self,
+            tt_filename,
+            tt_folder_path=cfg.MOVEOUTS_PATH,
+            ):
+        """
+        Parameters
+        ----------
+        tt_filename : str
+            Name of the hdf5 file with the travel time tables.
+        tt_folder_path : str, optional
+            Path to the folder where `tt_filename`` is located. Default
+            is `cfg.MOVEOUTS_PATH`.
+        """
+        self.where = os.path.join(tt_folder_path, tt_filename)
+
+    @property
+    def n_sources(self):
+        if hasattr(self, "source_indexes"):
+            return len(self.source_indexes)
+        else:
+            print("Call self.read first.")
+
+    @property
+    def num_sources(self):
+        if hasattr(self, "source_indexes"):
+            return len(self.source_indexes)
+        else:
+            print("Call self.read first.")
+
+    @property
+    def phases(self):
+        if hasattr(self, "travel_times"):
+            return list(self.travel_times.columns)
+        elif hasattr(self, "travel_times_samp"):
+            return list(self.travel_times_samp.columns)
+        else:
+            return
+
+    # aliases
+    @property
+    def tts(self):
+        if hasattr(self, "travel_times"):
+            return self.travel_times
+        else:
+            print("Call self.read first.")
+
+    @property
+    def source_coords(self):
+        if hasattr(self, "source_coordinates"):
+            return self.source_coordinates
+        else:
+            print("Call self.read first.")
+
+    def read(self, phases, source_indexes=None, read_coords=False, stations=None):
+        """
+        Parameters
+        ----------
+        phases : list of str
+            List of the seismic phases to read from `self.where`.
+        source_indexes : array-like, optional
+            Array-like with the source indexes to read. Default is None
+            (read the whole travel time table).
+        read_coords : boolean, optional
+            If True, the source coordinates are read  from `self.where`.
+        stations : list of str, optional
+            If not None, is a list of station names to read a subset of
+            travel times from `self.where`. Default is None, that is, all
+            stations are read.
+        """
+        import h5py as h5
+
+        tts = {}
+        with h5.File(self.where, mode="r") as fin:
+            grid_shape = fin["source_coordinates"]["depth"].shape
+            if source_indexes is None:
+                self.source_indexes = np.arange(np.prod(grid_shape))
+            else:
+                self.source_indexes = source_indexes
+            for ph in phases:
+                tts[ph] = {}
+                for sta in fin[f"tt_{ph}"].keys():
+                    if stations is not None and sta not in stations:
+                        continue
+                    # flatten the lon/lat/dep grid as we work with
+                    # flat source indexes
+                    if source_indexes is not None:
+                        # select a subset of the source grid
+                        source_indexes_unravelled = np.unravel_index(
+                            source_indexes, grid_shape
+                        )
+                        selection = np.zeros(grid_shape, dtype=bool)
+                        selection[source_indexes_unravelled] = True
+                        tts[ph][sta] = fin[f"tt_{ph}"][sta][selection].flatten().astype(
+                                "float32"
+                                )
+                    else:
+                        tts[ph][sta] = fin[f"tt_{ph}"][sta][()].flatten().astype(
+                                "float32"
+                                )
+            self.travel_times = pd.DataFrame(tts)
+            if read_coords:
+                source_coords = {}
+                if source_indexes is not None:
+                    source_indexes_unravelled = np.unravel_index(source_indexes, grid_shape)
+                    selection = np.zeros(grid_shape, dtype=bool)
+                    selection[source_indexes_unravelled] = True
+                    for coord in fin["source_coordinates"].keys():
+                        source_coords[coor] = fin[
+                                "source_coordinates"
+                                ][coord][selection].flatten()
+                else:
+                    for coord in fin["source_coordinates"].keys():
+                        source_coords[coord] = fin["source_coordinates"][coord][()].flatten()
+                self.source_coordinates = pd.DataFrame(source_coords, index=self.source_indexes)
+
+
+    def convert_to_samples(self, sampling_rate, remove_tt_seconds=False):
+        """
+        Creates a new `self.travel_times_samp` attribute.
+
+        Parameters
+        ----------
+        sampling_rate : float
+            The sampling rate to use to convert times from seconds to samples.
+        remove_tt_seconds : boolean, optional
+            If True, delete `self.travel_times` after conversion. This may be
+            necessary to save memory.
+        """
+        travel_times_samp = {}
+        for ph in self.travel_times.columns:
+            travel_times_samp[ph] = {}
+            for sta in self.travel_times.index:
+                travel_times_samp[ph][sta] = utils.sec_to_samp(
+                        self.travel_times.loc[sta, ph],
+                        sr=sampling_rate,
+                        )
+        self.travel_times_samp = pd.DataFrame(travel_times_samp)
+        if remove_tt_seconds:
+            del self.travel_times
+
+    def get_travel_times_array(
+            self, units="seconds", stations=None, phases=None, relative_to_first=False
+            ):
+        """
+        Parameters
+        ----------
+        units : str, optional
+            Either of 'seconds' or 'samples'.
+            If 'seconds', build array from `self.travel_times`.
+            If 'samples', build array from `self.travel_times_samp`.
+        stations : list of str, optional
+            List of stations to include in the output array.
+            Default is None, which uses all stations.
+        phases : list of str, optional
+            List of phases to include in the output array.
+            Default is None, which uses all phases.
+        relative_to_first : boolean, optional
+            If True, the travel times are given as relative to the
+            earliest phase for each source.
+        """
+        assert units in ["seconds", "samples"], print(
+                "units shoulds be either of 'seconds' or 'samples'"
+                )
+        if units == "seconds" and not hasattr(self, "travel_times"):
+            print("Call `self.read` first.")
+            return
+        elif units == "samples" and not hasattr(self, "travel_times_samp"):
+            print("Call `self.convert_to_samples` first.")
+            return
+        if units == "seconds":
+            attr = getattr(self, "travel_times")
+        elif units == "samples":
+            attr = getattr(self, "travel_times_samp")
+        if stations is None:
+            stations = attr.index
+        if phases is None:
+            phases = attr.columns
+        dtype = attr.loc[stations[0], phases[0]].dtype
+        tts = np.zeros(
+                (self.n_sources, len(stations), len(phases)),
+                dtype=dtype
+                )
+        for s, sta in enumerate(stations):
+            for p, ph in enumerate(phases):
+                tts[:, s, p] = attr.loc[sta, ph]
+        if relative_to_first:
+            tts = tts - np.min(tts, axis=(1, 2), keepdims=True)
+        return tts
+
+
 class Beamformer(object):
     """Class for backprojecting waveform features with beamforming."""
 
     def __init__(
         self,
-        travel_times,
-        source_coordinates,
-        sampling_rate=cfg.SAMPLING_RATE_HZ,
         data=None,
         network=None,
         phases=None,
-        remove_tt_min=True,
+        travel_times=None,
+        moveouts_relative_to_first=True,
     ):
         """Initialize the essential attributes.
 
+        Once initialized, the `Beamformer` instance can be re-used for
+        different settings. For example, when processing multiple days in a row,
+        `Beamformer.set_data` and `Beamformer.set_network` can be called at the
+        beginning of each day to adapt to new data and potentially different 
+        network configurations.
+
         Parameters
         -----------
-        tt_filename: string, default to 'tts.h5'
-            Name of the hdf5 file with travel-times.
-        path_tts: string, default to `cfg.MOVEOUTS_PATH`
-            Path to the directory with the travel-time files.
-        phases: list, default to ['P', 'S']
+        data : `dataset.Data`, optional
+            `dataset.Data` class instance representing the seismic data
+            that `Beamformer` will backproject. Default is None, in which
+            case `self.set_data` must be called later.
+        network : `dataset.Network`, optional
+            `dataset.Network` class instance with the seismic network metadata.
+            Default is None, in which case `self.set_network` must be called later.
+        phases : list, optional
             List of seismic phases used in the computation of the network
-            response.
+            response. `phases` determines in which order `self.moveouts` is built.
+            Default is None, in which case `self.set_phases` must be called later.
+        travel_times : `TravelTimes`, optional
+            `TravelTimes` class instance with the travel time table that will
+            be used for backprojection the waveform features. Default is None, 
+            in which case `self.set_travel_times` must be called later.
+        moveouts_relative_to_first : boolean, optional
+            If True, the moveouts used for backprojection are set relative to the
+            first seismic arrival for each source. Default is True.
         """
-        self.travel_times = travel_times
-        self.travel_times_samp = self.travel_times.copy()
-        for sta in self.travel_times_samp.index:
-            for ph in self.travel_times_samp.columns:
-                self.travel_times_samp.loc[sta, ph] = utils.sec_to_samp(
-                    self.travel_times_samp.loc[sta, ph],
-                    sr=sampling_rate,
-                )
-        self.source_coordinates = source_coordinates
-        self.n_sources = len(self.source_coordinates["depth"])
         self.data = data
         self.network = network
         self.phases = phases
-        if remove_tt_min:
-            # find min travel-time for each source
-            tts = np.asarray(
-                [
-                    [
-                        self.travel_times_samp.loc[sta, ph]
-                        for sta in self.travel_times_samp.index
-                    ]
-                    for ph in self.phases
-                ]
-            ).T
-            tt_min = np.min(tts, axis=(1, 2))
-            for sta in self.travel_times_samp.index:
-                for ph in self.phases:
-                    self.travel_times_samp.loc[sta, ph] -= tt_min
+        self.travel_times = travel_times
+        self.moveouts_relative_to_first = moveouts_relative_to_first
+
+    @property
+    def moveouts(self):
+        if hasattr(self, "travel_times"):
+            return self.travel_times.get_travel_times_array(
+                    units="samples",
+                    stations=self.stations,
+                    phases=self.phases,
+                    relative_to_first=self.moveouts_relative_to_first,
+                    )
+        else:
+            print("Call `set_travel_times` first.")
 
     @property
     def n_stations(self):
@@ -95,13 +293,18 @@ class Beamformer(object):
         return len(self.phases)
 
     @property
-    def moveouts(self):
-        return np.asarray(
-            [
-                [self.travel_times_samp.loc[sta, ph] for sta in self.stations]
-                for ph in self.phases
-            ]
-        ).T
+    def n_sources(self):
+        if hasattr(self, "travel_times"):
+            return self.travel_times.n_sources
+        else:
+            print("Call `set_travel_times` first.")
+
+    @property
+    def num_sources(self):
+        if hasattr(self, "travel_times"):
+            return self.travel_times.num_sources
+        else:
+            print("Call `set_travel_times` first.")
 
     @property
     def stations(self):
@@ -109,6 +312,15 @@ class Beamformer(object):
             print("You need to call set_network first.")
             return
         return self.network.stations
+
+    @property
+    def source_coordinates(self):
+        if hasattr(self, "travel_times"):
+            return self.travel_times.source_coordinates
+        else:
+            print("Call `set_travel_times` first.")
+
+
 
     @staticmethod
     def _likelihood(beam_volume):
@@ -262,14 +474,16 @@ class Beamformer(object):
         return detections, peak_indexes, source_indexes
 
     def remove_baseline(self, window, attribute="composite"):
-        """Remove baseline from network response."""
+        """Remove baseline from network response
+        """
         # convert window from seconds to samples
         window = int(window * self.sampling_rate)
         attr_baseline = self._baseline(getattr(self, attribute), window)
         setattr(self, attribute, getattr(self, attribute) - attr_baseline)
 
     def return_pd_series(self, attribute="maxbeam"):
-        """Return the network response as a Pandas.Series."""
+        """Return the network response as a Pandas.Series.
+        """
         import pandas as pd
 
         time_series = getattr(self, attribute)
@@ -300,26 +514,6 @@ class Beamformer(object):
         self.data = data
         self.starttime = self.data.date
 
-    def set_moveouts(self, moveouts, stations, phases):
-        """Attribute `_moveouts` to the class instance.
-
-        Parameters
-        -----------
-        moveouts: (n_sources, n_stations, n_phases) numpy.ndarray
-            The moveouts to use for backprojection.
-        stations: (n_stations,) list or numpy.ndarray of strings
-            Station names corresponding with the second axis of `moveouts`.
-        phases: (n_phases,) list or numpy.ndarray of strings
-            Phase names corresponing with the third axis of `moveouts`.
-        """
-        self._moveouts = pd.DataFrame(
-            index=stations,
-            columns=phases,
-        )
-        for s, sta in enumerate(stations):
-            for ph in enumerate(phases):
-                self._moveouts.loc[sta, ph] = moveouts[:, s, p]
-
     def set_network(self, network):
         """Attribute `network` to the class instance.
 
@@ -329,13 +523,35 @@ class Beamformer(object):
 
         Parameters
         ----------
-        network: dataset.Network instance
+        network : dataset.Network
             The Network instance with the station network information.
             `network` can force the network response to be computed only on
             a subset of the data stored in `data`.
 
         """
         self.network = network
+
+    def set_phases(self, phases):
+        """Attach `phases` to the class instance.
+
+        Parameters
+        ----------
+        phases : list of str
+            List of strings representing the phase names to read from
+            the travel time table. `phases` determines the order in which
+            `self.moveouts` is built.
+        """
+        self.phases = phases
+
+    def set_travel_times(self, travel_times):
+        """Attaches `travel_times` to the class instance.
+
+        Parameters
+        -----------
+        travel_times : TravelTimes
+            TravelTimes instance.
+        """
+        self.travel_times = travel_times
 
     def set_source_coordinates(self, source_coords):
         """Attribute `_source_coordinates` to the class instance.
