@@ -442,7 +442,9 @@ def write_NLLoc_control(
             f"{min_node_size} 10000 1000 1 1\n"
             )
     # read header file to automatically determine grid dimensions
-    fn = glob.glob(os.path.join(NLLoc_input_path, "*hdr"))[0]
+    fn = glob.glob(
+            os.path.join(NLLoc_input_path, f"{NLLoc_basename}*hdr")
+            )[0]
     with open(fn, "r") as fhdr:
         dim = fhdr.readline()
     locgrid_params = dim.split()[:-1]
