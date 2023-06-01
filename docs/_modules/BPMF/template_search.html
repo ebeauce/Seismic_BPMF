@@ -661,7 +661,9 @@
         <span class="n">wav_axes</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ax_maxbeam</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_maxbeam</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax_maxbeam</span><span class="p">,</span> <span class="n">detection</span><span class="o">=</span><span class="n">detection</span><span class="p">)</span>
-        <span class="n">ax_maxbeam</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">detection</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;maxbeam&quot;</span><span class="p">])</span>
+        <span class="n">ax_maxbeam</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span>
+                <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ax_maxbeam</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[</span><span class="mi">0</span><span class="p">]),</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">detection</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;maxbeam&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
         <span class="n">beam</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stations</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">cp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">components</span><span class="p">):</span>
@@ -737,7 +739,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">hor_slice</span><span class="p">],</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">hor_slice</span><span class="p">],</span>
             <span class="n">likelihood</span><span class="p">[</span><span class="n">hor_slice</span><span class="p">],</span>
-            <span class="n">levels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+            <span class="n">levels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
             <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;inferno&quot;</span><span class="p">,</span>
             <span class="n">alpha</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
             <span class="n">transform</span><span class="o">=</span><span class="n">data_coords</span><span class="p">,</span>
@@ -909,145 +911,13 @@
     <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;see `utils._detect_peaks`.</span>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect peaks in data based on their amplitude and other features.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    x : 1D array_like</span>
-<span class="sd">        data.</span>
-<span class="sd">    mph : {None, number}, optional (default = None)</span>
-<span class="sd">        detect peaks that are greater than minimum peak height.</span>
-<span class="sd">    mpd : positive integer, optional (default = 1)</span>
-<span class="sd">        detect peaks that are at least separated by minimum peak distance (in</span>
-<span class="sd">        number of data).</span>
-<span class="sd">    threshold : positive number, optional (default = 0)</span>
-<span class="sd">        detect peaks (valleys) that are greater (smaller) than `threshold`</span>
-<span class="sd">        in relation to their immediate neighbors.</span>
-<span class="sd">    edge : {None, &#39;rising&#39;, &#39;falling&#39;, &#39;both&#39;}, optional (default = &#39;rising&#39;)</span>
-<span class="sd">        for a flat peak, keep only the rising edge (&#39;rising&#39;), only the</span>
-<span class="sd">        falling edge (&#39;falling&#39;), both edges (&#39;both&#39;), or don&#39;t detect a</span>
-<span class="sd">        flat peak (None).</span>
-<span class="sd">    kpsh : bool, optional (default = False)</span>
-<span class="sd">        keep peaks with same height even if they are closer than `mpd`.</span>
-<span class="sd">    valley : bool, optional (default = False)</span>
-<span class="sd">        if True (1), detect valleys (local minima) instead of peaks.</span>
-<span class="sd">    show : bool, optional (default = False)</span>
-<span class="sd">        if True (1), plot data in matplotlib figure.</span>
-<span class="sd">    ax : a matplotlib.axes.Axes instance, optional (default = None).</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    ind : 1D array_like</span>
-<span class="sd">        indeces of the peaks in `x`.</span>
-
-<span class="sd">    Notes</span>
-<span class="sd">    -----</span>
-<span class="sd">    The detection of valleys instead of peaks is performed internally by simply</span>
-<span class="sd">    negating the data: `ind_valleys = detect_peaks(-x)`</span>
-
-<span class="sd">    The function can handle NaN&#39;s</span>
-
-<span class="sd">    See this IPython Notebook [1]_.</span>
-
-<span class="sd">    References</span>
-<span class="sd">    ----------</span>
-<span class="sd">    .. [1]:http://nbviewer.ipython.org/github/demotu/BMC/blob/master/</span>
-<span class="sd">        notebooks/DetectPeaks.ipynb</span>
-
-<span class="sd">    Examples</span>
-<span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; from detect_peaks import detect_peaks</span>
-<span class="sd">    &gt;&gt;&gt; x = np.random.randn(100)</span>
-<span class="sd">    &gt;&gt;&gt; x[60:81] = np.nan</span>
-<span class="sd">    &gt;&gt;&gt; # detect all peaks and plot data</span>
-<span class="sd">    &gt;&gt;&gt; ind = detect_peaks(x, show=True)</span>
-<span class="sd">    &gt;&gt;&gt; print(ind)</span>
-
-<span class="sd">    &gt;&gt;&gt; x = np.sin(2*np.pi*5*np.linspace(0, 1, 200)) + np.random.randn(200)/5</span>
-<span class="sd">    &gt;&gt;&gt; # set minimum peak height = 0 and minimum peak distance = 20</span>
-<span class="sd">    &gt;&gt;&gt; detect_peaks(x, mph=0, mpd=20, show=True)</span>
-
-<span class="sd">    &gt;&gt;&gt; x = [0, 1, 0, 2, 0, 3, 0, 2, 0, 1, 0]</span>
-<span class="sd">    &gt;&gt;&gt; # set minimum peak distance = 2</span>
-<span class="sd">    &gt;&gt;&gt; detect_peaks(x, mpd=2, show=True)</span>
-
-<span class="sd">    &gt;&gt;&gt; x = np.sin(2*np.pi*5*np.linspace(0, 1, 200)) + np.random.randn(200)/5</span>
-<span class="sd">    &gt;&gt;&gt; # detection of valleys instead of peaks</span>
-<span class="sd">    &gt;&gt;&gt; detect_peaks(x, mph=0, mpd=20, valley=True, show=True)</span>
-
-<span class="sd">    &gt;&gt;&gt; x = [0, 1, 1, 0, 1, 1, 0]</span>
-<span class="sd">    &gt;&gt;&gt; # detect both edges</span>
-<span class="sd">    &gt;&gt;&gt; detect_peaks(x, edge=&#39;both&#39;, show=True)</span>
-
-<span class="sd">    &gt;&gt;&gt; x = [-2, 1, -2, 2, 1, 1, 3, 0]</span>
-<span class="sd">    &gt;&gt;&gt; # set threshold = 2</span>
-<span class="sd">    &gt;&gt;&gt; detect_peaks(x, threshold = 2, show=True)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">valley</span><span class="p">:</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span>
-    <span class="c1"># find indices of all peaks</span>
-    <span class="n">dx</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="c1"># handle NaN&#39;s</span>
-    <span class="n">indnan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">indnan</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
-        <span class="n">x</span><span class="p">[</span><span class="n">indnan</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
-        <span class="n">dx</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">dx</span><span class="p">))[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
-    <span class="n">ine</span><span class="p">,</span> <span class="n">ire</span><span class="p">,</span> <span class="n">ife</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[],</span> <span class="p">[],</span> <span class="p">[]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">edge</span><span class="p">:</span>
-        <span class="n">ine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">dx</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;rising&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
-            <span class="n">ire</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">dx</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;falling&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
-            <span class="n">ife</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">dx</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">ine</span><span class="p">,</span> <span class="n">ire</span><span class="p">,</span> <span class="n">ife</span><span class="p">)))</span>
-    <span class="c1"># handle NaN&#39;s</span>
-    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">indnan</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
-        <span class="c1"># NaN&#39;s and values close to NaN&#39;s cannot be peaks</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span>
-                <span class="n">ind</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">indnan</span><span class="p">,</span> <span class="n">indnan</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">indnan</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))),</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span>
+    <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">_detect_peaks</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">mph</span><span class="o">=</span><span class="n">mph</span><span class="p">,</span> <span class="n">mpd</span><span class="o">=</span><span class="n">mpd</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="n">edge</span><span class="p">,</span>
+            <span class="n">kpsh</span><span class="o">=</span><span class="n">kpsh</span><span class="p">,</span> <span class="n">valley</span><span class="o">=</span><span class="n">valley</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="n">show</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span>
             <span class="p">)</span>
-        <span class="p">]</span>
-    <span class="c1"># first and last values of x cannot be peaks</span>
-    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">ind</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="c1"># remove peaks &lt; minimum peak height</span>
-    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">mph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">mph</span><span class="p">]</span>
-    <span class="c1"># remove peaks - neighbors &lt; threshold</span>
-    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">threshold</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dx</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="c1"># detect small peaks closer than minimum peak distance</span>
-    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">mpd</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">])][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># sort ind by peak height</span>
-        <span class="n">idel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">idel</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-                <span class="c1"># keep peaks with the same height if kpsh is True</span>
-                <span class="n">idel</span> <span class="o">=</span> <span class="n">idel</span> <span class="o">|</span> <span class="p">(</span><span class="n">ind</span> <span class="o">&gt;=</span> <span class="n">ind</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">mpd</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ind</span> <span class="o">&lt;=</span> <span class="n">ind</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">mpd</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span>
-                    <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">kpsh</span> <span class="k">else</span> <span class="kc">True</span>
-                <span class="p">)</span>
-                <span class="n">idel</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Keep current peak</span>
-        <span class="c1"># remove the small peaks and sort back the indices by their occurrence</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">ind</span><span class="p">[</span><span class="o">~</span><span class="n">idel</span><span class="p">])</span>
-
-    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">indnan</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">[</span><span class="n">indnan</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-        <span class="k">if</span> <span class="n">valley</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span>
-        <span class="n">_plot_peaks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mph</span><span class="p">,</span> <span class="n">mpd</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">valley</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">ind</span>
 
 
 <span class="k">def</span> <span class="nf">_plot_peaks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mph</span><span class="p">,</span> <span class="n">mpd</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">valley</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>

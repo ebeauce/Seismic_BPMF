@@ -209,8 +209,9 @@
             <span class="n">uncertainty_info</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
             <span class="k">break</span>
     <span class="c1"># warning! The covariance matrix is expressed</span>
-    <span class="c1"># in a LEFT HANDED system (make sure to define</span>
-    <span class="c1"># rotations accordingly!)</span>
+    <span class="c1"># in a LEFT HANDED system </span>
+    <span class="c1"># for a RIGHT HANDED system, we reverse Z-axis</span>
+    <span class="c1"># which is initially pointing downward</span>
     <span class="n">cov_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     <span class="n">cov_mat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">uncertainty_info</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>  <span class="c1"># cov XX</span>
     <span class="n">cov_mat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">uncertainty_info</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>  <span class="c1"># cov XY</span>
@@ -218,6 +219,8 @@
     <span class="n">cov_mat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">uncertainty_info</span><span class="p">[</span><span class="mi">14</span><span class="p">])</span>  <span class="c1"># cov YY</span>
     <span class="n">cov_mat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">uncertainty_info</span><span class="p">[</span><span class="mi">16</span><span class="p">])</span>  <span class="c1"># cov YZ</span>
     <span class="n">cov_mat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">uncertainty_info</span><span class="p">[</span><span class="mi">18</span><span class="p">])</span>  <span class="c1"># cov ZZ</span>
+    <span class="n">cov_mat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.</span>
+    <span class="n">cov_mat</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.</span>
     <span class="c1"># symmetrical matrix:</span>
     <span class="n">hypocenter</span><span class="p">[</span><span class="s2">&quot;cov_mat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cov_mat</span> <span class="o">+</span> <span class="n">cov_mat</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">cov_mat</span><span class="o">.</span><span class="n">diagonal</span><span class="p">())</span>
     <span class="c1"># read until relevant line</span>

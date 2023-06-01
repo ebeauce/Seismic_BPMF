@@ -617,7 +617,8 @@
         <span class="n">num_points</span><span class="o">=</span><span class="mi">100</span>
         <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute a set of longitude and latitude points that describe the uncertainty ellipse.</span>
+<span class="sd">    Compute a set of longitude and latitude points that describe the uncertainty</span>
+<span class="sd">    ellipse in the horizontal plane.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -647,13 +648,94 @@
     <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">azimuths</span> <span class="o">-</span> <span class="n">hmax_azimuth_deg</span><span class="p">))</span>
     <span class="c1"># ellipse formula</span>
     <span class="n">eccentricity_pow2</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="p">(</span><span class="n">hmin_uncertainty_km</span> <span class="o">/</span> <span class="n">hmax_uncertainty_km</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-    <span class="n">ellipse_m</span> <span class="o">=</span> <span class="n">hmin_uncertainty_km</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">eccentricity_pow2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">ellipse_km</span> <span class="o">=</span> <span class="n">hmin_uncertainty_km</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">eccentricity_pow2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="c1"># ray shooting with Geodesic</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="p">()</span>
     <span class="n">longitude_ellipse</span><span class="p">,</span> <span class="n">latitude_ellipse</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
-        <span class="n">G</span><span class="o">.</span><span class="n">direct</span><span class="p">([</span><span class="n">longitude_center</span><span class="p">,</span> <span class="n">latitude_center</span><span class="p">],</span> <span class="n">azimuths</span><span class="p">,</span> <span class="mf">1000.</span> <span class="o">*</span> <span class="n">ellipse_m</span><span class="p">)</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">direct</span><span class="p">([</span><span class="n">longitude_center</span><span class="p">,</span> <span class="n">latitude_center</span><span class="p">],</span> <span class="n">azimuths</span><span class="p">,</span> <span class="mf">1000.</span> <span class="o">*</span> <span class="n">ellipse_km</span><span class="p">)</span>
     <span class="p">)</span><span class="o">.</span><span class="n">T</span>
     <span class="k">return</span> <span class="n">longitude_ellipse</span><span class="p">,</span> <span class="n">latitude_ellipse</span></div>
+
+<div class="viewcode-block" id="vertical_uncertainty_ellipse"><a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.vertical_uncertainty_ellipse">[docs]</a><span class="k">def</span> <span class="nf">vertical_uncertainty_ellipse</span><span class="p">(</span>
+        <span class="n">cov_mat</span><span class="p">,</span> <span class="n">longitude_center</span><span class="p">,</span> <span class="n">latitude_center</span><span class="p">,</span> <span class="n">depth_center</span><span class="p">,</span>
+        <span class="n">horizontal_direction</span><span class="o">=</span><span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="n">num_points</span><span class="o">=</span><span class="mi">100</span>
+        <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a set of longitude and latitude points that describe the uncertainty</span>
+<span class="sd">    ellipse in the vertical plane.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    cov_mat : numpy.ndarray</span>
+<span class="sd">        The (3x3) covariance matrix returned by Event.relocate(method=&#39;NLLoc&#39;).</span>
+<span class="sd">    longitude_center : float</span>
+<span class="sd">        The longitude coordinate of the center point of the ellipse.</span>
+<span class="sd">    latitude_center : float</span>
+<span class="sd">        The latitude coordinate of the center point of the ellipse.</span>
+<span class="sd">    depth_center : float</span>
+<span class="sd">        The depth, in km, of the center point of the ellipse.</span>
+<span class="sd">    horizontal_direction : str, optional</span>
+<span class="sd">        Either &#39;longitude&#39; or &#39;latitude&#39;. Define the x-coordinate of the plane.</span>
+<span class="sd">    num_points : int, optional</span>
+<span class="sd">        The number of points used to describe the ellipse, default is 100.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    longitude_ellipse : numpy.ndarray</span>
+<span class="sd">        The longitude coordinates of the points that make up the uncertainty ellipse.</span>
+<span class="sd">    latitude_ellipse : numpy.ndarray</span>
+<span class="sd">        The latitude coordinates of the points that make up the uncertainty ellipse.</span>
+<span class="sd">    depth_ellipse : numpy.ndarray</span>
+<span class="sd">        The depth, in km, of the points that make up the uncertainty ellipse.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">cartopy.geodesic</span> <span class="kn">import</span> <span class="n">Geodesic</span>
+
+    <span class="c1"># ray shooting with Geodesic</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="p">()</span>
+    <span class="n">phis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">360.</span><span class="p">,</span> <span class="n">num_points</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">horizontal_direction</span> <span class="o">==</span> <span class="s2">&quot;longitude&quot;</span><span class="p">:</span>
+        <span class="c1"># az_max_edg is angle between vertical axis and  </span>
+        <span class="n">max_unc_km</span><span class="p">,</span> <span class="n">min_unc_km</span><span class="p">,</span> <span class="n">phi_max_deg</span><span class="p">,</span> <span class="n">phi_min_deg</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">cov_mat_intersection</span><span class="p">(</span>
+                <span class="n">cov_mat</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis2</span><span class="o">=</span><span class="mi">2</span>
+                <span class="p">)</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">((</span><span class="n">phis</span> <span class="o">-</span> <span class="n">phi_max_deg</span><span class="p">))</span>
+        <span class="c1"># ellipse formula</span>
+        <span class="n">eccentricity_pow2</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="p">(</span><span class="n">min_unc_km</span> <span class="o">/</span> <span class="n">max_unc_km</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">ellipse_km</span> <span class="o">=</span> <span class="n">min_unc_km</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">eccentricity_pow2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># this is the ellipse depth</span>
+        <span class="n">depth_ellipse</span> <span class="o">=</span> <span class="n">depth_center</span> <span class="o">-</span> <span class="n">ellipse_km</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">phis</span><span class="p">))</span>
+        <span class="c1"># this is the ray length</span>
+        <span class="n">ellipse_horizontal_km</span> <span class="o">=</span> <span class="n">ellipse_km</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">phis</span><span class="p">))</span>
+        <span class="c1"># this is the ray azimuth</span>
+        <span class="n">ray_azimuth</span> <span class="o">=</span> <span class="mf">270.</span>
+    <span class="k">elif</span> <span class="n">horizontal_direction</span> <span class="o">==</span> <span class="s2">&quot;latitude&quot;</span><span class="p">:</span>
+        <span class="n">max_unc_km</span><span class="p">,</span> <span class="n">min_unc_km</span><span class="p">,</span> <span class="n">phi_max_deg</span><span class="p">,</span> <span class="n">phi_min_deg</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">cov_mat_intersection</span><span class="p">(</span>
+                <span class="n">cov_mat</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis2</span><span class="o">=</span><span class="mi">2</span>
+                <span class="p">)</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">((</span><span class="n">phis</span> <span class="o">-</span> <span class="n">phi_max_deg</span><span class="p">))</span>
+        <span class="c1"># ellipse formula</span>
+        <span class="n">eccentricity_pow2</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="p">(</span><span class="n">min_unc_km</span> <span class="o">/</span> <span class="n">max_unc_km</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">ellipse_km</span> <span class="o">=</span> <span class="n">min_unc_km</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">eccentricity_pow2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># this is the ellipse depth</span>
+        <span class="n">depth_ellipse</span> <span class="o">=</span> <span class="n">depth_center</span> <span class="o">-</span> <span class="n">ellipse_km</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">phis</span><span class="p">))</span>
+        <span class="c1"># this is the ray length</span>
+        <span class="n">ellipse_horizontal_km</span> <span class="o">=</span> <span class="n">ellipse_km</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">phis</span><span class="p">))</span>
+        <span class="c1"># this is the ray azimuth</span>
+        <span class="n">ray_azimuth</span> <span class="o">=</span> <span class="mf">180.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;horizontal_direction should be either of &#39;longitude&#39; or &#39;latitude&#39;.&quot;</span>
+        <span class="p">)</span>
+    <span class="n">longitude_ellipse</span><span class="p">,</span> <span class="n">latitude_ellipse</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">direct</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">longitude_center</span><span class="p">,</span> <span class="n">latitude_center</span><span class="p">],</span>
+            <span class="n">ray_azimuth</span><span class="p">,</span>
+            <span class="mf">1000.</span> <span class="o">*</span> <span class="n">ellipse_horizontal_km</span>
+            <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="n">longitude_ellipse</span><span class="p">,</span> <span class="n">latitude_ellipse</span><span class="p">,</span> <span class="n">depth_ellipse</span></div>
 </pre></div>
 
            </div>

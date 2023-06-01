@@ -50,6 +50,8 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Pre-requisites</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#environment">Environment</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#base">Base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#beampower">Beampower</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fast-matched-filter">Fast Matched Filter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pykonal">PyKonal</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#phasenet">PhaseNet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#nonlinloc">NonLinLoc</a></li>
@@ -66,10 +68,10 @@
 <li class="toctree-l2"><a class="reference internal" href="notebooks/4_travel_times.html">Compute P-/S-wave travel Times</a></li>
 <li class="toctree-l2"><a class="reference internal" href="notebooks/5_backprojection.html">Backprojection of the Seismic Wavefield</a></li>
 <li class="toctree-l2"><a class="reference internal" href="notebooks/6_relocate.html">Relocation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/7_magnitudes.html">Estimate the seismic moments and moment magnitudes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/8_build_template_database.html">Build Template Database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/9_template_matching.html">Template Matching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/10_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/7_build_template_database.html">Build Template Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/8_template_matching.html">Template Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/9_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/10_magnitudes.html">Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../updates.html">Updates</a></li>
@@ -150,9 +152,32 @@
 </pre></div>
 </div>
 <p>Run the following command to install (almost) all the packages need for this tutorial:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>obspy<span class="w"> </span>numpy<span class="w"> </span>scipy<span class="w"> </span>pandas<span class="w"> </span>matplotlib<span class="w"> </span>h5py<span class="w"> </span>ipython<span class="w"> </span>jupyter<span class="w"> </span>cartopy
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>obspy<span class="w"> </span>numpy<span class="w"> </span>scipy<span class="w"> </span>pandas<span class="w"> </span>matplotlib<span class="w"> </span>h5py<span class="w"> </span>ipython<span class="w"> </span>jupyter<span class="w"> </span>cartopy<span class="w"> </span>colorcet
 </pre></div>
 </div>
+</section>
+<section id="beampower">
+<h3>Beampower<a class="headerlink" href="#beampower" title="Permalink to this heading"></a></h3>
+<p><code class="xref py py-data docutils literal notranslate"><span class="pre">beampower</span></code> is our package with C and CUDA-C routines for
+backprojection wrapped in Python code. You can download and install
+<code class="xref py py-data docutils literal notranslate"><span class="pre">beampower</span></code> with:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/ebeauce/beampower
+</pre></div>
+</div>
+<p>Note: You might have to modify the <cite>Makefile</cite> depending on your compilers. See
+<a class="reference external" href="https://ebeauce.github.io/beampower/introduction.html#installation">https://ebeauce.github.io/beampower/introduction.html#installation</a> for more
+information.</p>
+</section>
+<section id="fast-matched-filter">
+<h3>Fast Matched Filter<a class="headerlink" href="#fast-matched-filter" title="Permalink to this heading"></a></h3>
+<p><code class="xref py py-data docutils literal notranslate"><span class="pre">fastmatchedfilter</span></code> is our package with C and CUDA-C routines for
+template matching wrappedin Python code. You can download and install
+<code class="xref py py-data docutils literal notranslate"><span class="pre">fastmatchedfilter</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/beridel/fast_matched_filter
+</pre></div>
+</div>
+<p>Note: You might have to modify the <cite>Makefile</cite> depending on your compilers. See <a class="reference external" href="https://ebeauce.github.io/FMF_documentation/introduction.html#installation">https://ebeauce.github.io/FMF_documentation/introduction.html#installation</a>
+for more information.</p>
 </section>
 <section id="pykonal">
 <h3>PyKonal<a class="headerlink" href="#pykonal" title="Permalink to this heading"></a></h3>
@@ -163,11 +188,11 @@
 </section>
 <section id="phasenet">
 <h3>PhaseNet<a class="headerlink" href="#phasenet" title="Permalink to this heading"></a></h3>
-<p>Several important features of <code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code> relies on the deep neural network phase picker PhaseNet. In order to use PhaseNet, you have to install <code class="xref py py-data docutils literal notranslate"><span class="pre">phasenet</span></code> from E.B.’s Github (modified version with wrapper functions to use PhaseNet from within a python script) at: <a class="reference external" href="https://github.com/ebeauce/PhaseNet">https://github.com/ebeauce/PhaseNet</a>. Go to PhaseNet’s root folder and run:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>.
+<p>Several important features of <code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code> relies on the deep neural network phase picker PhaseNet. In order to use PhaseNet, you have to install <code class="xref py py-data docutils literal notranslate"><span class="pre">seisbench</span></code> (<a class="reference external" href="https://github.com/seisbench/seisbench">https://github.com/seisbench/seisbench</a>), a convenient python package to run the most popular machine learning earthquake pickers/detectors. Simply run:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>seisbench
 </pre></div>
 </div>
-<p>This should download the package <code class="xref py py-data docutils literal notranslate"><span class="pre">tensorflow</span></code> and may take some time.</p>
+<p>This should download the package <code class="xref py py-data docutils literal notranslate"><span class="pre">torch</span></code>.</p>
 </section>
 <section id="nonlinloc">
 <h3>NonLinLoc<a class="headerlink" href="#nonlinloc" title="Permalink to this heading"></a></h3>

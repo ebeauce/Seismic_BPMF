@@ -78,6 +78,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">h5py</span> <span class="k">as</span> <span class="nn">h5</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
 
 <span class="kn">import</span> <span class="nn">obspy</span> <span class="k">as</span> <span class="nn">obs</span>
 <span class="kn">from</span> <span class="nn">obspy.core</span> <span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">udt</span>
@@ -284,27 +285,29 @@
 <span class="sd">        A preprocessed stream of seismic data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
     <span class="n">data_preprocessor</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
-            <span class="n">_preprocess_stream</span><span class="p">,</span>
-            <span class="n">freqmin</span><span class="o">=</span><span class="n">freqmin</span><span class="p">,</span>
-            <span class="n">freqmax</span><span class="o">=</span><span class="n">freqmax</span><span class="p">,</span>
-            <span class="n">target_SR</span><span class="o">=</span><span class="n">target_SR</span><span class="p">,</span>
-            <span class="n">remove_response</span><span class="o">=</span><span class="n">remove_response</span><span class="p">,</span>
-            <span class="n">remove_sensitivity</span><span class="o">=</span><span class="n">remove_sensitivity</span><span class="p">,</span>
-            <span class="n">plot_resp</span><span class="o">=</span><span class="n">plot_resp</span><span class="p">,</span>
-            <span class="n">target_duration</span><span class="o">=</span><span class="n">target_duration</span><span class="p">,</span>
-            <span class="n">target_starttime</span><span class="o">=</span><span class="n">target_starttime</span><span class="p">,</span>
-            <span class="n">target_endtime</span><span class="o">=</span><span class="n">target_endtime</span><span class="p">,</span>
-            <span class="n">minimum_length</span><span class="o">=</span><span class="n">minimum_length</span><span class="p">,</span>
-            <span class="n">minimum_chunk_duration</span><span class="o">=</span><span class="n">minimum_chunk_duration</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
-            <span class="n">SR_decimals</span><span class="o">=</span><span class="n">SR_decimals</span><span class="p">,</span>
-            <span class="n">decimation_method</span><span class="o">=</span><span class="n">decimation_method</span><span class="p">,</span>
-            <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">)</span>
+        <span class="n">_preprocess_stream</span><span class="p">,</span>
+        <span class="n">freqmin</span><span class="o">=</span><span class="n">freqmin</span><span class="p">,</span>
+        <span class="n">freqmax</span><span class="o">=</span><span class="n">freqmax</span><span class="p">,</span>
+        <span class="n">target_SR</span><span class="o">=</span><span class="n">target_SR</span><span class="p">,</span>
+        <span class="n">remove_response</span><span class="o">=</span><span class="n">remove_response</span><span class="p">,</span>
+        <span class="n">remove_sensitivity</span><span class="o">=</span><span class="n">remove_sensitivity</span><span class="p">,</span>
+        <span class="n">plot_resp</span><span class="o">=</span><span class="n">plot_resp</span><span class="p">,</span>
+        <span class="n">target_duration</span><span class="o">=</span><span class="n">target_duration</span><span class="p">,</span>
+        <span class="n">target_starttime</span><span class="o">=</span><span class="n">target_starttime</span><span class="p">,</span>
+        <span class="n">target_endtime</span><span class="o">=</span><span class="n">target_endtime</span><span class="p">,</span>
+        <span class="n">minimum_length</span><span class="o">=</span><span class="n">minimum_length</span><span class="p">,</span>
+        <span class="n">minimum_chunk_duration</span><span class="o">=</span><span class="n">minimum_chunk_duration</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="n">SR_decimals</span><span class="o">=</span><span class="n">SR_decimals</span><span class="p">,</span>
+        <span class="n">decimation_method</span><span class="o">=</span><span class="n">decimation_method</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="k">if</span> <span class="n">n_threads</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
+
         <span class="k">with</span> <span class="n">ProcessPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">n_threads</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
             <span class="c1"># we need to group traces from same channels, therefore,</span>
             <span class="c1"># we use merge to fill gaps with masked arrays</span>
@@ -312,8 +315,8 @@
             <span class="n">preprocessed_stream</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">data_preprocessor</span><span class="p">,</span> <span class="n">stream</span><span class="p">))</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">preprocessed_stream</span> <span class="o">=</span> <span class="p">[</span>
-                        <span class="n">tr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">preprocessed_stream</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-                        <span class="p">]</span>
+                    <span class="n">tr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">preprocessed_stream</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="p">]</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">preprocessed_stream</span><span class="p">)</span>
@@ -352,7 +355,8 @@
         <span class="n">stream</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
     <span class="n">preprocessed_stream</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Input data is empty!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Input data is empty!&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">preprocessed_stream</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">target_duration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
         <span class="p">(</span><span class="n">target_starttime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">target_endtime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -369,6 +373,10 @@
         <span class="k">if</span> <span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span> <span class="o">&lt;</span> <span class="n">minimum_chunk_duration</span><span class="p">:</span>
             <span class="c1"># don&#39;t include this chunk</span>
             <span class="n">stream</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Removed all traces because they were too short.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">preprocessed_stream</span>
     <span class="c1"># second, make a list of all stations in stream</span>
     <span class="n">stations</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
@@ -395,24 +403,32 @@
         <span class="c1"># if more than one sampling rate, remove the traces with the least</span>
         <span class="c1"># represented sampling rate</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_sampling_rates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">ref_sampling_rate</span> <span class="o">=</span> <span class="n">unique_sampling_rates</span><span class="p">[</span><span class="n">sampling_rates_counts</span><span class="o">.</span><span class="n">argmax</span><span class="p">()]</span>
+            <span class="k">if</span> <span class="n">sampling_rates_counts</span><span class="p">[</span><span class="n">unique_sampling_rates</span><span class="o">.</span><span class="n">argmax</span><span class="p">()]</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">ref_sampling_rate</span> <span class="o">=</span> <span class="n">unique_sampling_rates</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ref_sampling_rate</span> <span class="o">=</span> <span class="n">unique_sampling_rates</span><span class="p">[</span><span class="n">sampling_rates_counts</span><span class="o">.</span><span class="n">argmax</span><span class="p">()]</span>
             <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">!=</span> <span class="n">ref_sampling_rate</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removing </span><span class="si">{</span><span class="n">tr</span><span class="si">}</span><span class="s2"> (target SR is </span><span class="si">{</span><span class="n">ref_sampling_rate</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removing </span><span class="si">{</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> because not desired sampling rate.&quot;</span><span class="p">)</span>
                     <span class="n">stream</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>
     <span class="c1"># start by cleaning the gaps if there are any</span>
     <span class="c1"># start with a simple merge to unite data from same channels into unique</span>
     <span class="c1"># trace but without losing information on gaps</span>
     <span class="n">stream</span><span class="o">.</span><span class="n">merge</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">trace_id</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">id</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">()):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Problem with </span><span class="si">{</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> (detected NaNs)!&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Problem with </span><span class="si">{</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> (detected NaNs)!&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
         <span class="n">T1</span> <span class="o">=</span> <span class="n">udt</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
         <span class="n">T2</span> <span class="o">=</span> <span class="n">udt</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">endtime</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
         <span class="n">trace_duration</span> <span class="o">=</span> <span class="n">T2</span> <span class="o">-</span> <span class="n">T1</span>
         <span class="k">if</span> <span class="n">trace_duration</span> <span class="o">&lt;</span> <span class="n">minimum_length</span> <span class="o">*</span> <span class="n">target_duration</span><span class="p">:</span>
             <span class="c1"># don&#39;t include this trace</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Too much gap duration on </span><span class="si">{</span><span class="n">trace_id</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
         <span class="c1"># split will lose information about start and end times</span>
         <span class="c1"># if the start or the end is masked</span>
@@ -425,6 +441,8 @@
                 <span class="n">tr</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># all chunks were too short</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All chunks within </span><span class="si">{</span><span class="n">trace_id</span><span class="si">}</span><span class="s2"> were too short.&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
         <span class="c1"># measure gap duration</span>
         <span class="n">gap_duration</span> <span class="o">=</span> <span class="n">target_duration</span> <span class="o">-</span> <span class="n">trace_duration</span>
@@ -433,6 +451,8 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">target_duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="n">gap_duration</span> <span class="o">&gt;</span> <span class="n">minimum_length</span> <span class="o">*</span> <span class="n">target_duration</span>
         <span class="p">):</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Too much gap duration on </span><span class="si">{</span><span class="n">trace_id</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
         <span class="n">tr</span><span class="o">.</span><span class="n">detrend</span><span class="p">(</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span>
         <span class="n">tr</span><span class="o">.</span><span class="n">detrend</span><span class="p">(</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
@@ -474,7 +494,7 @@
                 <span class="n">tr</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">target_SR</span><span class="p">,</span> <span class="n">no_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">sr_ratio</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sampling rate is too high!&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sampling rate is too high on </span><span class="si">{tr.id}</span><span class="s2">.&quot;</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>
             <span class="n">preprocessed_stream</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>
             <span class="k">continue</span>
@@ -749,7 +769,6 @@
     <span class="n">unique_events</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">catalog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-
     <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
     <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
 
@@ -843,7 +862,6 @@
     <span class="n">flip_order</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">preprocess_kwargs</span><span class="p">,</span>
 <span class="p">):</span>
-
     <span class="c1"># sys.path.append(os.path.join(cfg.base, &#39;earthquake_location_eb&#39;))</span>
     <span class="c1"># import relocation_utils</span>
     <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">event_extraction</span>
@@ -959,7 +977,6 @@
     <span class="n">attach_raw_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">detection_waveforms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
@@ -1328,6 +1345,50 @@
 <span class="c1">#             Others</span>
 <span class="c1"># -------------------------------------------------</span>
 
+<div class="viewcode-block" id="cov_mat_intersection"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.cov_mat_intersection">[docs]</a><span class="k">def</span> <span class="nf">cov_mat_intersection</span><span class="p">(</span><span class="n">cov_mat</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis2</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute intersection between covariance matrix and plane.</span>
+
+<span class="sd">    Note that we assume the following coordinate system:</span>
+<span class="sd">    - X: westward</span>
+<span class="sd">    - Y: southward</span>
+<span class="sd">    - Z: upward</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cov_mat : numpy.ndarray</span>
+<span class="sd">        The (3x3) covariance matrix returned by Event.relocate(method=&#39;NLLoc&#39;).</span>
+<span class="sd">    axis1 : integer, optional</span>
+<span class="sd">        Index of the first axis defining the intersecting plane.</span>
+<span class="sd">    axis2 : integer, optional</span>
+<span class="sd">        Index of the second axis defining the intersecting plane.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    max_unc : float</span>
+<span class="sd">        Maximum uncertainty, in km, of the intersected covariance matrix.</span>
+<span class="sd">    min_unc : float</span>
+<span class="sd">        Minimum uncertainty, in km, of the intersected covariance matrix.</span>
+<span class="sd">    az_max : float</span>
+<span class="sd">        &quot;Azimuth&quot;, that is, angle from `axis2` of maximum uncertainty.</span>
+<span class="sd">    az_min : float</span>
+<span class="sd">        &quot;Azimuth&quot;, that is, angle from `axis2` of minimum uncertainty.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># X: west, Y: south, Z: upward</span>
+    <span class="n">s_68_3df</span> <span class="o">=</span> <span class="mf">3.52</span>
+    <span class="n">s_68_2df</span> <span class="o">=</span> <span class="mf">2.28</span>
+    <span class="c1"># eigendecomposition of restricted matrix</span>
+    <span class="n">indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">axis1</span><span class="p">,</span> <span class="n">axis2</span><span class="p">])</span>
+    <span class="n">w</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">cov_mat</span><span class="p">[</span><span class="n">indexes</span><span class="p">,</span> <span class="p">:][:,</span> <span class="n">indexes</span><span class="p">])</span>
+    <span class="n">semi_axis_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s_68_2df</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span>
+    <span class="n">max_unc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">semi_axis_length</span><span class="p">)</span>
+    <span class="n">min_unc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">semi_axis_length</span><span class="p">)</span>
+    <span class="n">max_dir</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:,</span> <span class="n">w</span><span class="o">.</span><span class="n">argmax</span><span class="p">()]</span>
+    <span class="n">min_dir</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:,</span> <span class="n">w</span><span class="o">.</span><span class="n">argmin</span><span class="p">()]</span>
+    <span class="c1"># &quot;azimuth&quot; is angle between `axis2` (`max_dir[1]`) and ellipse&#39;s semi-axis</span>
+    <span class="n">az_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">max_dir</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">max_dir</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mf">180.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="n">az_min</span> <span class="o">=</span> <span class="p">(</span><span class="n">az_max</span> <span class="o">+</span> <span class="mf">90.</span><span class="p">)</span> <span class="o">%</span> <span class="mf">360.</span>
+    <span class="k">return</span> <span class="n">max_unc</span><span class="p">,</span> <span class="n">min_unc</span><span class="p">,</span> <span class="n">az_max</span><span class="p">,</span> <span class="n">az_min</span></div>
+
 
 <div class="viewcode-block" id="compute_distances"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.compute_distances">[docs]</a><span class="k">def</span> <span class="nf">compute_distances</span><span class="p">(</span>
     <span class="n">source_longitudes</span><span class="p">,</span>
@@ -1600,6 +1661,31 @@
     <span class="n">running_stat</span> <span class="o">=</span> <span class="n">interpolator</span><span class="p">(</span><span class="n">full_time</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">running_stat</span></div>
 
+<div class="viewcode-block" id="two_point_epicentral_distance"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.two_point_epicentral_distance">[docs]</a><span class="k">def</span> <span class="nf">two_point_epicentral_distance</span><span class="p">(</span><span class="n">lon_1</span><span class="p">,</span> <span class="n">lat_1</span><span class="p">,</span> <span class="n">lon_2</span><span class="p">,</span> <span class="n">lat_2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the distance between two points.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    lon_1: scalar, float</span>
+<span class="sd">        Longitude of Point 1.</span>
+<span class="sd">    lat_1: scalar, float</span>
+<span class="sd">        Latitude of Point 1.</span>
+<span class="sd">    lon_2: scalar, float</span>
+<span class="sd">        Longitude of Point 2.</span>
+<span class="sd">    lat_2: scalar, float</span>
+<span class="sd">        Latitude of Point 2.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ---------</span>
+<span class="sd">    dist: scalar, float</span>
+<span class="sd">        Distance between Point 1 and Point 2 in kilometers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">obspy.geodetics.base</span> <span class="kn">import</span> <span class="n">calc_vincenty_inverse</span>
+
+    <span class="n">dist</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">baz</span> <span class="o">=</span> <span class="n">calc_vincenty_inverse</span><span class="p">(</span><span class="n">lat_1</span><span class="p">,</span> <span class="n">lon_1</span><span class="p">,</span> <span class="n">lat_2</span><span class="p">,</span> <span class="n">lon_2</span><span class="p">)</span>
+    <span class="n">dist</span> <span class="o">/=</span> <span class="mf">1000.0</span>  <span class="c1"># from m to km</span>
+    <span class="k">return</span> <span class="n">dist</span></div>
 
 <div class="viewcode-block" id="two_point_distance"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.two_point_distance">[docs]</a><span class="k">def</span> <span class="nf">two_point_distance</span><span class="p">(</span><span class="n">lon_1</span><span class="p">,</span> <span class="n">lat_1</span><span class="p">,</span> <span class="n">depth_1</span><span class="p">,</span> <span class="n">lon_2</span><span class="p">,</span> <span class="n">lat_2</span><span class="p">,</span> <span class="n">depth_2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the distance between two points.</span>
@@ -1633,21 +1719,471 @@
     <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dist</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">depth_1</span> <span class="o">-</span> <span class="n">depth_2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">dist</span></div>
 
+
 <div class="viewcode-block" id="donefun"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.donefun">[docs]</a><span class="k">def</span> <span class="nf">donefun</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Super useful function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</span>
-<span class="s2">    ⠀⠀⠀⠀⠀⠀⢀⡤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀</span>
-<span class="s2">    ⠀⠀⠀⠀⠀⢀⡏⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⣀⠴⠋⠉⠉⡆⠀⠀⠀⠀⠀</span>
-<span class="s2">    ⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠈⠉⠉⠙⠓⠚⠁⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀</span>
-<span class="s2">    ⠀⠀⠀⠀⢀⠞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣄⠀⠀⠀⠀</span>
-<span class="s2">    ⠀⠀⠀⠀⡞⠀⠀⠀⠀⠀⠶⠀⠀⠀⠀⠀⠀⠦⠀⠀⠀⠀⠀⠸⡆⠀⠀⠀</span>
-<span class="s2">    ⢠⣤⣶⣾⣧⣤⣤⣀⡀⠀⠀⠀⠀⠈⠀⠀⠀⢀⡤⠴⠶⠤⢤⡀⣧⣀⣀⠀</span>
-<span class="s2">    ⠻⠶⣾⠁⠀⠀⠀⠀⠙⣆⠀⠀⠀⠀⠀⠀⣰⠋⠀⠀⠀⠀⠀⢹⣿⣭⣽⠇</span>
-<span class="s2">    ⠀⠀⠙⠤⠴⢤⡤⠤⠤⠋⠉⠉⠉⠉⠉⠉⠉⠳⠖⠦⠤⠶⠦⠞⠁⠀⠀⠀</span>
-<span class="s2">                ALL DONE!⠀⠀⠀⠀</span>
-<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀</span>
+<span class="sd">    ⠀⠀⠀⠀⠀⠀⢀⡤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀</span>
+<span class="sd">    ⠀⠀⠀⠀⠀⢀⡏⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⣀⠴⠋⠉⠉⡆⠀⠀⠀⠀⠀</span>
+<span class="sd">    ⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠈⠉⠉⠙⠓⠚⠁⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀</span>
+<span class="sd">    ⠀⠀⠀⠀⢀⠞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣄⠀⠀⠀⠀</span>
+<span class="sd">    ⠀⠀⠀⠀⡞⠀⠀⠀⠀⠀⠶⠀⠀⠀⠀⠀⠀⠦⠀⠀⠀⠀⠀⠸⡆⠀⠀⠀</span>
+<span class="sd">    ⢠⣤⣶⣾⣧⣤⣤⣀⡀⠀⠀⠀⠀⠈⠀⠀⠀⢀⡤⠴⠶⠤⢤⡀⣧⣀⣀⠀</span>
+<span class="sd">    ⠻⠶⣾⠁⠀⠀⠀⠀⠙⣆⠀⠀⠀⠀⠀⠀⣰⠋⠀⠀⠀⠀⠀⢹⣿⣭⣽⠇</span>
+<span class="sd">    ⠀⠀⠙⠤⠴⢤⡤⠤⠤⠋⠉⠉⠉⠉⠉⠉⠉⠳⠖⠦⠤⠶⠦⠞⠁⠀⠀⠀</span>
+<span class="sd">                ALL DONE!⠀⠀⠀⠀</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_lock_file"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.write_lock_file">[docs]</a><span class="k">def</span> <span class="nf">write_lock_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">check</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Lock file </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> already exists!&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">flush</span><span class="p">:</span>
+        <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">fsync</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">fileno</span><span class="p">())</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="read_write_waiting_list"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.read_write_waiting_list">[docs]</a><span class="k">def</span> <span class="nf">read_write_waiting_list</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">unit_wait_time</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read/write queue to avoid conflicts between jobs.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+
+    <span class="n">path_no_ext</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">path_lock</span> <span class="o">=</span> <span class="n">path_no_ext</span> <span class="o">+</span> <span class="s2">&quot;_lock&quot;</span>
+            <span class="n">path_wait</span> <span class="o">=</span> <span class="n">path_no_ext</span> <span class="o">+</span> <span class="s2">&quot;_waiting_list&quot;</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="n">unit_wait_time</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">())</span>
+            <span class="n">waiting_list_position</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">path_wait</span> <span class="o">+</span> <span class="s2">&quot;*&quot;</span><span class="p">))</span>
+            <span class="n">waiting_list_ticket</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_wait</span><span class="si">}{</span><span class="n">waiting_list_position</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># take place in waiting list by creating empty file</span>
+                    <span class="n">write_lock_file</span><span class="p">(</span><span class="n">waiting_list_ticket</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="k">break</span>
+                <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+                    <span class="c1"># several jobs trying to create the same ticket?</span>
+                    <span class="c1"># randomness will solve the conflict</span>
+                    <span class="n">waiting_list_position</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+                    <span class="n">waiting_list_ticket</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_wait</span><span class="si">}{</span><span class="n">waiting_list_position</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">next_place_ticket</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_wait</span><span class="si">}{</span><span class="n">waiting_list_position</span><span class="o">-</span><span class="mi">1</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="c1"># print(f&quot;1: Created {os.path.basename(waiting_list_ticket)}&quot;)</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="c1"># sleep(unit_wait_time * np.random.random())</span>
+                <span class="k">if</span> <span class="n">waiting_list_position</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># is first in the waiting list!</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_lock</span><span class="p">):</span>
+                        <span class="c1"># first, create lock file</span>
+                        <span class="n">write_lock_file</span><span class="p">(</span><span class="n">path_lock</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="c1"># print(f&quot;2: Created {os.path.basename(path_lock)}&quot;)</span>
+                        <span class="c1"># then, free the waiting list position #0</span>
+                        <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">waiting_list_ticket</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                        <span class="c1"># print(f&quot;2: Deleted {os.path.basename(waiting_list_ticket)}&quot;)</span>
+                        <span class="c1"># now the process can proceed with the reading or writing</span>
+                        <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># wait a bit</span>
+                        <span class="n">sleep</span><span class="p">(</span><span class="n">unit_wait_time</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">())</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">next_place_ticket</span><span class="p">):</span>
+                    <span class="c1"># front place in the waiting list was freed!</span>
+                    <span class="c1"># first, create new ticket at the new position</span>
+                    <span class="n">write_lock_file</span><span class="p">(</span><span class="n">next_place_ticket</span><span class="p">)</span>
+                    <span class="c1"># print(f&quot;3: Created {os.path.basename(next_place_ticket)}&quot;)</span>
+                    <span class="c1"># then, free previous place in the waiting list</span>
+                    <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">waiting_list_ticket</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                    <span class="c1"># print(f&quot;3: Deleted {os.path.basename(waiting_list_ticket)}&quot;)</span>
+                    <span class="c1"># update place in waiting list</span>
+                    <span class="n">waiting_list_position</span> <span class="o">-=</span> <span class="mi">1</span>
+                    <span class="c1"># update ticket names</span>
+                    <span class="n">waiting_list_ticket</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_wait</span><span class="si">}{</span><span class="n">waiting_list_position</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">next_place_ticket</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_wait</span><span class="si">}{</span><span class="n">waiting_list_position</span><span class="o">-</span><span class="mi">1</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="c1"># and wait for its turn</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="n">unit_wait_time</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># waiting list didn&#39;t change, just wait</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="n">unit_wait_time</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">())</span>
+            <span class="c1"># start reading/writing</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">func</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path_lock</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                <span class="k">raise</span> <span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path_lock</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="k">break</span>
+            <span class="c1"># done!</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;4: Concurent error, reset queue &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;(last ticket was </span><span class="si">{</span><span class="n">waiting_list_ticket</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">waiting_list_position</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_lock</span><span class="p">))</span>
+                <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path_lock</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="k">continue</span></div>
+
+<span class="c1"># =======================================================</span>
+<span class="c1">#         routines for automatic picking</span>
+<span class="c1"># =======================================================</span>
+
+
+<div class="viewcode-block" id="normalize_batch"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.normalize_batch">[docs]</a><span class="k">def</span> <span class="nf">normalize_batch</span><span class="p">(</span><span class="n">seismogram</span><span class="p">,</span> <span class="n">normalization_window_sample</span><span class="o">=</span><span class="mi">3000</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply Z-score normalization in running windows.</span>
+
+<span class="sd">    Following Zhu et al. 2019, this function applied Z-score</span>
+<span class="sd">    normalization in running windows with length `normalization_window_sample`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    seismogram : numpy.ndarray</span>
+<span class="sd">        Three-component seismograms. `seismogram` has shape</span>
+<span class="sd">        (num_traces, num_channels=3, num_time_samples).</span>
+<span class="sd">    normalization_window_sample : integer, optional</span>
+<span class="sd">        The window length, in samples, over which normalization is applied.</span>
+<span class="sd">        Default is 3000 (like in Zhu et al. 2019).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    normalized_seismogram : numpy.ndarray</span>
+<span class="sd">        Normalized seismogram with same shape as `seismogram`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+
+    <span class="n">shift</span> <span class="o">=</span> <span class="n">normalization_window_sample</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">num_stations</span><span class="p">,</span> <span class="n">num_channels</span><span class="p">,</span> <span class="n">num_time_samples</span> <span class="o">=</span> <span class="n">seismogram</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="c1"># std in sliding windows</span>
+    <span class="n">seismogram_pad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+        <span class="n">seismogram</span><span class="p">,</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="n">shift</span><span class="p">)),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;reflect&quot;</span>
+    <span class="p">)</span>
+    <span class="c1"># time = np.arange(0, num_time_samples, shift, dtype=np.int32)</span>
+    <span class="n">seismogram_view</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">stride_tricks</span><span class="o">.</span><span class="n">sliding_window_view</span><span class="p">(</span>
+        <span class="n">seismogram_pad</span><span class="p">,</span> <span class="n">normalization_window_sample</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="p">)[:,</span> <span class="p">:,</span> <span class="p">::</span><span class="n">shift</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">sliding_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">seismogram_view</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">sliding_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">seismogram_view</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># time at centers of sliding windows</span>
+    <span class="n">num_sliding_windows</span> <span class="o">=</span> <span class="n">seismogram_view</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="n">num_time_samples</span> <span class="o">-</span> <span class="n">shift</span><span class="p">,</span> <span class="n">num_sliding_windows</span><span class="p">)</span>
+
+    <span class="n">sliding_std</span><span class="p">[:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">sliding_mean</span><span class="p">[:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">sliding_std</span><span class="p">[:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">2</span><span class="p">],</span>
+        <span class="n">sliding_mean</span><span class="p">[:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">2</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">sliding_std</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">sliding_mean</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">sliding_std</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="n">sliding_mean</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">sliding_std</span><span class="p">[</span><span class="n">sliding_std</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># normalize data with sliding std and mean</span>
+    <span class="n">t_interp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_time_samples</span><span class="p">)</span>
+    <span class="n">std_interp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+                <span class="n">t_interp</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">sld_std</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">sld_std</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="n">sld_std</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">sld_std</span> <span class="ow">in</span> <span class="n">sliding_std</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sliding_std</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="p">),</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                    <span class="n">sliding_std</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_interp</span><span class="p">),)</span>
+                    <span class="p">)</span>
+    <span class="n">mean_interp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+                <span class="n">t_interp</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">m_std</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">m_std</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="n">m_std</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">m_std</span> <span class="ow">in</span> <span class="n">sliding_mean</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sliding_mean</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="p">),</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                    <span class="n">sliding_mean</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_interp</span><span class="p">),)</span>
+                    <span class="p">)</span>
+
+    <span class="n">seismogram</span> <span class="o">=</span> <span class="p">(</span><span class="n">seismogram</span> <span class="o">-</span> <span class="n">mean_interp</span><span class="p">)</span> <span class="o">/</span> <span class="n">std_interp</span>
+
+    <span class="k">return</span> <span class="n">seismogram</span></div>
+
+<div class="viewcode-block" id="trigger_picks"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.trigger_picks">[docs]</a><span class="k">def</span> <span class="nf">trigger_picks</span><span class="p">(</span>
+        <span class="n">probability</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="p">,</span>
+        <span class="n">minimum_peak_distance_samp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1.</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">)</span>
+        <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    probability : 1D array_like</span>
+<span class="sd">    threshold : float</span>
+<span class="sd">    minimum_peak_distance_samp : integer</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    probability_at_peak : 1D array_like</span>
+<span class="sd">    peak_indexes : 1D array_like</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">peak_indexes</span> <span class="o">=</span> <span class="n">_detect_peaks</span><span class="p">(</span>
+            <span class="n">probability</span><span class="p">,</span> <span class="n">mph</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">mpd</span><span class="o">=</span><span class="n">minimum_peak_distance_samp</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">probability</span><span class="p">[</span><span class="n">peak_indexes</span><span class="p">]),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">peak_indexes</span><span class="p">)</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="get_picks"><a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.get_picks">[docs]</a><span class="k">def</span> <span class="nf">get_picks</span><span class="p">(</span>
+        <span class="n">picks</span><span class="p">,</span>
+        <span class="n">buffer_length</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">),</span>
+        <span class="n">prior_knowledge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">search_win_samp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">4.</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">)</span>
+        <span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Select a single P- and S-pick on each 3-comp seismogram.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    picks: dictionary</span>
+<span class="sd">        Dictionary returned by `automatic_picking`.</span>
+<span class="sd">    buffer_length: scalar int, optional</span>
+<span class="sd">        Picks that are before this buffer length, in samples, are discarded.</span>
+<span class="sd">    prior_knowledge: pandas.DataFrame, optional</span>
+<span class="sd">        If given, picks that are closer to the a priori pick</span>
+<span class="sd">        (for example, given by a preliminary location) will be given</span>
+<span class="sd">        a larger weight and will be more likely to be selected. In practice,</span>
+<span class="sd">        pick probabilities are multiplied by gaussian weights and the highest</span>
+<span class="sd">        modified pick probability is selected.</span>
+<span class="sd">    search_win_samp: scalar int, optional</span>
+<span class="sd">        Standard deviation, in samples, used in the gaussian weights.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">st</span> <span class="ow">in</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">prior_knowledge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prior_P</span> <span class="o">=</span> <span class="n">prior_knowledge</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">st</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">]</span>
+            <span class="n">prior_S</span> <span class="o">=</span> <span class="n">prior_knowledge</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">st</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">]</span>
+        <span class="c1">#for n in range(len(picks[&quot;P_picks&quot;][st])):</span>
+        <span class="c1"># ----------------</span>
+        <span class="c1"># remove picks from the buffer length</span>
+        <span class="n">valid_P_picks</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">buffer_length</span><span class="p">)</span>
+        <span class="n">valid_S_picks</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">buffer_length</span><span class="p">)</span>
+        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">][</span><span class="n">valid_P_picks</span><span class="p">]</span>
+        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">][</span><span class="n">valid_S_picks</span><span class="p">]</span>
+        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">][</span><span class="n">valid_P_picks</span><span class="p">]</span>
+        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">][</span><span class="n">valid_S_picks</span><span class="p">]</span>
+        <span class="n">search_S_pick</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">search_P_pick</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># if no valid S pick: fill in with nan</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">search_S_pick</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># if no valid P pick: fill in with nan</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">search_P_pick</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">search_S_pick</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">prior_knowledge</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># take only the highest probability trigger</span>
+                <span class="n">best_S_trigger</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># use a priori picks</span>
+                <span class="n">tapered_S_probas</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span>
+                        <span class="o">*</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                            <span class="o">-</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">-</span> <span class="n">prior_S</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">search_win_samp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+                <span class="n">best_S_trigger</span> <span class="o">=</span> <span class="n">tapered_S_probas</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">][</span><span class="n">best_S_trigger</span><span class="p">]</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">][</span><span class="n">best_S_trigger</span><span class="p">]</span>
+            <span class="c1"># update P picks: keep only those that are before the best S pick</span>
+            <span class="k">if</span> <span class="n">search_P_pick</span><span class="p">:</span>
+                <span class="n">valid_P_picks</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span>
+                <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">][</span><span class="n">valid_P_picks</span><span class="p">]</span>
+                <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">][</span><span class="n">valid_P_picks</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># if no valid P pick: fill in with nan</span>
+                    <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                    <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                    <span class="n">search_P_pick</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">search_P_pick</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">prior_knowledge</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># take only the highest probability trigger</span>
+                <span class="n">best_P_trigger</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># use a priori picks</span>
+                <span class="n">tapered_P_probas</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span>
+                        <span class="o">*</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                            <span class="o">-</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">-</span> <span class="n">prior_P</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">search_win_samp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+                <span class="n">best_P_trigger</span> <span class="o">=</span> <span class="n">tapered_P_probas</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">][</span><span class="n">best_P_trigger</span><span class="p">]</span>
+            <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">][</span><span class="n">best_P_trigger</span><span class="p">]</span>
+        <span class="c1"># convert picks to float to allow NaNs</span>
+        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]))</span>
+        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_picks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]))</span>
+        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]))</span>
+        <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_proba&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">picks</span></div>
+
+<span class="k">def</span> <span class="nf">_detect_peaks</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="n">mph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mpd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">edge</span><span class="o">=</span><span class="s2">&quot;rising&quot;</span><span class="p">,</span>
+    <span class="n">kpsh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">valley</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect peaks in data based on their amplitude and other features.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : 1D array_like</span>
+<span class="sd">        data.</span>
+<span class="sd">    mph : {None, number}, optional (default = None)</span>
+<span class="sd">        detect peaks that are greater than minimum peak height.</span>
+<span class="sd">    mpd : positive integer, optional (default = 1)</span>
+<span class="sd">        detect peaks that are at least separated by minimum peak distance (in</span>
+<span class="sd">        number of data).</span>
+<span class="sd">    threshold : positive number, optional (default = 0)</span>
+<span class="sd">        detect peaks (valleys) that are greater (smaller) than `threshold`</span>
+<span class="sd">        in relation to their immediate neighbors.</span>
+<span class="sd">    edge : {None, &#39;rising&#39;, &#39;falling&#39;, &#39;both&#39;}, optional (default = &#39;rising&#39;)</span>
+<span class="sd">        for a flat peak, keep only the rising edge (&#39;rising&#39;), only the</span>
+<span class="sd">        falling edge (&#39;falling&#39;), both edges (&#39;both&#39;), or don&#39;t detect a</span>
+<span class="sd">        flat peak (None).</span>
+<span class="sd">    kpsh : bool, optional (default = False)</span>
+<span class="sd">        keep peaks with same height even if they are closer than `mpd`.</span>
+<span class="sd">    valley : bool, optional (default = False)</span>
+<span class="sd">        if True (1), detect valleys (local minima) instead of peaks.</span>
+<span class="sd">    show : bool, optional (default = False)</span>
+<span class="sd">        if True (1), plot data in matplotlib figure.</span>
+<span class="sd">    ax : a matplotlib.axes.Axes instance, optional (default = None).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ind : 1D array_like</span>
+<span class="sd">        indeces of the peaks in `x`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The detection of valleys instead of peaks is performed internally by simply</span>
+<span class="sd">    negating the data: `ind_valleys = detect_peaks(-x)`</span>
+
+<span class="sd">    The function can handle NaN&#39;s</span>
+
+<span class="sd">    See this IPython Notebook [1]_.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1]:http://nbviewer.ipython.org/github/demotu/BMC/blob/master/</span>
+<span class="sd">        notebooks/DetectPeaks.ipynb</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from detect_peaks import detect_peaks</span>
+<span class="sd">    &gt;&gt;&gt; x = np.random.randn(100)</span>
+<span class="sd">    &gt;&gt;&gt; x[60:81] = np.nan</span>
+<span class="sd">    &gt;&gt;&gt; # detect all peaks and plot data</span>
+<span class="sd">    &gt;&gt;&gt; ind = detect_peaks(x, show=True)</span>
+<span class="sd">    &gt;&gt;&gt; print(ind)</span>
+
+<span class="sd">    &gt;&gt;&gt; x = np.sin(2*np.pi*5*np.linspace(0, 1, 200)) + np.random.randn(200)/5</span>
+<span class="sd">    &gt;&gt;&gt; # set minimum peak height = 0 and minimum peak distance = 20</span>
+<span class="sd">    &gt;&gt;&gt; detect_peaks(x, mph=0, mpd=20, show=True)</span>
+
+<span class="sd">    &gt;&gt;&gt; x = [0, 1, 0, 2, 0, 3, 0, 2, 0, 1, 0]</span>
+<span class="sd">    &gt;&gt;&gt; # set minimum peak distance = 2</span>
+<span class="sd">    &gt;&gt;&gt; detect_peaks(x, mpd=2, show=True)</span>
+
+<span class="sd">    &gt;&gt;&gt; x = np.sin(2*np.pi*5*np.linspace(0, 1, 200)) + np.random.randn(200)/5</span>
+<span class="sd">    &gt;&gt;&gt; # detection of valleys instead of peaks</span>
+<span class="sd">    &gt;&gt;&gt; detect_peaks(x, mph=0, mpd=20, valley=True, show=True)</span>
+
+<span class="sd">    &gt;&gt;&gt; x = [0, 1, 1, 0, 1, 1, 0]</span>
+<span class="sd">    &gt;&gt;&gt; # detect both edges</span>
+<span class="sd">    &gt;&gt;&gt; detect_peaks(x, edge=&#39;both&#39;, show=True)</span>
+
+<span class="sd">    &gt;&gt;&gt; x = [-2, 1, -2, 2, 1, 1, 3, 0]</span>
+<span class="sd">    &gt;&gt;&gt; # set threshold = 2</span>
+<span class="sd">    &gt;&gt;&gt; detect_peaks(x, threshold = 2, show=True)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">valley</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span>
+    <span class="c1"># find indices of all peaks</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># handle NaN&#39;s</span>
+    <span class="n">indnan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">indnan</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="n">x</span><span class="p">[</span><span class="n">indnan</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="n">dx</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">dx</span><span class="p">))[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="n">ine</span><span class="p">,</span> <span class="n">ire</span><span class="p">,</span> <span class="n">ife</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[],</span> <span class="p">[],</span> <span class="p">[]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">edge</span><span class="p">:</span>
+        <span class="n">ine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">dx</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;rising&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+            <span class="n">ire</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">dx</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;falling&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+            <span class="n">ife</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">dx</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">ine</span><span class="p">,</span> <span class="n">ire</span><span class="p">,</span> <span class="n">ife</span><span class="p">)))</span>
+    <span class="c1"># handle NaN&#39;s</span>
+    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">indnan</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="c1"># NaN&#39;s and values close to NaN&#39;s cannot be peaks</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span>
+                <span class="n">ind</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">indnan</span><span class="p">,</span> <span class="n">indnan</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">indnan</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))),</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+    <span class="c1"># first and last values of x cannot be peaks</span>
+    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">ind</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># remove peaks &lt; minimum peak height</span>
+    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">mph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">mph</span><span class="p">]</span>
+    <span class="c1"># remove peaks - neighbors &lt; threshold</span>
+    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">threshold</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dx</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># detect small peaks closer than minimum peak distance</span>
+    <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">mpd</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">])][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># sort ind by peak height</span>
+        <span class="n">idel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">idel</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="c1"># keep peaks with the same height if kpsh is True</span>
+                <span class="n">idel</span> <span class="o">=</span> <span class="n">idel</span> <span class="o">|</span> <span class="p">(</span><span class="n">ind</span> <span class="o">&gt;=</span> <span class="n">ind</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">mpd</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ind</span> <span class="o">&lt;=</span> <span class="n">ind</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">mpd</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span>
+                    <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">kpsh</span> <span class="k">else</span> <span class="kc">True</span>
+                <span class="p">)</span>
+                <span class="n">idel</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Keep current peak</span>
+        <span class="c1"># remove the small peaks and sort back the indices by their occurrence</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">ind</span><span class="p">[</span><span class="o">~</span><span class="n">idel</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">indnan</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">indnan</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">if</span> <span class="n">valley</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span>
+        <span class="n">_plot_peaks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mph</span><span class="p">,</span> <span class="n">mpd</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">valley</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ind</span>
+
 </pre></div>
 
            </div>

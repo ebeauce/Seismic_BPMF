@@ -57,6 +57,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.SVDWF_multiplets"><code class="docutils literal notranslate"><span class="pre">SVDWF_multiplets()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.bandpass_filter"><code class="docutils literal notranslate"><span class="pre">bandpass_filter()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.compute_distances"><code class="docutils literal notranslate"><span class="pre">compute_distances()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.cov_mat_intersection"><code class="docutils literal notranslate"><span class="pre">cov_mat_intersection()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.donefun"><code class="docutils literal notranslate"><span class="pre">donefun()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.event_count"><code class="docutils literal notranslate"><span class="pre">event_count()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.extract_colors_from_tree"><code class="docutils literal notranslate"><span class="pre">extract_colors_from_tree()</span></code></a></li>
@@ -65,18 +66,24 @@
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.find_template_clusters"><code class="docutils literal notranslate"><span class="pre">find_template_clusters()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.get_moveout_array"><code class="docutils literal notranslate"><span class="pre">get_moveout_array()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.get_np_array"><code class="docutils literal notranslate"><span class="pre">get_np_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.get_picks"><code class="docutils literal notranslate"><span class="pre">get_picks()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.linear_regression"><code class="docutils literal notranslate"><span class="pre">linear_regression()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.load_travel_times"><code class="docutils literal notranslate"><span class="pre">load_travel_times()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.lowpass_chebyshev_I"><code class="docutils literal notranslate"><span class="pre">lowpass_chebyshev_I()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.lowpass_chebyshev_II"><code class="docutils literal notranslate"><span class="pre">lowpass_chebyshev_II()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.max_norm"><code class="docutils literal notranslate"><span class="pre">max_norm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.normalize_batch"><code class="docutils literal notranslate"><span class="pre">normalize_batch()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.preprocess_stream"><code class="docutils literal notranslate"><span class="pre">preprocess_stream()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.read_write_waiting_list"><code class="docutils literal notranslate"><span class="pre">read_write_waiting_list()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.round_time"><code class="docutils literal notranslate"><span class="pre">round_time()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.running_mad"><code class="docutils literal notranslate"><span class="pre">running_mad()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.sec_to_samp"><code class="docutils literal notranslate"><span class="pre">sec_to_samp()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.time_range"><code class="docutils literal notranslate"><span class="pre">time_range()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.trigger_picks"><code class="docutils literal notranslate"><span class="pre">trigger_picks()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.two_point_distance"><code class="docutils literal notranslate"><span class="pre">two_point_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.two_point_epicentral_distance"><code class="docutils literal notranslate"><span class="pre">two_point_epicentral_distance()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.weighted_linear_regression"><code class="docutils literal notranslate"><span class="pre">weighted_linear_regression()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.write_lock_file"><code class="docutils literal notranslate"><span class="pre">write_lock_file()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="NLLoc_utils.html">BPMF.NLLoc_utils</a></li>
@@ -259,6 +266,34 @@ are located at the surface.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="BPMF.utils.cov_mat_intersection">
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">cov_mat_intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cov_mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#cov_mat_intersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.cov_mat_intersection" title="Permalink to this definition"></a></dt>
+<dd><p>Compute intersection between covariance matrix and plane.</p>
+<p>Note that we assume the following coordinate system:
+- X: westward
+- Y: southward
+- Z: upward</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cov_mat</strong> (<em>numpy.ndarray</em>) – The (3x3) covariance matrix returned by Event.relocate(method=’NLLoc’).</p></li>
+<li><p><strong>axis1</strong> (<em>integer</em><em>, </em><em>optional</em>) – Index of the first axis defining the intersecting plane.</p></li>
+<li><p><strong>axis2</strong> (<em>integer</em><em>, </em><em>optional</em>) – Index of the second axis defining the intersecting plane.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>max_unc</strong> (<em>float</em>) – Maximum uncertainty, in km, of the intersected covariance matrix.</p></li>
+<li><p><strong>min_unc</strong> (<em>float</em>) – Minimum uncertainty, in km, of the intersected covariance matrix.</p></li>
+<li><p><strong>az_max</strong> (<em>float</em>) – “Azimuth”, that is, angle from <cite>axis2</cite> of maximum uncertainty.</p></li>
+<li><p><strong>az_min</strong> (<em>float</em>) – “Azimuth”, that is, angle from <cite>axis2</cite> of minimum uncertainty.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.donefun">
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">donefun</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#donefun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.donefun" title="Permalink to this definition"></a></dt>
 <dd><p>Super useful function.</p>
@@ -402,6 +437,26 @@ the length of the first trace.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="BPMF.utils.get_picks">
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">get_picks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">picks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_knowledge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_win_samp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-40</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#get_picks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.get_picks" title="Permalink to this definition"></a></dt>
+<dd><p>Select a single P- and S-pick on each 3-comp seismogram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>picks</strong> (<em>dictionary</em>) – Dictionary returned by <cite>automatic_picking</cite>.</p></li>
+<li><p><strong>buffer_length</strong> (<em>scalar int</em><em>, </em><em>optional</em>) – Picks that are before this buffer length, in samples, are discarded.</p></li>
+<li><p><strong>prior_knowledge</strong> (<em>pandas.DataFrame</em><em>, </em><em>optional</em>) – If given, picks that are closer to the a priori pick
+(for example, given by a preliminary location) will be given
+a larger weight and will be more likely to be selected. In practice,
+pick probabilities are multiplied by gaussian weights and the highest
+modified pick probability is selected.</p></li>
+<li><p><strong>search_win_samp</strong> (<em>scalar int</em><em>, </em><em>optional</em>) – Standard deviation, in samples, used in the gaussian weights.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.linear_regression">
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">linear_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#linear_regression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.linear_regression" title="Permalink to this definition"></a></dt>
 <dd><p>cf. <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html</a></p>
@@ -464,6 +519,30 @@ three (n_sources,) numpy.ndarray: <cite>source_coords[‘latitude’]</cite>,
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="BPMF.utils.normalize_batch">
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">normalize_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seismogram</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_window_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#normalize_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.normalize_batch" title="Permalink to this definition"></a></dt>
+<dd><p>Apply Z-score normalization in running windows.</p>
+<p>Following Zhu et al. 2019, this function applied Z-score
+normalization in running windows with length <cite>normalization_window_sample</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seismogram</strong> (<em>numpy.ndarray</em>) – Three-component seismograms. <cite>seismogram</cite> has shape
+(num_traces, num_channels=3, num_time_samples).</p></li>
+<li><p><strong>normalization_window_sample</strong> (<em>integer</em><em>, </em><em>optional</em>) – The window length, in samples, over which normalization is applied.
+Default is 3000 (like in Zhu et al. 2019).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>normalized_seismogram</strong> – Normalized seismogram with same shape as <cite>seismogram</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.preprocess_stream">
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">preprocess_stream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_SR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_response</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_sensitivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_resp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_starttime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_endtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_chunk_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SR_decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'VEL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#preprocess_stream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.preprocess_stream" title="Permalink to this definition"></a></dt>
 <dd><p>Preprocesses a stream of seismic data.</p>
@@ -497,6 +576,12 @@ three (n_sources,) numpy.ndarray: <cite>source_coords[‘latitude’]</cite>,
 <dd class="field-odd"><p>obspy.Stream</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.utils.read_write_waiting_list">
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">read_write_waiting_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_wait_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#read_write_waiting_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.read_write_waiting_list" title="Permalink to this definition"></a></dt>
+<dd><p>Read/write queue to avoid conflicts between jobs.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -556,6 +641,27 @@ round the time.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="BPMF.utils.trigger_picks">
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">trigger_picks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">probability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_peak_distance_samp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#trigger_picks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.trigger_picks" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>probability</strong> (<em>1D array_like</em>) – </p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – </p></li>
+<li><p><strong>minimum_peak_distance_samp</strong> (<em>integer</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>probability_at_peak</strong> (<em>1D array_like</em>)</p></li>
+<li><p><strong>peak_indexes</strong> (<em>1D array_like</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.two_point_distance">
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">two_point_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#two_point_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.two_point_distance" title="Permalink to this definition"></a></dt>
 <dd><p>Compute the distance between two points.</p>
@@ -568,6 +674,28 @@ round the time.</p></li>
 <li><p><strong>lon_2</strong> (<em>scalar</em><em>, </em><em>float</em>) – Longitude of Point 2.</p></li>
 <li><p><strong>lat_2</strong> (<em>scalar</em><em>, </em><em>float</em>) – Latitude of Point 2.</p></li>
 <li><p><strong>depth_2</strong> (<em>scalar</em><em>, </em><em>float</em>) – Depth of Point 2 (in km).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>dist</strong> – Distance between Point 1 and Point 2 in kilometers.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>scalar, float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.utils.two_point_epicentral_distance">
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">two_point_epicentral_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#two_point_epicentral_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.two_point_epicentral_distance" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the distance between two points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lon_1</strong> (<em>scalar</em><em>, </em><em>float</em>) – Longitude of Point 1.</p></li>
+<li><p><strong>lat_1</strong> (<em>scalar</em><em>, </em><em>float</em>) – Latitude of Point 1.</p></li>
+<li><p><strong>lon_2</strong> (<em>scalar</em><em>, </em><em>float</em>) – Longitude of Point 2.</p></li>
+<li><p><strong>lat_2</strong> (<em>scalar</em><em>, </em><em>float</em>) – Latitude of Point 2.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -600,6 +728,11 @@ round the time.</p></li>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.utils.write_lock_file">
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">write_lock_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flush</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#write_lock_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.write_lock_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 
