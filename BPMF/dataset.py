@@ -1010,7 +1010,7 @@ class Event(object):
         self.moveouts = pd.DataFrame(mv_table)
         self.moveouts.set_index("stations", inplace=True)
         if id is None:
-            self.id = self.origin_time.strftime("%Y%m%d_%H%M%S")
+            self.id = self.origin_time.strftime("%Y%m%d_%H%M%S.%f")
         else:
             self.id = id
         self.data_reader = data_reader
