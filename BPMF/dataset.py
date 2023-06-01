@@ -364,7 +364,27 @@ class Catalog(object):
 
     @classmethod
     def read_from_events(cls, events, extra_attributes=[], fill_value=np.nan):
-        """Build catalog from list of `Event` instances."""
+        """Build catalog from list of `Event` instances.
+        
+        Parameters
+        ----------
+        events : list
+            List of `Event` instances.
+        extra_attributes : list, optional
+            Default attributes included in the catalog are: longitude,
+            latitude, depth and origin time. Any extra attribute that
+            should be returned in the catalog should be given here as
+            a string in a list.
+            Example: `extra_attributes=['hmax_inc', 'vmax_inc']`
+        fill_value : any, optional
+            Value that is returned in the catalog if an attribute
+            from `extra_attributes` is not found. Default is `numpy.nan`.
+
+        Returns
+        -------
+        catalog : `Catalog`
+            `Catalog` instance.
+        """
         longitudes, latitudes, depths, origin_times = [], [], [], []
         extra_attr = {}
         # initialize empty lists for extra requested attributes
@@ -388,7 +408,19 @@ class Catalog(object):
 
     @classmethod
     def read_from_dataframe(cls, dataframe):
-        """Initialize a Catalog instance from a `pandas.DataFrame` instance."""
+        """Initialize a Catalog instance from a `pandas.DataFrame` instance.
+        
+        Parameters
+        ----------
+        dataframe : `pandas.DataFrame`
+            `pandas.DataFrame` from which the `Catalog` instance will
+            be built.
+
+        Returns
+        -------
+        catalog : `Catalog`
+            `Catalog` instance.
+        """
         catalog = cls(
             dataframe["longitude"],
             dataframe["latitude"],
@@ -408,7 +440,39 @@ class Catalog(object):
         fill_value=np.nan,
         return_events=False,
     ):
-        """Read all detected events and build catalog."""
+        """Read all detected events and build catalog.
+
+        Parameters
+        ----------
+        filename : string
+            Name of the hdf5 file with the event data base.
+        db_path : string, optional
+            Name of the directory where `filename` is located.
+            Default is `config.OUTPUT_PATH`.
+        gid : string or float or int, optional
+            Name of the group to read within the hdf5 file. If
+            None (default), reads all the groups in the root
+            directory of the hdf5 file.
+        extra_attributes : list, optional
+            Default attributes included in the catalog are: longitude,
+            latitude, depth and origin time. Any extra attribute that
+            should be returned in the catalog should be given here as
+            a string in a list.
+            Example: `extra_attributes=['hmax_inc', 'vmax_inc']`
+        fill_value : any, optional
+            Value that is returned in the catalog if an attribute
+            from `extra_attributes` is not found. Default is `numpy.nan`.
+        return_events : boolean, optional
+            If True, returns the list of `Event` instances in addition to
+            the `Catalog` instance. Default is False.
+
+        Returns
+        -------
+        catalog : `Catalog`
+            `Catalog` instance.
+        events : list, optional
+            List of `Event` instances of `return_events=True`.
+        """
         events = []
         try:
             with h5.File(os.path.join(db_path, filename), mode="r") as f:
@@ -883,40 +947,42 @@ class Event(object):
 
         Parameters
         -----------
-        origin_time: string
-            Origin time, or detection time, of the event. Phase picks are
-            defined by origin_time + moveout.
-        moveouts: (n_stations, n_phases) float numpy.ndarray
+        origin_time : string
+            Origin time, or detection time, of the event.
+        moveouts : numpy.ndarray
+            (n_stations, n_phases) float `numpy.ndarray`.
             Moveouts, in seconds, for each station and each phase.
-        stations: List of strings
+        stations : list of strings
             List of station names corresponding to `moveouts`.
-        phases: List of strings
+        phases : list of strings
             List of phase names corresponding to `moveouts`.
-        data_filename: string
+        data_filename : string
             Name of the data file.
-        data_path: string
+        data_path : string
             Path to the data directory.
-        latitude: scalar float, default to None
-            Event latitude.
-        longitude: scalar float, default to None
-            Event longitude.
-        depth: scalar float, default to None
-            Event depth.
-        sampling_rate: scalar float, default to None
+        latitude : float, optional
+            Event latitude. Default is None.
+        longitude : float, optional
+            Event longitude. Default is None.
+        depth : float, optional 
+            Event depth. Default is None.
+        sampling_rate : float, optionak
             Sampling rate (Hz) of the waveforms. It should be different from
-            None only if you plan on reading preprocessed data with a fixed
+            None (default) only if you plan to read preprocessed data with a fixed
             sampling rate.
-        components: List of strings, default to ['N','E','Z']
+        components : list of strings, optional
             List of the components to use in reading and plotting methods.
-        component_aliases: Dictionary, optional
+            Default is `['N','E','Z']`.
+        component_aliases : dictionary, optional
             Each entry of the dictionary is a list of strings.
             `component_aliases[comp]` is the list of all aliases used for
             the same component 'comp'. For example, `component_aliases['N'] =
             ['N', '1']` means that both the 'N' and '1' channels will be mapped
             to the Event's 'N' channel.
-        id: string, default to None
-            Identifying label.
-        data_reader: function, default to None
+        id : string, optional
+            Identifying label. Default is None, in which case the id is taken
+            to be YYYYMMDD_HHMMSS.
+        data_reader : function, optional
             Function that takes a path and optional key-word arguments to read
             data from this path and returns an `obspy.Stream` instance. If None,
             `data_reader` has to be specified when calling `read_waveforms`.
