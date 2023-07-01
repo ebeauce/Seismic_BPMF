@@ -1944,20 +1944,26 @@ class Event(object):
                     self.origin_time + self.arrival_times.loc[sta, f"{ph}_tt_sec"]
                 )
 
-    def relocate_NLLoc(self, stations=None, method="EDT", verbose=0, **kwargs):
+    def relocate_NLLoc(
+            self, stations=None, method="EDT", verbose=0, cleanup_out_dir=True, **kwargs
+            ):
         """Relocate with NLLoc using `self.picks`.
 
         Parameters
         -----------
-        stations: list of strings, default to None
+        stations : list of str, optional
             Names of the stations to include in the relocation process. If None,
-            `stations` is set to `self.stations`.
-        method: string, default to 'EDT'
+            `stations` is set to `self.stations`. Defaults to None.
+        method : str, optional 
             Optimization algorithm used by NonLinLoc. Either 'GAU_ANALYTIC',
             'EDT', 'EDT_OT', 'EDT_OT_WT_ML'. See NonLinLoc's documentation for
-            more information.
-        verbose: scalar int, default to 0
+            more information. Defaults to 'EDT'.
+        verbose : int, optional
             If more than 0, print NLLoc's outputs to the standard output.
+            Defaults to 0.
+        cleanup_out_dir : boolean, optional
+            If True, NLLoc's output files are deleted after reading the
+            relevant information.
         """
         import subprocess
         import glob
@@ -2064,12 +2070,13 @@ class Event(object):
             # add this protection against unexpected
             # external change
             pathlib.Path(input_dir).rmdir()
-        for fn in glob.glob(os.path.join(output_dir, "*")):
-            pathlib.Path(fn).unlink()
-        if os.path.isdir(output_dir):
-            # add this protection against unexpected
-            # external change
-            pathlib.Path(output_dir).rmdir()
+        if cleanup_out_dir:
+            for fn in glob.glob(os.path.join(output_dir, "*")):
+                pathlib.Path(fn).unlink()
+            if os.path.isdir(output_dir):
+                # add this protection against unexpected
+                # external change
+                pathlib.Path(output_dir).rmdir()
 
     def remove_outlier_picks(self, max_diff_percent=25.0):
         """Remove picks that are too far from predicted arrival times.
