@@ -436,12 +436,14 @@ class Spectrum:
         #    print("Not enough points below corner frequency "
         #         f"(only {100.*(npts_below_fc/float(len(spectrum['freq'])))}%)")
         #    return
-        if (
-            float(npts_valid_below_fc) / float(len(spectrum["freq"]))
-        ) < min_fraction_valid_points_below_fc:
+        fraction_valid_points_below_fc = (
+                float(npts_valid_below_fc) / float(len(spectrum["freq"]))
+                    )
+        #print(f"Fraction of valid points below fc is: {fraction_valid_points_below_fc:.2f}")
+        if fraction_valid_points_below_fc < min_fraction_valid_points_below_fc:
             self.inversion_success = False
             print("Not enough valid points below corner frequency "
-                 f"(only {100.*(npts_valid_below_fc/float(len(spectrum['freq'])))}%)")
+                    f"(only {100.*fraction_valid_points_below_fc:.1f}%)")
             return
         perr = np.sqrt(np.diag(pcov))
         self.M0 = popt[0]

@@ -61,18 +61,21 @@ setup(
         "Operating System :: OS Independent",
     ],
     license="GPL",
-    packages=['BPMF'],
+    packages=["BPMF"],
     install_requires=[
-        "numpy",
-        "scipy",
-        "pandas",
+        "beampower",
+        "fast_matched_filter",
         "h5py",
+        "matplotlib",
+        "numpy",
         "obspy",
-        "matplotlib"],
+        "pandas",
+        "scipy",
+        ],
     python_requires=">=3.6",
     zip_safe=False,
     cmdclass={
-        'build_ext': BPMFBuild},
+        "build_ext": BPMFBuild},
     include_package_data=True,
-    ext_modules=[BPMFExtension('BPMF.lib.libc')]
+    ext_modules=[BPMFExtension("BPMF.lib.libc")]
 )
