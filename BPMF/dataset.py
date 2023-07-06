@@ -2806,7 +2806,48 @@ class Event(object):
 
 
 class Template(Event):
-    """A class for template events."""
+    """
+    A class for template events.
+
+    The Template class is a subclass of the Event class and is specifically designed
+    for template events. It inherits all the attributes and methods of the Event
+    class and adds additional functionality specific to template events.
+
+    Parameters
+    ----------
+    origin_time : str or datetime
+        The origin time of the template event. Can be specified as a string in
+        ISO 8601 format or as a datetime object.
+    moveouts : pandas.DataFrame
+        The moveout table containing the travel time information for the template
+        event. The moveouts table should have the following columns: 'Phase', 'Station',
+        'Distance', and 'TravelTime'.
+    stations : list of str
+        The list of station names associated with the template event.
+    phases : list of str
+        The list of phase names associated with the template event.
+    template_filename : str
+        The filename of the template waveform file.
+    template_path : str
+        The path to the directory containing the template waveform file.
+    latitude : float or None, optional
+        The latitude of the template event in decimal degrees. If None, latitude
+        information is not provided. Defaults to None.
+    longitude : float or None, optional
+        The longitude of the template event in decimal degrees. If None, longitude
+        information is not provided. Defaults to None.
+    depth : float or None, optional
+        The depth of the template event in kilometers. If None, depth information
+        is not provided. Defaults to None.
+    sampling_rate : float or None, optional
+        The sampling rate of the template waveforms in Hz. If None, the sampling
+        rate is not provided. Defaults to None.
+    components : list of str, optional
+        The list of component names associated with the template waveforms.
+        Defaults to ['N', 'E', 'Z'].
+    id : str or None, optional
+        The ID of the template event. If None, no ID is assigned. Defaults to None.
+    """
 
     def __init__(
         self,
@@ -2844,19 +2885,26 @@ class Template(Event):
 
     @classmethod
     def init_from_event(cls, event, attach_waveforms=True):
-        """Instanciate a `Template` object from an `Event` object.
+        """
+        Instantiate a Template object from an Event object.
+
+        This class method creates a Template object based on an existing Event object.
+        It converts the Event object into a Template object by transferring the relevant
+        attributes and data.
 
         Parameters
-        -----------
-        event: `Event` instance
-            The `Event` instance to convert to a `Template` instance.
-        attach_waveforms: boolean, default to True
-            Should not be turned to False when used directly.
+        ----------
+        event : Event instance
+            The Event instance to convert to a Template instance.
+        attach_waveforms : boolean, optional
+            Specifies whether to attach the waveform data to the Template instance.
+            If True, the waveform data is attached. If False, the waveform data is not
+            attached. Defaults to True.
 
         Returns
-        ---------
-        template: Template instance
-            `Template` instance base on `event`.
+        -------
+        template : Template instance
+            The Template instance based on the provided Event instance.
         """
         db_path, db_filename = os.path.split(event.where)
         template = cls(
@@ -2913,7 +2961,28 @@ class Template(Event):
 
     @classmethod
     def read_from_file(cls, filename, db_path=cfg.INPUT_PATH, gid=None):
-        """Initialize a `Template` instance from a file."""
+        """
+        Initialize a Template instance from a file.
+
+        This class method reads a file and initializes a Template instance based on the
+        content of the file. It utilizes the Event class method `read_from_file` to
+        read the file and convert it into an Event instance. The Event instance is then
+        converted into a Template instance using the `init_from_event` class method.
+
+        Parameters
+        ----------
+        filename : str
+            The name of the file to read and initialize the Template instance.
+        db_path : str, optional
+            The path to the directory containing the file. Defaults to cfg.INPUT_PATH.
+        gid : str, optional
+            The name of the hdf5 group where the file is stored. Defaults to None.
+
+        Returns
+        -------
+        template : Template instance
+            The Template instance initialized from the specified file.
+        """
         template = cls.init_from_event(
             Event.read_from_file(filename, db_path=db_path, gid=gid),
             attach_waveforms=False,
@@ -2975,16 +3044,26 @@ class Template(Event):
 
     # methods
     def distance(self, longitude, latitude, depth):
-        """Compute distance between template and a given location.
+        """
+        Compute the distance between the template and a given location.
+
+        This function calculates the distance between the longitude, latitude, and depth
+        of the template and the longitude, latitude, and depth of a target location using
+        the `two_point_distance` function from the `utils` module.
 
         Parameters
-        -----------
-        longitude: scalar, float
-            Longitude of the target location.
-        latitude: scalar, float
-            Latitude of the target location.
-        depth: scalar, float
-            Depth of the target location, in km.
+        ----------
+        longitude : float
+            The longitude of the target location.
+        latitude : float
+            The latitude of the target location.
+        depth : float
+            The depth of the target location in kilometers.
+
+        Returns
+        -------
+        distance : float
+            The distance, in kilometers, between the template and the target location.
         """
         from .utils import two_point_distance
 
@@ -2993,20 +3072,21 @@ class Template(Event):
         )
 
     def n_best_SNR_stations(self, n, available_stations=None):
-        """Adjust `self.stations` to the `n` best SNR stations.
+        """
+        Adjust `self.stations` to the `n` best SNR stations.
 
-
-        Find the `n` best stations and modify `self.stations` accordingly.
-        The instance's properties will also change accordingly.
+        This function finds the `n` best stations based on signal-to-noise ratio (SNR)
+        and modifies the `self.stations` attribute accordingly. The instance's properties
+        will also change to reflect the new selection of stations.
 
         Parameters
-        ----------------
-        n: scalar int
-            The `n` closest stations.
-        available_stations: list of strings, default to None
-            The list of stations from which we search the closest stations.
-            If some stations are known to lack data, the user
-            may choose to not include these in the closest stations.
+        ----------
+        n : int
+            The number of best SNR stations to select.
+        available_stations : list of str, default None
+            The list of stations from which to search for the closest stations. If
+            provided, only stations in this list will be considered. This can be used
+            to exclude stations that are known to lack data.
         """
         # re-initialize the stations attribute
         self.stations = np.array(self.network_stations, copy=True)
@@ -3033,7 +3113,30 @@ class Template(Event):
         self.stations = self.network_stations[best_SNR_stations[:n]]
 
     def read_waveforms(self, stations=None, components=None):
-        """Read the waveforms time series."""
+        """
+        Read the waveforms time series.
+
+        This function reads the waveforms from the stored data file and initializes
+        the `self.traces` attribute with the waveform data.
+
+        Parameters
+        ----------
+        stations : list of str, default None
+            The list of station names for which to read the waveforms. If None, all
+            stations in `self.stations` will be read.
+        components : list of str, default None
+            The list of component names for which to read the waveforms. If None,
+            all components in `self.components` will be read.
+
+        Notes
+        -----
+        - The waveform data is stored in the `self.traces` attribute as an `obspy.Stream`
+          object.
+        - The `starttime` of each trace is set based on the origin time of the event
+          and the moveout values stored in the `moveouts_win` attribute.
+        - The `set_availability` method is called to update the availability of the
+          waveforms for the selected stations.
+        """
         if stations is None:
             stations = self.stations
         if components is None:
@@ -3080,6 +3183,41 @@ class Template(Event):
         gid=None,
         overwrite=False,
     ):
+        """
+        Write the Template instance to an HDF5 file.
+
+        This function writes the Template instance to an HDF5 file specified by
+        `db_filename` and `db_path`. It uses the `Event.write` method to handle the
+        majority of the writing process.
+
+        Parameters
+        ----------
+        db_filename : str
+            Name of the HDF5 file to store the Template instance.
+        db_path : str, optional
+            Path to the directory where the HDF5 file will be located. Defaults to
+            `cfg.OUTPUT_PATH`.
+        save_waveforms : bool, optional
+            Flag indicating whether to save the waveforms in the HDF5 file. Defaults
+            to True.
+        gid : str, optional
+            Name of the HDF5 group under which the Template instance will be stored.
+            If None, the Template instance will be stored directly in the root of
+            the HDF5 file. Defaults to None.
+        overwrite : bool, optional
+            Flag indicating whether to overwrite an existing HDF5 file with the same
+            name. If True, the existing file will be removed before writing. If False,
+            the write operation will be skipped. Defaults to False.
+
+        Notes
+        -----
+        - The `write` function sets the `where` attribute of the Template instance
+          to the full path of the HDF5 file.
+        - If `overwrite` is True and an existing file with the same name already
+          exists, it will be removed before writing the Template instance.
+        - The majority of the writing process is handled by the `Event.write` method,
+          which is called with appropriate arguments.
+        """
         self.where = os.path.join(db_path, db_filename)
         if overwrite and os.path.isfile(self.where):
             os.remove(self.where)
@@ -3099,30 +3237,46 @@ class Template(Event):
         return_events=False,
         check_summary_file=True,
     ):
-        """Build a `Catalog` instance.
+        """
+        Build a Catalog instance from detection data.
+
+        This function builds a Catalog instance by reading detection data from a file
+        specified by `filename` and `db_path`, or by checking for an existing summary
+        file. It supports reading additional attributes specified by `extra_attributes`
+        and provides options to control the behavior of filling missing values with
+        `fill_value` and returning a list of Event instances with `return_events`.
 
         Parameters
-        ------------
-        filename: string, default to None
-            Name of the detection file. If None, use the standard file
-            and folder naming convention.
-        db_path: string, default to None
-            Name of the directory where the detection file is located. If None,
-            use the standard file and folder naming convention.
-        gid: string, int, or float, default to None
-            If not None, this is the hdf5 group where to read the data.
-        extra_attributes: list of strings, default to []
-            Attributes to read in addition to the default 'longitude',
-            'latitude', 'depth', and 'origin_time'.
-        fill_value: string, int, or float, default to np.nan
-            Default value if the target attribute does not exist.
-        return_events: boolean, default to False
-            If True, return a list of `dataset.Event` instances. Can only be
-            True if `check_summary_file=False`.
-        check_summary_file: boolean, default to True
-            If True, check if the summary hdf5 file already exists and read from
-            if it does; this uses the standard naming convention. If False,
-            it builds the catalog from the detection output.
+        ----------
+        filename : str, optional
+            Name of the detection file. If None, the standard file and folder naming
+            convention will be used. Defaults to None.
+        db_path : str, optional
+            Name of the directory where the detection file is located. If None, the
+            standard file and folder naming convention will be used. Defaults to None.
+        gid : str, int, or float, optional
+            If not None, this is the HDF5 group where the data will be read from.
+            Defaults to None.
+        extra_attributes : list of str, optional
+            Additional attributes to read in addition to the default attributes
+            ('longitude', 'latitude', 'depth', and 'origin_time'). Defaults to an
+            empty list.
+        fill_value : str, int, or float, optional
+            Default value to fill missing target attributes. Defaults to np.nan.
+        return_events : bool, optional
+            If True, a list of Event instances will be returned. This can only be
+            True if check_summary_file is set to False. Defaults to False.
+        check_summary_file : bool, optional
+            If True, it checks if the summary HDF5 file already exists and reads from
+            it using the standard naming convention. If False, it builds the catalog
+            from the detection output. Defaults to True.
+
+        Notes
+        -----
+        - If `return_events` is set to True, `check_summary_file` must be set to False.
+        - The `read_catalog` function first checks if the summary file exists.
+        - The resulting Catalog instance is assigned to `self.catalog`, and additional
+          attributes such as 'tid' and 'event_id' are set accordingly.
         """
         db_path_T, filename_T = os.path.split(self.where)
         if return_events and check_summary_file:
@@ -3199,25 +3353,28 @@ class Template(Event):
             return events
 
     def write_summary(self, attributes, filename=None, db_path=None, overwrite=True):
-        """Write summary of template characteristics.
+        """
+        Write the summary of template characteristics to an HDF5 file.
 
-        hdf5 does not support storing datasets of strings. Therefore, You need
-        to convert strings to bytes or this method will raise an error.
+        This function writes the summary of template characteristics, e.g. the
+        characteristics of the detected events, specified in the `attributes`
+        dictionary to an HDF5 file specified by `filename` and `db_path`.
+        It supports overwriting existing datasets or groups with `overwrite` option.
 
         Parameters
-        -----------
-        attributes: dictionary
-            Dictionary with scalars, `numpy.ndarray`, dictionary, or
-            `pandas.DataFrame`. The keys of the dictionary are used to name the
-            dataset or group in the hdf5 file.
-        filename: string, default to None
-            Name of the detection file. If None, use the standard file
-            and folder naming convention.
-        db_path: string, default to None
-            Name of the directory where the detection file is located. If None,
-            use the standard file and folder naming convention.
-        overwrite: boolean, default to True
-            If True, overwrite existing datasets or groups.
+        ----------
+        attributes : dict
+            Dictionary containing scalars, numpy arrays, dictionaries, or pandas dataframes.
+            The keys of the dictionary are used to name the dataset or group in the HDF5 file.
+        filename : str, optional
+            Name of the detection file. If None, the standard file and folder naming
+            convention will be used. Defaults to None.
+        db_path : str, optional
+            Name of the directory where the detection file is located. If None, the
+            standard file and folder naming convention will be used. Defaults to None.
+        overwrite : bool, optional
+            If True, existing datasets or groups will be overwritten. If False, they
+            will be skipped. Defaults to True.
         """
         if db_path is None:
             db_path, _ = os.path.split(self.where)
@@ -3249,17 +3406,35 @@ class Template(Event):
         offset_ot=10.0,
         **kwargs,
     ):
-        """Plot the `idx`-th detection made with this template.
+        """
+        Plot the `idx`-th detection made with this template.
 
         Parameters
-        ------------
-        filename: string, default to None
-            Name of the detection file. If None, use the standard file
-            and folder naming convention.
-        db_path: string, default to None
-            Name of the directory where the detection file is located. If None,
-            use the standard file and folder naming convention.
+        ----------
+        idx : int
+            Index of the detection to plot.
+        filename : str, optional
+            Name of the detection file. If None, use the standard file and folder naming
+            convention. Defaults to None.
+        db_path : str, optional
+            Name of the directory where the detection file is located. If None, use the
+            standard file and folder naming convention. Defaults to None.
+        duration : float, optional
+            Duration of the waveforms to plot, in seconds. Defaults to 60.0.
+        phase_on_comp : dict, optional
+            Dictionary specifying the phase associated with each component. The keys
+            are component codes, and the values are phase codes. Defaults to
+            {"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"}.
+        offset_ot : float, optional
+            Offset in seconds to apply to the origin time of the event when retrieving
+            the waveforms. Defaults to 10.0.
+        **kwargs:
+            Additional keyword arguments to be passed to the `Event.plot` method.
 
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+            Figure instance produced by this method.
         """
         if not hasattr(self, "traces"):
             print("Call `Template.read_waveforms` first.")
@@ -3349,12 +3524,24 @@ class Template(Event):
     def plot_recurrence_times(
         self, ax=None, annotate_axes=True, figsize=(20, 10), **kwargs
     ):
-        """Plot recurrence times vs detection times.
+        """
+        Plot recurrence times vs detection times.
 
         Parameters
-        -----------
-        ax: `plt.Axes`, default to None
-            If not None, use this `plt.Axes` instance to plot the data.
+        ----------
+        ax : plt.Axes, optional
+            If not None, use this plt.Axes instance to plot the data.
+        annotate_axes : bool, optional
+            Whether to annotate the axes with labels. Defaults to True.
+        figsize : tuple, optional
+            Figure size (width, height) in inches. Defaults to (20, 10).
+        **kwargs:
+            Additional keyword arguments to be passed to the plt.plot function.
+
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+            Figure instance produced by this method.
         """
         import matplotlib.pyplot as plt
 
