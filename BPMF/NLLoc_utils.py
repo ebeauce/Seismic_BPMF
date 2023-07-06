@@ -430,9 +430,9 @@ def write_NLLoc_control(
     fc.write("# ---------------------------\n")
     fc.write(f"LOCSIG  {author}  --  {affiliation}\n")
     in_fn = os.path.join(NLLoc_input_path, obs_filename)
-    NLLoc_basename = os.path.join(NLLoc_input_path, NLLoc_basename)
+    NLLoc_root = os.path.join(NLLoc_input_path, NLLoc_basename)
     out_fn = os.path.join(NLLoc_output_path, out_filename)
-    fc.write(f"LOCFILES  {in_fn}  NLLOC_OBS  {NLLoc_basename}  {out_fn}\n")
+    fc.write(f"LOCFILES  {in_fn}  NLLOC_OBS  {NLLoc_root}  {out_fn}\n")
     # fc.write('LOCHYPOUT  SAVE_NLLOC_ALL  SAVE_HYPOINV_SUM\n')
     fc.write("LOCHYPOUT  SAVE_NLLOC_ALL\n")
 
