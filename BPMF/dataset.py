@@ -3692,21 +3692,29 @@ class Family(ABC):
 
 
 class EventGroup(Family):
-    """A class for a group of events.
+    """
+    A class for a group of events.
 
     Each event is represented by a `dataset.Event` instance.
+
+    Attributes
+    ----------
+    events : list
+        List of `dataset.Event` instances constituting the group.
+    network : `dataset.Network`
+        The `Network` instance used to query consistent data across all events.
     """
 
     def __init__(self, events, network):
-        """Initialize the EventGroup with a list of `dataset.Event` instances.
+        """
+        Initialize the EventGroup with a list of `dataset.Event` instances.
 
         Parameters
         ----------
-        events: (n_events,) list of `dataset.Event` instances
-            The list of events constituting the group.
-        network: `dataset.Network` instance
-            The `Network` instance used to query consistent data accross all
-            events.
+        events : list of `dataset.Event` instances
+            List of `dataset.Event` instances constituting the group.
+        network : `dataset.Network` instance
+            The `Network` instance used to query consistent data across all events.
         """
         self.events = events
         self.network = network
@@ -3724,7 +3732,28 @@ class EventGroup(Family):
 
     # methods
     def read_waveforms(self, duration, time_shifted=False, progress=False, **kwargs):
-        """Call `dataset.Event.read_waveform` with each event."""
+        """
+        Call `dataset.Event.read_waveform` with each event.
+
+        Parameters
+        ----------
+        duration : float
+            Duration of the waveform to read, in seconds.
+        time_shifted : bool, default False
+            Whether to apply time shifting to the waveforms.
+        progress : bool, default False
+            Whether to display progress information during waveform reading.
+
+        Other Parameters
+        ----------------
+        **kwargs : dict
+            Additional keyword arguments to pass to `dataset.Event.read_waveforms`.
+
+        Returns
+        -------
+        None
+
+        """
         self.time_shifted = time_shifted
         disable = np.bitwise_not(progress)
         for ev in tqdm(self.events, desc="Reading event waveforms", disable=disable):
@@ -3740,6 +3769,34 @@ class EventGroup(Family):
         max_singular_values=5,
         wiener_filter_colsize=None,
     ):
+        """
+        Apply Singular Value Decomposition Waveform Filtering (SVDWF) and stack the waveforms.
+
+        Parameters
+        ----------
+        freqmin : float
+            Minimum frequency in Hz for the bandpass filter.
+        freqmax : float
+            Maximum frequency in Hz for the bandpass filter.
+        sampling_rate : float
+            Sampling rate in Hz of the waveforms.
+        expl_var : float, default 0.4
+            Explained variance ratio threshold for retaining singular values.
+        max_singular_values : int, default 5
+            Maximum number of singular values to retain during SVDWF.
+        wiener_filter_colsize : int, default None
+            Size of the column blocks used for the Wiener filter.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        See: Moreau, L., Stehly, L., Boué, P., Lu, Y., Larose, E., & Campillo, M. (2017).
+        Improving ambient noise correlation functions with an SVD-based Wiener filter.
+        Geophysical Journal International, 211(1), 418-426.
+        """
         filtered_data = np.zeros_like(self.waveforms_arr)
         for s in range(len(self.stations)):
             for c in range(len(self.components)):
@@ -3804,23 +3861,23 @@ class EventGroup(Family):
 
 
 class TemplateGroup(Family):
-    """A class for a group of templates.
+    """
+    A class for a group of templates.
 
     Each template is represented by a `dataset.Template` instance.
     """
 
     def __init__(self, templates, network, source_receiver_dist=True):
-        """Initialize the TemplateGroup instance with a list of
-        `dataset.Template` instances.
+        """
+        Initialize the TemplateGroup instance with a list of `dataset.Template` instances.
 
         Parameters
-        ------------
-        templates: (n_templates,) list of `dataset.Template` instances
+        ----------
+        templates : list of `dataset.Template` instances
             The list of templates constituting the group.
-        network: `dataset.Network` instance
-            The `Network` instance used to query consistent data accross all
-            templates.
-        source_receiver_dist: boolean, default to True
+        network : `dataset.Network` instance
+            The `Network` instance used to query consistent data across all templates.
+        source_receiver_dist : bool, optional
             If True, compute the source-receiver distances on all templates.
         """
         self.templates = templates
@@ -3842,23 +3899,23 @@ class TemplateGroup(Family):
 
     @classmethod
     def read_from_files(cls, filenames, network, gids=None, **kwargs):
-        """Initialize the TemplateGroup instance given a list of filenames.
+        """
+        Initialize the TemplateGroup instance given a list of filenames.
 
         Parameters
-        -----------
-        filenames: (n_templates,) list of strings
-            List of full file paths from which we instanciate the list of
-            `dataset.Template` objects.
-        network: `dataset.Network` instance
-            The `Network` instance used to query consistent data accross all
-            templates.
-        gids: (n_templates,) list of strings, default to None
-            If not None, this should be a list of group ids where the template
-            data are stored in their hdf5 files.
-
+        ----------
+        filenames : list of str
+            List of full file paths from which to instantiate the list
+            of `dataset.Template` objects.
+        network : `dataset.Network` instance
+            The `Network` instance used to query consistent data across all templates.
+        gids : list of str, optional
+            If provided, this should be a list of group IDs where the
+            template data is stored in their HDF5 files.
+        
         Returns
-        --------
-        template_group: TemplateGroup instance
+        -------
+        template_group : TemplateGroup instance
             The initialized TemplateGroup instance.
         """
         templates = []
@@ -3915,18 +3972,28 @@ class TemplateGroup(Family):
 
     # methods
     def box(self, lon_min, lon_max, lat_min, lat_max, inplace=False):
-        """Keep templates inside the requested geographic bounds.
+        """
+        Keep templates inside the requested geographic bounds.
 
         Parameters
-        -----------
-        lon_min: scalar float
-            Minimum longitude, in decimal degrees.
-        lon_max: scalar float
-            Maximum longitude, in decimal degrees.
-        lat_min: scalar float
-            Minimum latitude, in decimal degrees.
-        lat_max: scalar float
-            Maximum latitude, in decimal degrees.
+        ----------
+        lon_min : float
+            Minimum longitude in decimal degrees.
+        lon_max : float
+            Maximum longitude in decimal degrees.
+        lat_min : float
+            Minimum latitude in decimal degrees.
+        lat_max : float
+            Maximum latitude in decimal degrees.
+        inplace : bool, default False
+            If True, perform the operation in-place by modifying the existing TemplateGroup.
+            If False, create and return a new TemplateGroup with the filtered templates.
+
+        Returns
+        -------
+        template_group : TemplateGroup instance
+            The TemplateGroup instance containing templates within the specified geographic bounds.
+            This is returned only when inplace=False.
         """
         templates_inside = []
         for template in self.templates:
@@ -3979,7 +4046,21 @@ class TemplateGroup(Family):
             return new_template_group
 
     def compute_intertemplate_dist(self):
-        """Compute the template-pairwise distances, in km."""
+        """
+        Compute the template-pairwise distances in kilometers.
+
+        This method calculates the distances between all pairs of templates in the TemplateGroup.
+        The distances are computed based on the longitude, latitude, and depth of each template.
+
+        The computed distances are then read at the `self.intertemplate_dist` property
+        of the TemplateGroup instance.
+
+        Returns
+        -------
+        None
+            The computed distances can be accessed at the `self.intertemplate_dist`
+            property of the TemplateGroup.
+        """
         longitudes = np.float32([tp.longitude for tp in self.templates])
         latitudes = np.float32([tp.latitude for tp in self.templates])
         depths = np.float32([tp.depth for tp in self.templates])
@@ -3991,16 +4072,28 @@ class TemplateGroup(Family):
         )
 
     def compute_dir_errors(self):
-        """Compute length of uncertainty ellipsoid in inter-template direction.
+        """
+        Compute the length of the uncertainty ellipsoid in the inter-template direction.
 
-        New Attributes
-        --------------
-        _dir_errors: (n_templates, n_templates) pandas.DataFrame
-            The length, in kilometers, of the uncertainty ellipsoid in the
-            inter-template direction.
-            Example: self.directional_errors.loc[tid1, tid2] is the width of
-            template tid1's uncertainty ellipsoid in the direction of
-            template tid2.
+        This method calculates the length of the uncertainty ellipsoid in the
+        inter-template direction for each pair of templates in the TemplateGroup.
+        The inter-template direction is defined as the direction linking two templates.
+        The length of the uncertainty ellipsoid is computed based on the covariance
+        matrix of each template.
+
+        The computed errors can be read at the `self.dir_errors` property of
+        the TemplateGroup. It is a pandas DataFrame with dimensions
+        (n_templates, n_templates), where each entry represents the length of
+        the uncertainty ellipsoid in kilometers.
+
+        Example: `self.dir_errors.loc[tid1, tid2]` is the width of template `tid1`'s
+        uncertainty ellipsoid in the direction of template `tid2`.
+
+        Returns
+        -------
+        None
+            The computed errors can be read at the `self.dir_errors` property
+            of the TemplateGroup instance.
         """
         from cartopy import crs
 
@@ -4052,9 +4145,25 @@ class TemplateGroup(Family):
         )
 
     def compute_ellipsoid_dist(self):
-        """Compute separation between unc. ellipsoids in inter-template dir.
+        """
+        Compute the separation between uncertainty ellipsoids in the inter-template direction.
 
-        Can be negative if the uncertainty ellipsoids overlap.
+        This method calculates the separation between the uncertainty
+        ellipsoids in the inter-template direction for each pair of templates
+        in the TemplateGroup instance. The separation is computed as the difference
+        between the inter-template distances and the directional errors. It can
+        be negative if the uncertainty ellipsoids overlap.
+
+        The computed separations can be read at the `self.ellipsoid_dist`
+        property of the TemplateGroup instance. It is a pandas DataFrame with
+        dimensions (n_templates, n_templates), where each entry represents
+        the separation between the uncertainty ellipsoids in kilometers.
+
+        Returns
+        -------
+        None
+            The computed separations can be read at the `self.ellipsoid_dist`
+            property of the TemplateGroup instance.
         """
         self._ellipsoid_dist = (
             self.intertemplate_dist - self.dir_errors - self.dir_errors.T
@@ -4069,33 +4178,51 @@ class TemplateGroup(Family):
         compute_from_scratch=False,
         device="cpu",
         progress=False,
+        output_filename="intertp_cc.h5"
     ):
-        """Compute the pairwise template CCs.
+        """
+        Compute the pairwise template cross-correlations (CCs).
+
+        This method computes the pairwise cross-correlations (CCs) between
+        templates in the TemplateGroup.
+
+        The CCs measure the similarity between the waveforms of different templates.
+        CCs are computed only for template pairs that are separated by less than
+        `distance_threhold`. The number of closest stations to include and the maximum
+        lag for searching the maximum CC are configurable parameters.
 
         Parameters
-        -----------
-        distance_threshold: float, default to 5
-            The distance threshold, in kilometers, between two
-            uncertainty ellipsoids under which similarity is computed.
-        n_stations: integer, default to 10
-            The number of stations closest to each template used in
+        ----------
+        distance_threshold : float, default to 5.0
+            The distance threshold, in kilometers, between two uncertainty
+            ellipsoids under which the CC is computed.
+        n_stations : int, default to 10
+            The number of closest stations to each template that are used in
             the computation of the average CC.
-        max_lag: integer, default to 10
-            Maximum lag, in samples, allowed when searching for the
-            maximum CC on each channel. This is to account for small
-            discrepancies in windowing that could occur for two templates
-            highly similar but associated to slightly different locations.
-        save_cc: boolean, default to False
-            If True, save the inter-template CCs in the same folder as
-            `self.templates[0]` and with filename 'intertp_cc.h5'.
-        compute_from_scratch: boolean, default to False
-            If True, force to compute the inter-template CCs from scratch.
-            Useful if user knows the computation is faster than reading a
-            potentially large file.
-        device: string, default to 'cpu'
-            Either 'cpu' or 'gpu'.
-        progress: boolean, default to False
-            If True, print progress bar with `tqdm`.
+        max_lag : int, default to 10
+            The maximum lag, in samples, allowed when searching for the maximum
+            CC on each channel. This parameter accounts for small discrepancies
+            in windowing that could occur for two templates highly similar but
+            associated with slightly different locations.
+        save_cc : bool, default to False
+            If True, save the inter-template CCs in the same folder as the first
+            template (`self.templates[0]`) with filename 'output_filename'.
+        compute_from_scratch : bool, default to False
+            If True, force the computation of the inter-template CCs from scratch.
+            This is useful when the user knows that the computation is faster than
+            reading a potentially large file.
+        device : str, default to 'cpu'
+            The device to use for the computation. Can be either 'cpu' or 'gpu'.
+        progress : bool, default to False
+            If True, print a progress bar using `tqdm`.
+        output_filename : str, default to 'intertp_cc.h5'
+            The filename to use when saving the inter-template CCs.
+
+        Returns
+        -------
+        None
+            The computed inter-template CCs can be read at the `self.intertemplate_cc`
+            property of the TemplateGroup instance.
         """
         import fast_matched_filter as fmf  # clearly need some optimization
 
@@ -4103,7 +4230,7 @@ class TemplateGroup(Family):
 
         # try reading the inter-template CC from db
         db_path, db_filename = os.path.split(self.templates[0].where)
-        cc_fn = os.path.join(db_path, "intertp_cc.h5")
+        cc_fn = os.path.join(db_path, output_filename)
         if not compute_from_scratch and os.path.isfile(cc_fn):
             _intertemplate_cc = self._read_intertp_cc(cc_fn)
             if (
@@ -4186,14 +4313,24 @@ class TemplateGroup(Family):
 
     @staticmethod
     def _save_intertp_cc(intertp_cc, fullpath):
-        """Save inter-template correlation coefficients.
+        """
+        Save the inter-template correlation coefficients to a file.
+
+        This method saves the inter-template correlation coefficients computed
+        by the `compute_intertemplate_cc` method to a specified file.
 
         Parameters
-        -----------
-        intertp_cc: `pd.DataFrame`
-            The inter-template CC computed by `compute_intertemplate_cc`.
-        fullpath: string
-            Full path to output file.
+        ----------
+        intertp_cc : pd.DataFrame
+            The inter-template correlation coefficients computed by the
+            `compute_intertemplate_cc` method.
+        fullpath : str
+            The full path to the output file where the correlation coefficients
+            will be saved.
+
+        Returns
+        -------
+        None
         """
         with h5.File(fullpath, mode="w") as f:
             f.create_dataset("tids", data=np.int32(intertp_cc.columns))
@@ -4205,13 +4342,13 @@ class TemplateGroup(Family):
 
         Parameters
         -----------
-        fullpath: string
+        fullpath : string
             Full path to output file.
 
         Returns
         --------
-        intertp_cc: `pd.DataFrame`
-            The inter-template CC in a `pd.DataFrame`.
+        intertp_cc : pd.DataFrame
+            The inter-template CC in a pd.DataFrame.
         """
         with h5.File(fullpath, mode="r") as f:
             tids = f["tids"][()]
@@ -4220,10 +4357,25 @@ class TemplateGroup(Family):
 
     def read_waveforms(self, n_threads=1, progress=False):
         """
+        Read waveforms for all templates in the TemplateGroup.
+
+        This method calls `template.read_waveforms` for each `Template`
+        instance in `self.templates`.
+
         Parameters
         ----------
-        progress: boolean, default to False
-            If True, print progress bar with `tqdm`.
+        n_threads : int, optional
+            The number of threads to use for parallel execution. If set to 1
+            (default), the waveforms will be read sequentially. If set to a
+            value greater than 1, the waveforms will be read in parallel using
+            multiple threads. If set to 0, None, or "all", the method will use all
+            available CPUs for parallel execution.
+        progress : bool, optional
+            If True, a progress bar will be displayed during the waveform reading process.
+
+        Returns
+        -------
+        None
         """
         disable = np.bitwise_not(progress)
         if n_threads != 1:
@@ -4246,13 +4398,23 @@ class TemplateGroup(Family):
         self._remember("read_waveforms")
 
     def set_network_to_template_map(self):
-        """Compute the map between network arrays and template data.
+        """
+        Compute the map between network arrays and template data.
 
         Template data are broadcasted to fit the dimensions of the network
         arrays. This method computes the `network_to_template_map` that tells
-        which stations and channels are used on each template. For example:
-        `network_to_template_map[t, s, c] = False` means that station s and
-        channel c are not used on template t.
+        which stations and channels are used on each template.
+        For example:
+        `network_to_template_map[t, s, c] = False`
+        means that station s and channel c are not used on template t.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
         """
         _network_to_template_map = np.zeros(
             (self.n_templates, self.network.n_stations, self.network.n_components),
@@ -4269,20 +4431,26 @@ class TemplateGroup(Family):
         self._network_to_template_map = _network_to_template_map
 
     def n_best_SNR_stations(self, n, available_stations=None):
-        """Adjust `self.stations` on each template to the `n` best SNR stations.
+        """
+        Adjust `self.stations` on each template to the `n` best SNR stations.
 
-
-        Find the `n` best stations and modify `self.stations` accordingly.
-        The instance's properties will also change accordingly.
+        This method calls `template.n_best_SNR_stations` for each Template
+        instance in `self.templates`. For each template, it finds the `n` best
+        SNR stations and modify `template.stations` accordingly.
 
         Parameters
-        ----------------
-        n: scalar int
-            The `n` closest stations.
-        available_stations: list of strings, default to None
+        ----------
+        n : int
+            The `n` best SNR stations.
+        available_stations : list of str, optional
             The list of stations from which we search the closest stations.
             If some stations are known to lack data, the user
-            may choose to not include these in the closest stations.
+            may choose to not include these in the best SNR stations.
+            Defaults to None.
+
+        Returns
+        -------
+        None
         """
         for tp in self.templates:
             tp.n_best_SNR_stations(n, available_stations=available_stations)
@@ -4290,20 +4458,27 @@ class TemplateGroup(Family):
             del self._network_to_template_map
 
     def n_closest_stations(self, n, available_stations=None):
-        """Adjust `self.stations` on each template to the `n` closest stations.
+        """
+        Adjust `self.stations` on each template to the `n` closest stations.
 
-
-        Find the `n` closest stations and modify `self.stations` accordingly.
-        The instance's properties will also change accordingly.
+        This method calls `template.n_closest_stations` for each Template
+        instance in `self.templates`. For each template, it finds the `n`
+        closest stations and modify `template.stations` accordingly.
 
         Parameters
-        ----------------
-        n: scalar int
-            The `n` closest stations to fetch.
-        available_stations: list of strings, default to None
+        ----------
+        n : int
+            The `n` closest stations.
+        available_stations : list of str, optional
             The list of stations from which we search the closest stations.
             If some stations are known to lack data, the user
             may choose to not include these in the closest stations.
+            Defaults to None.
+
+        Returns
+        -------
+        None
+
         """
         for tp in self.templates:
             tp.n_closest_stations(n, available_stations=available_stations)
@@ -4313,19 +4488,41 @@ class TemplateGroup(Family):
     def read_catalog(
         self, extra_attributes=[], fill_value=np.nan, progress=False, **kwargs
     ):
-        """Build a catalog from all templates' detections.
-
-        Work only if folder and file names follow the standard convention.
+        """
+        Build a catalog from all templates' detections.
 
         Parameters
-        ------------
-        extra_attributes: list of strings, default to []
-            Attributes to read in addition to the default 'longitude',
-            'latitude', 'depth', and 'origin_time'.
-        fill_value: string, int, or float, default to np.nan
-            Default value if the target attribute does not exist.
-        progress: boolean, default to False
-            If True, print progress bar with `tqdm`.
+        ----------
+        extra_attributes : list of str, optional
+            Additional attributes to read in addition to the default attributes of
+            'longitude', 'latitude', 'depth', and 'origin_time'.
+        fill_value : str, int, or float, optional
+            Default value to use if the target attribute does not exist in a template's
+            detections.
+        progress : bool, optional
+            If True, display a progress bar during the operation.
+        **kwargs
+            Additional keyword arguments to be passed to the `read_catalog`
+            method of each template.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This method reads the detection information from each template in the TemplateGroup
+        and builds a catalog that contains the combined detections from all templates.
+
+        The resulting catalog will include the default attributes of 'longitude', 'latitude',
+        'depth', and 'origin_time', as well as any additional attributes specified in
+        the `extra_attributes` parameter.
+
+        If a template does not have a specific attribute in its detections, it will be assigned
+        the `fill_value` for that attribute.
+
+        The `progress` parameter controls whether a progress bar is displayed during the operation.
+        Setting it to True provides visual feedback on the progress of reading the catalogs.
         """
         disable = np.bitwise_not(progress)
         for template in tqdm(self.templates, desc="Reading catalog", disable=disable):
@@ -4349,31 +4546,40 @@ class TemplateGroup(Family):
         progress=False,
         **kwargs,
     ):
-        """Search for events detected by multiple templates.
+        """
+        Search for events detected by multiple templates and flag them.
 
         Parameters
-        -----------
-        n_closest_stations: integer, default to 10
-            In case template similarity is taken into account,
-            this is the number of stations closest to each template
-            that are used in the calculation of the average cc.
-        dt_criterion: float, default to 4
-            Time interval, in seconds, under which two events are
-            examined for redundancy.
-        distance_criterion: float, default to 1
-            Distance threshold, in kilometers, between two uncertainty
-            ellipsoids under which two events are examined for redundancy.
-        speed_criterion: float, default to 5
-            Speed criterion, in km/s, below which the inter-event time and
-            inter-event distance can be explained by errors in origin times and
-            a reasonable P-wave speed.
-        similarity_criterion: float, default to -1
-            Template similarity threshold, in terms of average CC, over
-            which two events are examined for redundancy. The default
-            value of -1 is always verified, meaning that similarity is
-            actually not taken into account.
-        progress: boolean, default to False
+        ----------
+        n_closest_stations : int, optional
+            The number of stations closest to each template used in the calculation
+            of the average cross-correlation (cc).
+        dt_criterion : float, optional
+            The time interval, in seconds, under which two events are examined for redundancy.
+        distance_criterion : float, optional
+            The distance threshold, in kilometers, between two uncertainty ellipsoids
+            under which two events are examined for redundancy.
+        speed_criterion : float, optional
+            The speed criterion, in km/s, below which the inter-event time and inter-event
+            distance can be explained by errors in origin times and a reasonable P-wave speed.
+        similarity_criterion : float, optional
+            The template similarity threshold, in terms of average cc, over which two events
+            are examined for redundancy. The default value of -1 means that similarity is not
+            taken into account.
+        progress : bool, optional
             If True, print progress bar with `tqdm`.
+        **kwargs
+            Additional keyword arguments.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This method creates a new entry in each Template instance's catalog where
+        unique events are flagged:
+        `self.templates[i].catalog.catalog['unique_events']`
         """
         disable = np.bitwise_not(progress)
         if not hasattr(self, "catalog"):
@@ -4501,15 +4707,19 @@ class TemplateGroup(Family):
     # plotting routines
     def plot_detection(self, idx, **kwargs):
         """
+        Plot the idx-th event in `self.catalog.catalog`.
+
+        This method identifies which template detected the idx-th event
+        and calls `template.plot_detection` with the appropriate arguments.
 
         Parameters
         -----------
-        idx: scalar int
+        idx : int
             Event index in `self.catalog.catalog`.
 
         Returns
         ---------
-        fig: `plt.Figure`
+        fig : matplotlib.pyplot.Figure 
             The figure showing the detected event.
         """
         tid, evidx = self.catalog.catalog.index[idx].split(".")
@@ -4519,15 +4729,21 @@ class TemplateGroup(Family):
         fig = self.templates[tt].plot_detection(int(evidx), **kwargs)
         return fig
 
-    def plot_recurrence_times(self, figsize=(20, 10), progress=False, **kwargs):
-        """Plot recurrence times vs detection times, template-wise.
+    def plot_recurrence_times(self, figsize=(15, 7), progress=False, **kwargs):
+        """
+        Plot recurrence times vs detection times, template-wise.
+
+        This method calls `template.plot_recurrence_times` for every
+        Template instance in `self.templates`. Thus, the recurrence time
+        is defined template-wise.
 
         Parameters
         -----------
-        figsize: tuple of floats, default to (20, 10)
+        figsize : tuple of floats, optional 
             Size in inches of the figure (width, height).
-        progress: boolean, default to False
-            If True, print progress bar with `tqdm`.
+            Defaults to (15, 7).
+        progress : boolean, optional
+            If True, print progress bar with `tqdm`. Defaults to False.
         """
         import matplotlib.pyplot as plt
 
