@@ -183,7 +183,13 @@ class Network(object):
 
     @property
     def interstation_distances(self):
-        """Compute the distance between all station pairs."""
+        """Compute the distance between all station pairs.
+
+        Returns:
+            DataFrame: A pandas DataFrame containing the interstation distances.
+                       The rows and columns represent the station names, and the
+                       values represent the distances in kilometers.
+        """
         # should update code to reuse utils.compute_distamces
         if (
             hasattr(self, "_interstation_distances")
@@ -507,16 +513,17 @@ class Catalog(object):
         """Plot the histograms of time of the day and day of the week.
 
         Parameters
-        ------------
-        figsize: tuple of floats, default to (16, 7)
-            Size, in inches, of the figure (width, height).
+        ----------
+        figsize : tuple of floats, optional
+            Size, in inches, of the figure (width, height). Default is (16, 7).
         UTC_local_corr : float, optional
             Apply UTC to local time correction such that:
                 `local_hour = UTC_hour + UTC_local_corr`
 
         Returns
-        ---------
-        fig: `plt.Figure`
+        -------
+        fig : matplotlib.figure.Figure
+            The created matplotlib Figure object.
         """
         import matplotlib.pyplot as plt
 
@@ -568,7 +575,7 @@ class Catalog(object):
 
         Returns
         ----------
-        fig: matplotlib.pyplot.Figure
+        fig : matplotlib.pyplot.Figure
             The figure with depth color-coded epicenters.
         """
         from . import plotting_utils
@@ -706,7 +713,7 @@ class Catalog(object):
 
         Returns
         --------
-        fig: `plt.Figure`
+        fig : matplotlib.pyplot.Figure
             The figure with color coded latitudes or longitudes.
         """
         import matplotlib.pyplot as plt
@@ -828,6 +835,8 @@ class Data(object):
         priority="HH",
         verbose=True,
     ):
+        """Arguments go to `BPMF.utils.get_np_array`.
+        """
         if not hasattr(self, "traces"):
             print("You should call read_waveforms first.")
             return None
@@ -845,10 +854,16 @@ class Data(object):
         """Read the waveform time series.
 
         Parameters
-        -----------
-        trim_traces: boolean, default to True
+        ----------
+        trim_traces : bool, optional
             If True, call `trim_waveforms` to make sure all traces have the same
             start time.
+
+        Notes
+        -----
+        Additional parameters can be provided as keyword arguments `**reader_kwargs`
+        which are passed to the `data_reader` method for waveform reading.
+
         """
         reader_kwargs.setdefault("starttime", self.date)
         reader_kwargs.setdefault("endtime", self.date + self.duration)
@@ -862,16 +877,27 @@ class Data(object):
         components=["N", "E", "Z"],
         component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
     ):
-        """Set the data availability.
+        """
+        Set the data availability.
 
         A station is available if at least one station has non-zero data. The
         availability is then accessed via the property `self.availability`.
 
         Parameters
-        -----------
-        stations: list of strings or numpy.ndarray
+        ----------
+        stations : list of strings or numpy.ndarray
             Names of the stations on which we check availability. If None, use
             `self.stations`.
+        components : list, optional
+            List of component codes to consider for availability check,
+            by default ["N", "E", "Z"]
+        component_aliases : dict, optional
+            Dictionary mapping component codes to their aliases,
+            by default {"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]}
+
+        Returns
+        -------
+        None
         """
         if not hasattr(self, "traces"):
             print("Call `self.read_waveforms` first.")
@@ -900,17 +926,24 @@ class Data(object):
         self.availability = self.availability_per_sta
 
     def trim_waveforms(self, starttime=None, endtime=None):
-        """Trim waveforms.
+        """
+        Trim waveforms.
 
-        Start times might differ of one sample on different traces. Use this
-        method to make sure all traces have the same start time.
+        Adjusts the start and end times of waveforms to ensure all traces
+        are synchronized.
 
         Parameters
-        -----------
-        starttime: string or datetime, default to None
-            If None, use `self.date` as the start time.
-        endtime: string or datetime, default to None
-            If None, use `self.date` + `self.duration` as the end time.
+        ----------
+        starttime : str or datetime, optional
+            Start time to use for trimming the waveforms. If None,
+            `self.date` is used as the start time. (default None)
+        endtime : str or datetime, optional
+            End time to use for trimming the waveforms. If None,
+            `self.date` + `self.duration` is used as the end time. (default None)
+
+        Returns
+        -------
+        None
         """
         if not hasattr(self, "traces"):
             print("You should call `read_waveforms` first.")
@@ -1246,6 +1279,8 @@ class Event(object):
         return self.sampling_rate
 
     def get_np_array(self, stations, components=None, priority="HH", verbose=True):
+        """Arguments are passed to `BPMF.utils.get_np_array`.
+        """
         if not hasattr(self, "traces"):
             print("You should call read_waveforms first.")
             return None
@@ -1290,39 +1325,48 @@ class Event(object):
 
 
     def hor_ver_uncertainties(self, mode="intersection"):
-        """Compute the horizontal and vertical uncertainties on location.
+        """
+        Compute the horizontal and vertical uncertainties on location.
 
-        Return errors as given by the 68% confidence ellipsoid.
+        Returns the errors as given by the 68% confidence ellipsoid.
 
         Parameters
-        ---------------
-        mode: string, default to 'intersection'
-            Either 'intersection' or 'projection'. If `mode` is 'intersection', the
-            horizontal uncertainties are the lengths of the semi-axes of the ellipse
-            defined by the intersection between the confidence ellipsoid and the
-            horizontal plane. This is consistent with the horizontal errors returned
-            by NLLoc. If mode is 'projection', the horizontal uncertainties are the
-            max and min span of the confidence ellipsoid in the horizontal
-            directions.
+        ----------
+        mode : str, optional
+            Specifies the mode for calculating the horizontal uncertainties.
+            - If 'intersection', the horizontal uncertainties are the lengths
+            of the semi-axes of the ellipse defined by the intersection between
+            the confidence ellipsoid and the horizontal plane.
+            - If 'projection', the horizontal uncertainties are the maximum and minimum
+            spans of the confidence ellipsoid in the horizontal directions.
+            (default 'intersection')
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        None
 
         New Attributes
-        ----------------
-        hmax_unc: scalar, float
-            The maximum horizontal uncertainty, in km.
-        hmin_unc: scalar, float
-            The minimum horizontal uncertainty, in km.
-        vmax_unc: scalar, float
-            The maximum vertical uncertainty, in km.
-        az_hmax_unc: scalar, float
-            The azimuth (angle from north) of the maximum horizontal
-            uncertainty, in degrees.
-        az_hmin_unc: scalar, float
-            The azimuth (angle from north) of the minimum horizontal
-            uncertainty, in degrees.
+        --------------
+        _hmax_unc : float
+            The maximum horizontal uncertainty in kilometers.
+        _hmin_unc : float
+            The minimum horizontal uncertainty in kilometers.
+        _vmax_unc : float
+            The maximum vertical uncertainty in kilometers.
+        _az_hmax_unc : float
+            The azimuth (angle from north) of the maximum horizontal uncertainty in degrees.
+        _az_hmin_unc : float
+            The azimuth (angle from north) of the minimum horizontal uncertainty in degrees.
 
-        Note: hmax + vmax does not have to be equal to the
-        max_loc, the latter simply being the length of the
-        longest semi-axis of the uncertainty ellipsoid.
+        Notes
+        -----
+        - The sum of _hmax_unc and _vmax_unc does not necessarily equal the
+        maximum length of the uncertainty ellipsoid's semi-axis; the latter
+        represents the longest semi-axis of the ellipsoid.
         """
         if not hasattr(self, "cov_mat"):
             print("Class instance does not have a `cov_mat` attribute.")
@@ -1372,20 +1416,24 @@ class Event(object):
         self._az_hmin_unc = az_hmin
 
     def n_closest_stations(self, n, available_stations=None):
-        """Adjust `self.stations` to the `n` closest stations.
+        """
+        Adjust `self.stations` to the `n` closest stations.
 
-
-        Find the `n` closest stations and modify `self.stations` accordingly.
-        The instance's properties will also change accordingly.
+        Finds the `n` closest stations based on distance and modifies `self.stations` accordingly.
+        The instance's properties will also change to reflect the updated station selection.
 
         Parameters
-        ----------------
-        n: scalar int
-            The `n` closest stations to fetch.
-        available_stations: list of strings, default to None
-            The list of stations from which we search the closest stations.
-            If some stations are known to lack data, the user
-            may choose to not include these in the closest stations.
+        ----------
+        n : int
+            The number of closest stations to fetch.
+        available_stations : list of strings, optional
+            The list of stations from which the closest stations are searched.
+            If certain stations are known to lack data, they can be excluded
+            from the closest stations selection. (default None)
+
+        Returns
+        -------
+        None
         """
         if not hasattr(self, "network_stations"):
             # typically, an Event instance has no network_stations
@@ -1419,102 +1467,6 @@ class Event(object):
             )
         self.stations = np.asarray(closest_stations).astype("U")
 
-    def pick_PS_phases_EQTransformer(
-        self,
-        duration,
-        threshold_P=0.60,
-        threshold_S=0.60,
-        offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
-        phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
-        component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
-        **kwargs,
-    ):
-        """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
-
-        Note1: PhaseNet must be used with 3-comp data.
-        Note2: Extra kwargs are passed to
-        `phasenet.wrapper.automatic_detection`.
-
-        Parameters
-        -----------
-        duration: scalar float
-            Duration, in seconds, of the time window to process to search for P
-            and S wave arrivals.
-        tag: string
-            Tag name of the target data. For example: 'preprocessed_1_12'.
-        threshold_P: scalar float, default to 0.60
-            Threshold on PhaseNet's probabilities to trigger the identification
-            of a P-wave arrival.
-        threshold_S: scalar float, default to 0.60
-            Threshold on PhaseNet's probabilities to trigger the identification
-            of a S-wave arrival.
-        mini_batch_size: scalar int, default to 126
-            Number of traces processed in a single batch by PhaseNet. This
-            shouldn't have to be tuned.
-        phase_on_comp: dictionary, optional
-            Dictionary defining which seismic phase is extracted on each
-            component. For example, phase_on_comp['N'] gives the phase that is
-            extracted on the north component.
-        component_aliases: Dictionary
-            Each entry of the dictionary is a list of strings.
-            `component_aliases[comp]` is the list of all aliases used for
-            the same component 'comp'. For example, `component_aliases['N'] =
-            ['N', '1']` means that both the 'N' and '1' channels will be mapped
-            to the Event's 'N' channel.
-        """
-        import seisbench.models as sbm
-
-        # load model
-        model = sbm.EQTransformer.from_pretrained("original")
-
-        if kwargs.get("read_waveforms", True):
-            # read waveforms in picking mode, i.e. with `time_shifted`=False
-            self.read_waveforms(
-                duration,
-                offset_ot=offset_ot,
-                phase_on_comp=phase_on_comp,
-                component_aliases=component_aliases,
-                time_shifted=False,
-                **kwargs,
-            )
-        ML_picks = model.classify(
-            self.traces,
-            P_threshold=threshold_P,
-            S_threshold=threshold_S,
-        )
-        # add picks to auxiliary data
-        # self.set_aux_data(PhaseNet_picks)
-        # format picks in pandas DataFrame
-        pandas_picks = pd.DataFrame(
-            index=self.stations,
-            columns=[
-                "P_picks_sec",
-                "P_probas",
-                "P_abs_picks",
-                "S_picks_sec",
-                "S_probas",
-                "S_abs_picks",
-            ],
-        )
-        for pick in ML_picks[0]:
-            sta = pick.trace_id.split(".")[1]
-            if (
-                ~pd.isna(pandas_picks.loc[sta, f"{pick.phase}_probas"])
-                and pick.peak_value > pandas_picks.loc[sta, f"{pick.phase}_probas"]
-            ):
-                pandas_picks.loc[sta, f"{pick.phase}_probas"] = pick.peak_value
-                pandas_picks.loc[sta, f"{pick.phase}_picks_sec"] = (
-                    pick.peak_time - self.origin_time
-                )
-                pandas_picks.loc[sta, f"{pick.phase}_abs_picks"] = pick.peak_time
-            else:
-                pandas_picks.loc[sta, f"{pick.phase}_probas"] = pick.peak_value
-                pandas_picks.loc[sta, f"{pick.phase}_picks_sec"] = (
-                    pick.peak_time - self.origin_time
-                )
-                pandas_picks.loc[sta, f"{pick.phase}_abs_picks"] = pick.peak_time
-        self.picks = pandas_picks
-
     def pick_PS_phases(
         self,
         duration,
@@ -1532,42 +1484,63 @@ class Event(object):
         ml_model_name="original",
         **kwargs,
     ):
-        """Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
-
-        Note1: PhaseNet must be used with 3-comp data.
-        Note2: Extra kwargs are passed to
-        `phasenet.wrapper.automatic_detection`.
+        """
+        Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
 
         Parameters
-        -----------
-        duration: scalar float
-            Duration, in seconds, of the time window to process to search for P
-            and S wave arrivals.
-        tag: string
-            Tag name of the target data. For example: 'preprocessed_1_12'.
-        threshold_P: scalar float, default to 0.60
-            Threshold on PhaseNet's probabilities to trigger the identification
-            of a P-wave arrival.
-        threshold_S: scalar float, default to 0.60
-            Threshold on PhaseNet's probabilities to trigger the identification
-            of a S-wave arrival.
-        mini_batch_size: scalar int, default to 126
-            Number of traces processed in a single batch by PhaseNet. This
-            shouldn't have to be tuned.
-        phase_on_comp: dictionary, optional
-            Dictionary defining which seismic phase is extracted on each
-            component. For example, phase_on_comp['N'] gives the phase that is
-            extracted on the north component.
-        component_aliases: Dictionary
-            Each entry of the dictionary is a list of strings.
-            `component_aliases[comp]` is the list of all aliases used for
-            the same component 'comp'. For example, `component_aliases['N'] =
-            ['N', '1']` means that both the 'N' and '1' channels will be mapped
-            to the Event's 'N' channel.
-        upsampling: scalar integer, default to 1
-            Upsampling factor applied before calling PhaseNet.
-        downsampling: scalar integer, default to 1
-            Downsampling factor applied before calling PhaseNet.
+        ----------
+        duration : float
+            Duration of the time window, in seconds, to process and search
+            for P and S wave arrivals.
+        threshold_P : float, optional
+            Threshold on PhaseNet's probabilities to trigger the
+            identification of a P-wave arrival. (default 0.60)
+        threshold_S : float, optional
+            Threshold on PhaseNet's probabilities to trigger the
+            identification of an S-wave arrival. (default 0.60)
+        offset_ot : float, optional
+            Offset in seconds to apply to the origin time.
+            (default cfg.BUFFER_EXTRACTED_EVENTS_SEC)
+        mini_batch_size : int, optional
+            Number of traces processed in a single batch by PhaseNet. (default 126)
+        phase_on_comp : dict, optional
+            Dictionary defining the seismic phase extracted on each component.
+            For example, `phase_on_comp['N']` specifies the phase extracted on
+            the north component.
+            (default {"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"})
+        component_aliases : dict, optional
+            Dictionary mapping each component to a list of strings representing
+            aliases used for the same component. For example, `component_aliases['N'] = ['N', '1']`
+            means that both the 'N' and '1' channels will be mapped to the
+            Event's 'N' channel.
+            (default {"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]})
+        upsampling : int, optional
+            Upsampling factor applied before calling PhaseNet. (default 1)
+        downsampling : int, optional
+            Downsampling factor applied before calling PhaseNet. (default 1)
+        use_apriori_picks : bool, optional
+            Flag indicating whether to use apriori picks for refining
+            the P and S wave picks. (default False)
+        search_win_sec : float, optional
+            Search window size, in seconds, used for refining
+            the P and S wave picks. (default 2.0)
+        ml_model : object, optional
+            Pre-trained PhaseNet model object. If not provided,
+            the default model will be loaded. (default None)
+        ml_model_name : str, optional
+            Name of the pre-trained PhaseNet model to load if `ml_model`
+            is not provided. (default "original")
+        **kwargs : dict, optional
+            Extra keyword arguments passed to `Event.read_waveforms`.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        - PhaseNet must be used with 3-component data.
+        - Results are stored in the object's attribute `self.picks`.
         """
         from torch import no_grad, from_numpy
 
@@ -1612,7 +1585,7 @@ class Event(object):
                     from_numpy(data_arr_n).float()
                     )
             ml_probas = ml_probas.detach().numpy()
-        # find picks and sotre in dictionaries
+        # find picks and store in dictionaries
         picks = {}
         picks["P_picks"] = {}
         picks["P_proba"] = {}
@@ -1686,43 +1659,62 @@ class Event(object):
         n_threads=1,
         **reader_kwargs,
     ):
-        """Read waveform data (Event class).
+        """
+        Read waveform data (Event class).
 
         Parameters
-        -----------
+        ----------
         duration : float
-            Duration, in seconds, of the extracted time windows.
-        phase_on_comp : dictionary, optional
-            Dictionary defining which seismic phase is extracted on each
-            component. For example, phase_on_comp['N'] gives the phase that is
-            extracted on the north component.
-        component_aliases : dictionary, optional
-            Each entry of the dictionary is a list of strings.
-            `component_aliases[comp]` is the list of all aliases used for
-            the same component 'comp'. For example, `component_aliases['N'] =
-            ['N', '1']` means that both the 'N' and '1' channels will be mapped
-            to the Event's 'N' channel.
-        offset_phase : dictionary, optional
-            Dictionary defining when the time window starts with respect to the
-            pick. A positive offset means the window starts before the pick. Not
-            used if `time_shifted` is False.
-        time_shifted : boolean, optional
-            If True (default), the moveouts are used to extract time windows from specific
-            seismic phases. If False, windows are simply extracted with respect to
-            the origin time.
+            Duration of the extracted time windows in seconds.
+        phase_on_comp : dict, optional
+            Dictionary defining the seismic phase extracted on each component.
+            For example, `phase_on_comp['N']` specifies the phase extracted on the north component.
+            (default {"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"})
+        component_aliases : dict, optional
+            Dictionary mapping each component to a list of strings
+            representing aliases used for the same component.
+            For example, `component_aliases['N'] = ['N', '1']` means that both the
+            'N' and '1' channels will be mapped to the Event's 'N' channel.
+            (default {"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]})
+        offset_phase : dict, optional
+            Dictionary defining when the time window starts with respect to the pick.
+            A positive offset means the window starts before the pick.
+            Not used if `time_shifted` is False. (default {"P": 1.0, "S": 4.0})
+        time_shifted : bool, optional
+            If True (default), the moveouts are used to extract time windows
+            from specific seismic phases. If False, windows are simply extracted
+            with respect to the origin time.
         offset_ot : float, optional
-            Only used if `time_shifted` is False. Time, in seconds, taken before
-            `origin_time`. Default to `cfg.BUFFER_EXTRACTED_EVENTS_SEC`.
-        data_reader : func, optional
-            Function that takes a path and optional key-word arguments to read
-            data from this path and returns an `obspy.Stream` instance. If None
-            (default), this function uses `self.data_reader` and returns
-            None if `self.data_reader=None`.
+            Only used if `time_shifted` is False.
+            Time in seconds taken before `origin_time`.
+            (default cfg.BUFFER_EXTRACTED_EVENTS_SEC)
+        data_reader : function, optional
+            Function that takes a path and optional keyword arguments to read
+            data from this path and returns an `obspy.Stream` instance.
+            If None (default), this function uses `self.data_reader` and
+            returns None if `self.data_reader=None`.
         n_threads : int, optional
-            The number of threads used to parallelize reading. Default is 1
-            (sequential reading). 
+            Number of threads used to parallelize reading. Default is 1 (sequential reading).
+        **reader_kwargs : dict, optional
+            Extra keyword arguments passed to the `data_reader` function.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        None
+
+        Notes
+        -----
+        - This function populates the `self.traces` attribute with the waveform data.
+        - The `duration` and `component_aliases` are stored as attributes in the instance.
+        - The `phase_on_comp` and `offset_phase` information is stored
+        as auxiliary data in the instance.
+        - If `reader_kwargs` contains the "attach_response" key set to True,
+        traces without instrument response information are removed from `self.traces`.
         """
-        # from pyasdf import ASDFDataSet
         from obspy import Stream
         from functools import partial
         if n_threads != 1:
@@ -1792,20 +1784,31 @@ class Event(object):
             )
 
     def relocate(self, *args, routine="NLLoc", **kwargs):
-        """Wrapper function for relocation with multiple methods.
+        """
+        Wrapper function for earthquake relocation using multiple methods.
 
-        This single function interfaces the earthquake relocation with
-        multiple relocation routines. All key-word arguments go the
-        routine corresponding to `routine`.
+        This function serves as an interface for the earthquake relocation process
+        using different relocation routines. The routine to be used is specified
+        by the `routine` parameter. All keyword arguments are passed to the
+        corresponding routine.
 
         Parameters
         ----------
-        routine : string, optional
-            Method used for relocation.
-                - 'NLLoc' calls `relocate_NLLoc` and
-                requires `self` to have the attribute `picks`.
-                - 'beam' calls `relocated_beam`.
+        routine : str, optional
+            Method used for the relocation. Available options are:
+            - 'NLLoc': Calls the `relocate_NLLoc` method and requires the event
+              object to have the `picks` attribute.
+            - 'beam': Calls the `relocate_beam` method.
+            Default is 'NLLoc'.
+
+        Notes
+        -----
+        - The `relocate` function acts as a wrapper that allows for flexibility in
+          choosing the relocation routine.
+        - Depending on the specified `routine`, the function calls the corresponding
+          relocation method with the provided arguments and keyword arguments.
         """
+
         if routine.lower() == "nlloc":
             self.relocate_NLLoc(**kwargs)
         elif routine.lower() == "beam":
@@ -1823,44 +1826,52 @@ class Event(object):
         device="cpu",
         **kwargs,
     ):
-        """ 
+        """
+        Use a Beamformer instance for backprojection to relocate the event.
+
         Parameters
         ----------
-        beamformer : `BPMF.template_search.Beamformer`
+        beamformer : BPMF.template_search.Beamformer
             Beamformer instance used for backprojection.
         duration : float, optional
-            Duration, in seconds, of the extracted time windows. Default is
-            60sec.
+            Duration, in seconds, of the extracted time windows. Default is 60.0 seconds.
         offset_ot : float, optional
-            Only used if `time_shifted` is False. Time, in seconds, taken before
-            `origin_time`. Default to `cfg.BUFFER_EXTRACTED_EVENTS_SEC`.
-        phase_on_comp : dictionary, optional
-            Dictionary defining which seismic phase is extracted on each
-            component. For example, phase_on_comp['N'] gives the phase that is
-            extracted on the north component.
-        component_aliases : dictionary, optional
-            Each entry of the dictionary is a list of strings.
-            `component_aliases[comp]` is the list of all aliases used for
-            the same component 'comp'. For example, `component_aliases['N'] =
-            ['N', '1']` means that both the 'N' and '1' channels will be mapped
-            to the Event's 'N' channel.
-        offset_phase : dictionary, optional
-            Dictionary defining when the time window starts with respect to the
-            pick. A positive offset means the window starts before the pick. Not
-            used if `time_shifted` is False.
+            Time in seconds taken before the `origin_time`. Only used if `time_shifted` is False.
+            Default is `cfg.BUFFER_EXTRACTED_EVENTS_SEC`.
+        phase_on_comp : dict, optional
+            Dictionary defining which seismic phase is extracted on each component.
+            For example, `phase_on_comp['N']` gives the phase extracted on the north component.
+            Default is `{"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"}`.
+        component_aliases : dict, optional
+            Dictionary where each entry is a list of strings. `component_aliases[comp]`
+            is the list of all aliases used for the same component 'comp'. For example,
+            `component_aliases['N'] = ['N', '1']` means that both the 'N' and '1' channels
+            will be mapped to the Event's 'N' channel. Default is `{"N": ["N", "1"],
+            "E": ["E", "2"], "Z": ["Z"]}`.
         waveform_features : numpy.ndarray, optional
-            If not None (default), it must be a `(num_stations, num_channels,
-            num_time_samples)` numpy.ndarray. This array contains the waveform
-            features, or characteristic functions, that are backprojected onto
-            the grid of theoretical seismic sources.
+            If not None, it must be a `(num_stations, num_channels, num_time_samples)`
+            numpy.ndarray containing waveform features or characteristic functions
+            that are backprojected onto the grid of theoretical seismic sources.
+            Default is None.
         restricted_domain_side_km : float, optional
-            Location uncertainties are computed on the full 3D beam at the time
-            when the 4D beam achieves its maximum over the `duration` seconds.
-            To avoid having grid-size-dependent uncertainties, it is useful
-            to truncate the domain around the location of the max beam. This
-            variable controls the size of the truncated domain.
-        device : string, optional
-            Either 'cpu' (default) or 'gpu'.
+            The location uncertainties are computed on the full 3D beam at the time when
+            the 4D beam achieves its maximum over the `duration` seconds. To avoid having
+            grid-size-dependent uncertainties, it is useful to truncate the domain around
+            the location of the maximum beam. This parameter controls the size of the
+            truncated domain. Default is 100.0 km.
+        device : str, optional
+            Device to be used for computation. Must be either 'cpu' (default) or 'gpu'.
+        **kwargs : dict, optional
+            Additional keyword arguments.
+
+        Notes
+        -----
+        - The function updates the `origin_time`, `longitude`, `latitude`, and `depth`
+          attributes of the event based on the maximum focusing of the beamformer.
+        - Location uncertainties are estimated based on the computed likelihood,
+          a restricted domain, and the location coordinates.
+        - The estimated uncertainties can be accessed through the `Event`'s
+        properties `Event.hmax_unc`, `Event.hmin_unc`, `Event.vmax_unc`.
         """
         from .template_search import Beamformer, envelope
 
@@ -1947,23 +1958,31 @@ class Event(object):
     def relocate_NLLoc(
             self, stations=None, method="EDT", verbose=0, cleanup_out_dir=True, **kwargs
             ):
-        """Relocate with NLLoc using `self.picks`.
+        """
+        Relocate the event using NonLinLoc (NLLoc) based on the provided picks.
 
         Parameters
-        -----------
+        ----------
         stations : list of str, optional
             Names of the stations to include in the relocation process. If None,
-            `stations` is set to `self.stations`. Defaults to None.
-        method : str, optional 
-            Optimization algorithm used by NonLinLoc. Either 'GAU_ANALYTIC',
-            'EDT', 'EDT_OT', 'EDT_OT_WT_ML'. See NonLinLoc's documentation for
-            more information. Defaults to 'EDT'.
+            all stations in `self.stations` are used. Default is None.
+        method : str, optional
+            Optimization algorithm used by NonLinLoc. Available options are:
+            'GAU_ANALYTIC', 'EDT', 'EDT_OT', 'EDT_OT_WT_ML'. Refer to NonLinLoc's
+            documentation for more details. Default is 'EDT'.
         verbose : int, optional
-            If more than 0, print NLLoc's outputs to the standard output.
-            Defaults to 0.
-        cleanup_out_dir : boolean, optional
-            If True, NLLoc's output files are deleted after reading the
-            relevant information.
+            Verbosity level of NonLinLoc. If greater than 0, NonLinLoc's outputs
+            are printed to the standard output. Default is 0.
+        cleanup_out_dir : bool, optional
+            If True, NLLoc's output files are deleted after reading the relevant
+            information. Default is True.
+        **kwargs : dict, optional
+            Additional keyword arguments for `BPMF.NLLoc_utils.write_NLLoc_control`.
+
+        Notes
+        -----
+        - The event's attributes, including the origin time and location, are updated.
+        - The theoretical arrival times are attached to the event in `Event.arrival_times`.
         """
         import subprocess
         import glob
@@ -2079,13 +2098,19 @@ class Event(object):
                 pathlib.Path(output_dir).rmdir()
 
     def remove_outlier_picks(self, max_diff_percent=25.0):
-        """Remove picks that are too far from predicted arrival times.
+        """
+        Remove picks that are too far from the predicted arrival times.
+
+        Picks that have a difference exceeding the specified threshold between the
+        picked arrival time and the predicted arrival time are considered outliers
+        and are removed.
 
         Parameters
         ----------
-        max_diff_percent: float, default to 25
-            Maximum difference, in percentage, between the picked and predicted
-            arrival time.
+        max_diff_percent : float, optional
+            Maximum allowable difference, in percentage, between the picked and
+            predicted arrival times. Picks with a difference greater than this
+            threshold will be considered outliers and removed. Default is 25.0.
         """
         stations_outlier = []
         for sta in self.stations:
@@ -2105,14 +2130,24 @@ class Event(object):
                     self.picks.loc[sta, f"{ph}_probas"] = np.nan
 
     def zero_out_clipped_waveforms(self, kurtosis_threshold=-1.0):
-        """Find waveforms with anomalous statistic and zero them out.
+        """
+        Find waveforms with anomalous statistic and zero them out.
+
+        This function identifies waveforms with a kurtosis value below the specified
+        threshold as anomalous and zeros out their data. The kurtosis of a waveform
+        is a measure of its statistical distribution, with a value of 0 indicating a
+        Gaussian distribution.
 
         Parameters
         ----------
-        kurtosis_threshold: scalar float, optional
-            Threshold below which the kurtosis is considered anomalous.
-            Note that the Fischer definition of the kurtosis is used,
-            that is, kurtosis=0 for gaussian distribution.
+        kurtosis_threshold : float, optional
+            Threshold below which the kurtosis is considered anomalous. Waveforms
+            with a kurtosis value lower than this threshold will have their data
+            zeroed out. Default is -1.0.
+
+        Notes
+        -----
+        - This is an oversimplified technique to find clipped waveforms.
         """
         from scipy.stats import kurtosis
 
@@ -2123,12 +2158,30 @@ class Event(object):
                 tr.data = np.zeros(len(tr.data), dtype=tr.data.dtype)
 
     def remove_distant_stations(self, max_distance_km=50.0):
-        """Remove picks on stations that are further than given distance.
+        """
+        Remove picks on stations that are further than a given distance.
+
+        This function removes picks on stations that are located at a distance
+        greater than the specified maximum distance. The distance between the source
+        and each station is computed using the `source_receiver_dist` attribute.
+        Picks on stations beyond the maximum distance are set to NaN.
 
         Parameters
         ----------
-        max_distance_km: float, default to 50
-            Maximum distance, in km, beyond which picks are set to NaN.
+        max_distance_km : float, optional
+            Maximum distance, in kilometers, beyond which picks are considered to be
+            on stations that are too distant. Picks on stations with a distance
+            greater than this threshold will be set to NaN. Default is 50.0.
+
+        Notes
+        -----
+        - The function checks if the `source_receiver_dist` attribute is present in
+          the object. If it is not available, an informative message is printed and
+          the function returns.
+        - For each station in `stations`, the distance between the source and the
+          station is retrieved from the `source_receiver_dist` attribute.
+        - If the distance of a station is greater than the specified maximum distance
+          (`max_distance_km`), the picks associated with that station are set to NaN.
         """
         if self.source_receiver_dist is None:
             print(
@@ -2288,45 +2341,73 @@ class Event(object):
                     )
 
     def set_source_receiver_dist(self, network):
-        """Set source-receiver distances, given `network`.
+        """
+        Set source-receiver distances using the provided `network`.
+
+        This function calculates the hypocentral and epicentral distances between
+        the event's source location and the stations in the given network. It
+        stores the distances as attributes of the event object.
 
         Parameters
-        -----------
-        network: `dataset.Network` instance
-            The `Network` instance with the station coordinates to use
-            in the source-receiver computation.
+        ----------
+        network : dataset.Network
+            The `Network` instance containing the station coordinates to use in
+            the source-receiver distance calculation.
+
+        Notes
+        -----
+        - The function uses the `BPMF.utils.compute_distances` function to compute
+          both hypocentral and epicentral distances between the event's source
+          location and the stations in the network.
+        - The computed distances can be accessed with the `Event`'s properties
+        `Event.source_receiver_dist` and `Event.source_receiver_epicentral_dist`.
         """
-        distances = utils.compute_distances(
+        hypocentral_distances, epicentral_distances = utils.compute_distances(
             [self.longitude],
             [self.latitude],
             [self.depth],
             network.longitude,
             network.latitude,
             network.depth,
+            return_epicentral_distances=True
         )
         self._source_receiver_dist = pd.Series(
             index=network.stations,
-            data=distances.squeeze(),
-            name="source-receiver dist (km)",
+            data=hypocentral_distances.squeeze(),
+            name="source-receiver hypocentral distance (km)",
+        )
+        self._source_receiver_epicentral_dist = pd.Series(
+            index=network.stations,
+            data=epicentral_distances.squeeze(),
+            name="source-receiver epicentral distance (km)",
         )
         if not hasattr(self, "network_stations"):
             self.network_stations = self.stations.copy()
         self._source_receiver_dist = self.source_receiver_dist.loc[
             self.network_stations
         ]
+        self._source_receiver_epicentral_dist = self.source_receiver_epicentral_dist.loc[
+            self.network_stations
+        ]
 
     def trim_waveforms(self, starttime=None, endtime=None):
-        """Trim waveforms.
+        """
+        Trim waveforms to a specified time window.
 
-        Start times might differ of one sample on different traces. Use this
-        method to make sure all traces have the same start time.
+        This function trims the waveforms in the event's `traces` attribute to the
+        specified time window. It ensures that all traces have the same start time
+        by adjusting the start time if necessary.
 
         Parameters
-        -----------
-        starttime: string or datetime, default to None
-            If None, use `self.date` as the start time.
-        endtime: string or datetime, default to None
-            If None, use `self.date` + `self.duration` as the end time.
+        ----------
+        starttime : str or datetime, optional
+            The start time of the desired time window. If None, the event's `date`
+            attribute is used as the start time. Default is None.
+        endtime : str or datetime, optional
+            The end time of the desired time window. If None, the end time is set
+            as `self.date` + `self.duration`, where `self.date` is the event's date
+            attribute and `self.duration` is the event's duration attribute.
+            Default is None.
         """
         if not hasattr(self, "traces"):
             print("You should call `read_waveforms` first.")
@@ -2342,7 +2423,14 @@ class Event(object):
             )
 
     def update_picks(self):
-        """Update the picks w.r.t the current origin time."""
+        """
+        Update the picks with respect to the current origin time.
+
+        This function updates the picks of each station with respect to the current
+        origin time of the event. It computes the relative pick times by subtracting
+        the origin time from the absolute pick times and update the
+        `picks` attribute of the event.
+        """
         if not hasattr(self, "picks"):
             print("Does not have a `picks` attribute.")
             return
@@ -2355,7 +2443,14 @@ class Event(object):
                 ) - udt(self.origin_time)
 
     def update_travel_times(self):
-        """Update travel times w.r.t the current origin time."""
+        """
+        Update the travel times with respect to the current origin time.
+
+        This function updates the travel times of each station and phase with respect
+        to the current origin time of the event. It adjusts the propagation times
+        by subtracting the origin time from the absolute times and update the
+        `arrival_times` attribute of the event.
+        """
         if not hasattr(self, "arrival_times"):
             print("Does not have an `arrival_times` attribute.")
             return
@@ -2366,17 +2461,33 @@ class Event(object):
                 ) - udt(self.origin_time)
 
     def update_aux_data_database(self, overwrite=False):
-        """Add the new elements of `self.aux_data` that are not in the database.
+        """
+        Update the auxiliary data in the database with new elements from `self.aux_data`.
+
+        This function adds new elements from the `self.aux_data` attribute to the database
+        located at `path_database`. If the element already exists in the database
+        and `overwrite` is False, it skips the element. If `overwrite` is True, it
+        overwrites the existing data in the database with the new data.
 
         Parameters
-        -----------
+        ----------
+        overwrite : bool, optional
+            If True, overwrite existing data in the database. If False (default),
+            skip existing elements and do not modify the database.
 
-        overwrite : boolean, optional
-            If True, will overwrite existing data. Otherwise, does not do
-            anything.
+        Notes
+        -----
+        - If any error occurs during the process, the function removes the lock file and
+          raises the exception.
+
+        Raises
+        ------
+        Exception
+            If an error occurs while updating the database, the function raises the
+            exception after removing the lock file.
         """
         if not hasattr(self, "path_database"):
-            print("It looks like you create this Event instance from scratch...")
+            print("It looks like you have created this Event instance from scratch...")
             print("Call Event.write instead.")
             return
         lock_file = os.path.splitext(self.path_database)[0] + ".lock"
@@ -2521,22 +2632,44 @@ class Event(object):
         gid=None,
         hdf5_file=None,
     ):
-        """Write to hdf5 file.
+        """
+        Write the event information to an HDF5 file.
+
+        This function writes the event information, including waveform data if
+        specified, to an HDF5 file. The event information is stored in a specific
+        group within the file. The function uses the `h5py` module to interact
+        with the HDF5 file.
 
         Parameters
-        ------------
-        db_filename: string
-            Name of the hdf5 file storing the event information.
-        db_path: string, default to `cfg.OUTPUT_PATH`
-            Name of the directory with `db_filename`.
-        save_waveforms: boolean, default to False
-            If True, save the waveforms.
-        gid: string, default to None
-            Name of the hdf5 group where Event will be stored. If `gid=None`
-            then Event is directly stored at the root.
-        hdf5_file: `h5py.File`, default to None
-            If not None, is an opened file pointing directly at the subfolder of
-            interest.
+        ----------
+        db_filename : str
+            Name of the HDF5 file storing the event information.
+        db_path : str, optional
+            Path to the directory where the HDF5 file is located. Defaults to
+            `cfg.OUTPUT_PATH`.
+        save_waveforms : bool, optional
+            If True, save the waveform data associated with the event in the HDF5
+            file. Defaults to False.
+        gid : str, optional
+            Name of the HDF5 group where the event will be stored. If `gid` is None,
+            the event is stored directly at the root of the HDF5 file. Defaults to
+            None.
+        hdf5_file : h5py.File, optional
+            An opened HDF5 file object pointing directly to the subfolder of
+            interest. If provided, the `db_path` parameter is ignored. Defaults to
+            None.
+
+        Notes
+        -----
+        - The function uses the `read_write_waiting_list` function from the `utils`
+          module to handle the writing operation in a thread-safe manner. The actual
+          writing is performed by the `_write` method, which is called with the
+          appropriate parameters.
+        - The `read_write_waiting_list` function handles the synchronization and
+          queueing of write operations to avoid conflicts when multiple processes
+          try to write to the same file simultaneously. The function waits for a
+          lock before executing the `func` partial function, which performs the
+          actual writing operation. **BUT** the queueing is still not bullet-proof.
         """
         from functools import partial
         func = partial(
@@ -2563,15 +2696,36 @@ class Event(object):
         ylabel=r"Velocity ($\mu$m/s)",
         **kwargs,
     ):
-        """Plot the waveforms of the Event instance.
+        """
+        Plot the waveforms of the Event instance.
+
+        This function plots the waveforms associated with the Event instance. The
+        waveforms are plotted as subplots, with each subplot representing a station
+        and component combination. The start and end times of the waveforms are
+        determined to set the x-axis limits of each subplot. The picks and theoretical
+        arrival times associated with the Event are overlaid on the waveforms.
 
         Parameters
-        ------------
+        ----------
+        figsize : tuple, optional
+            The figure size in inches, specified as a tuple (width, height). Defaults
+            to (20, 15).
+        gain : float, optional
+            The gain factor applied to the waveform data before plotting. Defaults to
+            1.0e6.
+        stations : list of str, optional
+            The list of station names for which to plot the waveforms. If None, all
+            stations associated with the Event are plotted. Defaults to None.
+        ylabel : str, optional
+            The label for the y-axis. Defaults to r"Velocity ($\mu$m/s).
+        **kwargs
+            Additional keyword arguments that are passed to the matplotlib plot
+            function.
 
         Returns
-        ----------
-        fig: plt.Figure
-            Figure instance produced by this method.
+        -------
+        fig : matplotlib.figure.Figure
+            The Figure instance produced by this method.
         """
         import matplotlib.pyplot as plt
         import matplotlib.dates as mdates
