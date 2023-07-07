@@ -382,7 +382,7 @@ div.rendered_html tbody tr:hover {
 <h1>Template Matching<a class="headerlink" href="#Template-Matching" title="Permalink to this heading"></a></h1>
 <p>Use the events detected with the backprojection method and previously formatted in <code class="docutils literal notranslate"><span class="pre">6_build_template_database.ipynb</span></code> as template events for a matched-filter search.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
@@ -402,7 +402,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&quot;svg&quot;]
@@ -410,7 +410,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PROGRAM PARAMETERS</span>
@@ -480,7 +480,7 @@ div.rendered_html tbody tr:hover {
 <section id="Read-the-template-database">
 <h2>Read the template database<a class="headerlink" href="#Read-the-template-database" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read the network metadata</span>
@@ -490,7 +490,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">template_filenames</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span>
@@ -501,7 +501,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># initialize the template group</span>
@@ -520,14 +520,14 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.55sec to read the 13 templates.
+0.55sec to read the 14 templates.
 </pre></div></div>
 </div>
 </section>
 <section id="Initialize-the-BPMF.similarity_search.MatchedFilter-instance.">
 <h2>Initialize the <code class="docutils literal notranslate"><span class="pre">BPMF.similarity_search.MatchedFilter</span></code> instance.<a class="headerlink" href="#Initialize-the-BPMF.similarity_search.MatchedFilter-instance." title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># initialize the MatchedFilter object</span>
@@ -551,7 +551,7 @@ div.rendered_html tbody tr:hover {
 <section id="Load-the-data">
 <h2>Load the data<a class="headerlink" href="#Load-the-data" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">date_list</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">datelist</span><span class="p">()</span>
@@ -568,7 +568,7 @@ Days to process:  DatetimeIndex([&#39;2012-07-26 00:00:00+00:00&#39;], dtype=&#3
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># this could be written as a loop:</span>
@@ -605,33 +605,33 @@ Days to process:  DatetimeIndex([&#39;2012-07-26 00:00:00+00:00&#39;], dtype=&#3
 Processing 2012-07-26
 24 Trace(s) in Stream:
 YH.DD06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC08..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DE08..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.SPNC..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC06..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.SAUV..HHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DE08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.SPNC..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC06..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC08..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.SPNC..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DE08..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.SAUV..HHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.SPNC..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DE08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DD06..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DC07..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DE07..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DD06..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DD06..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DE07..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DC07..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DD06..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.SAUV..HHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DE08..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.SPNC..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC08..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DC06..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.SPNC..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DE08..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC08..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DC07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DE07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># compute data availability</span>
@@ -650,7 +650,7 @@ YH.DE07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 
 <section id="Run-the-matched-filter-search">
 <h2>Run the matched-filter search<a class="headerlink" href="#Run-the-matched-filter-search" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># we use verbose = 1 for this example but you might want to use verbose = 0 for large-scale applications</span>
@@ -671,37 +671,39 @@ YH.DE07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Template 0 detected 39 events.
+20 correlation computations were skipped on the 0-th template. Can be caused by zeros in data, or too low amplitudes (try to increase the gain).
+Template 0 detected 29 events.
 Template 1 detected 1 events.
-Template 10 detected 42 events.
-Template 11 detected 1 events.
-Template 12 detected 1 events.
-Template 2 detected 32 events.
-Template 3 detected 12 events.
-Template 4 detected 12 events.
-Template 5 detected 34 events.
-Template 6 detected 4 events.
+Template 10 detected 13 events.
+Template 11 detected 35 events.
+Template 12 detected 4 events.
+Template 13 detected 1 events.
+Template 2 detected 41 events.
+Template 3 detected 30 events.
+Template 4 detected 41 events.
+Template 5 detected 1 events.
+Template 6 detected 1 events.
 Template 7 detected 1 events.
-Template 8 detected 1 events.
-Template 9 detected 31 events.
-Total time spent on computing CCs: 5.22sec
-Total time spent on finding detections: 0.55sec
+Template 8 detected 20 events.
+Template 9 detected 14 events.
+Total time spent on computing CCs: 5.68sec
+Total time spent on finding detections: 0.53sec
 </pre></div></div>
 </div>
 </section>
 <section id="Plot-the-detected-events">
 <h2>Plot the detected events<a class="headerlink" href="#Plot-the-detected-events" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># choose the template you want to plot</span>
-<span class="n">TEMPLATE_ID</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">TEMPLATE_ID</span> <span class="o">=</span> <span class="mi">0</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">MF</span><span class="o">.</span><span class="n">plot_cc</span><span class="p">(</span><span class="n">TEMPLATE_ID</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
@@ -715,7 +717,7 @@ Total time spent on finding detections: 0.55sec
 <img alt="../../_images/tutorial_notebooks_8_template_matching_18_0.svg" src="../../_images/tutorial_notebooks_8_template_matching_18_0.svg" /></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read the detected events&#39; waveforms for plotting purposes</span>
@@ -733,7 +735,7 @@ Total time spent on finding detections: 0.55sec
 <span class="n">TIME_SHIFTED</span> <span class="o">=</span> <span class="kc">True</span>
 
 <span class="n">t1</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">detections</span><span class="p">)):</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">detections</span><span class="p">[</span><span class="n">TEMPLATE_ID</span><span class="p">])):</span>
     <span class="n">detections</span><span class="p">[</span><span class="n">TEMPLATE_ID</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span>
         <span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">TEMPLATE_LEN_SEC</span><span class="p">,</span>
         <span class="n">phase_on_comp</span><span class="o">=</span><span class="n">PHASE_ON_COMP</span><span class="p">,</span>
@@ -753,16 +755,16 @@ Total time spent on finding detections: 0.55sec
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-3.02sec to read the waveforms for all 13 detections.
+5.45sec to read the waveforms for all 14 detections.
 </pre></div></div>
 </div>
 <p>Using <code class="docutils literal notranslate"><span class="pre">BPMF.similarity.MatchedFilter.plot_detection</span></code> method, we plot the waveforms of a detected event (black) on top of which we plot the template waveforms (red). The location in time of the detected event is also shown by an arrow on the CC time series (top plot).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># choose the event idx you want to plot</span>
-<span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">7</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">MF</span><span class="o">.</span><span class="n">plot_detection</span><span class="p">(</span>
     <span class="n">detections</span><span class="p">[</span><span class="n">TEMPLATE_ID</span><span class="p">][</span><span class="n">EVENT_IDX</span><span class="p">],</span>
     <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
@@ -777,11 +779,11 @@ Total time spent on finding detections: 0.55sec
 <img alt="../../_images/tutorial_notebooks_8_template_matching_21_0.svg" src="../../_images/tutorial_notebooks_8_template_matching_21_0.svg" /></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># choose the event idx you want to plot</span>
-<span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">18</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">MF</span><span class="o">.</span><span class="n">plot_detection</span><span class="p">(</span>
     <span class="n">detections</span><span class="p">[</span><span class="n">TEMPLATE_ID</span><span class="p">][</span><span class="n">EVENT_IDX</span><span class="p">],</span>
     <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
@@ -800,7 +802,7 @@ Total time spent on finding detections: 0.55sec
 <h2>Save the detected events to database<a class="headerlink" href="#Save-the-detected-events-to-database" title="Permalink to this heading"></a></h2>
 <p>Here, we save the detected events’ metadata in a hdf5 file that is unique to each template. Each detected event is stored in a hdf5 <code class="docutils literal notranslate"><span class="pre">Group</span></code> which is identified by a string with its origin time.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># save detections in their parent-template file</span>
@@ -830,7 +832,7 @@ Total time spent on finding detections: 0.55sec
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Writing took 25.21sec.
+Writing took 27.60sec.
 </pre></div></div>
 </div>
 <p>We are almost done! Note that neighboring templates are very likely to detect some events in common. Thus, to build a meaningful earthquake catalog with no (or, more realistically, few) multiple detections of the same events, we still need to clean up the database (see next notebook).</p>

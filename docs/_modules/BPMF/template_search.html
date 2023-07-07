@@ -100,59 +100,257 @@
 <span class="kn">from</span> <span class="nn">obspy.core</span> <span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">udt</span>
 
 
+<div class="viewcode-block" id="TravelTimes"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.TravelTimes">[docs]</a><span class="k">class</span> <span class="nc">TravelTimes</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for handling travel time tables. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">tt_filename</span><span class="p">,</span>
+            <span class="n">tt_folder_path</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">MOVEOUTS_PATH</span><span class="p">,</span>
+            <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tt_filename : str</span>
+<span class="sd">            Name of the hdf5 file with the travel time tables.</span>
+<span class="sd">        tt_folder_path : str, optional</span>
+<span class="sd">            Path to the folder where `tt_filename`` is located. Default</span>
+<span class="sd">            is `cfg.MOVEOUTS_PATH`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">where</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tt_folder_path</span><span class="p">,</span> <span class="n">tt_filename</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;source_indexes&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_indexes</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call self.read first.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;source_indexes&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_indexes</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call self.read first.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">phases</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times_samp&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+    <span class="c1"># aliases</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call self.read first.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">source_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;source_coordinates&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call self.read first.&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TravelTimes.read"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.TravelTimes.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phases</span><span class="p">,</span> <span class="n">source_indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">read_coords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        phases : list of str</span>
+<span class="sd">            List of the seismic phases to read from `self.where`.</span>
+<span class="sd">        source_indexes : array-like, optional</span>
+<span class="sd">            Array-like with the source indexes to read. Default is None</span>
+<span class="sd">            (read the whole travel time table).</span>
+<span class="sd">        read_coords : boolean, optional</span>
+<span class="sd">            If True, the source coordinates are read  from `self.where`.</span>
+<span class="sd">        stations : list of str, optional</span>
+<span class="sd">            If not None, is a list of station names to read a subset of</span>
+<span class="sd">            travel times from `self.where`. Default is None, that is, all</span>
+<span class="sd">            stations are read.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">h5py</span> <span class="k">as</span> <span class="nn">h5</span>
+
+        <span class="n">tts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">with</span> <span class="n">h5</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">where</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fin</span><span class="p">:</span>
+            <span class="n">grid_shape</span> <span class="o">=</span> <span class="n">fin</span><span class="p">[</span><span class="s2">&quot;source_coordinates&quot;</span><span class="p">][</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+            <span class="k">if</span> <span class="n">source_indexes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">source_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">grid_shape</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">source_indexes</span> <span class="o">=</span> <span class="n">source_indexes</span>
+            <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">phases</span><span class="p">:</span>
+                <span class="n">tts</span><span class="p">[</span><span class="n">ph</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="n">fin</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;tt_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">stations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sta</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stations</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="c1"># flatten the lon/lat/dep grid as we work with</span>
+                    <span class="c1"># flat source indexes</span>
+                    <span class="k">if</span> <span class="n">source_indexes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="c1"># select a subset of the source grid</span>
+                        <span class="n">source_indexes_unravelled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span>
+                            <span class="n">source_indexes</span><span class="p">,</span> <span class="n">grid_shape</span>
+                        <span class="p">)</span>
+                        <span class="n">selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">grid_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+                        <span class="n">selection</span><span class="p">[</span><span class="n">source_indexes_unravelled</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">tts</span><span class="p">[</span><span class="n">ph</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="n">fin</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;tt_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">][</span><span class="n">selection</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                                <span class="s2">&quot;float32&quot;</span>
+                                <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">tts</span><span class="p">[</span><span class="n">ph</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="n">fin</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;tt_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">][()]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                                <span class="s2">&quot;float32&quot;</span>
+                                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">tts</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">read_coords</span><span class="p">:</span>
+                <span class="n">source_coords</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">if</span> <span class="n">source_indexes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">source_indexes_unravelled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">source_indexes</span><span class="p">,</span> <span class="n">grid_shape</span><span class="p">)</span>
+                    <span class="n">selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">grid_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+                    <span class="n">selection</span><span class="p">[</span><span class="n">source_indexes_unravelled</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">fin</span><span class="p">[</span><span class="s2">&quot;source_coordinates&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">source_coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span> <span class="o">=</span> <span class="n">fin</span><span class="p">[</span>
+                                <span class="s2">&quot;source_coordinates&quot;</span>
+                                <span class="p">][</span><span class="n">coord</span><span class="p">][</span><span class="n">selection</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">fin</span><span class="p">[</span><span class="s2">&quot;source_coordinates&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">source_coords</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span> <span class="o">=</span> <span class="n">fin</span><span class="p">[</span><span class="s2">&quot;source_coordinates&quot;</span><span class="p">][</span><span class="n">coord</span><span class="p">][()]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">source_coords</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">source_indexes</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TravelTimes.convert_to_samples"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.TravelTimes.convert_to_samples">[docs]</a>    <span class="k">def</span> <span class="nf">convert_to_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">remove_tt_seconds</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a new `self.travel_times_samp` attribute.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sampling_rate : float</span>
+<span class="sd">            The sampling rate to use to convert times from seconds to samples.</span>
+<span class="sd">        remove_tt_seconds : boolean, optional</span>
+<span class="sd">            If True, delete `self.travel_times` after conversion. This may be</span>
+<span class="sd">            necessary to save memory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">travel_times_samp</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">travel_times_samp</span><span class="p">[</span><span class="n">ph</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+                <span class="n">travel_times_samp</span><span class="p">[</span><span class="n">ph</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">],</span>
+                        <span class="n">sr</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
+                        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">travel_times_samp</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">remove_tt_seconds</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span></div>
+
+<div class="viewcode-block" id="TravelTimes.get_travel_times_array"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.TravelTimes.get_travel_times_array">[docs]</a>    <span class="k">def</span> <span class="nf">get_travel_times_array</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;seconds&quot;</span><span class="p">,</span> <span class="n">stations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">relative_to_first</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        units : str, optional</span>
+<span class="sd">            Either of &#39;seconds&#39; or &#39;samples&#39;.</span>
+<span class="sd">            If &#39;seconds&#39;, build array from `self.travel_times`.</span>
+<span class="sd">            If &#39;samples&#39;, build array from `self.travel_times_samp`.</span>
+<span class="sd">        stations : list of str, optional</span>
+<span class="sd">            List of stations to include in the output array.</span>
+<span class="sd">            Default is None, which uses all stations.</span>
+<span class="sd">        phases : list of str, optional</span>
+<span class="sd">            List of phases to include in the output array.</span>
+<span class="sd">            Default is None, which uses all phases.</span>
+<span class="sd">        relative_to_first : boolean, optional</span>
+<span class="sd">            If True, the travel times are given as relative to the</span>
+<span class="sd">            earliest phase for each source.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">units</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;seconds&quot;</span><span class="p">,</span> <span class="s2">&quot;samples&quot;</span><span class="p">],</span> <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;units shoulds be either of &#39;seconds&#39; or &#39;samples&#39;&quot;</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;seconds&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call `self.read` first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;samples&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times_samp&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call `self.convert_to_samples` first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;seconds&quot;</span><span class="p">:</span>
+            <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;samples&quot;</span><span class="p">:</span>
+            <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times_samp&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">stations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">stations</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">index</span>
+        <span class="k">if</span> <span class="n">phases</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">phases</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">columns</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">stations</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">phases</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">dtype</span>
+        <span class="n">tts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_sources</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">stations</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">phases</span><span class="p">)),</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span>
+                <span class="p">)</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stations</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">ph</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">phases</span><span class="p">):</span>
+                <span class="n">tts</span><span class="p">[:,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">relative_to_first</span><span class="p">:</span>
+            <span class="n">tts</span> <span class="o">=</span> <span class="n">tts</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">tts</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tts</span></div></div>
+
+
 <div class="viewcode-block" id="Beamformer"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer">[docs]</a><span class="k">class</span> <span class="nc">Beamformer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for backprojecting waveform features with beamforming.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">travel_times</span><span class="p">,</span>
-        <span class="n">source_coordinates</span><span class="p">,</span>
-        <span class="n">sampling_rate</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">,</span>
         <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">network</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">phases</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">remove_tt_min</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">travel_times</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">moveouts_relative_to_first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the essential attributes.</span>
 
+<span class="sd">        Once initialized, the `Beamformer` instance can be re-used for</span>
+<span class="sd">        different settings. For example, when processing multiple days in a row,</span>
+<span class="sd">        `Beamformer.set_data` and `Beamformer.set_network` can be called at the</span>
+<span class="sd">        beginning of each day to adapt to new data and potentially different </span>
+<span class="sd">        network configurations.</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        -----------</span>
-<span class="sd">        tt_filename: string, default to &#39;tts.h5&#39;</span>
-<span class="sd">            Name of the hdf5 file with travel-times.</span>
-<span class="sd">        path_tts: string, default to `cfg.MOVEOUTS_PATH`</span>
-<span class="sd">            Path to the directory with the travel-time files.</span>
-<span class="sd">        phases: list, default to [&#39;P&#39;, &#39;S&#39;]</span>
+<span class="sd">        data : `dataset.Data`, optional</span>
+<span class="sd">            `dataset.Data` class instance representing the seismic data</span>
+<span class="sd">            that `Beamformer` will backproject. Default is None, in which</span>
+<span class="sd">            case `self.set_data` must be called later.</span>
+<span class="sd">        network : `dataset.Network`, optional</span>
+<span class="sd">            `dataset.Network` class instance with the seismic network metadata.</span>
+<span class="sd">            Default is None, in which case `self.set_network` must be called later.</span>
+<span class="sd">        phases : list, optional</span>
 <span class="sd">            List of seismic phases used in the computation of the network</span>
-<span class="sd">            response.</span>
+<span class="sd">            response. `phases` determines in which order `self.moveouts` is built.</span>
+<span class="sd">            Default is None, in which case `self.set_phases` must be called later.</span>
+<span class="sd">        travel_times : `TravelTimes`, optional</span>
+<span class="sd">            `TravelTimes` class instance with the travel time table that will</span>
+<span class="sd">            be used for backprojection the waveform features. Default is None, </span>
+<span class="sd">            in which case `self.set_travel_times` must be called later.</span>
+<span class="sd">        moveouts_relative_to_first : boolean, optional</span>
+<span class="sd">            If True, the moveouts used for backprojection are set relative to the</span>
+<span class="sd">            first seismic arrival for each source. Default is True.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span> <span class="o">=</span> <span class="n">travel_times</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">],</span>
-                    <span class="n">sr</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
-                <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span> <span class="o">=</span> <span class="n">source_coordinates</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_sources</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phases</span> <span class="o">=</span> <span class="n">phases</span>
-        <span class="k">if</span> <span class="n">remove_tt_min</span><span class="p">:</span>
-            <span class="c1"># find min travel-time for each source</span>
-            <span class="n">tts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="p">[</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span>
-                        <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">index</span>
-                    <span class="p">]</span>
-                    <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span>
-                <span class="p">]</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">T</span>
-            <span class="n">tt_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">tts</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-            <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span> <span class="o">-=</span> <span class="n">tt_min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span> <span class="o">=</span> <span class="n">travel_times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveouts_relative_to_first</span> <span class="o">=</span> <span class="n">moveouts_relative_to_first</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">moveouts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">get_travel_times_array</span><span class="p">(</span>
+                    <span class="n">units</span><span class="o">=</span><span class="s2">&quot;samples&quot;</span><span class="p">,</span>
+                    <span class="n">stations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span>
+                    <span class="n">phases</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">,</span>
+                    <span class="n">relative_to_first</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">moveouts_relative_to_first</span><span class="p">,</span>
+                    <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call `set_travel_times` first.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_stations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -169,13 +367,18 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">moveouts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">travel_times_samp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span> <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span>
-            <span class="p">]</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">def</span> <span class="nf">n_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">n_sources</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call `set_travel_times` first.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">num_sources</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call `set_travel_times` first.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">stations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -183,6 +386,15 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to call set_network first.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">stations</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">source_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">source_coordinates</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call `set_travel_times` first.&quot;</span><span class="p">)</span>
+
+
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_likelihood</span><span class="p">(</span><span class="n">beam_volume</span><span class="p">):</span>
@@ -336,14 +548,16 @@
         <span class="k">return</span> <span class="n">detections</span><span class="p">,</span> <span class="n">peak_indexes</span><span class="p">,</span> <span class="n">source_indexes</span></div>
 
 <div class="viewcode-block" id="Beamformer.remove_baseline"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.remove_baseline">[docs]</a>    <span class="k">def</span> <span class="nf">remove_baseline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;composite&quot;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove baseline from network response.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove baseline from network response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># convert window from seconds to samples</span>
         <span class="n">window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">window</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
         <span class="n">attr_baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_baseline</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">),</span> <span class="n">window</span><span class="p">)</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span> <span class="o">-</span> <span class="n">attr_baseline</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Beamformer.return_pd_series"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.return_pd_series">[docs]</a>    <span class="k">def</span> <span class="nf">return_pd_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;maxbeam&quot;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the network response as a Pandas.Series.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the network response as a Pandas.Series.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
         <span class="n">time_series</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
@@ -374,26 +588,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">starttime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">date</span></div>
 
-<div class="viewcode-block" id="Beamformer.set_moveouts"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_moveouts">[docs]</a>    <span class="k">def</span> <span class="nf">set_moveouts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">moveouts</span><span class="p">,</span> <span class="n">stations</span><span class="p">,</span> <span class="n">phases</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Attribute `_moveouts` to the class instance.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        -----------</span>
-<span class="sd">        moveouts: (n_sources, n_stations, n_phases) numpy.ndarray</span>
-<span class="sd">            The moveouts to use for backprojection.</span>
-<span class="sd">        stations: (n_stations,) list or numpy.ndarray of strings</span>
-<span class="sd">            Station names corresponding with the second axis of `moveouts`.</span>
-<span class="sd">        phases: (n_phases,) list or numpy.ndarray of strings</span>
-<span class="sd">            Phase names corresponing with the third axis of `moveouts`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_moveouts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-            <span class="n">index</span><span class="o">=</span><span class="n">stations</span><span class="p">,</span>
-            <span class="n">columns</span><span class="o">=</span><span class="n">phases</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stations</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">phases</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_moveouts</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span> <span class="o">=</span> <span class="n">moveouts</span><span class="p">[:,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">]</span></div>
-
 <div class="viewcode-block" id="Beamformer.set_network"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_network">[docs]</a>    <span class="k">def</span> <span class="nf">set_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attribute `network` to the class instance.</span>
 
@@ -403,13 +597,35 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        network: dataset.Network instance</span>
+<span class="sd">        network : dataset.Network</span>
 <span class="sd">            The Network instance with the station network information.</span>
 <span class="sd">            `network` can force the network response to be computed only on</span>
 <span class="sd">            a subset of the data stored in `data`.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span></div>
+
+<div class="viewcode-block" id="Beamformer.set_phases"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_phases">[docs]</a>    <span class="k">def</span> <span class="nf">set_phases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phases</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Attach `phases` to the class instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        phases : list of str</span>
+<span class="sd">            List of strings representing the phase names to read from</span>
+<span class="sd">            the travel time table. `phases` determines the order in which</span>
+<span class="sd">            `self.moveouts` is built.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phases</span> <span class="o">=</span> <span class="n">phases</span></div>
+
+<div class="viewcode-block" id="Beamformer.set_travel_times"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_travel_times">[docs]</a>    <span class="k">def</span> <span class="nf">set_travel_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">travel_times</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Attaches `travel_times` to the class instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        travel_times : TravelTimes</span>
+<span class="sd">            TravelTimes instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span> <span class="o">=</span> <span class="n">travel_times</span></div>
 
 <div class="viewcode-block" id="Beamformer.set_source_coordinates"><a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_source_coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">set_source_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_coords</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attribute `_source_coordinates` to the class instance.</span>

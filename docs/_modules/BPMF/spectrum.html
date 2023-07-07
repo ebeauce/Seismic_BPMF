@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BPMF.spectrum &mdash; BPMF 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BPMF
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BPMF</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">BPMF.spectrum</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for BPMF.spectrum</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">scisig</span>
+
+
+<div class="viewcode-block" id="Spectrum"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum">[docs]</a><span class="k">class</span> <span class="nc">Spectrum</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for handling spectral data and calculations.$a</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frequency_bands</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : str or None, optional</span>
+<span class="sd">            The event associated with the spectrum. Default is None.</span>
+<span class="sd">        frequency_bands : list or None, optional</span>
+<span class="sd">            The frequency bands for the spectrum. Default is None.</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : str or None</span>
+<span class="sd">            The event associated with the spectrum.</span>
+<span class="sd">        frequency_bands : list or None</span>
+<span class="sd">            The frequency bands for the spectrum.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">event</span>
+        <span class="k">if</span> <span class="n">frequency_bands</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_frequency_bands</span><span class="p">(</span><span class="n">frequency_bands</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Spectrum.attenuation_Q_model"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.attenuation_Q_model">[docs]</a>    <span class="k">def</span> <span class="nf">attenuation_Q_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the attenuation Q model for P and S phases.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Q : array-like</span>
+<span class="sd">            Array of attenuation Q values.</span>
+<span class="sd">        frequencies : array-like</span>
+<span class="sd">            Array of corresponding frequencies.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The attenuation Q model is stored in the `attenuation_model` attribute.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+
+        <span class="n">interpolator</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span>
+            <span class="n">frequencies</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="p">(</span><span class="n">Q</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Q</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_model</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_model</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">interpolator</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_model</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">interpolator</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spectrum.compute_correction_factor"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_correction_factor">[docs]</a>    <span class="k">def</span> <span class="nf">compute_correction_factor</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">rho_source</span><span class="p">,</span>
+        <span class="n">rho_receiver</span><span class="p">,</span>
+        <span class="n">vp_source</span><span class="p">,</span>
+        <span class="n">vp_receiver</span><span class="p">,</span>
+        <span class="n">vs_source</span><span class="p">,</span>
+        <span class="n">vs_receiver</span><span class="p">,</span>
+        <span class="n">radiation_S</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">/</span> <span class="mf">5.0</span><span class="p">),</span>
+        <span class="n">radiation_P</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">4.0</span> <span class="o">/</span> <span class="mf">15.0</span><span class="p">),</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the correction factor and attenuation factor for a seismic event.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        rho_source : float</span>
+<span class="sd">            Density of the source medium, in kg/m3.</span>
+<span class="sd">        rho_receiver : float</span>
+<span class="sd">            Density of the receiver medium, in kg/m3.</span>
+<span class="sd">        vp_source : float</span>
+<span class="sd">            P-wave velocity of the source medium, in m/s.</span>
+<span class="sd">        vp_receiver : float</span>
+<span class="sd">            P-wave velocity of the receiver medium, in m/s.</span>
+<span class="sd">        vs_source : float</span>
+<span class="sd">            S-wave velocity of the source medium, in m/s.</span>
+<span class="sd">        vs_receiver : float</span>
+<span class="sd">            S-wave velocity of the receiver medium, in m/s.</span>
+<span class="sd">        radiation_S : float, optional</span>
+<span class="sd">            Radiation coefficient for S-wave. Default is sqrt(2/5).</span>
+<span class="sd">        radiation_P : float, optional</span>
+<span class="sd">            Radiation coefficient for P-wave. Default is sqrt(4/15).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The correction factor and attenuation factor are stored in the</span>
+<span class="sd">            object&#39;s attributes `correction_factor` and `attenuation_factor`.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This method requires the object to have an attached `BPMF.dataset.Event`</span>
+<span class="sd">        instance and for the instance to have called the `set_source_receiver_dist(network)` method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;event&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Attach the BPMF.dataset.Event instance first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">,</span> <span class="s2">&quot;_source_receiver_dist&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call event.set_source_receiver_dist(network) first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">correction_factor</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">attenuation_factor</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="n">r_m</span> <span class="o">=</span> <span class="mf">1000.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">]</span>
+            <span class="n">tt_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;S_tt_sec&quot;</span><span class="p">]</span>
+            <span class="n">corr_s</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mf">4.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                    <span class="o">*</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho_receiver</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho_source</span><span class="p">)</span>
+                    <span class="o">*</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vs_receiver</span><span class="p">)</span> <span class="o">*</span> <span class="n">vs_source</span><span class="o">**</span><span class="p">(</span><span class="mf">5.</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
+                    <span class="o">*</span>
+                    <span class="n">r_m</span> <span class="o">/</span> <span class="n">radiation_S</span>
+                    <span class="p">)</span>
+            <span class="n">correction_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;correction_S&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">corr_s</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;attenuation_model&quot;</span><span class="p">):</span>
+                <span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_S&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">freq</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">tt_s</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_model</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">](</span><span class="n">freq</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_S&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">tt_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_tt_sec&quot;</span><span class="p">]</span>
+            <span class="n">corr_p</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mf">4.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                    <span class="o">*</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho_receiver</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho_source</span><span class="p">)</span>
+                    <span class="o">*</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vp_receiver</span><span class="p">)</span> <span class="o">*</span> <span class="n">vp_source</span><span class="o">**</span><span class="p">(</span><span class="mf">5.</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
+                    <span class="o">*</span>
+                    <span class="n">r_m</span> <span class="o">/</span> <span class="n">radiation_P</span>
+                    <span class="p">)</span>
+            <span class="n">correction_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;correction_P&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">corr_p</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;attenuation_model&quot;</span><span class="p">):</span>
+                <span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_P&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">freq</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">tt_p</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_model</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">](</span><span class="n">freq</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No attenuation model found!&quot;</span><span class="p">)</span>
+                <span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_P&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">correction_factor</span> <span class="o">=</span> <span class="n">correction_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_factor</span> <span class="o">=</span> <span class="n">attenuation_factor</span></div>
+
+<div class="viewcode-block" id="Spectrum.compute_network_average_spectrum"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_network_average_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">compute_network_average_spectrum</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">phase</span><span class="p">,</span>
+        <span class="n">snr_threshold</span><span class="p">,</span>
+        <span class="n">correct_propagation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">average_log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">min_num_valid_channels_per_freq_bin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_relative_distance_err_pct</span><span class="o">=</span><span class="mf">25.</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the network average spectrum for a given phase.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        phase : str</span>
+<span class="sd">            Phase of the seismic event. Should be either &#39;p&#39; or &#39;s&#39;.</span>
+<span class="sd">        snr_threshold : float</span>
+<span class="sd">            Signal-to-noise ratio threshold for valid channels.</span>
+<span class="sd">        correct_propagation : bool, optional</span>
+<span class="sd">            Flag indicating whether to correct for propagation effects. Default is True.</span>
+<span class="sd">        average_log : bool, optional</span>
+<span class="sd">            Flag indicating whether to average the logarithm of the spectra. Default is True.</span>
+<span class="sd">        min_num_valid_channels_per_freq_bin : int, optional</span>
+<span class="sd">            Minimum number of valid channels required per frequency bin. Default is 0.</span>
+<span class="sd">        max_relative_distance_err_pct : float, optional</span>
+<span class="sd">            Maximum relative distance error percentage for a valid channel. Default is 25.0.</span>
+<span class="sd">        verbose : int, optional</span>
+<span class="sd">            Verbosity level. Set to 0 for no output. Default is 0.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The average spectrum and related information are stored in the object&#39;s attributes.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This method requires the object to have already computed the spectrum for the specified phase</span>
+<span class="sd">        and to have set the target frequencies using the `set_target_frequencies` method.</span>
+<span class="sd">        If `correct_propagation` is set to True, the method also requires the object to have computed</span>
+<span class="sd">        the correction factor using the `compute_correction_factor` method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">phase</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">],</span> <span class="s2">&quot;phase should be &#39;p&#39; or &#39;s&#39;&quot;</span>
+        <span class="k">assert</span> <span class="n">phase</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;You need to compute the </span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2"> spectrum first&quot;</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;frequencies&quot;</span>
+        <span class="p">),</span> <span class="s2">&quot;You need to use set_target_frequencies first&quot;</span>
+        <span class="k">if</span> <span class="n">correct_propagation</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;correction_factor&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You requested correcting for propagation effects. &quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to use compute_correction_factor first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">average_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">masked_spectra</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">signal_spectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)</span>
+        <span class="n">snr_spectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;snr_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">trid</span> <span class="ow">in</span> <span class="n">signal_spectrum</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;relative_distance_err_pct&quot;</span><span class="p">]</span>
+                    <span class="o">&gt;</span>
+                    <span class="n">max_relative_distance_err_pct</span>
+                    <span class="p">):</span>
+                <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Source-receiver distance relative error is too high: &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s1">&#39;relative_distance_err_pct&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="c1"># the location uncertainty implies too much error</span>
+                <span class="c1"># on this station, skip it</span>
+                <span class="k">continue</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">snr_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;snr&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">snr_threshold</span>
+            <span class="n">amplitude_spectrum</span> <span class="o">=</span> <span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">correct_propagation</span><span class="p">:</span>
+                <span class="n">sta</span> <span class="o">=</span> <span class="n">trid</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">amplitude_spectrum</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">correction_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                    <span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;correction_</span><span class="si">{</span><span class="n">phase</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_</span><span class="si">{</span><span class="n">phase</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+                <span class="p">):</span>
+                    <span class="n">att</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                        <span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_</span><span class="si">{</span><span class="n">phase</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">]</span>
+                    <span class="n">amplitude_spectrum</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                        <span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_</span><span class="si">{</span><span class="n">phase</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">](</span><span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">])</span>
+            <span class="n">masked_spectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">amplitude_spectrum</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">masked_spectra</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># there seems to be cases when to spectra were in signal_spectrum??</span>
+            <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No spectra found in </span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">average_spectra</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">return</span>
+        <span class="c1"># it looks like we need this explicit definition of the mask</span>
+        <span class="c1"># otherwise the mask can be converted to a single boolean when</span>
+        <span class="c1"># all elements are False</span>
+        <span class="n">masked_spectra</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">arr</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">masked_spectra</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                <span class="n">mask</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">arr</span><span class="o">.</span><span class="n">mask</span> <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">masked_spectra</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                <span class="p">)</span>
+        <span class="c1"># count the number of channels that satisfied the SNR criterion</span>
+        <span class="n">num_valid_channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">~</span><span class="n">masked_spectra</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># discard the frequency bins for which the minimum number</span>
+        <span class="c1"># of valid channels was not achieved</span>
+        <span class="n">discarded_freq_bins</span> <span class="o">=</span> <span class="n">num_valid_channels</span> <span class="o">&lt;</span> <span class="n">min_num_valid_channels_per_freq_bin</span>
+        <span class="n">masked_spectra</span><span class="o">.</span><span class="n">mask</span><span class="p">[:,</span> <span class="n">discarded_freq_bins</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># compute average spectrum without masked elements</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">masked_spectra</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">average_log</span><span class="p">:</span>
+            <span class="n">log10_masked_spectra</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">masked_spectra</span><span class="p">)</span>
+            <span class="c1"># another mysterious feature of numpy....</span>
+            <span class="c1"># need to use exp to propagate mask correctly</span>
+            <span class="n">average_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">log10_masked_spectra</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
+                    <span class="p">)</span>
+            <span class="n">std_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">log10_masked_spectra</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">average_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">masked_spectra</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">std_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">masked_spectra</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="nb">setattr</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;average_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;spectrum&quot;</span><span class="p">:</span> <span class="n">average_spectrum</span><span class="p">,</span>
+                <span class="s2">&quot;std&quot;</span><span class="p">:</span> <span class="n">std_spectrum</span><span class="p">,</span>
+                <span class="s2">&quot;num_valid_channels&quot;</span><span class="p">:</span> <span class="n">num_valid_channels</span><span class="p">,</span>
+                <span class="s2">&quot;spectra&quot;</span><span class="p">:</span> <span class="n">masked_spectra</span><span class="p">,</span>
+                <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">,</span>
+                <span class="s2">&quot;snr_threshold&quot;</span><span class="p">:</span> <span class="n">snr_threshold</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;average_spectra&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">average_spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">phase</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">average_spectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">average_spectra</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">average_spectra</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Spectrum.compute_multi_band_spectrum"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_multi_band_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">compute_multi_band_spectrum</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">buffer_seconds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute spectrum from the maximum amplitude in multiple 1-octave frequency bands.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        traces : list</span>
+<span class="sd">            List of seismic traces.</span>
+<span class="sd">        phase : str</span>
+<span class="sd">            Phase of the seismic event. Should be &#39;noise&#39;, &#39;p&#39;, or &#39;s&#39;.</span>
+<span class="sd">        buffer_seconds : float</span>
+<span class="sd">            Buffer duration in seconds to remove from the beginning and end of the trace.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Additional keyword arguments for filtering.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The computed spectrum is stored in the object&#39;s attribute `{phase}_spectrum`.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - The attribute `frequency_bands` is required for this method.</span>
+<span class="sd">        - The spectrum is computed by finding the maximum amplitude in each 1-octave frequency band.</span>
+<span class="sd">        - The resulting spectrum and frequency values are stored in the `spectrum` dictionary.</span>
+<span class="sd">        - The relative distance error percentage is calculated and stored for each trace.</span>
+<span class="sd">        - The attribute `{phase.lower()}_spectrum` is updated with the computed spectrum.</span>
+<span class="sd">        - If the attribute `phases` exists, the phase is appended to the list. Otherwise, a new list is created.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;noise&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;p&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;s&quot;</span><span class="p">,</span>
+        <span class="p">),</span> <span class="s2">&quot;phase should be &#39;noise&#39;, &#39;p&#39; or &#39;s&#39;.&quot;</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;frequency_bands&quot;</span><span class="p">),</span>\
+                <span class="s2">&quot;Attribute `frequency_bands` is required for this method.&quot;</span>
+        <span class="n">num_freqs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">)</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">traces</span><span class="p">:</span>
+            <span class="n">buffer_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">buffer_seconds</span> <span class="o">*</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_freqs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_freqs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">band</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">):</span>
+                <span class="n">bandwidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">center_freq</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="p">)</span>
+                <span class="n">tr_band</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">tr_band</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                        <span class="s2">&quot;bandpass&quot;</span><span class="p">,</span>
+                        <span class="n">freqmin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="n">freqmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="n">corners</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;corners&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                        <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span>
+                        <span class="p">)</span>
+                <span class="n">trimmed_tr</span> <span class="o">=</span> <span class="n">tr_band</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">buffer_samples</span><span class="p">:</span><span class="o">-</span><span class="n">buffer_samples</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trimmed_tr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># gap in data?</span>
+                    <span class="k">continue</span>
+                <span class="n">max_amp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">trimmed_tr</span><span class="p">))</span> <span class="o">/</span> <span class="n">bandwidth</span>
+                <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_amp</span>
+                <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">center_freq</span>
+            <span class="n">max_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">hmax_unc</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">vmax_unc</span><span class="o">**</span><span class="mi">2</span>
+                    <span class="p">)</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;relative_distance_err_pct&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">100.</span> <span class="o">*</span> <span class="p">(</span>
+                    <span class="n">max_err</span>
+                    <span class="o">/</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span><span class="p">]</span>
+                    <span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;phases&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phases</span> <span class="o">=</span> <span class="p">[</span><span class="n">phase</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Spectrum.compute_spectrum"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">compute_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">taper</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">taper_kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute spectrum using the Fast Fourier Transform (FFT) on the input traces.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        traces : list</span>
+<span class="sd">            List of seismic traces.</span>
+<span class="sd">        phase : str</span>
+<span class="sd">            Phase of the seismic event. Should be &#39;noise&#39;, &#39;p&#39;, or &#39;s&#39;.</span>
+<span class="sd">        taper : callable or None, optional</span>
+<span class="sd">            Tapering function to apply to the traces before computing the spectrum. Default is None.</span>
+<span class="sd">        **taper_kwargs</span>
+<span class="sd">            Additional keyword arguments for the tapering function.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The computed spectrum is stored in the object&#39;s attribute `{phase}_spectrum`.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - The spectrum is computed using the FFT on the input traces.</span>
+<span class="sd">        - The computed spectrum and frequency values are stored in the `spectrum` dictionary.</span>
+<span class="sd">        - The relative distance error percentage is calculated and stored for each trace.</span>
+<span class="sd">        - The attribute `{phase.lower()}_spectrum` is updated with the computed spectrum.</span>
+<span class="sd">        - If the attribute `phases` exists, the phase is appended to the list. Otherwise, a new list is created.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;noise&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;p&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;s&quot;</span><span class="p">,</span>
+        <span class="p">),</span> <span class="s2">&quot;phase should be &#39;noise&#39;, &#39;p&#39; or &#39;s&#39;.&quot;</span>
+        <span class="k">if</span> <span class="n">taper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">taper</span> <span class="o">=</span> <span class="n">scisig</span><span class="o">.</span><span class="n">tukey</span>
+            <span class="n">taper_kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">traces</span><span class="p">:</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">taper</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">npts</span><span class="p">,</span> <span class="o">**</span><span class="n">taper_kwargs</span><span class="p">))</span>
+                <span class="o">*</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span>
+            <span class="p">)</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftfreq</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">npts</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span><span class="p">)</span>
+            <span class="n">max_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">hmax_unc</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">vmax_unc</span><span class="o">**</span><span class="mi">2</span>
+                    <span class="p">)</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;relative_distance_err_pct&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">100.</span> <span class="o">*</span> <span class="p">(</span>
+                    <span class="n">max_err</span>
+                    <span class="o">/</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span><span class="p">]</span>
+                    <span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;phases&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phases</span> <span class="o">=</span> <span class="p">[</span><span class="n">phase</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Spectrum.compute_signal_to_noise_ratio"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_signal_to_noise_ratio">[docs]</a>    <span class="k">def</span> <span class="nf">compute_signal_to_noise_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the signal-to-noise ratio (SNR) for the specified phase.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        phase : str</span>
+<span class="sd">            Phase of the seismic event. Should be &#39;p&#39; or &#39;s&#39;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The computed SNR values are stored in the object&#39;s attribute `snr_{phase}_spectrum`.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            - If `phase` is not &#39;p&#39; or &#39;s&#39;.</span>
+<span class="sd">            - If the {phase} spectrum has not been computed.</span>
+<span class="sd">            - If the noise spectrum has not been computed.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - The SNR is calculated as the modulus of the signal spectrum divided by the modulus of the noise spectrum.</span>
+<span class="sd">        - The SNR values and corresponding frequencies are stored in the `snr` dictionary.</span>
+<span class="sd">        - The attribute `snr_{phase}_spectrum` is updated with the computed SNR values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">phase</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">],</span> <span class="s2">&quot;phase should be &#39;p&#39; or &#39;s&#39;&quot;</span>
+        <span class="k">assert</span> <span class="n">phase</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;You need to compute the </span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2"> spectrum first&quot;</span>
+        <span class="k">assert</span> <span class="s2">&quot;noise&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;You need to compute the noise spectrum first&quot;</span>
+        <span class="n">signal_spectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)</span>
+        <span class="n">noise_spectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;noise_spectrum&quot;</span><span class="p">)</span>
+        <span class="n">snr</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">trid</span> <span class="ow">in</span> <span class="n">signal_spectrum</span><span class="p">:</span>
+            <span class="n">snr</span><span class="p">[</span><span class="n">trid</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">trid</span> <span class="ow">in</span> <span class="n">noise_spectrum</span><span class="p">:</span>
+                <span class="n">snr_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+                    <span class="n">noise_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># no noise spectrum, probably because of gap</span>
+                <span class="n">snr_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="n">snr</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;snr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">snr_</span>
+            <span class="n">snr</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;snr_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">,</span> <span class="n">snr</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spectrum.integrate"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.integrate">[docs]</a>    <span class="k">def</span> <span class="nf">integrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Integrate the spectrum for a specific phase.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        phase : str</span>
+<span class="sd">            Phase name. Should be &#39;p&#39; or &#39;s&#39;.</span>
+<span class="sd">        average : bool, optional</span>
+<span class="sd">            Specifies whether to integrate the average spectrum (if True) or individual spectra (if False).</span>
+<span class="sd">            Default is True.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The spectrum is integrated in-place.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            If the specified phase spectrum has not been computed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">average</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">phase</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_spectra</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;You need to compute the average </span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2"> spectrum first.&quot;</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;average_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;average_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span>
+                <span class="o">/</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;average_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)[</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">phase</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;You need to compute the </span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2"> spectrum first.&quot;</span>
+            <span class="n">spectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">trid</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="p">:</span>
+                <span class="n">spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span> <span class="o">/=</span> <span class="n">spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Spectrum.differentiate"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.differentiate">[docs]</a>    <span class="k">def</span> <span class="nf">differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply differentiation to the spectrum of the specified phase.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        phase : str</span>
+<span class="sd">            Phase of the seismic event. Should be &#39;p&#39; or &#39;s&#39;.</span>
+<span class="sd">        average : bool, optional</span>
+<span class="sd">            Flag indicating whether to differentiate the average spectrum (True) or individual spectra (False).</span>
+<span class="sd">            Defaults to True.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The spectrum is modified in-place by multiplying it with the corresponding frequency values.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            - If `average` is True and the average {phase} spectrum has not been computed.</span>
+<span class="sd">            - If `average` is False and the {phase} spectrum has not been computed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">average</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">phase</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_spectra</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;You need to compute the average </span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2"> spectrum first.&quot;</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;average_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;average_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span>
+                <span class="o">*</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;average_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)[</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">phase</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;You need to compute the </span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2"> spectrum first.&quot;</span>
+            <span class="n">spectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">trid</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="p">:</span>
+                <span class="n">spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span> <span class="o">*=</span> <span class="n">spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Spectrum.fit_average_spectrum"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.fit_average_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">fit_average_spectrum</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">phase</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="s2">&quot;brune&quot;</span><span class="p">,</span>
+        <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">min_fraction_valid_points_below_fc</span><span class="o">=</span><span class="mf">0.10</span><span class="p">,</span>
+        <span class="n">min_fraction_valid_points</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
+        <span class="n">weighted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit the average displacement spectrum with a specified model.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        phase : str</span>
+<span class="sd">            Phase of the seismic event. Should be &#39;p&#39; or &#39;s&#39;.</span>
+<span class="sd">        model : str, optional</span>
+<span class="sd">            Model to use for fitting the spectrum. Default is &#39;brune&#39;.</span>
+<span class="sd">        log : bool, optional</span>
+<span class="sd">            Flag indicating whether to fit the logarithm of the spectrum. Default is True.</span>
+<span class="sd">        min_fraction_valid_points_below_fc : float, optional</span>
+<span class="sd">            Minimum fraction of valid points required below the corner frequency. Default is 0.10.</span>
+<span class="sd">        min_fraction_valid_points : float, optional</span>
+<span class="sd">            Minimum fraction of valid points required overall. Default is 0.50.</span>
+<span class="sd">        weighted : bool, optional</span>
+<span class="sd">            Flag indicating whether to apply weighted fitting using sigmoid weights. Default is False.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Additional keyword arguments to be passed to the curve fitting function.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The fitting results are stored as attributes of the object.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            If the average {phase} spectrum has not been computed.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - If the spectrum is below the SNR threshold everywhere, the fitting cannot be performed.</span>
+<span class="sd">        - If there are not enough valid points or valid points below the corner frequency,</span>
+<span class="sd">          the fitting is considered unsuccessful.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">curve_fit</span>
+        <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">phase</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_spectra</span>
+        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;You need to compute the average </span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2"> spectrum first.&quot;</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;average_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">~</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Spectrum is below SNR threshold everywhere, cannot fit it.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inversion_success</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">return</span>
+        <span class="n">valid_fraction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">~</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">valid_fraction</span> <span class="o">&lt;</span> <span class="n">min_fraction_valid_points</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not enough valid points! (Only </span><span class="si">{</span><span class="mf">100.</span><span class="o">*</span><span class="n">valid_fraction</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%)&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inversion_success</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">return</span>
+        <span class="n">omega0_first_guess</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">~</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mask</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">fc_first_guess</span> <span class="o">=</span> <span class="n">fc_circular_crack</span><span class="p">(</span><span class="n">moment_to_magnitude</span><span class="p">(</span><span class="n">omega0_first_guess</span><span class="p">))</span>
+        <span class="n">standardized_num_valid_channels</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;num_valid_channels&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;num_valid_channels&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;num_valid_channels&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">sigmoid_weights</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">standardized_num_valid_channels</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;brune&quot;</span><span class="p">:</span>
+            <span class="n">mod</span> <span class="o">=</span> <span class="n">brune</span>
+        <span class="k">elif</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;boatwright&quot;</span><span class="p">:</span>
+            <span class="n">mod</span> <span class="o">=</span> <span class="n">boatwright</span>
+        <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+            <span class="n">obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">obs</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+        <span class="c1"># misfit = (</span>
+        <span class="c1">#        lambda f, omega0, fc:</span>
+        <span class="c1">#        weights * (obs - mod(f, omega0, fc, log=log))</span>
+        <span class="c1">#        )</span>
+        <span class="n">mod</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[</span><span class="o">~</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;freq&quot;</span><span class="p">][</span><span class="o">~</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">weighted</span><span class="p">:</span>
+            <span class="n">inverse_weights</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">sigmoid_weights</span><span class="p">[</span><span class="o">~</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inverse_weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">omega0_first_guess</span><span class="p">,</span> <span class="n">fc_first_guess</span><span class="p">])</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span>
+                <span class="n">mod</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="n">p0</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">inverse_weights</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inversion_success</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">RuntimeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Inversion (scipy.optimize.cuve_fit) failed.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inversion_success</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">return</span>
+        <span class="c1"># check whether the low-frequency plateau was well constrained</span>
+        <span class="n">npts_valid_below_fc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">popt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">fraction_valid_points_below_fc</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">npts_valid_below_fc</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;freq&quot;</span><span class="p">]))</span>
+                    <span class="p">)</span>
+        <span class="c1">#print(f&quot;Fraction of valid points below fc is: {fraction_valid_points_below_fc:.2f}&quot;)</span>
+        <span class="k">if</span> <span class="n">fraction_valid_points_below_fc</span> <span class="o">&lt;</span> <span class="n">min_fraction_valid_points_below_fc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inversion_success</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not enough valid points below corner frequency &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;(only </span><span class="si">{</span><span class="mf">100.</span><span class="o">*</span><span class="n">fraction_valid_points_below_fc</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">perr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">pcov</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">M0</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Mw</span> <span class="o">=</span> <span class="n">moment_to_magnitude</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">M0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">M0_err</span> <span class="o">=</span> <span class="n">perr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc_err</span> <span class="o">=</span> <span class="n">perr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="Spectrum.resample"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.resample">[docs]</a>    <span class="k">def</span> <span class="nf">resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_frequencies</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resample the spectrum to new frequencies.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_frequencies : array-like</span>
+<span class="sd">            New frequency values to resample the spectrum to.</span>
+<span class="sd">        phase : str or list</span>
+<span class="sd">            Phase(s) of the seismic event to resample. Can be a single phase or a list of phases.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The spectrum is resampled and updated in-place.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">phase</span> <span class="o">=</span> <span class="p">[</span><span class="n">phase</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">phase</span><span class="p">:</span>
+            <span class="n">ph</span> <span class="o">=</span> <span class="n">ph</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attribute </span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_spectrum does not exist.&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">spectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">trid</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="p">:</span>
+                <span class="n">spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+                    <span class="n">new_frequencies</span><span class="p">,</span>
+                    <span class="n">spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">],</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]),</span>
+                <span class="p">)</span>
+                <span class="n">spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_frequencies</span></div>
+
+<div class="viewcode-block" id="Spectrum.set_frequency_bands"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.set_frequency_bands">[docs]</a>    <span class="k">def</span> <span class="nf">set_frequency_bands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequency_bands</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the frequency bands for spectrum analysis.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        frequency_bands : dict</span>
+<span class="sd">            Dictionary specifying the frequency bands.</span>
+<span class="sd">            The keys are the names of the bands, and the values are tuples of the form (freqmin, freqmax).</span>
+<span class="sd">            freqmin and freqmax represent the minimum and maximum frequencies of each band, respectively.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The frequency bands are set and stored as an attribute in the object.</span>
+<span class="sd">            The center frequencies of each band are also calculated and stored in the `frequencies` attribute.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span> <span class="o">=</span> <span class="n">frequency_bands</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">band</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spectrum.set_target_frequencies"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.set_target_frequencies">[docs]</a>    <span class="k">def</span> <span class="nf">set_target_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq_min</span><span class="p">,</span> <span class="n">freq_max</span><span class="p">,</span> <span class="n">num_points</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the target frequencies for spectrum analysis.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        freq_min : float</span>
+<span class="sd">            Minimum frequency.</span>
+<span class="sd">        freq_max : float</span>
+<span class="sd">            Maximum frequency.</span>
+<span class="sd">        num_points : int</span>
+<span class="sd">            Number of target frequencies to generate.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The target frequencies are set and stored as an attribute in the object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">freq_min</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">freq_max</span><span class="p">),</span> <span class="n">num_points</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spectrum.plot_average_spectrum"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.plot_average_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">plot_average_spectrum</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">phase</span><span class="p">,</span>
+        <span class="n">figname</span><span class="o">=</span><span class="s2">&quot;spectrum&quot;</span><span class="p">,</span>
+        <span class="n">figtitle</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+        <span class="n">colors</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;noise&quot;</span><span class="p">:</span> <span class="s2">&quot;dimgrey&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="s2">&quot;C3&quot;</span><span class="p">},</span>
+        <span class="n">linestyle</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;noise&quot;</span><span class="p">:</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="s2">&quot;-&quot;</span><span class="p">},</span>
+        <span class="n">plot_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">plot_std</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">plot_num_valid_channels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the average spectrum for a given phase.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        phase : str or list of str</span>
+<span class="sd">            The phase(s) for which to plot the average spectrum.</span>
+<span class="sd">        figname : str, optional</span>
+<span class="sd">            The name of the figure. Default is &quot;spectrum&quot;.</span>
+<span class="sd">        figtitle : str, optional</span>
+<span class="sd">            The title of the figure. Default is an empty string.</span>
+<span class="sd">        figsize : tuple, optional</span>
+<span class="sd">            The size of the figure in inches. Default is (10, 10).</span>
+<span class="sd">        colors : dict, optional</span>
+<span class="sd">            A dictionary specifying the colors for different phases.</span>
+<span class="sd">            Default is {&quot;noise&quot;: &quot;dimgrey&quot;, &quot;s&quot;: &quot;black&quot;, &quot;p&quot;: &quot;C3&quot;}.</span>
+<span class="sd">        linestyle : dict, optional</span>
+<span class="sd">            A dictionary specifying the line styles for different phases.</span>
+<span class="sd">            Default is {&quot;noise&quot;: &quot;--&quot;, &quot;s&quot;: &quot;-&quot;, &quot;p&quot;: &quot;-&quot;}.</span>
+<span class="sd">        plot_fit : bool, optional</span>
+<span class="sd">            Whether to plot the fitted model spectrum. Default is False.</span>
+<span class="sd">        plot_std : bool, optional</span>
+<span class="sd">            Whether to plot the standard deviation range of the average spectrum. Default is False.</span>
+<span class="sd">        plot_num_valid_channels : bool, optional</span>
+<span class="sd">            Whether to plot the number of channels above the signal-to-noise ratio (SNR) threshold. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        matplotlib.figure.Figure</span>
+<span class="sd">            The generated figure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">fnmatch</span>
+        <span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">MaxNLocator</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">phase</span> <span class="o">=</span> <span class="p">[</span><span class="n">phase</span><span class="p">]</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="n">figname</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">figtitle</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">phase</span><span class="p">:</span>
+            <span class="n">ph</span> <span class="o">=</span> <span class="n">ph</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;average_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attribute </span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_spectrum does not exist.&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">spectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;average_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)</span>
+            <span class="n">fft</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span>
+            <span class="n">freq</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span>
+            <span class="n">amplitude_spec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fft</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">freq</span><span class="p">,</span>
+                <span class="n">amplitude_spec</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ph</span><span class="p">],</span>
+                <span class="n">ls</span><span class="o">=</span><span class="n">linestyle</span><span class="p">[</span><span class="n">ph</span><span class="p">],</span>
+                <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Average </span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2"> spectrum&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">plot_std</span><span class="p">:</span>
+                <span class="n">lower_amp</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">amplitude_spec</span><span class="p">)</span> <span class="o">-</span> <span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">])</span>
+                <span class="n">upper_amp</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">amplitude_spec</span><span class="p">)</span> <span class="o">+</span> <span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">])</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                    <span class="n">freq</span><span class="p">,</span> <span class="n">lower_amp</span><span class="p">,</span> <span class="n">upper_amp</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ph</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.33</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">plot_num_valid_channels</span><span class="p">:</span>
+                <span class="n">axb</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+                <span class="n">axb</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">freq</span><span class="p">,</span>
+                    <span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;num_valid_channels&quot;</span><span class="p">],</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+                    <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ph</span><span class="p">],</span>
+                    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Number of channels above SNR threshold&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">axb</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Number of channels above SNR threshold&quot;</span><span class="p">)</span>
+                <span class="n">ylim</span> <span class="o">=</span> <span class="n">axb</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+                <span class="n">axb</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">axb</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="n">integer</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_zorder</span><span class="p">(</span><span class="n">axb</span><span class="o">.</span><span class="n">get_zorder</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">axb</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">plot_fit</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;M0&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;brune&quot;</span><span class="p">:</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">brune</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;boatwright&quot;</span><span class="p">:</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">boatwright</span>
+            <span class="n">fit</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">M0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2"> model:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">r</span><span class="s2">&quot;$M_w=$&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Mw</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">r</span><span class="s2">&quot;$f_c$=&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">Hz&quot;</span>
+            <span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">fit</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ph</span><span class="p">],</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency (Hz)&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Amplitude spectrum ([input units/Hz])&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+<div class="viewcode-block" id="Spectrum.plot_spectrum"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.plot_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">plot_spectrum</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">phase</span><span class="p">,</span>
+        <span class="n">station</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">figname</span><span class="o">=</span><span class="s2">&quot;spectrum&quot;</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+        <span class="n">correct_propagation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">plot_snr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">colors</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;noise&quot;</span><span class="p">:</span> <span class="s2">&quot;dimgrey&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="s2">&quot;C3&quot;</span><span class="p">},</span>
+        <span class="n">linestyle</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;noise&quot;</span><span class="p">:</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="s2">&quot;-&quot;</span><span class="p">},</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the spectrum for the specified phase(s) and trace(s).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        phase : str or list of str</span>
+<span class="sd">            The phase(s) for which to plot the spectrum.</span>
+<span class="sd">        station : str or None, optional</span>
+<span class="sd">            The station code. If None, all stations will be plotted. Default is None.</span>
+<span class="sd">        component : str or None, optional</span>
+<span class="sd">            The component code. If None, all components will be plotted. Default is None.</span>
+<span class="sd">        figname : str, optional</span>
+<span class="sd">            The name of the figure. Default is &quot;spectrum&quot;.</span>
+<span class="sd">        figsize : tuple, optional</span>
+<span class="sd">            The size of the figure in inches. Default is (10, 10).</span>
+<span class="sd">        correct_propagation : bool, optional</span>
+<span class="sd">            Whether to correct the spectrum for propagation effects. Default is False.</span>
+<span class="sd">        plot_snr : bool, optional</span>
+<span class="sd">            Whether to plot the signal-to-noise ratio (SNR) spectrum if available. Default is False.</span>
+<span class="sd">        colors : dict, optional</span>
+<span class="sd">            A dictionary specifying the colors for different phases. Default is {&quot;noise&quot;: &quot;dimgrey&quot;, &quot;s&quot;: &quot;black&quot;, &quot;p&quot;: &quot;C3&quot;}.</span>
+<span class="sd">        linestyle : dict, optional</span>
+<span class="sd">            A dictionary specifying the line styles for different phases. Default is {&quot;noise&quot;: &quot;--&quot;, &quot;s&quot;: &quot;-&quot;, &quot;p&quot;: &quot;-&quot;}.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        matplotlib.figure.Figure</span>
+<span class="sd">            The generated figure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">fnmatch</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">phase</span> <span class="o">=</span> <span class="p">[</span><span class="n">phase</span><span class="p">]</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="n">figname</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">phase</span><span class="p">:</span>
+            <span class="n">ph</span> <span class="o">=</span> <span class="n">ph</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attribute </span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_spectrum does not exist.&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">spectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)</span>
+            <span class="n">trace_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">station</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">station</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
+            <span class="k">if</span> <span class="n">component</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">component</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
+            <span class="n">target_tr_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;*.</span><span class="si">{</span><span class="n">station</span><span class="si">}</span><span class="s2">.*.*</span><span class="si">{</span><span class="n">component</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">selected_ids</span> <span class="o">=</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">trace_ids</span><span class="p">,</span> <span class="n">target_tr_id</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">trid</span> <span class="ow">in</span> <span class="n">selected_ids</span><span class="p">:</span>
+                <span class="n">fft</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span>
+                <span class="n">freq</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span>
+                <span class="n">amplitude_spec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fft</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">correct_propagation</span> <span class="ow">and</span> <span class="n">ph</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">]:</span>
+                    <span class="c1"># sta = trid.split(&quot;.&quot;)[1]</span>
+                    <span class="n">amplitude_spec</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">correction_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                        <span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;correction_</span><span class="si">{</span><span class="n">ph</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">]</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">freq</span><span class="p">,</span>
+                    <span class="n">amplitude_spec</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ph</span><span class="p">],</span>
+                    <span class="n">ls</span><span class="o">=</span><span class="n">linestyle</span><span class="p">[</span><span class="n">ph</span><span class="p">],</span>
+                    <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2"> spectrum: </span><span class="si">{</span><span class="n">trid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">plot_snr</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;snr_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">):</span>
+                        <span class="c1"># print(f&quot;Attribute snr_{ph}_spectrum does not exist.&quot;)</span>
+                        <span class="k">continue</span>
+                    <span class="n">snr_spectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;snr_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                        <span class="n">snr_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">],</span>
+                        <span class="n">snr_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;snr&quot;</span><span class="p">],</span>
+                        <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ph</span><span class="p">],</span>
+                        <span class="n">ls</span><span class="o">=</span><span class="n">linestyle</span><span class="p">[</span><span class="s2">&quot;noise&quot;</span><span class="p">],</span>
+                        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2"> snr: </span><span class="si">{</span><span class="n">trid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">right</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.20</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">1.01</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">),</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper left&quot;</span><span class="p">,</span> <span class="n">handlelength</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency (Hz)&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Amplitude spectrum ([input units/Hz])&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fig</span></div></div>
+
+
+<span class="c1"># classic models of earthquake displacement far-field spectrum</span>
+
+
+<div class="viewcode-block" id="brune"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.brune">[docs]</a><span class="k">def</span> <span class="nf">brune</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">omega0</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Brune model.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">omega0</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">freqs</span> <span class="o">/</span> <span class="n">fc</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">omega0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">freqs</span> <span class="o">/</span> <span class="n">fc</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="boatwright"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.boatwright">[docs]</a><span class="k">def</span> <span class="nf">boatwright</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">omega0</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Boatwright model.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">omega0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">freqs</span> <span class="o">/</span> <span class="n">fc</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">omega0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">freqs</span> <span class="o">/</span> <span class="n">fc</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="magnitude_to_moment"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.magnitude_to_moment">[docs]</a><span class="k">def</span> <span class="nf">magnitude_to_moment</span><span class="p">(</span><span class="n">Mw</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert moment magnitude to seismic moment [N.m].&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">Mw</span> <span class="o">+</span> <span class="mf">9.1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="moment_to_magnitude"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.moment_to_magnitude">[docs]</a><span class="k">def</span> <span class="nf">moment_to_magnitude</span><span class="p">(</span><span class="n">M0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert seismic moment [N.m] to moment magnitude.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">M0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">9.1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="fc_circular_crack"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.fc_circular_crack">[docs]</a><span class="k">def</span> <span class="nf">fc_circular_crack</span><span class="p">(</span>
+    <span class="n">Mw</span><span class="p">,</span> <span class="n">stress_drop_Pa</span><span class="o">=</span><span class="mf">1.0e6</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="n">vs_m_per_s</span><span class="o">=</span><span class="mf">3500.0</span><span class="p">,</span> <span class="n">vr_vs_ratio</span><span class="o">=</span><span class="mf">0.9</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the corner frequency assuming a circular crack model (Eshelby).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Mw : float</span>
+<span class="sd">        Moment magnitude of the earthquake.</span>
+<span class="sd">    stress_drop_Pa : float, optional</span>
+<span class="sd">        Stress drop in Pascals. Default is 1.0e6.</span>
+<span class="sd">    phase : str, optional</span>
+<span class="sd">        Seismic phase. Valid values are &#39;p&#39; for P-wave and &#39;s&#39; for S-wave.</span>
+<span class="sd">        Default is &#39;p&#39;.</span>
+<span class="sd">    vs_m_per_s : float, optional</span>
+<span class="sd">        Shear wave velocity in meters per second. Default is 3500.0.</span>
+<span class="sd">    vr_vs_ratio : float, optional</span>
+<span class="sd">        Ratio of rupture velocity to shear wave velocity. Default is 0.9.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    corner_frequency : float</span>
+<span class="sd">        Corner frequency in Hertz.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    AssertionError</span>
+<span class="sd">        If phase is not &#39;p&#39; or &#39;s&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">phase</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">],</span> <span class="s2">&quot;phase should &#39;p&#39; or &#39;s&#39;.&quot;</span>
+    <span class="n">M0</span> <span class="o">=</span> <span class="n">magnitude_to_moment</span><span class="p">(</span><span class="n">Mw</span><span class="p">)</span>
+    <span class="n">crack_radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="mf">7.0</span> <span class="o">/</span> <span class="mf">16.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">M0</span> <span class="o">/</span> <span class="n">stress_drop_Pa</span><span class="p">),</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span>
+        <span class="n">constant</span> <span class="o">=</span> <span class="mf">2.23</span>
+    <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;s&quot;</span><span class="p">:</span>
+        <span class="n">constant</span> <span class="o">=</span> <span class="mf">1.47</span>
+    <span class="n">vr</span> <span class="o">=</span> <span class="n">vr_vs_ratio</span> <span class="o">*</span> <span class="n">vs_m_per_s</span>
+    <span class="n">corner_frequency</span> <span class="o">=</span> <span class="p">(</span><span class="n">constant</span> <span class="o">*</span> <span class="n">vr</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">crack_radius</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">corner_frequency</span></div>
+
+<div class="viewcode-block" id="stress_drop_circular_crack"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.stress_drop_circular_crack">[docs]</a><span class="k">def</span> <span class="nf">stress_drop_circular_crack</span><span class="p">(</span>
+        <span class="n">Mw</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="n">vs_m_per_s</span><span class="o">=</span><span class="mf">3500.0</span><span class="p">,</span> <span class="n">vr_vs_ratio</span><span class="o">=</span><span class="mf">0.9</span>
+        <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the stress drop assuming a circular crack model (Eshelby).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Mw : float</span>
+<span class="sd">        Moment magnitude of the earthquake.</span>
+<span class="sd">    fc : float</span>
+<span class="sd">        Corner frequency in Hertz.</span>
+<span class="sd">    phase : str, optional</span>
+<span class="sd">        Seismic phase. Valid values are &#39;p&#39; for P-wave and &#39;s&#39; for S-wave.</span>
+<span class="sd">        Default is &#39;p&#39;.</span>
+<span class="sd">    vs_m_per_s : float, optional</span>
+<span class="sd">        Shear wave velocity in meters per second. Default is 3500.0.</span>
+<span class="sd">    vr_vs_ratio : float, optional</span>
+<span class="sd">        Ratio of rupture velocity to shear wave velocity. Default is 0.9.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    stress_drop : float</span>
+<span class="sd">        Stress drop in Pascals.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    AssertionError</span>
+<span class="sd">        If phase is not &#39;p&#39; or &#39;s&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">phase</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">],</span> <span class="s2">&quot;phase should &#39;p&#39; or &#39;s&#39;.&quot;</span>
+    <span class="n">M0</span> <span class="o">=</span> <span class="n">magnitude_to_moment</span><span class="p">(</span><span class="n">Mw</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span>
+        <span class="n">constant</span> <span class="o">=</span> <span class="mf">2.23</span>
+    <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;s&quot;</span><span class="p">:</span>
+        <span class="n">constant</span> <span class="o">=</span> <span class="mf">1.47</span>
+    <span class="n">vr</span> <span class="o">=</span> <span class="n">vr_vs_ratio</span> <span class="o">*</span> <span class="n">vs_m_per_s</span>
+    <span class="n">crack_radius</span> <span class="o">=</span> <span class="n">constant</span> <span class="o">*</span> <span class="n">vr</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">fc</span><span class="p">)</span>
+    <span class="n">stress_drop</span> <span class="o">=</span> <span class="mf">7.</span> <span class="o">/</span> <span class="mf">16.</span> <span class="o">*</span> <span class="n">M0</span> <span class="o">/</span> <span class="n">crack_radius</span><span class="o">**</span><span class="mi">3</span>
+    <span class="k">return</span> <span class="n">stress_drop</span></div>
+
+
+<span class="c1"># workflow function</span>
+<div class="viewcode-block" id="compute_moment_magnitude"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.compute_moment_magnitude">[docs]</a><span class="k">def</span> <span class="nf">compute_moment_magnitude</span><span class="p">(</span>
+    <span class="n">event</span><span class="p">,</span>
+    <span class="n">mag_params</span><span class="p">,</span>
+    <span class="n">plot_above_Mw</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
+    <span class="n">plot_above_random</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">path_figures</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">phases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">],</span>
+    <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">set_moveouts_to_theoretical_times</span><span class="p">()</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">set_moveouts_to_empirical_times</span><span class="p">()</span>
+    <span class="n">spectrum</span> <span class="o">=</span> <span class="n">Spectrum</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">)</span>
+
+    <span class="c1"># ---------------------------------------------------------------</span>
+    <span class="c1">#                 extract waveforms</span>
+    <span class="c1"># first, read short extract before signal as an estimate of noise</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span>
+        <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;DURATION_SEC&quot;</span><span class="p">],</span>
+        <span class="n">time_shifted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">data_folder</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;DATA_FOLDER&quot;</span><span class="p">],</span>
+        <span class="n">offset_ot</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;OFFSET_OT_SEC_NOISE&quot;</span><span class="p">],</span>
+        <span class="n">attach_response</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;ATTACH_RESPONSE&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">noise</span><span class="o">.</span><span class="n">remove_sensitivity</span><span class="p">()</span>
+    <span class="n">spectrum</span><span class="o">.</span><span class="n">compute_spectrum</span><span class="p">(</span><span class="n">noise</span><span class="p">,</span> <span class="s2">&quot;noise&quot;</span><span class="p">)</span>
+    <span class="c1"># then, read signal</span>
+    <span class="k">if</span> <span class="s2">&quot;p&quot;</span> <span class="ow">in</span> <span class="n">phases</span><span class="p">:</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span>
+            <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;DURATION_SEC&quot;</span><span class="p">],</span>
+            <span class="n">phase_on_comp</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;PHASE_ON_COMP_P&quot;</span><span class="p">],</span>
+            <span class="n">offset_phase</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;OFFSET_PHASE&quot;</span><span class="p">],</span>
+            <span class="n">time_shifted</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;TIME_SHIFTED&quot;</span><span class="p">],</span>
+            <span class="n">data_folder</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;DATA_FOLDER&quot;</span><span class="p">],</span>
+            <span class="n">attach_response</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;ATTACH_RESPONSE&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">remove_sensitivity</span><span class="p">()</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">zero_out_clipped_waveforms</span><span class="p">(</span><span class="n">kurtosis_threshold</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">p_wave</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">spectrum</span><span class="o">.</span><span class="n">compute_spectrum</span><span class="p">(</span><span class="n">p_wave</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;s&quot;</span> <span class="ow">in</span> <span class="n">phases</span><span class="p">:</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span>
+            <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;DURATION_SEC&quot;</span><span class="p">],</span>
+            <span class="n">phase_on_comp</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;PHASE_ON_COMP_S&quot;</span><span class="p">],</span>
+            <span class="n">offset_phase</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;OFFSET_PHASE&quot;</span><span class="p">],</span>
+            <span class="n">time_shifted</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;TIME_SHIFTED&quot;</span><span class="p">],</span>
+            <span class="n">data_folder</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;DATA_FOLDER&quot;</span><span class="p">],</span>
+            <span class="n">attach_response</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;ATTACH_RESPONSE&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">remove_sensitivity</span><span class="p">()</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">zero_out_clipped_waveforms</span><span class="p">(</span><span class="n">kurtosis_threshold</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">s_wave</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">spectrum</span><span class="o">.</span><span class="n">compute_spectrum</span><span class="p">(</span><span class="n">s_wave</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">)</span>
+
+    <span class="c1"># -----------------------------------------------------------</span>
+    <span class="n">spectrum</span><span class="o">.</span><span class="n">set_target_frequencies</span><span class="p">(</span>
+        <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;FREQ_MIN_HZ&quot;</span><span class="p">],</span> <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;FREQ_MAX_HZ&quot;</span><span class="p">],</span> <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;NUM_FREQS&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">spectrum</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">phases</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">phases</span><span class="p">:</span>
+        <span class="n">spectrum</span><span class="o">.</span><span class="n">compute_signal_to_noise_ratio</span><span class="p">(</span><span class="n">ph</span><span class="p">)</span>
+
+    <span class="c1"># from Ford et al 2008, BSSA</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;Q_1HZ&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span>
+        <span class="n">spectrum</span><span class="o">.</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;ATTENUATION_N&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">spectrum</span><span class="o">.</span><span class="n">attenuation_Q_model</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+    <span class="n">spectrum</span><span class="o">.</span><span class="n">compute_correction_factor</span><span class="p">(</span>
+        <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;RHO_SOURCE_KGM3&quot;</span><span class="p">],</span>
+        <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;RHO_RECEIVER_KGM3&quot;</span><span class="p">],</span>
+        <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;VP_SOURCE_MS&quot;</span><span class="p">],</span>
+        <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;VP_RECEIVER_MS&quot;</span><span class="p">],</span>
+        <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;VS_SOURCE_MS&quot;</span><span class="p">],</span>
+        <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;VS_RECEIVER_MS&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">source_parameters</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">phase_for_mag</span> <span class="ow">in</span> <span class="n">phases</span><span class="p">:</span>
+        <span class="n">spectrum</span><span class="o">.</span><span class="n">compute_network_average_spectrum</span><span class="p">(</span>
+            <span class="n">phase_for_mag</span><span class="p">,</span>
+            <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;SNR_THRESHOLD&quot;</span><span class="p">],</span>
+            <span class="n">min_num_valid_channels_per_freq_bin</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span>
+                <span class="s2">&quot;MIN_NUM_VALID_CHANNELS_PER_FREQ_BIN&quot;</span>
+            <span class="p">],</span>
+            <span class="n">max_relative_distance_err_pct</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;MAX_RELATIVE_DISTANCE_ERR_PCT&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">phase_for_mag</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">average_spectra</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">spectrum</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">phase_for_mag</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">spectrum</span><span class="o">.</span><span class="n">fit_average_spectrum</span><span class="p">(</span>
+            <span class="n">phase_for_mag</span><span class="p">,</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;SPECTRAL_MODEL&quot;</span><span class="p">],</span>
+            <span class="n">min_fraction_valid_points_below_fc</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span>
+                <span class="s2">&quot;MIN_FRACTION_VALID_POINTS_BELOW_FC&quot;</span>
+            <span class="p">],</span>
+            <span class="n">weighted</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;NUM_CHANNEL_WEIGHTED_FIT&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">inversion_success</span><span class="p">:</span>
+            <span class="n">rel_M0_err</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">M0_err</span> <span class="o">/</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">M0</span>
+            <span class="n">rel_fc_err</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">fc_err</span> <span class="o">/</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">fc</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">rel_M0_err</span> <span class="o">&gt;</span> <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;MAX_REL_M0_ERR_PCT&quot;</span><span class="p">]</span>
+                <span class="ow">or</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">fc</span> <span class="o">&lt;</span> <span class="mf">0.0</span>
+                <span class="ow">or</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">fc</span> <span class="o">&gt;</span> <span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;MAX_REL_FC_ERR_PCT&quot;</span><span class="p">]</span>
+            <span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Relative error on M0: </span><span class="si">{</span><span class="n">rel_M0_err</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Relative error on fc: </span><span class="si">{</span><span class="n">rel_fc_err</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+            <span class="c1"># event.set_aux_data({f&quot;Mw_{phase_for_mag}&quot;: spectrum.Mw})</span>
+            <span class="n">figtitle</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">origin_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">latitude</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;</span><span class="se">\u00b0</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;N, </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">longitude</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;</span><span class="se">\u00b0</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;E, </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">depth</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">km, &quot;</span>
+                <span class="sa">r</span><span class="s2">&quot;$\Delta M_0 / M_0=$&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rel_M0_err</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%, &quot;</span>
+                <span class="sa">r</span><span class="s2">&quot;$\Delta f_c / f_c=$&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rel_fc_err</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span>
+            <span class="p">)</span>
+            <span class="n">source_parameters</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;M0_</span><span class="si">{</span><span class="n">phase_for_mag</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">M0</span>
+            <span class="n">source_parameters</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Mw_</span><span class="si">{</span><span class="n">phase_for_mag</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">Mw</span>
+            <span class="n">source_parameters</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;fc_</span><span class="si">{</span><span class="n">phase_for_mag</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">fc</span>
+            <span class="n">source_parameters</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;M0_err_</span><span class="si">{</span><span class="n">phase_for_mag</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">M0_err</span>
+            <span class="n">source_parameters</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;fc_err_</span><span class="si">{</span><span class="n">phase_for_mag</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">fc_err</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">plot</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">Mw</span> <span class="o">&gt;</span> <span class="n">plot_above_Mw</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">plot_above_random</span>
+            <span class="p">):</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">plot_average_spectrum</span><span class="p">(</span>
+                    <span class="n">phase_for_mag</span><span class="p">,</span>
+                    <span class="n">plot_fit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">figname</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">phase_for_mag</span><span class="si">}</span><span class="s2">_spectrum_</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+                    <span class="n">figtitle</span><span class="o">=</span><span class="n">figtitle</span><span class="p">,</span>
+                    <span class="n">plot_std</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">plot_num_valid_channels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_figures</span><span class="p">,</span> <span class="n">fig</span><span class="o">.</span><span class="n">_label</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">),</span>
+                    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span>
+                    <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+    <span class="n">Mw_exists</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">Mw</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">Mw_err</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;Mw_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">source_parameters</span><span class="p">:</span>
+            <span class="n">Mw</span> <span class="o">+=</span> <span class="n">source_parameters</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Mw_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+            <span class="n">Mw_err</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="mf">2.0</span>
+                <span class="o">/</span> <span class="mf">3.0</span>
+                <span class="o">*</span> <span class="n">source_parameters</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;M0_err_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+                <span class="o">/</span> <span class="n">source_parameters</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;M0_</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">norm</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">Mw_exists</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">Mw_exists</span><span class="p">:</span>
+        <span class="n">Mw</span> <span class="o">/=</span> <span class="n">norm</span>
+        <span class="n">Mw_err</span> <span class="o">/=</span> <span class="n">norm</span>
+        <span class="n">source_parameters</span><span class="p">[</span><span class="s2">&quot;Mw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Mw</span>
+        <span class="n">source_parameters</span><span class="p">[</span><span class="s2">&quot;Mw_err&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Mw_err</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Mw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">Mw_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="k">if</span> <span class="n">Mw_exists</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The P-S averaged moment magnitude is </span><span class="si">{</span><span class="n">Mw</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> +/- </span><span class="si">{</span><span class="n">Mw_err</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">source_parameters</span><span class="p">[</span><span class="s2">&quot;Mw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Mw</span>
+        <span class="n">source_parameters</span><span class="p">[</span><span class="s2">&quot;Mw_err&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Mw_err</span>
+
+    <span class="n">event</span><span class="o">.</span><span class="n">set_aux_data</span><span class="p">(</span><span class="n">source_parameters</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">event</span><span class="p">,</span> <span class="n">spectrum</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Eric Beauce, William B. Frank.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

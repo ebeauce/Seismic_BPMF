@@ -380,7 +380,7 @@ div.rendered_html tbody tr:hover {
 <h1>Build Template Database<a class="headerlink" href="#Build-Template-Database" title="Permalink to this heading"></a></h1>
 <p>In this notebook, we use the events detected in notebook 5, and further characterized in notebooks 6 ands 7, to build a database of template events. This step consists mostly in building data and metadata files but also allows the selection of events based on quality and the grouping of similar events. We want to avoid having too many similar templates in the database as it means useless, redundant computation in the template matching process (similar templates detect the same events).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
@@ -400,7 +400,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&quot;svg&quot;]
@@ -408,7 +408,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># program parameters</span>
@@ -420,7 +420,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read network metadata</span>
@@ -433,7 +433,7 @@ div.rendered_html tbody tr:hover {
 <h2>Read the database of detected events<a class="headerlink" href="#Read-the-database-of-detected-events" title="Permalink to this heading"></a></h2>
 <p>We read the database of events detected with backprojection and, with them, create <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Template</span></code> instances.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># HMAX_LOCATION_UNCERTAINTY_KM: All events with hmax_unc &lt; HMAX_LOCATION_UNCERTAINTY_KM will be selected</span>
@@ -443,7 +443,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">templates</span> <span class="o">=</span> <span class="p">[]</span>
@@ -491,7 +491,7 @@ Checking reloc_bp.h5...
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|██████████| 17/17 [00:02&lt;00:00,  6.46it/s]
+  0%|          | 0/17 [00:00&lt;?, ?it/s]100%|██████████| 17/17 [00:02&lt;00:00,  7.41it/s]
 </pre></div></div>
 </div>
 </section>
@@ -499,21 +499,21 @@ Checking reloc_bp.h5...
 <h2>Remove redundant templates<a class="headerlink" href="#Remove-redundant-templates" title="Permalink to this heading"></a></h2>
 <p>We first create an <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.TemplateGroup</span></code> instance with the templates built in the previous cell. This class offers a number of methods to operate on groups of templates.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">template_group</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">TemplateGroup</span><span class="p">(</span><span class="n">templates</span><span class="p">,</span> <span class="n">net</span><span class="p">)</span>
 <span class="c1"># this trick is necessary to make the class aware that the waveforms are already</span>
 <span class="c1"># attached to the Template instances (_update_attributes should never be called at</span>
 <span class="c1"># any other time of the workflow).</span>
-<span class="n">template_group</span><span class="o">.</span><span class="n">_update_attributes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;read_waveforms&#39;</span><span class="p">)</span>
+<span class="n">template_group</span><span class="o">.</span><span class="n">_update_attributes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;read_waveforms&quot;</span><span class="p">)</span>
 <span class="c1"># normalize the waveforms</span>
 <span class="n">template_group</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># parameters controlling how the inter-template correlation matrix is computed</span>
@@ -525,7 +525,7 @@ Checking reloc_bp.h5...
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">TemplateGroup.compute_intertemplate_cc</span></code> computes the network-averaged correlation coefficient between templates. To account for possible location errors – and, therefore, different alignments on the P- and S-wave arrivals – we search for the maximum correlation within +/- <code class="docutils literal notranslate"><span class="pre">MAX_LAG_SAMP</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t1</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
@@ -548,27 +548,20 @@ Checking reloc_bp.h5...
 <div class="highlight"><pre>
 Computing the similarity matrix...
 Computing the inter-template directional errors...
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/ebeauce/miniconda3/envs/hy7_py310/lib/python3.10/site-packages/BPMF/dataset.py:3616: RuntimeWarning: invalid value encountered in divide
-  unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[
+Computed inter-template CCs in 0.15sec.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Computed inter-template CCs in 2.29sec.
+/home/ebeauce/miniconda3/envs/hy7_py310/lib/python3.10/site-packages/BPMF/dataset.py:4169: RuntimeWarning: invalid value encountered in divide
+  unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">template_group</span><span class="o">.</span><span class="n">intertemplate_cc</span>
@@ -576,7 +569,7 @@ Computed inter-template CCs in 2.29sec.
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -621,341 +614,341 @@ Computed inter-template CCs in 2.29sec.
     <tr>
       <th>0</th>
       <td>1.000000</td>
-      <td>0.744974</td>
+      <td>0.745198</td>
+      <td>0.162663</td>
+      <td>0.489752</td>
       <td>0.000000</td>
-      <td>0.534567</td>
-      <td>0.290406</td>
-      <td>0.128623</td>
-      <td>0.417173</td>
+      <td>0.751065</td>
+      <td>0.433426</td>
       <td>0.000000</td>
-      <td>0.324499</td>
-      <td>0.000000</td>
-      <td>0.178929</td>
-      <td>0.640170</td>
-      <td>0.350904</td>
-      <td>0.750798</td>
-      <td>0.435296</td>
-      <td>0.164166</td>
-      <td>0.173965</td>
+      <td>0.187433</td>
+      <td>0.132249</td>
+      <td>0.173695</td>
+      <td>0.691722</td>
+      <td>0.297668</td>
+      <td>0.417570</td>
+      <td>0.482067</td>
+      <td>0.333438</td>
+      <td>0.165799</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.744974</td>
+      <td>0.745198</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.396878</td>
-      <td>0.250303</td>
-      <td>0.154200</td>
-      <td>0.348427</td>
+      <td>0.451443</td>
       <td>0.000000</td>
-      <td>0.288107</td>
+      <td>0.697121</td>
+      <td>0.455028</td>
       <td>0.000000</td>
-      <td>0.161985</td>
-      <td>0.647501</td>
-      <td>0.328757</td>
-      <td>0.590861</td>
-      <td>0.404483</td>
-      <td>0.186757</td>
-      <td>0.190373</td>
+      <td>0.186291</td>
+      <td>0.151569</td>
+      <td>0.204040</td>
+      <td>0.583336</td>
+      <td>0.309618</td>
+      <td>0.376188</td>
+      <td>0.440005</td>
+      <td>0.294525</td>
+      <td>0.157504</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.000000</td>
+      <td>0.162663</td>
       <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.162423</td>
       <td>0.000000</td>
-      <td>0.166374</td>
+      <td>0.156482</td>
+      <td>0.169598</td>
+      <td>0.140515</td>
       <td>0.000000</td>
-      <td>0.147886</td>
+      <td>0.152657</td>
+      <td>0.169002</td>
       <td>0.000000</td>
-      <td>0.163174</td>
-      <td>0.173734</td>
+      <td>0.163741</td>
       <td>0.000000</td>
-      <td>0.147432</td>
-      <td>0.000000</td>
-      <td>0.169048</td>
-      <td>0.166136</td>
-      <td>0.165519</td>
+      <td>0.154538</td>
+      <td>0.165371</td>
+      <td>0.146140</td>
+      <td>0.171176</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.534567</td>
-      <td>0.396878</td>
-      <td>0.162423</td>
+      <td>0.489752</td>
+      <td>0.451443</td>
+      <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.307101</td>
-      <td>0.175604</td>
-      <td>0.370633</td>
       <td>0.000000</td>
-      <td>0.302889</td>
+      <td>0.550850</td>
+      <td>0.402199</td>
       <td>0.000000</td>
-      <td>0.176410</td>
-      <td>0.435070</td>
-      <td>0.399806</td>
-      <td>0.459875</td>
-      <td>0.500056</td>
-      <td>0.195253</td>
-      <td>0.200795</td>
+      <td>0.169801</td>
+      <td>0.146803</td>
+      <td>0.149911</td>
+      <td>0.423282</td>
+      <td>0.445811</td>
+      <td>0.348178</td>
+      <td>0.357582</td>
+      <td>0.319644</td>
+      <td>0.139809</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.290406</td>
-      <td>0.250303</td>
       <td>0.000000</td>
-      <td>0.307101</td>
+      <td>0.000000</td>
+      <td>0.156482</td>
+      <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.141977</td>
-      <td>0.261030</td>
       <td>0.000000</td>
-      <td>0.206473</td>
       <td>0.000000</td>
-      <td>0.165956</td>
-      <td>0.262600</td>
-      <td>0.303637</td>
-      <td>0.302957</td>
-      <td>0.312839</td>
-      <td>0.177317</td>
-      <td>0.198118</td>
+      <td>0.000000</td>
+      <td>0.187234</td>
+      <td>0.136836</td>
+      <td>0.171432</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.142375</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>0.128623</td>
-      <td>0.154200</td>
-      <td>0.166374</td>
-      <td>0.175604</td>
-      <td>0.141977</td>
+      <td>0.751065</td>
+      <td>0.697121</td>
+      <td>0.169598</td>
+      <td>0.550850</td>
+      <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.160476</td>
+      <td>0.573692</td>
       <td>0.000000</td>
-      <td>0.124628</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.132526</td>
-      <td>0.112839</td>
-      <td>0.128560</td>
-      <td>0.146606</td>
-      <td>0.164145</td>
-      <td>0.169140</td>
+      <td>0.177688</td>
+      <td>0.128839</td>
+      <td>0.163332</td>
+      <td>0.581510</td>
+      <td>0.316958</td>
+      <td>0.426413</td>
+      <td>0.457873</td>
+      <td>0.322279</td>
+      <td>0.143578</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>0.417173</td>
-      <td>0.348427</td>
+      <td>0.433426</td>
+      <td>0.455028</td>
+      <td>0.140515</td>
+      <td>0.402199</td>
       <td>0.000000</td>
-      <td>0.370633</td>
-      <td>0.261030</td>
-      <td>0.160476</td>
+      <td>0.573692</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.296597</td>
-      <td>0.000000</td>
-      <td>0.154076</td>
-      <td>0.409965</td>
-      <td>0.284307</td>
-      <td>0.423800</td>
-      <td>0.349528</td>
-      <td>0.176945</td>
-      <td>0.158397</td>
+      <td>0.181900</td>
+      <td>0.174854</td>
+      <td>0.179139</td>
+      <td>0.492894</td>
+      <td>0.288432</td>
+      <td>0.351653</td>
+      <td>0.395676</td>
+      <td>0.294420</td>
+      <td>0.159435</td>
     </tr>
     <tr>
       <th>7</th>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.147886</td>
+      <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>1.000000</td>
+      <td>0.193355</td>
+      <td>0.167718</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.181220</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.154709</td>
-      <td>0.161151</td>
+      <td>0.197122</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>0.324499</td>
-      <td>0.288107</td>
-      <td>0.000000</td>
-      <td>0.302889</td>
-      <td>0.206473</td>
-      <td>0.124628</td>
-      <td>0.296597</td>
-      <td>0.000000</td>
+      <td>0.187433</td>
+      <td>0.186291</td>
+      <td>0.152657</td>
+      <td>0.169801</td>
+      <td>0.187234</td>
+      <td>0.177688</td>
+      <td>0.181900</td>
+      <td>0.193355</td>
       <td>1.000000</td>
-      <td>0.000000</td>
-      <td>0.146955</td>
-      <td>0.328988</td>
-      <td>0.260875</td>
-      <td>0.314985</td>
-      <td>0.295398</td>
-      <td>0.158779</td>
-      <td>0.178219</td>
+      <td>0.193144</td>
+      <td>0.187271</td>
+      <td>0.204847</td>
+      <td>0.199492</td>
+      <td>0.152425</td>
+      <td>0.149325</td>
+      <td>0.163335</td>
+      <td>0.171001</td>
     </tr>
     <tr>
       <th>9</th>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.163174</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
+      <td>0.132249</td>
+      <td>0.151569</td>
+      <td>0.169002</td>
+      <td>0.146803</td>
+      <td>0.136836</td>
+      <td>0.128839</td>
+      <td>0.174854</td>
+      <td>0.167718</td>
+      <td>0.193144</td>
       <td>1.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.164063</td>
-      <td>0.000000</td>
+      <td>0.169805</td>
+      <td>0.167378</td>
+      <td>0.167384</td>
+      <td>0.172907</td>
+      <td>0.151373</td>
+      <td>0.152229</td>
+      <td>0.179561</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>0.178929</td>
-      <td>0.161985</td>
-      <td>0.173734</td>
-      <td>0.176410</td>
-      <td>0.165956</td>
+      <td>0.173695</td>
+      <td>0.204040</td>
       <td>0.000000</td>
-      <td>0.154076</td>
-      <td>0.181220</td>
-      <td>0.146955</td>
+      <td>0.149911</td>
+      <td>0.171432</td>
+      <td>0.163332</td>
+      <td>0.179139</td>
       <td>0.000000</td>
+      <td>0.187271</td>
+      <td>0.169805</td>
       <td>1.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.180292</td>
-      <td>0.156572</td>
-      <td>0.155401</td>
-      <td>0.150891</td>
+      <td>0.188334</td>
+      <td>0.165065</td>
+      <td>0.181436</td>
+      <td>0.146070</td>
+      <td>0.155118</td>
+      <td>0.164733</td>
     </tr>
     <tr>
       <th>11</th>
-      <td>0.640170</td>
-      <td>0.647501</td>
+      <td>0.691722</td>
+      <td>0.583336</td>
+      <td>0.163741</td>
+      <td>0.423282</td>
       <td>0.000000</td>
-      <td>0.435070</td>
-      <td>0.262600</td>
-      <td>0.132526</td>
-      <td>0.409965</td>
+      <td>0.581510</td>
+      <td>0.492894</td>
       <td>0.000000</td>
-      <td>0.328988</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
+      <td>0.204847</td>
+      <td>0.167378</td>
+      <td>0.188334</td>
       <td>1.000000</td>
-      <td>0.367012</td>
-      <td>0.681258</td>
-      <td>0.463339</td>
-      <td>0.159796</td>
-      <td>0.167703</td>
+      <td>0.313229</td>
+      <td>0.435087</td>
+      <td>0.503254</td>
+      <td>0.332503</td>
+      <td>0.149142</td>
     </tr>
     <tr>
       <th>12</th>
-      <td>0.350904</td>
-      <td>0.328757</td>
-      <td>0.147432</td>
-      <td>0.399806</td>
-      <td>0.303637</td>
-      <td>0.112839</td>
-      <td>0.284307</td>
+      <td>0.297668</td>
+      <td>0.309618</td>
       <td>0.000000</td>
-      <td>0.260875</td>
+      <td>0.445811</td>
       <td>0.000000</td>
+      <td>0.316958</td>
+      <td>0.288432</td>
       <td>0.000000</td>
-      <td>0.367012</td>
+      <td>0.199492</td>
+      <td>0.167384</td>
+      <td>0.165065</td>
+      <td>0.313229</td>
       <td>1.000000</td>
-      <td>0.390736</td>
-      <td>0.379516</td>
-      <td>0.163981</td>
-      <td>0.183909</td>
+      <td>0.367145</td>
+      <td>0.263499</td>
+      <td>0.289228</td>
+      <td>0.179794</td>
     </tr>
     <tr>
       <th>13</th>
-      <td>0.750798</td>
-      <td>0.590861</td>
+      <td>0.417570</td>
+      <td>0.376188</td>
+      <td>0.154538</td>
+      <td>0.348178</td>
       <td>0.000000</td>
-      <td>0.459875</td>
-      <td>0.302957</td>
-      <td>0.128560</td>
-      <td>0.423800</td>
+      <td>0.426413</td>
+      <td>0.351653</td>
       <td>0.000000</td>
-      <td>0.314985</td>
-      <td>0.000000</td>
-      <td>0.180292</td>
-      <td>0.681258</td>
-      <td>0.390736</td>
+      <td>0.152425</td>
+      <td>0.172907</td>
+      <td>0.181436</td>
+      <td>0.435087</td>
+      <td>0.367145</td>
       <td>1.000000</td>
-      <td>0.574542</td>
-      <td>0.164327</td>
-      <td>0.163945</td>
+      <td>0.351013</td>
+      <td>0.301293</td>
+      <td>0.152648</td>
     </tr>
     <tr>
       <th>14</th>
-      <td>0.435296</td>
-      <td>0.404483</td>
-      <td>0.169048</td>
-      <td>0.500056</td>
-      <td>0.312839</td>
-      <td>0.146606</td>
-      <td>0.349528</td>
+      <td>0.482067</td>
+      <td>0.440005</td>
+      <td>0.165371</td>
+      <td>0.357582</td>
       <td>0.000000</td>
-      <td>0.295398</td>
+      <td>0.457873</td>
+      <td>0.395676</td>
       <td>0.000000</td>
-      <td>0.156572</td>
-      <td>0.463339</td>
-      <td>0.379516</td>
-      <td>0.574542</td>
+      <td>0.149325</td>
+      <td>0.151373</td>
+      <td>0.146070</td>
+      <td>0.503254</td>
+      <td>0.263499</td>
+      <td>0.351013</td>
       <td>1.000000</td>
-      <td>0.167910</td>
-      <td>0.170484</td>
+      <td>0.308089</td>
+      <td>0.147887</td>
     </tr>
     <tr>
       <th>15</th>
-      <td>0.164166</td>
-      <td>0.186757</td>
-      <td>0.166136</td>
-      <td>0.195253</td>
-      <td>0.177317</td>
-      <td>0.164145</td>
-      <td>0.176945</td>
-      <td>0.154709</td>
-      <td>0.158779</td>
-      <td>0.164063</td>
-      <td>0.155401</td>
-      <td>0.159796</td>
-      <td>0.163981</td>
-      <td>0.164327</td>
-      <td>0.167910</td>
+      <td>0.333438</td>
+      <td>0.294525</td>
+      <td>0.146140</td>
+      <td>0.319644</td>
+      <td>0.000000</td>
+      <td>0.322279</td>
+      <td>0.294420</td>
+      <td>0.000000</td>
+      <td>0.163335</td>
+      <td>0.152229</td>
+      <td>0.155118</td>
+      <td>0.332503</td>
+      <td>0.289228</td>
+      <td>0.301293</td>
+      <td>0.308089</td>
       <td>1.000000</td>
-      <td>0.175545</td>
+      <td>0.150512</td>
     </tr>
     <tr>
       <th>16</th>
-      <td>0.173965</td>
-      <td>0.190373</td>
-      <td>0.165519</td>
-      <td>0.200795</td>
-      <td>0.198118</td>
-      <td>0.169140</td>
-      <td>0.158397</td>
-      <td>0.161151</td>
-      <td>0.178219</td>
-      <td>0.000000</td>
-      <td>0.150891</td>
-      <td>0.167703</td>
-      <td>0.183909</td>
-      <td>0.163945</td>
-      <td>0.170484</td>
-      <td>0.175545</td>
+      <td>0.165799</td>
+      <td>0.157504</td>
+      <td>0.171176</td>
+      <td>0.139809</td>
+      <td>0.142375</td>
+      <td>0.143578</td>
+      <td>0.159435</td>
+      <td>0.197122</td>
+      <td>0.171001</td>
+      <td>0.179561</td>
+      <td>0.164733</td>
+      <td>0.149142</td>
+      <td>0.179794</td>
+      <td>0.152648</td>
+      <td>0.147887</td>
+      <td>0.150512</td>
       <td>1.000000</td>
     </tr>
   </tbody>
@@ -963,7 +956,7 @@ Computed inter-template CCs in 2.29sec.
 </div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># set the threshold to consider two template as redundant</span>
@@ -976,7 +969,7 @@ Computed inter-template CCs in 2.29sec.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">templates_filtered</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1023,10 +1016,14 @@ Computed inter-template CCs in 2.29sec.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Template 0 is similar to: Int64Index([0, 1, 3, 11, 13], dtype=&#39;int64&#39;)
-Keeping only Template 0
-Template 14 is similar to: Int64Index([3, 13, 14], dtype=&#39;int64&#39;)
-Keeping only Template 13
+Template 0 is similar to: Int64Index([0, 1, 5, 11], dtype=&#39;int64&#39;)
+Keeping only Template 1
+Template 3 is similar to: Int64Index([3, 5], dtype=&#39;int64&#39;)
+Keeping only Template 5
+Template 6 is similar to: Int64Index([5, 6], dtype=&#39;int64&#39;)
+Keeping only Template 5
+Template 14 is similar to: Int64Index([11, 14], dtype=&#39;int64&#39;)
+Keeping only Template 14
 </pre></div></div>
 </div>
 </section>
@@ -1034,7 +1031,7 @@ Keeping only Template 13
 <h2>Plot the similar templates<a class="headerlink" href="#Plot-the-similar-templates" title="Permalink to this heading"></a></h2>
 <p>How good was our criterion to group similar templates together? Let’s check the waveforms of the similar templates. The previous cell told us that template 0 is similar to templates 1, 3, 11 and 13.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tid</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1044,7 +1041,7 @@ Keeping only Template 13
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1059,7 +1056,7 @@ Text(0.5, 0.98, &#39;Template 0&#39;)
 <img alt="../../_images/tutorial_notebooks_7_build_template_database_17_1.svg" src="../../_images/tutorial_notebooks_7_build_template_database_17_1.svg" /></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tid</span> <span class="o">=</span> <span class="mi">1</span>
@@ -1069,7 +1066,7 @@ Text(0.5, 0.98, &#39;Template 0&#39;)
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1085,7 +1082,7 @@ Text(0.5, 0.98, &#39;Template 1&#39;)
 </div>
 <p>Let’s plot the waveforms of all the templates similar to template 0 on SAUV.E .</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">hilbert</span>
@@ -1111,7 +1108,7 @@ Text(0.5, 0.98, &#39;Template 1&#39;)
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1130,7 +1127,7 @@ Text(0, 0.5, &#39;Velocity (AU)&#39;)
 <section id="Save-the-non-redundant-templates-in-a-database">
 <h2>Save the non-redundant templates in a database<a class="headerlink" href="#Save-the-non-redundant-templates-in-a-database" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">output_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">OUTPUT_PATH</span><span class="p">,</span> <span class="n">DB_PATH_T</span><span class="p">)</span>

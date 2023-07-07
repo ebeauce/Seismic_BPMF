@@ -383,7 +383,7 @@ div.rendered_html tbody tr:hover {
 <h1>Project Initialization<a class="headerlink" href="#Project-Initialization" title="Permalink to this heading"></a></h1>
 <p>In this first notebook, we initialize the project by creating the directory tree where inputs and outputs will be stored. Path variables are environment variables that are defined within the <code class="docutils literal notranslate"><span class="pre">parameters.cfg</span></code> file, which is located in your working directory. We also define a number of other environment variables that will be used at later stages of the BPMF workflow.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
@@ -393,7 +393,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
@@ -404,7 +404,7 @@ div.rendered_html tbody tr:hover {
 <h2>Define the path variables<a class="headerlink" href="#Define-the-path-variables" title="Permalink to this heading"></a></h2>
 <p>NB: path variables can either be relative or absolute paths</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># INPUT_PATH: path to root directory where all input data will be stored</span>
@@ -426,7 +426,7 @@ div.rendered_html tbody tr:hover {
 <section id="Create-folder-tree">
 <h2>Create folder tree<a class="headerlink" href="#Create-folder-tree" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;INPUT_PATH&quot;</span><span class="p">,</span> <span class="s2">&quot;OUTPUT_PATH&quot;</span><span class="p">,</span> <span class="s2">&quot;NETWORK_PATH&quot;</span><span class="p">,</span> <span class="s2">&quot;MOVEOUTS_PATH&quot;</span><span class="p">,</span> <span class="s2">&quot;NLLOC_INPUT_PATH&quot;</span><span class="p">,</span> <span class="s2">&quot;NLLOC_OUTPUT_PATH&quot;</span><span class="p">]:</span>
@@ -439,7 +439,7 @@ div.rendered_html tbody tr:hover {
 <section id="Define-the-preprocessing-parameters">
 <h2>Define the preprocessing parameters<a class="headerlink" href="#Define-the-preprocessing-parameters" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># SAMPLING_RATE_HZ: target sampling rate of the resampled data</span>
@@ -457,7 +457,7 @@ div.rendered_html tbody tr:hover {
 <section id="Define-the-backprojection-parameters">
 <h2>Define the backprojection parameters<a class="headerlink" href="#Define-the-backprojection-parameters" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># N_DEV_BP_THRESHOLD: number of deviations (e.g. rms or mad) above central tendency (e.g. mean or median) for</span>
@@ -470,7 +470,7 @@ div.rendered_html tbody tr:hover {
 <section id="Define-the-template-matching-parameters">
 <h2>Define the template matching parameters<a class="headerlink" href="#Define-the-template-matching-parameters" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># TEMPLATE_LEN_SEC: template length, in seconds</span>
@@ -487,7 +487,7 @@ div.rendered_html tbody tr:hover {
 <section id="Miscelleanous">
 <h2>Miscelleanous<a class="headerlink" href="#Miscelleanous" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># NLLOC_BASENAME: basename of NLLoc files</span>
@@ -501,7 +501,7 @@ div.rendered_html tbody tr:hover {
 <section id="Write-the-parameters.csv-file-in-current-working-directory">
 <h2>Write the <code class="docutils literal notranslate"><span class="pre">parameters.csv</span></code> file in current working directory<a class="headerlink" href="#Write-the-parameters.csv-file-in-current-working-directory" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># convert config dictionary to pandas.DataFrame for pretty print</span>
@@ -513,7 +513,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">config_pd</span>
@@ -521,7 +521,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -619,8 +619,8 @@ div.rendered_html tbody tr:hover {
 </table>
 </div></div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BPMF_parameters.cfg&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fparams</span><span class="p">:</span>
@@ -628,14 +628,6 @@ div.rendered_html tbody tr:hover {
         <span class="n">fparams</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-<span class="ansi-red-intense-fg ansi-bold">The Kernel crashed while executing code in the the current cell or a previous cell. Please review the code in the cell(s) to identify a possible cause of the failure. Click &lt;a href=&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;&gt;here&lt;/a&gt; for more info. View Jupyter &lt;a href=&#39;command:jupyter.viewOutput&#39;&gt;log&lt;/a&gt; for further details.</span>
-</pre></div></div>
 </div>
 </section>
 </section>

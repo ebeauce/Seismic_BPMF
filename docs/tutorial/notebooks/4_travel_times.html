@@ -790,14 +790,14 @@ Min radius: 6341 km, min co-latitude: 0.86 rad, min azimuthal angle: 0.53 rad
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Computing travel times: 8it [00:08,  1.01s/it]
+Computing travel times: 8it [00:06,  1.22it/s]
 </pre></div></div>
 </div>
 </section>
 <section id="Store-travel-time-table-for-backprojection">
 <h2>Store travel time table for backprojection<a class="headerlink" href="#Store-travel-time-table-for-backprojection" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># write travel-times in hdf5 file</span>
@@ -814,7 +814,7 @@ Computing travel times: 8it [00:08,  1.01s/it]
 <h2>Store travel time tables for <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code><a class="headerlink" href="#Store-travel-time-tables-for-NLLoc" title="Permalink to this heading"></a></h2>
 <p>We write the travel time tables in an adequate format for <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code> using the utility functions from <code class="docutils literal notranslate"><span class="pre">BPMF.NLLoc_utils</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># use the functions from ``</span>
@@ -875,7 +875,7 @@ Done!
 <section id="Plot-the-travel-time-field-for-a-given-station">
 <h2>Plot the travel time field for a given station<a class="headerlink" href="#Plot-the-travel-time-field-for-a-given-station" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartopy</span> <span class="k">as</span> <span class="nn">ctp</span>
@@ -889,7 +889,7 @@ Done!
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define map parameters</span>
@@ -920,7 +920,7 @@ Done!
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&#39;svg&#39;]
@@ -986,14 +986,14 @@ Done!
 <span class="n">cax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;5%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="s2">&quot;5%&quot;</span><span class="p">,</span> <span class="n">axes_class</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">cut_through</span><span class="p">(</span><span class="n">station_code</span><span class="p">,</span> <span class="n">cm</span><span class="o">=</span><span class="s2">&quot;inferno&quot;</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">cut_through</span><span class="p">(</span><span class="n">station_code</span><span class="p">,</span> <span class="n">lon_spacing</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">lat_spacing</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">cm</span><span class="o">=</span><span class="s2">&quot;inferno&quot;</span><span class="p">):</span>
     <span class="n">lon_sta</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">station_code</span><span class="p">]</span><span class="o">.</span><span class="n">longitude</span>
     <span class="n">lat_sta</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">station_code</span><span class="p">]</span><span class="o">.</span><span class="n">latitude</span>
     <span class="n">elv_sta</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">station_code</span><span class="p">]</span><span class="o">.</span><span class="n">elevation_m</span>
     <span class="n">station_code</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">station_code</span><span class="p">]</span><span class="o">.</span><span class="n">stations</span>
-    <span class="n">depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">source_coords</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">])</span>
-    <span class="n">longitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">source_coords</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">])</span>
-    <span class="n">latitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">source_coords</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">])</span>
+    <span class="c1"># depth = np.unique(source_coords[&quot;depth&quot;])</span>
+    <span class="c1"># longitude = np.unique(source_coords[&quot;longitude&quot;])</span>
+    <span class="c1"># latitude = np.unique(source_coords[&quot;latitude&quot;])</span>
     <span class="c1"># plot station in different color on map</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">lon_sta</span><span class="p">,</span> <span class="n">lat_sta</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">data_coords</span><span class="p">)</span>
     <span class="c1"># find closest slice in longitude</span>
@@ -1064,6 +1064,7 @@ Done!
         <span class="n">source_coords</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">][</span><span class="n">slice_lon</span><span class="p">],</span>
         <span class="n">tt_P_slice_lon</span><span class="p">,</span>
         <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Greys&quot;</span><span class="p">,</span>
+        <span class="n">linestyles</span><span class="o">=</span><span class="s2">&quot;--&quot;</span>
     <span class="p">)</span>
     <span class="n">cs_lat</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span>
         <span class="n">source_coords</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">][</span><span class="n">slice_lat</span><span class="p">],</span>
@@ -1079,7 +1080,10 @@ Done!
         <span class="n">source_coords</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">][</span><span class="n">slice_lat</span><span class="p">],</span>
         <span class="n">tt_P_slice_lat</span><span class="p">,</span>
         <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Greys&quot;</span><span class="p">,</span>
+        <span class="n">linestyles</span><span class="o">=</span><span class="s2">&quot;--&quot;</span>
     <span class="p">)</span>
+
+
     <span class="c1"># format axis labels</span>
     <span class="n">cs_lon</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
     <span class="n">cs_lat</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
@@ -1132,7 +1136,7 @@ Done!
 <p>If you want to study a large region and computed a large grid (several millions of grid points), earthquake detection with backprojection (see next notebook) will be quite slow. In fact, you might just want to keep those grid points that have significantly different moveouts to avoid losing time in redundant computations. The following cell shows how to use <code class="docutils literal notranslate"><span class="pre">BPMF.clib.find_similar_sources</span></code> to downsample the grid in a “smart” way.</p>
 <p>!! This operation does not overwrite the original grid, which is still available for the accurate earthquake location !!</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
@@ -1150,7 +1154,7 @@ Done!
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tts</span><span class="p">,</span> <span class="n">source_coords</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">load_travel_times</span><span class="p">(</span>
@@ -1163,7 +1167,7 @@ Done!
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the &quot;moveouts&quot;, that is, an array of relative travel times. All travel times are expressed with respect to the earliest arrival.</span>
@@ -1177,7 +1181,7 @@ Done!
 <p>The following cell should take very little time for the tutorial but it is not always the case for large-scale applications:</p>
 <p>!! The following cell can take a VERY long time for large grids (~24hours or more). This is a ONE TIME COMPUTATION that you probably want to run outside of this notebook when dealing with a large-scale problem. !!</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">redundant_sources</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">clib</span><span class="o">.</span><span class="n">find_similar_sources</span><span class="p">(</span><span class="n">moveouts</span><span class="p">,</span> <span class="n">MIN_TIME_DIFFERENCE_SEC</span><span class="p">)</span>
@@ -1205,7 +1209,7 @@ Progress: 90%
 </div>
 <p>We obtain the indexes of the non-redundant sources:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sparse_grid_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">redundant_sources</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)[</span>

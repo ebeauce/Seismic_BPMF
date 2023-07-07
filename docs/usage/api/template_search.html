@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="BPMF.utils" href="utils.html" />
-    <link rel="prev" title="BPMF.similarity_search" href="similarity_search.html" /> 
+    <link rel="prev" title="BPMF.spectrum" href="spectrum.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -50,9 +50,13 @@
 <li class="toctree-l3"><a class="reference internal" href="clib.html">BPMF.clib</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dataset.html">BPMF.dataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="data_reader_examples.html">BPMF.data_reader_examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="NLLoc_utils.html">BPMF.NLLoc_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plotting_utils.html">BPMF.ploting_utils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="similarity_search.html">BPMF.similarity_search</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrum.html">BPMF.spectrum</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">BPMF.template_search</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.template_search.Beamformer"><code class="docutils literal notranslate"><span class="pre">Beamformer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.template_search.TravelTimes"><code class="docutils literal notranslate"><span class="pre">TravelTimes</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.template_search.baseline"><code class="docutils literal notranslate"><span class="pre">baseline()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.template_search.envelope"><code class="docutils literal notranslate"><span class="pre">envelope()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.template_search.envelope_parallel"><code class="docutils literal notranslate"><span class="pre">envelope_parallel()</span></code></a></li>
@@ -62,8 +66,6 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="utils.html">BPMF.utils</a></li>
-<li class="toctree-l3"><a class="reference internal" href="NLLoc_utils.html">BPMF.NLLoc_utils</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plotting_utils.html">BPMF.ploting_utils</a></li>
 </ul>
 </li>
 </ul>
@@ -126,7 +128,7 @@
 <span id="bpmf-template-search"></span><h1>BPMF.template_search<a class="headerlink" href="#module-BPMF.template_search" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">Beamformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">travel_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_tt_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">Beamformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">travel_times</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moveouts_relative_to_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class for backprojecting waveform features with beamforming.</p>
 <dl class="py method">
@@ -183,8 +185,18 @@ each theoretical source.</p></li>
 <dd></dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="BPMF.template_search.Beamformer.n_sources">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_sources</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.n_sources" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.n_stations">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_stations</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.n_stations" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.template_search.Beamformer.num_sources">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_sources</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.num_sources" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -244,7 +256,7 @@ stations will be plotted.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.remove_baseline">
 <span class="sig-name descname"><span class="pre">remove_baseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attribute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'composite'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.remove_baseline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.remove_baseline" title="Permalink to this definition"></a></dt>
-<dd><p>Remove baseline from network response.</p>
+<dd><p>Remove baseline from network response</p>
 </dd></dl>
 
 <dl class="py method">
@@ -265,21 +277,6 @@ stations will be plotted.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="BPMF.template_search.Beamformer.set_moveouts">
-<span class="sig-name descname"><span class="pre">set_moveouts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">moveouts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_moveouts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_moveouts" title="Permalink to this definition"></a></dt>
-<dd><p>Attribute <cite>_moveouts</cite> to the class instance.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>moveouts</strong> (<em>(</em><em>n_sources</em><em>, </em><em>n_stations</em><em>, </em><em>n_phases</em><em>) </em><em>numpy.ndarray</em>) – The moveouts to use for backprojection.</p></li>
-<li><p><strong>stations</strong> (<em>(</em><em>n_stations</em><em>,</em><em>) </em><em>list</em><em> or </em><em>numpy.ndarray</em><em> of </em><em>strings</em>) – Station names corresponding with the second axis of <cite>moveouts</cite>.</p></li>
-<li><p><strong>phases</strong> (<em>(</em><em>n_phases</em><em>,</em><em>) </em><em>list</em><em> or </em><em>numpy.ndarray</em><em> of </em><em>strings</em>) – Phase names corresponing with the third axis of <cite>moveouts</cite>.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.set_network">
 <span class="sig-name descname"><span class="pre">set_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_network" title="Permalink to this definition"></a></dt>
 <dd><p>Attribute <cite>network</cite> to the class instance.</p>
@@ -288,9 +285,22 @@ of the beams. All arrays with a station axis are ordered according to
 <cite>network.stations</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>network</strong> (<em>dataset.Network instance</em>) – The Network instance with the station network information.
+<dd class="field-odd"><p><strong>network</strong> (<a class="reference internal" href="dataset.html#BPMF.dataset.Network" title="BPMF.dataset.Network"><em>dataset.Network</em></a>) – The Network instance with the station network information.
 <cite>network</cite> can force the network response to be computed only on
 a subset of the data stored in <cite>data</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.template_search.Beamformer.set_phases">
+<span class="sig-name descname"><span class="pre">set_phases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phases</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_phases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_phases" title="Permalink to this definition"></a></dt>
+<dd><p>Attach <cite>phases</cite> to the class instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>phases</strong> (<em>list</em><em> of </em><em>str</em>) – List of strings representing the phase names to read from
+the travel time table. <cite>phases</cite> determines the order in which
+<cite>self.moveouts</cite> is built.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -302,6 +312,17 @@ a subset of the data stored in <cite>data</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>source_coords</strong> (<em>dictionary</em>) – Dictionary with 3 fields: ‘latitude’, ‘longitude’ and ‘depth’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.template_search.Beamformer.set_travel_times">
+<span class="sig-name descname"><span class="pre">set_travel_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">travel_times</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_travel_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_travel_times" title="Permalink to this definition"></a></dt>
+<dd><p>Attaches <cite>travel_times</cite> to the class instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>travel_times</strong> (<a class="reference internal" href="#BPMF.template_search.TravelTimes" title="BPMF.template_search.TravelTimes"><em>TravelTimes</em></a>) – TravelTimes instance.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -340,6 +361,11 @@ the <cite>n_max_stations</cite> stations will be set a weight &gt; 0.</p>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="BPMF.template_search.Beamformer.source_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_coordinates</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.source_coordinates" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.stations">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stations</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.stations" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -372,6 +398,91 @@ If None, <cite>cutoff_dist</cite> is set to the median interstation distance.</p
 </dd>
 </dl>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BPMF.template_search.TravelTimes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">TravelTimes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tt_folder_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#TravelTimes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.TravelTimes" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for handling travel time tables.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.convert_to_samples">
+<span class="sig-name descname"><span class="pre">convert_to_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_tt_seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#TravelTimes.convert_to_samples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.TravelTimes.convert_to_samples" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a new <cite>self.travel_times_samp</cite> attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sampling_rate</strong> (<em>float</em>) – The sampling rate to use to convert times from seconds to samples.</p></li>
+<li><p><strong>remove_tt_seconds</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If True, delete <cite>self.travel_times</cite> after conversion. This may be
+necessary to save memory.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.get_travel_times_array">
+<span class="sig-name descname"><span class="pre">get_travel_times_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'seconds'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_to_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#TravelTimes.get_travel_times_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.TravelTimes.get_travel_times_array" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>units</strong> (<em>str</em><em>, </em><em>optional</em>) – Either of ‘seconds’ or ‘samples’.
+If ‘seconds’, build array from <cite>self.travel_times</cite>.
+If ‘samples’, build array from <cite>self.travel_times_samp</cite>.</p></li>
+<li><p><strong>stations</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – List of stations to include in the output array.
+Default is None, which uses all stations.</p></li>
+<li><p><strong>phases</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – List of phases to include in the output array.
+Default is None, which uses all phases.</p></li>
+<li><p><strong>relative_to_first</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If True, the travel times are given as relative to the
+earliest phase for each source.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.n_sources">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_sources</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.n_sources" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.num_sources">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_sources</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.num_sources" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.phases">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">phases</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.phases" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_indexes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#TravelTimes.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.TravelTimes.read" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phases</strong> (<em>list</em><em> of </em><em>str</em>) – List of the seismic phases to read from <cite>self.where</cite>.</p></li>
+<li><p><strong>source_indexes</strong> (<em>array-like</em><em>, </em><em>optional</em>) – Array-like with the source indexes to read. Default is None
+(read the whole travel time table).</p></li>
+<li><p><strong>read_coords</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If True, the source coordinates are read  from <cite>self.where</cite>.</p></li>
+<li><p><strong>stations</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – If not None, is a list of station names to read a subset of
+travel times from <cite>self.where</cite>. Default is None, that is, all
+stations are read.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.source_coords">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_coords</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.source_coords" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.tts">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tts</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.tts" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -495,7 +606,7 @@ the well backprojected events.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="similarity_search.html" class="btn btn-neutral float-left" title="BPMF.similarity_search" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectrum.html" class="btn btn-neutral float-left" title="BPMF.spectrum" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="utils.html" class="btn btn-neutral float-right" title="BPMF.utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

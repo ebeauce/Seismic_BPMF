@@ -19,7 +19,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="BPMF.NLLoc_utils" href="NLLoc_utils.html" />
+    <link rel="next" title="Tutorial" href="../../tutorial.html" />
     <link rel="prev" title="BPMF.template_search" href="template_search.html" /> 
 </head>
 
@@ -50,7 +50,10 @@
 <li class="toctree-l3"><a class="reference internal" href="clib.html">BPMF.clib</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dataset.html">BPMF.dataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="data_reader_examples.html">BPMF.data_reader_examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="NLLoc_utils.html">BPMF.NLLoc_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plotting_utils.html">BPMF.ploting_utils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="similarity_search.html">BPMF.similarity_search</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrum.html">BPMF.spectrum</a></li>
 <li class="toctree-l3"><a class="reference internal" href="template_search.html">BPMF.template_search</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">BPMF.utils</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.SVDWF"><code class="docutils literal notranslate"><span class="pre">SVDWF()</span></code></a></li>
@@ -86,8 +89,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.write_lock_file"><code class="docutils literal notranslate"><span class="pre">write_lock_file()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="NLLoc_utils.html">BPMF.NLLoc_utils</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plotting_utils.html">BPMF.ploting_utils</a></li>
 </ul>
 </li>
 </ul>
@@ -247,20 +248,34 @@ default value of 0.01 produces sharp windows.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.compute_distances">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">compute_distances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_longitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_latitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_depths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_longitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_latitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_depths</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#compute_distances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.compute_distances" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">compute_distances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_longitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_latitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_depths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_longitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_latitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_depths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_epicentral_distances</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#compute_distances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.compute_distances" title="Permalink to this definition"></a></dt>
 <dd><p>Fast distance computation between all source points and all receivers.</p>
-<p>Use <cite>cartopy.geodesic.Geodesic</cite> to compute pair-wise distances.</p>
+<p>This function uses <cite>cartopy.geodesic.Geodesic</cite> to compute pair-wise distances
+between source points and receivers. It computes both hypocentral distances
+and, if specified, epicentral distances.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>source_longitudes</strong> (<em>(</em><em>n_sources</em><em>,</em><em>) </em><em>list</em><em> or </em><em>numpy.array</em>) – Longitudes, in decimal degrees, of the source points.</p></li>
-<li><p><strong>source_latitudes</strong> (<em>(</em><em>n_sources</em><em>,</em><em>) </em><em>list</em><em> or </em><em>numpy.array</em>) – Latitudes, in decimal degrees, of the source points.</p></li>
-<li><p><strong>source_depths</strong> (<em>(</em><em>n_sources</em><em>,</em><em>) </em><em>list</em><em> or </em><em>numpy.array</em>) – Depths, in km, of the source points.</p></li>
-<li><p><strong>receiver_longitudes</strong> (<em>(</em><em>n_sources</em><em>,</em><em>) </em><em>list</em><em> or </em><em>numpy.array</em>) – Longitudes, in decimal degrees, of the receivers.</p></li>
-<li><p><strong>receiver_latitudes</strong> (<em>(</em><em>n_sources</em><em>,</em><em>) </em><em>list</em><em> or </em><em>numpy.array</em>) – Latitudes, in decimal degrees, of the receivers.</p></li>
-<li><p><strong>receiver_depths</strong> (<em>(</em><em>n_sources</em><em>,</em><em>) </em><em>list</em><em> or </em><em>numpy.array</em>) – Depths, in km, of the receivers. E.g., depths are negative if receivers
-are located at the surface.</p></li>
+<li><p><strong>source_longitudes</strong> (<em>numpy.ndarray</em><em> or </em><em>list</em>) – Longitudes, in decimal degrees, of the source points.</p></li>
+<li><p><strong>source_latitudes</strong> (<em>numpy.ndarray</em><em> or </em><em>list</em>) – Latitudes, in decimal degrees, of the source points.</p></li>
+<li><p><strong>source_depths</strong> (<em>numpy.ndarray</em><em> or </em><em>list</em>) – Depths, in kilometers, of the source points.</p></li>
+<li><p><strong>receiver_longitudes</strong> (<em>numpy.ndarray</em><em> or </em><em>list</em>) – Longitudes, in decimal degrees, of the receivers.</p></li>
+<li><p><strong>receiver_latitudes</strong> (<em>numpy.ndarray</em><em> or </em><em>list</em>) – Latitudes, in decimal degrees, of the receivers.</p></li>
+<li><p><strong>receiver_depths</strong> (<em>numpy.ndarray</em><em> or </em><em>list</em>) – Depths, in kilometers, of the receivers. Negative depths indicate
+receivers located at the surface.</p></li>
+<li><p><strong>return_epicentral_distances</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating whether to return epicentral distances in addition to
+hypocentral distances. Default is False.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>hypocentral_distances</strong> (<em>numpy.ndarray</em>) – Array of hypocentral distances between source points and receivers.
+The shape of the array is (n_sources, n_receivers).</p></li>
+<li><p><strong>epicentral_distances</strong> (<em>numpy.ndarray, optional</em>) – Array of epicentral distances between source points and receivers.
+This array is returned only if <cite>return_epicentral_distances</cite> is True.
+The shape of the array is (n_sources, n_receivers).</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -741,7 +756,7 @@ round the time.</p></li>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="template_search.html" class="btn btn-neutral float-left" title="BPMF.template_search" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="NLLoc_utils.html" class="btn btn-neutral float-right" title="BPMF.NLLoc_utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../../tutorial.html" class="btn btn-neutral float-right" title="Tutorial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
