@@ -1275,6 +1275,18 @@ class Event(object):
             return
 
     @property
+    def source_receiver_epicentral_dist(self):
+        if hasattr(self, "_source_receiver_epicentral_dist"):
+            return self._source_receiver_epicentral_dist[self.stations]
+        else:
+            print(
+                "You need to set source_receiver_epicentral_dist before."
+                " Call self.set_source_receiver_dist(network)"
+            )
+            return
+
+
+    @property
     def sr(self):
         return self.sampling_rate
 
@@ -1482,6 +1494,7 @@ class Event(object):
         search_win_sec=2.0,
         ml_model=None,
         ml_model_name="original",
+        keep_probability_time_series=False,
         **kwargs,
     ):
         """
@@ -1585,6 +1598,30 @@ class Event(object):
                     from_numpy(data_arr_n).float()
                     )
             ml_probas = ml_probas.detach().numpy()
+        if keep_probability_time_series:
+            self.probability_time_series = pd.DataFrame(
+                    index=self.stations,
+                    columns=["P", "S"]
+                    )
+            times = (
+                    np.arange(data_arr_n.shape[-1] - left - right).astype("float64")
+                    /
+                    float(self.sampling_rate)
+                    )
+            if times[1] > 1.e-3:
+                times = (1000 * times).astype("timedelta64[ms]")
+            else:
+                times = (1e9 * times).astype("timedelta64[ns]")
+            self.probability_times = (
+                    np.datetime64(self.traces[0].stats.starttime) + times
+                    )
+            for s, sta in enumerate(self.stations):
+                self.probability_time_series.loc[
+                        sta, "P"
+                        ] = ml_probas[s, ml_p_index, left:-right]
+                self.probability_time_series.loc[
+                        sta, "S"
+                        ] = ml_probas[s, ml_s_index, left:-right]
         # find picks and store in dictionaries
         picks = {}
         picks["P_picks"] = {}
@@ -2694,6 +2731,9 @@ class Event(object):
         gain=1.0e6,
         stations=None,
         ylabel=r"Velocity ($\mu$m/s)",
+        plot_picks=True,
+        plot_predicted_arrivals=True,
+        plot_probabilities=False,
         **kwargs,
     ):
         """
@@ -2739,6 +2779,8 @@ class Event(object):
             nrows=len(stations),
             ncols=len(self.components),
         )
+        pick_colors = {"P": "C0", "S": "C3"}
+        predicted_arrival_colors = {"P": "C4", "S": "C1"}
         fig.suptitle(f'Event at {self.origin_time.strftime("%Y-%m-%d %H:%M:%S")}')
         for s, sta in enumerate(stations):
             for c, cp in enumerate(self.components):
@@ -2762,36 +2804,40 @@ class Event(object):
                 axes[s, c].plot(
                     time[: self.n_samples], tr.data[: self.n_samples] * gain, color="k"
                 )
-                # plot the picks
-                if hasattr(self, "picks") and (
-                    sta in self.picks["P_abs_picks"].dropna().index
-                ):
-                    for P_pick in np.atleast_1d(self.picks.loc[sta]["P_abs_picks"]):
-                        axes[s, c].axvline(
-                                np.datetime64(P_pick), color="C0", lw=1.00, ls="--"
+                for ph in ["P", "S"]:
+                    # plot the P-/S-wave ML probabilities
+                    if plot_probabilities:
+                        axb = axes[s, c].twinx()
+                        ylim = axes[s, c].get_ylim()
+                        axb.set_ylim(-1.05 * abs(ylim[0])/abs(ylim[1]), 1.05)
+                    if plot_probabilities and hasattr(self, "probability_time_series") and (
+                            sta in self.probability_time_series[ph].dropna().index
+                            ):
+                        selection = (
+                                (self.probability_times >= time[0])
+                                &
+                                (self.probability_times <= time[-1])
                                 )
-                    #P_pick = np.datetime64(self.picks.loc[sta]["P_abs_picks"])
-                    #axes[s, c].axvline(P_pick, color="C0", lw=1.00, ls="--")
-                if hasattr(self, "picks") and (
-                    sta in self.picks["S_abs_picks"].dropna().index
-                ):
-                    for S_pick in np.atleast_1d(self.picks.loc[sta]["S_abs_picks"]):
-                        axes[s, c].axvline(
-                                np.datetime64(S_pick), color="C3", lw=1.00, ls="--"
+                        axb.plot(
+                                self.probability_times[selection],
+                                self.probability_time_series.loc[sta, ph][selection],
+                                color=pick_colors[ph],
+                                lw=0.75
                                 )
-                    #S_pick = np.datetime64(self.picks.loc[sta]["S_abs_picks"])
-                    #axes[s, c].axvline(S_pick, color="C3", lw=1.00, ls="--")
-                # plot the theoretical arrival times
-                if hasattr(self, "arrival_times") and (sta in self.arrival_times.index):
-                    P_pick = np.datetime64(
-                        self.arrival_times.loc[sta]["P_abs_arrival_times"]
-                    )
-                    axes[s, c].axvline(P_pick, color="C4", lw=1.25)
-                if hasattr(self, "arrival_times") and (sta in self.arrival_times.index):
-                    S_pick = np.datetime64(
-                        self.arrival_times.loc[sta]["S_abs_arrival_times"]
-                    )
-                    axes[s, c].axvline(S_pick, color="C1", lw=1.25)
+                    # plot the picks
+                    if plot_picks and hasattr(self, "picks") and (
+                        sta in self.picks[f"{ph}_abs_picks"].dropna().index
+                    ):
+                        for ph_pick in np.atleast_1d(self.picks.loc[sta, f"{ph}_abs_picks"]):
+                            axes[s, c].axvline(
+                                    np.datetime64(ph_pick), color=pick_colors[ph], lw=1.00, ls="--"
+                                    )
+                    # plot the theoretical arrival times
+                    if plot_predicted_arrivals and hasattr(self, "arrival_times") and (sta in self.arrival_times.index):
+                        ph_pick = np.datetime64(
+                            self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"]
+                        )
+                        axes[s, c].axvline(ph_pick, color=predicted_arrival_colors[ph], lw=1.25)
                 axes[s, c].text(
                     0.05, 0.05, f"{sta}.{cp_alias}", transform=axes[s, c].transAxes
                 )
