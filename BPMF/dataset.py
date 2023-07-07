@@ -4646,17 +4646,14 @@ class TemplateGroup(Family):
         )
         # alias:
         catalog = self.catalog.catalog
-        print(similarity_criterion > -1.0, hasattr(self, "_intertemplate_cc"))
         if similarity_criterion > -1.0:
             if not hasattr(self, "_intertemplate_cc"):
-                print("I'm here!")
                 self.compute_intertemplate_cc(
                     distance_threshold=distance_criterion,
                     n_stations=n_closest_stations,
                     max_lag=kwargs.get("max_lag", 10),
                     device=kwargs.get("device", "cpu"),
                 )
-                print(f"What about {hasattr(self, '_intertemplate_cc')}")
         # -----------------------------------
         t1 = give_time()
         print("Searching for events detected by multiple templates")
@@ -4721,7 +4718,7 @@ class TemplateGroup(Family):
                     np.where(
                         (
                             (ellips_dist < distance_criterion)
-                            | (speed_diff < speed_criterion)
+                            #| (speed_diff < speed_criterion)
                         )
                         & (similarities >= similarity_criterion)
                     )[0]
