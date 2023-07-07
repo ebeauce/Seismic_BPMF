@@ -1946,13 +1946,16 @@ def get_picks(
                             -(picks["S_picks"][st] - prior_S)**2/(2.*search_win_samp**2)
                             )
                         )
-                #print(f"------------- {st} ---------------")
-                #print(tapered_S_probas)
-                #print("vs")
-                #print(picks["S_proba"][st])
                 best_S_trigger = tapered_S_probas.argmax()
-            picks["S_picks"][st] = picks["S_picks"][st][best_S_trigger]
-            picks["S_proba"][st] = picks["S_proba"][st][best_S_trigger]
+                # don't keep if too far from a priori
+                if abs(picks["S_picks"][st][best_S_trigger] - prior_S) > 4 * search_win_samp:
+                    best_S_trigger = np.nan
+            if np.isnan(best_S_trigger):
+                picks["S_picks"][st] = np.nan 
+                picks["S_proba"][st] = np.nan 
+            else:
+                picks["S_picks"][st] = picks["S_picks"][st][best_S_trigger]
+                picks["S_proba"][st] = picks["S_proba"][st][best_S_trigger]
             # update P picks: keep only those that are before the best S pick
             if search_P_pick:
                 valid_P_picks = picks["P_picks"][st] < picks["S_picks"][st]
@@ -1977,8 +1980,15 @@ def get_picks(
                             )
                         )
                 best_P_trigger = tapered_P_probas.argmax()
-            picks["P_picks"][st] = picks["P_picks"][st][best_P_trigger]
-            picks["P_proba"][st] = picks["P_proba"][st][best_P_trigger]
+                # don't keep if too far from a priori
+                if abs(picks["P_picks"][st][best_P_trigger] - prior_P) > 4 * search_win_samp:
+                    best_P_trigger = np.nan
+            if np.isnan(best_P_trigger):
+                picks["P_picks"][st] = np.nan 
+                picks["P_proba"][st] = np.nan 
+            else:
+                picks["P_picks"][st] = picks["P_picks"][st][best_P_trigger]
+                picks["P_proba"][st] = picks["P_proba"][st][best_P_trigger]
         # convert picks to float to allow NaNs
         picks["P_picks"][st] = np.atleast_1d(np.float32(picks["P_picks"][st]))
         picks["S_picks"][st] = np.atleast_1d(np.float32(picks["S_picks"][st]))
