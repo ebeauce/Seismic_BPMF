@@ -1646,7 +1646,7 @@ class Event(object):
                 for ph in prior_knowledge.columns:
                     prior_knowledge.loc[sta, ph] = utils.sec_to_samp(
                         udt(self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"])
-                        - self.origin_time,
+                        - self.traces[0].stats.starttime,
                         sr=self.sampling_rate,
                     )
         else:

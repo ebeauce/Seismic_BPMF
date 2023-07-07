@@ -1946,6 +1946,10 @@ def get_picks(
                             -(picks["S_picks"][st] - prior_S)**2/(2.*search_win_samp**2)
                             )
                         )
+                #print(f"------------- {st} ---------------")
+                #print(tapered_S_probas)
+                #print("vs")
+                #print(picks["S_proba"][st])
                 best_S_trigger = tapered_S_probas.argmax()
             picks["S_picks"][st] = picks["S_picks"][st][best_S_trigger]
             picks["S_proba"][st] = picks["S_proba"][st][best_S_trigger]
