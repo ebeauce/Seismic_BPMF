@@ -137,7 +137,7 @@ class TravelTimes(object):
                     selection = np.zeros(grid_shape, dtype=bool)
                     selection[source_indexes_unravelled] = True
                     for coord in fin["source_coordinates"].keys():
-                        source_coords[coor] = fin[
+                        source_coords[coord] = fin[
                                 "source_coordinates"
                                 ][coord][selection].flatten()
                 else:

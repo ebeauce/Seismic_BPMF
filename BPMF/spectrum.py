@@ -6,12 +6,46 @@ import scipy.signal as scisig
 
 
 class Spectrum:
+    """
+    Class for handling spectral data and calculations.$a
+    """
+
     def __init__(self, event=None, frequency_bands=None):
+        """
+        Parameters
+        ----------
+        event : str or None, optional
+            The event associated with the spectrum. Default is None.
+        frequency_bands : list or None, optional
+            The frequency bands for the spectrum. Default is None.
+
+        Attributes
+        ----------
+        event : str or None
+            The event associated with the spectrum.
+        frequency_bands : list or None
+            The frequency bands for the spectrum.
+        """
         self.event = event
         if frequency_bands is not None:
             self.set_frequency_bands(frequency_bands)
 
     def attenuation_Q_model(self, Q, frequencies):
+        """
+        Set the attenuation Q model for P and S phases.
+
+        Parameters
+        ----------
+        Q : array-like
+            Array of attenuation Q values.
+        frequencies : array-like
+            Array of corresponding frequencies.
+
+        Returns
+        -------
+        None
+            The attenuation Q model is stored in the `attenuation_model` attribute.
+        """
         from scipy.interpolate import interp1d
 
         interpolator = interp1d(
@@ -37,12 +71,18 @@ class Spectrum:
 
         Parameters
         ----------
-        rho : float
-            Density of the medium, in kg/m3.
-        vp : float
-            P-wave velocity of the medium, in m/s.
-        vs : float
-            S-wave velocity of the medium, in m/s.
+        rho_source : float
+            Density of the source medium, in kg/m3.
+        rho_receiver : float
+            Density of the receiver medium, in kg/m3.
+        vp_source : float
+            P-wave velocity of the source medium, in m/s.
+        vp_receiver : float
+            P-wave velocity of the receiver medium, in m/s.
+        vs_source : float
+            S-wave velocity of the source medium, in m/s.
+        vs_receiver : float
+            S-wave velocity of the receiver medium, in m/s.
         radiation_S : float, optional
             Radiation coefficient for S-wave. Default is sqrt(2/5).
         radiation_P : float, optional
@@ -70,8 +110,6 @@ class Spectrum:
         for sta in self.event.source_receiver_dist.index:
             r_m = 1000.0 * self.event.source_receiver_dist.loc[sta]
             tt_s = self.event.arrival_times.loc[sta, "S_tt_sec"]
-            #corr_s = 2.0 * rho * vs**3 * r_m / radiation_S
-            #corr_s = 4.0 * np.pi * rho * vs**3 * r_m / radiation_S
             corr_s = (
                     4.0 * np.pi
                     *
@@ -89,8 +127,6 @@ class Spectrum:
             else:
                 attenuation_factor.loc[sta, f"attenuation_S"] = None
             tt_p = self.event.arrival_times.loc[sta, "P_tt_sec"]
-            #corr_p = 2.0 * rho * vp**3 * r_m / radiation_P
-            #corr_p = 4.0 * np.pi * rho * vp**3 * r_m / radiation_P
             corr_p = (
                     4.0 * np.pi
                     *
@@ -121,6 +157,38 @@ class Spectrum:
         max_relative_distance_err_pct=25.,
         verbose=0,
     ):
+        """
+        Compute the network average spectrum for a given phase.
+
+        Parameters
+        ----------
+        phase : str
+            Phase of the seismic event. Should be either 'p' or 's'.
+        snr_threshold : float
+            Signal-to-noise ratio threshold for valid channels.
+        correct_propagation : bool, optional
+            Flag indicating whether to correct for propagation effects. Default is True.
+        average_log : bool, optional
+            Flag indicating whether to average the logarithm of the spectra. Default is True.
+        min_num_valid_channels_per_freq_bin : int, optional
+            Minimum number of valid channels required per frequency bin. Default is 0.
+        max_relative_distance_err_pct : float, optional
+            Maximum relative distance error percentage for a valid channel. Default is 25.0.
+        verbose : int, optional
+            Verbosity level. Set to 0 for no output. Default is 0.
+
+        Returns
+        -------
+        None
+            The average spectrum and related information are stored in the object's attributes.
+
+        Notes
+        -----
+        This method requires the object to have already computed the spectrum for the specified phase
+        and to have set the target frequencies using the `set_target_frequencies` method.
+        If `correct_propagation` is set to True, the method also requires the object to have computed
+        the correction factor using the `compute_correction_factor` method.
+        """
         phase = phase.lower()
         assert phase in ["p", "s"], "phase should be 'p' or 's'"
         assert phase in self.phases, f"You need to compute the {phase} spectrum first"
@@ -189,9 +257,6 @@ class Spectrum:
         mask = masked_spectra.mask.copy()
         if average_log:
             log10_masked_spectra = np.ma.log10(masked_spectra)
-            #average_spectrum = np.ma.power(
-            #    10.0, np.ma.mean(log10_masked_spectra, axis=0)
-            #)
             # another mysterious feature of numpy....
             # need to use exp to propagate mask correctly
             average_spectrum = np.exp(
@@ -224,8 +289,33 @@ class Spectrum:
     def compute_multi_band_spectrum(
             self, traces, phase, buffer_seconds, **kwargs
             ):
-        """Compute spectrum from max amplitude in multiple 1-octave frequency bands.
+        """
+        Compute spectrum from the maximum amplitude in multiple 1-octave frequency bands.
 
+        Parameters
+        ----------
+        traces : list
+            List of seismic traces.
+        phase : str
+            Phase of the seismic event. Should be 'noise', 'p', or 's'.
+        buffer_seconds : float
+            Buffer duration in seconds to remove from the beginning and end of the trace.
+        **kwargs
+            Additional keyword arguments for filtering.
+
+        Returns
+        -------
+        None
+            The computed spectrum is stored in the object's attribute `{phase}_spectrum`.
+
+        Notes
+        -----
+        - The attribute `frequency_bands` is required for this method.
+        - The spectrum is computed by finding the maximum amplitude in each 1-octave frequency band.
+        - The resulting spectrum and frequency values are stored in the `spectrum` dictionary.
+        - The relative distance error percentage is calculated and stored for each trace.
+        - The attribute `{phase.lower()}_spectrum` is updated with the computed spectrum.
+        - If the attribute `phases` exists, the phase is appended to the list. Otherwise, a new list is created.
         """
         assert phase.lower() in (
             "noise",
@@ -276,7 +366,33 @@ class Spectrum:
             self.phases = [phase]
 
     def compute_spectrum(self, traces, phase, taper=None, **taper_kwargs):
-        """ """
+        """
+        Compute spectrum using the Fast Fourier Transform (FFT) on the input traces.
+
+        Parameters
+        ----------
+        traces : list
+            List of seismic traces.
+        phase : str
+            Phase of the seismic event. Should be 'noise', 'p', or 's'.
+        taper : callable or None, optional
+            Tapering function to apply to the traces before computing the spectrum. Default is None.
+        **taper_kwargs
+            Additional keyword arguments for the tapering function.
+
+        Returns
+        -------
+        None
+            The computed spectrum is stored in the object's attribute `{phase}_spectrum`.
+
+        Notes
+        -----
+        - The spectrum is computed using the FFT on the input traces.
+        - The computed spectrum and frequency values are stored in the `spectrum` dictionary.
+        - The relative distance error percentage is calculated and stored for each trace.
+        - The attribute `{phase.lower()}_spectrum` is updated with the computed spectrum.
+        - If the attribute `phases` exists, the phase is appended to the list. Otherwise, a new list is created.
+        """
         assert phase.lower() in (
             "noise",
             "p",
@@ -308,6 +424,32 @@ class Spectrum:
             self.phases = [phase]
 
     def compute_signal_to_noise_ratio(self, phase):
+        """
+        Compute the signal-to-noise ratio (SNR) for the specified phase.
+
+        Parameters
+        ----------
+        phase : str
+            Phase of the seismic event. Should be 'p' or 's'.
+
+        Returns
+        -------
+        None
+            The computed SNR values are stored in the object's attribute `snr_{phase}_spectrum`.
+
+        Raises
+        ------
+        AssertionError
+            - If `phase` is not 'p' or 's'.
+            - If the {phase} spectrum has not been computed.
+            - If the noise spectrum has not been computed.
+
+        Notes
+        -----
+        - The SNR is calculated as the modulus of the signal spectrum divided by the modulus of the noise spectrum.
+        - The SNR values and corresponding frequencies are stored in the `snr` dictionary.
+        - The attribute `snr_{phase}_spectrum` is updated with the computed SNR values.
+        """
         phase = phase.lower()
         assert phase in ["p", "s"], "phase should be 'p' or 's'"
         assert phase in self.phases, f"You need to compute the {phase} spectrum first"
@@ -329,6 +471,27 @@ class Spectrum:
         setattr(self, f"snr_{phase}_spectrum", snr)
 
     def integrate(self, phase, average=True):
+        """
+        Integrate the spectrum for a specific phase.
+
+        Parameters
+        ----------
+        phase : str
+            Phase name. Should be 'p' or 's'.
+        average : bool, optional
+            Specifies whether to integrate the average spectrum (if True) or individual spectra (if False).
+            Default is True.
+
+        Returns
+        -------
+        None
+            The spectrum is integrated in-place.
+
+        Raises
+        ------
+        AssertionError
+            If the specified phase spectrum has not been computed.
+        """
         phase = phase.lower()
         if average:
             assert (
@@ -347,6 +510,28 @@ class Spectrum:
                 spectrum[trid]["spectrum"] /= spectrum[trid]["freq"]
 
     def differentiate(self, phase, average=True):
+        """
+        Apply differentiation to the spectrum of the specified phase.
+
+        Parameters
+        ----------
+        phase : str
+            Phase of the seismic event. Should be 'p' or 's'.
+        average : bool, optional
+            Flag indicating whether to differentiate the average spectrum (True) or individual spectra (False).
+            Defaults to True.
+
+        Returns
+        -------
+        None
+            The spectrum is modified in-place by multiplying it with the corresponding frequency values.
+
+        Raises
+        ------
+        AssertionError
+            - If `average` is True and the average {phase} spectrum has not been computed.
+            - If `average` is False and the {phase} spectrum has not been computed.
+        """
         phase = phase.lower()
         if average:
             assert (
@@ -374,7 +559,42 @@ class Spectrum:
         weighted=False,
         **kwargs
     ):
-        """Fit average displacement spectrum with model."""
+        """
+        Fit the average displacement spectrum with a specified model.
+
+        Parameters
+        ----------
+        phase : str
+            Phase of the seismic event. Should be 'p' or 's'.
+        model : str, optional
+            Model to use for fitting the spectrum. Default is 'brune'.
+        log : bool, optional
+            Flag indicating whether to fit the logarithm of the spectrum. Default is True.
+        min_fraction_valid_points_below_fc : float, optional
+            Minimum fraction of valid points required below the corner frequency. Default is 0.10.
+        min_fraction_valid_points : float, optional
+            Minimum fraction of valid points required overall. Default is 0.50.
+        weighted : bool, optional
+            Flag indicating whether to apply weighted fitting using sigmoid weights. Default is False.
+        **kwargs
+            Additional keyword arguments to be passed to the curve fitting function.
+
+        Returns
+        -------
+        None
+            The fitting results are stored as attributes of the object.
+
+        Raises
+        ------
+        AssertionError
+            If the average {phase} spectrum has not been computed.
+
+        Notes
+        -----
+        - If the spectrum is below the SNR threshold everywhere, the fitting cannot be performed.
+        - If there are not enough valid points or valid points below the corner frequency,
+          the fitting is considered unsuccessful.
+        """
         from scipy.optimize import curve_fit
         from functools import partial
 
@@ -429,19 +649,15 @@ class Spectrum:
             self.inversion_success = False
             return
         # check whether the low-frequency plateau was well constrained
-        #npts_below_fc = np.sum(spectrum["freq"] < popt[1])
         npts_valid_below_fc = np.sum(x < popt[1])
-        #if npts_below_fc <= int(min_fraction_points_below_fc * len(spectrum["freq"])):
-        #    self.inversion_success = False
-        #    print("Not enough points below corner frequency "
-        #         f"(only {100.*(npts_below_fc/float(len(spectrum['freq'])))}%)")
-        #    return
-        if (
-            float(npts_valid_below_fc) / float(len(spectrum["freq"]))
-        ) < min_fraction_valid_points_below_fc:
+        fraction_valid_points_below_fc = (
+                float(npts_valid_below_fc) / float(len(spectrum["freq"]))
+                    )
+        #print(f"Fraction of valid points below fc is: {fraction_valid_points_below_fc:.2f}")
+        if fraction_valid_points_below_fc < min_fraction_valid_points_below_fc:
             self.inversion_success = False
             print("Not enough valid points below corner frequency "
-                 f"(only {100.*(npts_valid_below_fc/float(len(spectrum['freq'])))}%)")
+                    f"(only {100.*fraction_valid_points_below_fc:.1f}%)")
             return
         perr = np.sqrt(np.diag(pcov))
         self.M0 = popt[0]
@@ -452,6 +668,21 @@ class Spectrum:
         self.model = model
 
     def resample(self, new_frequencies, phase):
+        """
+        Resample the spectrum to new frequencies.
+
+        Parameters
+        ----------
+        new_frequencies : array-like
+            New frequency values to resample the spectrum to.
+        phase : str or list
+            Phase(s) of the seismic event to resample. Can be a single phase or a list of phases.
+
+        Returns
+        -------
+        None
+            The spectrum is resampled and updated in-place.
+        """
         if isinstance(phase, str):
             phase = [phase]
         for ph in phase:
@@ -469,6 +700,22 @@ class Spectrum:
                 spectrum[trid]["freq"] = new_frequencies
 
     def set_frequency_bands(self, frequency_bands):
+        """
+        Set the frequency bands for spectrum analysis.
+
+        Parameters
+        ----------
+        frequency_bands : dict
+            Dictionary specifying the frequency bands.
+            The keys are the names of the bands, and the values are tuples of the form (freqmin, freqmax).
+            freqmin and freqmax represent the minimum and maximum frequencies of each band, respectively.
+
+        Returns
+        -------
+        None
+            The frequency bands are set and stored as an attribute in the object.
+            The center frequencies of each band are also calculated and stored in the `frequencies` attribute.
+        """
         self.frequency_bands = frequency_bands
         self.frequencies = np.zeros(len(self.frequency_bands), dtype=np.float32)
         for i, band in enumerate(self.frequency_bands):
@@ -477,6 +724,23 @@ class Spectrum:
                     )
 
     def set_target_frequencies(self, freq_min, freq_max, num_points):
+        """
+        Set the target frequencies for spectrum analysis.
+
+        Parameters
+        ----------
+        freq_min : float
+            Minimum frequency.
+        freq_max : float
+            Maximum frequency.
+        num_points : int
+            Number of target frequencies to generate.
+
+        Returns
+        -------
+        None
+            The target frequencies are set and stored as an attribute in the object.
+        """
         self.frequencies = np.logspace(
             np.log10(freq_min), np.log10(freq_max), num_points
         )
@@ -493,6 +757,37 @@ class Spectrum:
         plot_std=False,
         plot_num_valid_channels=False,
     ):
+        """
+        Plot the average spectrum for a given phase.
+
+        Parameters
+        ----------
+        phase : str or list of str
+            The phase(s) for which to plot the average spectrum.
+        figname : str, optional
+            The name of the figure. Default is "spectrum".
+        figtitle : str, optional
+            The title of the figure. Default is an empty string.
+        figsize : tuple, optional
+            The size of the figure in inches. Default is (10, 10).
+        colors : dict, optional
+            A dictionary specifying the colors for different phases.
+            Default is {"noise": "dimgrey", "s": "black", "p": "C3"}.
+        linestyle : dict, optional
+            A dictionary specifying the line styles for different phases.
+            Default is {"noise": "--", "s": "-", "p": "-"}.
+        plot_fit : bool, optional
+            Whether to plot the fitted model spectrum. Default is False.
+        plot_std : bool, optional
+            Whether to plot the standard deviation range of the average spectrum. Default is False.
+        plot_num_valid_channels : bool, optional
+            Whether to plot the number of channels above the signal-to-noise ratio (SNR) threshold. Default is False.
+
+        Returns
+        -------
+        matplotlib.figure.Figure
+            The generated figure.
+        """
         import fnmatch
         from matplotlib.ticker import MaxNLocator
 
@@ -571,6 +866,35 @@ class Spectrum:
         colors={"noise": "dimgrey", "s": "black", "p": "C3"},
         linestyle={"noise": "--", "s": "-", "p": "-"},
     ):
+        """
+        Plot the spectrum for the specified phase(s) and trace(s).
+
+        Parameters
+        ----------
+        phase : str or list of str
+            The phase(s) for which to plot the spectrum.
+        station : str or None, optional
+            The station code. If None, all stations will be plotted. Default is None.
+        component : str or None, optional
+            The component code. If None, all components will be plotted. Default is None.
+        figname : str, optional
+            The name of the figure. Default is "spectrum".
+        figsize : tuple, optional
+            The size of the figure in inches. Default is (10, 10).
+        correct_propagation : bool, optional
+            Whether to correct the spectrum for propagation effects. Default is False.
+        plot_snr : bool, optional
+            Whether to plot the signal-to-noise ratio (SNR) spectrum if available. Default is False.
+        colors : dict, optional
+            A dictionary specifying the colors for different phases. Default is {"noise": "dimgrey", "s": "black", "p": "C3"}.
+        linestyle : dict, optional
+            A dictionary specifying the line styles for different phases. Default is {"noise": "--", "s": "-", "p": "-"}.
+
+        Returns
+        -------
+        matplotlib.figure.Figure
+            The generated figure.
+        """
         import fnmatch
 
         if isinstance(phase, str):
@@ -657,7 +981,33 @@ def moment_to_magnitude(M0):
 def fc_circular_crack(
     Mw, stress_drop_Pa=1.0e6, phase="p", vs_m_per_s=3500.0, vr_vs_ratio=0.9
 ):
-    """Compute corner frequency assuming circular crack model (Eshelby)."""
+    """
+    Compute the corner frequency assuming a circular crack model (Eshelby).
+
+    Parameters
+    ----------
+    Mw : float
+        Moment magnitude of the earthquake.
+    stress_drop_Pa : float, optional
+        Stress drop in Pascals. Default is 1.0e6.
+    phase : str, optional
+        Seismic phase. Valid values are 'p' for P-wave and 's' for S-wave.
+        Default is 'p'.
+    vs_m_per_s : float, optional
+        Shear wave velocity in meters per second. Default is 3500.0.
+    vr_vs_ratio : float, optional
+        Ratio of rupture velocity to shear wave velocity. Default is 0.9.
+
+    Returns
+    -------
+    corner_frequency : float
+        Corner frequency in Hertz.
+
+    Raises
+    ------
+    AssertionError
+        If phase is not 'p' or 's'.
+    """
     phase = phase.lower()
     assert phase in ["p", "s"], "phase should 'p' or 's'."
     M0 = magnitude_to_moment(Mw)
@@ -674,6 +1024,31 @@ def stress_drop_circular_crack(
         Mw, fc, phase="p", vs_m_per_s=3500.0, vr_vs_ratio=0.9
         ):
     """
+    Compute the stress drop assuming a circular crack model (Eshelby).
+
+    Parameters
+    ----------
+    Mw : float
+        Moment magnitude of the earthquake.
+    fc : float
+        Corner frequency in Hertz.
+    phase : str, optional
+        Seismic phase. Valid values are 'p' for P-wave and 's' for S-wave.
+        Default is 'p'.
+    vs_m_per_s : float, optional
+        Shear wave velocity in meters per second. Default is 3500.0.
+    vr_vs_ratio : float, optional
+        Ratio of rupture velocity to shear wave velocity. Default is 0.9.
+
+    Returns
+    -------
+    stress_drop : float
+        Stress drop in Pascals.
+
+    Raises
+    ------
+    AssertionError
+        If phase is not 'p' or 's'.
     """
     phase = phase.lower()
     assert phase in ["p", "s"], "phase should 'p' or 's'."

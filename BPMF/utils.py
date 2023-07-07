@@ -1323,26 +1323,43 @@ def compute_distances(
     receiver_longitudes,
     receiver_latitudes,
     receiver_depths,
+    return_epicentral_distances=False,
 ):
-    """Fast distance computation between all source points and all receivers.
+    """
+    Fast distance computation between all source points and all receivers.
 
-    Use `cartopy.geodesic.Geodesic` to compute pair-wise distances.
+    This function uses `cartopy.geodesic.Geodesic` to compute pair-wise distances
+    between source points and receivers. It computes both hypocentral distances
+    and, if specified, epicentral distances.
 
     Parameters
-    ------------
-    source_longitudes: (n_sources,) list or numpy.array
+    ----------
+    source_longitudes : numpy.ndarray or list
         Longitudes, in decimal degrees, of the source points.
-    source_latitudes: (n_sources,) list or numpy.array
+    source_latitudes : numpy.ndarray or list
         Latitudes, in decimal degrees, of the source points.
-    source_depths: (n_sources,) list or numpy.array
-        Depths, in km, of the source points.
-    receiver_longitudes: (n_sources,) list or numpy.array
+    source_depths : numpy.ndarray or list
+        Depths, in kilometers, of the source points.
+    receiver_longitudes : numpy.ndarray or list
         Longitudes, in decimal degrees, of the receivers.
-    receiver_latitudes: (n_sources,) list or numpy.array
+    receiver_latitudes : numpy.ndarray or list
         Latitudes, in decimal degrees, of the receivers.
-    receiver_depths: (n_sources,) list or numpy.array
-        Depths, in km, of the receivers. E.g., depths are negative if receivers
-        are located at the surface.
+    receiver_depths : numpy.ndarray or list
+        Depths, in kilometers, of the receivers. Negative depths indicate
+        receivers located at the surface.
+    return_epicentral_distances : bool, optional
+        Flag indicating whether to return epicentral distances in addition to
+        hypocentral distances. Default is False.
+
+    Returns
+    -------
+    hypocentral_distances : numpy.ndarray
+        Array of hypocentral distances between source points and receivers.
+        The shape of the array is (n_sources, n_receivers).
+    epicentral_distances : numpy.ndarray, optional
+        Array of epicentral distances between source points and receivers.
+        This array is returned only if `return_epicentral_distances` is True.
+        The shape of the array is (n_sources, n_receivers).
     """
     from cartopy.geodesic import Geodesic
 
@@ -1355,7 +1372,10 @@ def compute_distances(
         source_depths = np.asarray(source_depths)
 
     # initialize distance array
-    distances = np.zeros(
+    hypocentral_distances = np.zeros(
+        (len(source_latitudes), len(receiver_latitudes)), dtype=np.float32
+    )
+    epicentral_distances = np.zeros(
         (len(source_latitudes), len(receiver_latitudes)), dtype=np.float32
     )
     # initialize the Geodesic instance
@@ -1367,11 +1387,14 @@ def compute_distances(
                 (source_longitudes[:, np.newaxis], source_latitudes[:, np.newaxis])
             ),
         )
-        distances[:, s] = np.asarray(epi_distances)[:, 0].squeeze() / 1000.0
-        distances[:, s] = np.sqrt(
-            distances[:, s] ** 2 + (source_depths - receiver_depths[s]) ** 2
+        epicentral_distances[:, s] = np.asarray(epi_distances)[:, 0].squeeze() / 1000.0
+        hypocentral_distances[:, s] = np.sqrt(
+            epicentral_distances[:, s] ** 2 + (source_depths - receiver_depths[s]) ** 2
         )
-    return distances
+    if return_epicentral_distances:
+        return hypocentral_distances, epicentral_distances
+    else:
+        return hypocentral_distances
 
 
 def event_count(
@@ -1924,8 +1947,15 @@ def get_picks(
                             )
                         )
                 best_S_trigger = tapered_S_probas.argmax()
-            picks["S_picks"][st] = picks["S_picks"][st][best_S_trigger]
-            picks["S_proba"][st] = picks["S_proba"][st][best_S_trigger]
+                # don't keep if too far from a priori
+                if abs(picks["S_picks"][st][best_S_trigger] - prior_S) > 4 * search_win_samp:
+                    best_S_trigger = np.nan
+            if np.isnan(best_S_trigger):
+                picks["S_picks"][st] = np.nan 
+                picks["S_proba"][st] = np.nan 
+            else:
+                picks["S_picks"][st] = picks["S_picks"][st][best_S_trigger]
+                picks["S_proba"][st] = picks["S_proba"][st][best_S_trigger]
             # update P picks: keep only those that are before the best S pick
             if search_P_pick:
                 valid_P_picks = picks["P_picks"][st] < picks["S_picks"][st]
@@ -1950,8 +1980,15 @@ def get_picks(
                             )
                         )
                 best_P_trigger = tapered_P_probas.argmax()
-            picks["P_picks"][st] = picks["P_picks"][st][best_P_trigger]
-            picks["P_proba"][st] = picks["P_proba"][st][best_P_trigger]
+                # don't keep if too far from a priori
+                if abs(picks["P_picks"][st][best_P_trigger] - prior_P) > 4 * search_win_samp:
+                    best_P_trigger = np.nan
+            if np.isnan(best_P_trigger):
+                picks["P_picks"][st] = np.nan 
+                picks["P_proba"][st] = np.nan 
+            else:
+                picks["P_picks"][st] = picks["P_picks"][st][best_P_trigger]
+                picks["P_proba"][st] = picks["P_proba"][st][best_P_trigger]
         # convert picks to float to allow NaNs
         picks["P_picks"][st] = np.atleast_1d(np.float32(picks["P_picks"][st]))
         picks["S_picks"][st] = np.atleast_1d(np.float32(picks["S_picks"][st]))
