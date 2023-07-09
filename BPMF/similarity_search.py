@@ -285,7 +285,7 @@ class MatchedFilter(object):
         Parameters
         ----------
         weight_type: string, default to 'simple'
-            Either of 'simple (default), 'distance', or 'snr'.
+            'simple' is the only option for now.
         device : string, default to 'cpu'
             Either 'cpu' or 'gpu'.
         tids: list of `tid`, default to None
