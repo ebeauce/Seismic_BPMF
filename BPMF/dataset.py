@@ -1583,7 +1583,12 @@ class Event(object):
             # momentarily update samping_rate
             sampling_rate0 = float(self.sampling_rate)
             self.sampling_rate = self.sr * upsampling / downsampling
-        data_arr_n = utils.normalize_batch(data_arr)
+        data_arr_n = utils.normalize_batch(
+                data_arr, 
+                normalization_window_sample=kwargs.get(
+                    "normalization_window_sample", data_arr.shape[-1]
+                    )
+                )
         closest_pow2 = int(np.log2(data_arr_n.shape[-1])) + 1
         diff = 2**closest_pow2 - data_arr_n.shape[-1]
         left = diff//2
@@ -1930,8 +1935,11 @@ class Event(object):
             norm[norm == 0.0] = 1.0
             data_arr /= norm
             waveform_features = envelope(data_arr)
+        self.waveform_features = waveform_features
         # print(waveform_features)
-        beamformer.backproject(waveform_features, device=device, reduce="none")
+        beamformer.backproject(
+                waveform_features, device=device, reduce="none",
+                )
         # find where the maximum focusing occurred
         src_idx, time_idx = np.unravel_index(
             beamformer.beam.argmax(), beamformer.beam.shape

@@ -1782,7 +1782,7 @@ def read_write_waiting_list(func, path, unit_wait_time=0.2):
 # =======================================================
 
 
-def normalize_batch(seismogram, normalization_window_sample=3000):
+def normalize_batch(seismogram, normalization_window_sample=3000, overlap=0.50):
     """Apply Z-score normalization in running windows.
 
     Following Zhu et al. 2019, this function applied Z-score
@@ -1804,7 +1804,8 @@ def normalize_batch(seismogram, normalization_window_sample=3000):
     """
     from scipy.interpolate import interp1d
 
-    shift = normalization_window_sample // 2
+    #shift = normalization_window_sample // 2
+    shift = int((1. - overlap) * normalization_window_sample)
     num_stations, num_channels, num_time_samples = seismogram.shape
 
     # std in sliding windows

@@ -332,7 +332,12 @@ class Beamformer(object):
         likelihood = np.clip(likelihood, a_min=0., a_max=1.)
         return likelihood
 
-    def backproject(self, waveform_features, reduce="max", device="cpu"):
+    def backproject(
+            self,
+            waveform_features,
+            reduce="max",
+            device="cpu"
+            ):
         """Backproject the waveform features.
 
         Parameters
