@@ -1864,6 +1864,7 @@ class Event(object):
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
         component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
         waveform_features=None,
+        uncertainty_method="spatial",
         restricted_domain_side_km=100.,
         device="cpu",
         **kwargs,
@@ -1937,13 +1938,22 @@ class Event(object):
             waveform_features = envelope(data_arr)
         self.waveform_features = waveform_features
         # print(waveform_features)
+        out_of_bounds = kwargs.get("out_of_bounds", "flexible")
+        if uncertainty_method == "spatial":
+            reduce = "none"
+        elif uncertainty_method == "temporal":
+            reduce = "max"
         beamformer.backproject(
-                waveform_features, device=device, reduce="none",
+                waveform_features, device=device, reduce=reduce, out_of_bounds=out_of_bounds
                 )
         # find where the maximum focusing occurred
-        src_idx, time_idx = np.unravel_index(
-            beamformer.beam.argmax(), beamformer.beam.shape
-        )
+        if uncertainty_method == "spatial":
+            src_idx, time_idx = np.unravel_index(
+                beamformer.beam.argmax(), beamformer.beam.shape
+            )
+        elif uncertainty_method == "temporal":
+            time_idx = beamformer.maxbeam.argmax()
+            src_idx = beamformer.maxbeam_sources[time_idx]
         # update hypocenter
         self.origin_time = (
             self.traces[0].stats.starttime + time_idx / self.sampling_rate
@@ -1952,21 +1962,33 @@ class Event(object):
         self.latitude = beamformer.source_coordinates["latitude"].iloc[src_idx]
         self.depth = beamformer.source_coordinates["depth"].iloc[src_idx]
         # estimate location uncertainty
-        # 1) compute likelihood
-        likelihood = beamformer._likelihood(beamformer.beam[:, time_idx])
+        if uncertainty_method == "spatial":
+            # 1) define a restricted domain
+            domain = beamformer._rectangular_domain(
+                    self.longitude,
+                    self.latitude,
+                    side_km=restricted_domain_side_km,
+                    )
+            # 2) compute likelihood
+            likelihood = beamformer._likelihood(beamformer.beam[:, time_idx])
+            likelihood_domain = domain
+        elif uncertainty_method == "temporal":
+            # 1) likelihood is given by Gibbs distribution of maxbeam
+            effective_kT = kwargs.get("effective_kT", 0.33)
+            gibbs_cutoff = kwargs.get("gibbs_cutoff", 0.25)
+            gibbs_weight = np.exp(
+                    -(beamformer.maxbeam.max() - beamformer.maxbeam) / effective_kT
+                    )
+            domain = beamformer.maxbeam_sources[gibbs_weight > gibbs_cutoff]
+            likelihood = gibbs_weight
+            likelihood_domain = gibbs_weight > gibbs_cutoff
         beamformer.likelihood = likelihood
-        # 2) define a restricted domain
-        domain = beamformer._rectangular_domain(
-                self.longitude,
-                self.latitude,
-                side_km=restricted_domain_side_km,
-                )
         # 3) compute uncertainty
         hunc, vunc = beamformer._compute_location_uncertainty(
                 self.longitude,
                 self.latitude,
                 self.depth,
-                likelihood,
+                likelihood[likelihood_domain],
                 domain,
                 )
         # 4) set attributes
