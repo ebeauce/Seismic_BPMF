@@ -2013,14 +2013,17 @@ class Event(object):
         travel_times = beamformer.moveouts[src_idx, ...]
         beamformer.phases = [ph.upper() for ph in beamformer.phases]
         for s, sta in enumerate(beamformer.network.stations):
-            for p, ph in enumerate(["P", "S"]):
-                pp = beamformer.phases.index(ph)
+            for p, ph in enumerate(beamformer.phases):
                 self.arrival_times.loc[sta, f"{ph}_tt_sec"] = (
-                    travel_times[s, pp] / self.sampling_rate
+                    travel_times[s, p] / self.sampling_rate
                 )
                 self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"] = (
                     self.origin_time + self.arrival_times.loc[sta, f"{ph}_tt_sec"]
                 )
+        for ph in beamformer.phases:
+            self.arrival_times[f"{ph}_tt_sec"] = (
+                    self.arrival_times[f"{ph}_tt_sec"].astype("float32")
+                    )
 
     def relocate_NLLoc(
             self, stations=None, method="EDT", verbose=0, cleanup_out_dir=True, **kwargs
