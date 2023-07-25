@@ -3008,7 +3008,11 @@ class Template(Event):
             "tid",
             "cov_mat",
             "Mw",
-            "Mw_err"
+            "Mw_err",
+            "hmax_unc",
+            "hmin_unc",
+            "vmax_unc",
+            "az_hmax_unc"
         ]
         select = lambda str: str.startswith("phase_on_comp")
         aux_data_to_keep += list(filter(select, event.aux_data.keys()))
