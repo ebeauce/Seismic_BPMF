@@ -1948,9 +1948,9 @@ def get_picks(
                             )
                         )
                 best_S_trigger = tapered_S_probas.argmax()
-                # don't keep if too far from a priori
-                if abs(picks["S_picks"][st][best_S_trigger] - prior_S) > 4 * search_win_samp:
-                    best_S_trigger = np.nan
+                ## don't keep if too far from a priori
+                #if abs(picks["S_picks"][st][best_S_trigger] - prior_S) > 4 * search_win_samp:
+                #    best_S_trigger = np.nan
             if np.isnan(best_S_trigger):
                 picks["S_picks"][st] = np.nan 
                 picks["S_proba"][st] = np.nan 
@@ -1981,9 +1981,9 @@ def get_picks(
                             )
                         )
                 best_P_trigger = tapered_P_probas.argmax()
-                # don't keep if too far from a priori
-                if abs(picks["P_picks"][st][best_P_trigger] - prior_P) > 4 * search_win_samp:
-                    best_P_trigger = np.nan
+                ## don't keep if too far from a priori
+                #if abs(picks["P_picks"][st][best_P_trigger] - prior_P) > 4 * search_win_samp:
+                #    best_P_trigger = np.nan
             if np.isnan(best_P_trigger):
                 picks["P_picks"][st] = np.nan 
                 picks["P_proba"][st] = np.nan 
