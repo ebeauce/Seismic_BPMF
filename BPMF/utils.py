@@ -234,6 +234,12 @@ def preprocess_stream(
     if n_threads != 1:
         from concurrent.futures import ProcessPoolExecutor
 
+        #for tr in stream:
+        #    tr.stats.sampling_rate = np.round(
+        #            tr.stats.sampling_rate, decimals=SR_decimals
+        #            )
+        stream, _ = _premerge(stream, verbose=verbose)
+
         with ProcessPoolExecutor(max_workers=n_threads) as executor:
             # we need to group traces from same channels, therefore,
             # we use merge to fill gaps with masked arrays
@@ -252,6 +258,47 @@ def preprocess_stream(
         return obs.Stream(preprocessed_stream)
     else:
         return data_preprocessor(stream)
+
+def _premerge(stream, verbose=False):
+    """Clean-up stream before calling merge.
+    """
+    # first, make a list of all stations in stream
+    stations = []
+    for tr in stream:
+        stations.append(tr.stats.station)
+    stations = list(set(stations))
+    # second, make a list of all channel types for each station
+    for station in stations:
+        st = stream.select(station=station)
+        channels = []
+        for tr in st:
+            channels.append(tr.stats.channel[:-1])
+        channels = list(set(channels))
+        # third, for each channel type, make a list of all sampling
+        # rates and detect anomalies if there are more than one single
+        # sampling rate
+        sampling_rates = []
+        for cha in channels:
+            st_cha = st.select(channel=f"{cha}*")
+            for tr in st_cha:
+                sampling_rates.append(tr.stats.sampling_rate)
+        unique_sampling_rates, sampling_rates_counts = np.unique(
+            sampling_rates, return_counts=True
+        )
+        # if more than one sampling rate, remove the traces with the least
+        # represented sampling rate
+        if len(unique_sampling_rates) > 1:
+            if sampling_rates_counts[unique_sampling_rates.argmax()] >= 3:
+                ref_sampling_rate = unique_sampling_rates.max()
+            else:
+                ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
+            for tr in stream:
+                if tr.stats.sampling_rate != ref_sampling_rate:
+                    if verbose:
+                        print(f"Removing {tr.id} because not desired sampling rate "
+                              f"({tr.stats.sampling_rate} vs {ref_sampling_rate})"  )
+                    stream.remove(tr)
+    return stream, stations
 
 
 def _preprocess_stream(
@@ -303,41 +350,43 @@ def _preprocess_stream(
         if verbose:
             print("Removed all traces because they were too short.")
         return preprocessed_stream
-    # second, make a list of all stations in stream
-    stations = []
-    for tr in stream:
-        stations.append(tr.stats.station)
-    stations = list(set(stations))
-    # third, make a list of all channel types for each station
-    for station in stations:
-        st = stream.select(station=station)
-        channels = []
-        for tr in st:
-            channels.append(tr.stats.channel[:-1])
-        channels = list(set(channels))
-        # fourth, for each channel type, make a list of all sampling
-        # rates and detect anomalies if there are more than one single
-        # sampling rate
-        sampling_rates = []
-        for cha in channels:
-            st_cha = st.select(channel=f"{cha}*")
-            for tr in st_cha:
-                sampling_rates.append(tr.stats.sampling_rate)
-        unique_sampling_rates, sampling_rates_counts = np.unique(
-            sampling_rates, return_counts=True
-        )
-        # if more than one sampling rate, remove the traces with the least
-        # represented sampling rate
-        if len(unique_sampling_rates) > 1:
-            if sampling_rates_counts[unique_sampling_rates.argmax()] >= 3:
-                ref_sampling_rate = unique_sampling_rates.max()
-            else:
-                ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
-            for tr in stream:
-                if tr.stats.sampling_rate != ref_sampling_rate:
-                    if verbose:
-                        print(f"Removing {tr.id} because not desired sampling rate.")
-                    stream.remove(tr)
+    stream, stations = _premerge(stream, verbose=verbose)
+    ## second, make a list of all stations in stream
+    #stations = []
+    #for tr in stream:
+    #    stations.append(tr.stats.station)
+    #stations = list(set(stations))
+    ## third, make a list of all channel types for each station
+    #for station in stations:
+    #    st = stream.select(station=station)
+    #    channels = []
+    #    for tr in st:
+    #        channels.append(tr.stats.channel[:-1])
+    #    channels = list(set(channels))
+    #    # fourth, for each channel type, make a list of all sampling
+    #    # rates and detect anomalies if there are more than one single
+    #    # sampling rate
+    #    sampling_rates = []
+    #    for cha in channels:
+    #        st_cha = st.select(channel=f"{cha}*")
+    #        for tr in st_cha:
+    #            sampling_rates.append(tr.stats.sampling_rate)
+    #    unique_sampling_rates, sampling_rates_counts = np.unique(
+    #        sampling_rates, return_counts=True
+    #    )
+    #    # if more than one sampling rate, remove the traces with the least
+    #    # represented sampling rate
+    #    if len(unique_sampling_rates) > 1:
+    #        if sampling_rates_counts[unique_sampling_rates.argmax()] >= 3:
+    #            ref_sampling_rate = unique_sampling_rates.max()
+    #        else:
+    #            ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
+    #        for tr in stream:
+    #            if tr.stats.sampling_rate != ref_sampling_rate:
+    #                if verbose:
+    #                    print(f"Removing {tr.id} because not desired sampling rate "
+    #                          f"({tr.stats.sampling_rate} vs {ref_sampling_rate})"  )
+    #                stream.remove(tr)
     # start by cleaning the gaps if there are any
     # start with a simple merge to unite data from same channels into unique
     # trace but without losing information on gaps
