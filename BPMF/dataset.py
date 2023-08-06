@@ -2453,7 +2453,8 @@ class Event(object):
             name="source-receiver epicentral distance (km)",
         )
         if not hasattr(self, "network_stations"):
-            self.network_stations = self.stations.copy()
+            #self.network_stations = self.stations.copy() # why this line?
+            self.network_stations = network.stations.values.astype("U")
         self._source_receiver_dist = self.source_receiver_dist.loc[
             self.network_stations
         ]
