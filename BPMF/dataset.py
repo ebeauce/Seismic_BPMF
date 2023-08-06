@@ -1647,7 +1647,8 @@ class Event(object):
             if "S" in self.phases:
                 columns.append("S")
             prior_knowledge = pd.DataFrame(columns=columns)
-            for sta in self.stations:
+            #for sta in self.stations:
+            for sta in self.arrival_times.index:
                 for ph in prior_knowledge.columns:
                     prior_knowledge.loc[sta, ph] = utils.sec_to_samp(
                         udt(self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"])

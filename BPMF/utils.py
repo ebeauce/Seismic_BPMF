@@ -1959,9 +1959,11 @@ def get_picks(
         Standard deviation, in samples, used in the gaussian weights.
     """
     for st in picks["P_picks"].keys():
-        if prior_knowledge is not None:
+        if prior_knowledge is not None and st in prior_knowledge.index:
             prior_P = prior_knowledge.loc[st, "P"]
             prior_S = prior_knowledge.loc[st, "S"]
+        else:
+            prior_P, prior_S = None, None
         #for n in range(len(picks["P_picks"][st])):
         # ----------------
         # remove picks from the buffer length
@@ -1984,7 +1986,7 @@ def get_picks(
             picks["P_proba"][st] = np.nan
             search_P_pick = False
         if search_S_pick:
-            if prior_knowledge is None:
+            if prior_S is None:
                 # take only the highest probability trigger
                 best_S_trigger = picks["S_proba"][st].argmax()
             else:
@@ -2017,7 +2019,7 @@ def get_picks(
                     picks["P_proba"][st] = np.nan
                     search_P_pick = False
         if search_P_pick:
-            if prior_knowledge is None:
+            if prior_P is None:
                 # take only the highest probability trigger
                 best_P_trigger = picks["P_proba"][st].argmax()
             else:
