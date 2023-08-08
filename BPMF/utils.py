@@ -234,6 +234,12 @@ def preprocess_stream(
     if n_threads != 1:
         from concurrent.futures import ProcessPoolExecutor
 
+        #for tr in stream:
+        #    tr.stats.sampling_rate = np.round(
+        #            tr.stats.sampling_rate, decimals=SR_decimals
+        #            )
+        stream, _ = _premerge(stream, verbose=verbose)
+
         with ProcessPoolExecutor(max_workers=n_threads) as executor:
             # we need to group traces from same channels, therefore,
             # we use merge to fill gaps with masked arrays
@@ -252,6 +258,47 @@ def preprocess_stream(
         return obs.Stream(preprocessed_stream)
     else:
         return data_preprocessor(stream)
+
+def _premerge(stream, verbose=False):
+    """Clean-up stream before calling merge.
+    """
+    # first, make a list of all stations in stream
+    stations = []
+    for tr in stream:
+        stations.append(tr.stats.station)
+    stations = list(set(stations))
+    # second, make a list of all channel types for each station
+    for station in stations:
+        st = stream.select(station=station)
+        channels = []
+        for tr in st:
+            channels.append(tr.stats.channel[:-1])
+        channels = list(set(channels))
+        # third, for each channel type, make a list of all sampling
+        # rates and detect anomalies if there are more than one single
+        # sampling rate
+        sampling_rates = []
+        for cha in channels:
+            st_cha = st.select(channel=f"{cha}*")
+            for tr in st_cha:
+                sampling_rates.append(tr.stats.sampling_rate)
+        unique_sampling_rates, sampling_rates_counts = np.unique(
+            sampling_rates, return_counts=True
+        )
+        # if more than one sampling rate, remove the traces with the least
+        # represented sampling rate
+        if len(unique_sampling_rates) > 1:
+            if sampling_rates_counts[unique_sampling_rates.argmax()] >= 3:
+                ref_sampling_rate = unique_sampling_rates.max()
+            else:
+                ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
+            for tr in stream:
+                if tr.stats.sampling_rate != ref_sampling_rate:
+                    if verbose:
+                        print(f"Removing {tr.id} because not desired sampling rate "
+                              f"({tr.stats.sampling_rate} vs {ref_sampling_rate})"  )
+                    stream.remove(tr)
+    return stream, stations
 
 
 def _preprocess_stream(
@@ -303,41 +350,43 @@ def _preprocess_stream(
         if verbose:
             print("Removed all traces because they were too short.")
         return preprocessed_stream
-    # second, make a list of all stations in stream
-    stations = []
-    for tr in stream:
-        stations.append(tr.stats.station)
-    stations = list(set(stations))
-    # third, make a list of all channel types for each station
-    for station in stations:
-        st = stream.select(station=station)
-        channels = []
-        for tr in st:
-            channels.append(tr.stats.channel[:-1])
-        channels = list(set(channels))
-        # fourth, for each channel type, make a list of all sampling
-        # rates and detect anomalies if there are more than one single
-        # sampling rate
-        sampling_rates = []
-        for cha in channels:
-            st_cha = st.select(channel=f"{cha}*")
-            for tr in st_cha:
-                sampling_rates.append(tr.stats.sampling_rate)
-        unique_sampling_rates, sampling_rates_counts = np.unique(
-            sampling_rates, return_counts=True
-        )
-        # if more than one sampling rate, remove the traces with the least
-        # represented sampling rate
-        if len(unique_sampling_rates) > 1:
-            if sampling_rates_counts[unique_sampling_rates.argmax()] >= 3:
-                ref_sampling_rate = unique_sampling_rates.max()
-            else:
-                ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
-            for tr in stream:
-                if tr.stats.sampling_rate != ref_sampling_rate:
-                    if verbose:
-                        print(f"Removing {tr.id} because not desired sampling rate.")
-                    stream.remove(tr)
+    stream, stations = _premerge(stream, verbose=verbose)
+    ## second, make a list of all stations in stream
+    #stations = []
+    #for tr in stream:
+    #    stations.append(tr.stats.station)
+    #stations = list(set(stations))
+    ## third, make a list of all channel types for each station
+    #for station in stations:
+    #    st = stream.select(station=station)
+    #    channels = []
+    #    for tr in st:
+    #        channels.append(tr.stats.channel[:-1])
+    #    channels = list(set(channels))
+    #    # fourth, for each channel type, make a list of all sampling
+    #    # rates and detect anomalies if there are more than one single
+    #    # sampling rate
+    #    sampling_rates = []
+    #    for cha in channels:
+    #        st_cha = st.select(channel=f"{cha}*")
+    #        for tr in st_cha:
+    #            sampling_rates.append(tr.stats.sampling_rate)
+    #    unique_sampling_rates, sampling_rates_counts = np.unique(
+    #        sampling_rates, return_counts=True
+    #    )
+    #    # if more than one sampling rate, remove the traces with the least
+    #    # represented sampling rate
+    #    if len(unique_sampling_rates) > 1:
+    #        if sampling_rates_counts[unique_sampling_rates.argmax()] >= 3:
+    #            ref_sampling_rate = unique_sampling_rates.max()
+    #        else:
+    #            ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
+    #        for tr in stream:
+    #            if tr.stats.sampling_rate != ref_sampling_rate:
+    #                if verbose:
+    #                    print(f"Removing {tr.id} because not desired sampling rate "
+    #                          f"({tr.stats.sampling_rate} vs {ref_sampling_rate})"  )
+    #                stream.remove(tr)
     # start by cleaning the gaps if there are any
     # start with a simple merge to unite data from same channels into unique
     # trace but without losing information on gaps
@@ -1910,9 +1959,11 @@ def get_picks(
         Standard deviation, in samples, used in the gaussian weights.
     """
     for st in picks["P_picks"].keys():
-        if prior_knowledge is not None:
+        if prior_knowledge is not None and st in prior_knowledge.index:
             prior_P = prior_knowledge.loc[st, "P"]
             prior_S = prior_knowledge.loc[st, "S"]
+        else:
+            prior_P, prior_S = None, None
         #for n in range(len(picks["P_picks"][st])):
         # ----------------
         # remove picks from the buffer length
@@ -1935,7 +1986,7 @@ def get_picks(
             picks["P_proba"][st] = np.nan
             search_P_pick = False
         if search_S_pick:
-            if prior_knowledge is None:
+            if prior_S is None:
                 # take only the highest probability trigger
                 best_S_trigger = picks["S_proba"][st].argmax()
             else:
@@ -1948,9 +1999,9 @@ def get_picks(
                             )
                         )
                 best_S_trigger = tapered_S_probas.argmax()
-                # don't keep if too far from a priori
-                if abs(picks["S_picks"][st][best_S_trigger] - prior_S) > 4 * search_win_samp:
-                    best_S_trigger = np.nan
+                ## don't keep if too far from a priori
+                #if abs(picks["S_picks"][st][best_S_trigger] - prior_S) > 4 * search_win_samp:
+                #    best_S_trigger = np.nan
             if np.isnan(best_S_trigger):
                 picks["S_picks"][st] = np.nan 
                 picks["S_proba"][st] = np.nan 
@@ -1968,7 +2019,7 @@ def get_picks(
                     picks["P_proba"][st] = np.nan
                     search_P_pick = False
         if search_P_pick:
-            if prior_knowledge is None:
+            if prior_P is None:
                 # take only the highest probability trigger
                 best_P_trigger = picks["P_proba"][st].argmax()
             else:
@@ -1981,9 +2032,9 @@ def get_picks(
                             )
                         )
                 best_P_trigger = tapered_P_probas.argmax()
-                # don't keep if too far from a priori
-                if abs(picks["P_picks"][st][best_P_trigger] - prior_P) > 4 * search_win_samp:
-                    best_P_trigger = np.nan
+                ## don't keep if too far from a priori
+                #if abs(picks["P_picks"][st][best_P_trigger] - prior_P) > 4 * search_win_samp:
+                #    best_P_trigger = np.nan
             if np.isnan(best_P_trigger):
                 picks["P_picks"][st] = np.nan 
                 picks["P_proba"][st] = np.nan 

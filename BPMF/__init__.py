@@ -13,4 +13,4 @@ from . import utils
 from . import plotting_utils
 from . import spectrum
 
-__version__ = "2.0.0.beta"
+__version__ = "2.0.0.beta1"
