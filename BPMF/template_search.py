@@ -332,7 +332,13 @@ class Beamformer(object):
         likelihood = np.clip(likelihood, a_min=0., a_max=1.)
         return likelihood
 
-    def backproject(self, waveform_features, reduce="max", device="cpu"):
+    def backproject(
+            self,
+            waveform_features,
+            reduce="max",
+            device="cpu",
+            out_of_bounds="strict",
+            ):
         """Backproject the waveform features.
 
         Parameters
@@ -360,6 +366,7 @@ class Beamformer(object):
                 self.weights_phases,
                 self.weights_sources,
                 device=device,
+                out_of_bounds=out_of_bounds,
                 reduce=reduce,
             )
         elif reduce == "none":
@@ -369,6 +376,7 @@ class Beamformer(object):
                 self.weights_phases,
                 self.weights_sources,
                 device=device,
+                out_of_bounds=out_of_bounds,
                 reduce=reduce,
             )
         else:
@@ -1034,11 +1042,11 @@ class Beamformer(object):
         pointwise_distances = np.asarray(epi_distances)[:, 0].squeeze() / 1000.0
 
         # horizontal uncertainty
-        hunc = np.sum(likelihood[domain]*pointwise_distances)/np.sum(likelihood[domain])
+        hunc = np.sum(likelihood * pointwise_distances) / np.sum(likelihood)
 
         # vertical uncertainty
         depth_diff = np.abs(event_depth - self.source_coordinates["depth"].values[domain])
-        vunc = np.sum(likelihood[domain]*depth_diff)/np.sum(likelihood[domain])
+        vunc = np.sum(likelihood * depth_diff) / np.sum(likelihood)
         
         return hunc, vunc
 
