@@ -1264,6 +1264,10 @@ class Event(object):
             return self._pl_vmax_unc
 
     @property
+    def location(self):
+        return [self.longitude, self.latitude, self.depth]
+
+    @property
     def source_receiver_dist(self):
         if hasattr(self, "_source_receiver_dist"):
             return self._source_receiver_dist[self.stations]
