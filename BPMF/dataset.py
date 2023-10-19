@@ -1264,6 +1264,10 @@ class Event(object):
             return self._pl_vmax_unc
 
     @property
+    def location(self):
+        return [self.longitude, self.latitude, self.depth]
+
+    @property
     def source_receiver_dist(self):
         if hasattr(self, "_source_receiver_dist"):
             return self._source_receiver_dist[self.stations]
@@ -1583,7 +1587,12 @@ class Event(object):
             # momentarily update samping_rate
             sampling_rate0 = float(self.sampling_rate)
             self.sampling_rate = self.sr * upsampling / downsampling
-        data_arr_n = utils.normalize_batch(data_arr)
+        data_arr_n = utils.normalize_batch(
+                data_arr, 
+                normalization_window_sample=kwargs.get(
+                    "normalization_window_sample", data_arr.shape[-1]
+                    )
+                )
         closest_pow2 = int(np.log2(data_arr_n.shape[-1])) + 1
         diff = 2**closest_pow2 - data_arr_n.shape[-1]
         left = diff//2
@@ -1642,7 +1651,8 @@ class Event(object):
             if "S" in self.phases:
                 columns.append("S")
             prior_knowledge = pd.DataFrame(columns=columns)
-            for sta in self.stations:
+            #for sta in self.stations:
+            for sta in self.arrival_times.index:
                 for ph in prior_knowledge.columns:
                     prior_knowledge.loc[sta, ph] = utils.sec_to_samp(
                         udt(self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"])
@@ -1859,6 +1869,7 @@ class Event(object):
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
         component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
         waveform_features=None,
+        uncertainty_method="spatial",
         restricted_domain_side_km=100.,
         device="cpu",
         **kwargs,
@@ -1930,12 +1941,24 @@ class Event(object):
             norm[norm == 0.0] = 1.0
             data_arr /= norm
             waveform_features = envelope(data_arr)
+        self.waveform_features = waveform_features
         # print(waveform_features)
-        beamformer.backproject(waveform_features, device=device, reduce="none")
+        out_of_bounds = kwargs.get("out_of_bounds", "flexible")
+        if uncertainty_method == "spatial":
+            reduce = "none"
+        elif uncertainty_method == "temporal":
+            reduce = "max"
+        beamformer.backproject(
+                waveform_features, device=device, reduce=reduce, out_of_bounds=out_of_bounds
+                )
         # find where the maximum focusing occurred
-        src_idx, time_idx = np.unravel_index(
-            beamformer.beam.argmax(), beamformer.beam.shape
-        )
+        if uncertainty_method == "spatial":
+            src_idx, time_idx = np.unravel_index(
+                beamformer.beam.argmax(), beamformer.beam.shape
+            )
+        elif uncertainty_method == "temporal":
+            time_idx = beamformer.maxbeam.argmax()
+            src_idx = beamformer.maxbeam_sources[time_idx]
         # update hypocenter
         self.origin_time = (
             self.traces[0].stats.starttime + time_idx / self.sampling_rate
@@ -1944,21 +1967,33 @@ class Event(object):
         self.latitude = beamformer.source_coordinates["latitude"].iloc[src_idx]
         self.depth = beamformer.source_coordinates["depth"].iloc[src_idx]
         # estimate location uncertainty
-        # 1) compute likelihood
-        likelihood = beamformer._likelihood(beamformer.beam[:, time_idx])
+        if uncertainty_method == "spatial":
+            # 1) define a restricted domain
+            domain = beamformer._rectangular_domain(
+                    self.longitude,
+                    self.latitude,
+                    side_km=restricted_domain_side_km,
+                    )
+            # 2) compute likelihood
+            likelihood = beamformer._likelihood(beamformer.beam[:, time_idx])
+            likelihood_domain = domain
+        elif uncertainty_method == "temporal":
+            # 1) likelihood is given by Gibbs distribution of maxbeam
+            effective_kT = kwargs.get("effective_kT", 0.33)
+            gibbs_cutoff = kwargs.get("gibbs_cutoff", 0.25)
+            gibbs_weight = np.exp(
+                    -(beamformer.maxbeam.max() - beamformer.maxbeam) / effective_kT
+                    )
+            domain = beamformer.maxbeam_sources[gibbs_weight > gibbs_cutoff]
+            likelihood = gibbs_weight
+            likelihood_domain = gibbs_weight > gibbs_cutoff
         beamformer.likelihood = likelihood
-        # 2) define a restricted domain
-        domain = beamformer._rectangular_domain(
-                self.longitude,
-                self.latitude,
-                side_km=restricted_domain_side_km,
-                )
         # 3) compute uncertainty
         hunc, vunc = beamformer._compute_location_uncertainty(
                 self.longitude,
                 self.latitude,
                 self.depth,
-                likelihood,
+                likelihood[likelihood_domain],
                 domain,
                 )
         # 4) set attributes
@@ -1983,14 +2018,17 @@ class Event(object):
         travel_times = beamformer.moveouts[src_idx, ...]
         beamformer.phases = [ph.upper() for ph in beamformer.phases]
         for s, sta in enumerate(beamformer.network.stations):
-            for p, ph in enumerate(["P", "S"]):
-                pp = beamformer.phases.index(ph)
+            for p, ph in enumerate(beamformer.phases):
                 self.arrival_times.loc[sta, f"{ph}_tt_sec"] = (
-                    travel_times[s, pp] / self.sampling_rate
+                    travel_times[s, p] / self.sampling_rate
                 )
                 self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"] = (
                     self.origin_time + self.arrival_times.loc[sta, f"{ph}_tt_sec"]
                 )
+        for ph in beamformer.phases:
+            self.arrival_times[f"{ph}_tt_sec"] = (
+                    self.arrival_times[f"{ph}_tt_sec"].astype("float32")
+                    )
 
     def relocate_NLLoc(
             self, stations=None, method="EDT", verbose=0, cleanup_out_dir=True, **kwargs
@@ -2419,7 +2457,8 @@ class Event(object):
             name="source-receiver epicentral distance (km)",
         )
         if not hasattr(self, "network_stations"):
-            self.network_stations = self.stations.copy()
+            #self.network_stations = self.stations.copy() # why this line?
+            self.network_stations = network.stations.values.astype("U")
         self._source_receiver_dist = self.source_receiver_dist.loc[
             self.network_stations
         ]
@@ -2975,7 +3014,11 @@ class Template(Event):
             "tid",
             "cov_mat",
             "Mw",
-            "Mw_err"
+            "Mw_err",
+            "hmax_unc",
+            "hmin_unc",
+            "vmax_unc",
+            "az_hmax_unc"
         ]
         select = lambda str: str.startswith("phase_on_comp")
         aux_data_to_keep += list(filter(select, event.aux_data.keys()))
