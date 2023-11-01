@@ -3646,8 +3646,8 @@ class Template(Event):
             print("Call `read_catalog` first.")
             return
         rt = (
-            self.catalog.origin_time.values[1:] - self.catalog.origin_time.values[:-1]
-        ) / 1.0e9  # in sec
+            self.catalog.origin_time[1:] - self.catalog.origin_time[:-1]
+        ).astype("timedelta64[ns]").astype("float64") / 1.0e9  # in sec
         ax.plot(self.catalog.origin_time[1:], rt, **kwargs)
         if annotate_axes:
             ax.set_xlabel("Detection Time")
