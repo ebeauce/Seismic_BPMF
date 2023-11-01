@@ -2441,9 +2441,9 @@ class Event(object):
             [self.longitude],
             [self.latitude],
             [self.depth],
-            network.longitude,
-            network.latitude,
-            network.depth,
+            network.longitude.values,
+            network.latitude.values,
+            network.depth.values,
             return_epicentral_distances=True
         )
         self._source_receiver_dist = pd.Series(
