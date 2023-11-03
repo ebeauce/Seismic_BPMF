@@ -2441,9 +2441,9 @@ class Event(object):
             [self.longitude],
             [self.latitude],
             [self.depth],
-            network.longitude,
-            network.latitude,
-            network.depth,
+            network.longitude.values,
+            network.latitude.values,
+            network.depth.values,
             return_epicentral_distances=True
         )
         self._source_receiver_dist = pd.Series(
@@ -3647,7 +3647,7 @@ class Template(Event):
             return
         rt = (
             self.catalog.origin_time[1:] - self.catalog.origin_time[:-1]
-        ) / 1.0e9  # in sec
+        ).astype("timedelta64[ns]").astype("float64") / 1.0e9  # in sec
         ax.plot(self.catalog.origin_time[1:], rt, **kwargs)
         if annotate_axes:
             ax.set_xlabel("Detection Time")
