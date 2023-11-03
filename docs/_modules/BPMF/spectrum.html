@@ -77,6 +77,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">scisig</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
 
 
 <div class="viewcode-block" id="Spectrum"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum">[docs]</a><span class="k">class</span> <span class="nc">Spectrum</span><span class="p">:</span>
@@ -104,7 +105,7 @@
         <span class="k">if</span> <span class="n">frequency_bands</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_frequency_bands</span><span class="p">(</span><span class="n">frequency_bands</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Spectrum.attenuation_Q_model"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.attenuation_Q_model">[docs]</a>    <span class="k">def</span> <span class="nf">attenuation_Q_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">):</span>
+<div class="viewcode-block" id="Spectrum.set_Q_model"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.set_Q_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_Q_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the attenuation Q model for P and S phases.</span>
 
@@ -113,21 +114,53 @@
 <span class="sd">        Q : array-like</span>
 <span class="sd">            Array of attenuation Q values.</span>
 <span class="sd">        frequencies : array-like</span>
-<span class="sd">            Array of corresponding frequencies.</span>
+<span class="sd">            Array of corresponding frequencies. These are used to later keep</span>
+<span class="sd">            track of which frequencies were used for the Q model.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        None</span>
-<span class="sd">            The attenuation Q model is stored in the `attenuation_model` attribute.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+<span class="sd">            The Q model is stored in the `Q0` attribute. The frequencies are</span>
+<span class="sd">            stored in the `Q0_frequencies` attribute. These are later used to </span>
+<span class="sd">            computed the Q-model and attenuation factor at arbitrary frequencies.</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Q0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Q0_frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">frequencies</span><span class="p">)</span>
         <span class="n">interpolator</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span>
             <span class="n">frequencies</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="p">(</span><span class="n">Q</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Q</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_model</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_model</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">interpolator</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_model</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">interpolator</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">interpolator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Spectrum.update_Q_model"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.update_Q_model">[docs]</a>    <span class="k">def</span> <span class="nf">update_Q_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interpolate the Q-model at the current `self.frequencies`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">interpolator</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Q0_frequencies</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Q0</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+            <span class="n">fill_value</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q0</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="n">interpolator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spectrum.update_attenuation_factor"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.update_attenuation_factor">[docs]</a>    <span class="k">def</span> <span class="nf">update_attenuation_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute attenuation factor at the current `self.frequencies`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_Q_model</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="n">r_m</span> <span class="o">=</span> <span class="mf">1000.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">]</span>
+            <span class="n">tt_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;S_tt_sec&quot;</span><span class="p">]</span>
+            <span class="n">tt_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_tt_sec&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_S&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">tt_s</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_P&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">tt_s</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span>
+            <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Spectrum.compute_correction_factor"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_correction_factor">[docs]</a>    <span class="k">def</span> <span class="nf">compute_correction_factor</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -173,50 +206,58 @@
 <span class="sd">        This method requires the object to have an attached `BPMF.dataset.Event`</span>
 <span class="sd">        instance and for the instance to have called the `set_source_receiver_dist(network)` method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;event&quot;</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Attach the BPMF.dataset.Event instance first.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">,</span> <span class="s2">&quot;_source_receiver_dist&quot;</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call event.set_source_receiver_dist(network) first.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
-        <span class="n">correction_factor</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
-        <span class="n">attenuation_factor</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+        <span class="n">stations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">correction_factor</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">stations</span><span class="p">)</span>
+        <span class="n">attenuation_factor</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">stations</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;attenuation_P&quot;</span><span class="p">,</span> <span class="s2">&quot;attenuation_S&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Q&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_Q_model</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="n">stations</span><span class="p">:</span>
             <span class="n">r_m</span> <span class="o">=</span> <span class="mf">1000.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">]</span>
             <span class="n">tt_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;S_tt_sec&quot;</span><span class="p">]</span>
             <span class="n">corr_s</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="mf">4.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
-                    <span class="o">*</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho_receiver</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho_source</span><span class="p">)</span>
-                    <span class="o">*</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vs_receiver</span><span class="p">)</span> <span class="o">*</span> <span class="n">vs_source</span><span class="o">**</span><span class="p">(</span><span class="mf">5.</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
-                    <span class="o">*</span>
-                    <span class="n">r_m</span> <span class="o">/</span> <span class="n">radiation_S</span>
-                    <span class="p">)</span>
+                <span class="mf">4.0</span>
+                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho_receiver</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho_source</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vs_receiver</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">vs_source</span> <span class="o">**</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">r_m</span>
+                <span class="o">/</span> <span class="n">radiation_S</span>
+            <span class="p">)</span>
             <span class="n">correction_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;correction_S&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">corr_s</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;attenuation_model&quot;</span><span class="p">):</span>
-                <span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_S&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">freq</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">tt_s</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_model</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">](</span><span class="n">freq</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Q&quot;</span><span class="p">):</span>
+                <span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_S&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">tt_s</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_S&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
             <span class="n">tt_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_tt_sec&quot;</span><span class="p">]</span>
             <span class="n">corr_p</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="mf">4.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
-                    <span class="o">*</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho_receiver</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho_source</span><span class="p">)</span>
-                    <span class="o">*</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vp_receiver</span><span class="p">)</span> <span class="o">*</span> <span class="n">vp_source</span><span class="o">**</span><span class="p">(</span><span class="mf">5.</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
-                    <span class="o">*</span>
-                    <span class="n">r_m</span> <span class="o">/</span> <span class="n">radiation_P</span>
-                    <span class="p">)</span>
+                   <span class="mf">4.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                   <span class="o">*</span>
+                   <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho_receiver</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho_source</span><span class="p">)</span>
+                   <span class="o">*</span>
+                   <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vp_receiver</span><span class="p">)</span> <span class="o">*</span> <span class="n">vp_source</span><span class="o">**</span><span class="p">(</span><span class="mf">5.</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
+                   <span class="o">*</span>
+                   <span class="n">r_m</span> <span class="o">/</span> <span class="n">radiation_P</span>
+                   <span class="p">)</span>
             <span class="n">correction_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;correction_P&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">corr_p</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;attenuation_model&quot;</span><span class="p">):</span>
-                <span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_P&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">freq</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">tt_p</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_model</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">](</span><span class="n">freq</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Q&quot;</span><span class="p">):</span>
+                <span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_P&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">tt_p</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No attenuation model found!&quot;</span><span class="p">)</span>
                 <span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_P&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">correction_factor</span> <span class="o">=</span> <span class="n">correction_factor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_factor</span> <span class="o">=</span> <span class="n">attenuation_factor</span></div>
@@ -228,7 +269,7 @@
         <span class="n">correct_propagation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">average_log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">min_num_valid_channels_per_freq_bin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">max_relative_distance_err_pct</span><span class="o">=</span><span class="mf">25.</span><span class="p">,</span>
+        <span class="n">max_relative_distance_err_pct</span><span class="o">=</span><span class="mf">25.0</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -277,15 +318,19 @@
         <span class="n">masked_spectra</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">signal_spectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)</span>
         <span class="n">snr_spectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;snr_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Q&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_Q_model</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_attenuation_factor</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">trid</span> <span class="ow">in</span> <span class="n">signal_spectrum</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;relative_distance_err_pct&quot;</span><span class="p">]</span>
-                    <span class="o">&gt;</span>
-                    <span class="n">max_relative_distance_err_pct</span>
-                    <span class="p">):</span>
+                <span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;relative_distance_err_pct&quot;</span><span class="p">]</span>
+                <span class="o">&gt;</span> <span class="n">max_relative_distance_err_pct</span>
+            <span class="p">):</span>
                 <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Source-receiver distance relative error is too high: &quot;</span>
-                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s1">&#39;relative_distance_err_pct&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Source-receiver distance relative error is too high: &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s1">&#39;relative_distance_err_pct&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
                 <span class="c1"># the location uncertainty implies too much error</span>
                 <span class="c1"># on this station, skip it</span>
                 <span class="k">continue</span>
@@ -296,15 +341,16 @@
                 <span class="n">amplitude_spectrum</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">correction_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
                     <span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;correction_</span><span class="si">{</span><span class="n">phase</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">]</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span>
+                <span class="k">if</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_</span><span class="si">{</span><span class="n">phase</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+                    <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="p">):</span>
-                    <span class="n">att</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                        <span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_</span><span class="si">{</span><span class="n">phase</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="p">]</span>
+                    <span class="c1"># att = self.attenuation_factor.loc[</span>
+                    <span class="c1">#    sta, f&quot;attenuation_{phase.upper()}&quot;</span>
+                    <span class="c1"># ](signal_spectrum[trid][&quot;freq&quot;])</span>
                     <span class="n">amplitude_spectrum</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attenuation_factor</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
                         <span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;attenuation_</span><span class="si">{</span><span class="n">phase</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="p">](</span><span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">])</span>
+                    <span class="p">]</span>
             <span class="n">masked_spectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">amplitude_spectrum</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
             <span class="p">)</span>
@@ -318,9 +364,9 @@
         <span class="c1"># otherwise the mask can be converted to a single boolean when</span>
         <span class="c1"># all elements are False</span>
         <span class="n">masked_spectra</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span>
-                <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">arr</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">masked_spectra</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
-                <span class="n">mask</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">arr</span><span class="o">.</span><span class="n">mask</span> <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">masked_spectra</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
-                <span class="p">)</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">arr</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">masked_spectra</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">arr</span><span class="o">.</span><span class="n">mask</span> <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">masked_spectra</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+        <span class="p">)</span>
         <span class="c1"># count the number of channels that satisfied the SNR criterion</span>
         <span class="n">num_valid_channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">~</span><span class="n">masked_spectra</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="c1"># discard the frequency bins for which the minimum number</span>
@@ -334,8 +380,8 @@
             <span class="c1"># another mysterious feature of numpy....</span>
             <span class="c1"># need to use exp to propagate mask correctly</span>
             <span class="n">average_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">log10_masked_spectra</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
-                    <span class="p">)</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">log10_masked_spectra</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">10.0</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="n">std_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">log10_masked_spectra</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">average_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">masked_spectra</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -360,9 +406,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">average_spectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">average_spectra</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">average_spectra</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Spectrum.compute_multi_band_spectrum"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_multi_band_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">compute_multi_band_spectrum</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">buffer_seconds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">):</span>
+<div class="viewcode-block" id="Spectrum.compute_multi_band_spectrum"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_multi_band_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">compute_multi_band_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">buffer_seconds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute spectrum from the maximum amplitude in multiple 1-octave frequency bands.</span>
 
@@ -396,8 +440,9 @@
             <span class="s2">&quot;p&quot;</span><span class="p">,</span>
             <span class="s2">&quot;s&quot;</span><span class="p">,</span>
         <span class="p">),</span> <span class="s2">&quot;phase should be &#39;noise&#39;, &#39;p&#39; or &#39;s&#39;.&quot;</span>
-        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;frequency_bands&quot;</span><span class="p">),</span>\
-                <span class="s2">&quot;Attribute `frequency_bands` is required for this method.&quot;</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;frequency_bands&quot;</span>
+        <span class="p">),</span> <span class="s2">&quot;Attribute `frequency_bands` is required for this method.&quot;</span>
         <span class="n">num_freqs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">)</span>
         <span class="n">spectrum</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">traces</span><span class="p">:</span>
@@ -406,18 +451,20 @@
             <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_freqs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
             <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_freqs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">band</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">):</span>
-                <span class="n">bandwidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">bandwidth</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">)</span>
                 <span class="n">center_freq</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-                        <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="p">)</span>
                 <span class="n">tr_band</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
                 <span class="n">tr_band</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-                        <span class="s2">&quot;bandpass&quot;</span><span class="p">,</span>
-                        <span class="n">freqmin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
-                        <span class="n">freqmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
-                        <span class="n">corners</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;corners&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-                        <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span>
-                        <span class="p">)</span>
+                    <span class="s2">&quot;bandpass&quot;</span><span class="p">,</span>
+                    <span class="n">freqmin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">freqmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">corners</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;corners&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                    <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="n">trimmed_tr</span> <span class="o">=</span> <span class="n">tr_band</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">buffer_samples</span><span class="p">:</span><span class="o">-</span><span class="n">buffer_samples</span><span class="p">]</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trimmed_tr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="c1"># gap in data?</span>
@@ -425,14 +472,10 @@
                 <span class="n">max_amp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">trimmed_tr</span><span class="p">))</span> <span class="o">/</span> <span class="n">bandwidth</span>
                 <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_amp</span>
                 <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">center_freq</span>
-            <span class="n">max_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">hmax_unc</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">vmax_unc</span><span class="o">**</span><span class="mi">2</span>
-                    <span class="p">)</span>
-            <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;relative_distance_err_pct&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">100.</span> <span class="o">*</span> <span class="p">(</span>
-                    <span class="n">max_err</span>
-                    <span class="o">/</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span><span class="p">]</span>
-                    <span class="p">)</span>
+            <span class="n">max_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">hmax_unc</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">vmax_unc</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;relative_distance_err_pct&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="n">max_err</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span><span class="p">]</span>
+            <span class="p">)</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;phases&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
@@ -483,14 +526,10 @@
                 <span class="o">*</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span>
             <span class="p">)</span>
             <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftfreq</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">npts</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span><span class="p">)</span>
-            <span class="n">max_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">hmax_unc</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">vmax_unc</span><span class="o">**</span><span class="mi">2</span>
-                    <span class="p">)</span>
-            <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;relative_distance_err_pct&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">100.</span> <span class="o">*</span> <span class="p">(</span>
-                    <span class="n">max_err</span>
-                    <span class="o">/</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span><span class="p">]</span>
-                    <span class="p">)</span>
+            <span class="n">max_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">hmax_unc</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">vmax_unc</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">spectrum</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s2">&quot;relative_distance_err_pct&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="n">max_err</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span><span class="p">]</span>
+            <span class="p">)</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;phases&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
@@ -539,7 +578,9 @@
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># no noise spectrum, probably because of gap</span>
-                <span class="n">snr_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                <span class="n">snr_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+                <span class="p">)</span>
             <span class="n">snr</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;snr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">snr_</span>
             <span class="n">snr</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">signal_spectrum</span><span class="p">[</span><span class="n">trid</span><span class="p">][</span><span class="s2">&quot;freq&quot;</span><span class="p">]</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;snr_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">_spectrum&quot;</span><span class="p">,</span> <span class="n">snr</span><span class="p">)</span></div>
@@ -631,7 +672,7 @@
         <span class="n">min_fraction_valid_points_below_fc</span><span class="o">=</span><span class="mf">0.10</span><span class="p">,</span>
         <span class="n">min_fraction_valid_points</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
         <span class="n">weighted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fit the average displacement spectrum with a specified model.</span>
@@ -681,7 +722,9 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Spectrum is below SNR threshold everywhere, cannot fit it.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inversion_success</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">return</span>
-        <span class="n">valid_fraction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">~</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]))</span>
+        <span class="n">valid_fraction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">~</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;spectrum&quot;</span><span class="p">])</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="n">valid_fraction</span> <span class="o">&lt;</span> <span class="n">min_fraction_valid_points</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not enough valid points! (Only </span><span class="si">{</span><span class="mf">100.</span><span class="o">*</span><span class="n">valid_fraction</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%)&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inversion_success</span> <span class="o">=</span> <span class="kc">False</span>
@@ -724,14 +767,16 @@
             <span class="k">return</span>
         <span class="c1"># check whether the low-frequency plateau was well constrained</span>
         <span class="n">npts_valid_below_fc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">popt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">fraction_valid_points_below_fc</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="nb">float</span><span class="p">(</span><span class="n">npts_valid_below_fc</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;freq&quot;</span><span class="p">]))</span>
-                    <span class="p">)</span>
-        <span class="c1">#print(f&quot;Fraction of valid points below fc is: {fraction_valid_points_below_fc:.2f}&quot;)</span>
+        <span class="n">fraction_valid_points_below_fc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">npts_valid_below_fc</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">spectrum</span><span class="p">[</span><span class="s2">&quot;freq&quot;</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="c1"># print(f&quot;Fraction of valid points below fc is: {fraction_valid_points_below_fc:.2f}&quot;)</span>
         <span class="k">if</span> <span class="n">fraction_valid_points_below_fc</span> <span class="o">&lt;</span> <span class="n">min_fraction_valid_points_below_fc</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inversion_success</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not enough valid points below corner frequency &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;(only </span><span class="si">{</span><span class="mf">100.</span><span class="o">*</span><span class="n">fraction_valid_points_below_fc</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Not enough valid points below corner frequency &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;(only </span><span class="si">{</span><span class="mf">100.</span><span class="o">*</span><span class="n">fraction_valid_points_below_fc</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)&quot;</span>
+            <span class="p">)</span>
             <span class="k">return</span>
         <span class="n">perr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">pcov</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">M0</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -794,8 +839,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">band</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="p">)</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_bands</span><span class="p">[</span><span class="n">band</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Spectrum.set_target_frequencies"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.set_target_frequencies">[docs]</a>    <span class="k">def</span> <span class="nf">set_target_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq_min</span><span class="p">,</span> <span class="n">freq_max</span><span class="p">,</span> <span class="n">num_points</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1094,9 +1139,8 @@
     <span class="n">corner_frequency</span> <span class="o">=</span> <span class="p">(</span><span class="n">constant</span> <span class="o">*</span> <span class="n">vr</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">crack_radius</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">corner_frequency</span></div>
 
-<div class="viewcode-block" id="stress_drop_circular_crack"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.stress_drop_circular_crack">[docs]</a><span class="k">def</span> <span class="nf">stress_drop_circular_crack</span><span class="p">(</span>
-        <span class="n">Mw</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="n">vs_m_per_s</span><span class="o">=</span><span class="mf">3500.0</span><span class="p">,</span> <span class="n">vr_vs_ratio</span><span class="o">=</span><span class="mf">0.9</span>
-        <span class="p">):</span>
+
+<div class="viewcode-block" id="stress_drop_circular_crack"><a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.stress_drop_circular_crack">[docs]</a><span class="k">def</span> <span class="nf">stress_drop_circular_crack</span><span class="p">(</span><span class="n">Mw</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="n">vs_m_per_s</span><span class="o">=</span><span class="mf">3500.0</span><span class="p">,</span> <span class="n">vr_vs_ratio</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the stress drop assuming a circular crack model (Eshelby).</span>
 
@@ -1132,8 +1176,8 @@
     <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;s&quot;</span><span class="p">:</span>
         <span class="n">constant</span> <span class="o">=</span> <span class="mf">1.47</span>
     <span class="n">vr</span> <span class="o">=</span> <span class="n">vr_vs_ratio</span> <span class="o">*</span> <span class="n">vs_m_per_s</span>
-    <span class="n">crack_radius</span> <span class="o">=</span> <span class="n">constant</span> <span class="o">*</span> <span class="n">vr</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">fc</span><span class="p">)</span>
-    <span class="n">stress_drop</span> <span class="o">=</span> <span class="mf">7.</span> <span class="o">/</span> <span class="mf">16.</span> <span class="o">*</span> <span class="n">M0</span> <span class="o">/</span> <span class="n">crack_radius</span><span class="o">**</span><span class="mi">3</span>
+    <span class="n">crack_radius</span> <span class="o">=</span> <span class="n">constant</span> <span class="o">*</span> <span class="n">vr</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">fc</span><span class="p">)</span>
+    <span class="n">stress_drop</span> <span class="o">=</span> <span class="mf">7.0</span> <span class="o">/</span> <span class="mf">16.0</span> <span class="o">*</span> <span class="n">M0</span> <span class="o">/</span> <span class="n">crack_radius</span><span class="o">**</span><span class="mi">3</span>
     <span class="k">return</span> <span class="n">stress_drop</span></div>
 
 
@@ -1224,7 +1268,7 @@
             <span class="n">min_num_valid_channels_per_freq_bin</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span>
                 <span class="s2">&quot;MIN_NUM_VALID_CHANNELS_PER_FREQ_BIN&quot;</span>
             <span class="p">],</span>
-            <span class="n">max_relative_distance_err_pct</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;MAX_RELATIVE_DISTANCE_ERR_PCT&quot;</span><span class="p">]</span>
+            <span class="n">max_relative_distance_err_pct</span><span class="o">=</span><span class="n">mag_params</span><span class="p">[</span><span class="s2">&quot;MAX_RELATIVE_DISTANCE_ERR_PCT&quot;</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">phase_for_mag</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">average_spectra</span><span class="p">:</span>
             <span class="k">continue</span>
@@ -1319,8 +1363,6 @@
     <span class="n">event</span><span class="o">.</span><span class="n">set_aux_data</span><span class="p">(</span><span class="n">source_parameters</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">event</span><span class="p">,</span> <span class="n">spectrum</span></div>
-
-
 </pre></div>
 
            </div>

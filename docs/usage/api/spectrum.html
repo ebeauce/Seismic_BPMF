@@ -132,26 +132,6 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class for handling spectral data and calculations.$a</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.attenuation_Q_model">
-<span class="sig-name descname"><span class="pre">attenuation_Q_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.attenuation_Q_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.attenuation_Q_model" title="Permalink to this definition"></a></dt>
-<dd><p>Set the attenuation Q model for P and S phases.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>Q</strong> (<em>array-like</em>) – Array of attenuation Q values.</p></li>
-<li><p><strong>frequencies</strong> (<em>array-like</em>) – Array of corresponding frequencies.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The attenuation Q model is stored in the <cite>attenuation_model</cite> attribute.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.compute_correction_factor">
 <span class="sig-name descname"><span class="pre">compute_correction_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_receiver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp_receiver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vs_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vs_receiver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radiation_S</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.6324555320336759</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radiation_P</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5163977794943222</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.compute_correction_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.compute_correction_factor" title="Permalink to this definition"></a></dt>
 <dd><p>Compute the correction factor and attenuation factor for a seismic event.</p>
@@ -466,6 +446,29 @@ Default is {“noise”: “–”, “s”: “-”, “p”: “-“}.</p></li
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.set_Q_model">
+<span class="sig-name descname"><span class="pre">set_Q_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.set_Q_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.set_Q_model" title="Permalink to this definition"></a></dt>
+<dd><p>Set the attenuation Q model for P and S phases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Q</strong> (<em>array-like</em>) – Array of attenuation Q values.</p></li>
+<li><p><strong>frequencies</strong> (<em>array-like</em>) – Array of corresponding frequencies. These are used to later keep
+track of which frequencies were used for the Q model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Q model is stored in the <cite>Q0</cite> attribute. The frequencies are
+stored in the <cite>Q0_frequencies</cite> attribute. These are later used to
+computed the Q-model and attenuation factor at arbitrary frequencies.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.set_frequency_bands">
 <span class="sig-name descname"><span class="pre">set_frequency_bands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency_bands</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.set_frequency_bands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.set_frequency_bands" title="Permalink to this definition"></a></dt>
 <dd><p>Set the frequency bands for spectrum analysis.</p>
@@ -504,6 +507,18 @@ The center frequencies of each band are also calculated and stored in the <cite>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.update_Q_model">
+<span class="sig-name descname"><span class="pre">update_Q_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.update_Q_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.update_Q_model" title="Permalink to this definition"></a></dt>
+<dd><p>Interpolate the Q-model at the current <cite>self.frequencies</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.update_attenuation_factor">
+<span class="sig-name descname"><span class="pre">update_attenuation_factor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.update_attenuation_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.update_attenuation_factor" title="Permalink to this definition"></a></dt>
+<dd><p>Compute attenuation factor at the current <cite>self.frequencies</cite>.</p>
 </dd></dl>
 
 </dd></dl>

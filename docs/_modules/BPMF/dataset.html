@@ -1338,6 +1338,10 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pl_vmax_unc</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">location</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">source_receiver_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_source_receiver_dist&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_receiver_dist</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">]</span>
@@ -1657,7 +1661,12 @@
             <span class="c1"># momentarily update samping_rate</span>
             <span class="n">sampling_rate0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sr</span> <span class="o">*</span> <span class="n">upsampling</span> <span class="o">/</span> <span class="n">downsampling</span>
-        <span class="n">data_arr_n</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">normalize_batch</span><span class="p">(</span><span class="n">data_arr</span><span class="p">)</span>
+        <span class="n">data_arr_n</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">normalize_batch</span><span class="p">(</span>
+                <span class="n">data_arr</span><span class="p">,</span> 
+                <span class="n">normalization_window_sample</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s2">&quot;normalization_window_sample&quot;</span><span class="p">,</span> <span class="n">data_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
         <span class="n">closest_pow2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">data_arr_n</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">diff</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">closest_pow2</span> <span class="o">-</span> <span class="n">data_arr_n</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">left</span> <span class="o">=</span> <span class="n">diff</span><span class="o">//</span><span class="mi">2</span>
@@ -1716,7 +1725,8 @@
             <span class="k">if</span> <span class="s2">&quot;S&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">:</span>
                 <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
             <span class="n">prior_knowledge</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">:</span>
+            <span class="c1">#for sta in self.stations:</span>
+            <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">prior_knowledge</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                     <span class="n">prior_knowledge</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span>
                         <span class="n">udt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_abs_arrival_times&quot;</span><span class="p">])</span>
@@ -1933,6 +1943,7 @@
         <span class="n">phase_on_comp</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="s2">&quot;P&quot;</span><span class="p">},</span>
         <span class="n">component_aliases</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">],</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">],</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">]},</span>
         <span class="n">waveform_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">uncertainty_method</span><span class="o">=</span><span class="s2">&quot;spatial&quot;</span><span class="p">,</span>
         <span class="n">restricted_domain_side_km</span><span class="o">=</span><span class="mf">100.</span><span class="p">,</span>
         <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -2004,12 +2015,24 @@
             <span class="n">norm</span><span class="p">[</span><span class="n">norm</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
             <span class="n">data_arr</span> <span class="o">/=</span> <span class="n">norm</span>
             <span class="n">waveform_features</span> <span class="o">=</span> <span class="n">envelope</span><span class="p">(</span><span class="n">data_arr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">waveform_features</span> <span class="o">=</span> <span class="n">waveform_features</span>
         <span class="c1"># print(waveform_features)</span>
-        <span class="n">beamformer</span><span class="o">.</span><span class="n">backproject</span><span class="p">(</span><span class="n">waveform_features</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">reduce</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
+        <span class="n">out_of_bounds</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;out_of_bounds&quot;</span><span class="p">,</span> <span class="s2">&quot;flexible&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">uncertainty_method</span> <span class="o">==</span> <span class="s2">&quot;spatial&quot;</span><span class="p">:</span>
+            <span class="n">reduce</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
+        <span class="k">elif</span> <span class="n">uncertainty_method</span> <span class="o">==</span> <span class="s2">&quot;temporal&quot;</span><span class="p">:</span>
+            <span class="n">reduce</span> <span class="o">=</span> <span class="s2">&quot;max&quot;</span>
+        <span class="n">beamformer</span><span class="o">.</span><span class="n">backproject</span><span class="p">(</span>
+                <span class="n">waveform_features</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">reduce</span><span class="o">=</span><span class="n">reduce</span><span class="p">,</span> <span class="n">out_of_bounds</span><span class="o">=</span><span class="n">out_of_bounds</span>
+                <span class="p">)</span>
         <span class="c1"># find where the maximum focusing occurred</span>
-        <span class="n">src_idx</span><span class="p">,</span> <span class="n">time_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span>
-            <span class="n">beamformer</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">argmax</span><span class="p">(),</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">shape</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">uncertainty_method</span> <span class="o">==</span> <span class="s2">&quot;spatial&quot;</span><span class="p">:</span>
+            <span class="n">src_idx</span><span class="p">,</span> <span class="n">time_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span>
+                <span class="n">beamformer</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">argmax</span><span class="p">(),</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">shape</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">uncertainty_method</span> <span class="o">==</span> <span class="s2">&quot;temporal&quot;</span><span class="p">:</span>
+            <span class="n">time_idx</span> <span class="o">=</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">maxbeam</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+            <span class="n">src_idx</span> <span class="o">=</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">maxbeam_sources</span><span class="p">[</span><span class="n">time_idx</span><span class="p">]</span>
         <span class="c1"># update hypocenter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">origin_time</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span> <span class="o">+</span> <span class="n">time_idx</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span>
@@ -2018,21 +2041,33 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span> <span class="o">=</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">src_idx</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="o">=</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">source_coordinates</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">src_idx</span><span class="p">]</span>
         <span class="c1"># estimate location uncertainty</span>
-        <span class="c1"># 1) compute likelihood</span>
-        <span class="n">likelihood</span> <span class="o">=</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">_likelihood</span><span class="p">(</span><span class="n">beamformer</span><span class="o">.</span><span class="n">beam</span><span class="p">[:,</span> <span class="n">time_idx</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">uncertainty_method</span> <span class="o">==</span> <span class="s2">&quot;spatial&quot;</span><span class="p">:</span>
+            <span class="c1"># 1) define a restricted domain</span>
+            <span class="n">domain</span> <span class="o">=</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">_rectangular_domain</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
+                    <span class="n">side_km</span><span class="o">=</span><span class="n">restricted_domain_side_km</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="c1"># 2) compute likelihood</span>
+            <span class="n">likelihood</span> <span class="o">=</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">_likelihood</span><span class="p">(</span><span class="n">beamformer</span><span class="o">.</span><span class="n">beam</span><span class="p">[:,</span> <span class="n">time_idx</span><span class="p">])</span>
+            <span class="n">likelihood_domain</span> <span class="o">=</span> <span class="n">domain</span>
+        <span class="k">elif</span> <span class="n">uncertainty_method</span> <span class="o">==</span> <span class="s2">&quot;temporal&quot;</span><span class="p">:</span>
+            <span class="c1"># 1) likelihood is given by Gibbs distribution of maxbeam</span>
+            <span class="n">effective_kT</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;effective_kT&quot;</span><span class="p">,</span> <span class="mf">0.33</span><span class="p">)</span>
+            <span class="n">gibbs_cutoff</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gibbs_cutoff&quot;</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
+            <span class="n">gibbs_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                    <span class="o">-</span><span class="p">(</span><span class="n">beamformer</span><span class="o">.</span><span class="n">maxbeam</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">maxbeam</span><span class="p">)</span> <span class="o">/</span> <span class="n">effective_kT</span>
+                    <span class="p">)</span>
+            <span class="n">domain</span> <span class="o">=</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">maxbeam_sources</span><span class="p">[</span><span class="n">gibbs_weight</span> <span class="o">&gt;</span> <span class="n">gibbs_cutoff</span><span class="p">]</span>
+            <span class="n">likelihood</span> <span class="o">=</span> <span class="n">gibbs_weight</span>
+            <span class="n">likelihood_domain</span> <span class="o">=</span> <span class="n">gibbs_weight</span> <span class="o">&gt;</span> <span class="n">gibbs_cutoff</span>
         <span class="n">beamformer</span><span class="o">.</span><span class="n">likelihood</span> <span class="o">=</span> <span class="n">likelihood</span>
-        <span class="c1"># 2) define a restricted domain</span>
-        <span class="n">domain</span> <span class="o">=</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">_rectangular_domain</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
-                <span class="n">side_km</span><span class="o">=</span><span class="n">restricted_domain_side_km</span><span class="p">,</span>
-                <span class="p">)</span>
         <span class="c1"># 3) compute uncertainty</span>
         <span class="n">hunc</span><span class="p">,</span> <span class="n">vunc</span> <span class="o">=</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">_compute_location_uncertainty</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span>
-                <span class="n">likelihood</span><span class="p">,</span>
+                <span class="n">likelihood</span><span class="p">[</span><span class="n">likelihood_domain</span><span class="p">],</span>
                 <span class="n">domain</span><span class="p">,</span>
                 <span class="p">)</span>
         <span class="c1"># 4) set attributes</span>
@@ -2057,14 +2092,17 @@
         <span class="n">travel_times</span> <span class="o">=</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">moveouts</span><span class="p">[</span><span class="n">src_idx</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
         <span class="n">beamformer</span><span class="o">.</span><span class="n">phases</span> <span class="o">=</span> <span class="p">[</span><span class="n">ph</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">phases</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">beamformer</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">stations</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">ph</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">]):</span>
-                <span class="n">pp</span> <span class="o">=</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">phases</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ph</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">ph</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">beamformer</span><span class="o">.</span><span class="n">phases</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_tt_sec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">travel_times</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">pp</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span>
+                    <span class="n">travel_times</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_abs_arrival_times&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">origin_time</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_tt_sec&quot;</span><span class="p">]</span>
-                <span class="p">)</span></div>
+                <span class="p">)</span>
+        <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">beamformer</span><span class="o">.</span><span class="n">phases</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_tt_sec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">arrival_times</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}</span><span class="s2">_tt_sec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+                    <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Event.relocate_NLLoc"><a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Event.relocate_NLLoc">[docs]</a>    <span class="k">def</span> <span class="nf">relocate_NLLoc</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">stations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;EDT&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cleanup_out_dir</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
@@ -2477,9 +2515,9 @@
             <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">longitude</span><span class="p">],</span>
             <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">latitude</span><span class="p">],</span>
             <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="p">],</span>
-            <span class="n">network</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span>
-            <span class="n">network</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
-            <span class="n">network</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span>
+            <span class="n">network</span><span class="o">.</span><span class="n">longitude</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">network</span><span class="o">.</span><span class="n">latitude</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">network</span><span class="o">.</span><span class="n">depth</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="n">return_epicentral_distances</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_source_receiver_dist</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
@@ -2493,7 +2531,8 @@
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;source-receiver epicentral distance (km)&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;network_stations&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">network_stations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="c1">#self.network_stations = self.stations.copy() # why this line?</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">network_stations</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">stations</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;U&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_source_receiver_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_receiver_dist</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">network_stations</span>
         <span class="p">]</span>
@@ -3049,7 +3088,11 @@
             <span class="s2">&quot;tid&quot;</span><span class="p">,</span>
             <span class="s2">&quot;cov_mat&quot;</span><span class="p">,</span>
             <span class="s2">&quot;Mw&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Mw_err&quot;</span>
+            <span class="s2">&quot;Mw_err&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hmax_unc&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hmin_unc&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;vmax_unc&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;az_hmax_unc&quot;</span>
         <span class="p">]</span>
         <span class="n">select</span> <span class="o">=</span> <span class="k">lambda</span> <span class="nb">str</span><span class="p">:</span> <span class="nb">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;phase_on_comp&quot;</span><span class="p">)</span>
         <span class="n">aux_data_to_keep</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">select</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">aux_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
@@ -3678,7 +3721,7 @@
             <span class="k">return</span>
         <span class="n">rt</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">origin_time</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">origin_time</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="p">)</span> <span class="o">/</span> <span class="mf">1.0e9</span>  <span class="c1"># in sec</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;timedelta64[ns]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1.0e9</span>  <span class="c1"># in sec</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">origin_time</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">rt</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">annotate_axes</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Detection Time&quot;</span><span class="p">)</span>
