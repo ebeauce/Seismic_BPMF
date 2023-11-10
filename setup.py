@@ -64,7 +64,7 @@ setup(
     packages=["BPMF"],
     install_requires=[
         "beampower",
-        "fast_matched_filter",
+        "FastMatchedFilter",
         "h5py",
         "matplotlib",
         "numpy",
