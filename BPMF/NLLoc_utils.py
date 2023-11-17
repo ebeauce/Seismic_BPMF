@@ -408,17 +408,56 @@ def write_NLLoc_control(
     NLLoc_input_path=cfg.NLLOC_INPUT_PATH,
     NLLoc_output_path=cfg.NLLOC_OUTPUT_PATH,
     NLLoc_basename=cfg.NLLOC_BASENAME,
-    min_node_size=0.00001,
     method="EDT_OT_WT_ML",
     angle_grid="ANGLES_NO",
     grid="MISFIT",
+    locsearch="OCT",
     n_depth_points=None,
     **kwargs
 ):
     """Write the NLLoc control file."""
+    # for OCT
     kwargs.setdefault("initNumCells_x", 10)
     kwargs.setdefault("initNumCells_y", 10)
     kwargs.setdefault("initNumCells_z", 10)
+    kwargs.setdefault("minNodeSize", 0.00001)
+    kwargs.setdefault("maxNumNodes", 1000)
+    kwargs.setdefault("numScatter", 1000)
+    kwargs.setdefault("useStationsDensity", 1)
+    kwargs.setdefault("stopOnMinNodeSize", 1)
+    oct_args = [
+            str(kwargs["initNumCells_x"]),
+            str(kwargs["initNumCells_y"]),
+            str(kwargs["initNumCells_z"]),
+            str(kwargs["minNodeSize"]),
+            str(kwargs["maxNumNodes"]),
+            str(kwargs["numScatter"]),
+            str(kwargs["useStationsDensity"]),
+            str(kwargs["stopOnMinNodeSize"]),
+            ]
+    # for GRID
+    kwargs.setdefault("numSamplesDraw", 10)
+    # for MET
+    kwargs.setdefault("numSamples", 1000)
+    kwargs.setdefault("numLearn", 1000)
+    kwargs.setdefault("numEquil", 1000)
+    kwargs.setdefault("numBeginSave", 1000)
+    kwargs.setdefault("numSkip", 10)
+    kwargs.setdefault("stepInit", -10)
+    kwargs.setdefault("stepMin", 0.01)
+    kwargs.setdefault("stepFact", 8.)
+    kwargs.setdefault("probMin", 0.1)
+    met_args = [
+            str(kwargs["numSamples"]),
+            str(kwargs["numLearn"]),
+            str(kwargs["numEquil"]),
+            str(kwargs["numBeginSave"]),
+            str(kwargs["numSkip"]),
+            str(kwargs["stepInit"]),
+            str(kwargs["stepMin"]),
+            str(kwargs["stepFact"]),
+            str(kwargs["probMin"])
+            ]
     fc = open(os.path.join(NLLoc_input_path, ctrl_filename), "w")
     fc.write("# ---------------------------\n")
     fc.write("#    Generic control file statements    \n")
@@ -436,11 +475,23 @@ def write_NLLoc_control(
     # fc.write('LOCHYPOUT  SAVE_NLLOC_ALL  SAVE_HYPOINV_SUM\n')
     fc.write("LOCHYPOUT  SAVE_NLLOC_ALL\n")
 
-    fc.write(
-            f"LOCSEARCH  OCT {kwargs['initNumCells_x']} "
-            f"{kwargs['initNumCells_y']} {kwargs['initNumCells_z']} "
-            f"{min_node_size} 10000 1000 1 1\n"
-            )
+    if locsearch == "OCT":
+        fc.write(
+                "LOCSEARCH OCT " + " ".join(oct_args) + "\n"
+                )
+        #fc.write(
+        #        f"LOCSEARCH  OCT {kwargs['initNumCells_x']} "
+        #        f"{kwargs['initNumCells_y']} {kwargs['initNumCells_z']} "
+        #        f"{min_node_size} 10000 1000 1 1\n"
+        #        )
+    elif locsearch == "GRID":
+        fc.write(
+                f"LOCSEARCH  GRID {kwargs['numSamplesDraw']}\n"
+                )
+    elif locsearch == "MET":
+        fc.write(
+                "LOCSEARCH  MET " + " ".join(met_args) + "\n"
+                )
     # read header file to automatically determine grid dimensions
     fn = glob.glob(
             os.path.join(NLLoc_input_path, f"{NLLoc_basename}*hdr")

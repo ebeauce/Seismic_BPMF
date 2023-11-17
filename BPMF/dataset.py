@@ -3611,7 +3611,7 @@ class Template(Event):
         return fig
 
     def plot_recurrence_times(
-        self, ax=None, annotate_axes=True, figsize=(20, 10), **kwargs
+        self, ax=None, annotate_axes=True, unique=False, figsize=(20, 10), **kwargs
     ):
         """
         Plot recurrence times vs detection times.
@@ -3648,7 +3648,13 @@ class Template(Event):
         rt = (
             self.catalog.origin_time[1:] - self.catalog.origin_time[:-1]
         ).astype("timedelta64[ns]").astype("float64") / 1.0e9  # in sec
-        ax.plot(self.catalog.origin_time[1:], rt, **kwargs)
+        if unique and "unique_event" in self.catalog.catalog:
+            unique_event = self.catalog.catalog["unique_event"].values
+            time = self.catalog.origin_time[1:][unique_event[1:]]
+            rt = rt[unique_event[1:]]
+        else:
+            time = self.catalog.origin_time[1:]
+        ax.plot(time, rt, **kwargs)
         if annotate_axes:
             ax.set_xlabel("Detection Time")
             ax.set_ylabel("Recurrence Time (s)")
