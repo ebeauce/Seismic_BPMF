@@ -2840,8 +2840,10 @@ class Event(object):
                 )
                 start_times.append(time[0])
                 end_times.append(time[-1])
+                # channel-specific num_samples
+                num_samples = min(len(time), len(tr.data))
                 axes[s, c].plot(
-                    time[: self.n_samples], tr.data[: self.n_samples] * gain, color="k"
+                    time[: num_samples], tr.data[: num_samples] * gain, color="k"
                 )
                 for ph in ["P", "S"]:
                     # plot the P-/S-wave ML probabilities
