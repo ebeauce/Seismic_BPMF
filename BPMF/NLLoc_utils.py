@@ -421,7 +421,7 @@ def write_NLLoc_control(
     kwargs.setdefault("initNumCells_y", 10)
     kwargs.setdefault("initNumCells_z", 10)
     kwargs.setdefault("minNodeSize", 0.00001)
-    kwargs.setdefault("maxNumNodes", 1000)
+    kwargs.setdefault("maxNumNodes", 10000)
     kwargs.setdefault("numScatter", 1000)
     kwargs.setdefault("useStationsDensity", 1)
     kwargs.setdefault("stopOnMinNodeSize", 1)
@@ -429,7 +429,7 @@ def write_NLLoc_control(
             str(kwargs["initNumCells_x"]),
             str(kwargs["initNumCells_y"]),
             str(kwargs["initNumCells_z"]),
-            str(kwargs["minNodeSize"]),
+            f"{kwargs['minNodeSize']:f}",
             str(kwargs["maxNumNodes"]),
             str(kwargs["numScatter"]),
             str(kwargs["useStationsDensity"]),
@@ -486,12 +486,15 @@ def write_NLLoc_control(
         #        )
     elif locsearch == "GRID":
         fc.write(
-                f"LOCSEARCH  GRID {kwargs['numSamplesDraw']}\n"
+                f"LOCSEARCH GRID {kwargs['numSamplesDraw']}\n"
                 )
     elif locsearch == "MET":
         fc.write(
                 "LOCSEARCH  MET " + " ".join(met_args) + "\n"
                 )
+    else:
+        print("locsearch should be either of 'OCT', 'GRID' or 'MET'!")
+        return
     # read header file to automatically determine grid dimensions
     fn = glob.glob(
             os.path.join(NLLoc_input_path, f"{NLLoc_basename}*hdr")
