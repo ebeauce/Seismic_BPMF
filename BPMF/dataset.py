@@ -2514,9 +2514,9 @@ class Event(object):
             for ph in self.phases:
                 if pd.isnull(self.picks.loc[station, f"{ph.upper()}_abs_picks"]):
                     continue
-                self.picks.loc[station, f"{ph.upper()}_picks_sec"] = udt(
+                self.picks.loc[station, f"{ph.upper()}_picks_sec"] = np.float32(udt(
                     self.picks.loc[station, f"{ph.upper()}_abs_picks"]
-                ) - udt(self.origin_time)
+                ) - udt(self.origin_time))
 
     def update_travel_times(self):
         """
