@@ -843,7 +843,7 @@ class Spectrum:
         for ph in phase:
             ph = ph.lower()
             if not hasattr(self, f"average_{ph}_spectrum"):
-                print(f"Attribute {ph}_spectrum does not exist.")
+                print(f"Attribute average_{ph}_spectrum does not exist.")
                 continue
             spectrum = getattr(self, f"average_{ph}_spectrum")
             fft = spectrum["spectrum"]
