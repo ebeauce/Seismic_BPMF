@@ -196,6 +196,7 @@ class Spectrum:
         average_log=True,
         min_num_valid_channels_per_freq_bin=0,
         max_relative_distance_err_pct=25.0,
+        reduce="mean",
         verbose=0,
     ):
         """
@@ -233,6 +234,7 @@ class Spectrum:
         phase = phase.lower()
         assert phase in ["p", "s"], "phase should be 'p' or 's'"
         assert phase in self.phases, f"You need to compute the {phase} spectrum first"
+        assert reduce in ["median", "mean"], "reduce should be 'mean' or 'median'"
         assert hasattr(
             self, "frequencies"
         ), "You need to use set_target_frequencies first"
@@ -305,12 +307,20 @@ class Spectrum:
             log10_masked_spectra = np.ma.log10(masked_spectra)
             # another mysterious feature of numpy....
             # need to use exp to propagate mask correctly
-            average_spectrum = np.exp(
-                np.ma.mean(log10_masked_spectra, axis=0) * np.log(10.0)
-            )
+            if reduce == "mean":
+                average_spectrum = np.exp(
+                    np.ma.mean(log10_masked_spectra, axis=0) * np.log(10.0)
+                )
+            elif reduce == "median":
+                average_spectrum = np.exp(
+                    np.ma.median(log10_masked_spectra, axis=0) * np.log(10.0)
+                )
             std_spectrum = np.ma.std(log10_masked_spectra, axis=0)
         else:
-            average_spectrum = np.ma.mean(masked_spectra, axis=0)
+            if reduce == "mean":
+                average_spectrum = np.ma.mean(masked_spectra, axis=0)
+            elif reduce == "median":
+                average_spectrum = np.ma.median(masked_spectra, axis=0)
             std_spectrum = np.ma.std(masked_spectra, axis=0)
 
         setattr(
@@ -843,7 +853,7 @@ class Spectrum:
         for ph in phase:
             ph = ph.lower()
             if not hasattr(self, f"average_{ph}_spectrum"):
-                print(f"Attribute {ph}_spectrum does not exist.")
+                print(f"Attribute average_{ph}_spectrum does not exist.")
                 continue
             spectrum = getattr(self, f"average_{ph}_spectrum")
             fft = spectrum["spectrum"]
