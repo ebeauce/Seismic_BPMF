@@ -12,6 +12,9 @@ Check out the online documentation at [https://ebeauce.github.io/Seismic_BPMF/in
 
 ## Installation
 
+You may want to follow the instructions from the tutorial at
+[https://ebeauce.github.io/Seismic_BPMF/tutorial/general.html](https://ebeauce.github.io/Seismic_BPMF/tutorial/general.html).
+
 Download or clone the repository. Go to the root folder, activate your virtual
 environment, and execute the following command lines:
 ```shell
@@ -25,13 +28,18 @@ Details on how to set up a working environment at [https://ebeauce.github.io/Sei
 
 
 ## Reference
-Please, cite:
+Please, if you use this package for your research, cite:
+
+Beaucé, Eric and Frank, William B. and Seydoux, Léonard and Poli, Piero and Groebner, Nathan
+and van der Hilst, Robert D. and Campillo, Michel (2023). BPMF: A Backprojection and Matched‐Filtering Workflow for Automated Earthquake Detection and Location. *Seismological Research Letters*. DOI: [https://doi.org/10.1785/0220230230](https://doi.org/10.1785/0220230230).
+
+The methodology is detailed in:
 
 Beaucé, E., Frank, W. B., Paul, A., Campillo, M., & van der Hilst, R. D.
 (2019). Systematic detection of clustered seismicity beneath the Southwestern
 Alps. Journal of Geophysical Research: Solid Earth, 124(11), 11531-11548.
 
-and/or
+and
 
 Beaucé, E., van der Hilst, R. D., & Campillo M. (2022). Microseismic Constraints
 on the Mechanical State of the North Anatolian Fault Zone Thirteen Years after
@@ -39,19 +47,6 @@ the 1999 M7.4 Izmit Earthquake. Journal of Geophysical Research: Solid Earth.
 DOI:
 [https://doi.org/10.1029/2022JB024416](https://doi.org/10.1029/2022JB024416).
 
-If you use this package for your research.
-
-Note: Our paper Beaucé et al., 2022 (see References below) was prepared with
-BPMF v1.0.1, than you can find at
-[https://github.com/ebeauce/Seismic_BPMF/releases/tag/v1.0.1](https://github.com/ebeauce/Seismic_BPMF/releases/tag/v1.0.1).
-
-
-## To do:
-- [ ] Convert `availability` and `source_receiver_dist` to properties.
-- [ ] Robust and fast detection threshold for template matching.
-- [ ] Convert `moveouts` and `weights` to xarray-like objects with explicit
-  indexing using station names? 
-- [ ] Doc strings!!
 
 ## Contact
 Questions? Contact me at:<br/>

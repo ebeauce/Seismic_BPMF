@@ -338,20 +338,33 @@ class Beamformer(object):
             reduce="max",
             device="cpu",
             out_of_bounds="strict",
+            num_threads=None,
             ):
         """Backproject the waveform features.
 
         Parameters
         --------------
-        waveform_features: (n_stations, n_components, n_samples) numpy.ndarray
+        waveform_features : (n_stations, n_components, n_samples) numpy.ndarray
             Features of the waveform time series used for the
             backprojection onto the grid of theoretical sources.
-        device: string, default to 'cpu'
+        device : string, defaults to 'cpu'
             Either 'cpu' or 'gpu', depending on the available hardware and
             user's preferences.
-        reduce: string, default to 'max'
+        reduce : string, defaults to 'max'
             Either 'max' or 'none'. If 'max', returns the maximum beam at every
             time. If 'none', returns the full space-time beam.
+        out_of_bounds : string, defaults to 'strict'
+            Either 'strict' (default) or 'flexible'.
+            - 'strict': A beam is computed if and only if the moveouts point to a
+              valid sample (that is, within the bounds of the data stream) for every
+              channel used in the beam.
+            - 'flexbile': A beam is computed as long as the moveouts point to a
+              valid sample for at least one channel. This option is particularly
+              useful for real time applications where an event might have been
+              recorded at the closest stations but not yet at the more distant ones.
+        num_threads : int or None, defaults to None
+            Number of threads for CPU parallelization. If None (default), uses one thread
+            per available (visible) CPU.
         """
         if not hasattr(self, "weights_phases"):
             print("You need to set self.weights_phases first.")
@@ -367,6 +380,7 @@ class Beamformer(object):
                 self.weights_sources,
                 device=device,
                 out_of_bounds=out_of_bounds,
+                num_threads=num_threads,
                 reduce=reduce,
             )
         elif reduce == "none":
@@ -377,6 +391,7 @@ class Beamformer(object):
                 self.weights_sources,
                 device=device,
                 out_of_bounds=out_of_bounds,
+                num_threads=num_threads,
                 reduce=reduce,
             )
         else:
