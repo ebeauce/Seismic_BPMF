@@ -413,6 +413,7 @@ def write_NLLoc_control(
     grid="MISFIT",
     locsearch="OCT",
     n_depth_points=None,
+    station_density_weighting=False,
     **kwargs
 ):
     """Write the NLLoc control file."""
@@ -524,3 +525,5 @@ def write_NLLoc_control(
     fc.write("LOCPHASEID  S\n")
     fc.write("LOCQUAL2ERR 0.1 0.5 1.0 2.0 99999.9\n")
     fc.write(f"LOCANGLES  {angle_grid}  5\n")
+    cutoffDist = kwargs.get('cutoffDist', 10000000.)
+    fc.write(f"LOCSTAWT {int(station_density_weighting)} {cutoffDist}\n")
