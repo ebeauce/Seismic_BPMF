@@ -2190,11 +2190,18 @@ class Event(object):
         stations_outlier = []
         for sta in self.stations:
             for ph in self.phases:
+                if pd.isna(self.picks.loc[sta, f"{ph}_abs_picks"]):
+                    # no valid pick, pass
+                    continue
                 pick = pd.Timestamp(str(self.picks.loc[sta, f"{ph}_abs_picks"]))
                 predicted = pd.Timestamp(
                     str(self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"])
                 )
                 predicted_tt = self.arrival_times.loc[sta, f"{ph}_tt_sec"]
+                # use a minimum value for predicted_tt of a few samples
+                # to avoid issues arising when using self.set_arrival_times_to_moveouts
+                # because, by definition of a moveout, the min moveout is 0
+                predicted_tt = max(predicted_tt, 5/self.sampling_rate)
                 diff_percent = (
                     100.0 * abs((pick - predicted).total_seconds()) / predicted_tt
                 )
@@ -5082,14 +5089,15 @@ class Stack(Event):
         ml_p_index = kwargs.get("ml_P_index", 1)
         ml_s_index = kwargs.get("ml_S_index", 2)
 
-        # read waveforms in "picking" mode
-        self.read_waveforms(
-            duration,
-            offset_ot=0.0,
-            phase_on_comp=phase_on_comp,
-            time_shifted=False,
-            **kwargs,
-        )
+        if kwargs.get("read_waveforms", True):
+            # read waveforms in "picking" mode
+            self.read_waveforms(
+                duration,
+                offset_ot=0.0,
+                phase_on_comp=phase_on_comp,
+                time_shifted=False,
+                **kwargs,
+            )
         data_arr = self.get_np_array(self.stations, components=["N", "E", "Z"])
         if self.filtered_data is not None:
             data_arr = np.concatenate(
