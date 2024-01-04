@@ -517,7 +517,7 @@ def write_NLLoc_control(
     fc.write("LOCGRID  " + "  ".join(locgrid_params) + f"  {grid}  SAVE\n")
     fc.write(f"LOCMETH {method} 5000 6 -1 -1 -1 6 -1 1\n")
     fc.write("LOCGAU  0.2  5.0\n")
-    SigmaTfraction = kwargs.get("SigmaTfraction", 0.10)
+    SigmaTfraction = kwargs.get("SigmaTfraction", 0.05)
     SigmaTmin = kwargs.get("SigmaTmin", 0.02)
     SigmaTmax = kwargs.get("SigmaTmax", 10.)
     fc.write(f"LOCGAU2 {SigmaTfraction} {SigmaTmin} {SigmaTmax}\n")
