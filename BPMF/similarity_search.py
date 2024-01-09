@@ -547,7 +547,7 @@ class MatchedFilter(object):
             aux_data = {}
             aux_data["cc"] = cc_t[cc_idx[i]]
             aux_data["n_threshold"] = cc_t[cc_idx[i]] / threshold[cc_idx[i]]
-            aux_data["n_dev"] = aux_data["n_threshold"] * 
+            aux_data["n_dev"] = aux_data["n_threshold"] * cfg.N_DEV_MF_THRESHOLD
             aux_data["tid"] = tid
             if self.extract_peak_amplitudes:
                 aux_data["peak_amplitudes"] = peak_amplitudes
