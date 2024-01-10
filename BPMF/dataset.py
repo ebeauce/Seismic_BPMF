@@ -218,7 +218,7 @@ class Network(object):
                 # d is in m, convert it to km
                 d = np.asarray(d)[:, 0] / 1000.0
                 intersta_dist[s, :] = np.sqrt(
-                    d.squeeze() ** 2 + (self.depth[s] - self.depth)
+                    d.squeeze() ** 2 + (self.depth[s] - self.depth) ** 2
                 )
 
             # return distance in km
