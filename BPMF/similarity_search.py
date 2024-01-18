@@ -36,7 +36,7 @@ class MatchedFilter(object):
         step=cfg.MATCHED_FILTER_STEP_SAMP,
         max_memory=None,
         max_workers=None,
-        anomalous_cdf_at_mean_plus_1sig=0.50,
+        anomalous_cdf_at_mean_plus_1sig=0.00,
         window_for_validation_Tmax=100.,
         offset_win_peak_amp_sec=1.0,
         duration_win_peak_amp_sec=3.0,
@@ -86,7 +86,7 @@ class MatchedFilter(object):
             detections of new events in the CC time series. If None, use one CPU.
         anomalous_cdf_at_mean_plus_1sig: scalar float, optional
             Anomalous cumulative distribution function (cdf), between 0 and 1,
-            at {mean + 1xsigma}(CC), default to 0.50. The CC distribution is
+            at {mean + 1xsigma}(CC), default to 0.00. The CC distribution is
             approximately gaussian and, therefore, the expected value of 
             {mean + 1xsigma}(CC) is 0.78. If {mean + 1xsigma}(CC) is
             significantly lower than 0.78 in the vicinity of a CC(t) that
@@ -95,7 +95,8 @@ class MatchedFilter(object):
             1xsigma}(CC) was not properly estimated at time t. Since {mean +
             1xsigma}(CC) is computed from `threshold`, the detection threshold
             was probably not adequate and we discard CC(t). **Set this parameter
-            to zero to deactivate validation of the detection threshold.**
+            to zero to deactivate validation of the detection threshold. Otherwise,
+            a good default value seems to be 0.50.**
         window_for_validation_Tmax: scalar float, optional
             Window duration, in units of Tmax, the longest period in the data
             (that is, the inverse of `cfg.MIN_FREQ_HZ`), for analyzing the
@@ -546,6 +547,7 @@ class MatchedFilter(object):
             aux_data = {}
             aux_data["cc"] = cc_t[cc_idx[i]]
             aux_data["n_threshold"] = cc_t[cc_idx[i]] / threshold[cc_idx[i]]
+            aux_data["n_dev"] = aux_data["n_threshold"] * cfg.N_DEV_MF_THRESHOLD
             aux_data["tid"] = tid
             if self.extract_peak_amplitudes:
                 aux_data["peak_amplitudes"] = peak_amplitudes

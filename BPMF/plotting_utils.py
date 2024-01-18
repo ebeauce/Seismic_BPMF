@@ -414,7 +414,7 @@ def initialize_map(
                 category=oceans.category,
                 name=oceans.name,
                 scale="10m",
-                facecolor="#0076b482",
+                facecolor="#b0bfe8ff",
             )
         )
 

@@ -135,7 +135,7 @@ def read_NLLoc_outputs(filename, path):
             uncertainty_info = line[:-1].split()
             break
     # warning! The covariance matrix is expressed
-    # in a LEFT HANDED system 
+    # in a LEFT HANDED system
     # for a RIGHT HANDED system, we reverse Z-axis
     # which is initially pointing downward
     cov_mat = np.zeros((3, 3), dtype=np.float32)
@@ -145,8 +145,8 @@ def read_NLLoc_outputs(filename, path):
     cov_mat[1, 1] = float(uncertainty_info[14])  # cov YY
     cov_mat[1, 2] = float(uncertainty_info[16])  # cov YZ
     cov_mat[2, 2] = float(uncertainty_info[18])  # cov ZZ
-    cov_mat[2, :] *= -1.
-    cov_mat[:, 2] *= -1.
+    cov_mat[2, :] *= -1.0
+    cov_mat[:, 2] *= -1.0
     # symmetrical matrix:
     hypocenter["cov_mat"] = cov_mat + cov_mat.T - np.diag(cov_mat.diagonal())
     # read until relevant line
@@ -403,8 +403,6 @@ def write_NLLoc_control(
     out_filename,
     obs_filename,
     TRANS="GLOBAL",
-    author="Eric Beauce",
-    affiliation="Lamont-Doherty Earth Observatory",
     NLLoc_input_path=cfg.NLLOC_INPUT_PATH,
     NLLoc_output_path=cfg.NLLOC_OUTPUT_PATH,
     NLLoc_basename=cfg.NLLOC_BASENAME,
@@ -413,9 +411,68 @@ def write_NLLoc_control(
     grid="MISFIT",
     locsearch="OCT",
     n_depth_points=None,
-    **kwargs
+    **kwargs,
 ):
-    """Write the NLLoc control file."""
+    """Write the NLLoc control file.
+
+    All input and output files created here for NLLoc will be deleted.
+    Note that all additional key-word arguments to NLLoc, using the same
+    parameter names as in NLLoc (http://alomax.free.fr/nlloc/).
+    
+    Parameters
+    ----------
+    ctrl_filename : str
+        Name of the control file.
+    out_filename : str
+        Name of NLLoc's output file.
+    obs_filename : str
+        Name of the input observation file.
+    TRANS : str, optional
+        Geographic transformation. See NLLoc's documentation.
+        Defaults to 'GLOBAL'.
+    NLLoc_input_path : str, optional
+        Path to NLLoc's input files, that is, travel-time tables.
+        Defaults to 'cfg.NLLOC_INPUT_PATH'.
+    NLLoc_output_path : str, optional
+        Path to NLLoc's output files, that is, the results of location.
+        Defaults to 'cfg.NLLOC_OUTPUT_PATH'.
+    NLLoc_basename : str, optional
+        Basename of the travel-time files. If you have multiple travel-time
+        grids at the same `NLLoc_input_path` directory, use this argument to
+        use one or the other. Defaults to 'cfg.NLLOC_BASENAME'.
+    method : str, optional
+        Name of the loss function. See NLLoc's documentation.
+        Defaults to 'EDT_OT_WT_ML'.
+    angle_grid : str, optional
+        Alias for the 'angleMode' parameter of the 'LOCANGLES' command in the
+        NLLoc control file. See NLLoc's documentation.
+        Defaults to 'ANGLES_NO'.
+    grid : str, optional
+        Either of 'MISFIT' (default) or 'PROB_DENSITY'. Alias for the
+        'gridType' parameter of the 'LOCGRID' command in the NLLoc control
+        file. See NLLoc's documentation.
+    locsearch : str, optional
+        Either of 'GRID', 'MET' or 'OCT' (default). This parameter goes to the
+        LOCSEARCH command in the NLLoc control file. It determines how the loss
+        function is minimizes:
+        - GRID: Grid search (very computationally expensive).
+        - MET: Metropolis algorithm (MCMC). Efficient but may be stuck in a
+               local minimum.
+        - OCT: Oct tree importance sampling algorithm. This is a mix of sampling
+               and grid search that allows the efficient search for the global
+               minimum. See 'http://alomax.free.fr/nlloc/octtree/OctTree.html'
+               for more details. This is the default option.
+    n_depth_points : int or None, optional
+        If not None, only the first `n_depth_points` points are kept along 
+        the depth axis in the grid.
+
+        
+    """
+    # --------------------------------------------------
+    #          generic parameters
+    author = kwargs.get("author", "XXXX")
+    affiliation = kwargs.get("affiliation", "????????")
+    # --------------------------------------------------
     # for OCT
     kwargs.setdefault("initNumCells_x", 10)
     kwargs.setdefault("initNumCells_y", 10)
@@ -426,15 +483,15 @@ def write_NLLoc_control(
     kwargs.setdefault("useStationsDensity", 1)
     kwargs.setdefault("stopOnMinNodeSize", 1)
     oct_args = [
-            str(kwargs["initNumCells_x"]),
-            str(kwargs["initNumCells_y"]),
-            str(kwargs["initNumCells_z"]),
-            f"{kwargs['minNodeSize']:f}",
-            str(kwargs["maxNumNodes"]),
-            str(kwargs["numScatter"]),
-            str(kwargs["useStationsDensity"]),
-            str(kwargs["stopOnMinNodeSize"]),
-            ]
+        str(kwargs["initNumCells_x"]),
+        str(kwargs["initNumCells_y"]),
+        str(kwargs["initNumCells_z"]),
+        f"{kwargs['minNodeSize']:f}",
+        str(kwargs["maxNumNodes"]),
+        str(kwargs["numScatter"]),
+        str(kwargs["useStationsDensity"]),
+        str(kwargs["stopOnMinNodeSize"]),
+    ]
     # for GRID
     kwargs.setdefault("numSamplesDraw", 10)
     # for MET
@@ -445,19 +502,19 @@ def write_NLLoc_control(
     kwargs.setdefault("numSkip", 10)
     kwargs.setdefault("stepInit", -10)
     kwargs.setdefault("stepMin", 0.01)
-    kwargs.setdefault("stepFact", 8.)
+    kwargs.setdefault("stepFact", 8.0)
     kwargs.setdefault("probMin", 0.1)
     met_args = [
-            str(kwargs["numSamples"]),
-            str(kwargs["numLearn"]),
-            str(kwargs["numEquil"]),
-            str(kwargs["numBeginSave"]),
-            str(kwargs["numSkip"]),
-            str(kwargs["stepInit"]),
-            str(kwargs["stepMin"]),
-            str(kwargs["stepFact"]),
-            str(kwargs["probMin"])
-            ]
+        str(kwargs["numSamples"]),
+        str(kwargs["numLearn"]),
+        str(kwargs["numEquil"]),
+        str(kwargs["numBeginSave"]),
+        str(kwargs["numSkip"]),
+        str(kwargs["stepInit"]),
+        str(kwargs["stepMin"]),
+        str(kwargs["stepFact"]),
+        str(kwargs["probMin"]),
+    ]
     fc = open(os.path.join(NLLoc_input_path, ctrl_filename), "w")
     fc.write("# ---------------------------\n")
     fc.write("#    Generic control file statements    \n")
@@ -476,31 +533,20 @@ def write_NLLoc_control(
     fc.write("LOCHYPOUT  SAVE_NLLOC_ALL\n")
 
     if locsearch == "OCT":
-        fc.write(
-                "LOCSEARCH OCT " + " ".join(oct_args) + "\n"
-                )
-        #fc.write(
-        #        f"LOCSEARCH  OCT {kwargs['initNumCells_x']} "
-        #        f"{kwargs['initNumCells_y']} {kwargs['initNumCells_z']} "
-        #        f"{min_node_size} 10000 1000 1 1\n"
-        #        )
+        fc.write("LOCSEARCH OCT " + " ".join(oct_args) + "\n")
     elif locsearch == "GRID":
-        fc.write(
-                f"LOCSEARCH GRID {kwargs['numSamplesDraw']}\n"
-                )
+        fc.write(f"LOCSEARCH GRID {kwargs['numSamplesDraw']}\n")
     elif locsearch == "MET":
-        fc.write(
-                "LOCSEARCH  MET " + " ".join(met_args) + "\n"
-                )
+        fc.write("LOCSEARCH  MET " + " ".join(met_args) + "\n")
     else:
         print("locsearch should be either of 'OCT', 'GRID' or 'MET'!")
         return
     # read header file to automatically determine grid dimensions
-    fn = glob.glob(
-            os.path.join(NLLoc_input_path, f"{NLLoc_basename}*hdr")
-            )[0]
+    fn = glob.glob(os.path.join(NLLoc_input_path, f"{NLLoc_basename}*hdr"))[0]
     with open(fn, "r") as fhdr:
         dim = fhdr.readline()
+    # --------------------------------------------------------------
+    #                  LOCGRID parameters
     locgrid_params = dim.split()[:-1]
     locgrid_params[0] = str(kwargs.get("xNum", locgrid_params[0]))
     locgrid_params[1] = str(kwargs.get("yNum", locgrid_params[1]))
@@ -514,13 +560,58 @@ def write_NLLoc_control(
     if n_depth_points is not None:
         locgrid_params[2] = str(min(int(locgrid_params[2]), n_depth_points))
     fc.write("LOCGRID  " + "  ".join(locgrid_params) + f"  {grid}  SAVE\n")
-    fc.write(f"LOCMETH {method} 5000 6 -1 -1 -1 6 -1 1\n")
+    # --------------------------------------------------------------
+    #               LOCMETH parameters
+    maxDistStaGrid = kwargs.get("maxDistStaGrid", 5000)
+    minNumberPhases = kwargs.get("minNumberPhases", 6)
+    maxNumberPhases = kwargs.get("maxNumberPhases", -1)
+    minNumberSphases = kwargs.get("minNumberSphases", -1)
+    VpVsRatio = kwargs.get("VpVsRatio", -1)
+    maxNum3DGridMemory = kwargs.get("maxNum3DGridMemory", 6)
+    minDistStaGrid = kwargs.get("minDistStaGrid", -1)
+    iRejectDuplicateArrivals = kwargs.get("iRejectDuplicateArrivals", 1)
+    params = [
+        method,
+        maxDistStaGrid,
+        minNumberPhases,
+        maxNumberPhases,
+        minNumberSphases,
+        VpVsRatio,
+        maxNum3DGridMemory,
+        minDistStaGrid,
+        iRejectDuplicateArrivals,
+    ]
+    fc.write("LOCMETH " + " ".join([str(p) for p in params]) + "\n")
+    # fc.write(f"LOCMETH {method} 5000 6 -1 -1 -1 6 -1 1\n")
+    # --------------------------------------------------------------
+    #              LOCGAU parameters
+    SigmaTime = kwargs.get("SigmaTime", 0.2)
+    CorrLen = kwargs.get("CorrLen", 5.0)
     fc.write("LOCGAU  0.2  5.0\n")
-    SigmaTfraction = kwargs.get("SigmaTfraction", 0.10)
+    # --------------------------------------------------------------
+    #             LOCGAU2 parameters
+    SigmaTfraction = kwargs.get("SigmaTfraction", 0.05)
     SigmaTmin = kwargs.get("SigmaTmin", 0.02)
-    SigmaTmax = kwargs.get("SigmaTmax", 10.)
+    SigmaTmax = kwargs.get("SigmaTmax", 10.0)
     fc.write(f"LOCGAU2 {SigmaTfraction} {SigmaTmin} {SigmaTmax}\n")
+    # --------------------------------------------------------------
     fc.write("LOCPHASEID  P\n")
+    # --------------------------------------------------------------
     fc.write("LOCPHASEID  S\n")
-    fc.write("LOCQUAL2ERR 0.1 0.5 1.0 2.0 99999.9\n")
+    # --------------------------------------------------------------
+    #         LOCQUAL2ERR parameters
+    #  define 5 levels of quality
+    Err0 = kwargs.get("Err0", 0.1)
+    Err1 = kwargs.get("Err1", 0.5)
+    Err2 = kwargs.get("Err2", 1.0)
+    Err3 = kwargs.get("Err3", 2.0)
+    Err4 = kwargs.get("Err4", 99999.9)
+    params = [Err0, Err1, Err2, Err3, Err4] 
+    fc.write("LOCQUAL2ERR " + " ".join([str(p) for p in params]) + "\n")
+    # --------------------------------------------------------------
     fc.write(f"LOCANGLES  {angle_grid}  5\n")
+    # --------------------------------------------------------------
+    #       LOCSTAWT parameters
+    cutoffDist = kwargs.get("cutoffDist", 10000000.0)
+    useStationsDensity = int(kwargs.setdefault("useStationsDensity", 1))
+    fc.write(f"LOCSTAWT {useStationsDensity} {cutoffDist}\n")
