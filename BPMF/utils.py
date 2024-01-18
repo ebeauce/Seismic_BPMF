@@ -318,6 +318,7 @@ def _preprocess_stream(
     SR_decimals=1,
     decimation_method="simple",
     unit="VEL",
+    pre_filt=None,
     **kwargs,
 ):
     """
@@ -445,11 +446,12 @@ def _preprocess_stream(
             if not hasattr(tr.stats, "response"):
                 print(f"Could not find the instrument response for {tr.id}.")
                 continue
-            T_max = tr.stats.npts * tr.stats.delta
-            T_min = tr.stats.delta
-            f_min = 1.0 / T_max
-            f_max = 1.0 / (2.0 * T_min)
-            pre_filt = [f_min, 3.0 * f_min, 0.90 * f_max, 0.97 * f_max]
+            if pre_filt is None:
+                T_max = tr.stats.npts * tr.stats.delta
+                T_min = tr.stats.delta
+                f_min = 1.0 / T_max
+                f_max = 1.0 / (2.0 * T_min)
+                pre_filt = [f_min, 3.0 * f_min, 0.90 * f_max, 0.97 * f_max]
             tr.remove_response(pre_filt=pre_filt, output=unit, plot=plot_resp)
     elif remove_sensitivity:
         for tr in preprocessed_stream:
