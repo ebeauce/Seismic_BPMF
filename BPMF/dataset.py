@@ -3086,7 +3086,7 @@ class Template(Event):
             attach_waveforms=False,
         )
         template.n_samples = template.aux_data["n_samples"]
-        template.id = template.aux_data["tid"]
+        template.id = str(template.aux_data["tid"])
         # overwrite any path that was stored in aux_data, because what matters
         # for the template is only the file it was associated with
         template.where = os.path.join(db_path, filename)
