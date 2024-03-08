@@ -371,7 +371,7 @@ class Catalog(object):
     @classmethod
     def read_from_events(cls, events, extra_attributes=[], fill_value=np.nan):
         """Build catalog from list of `Event` instances.
-        
+
         Parameters
         ----------
         events : list
@@ -415,7 +415,7 @@ class Catalog(object):
     @classmethod
     def read_from_dataframe(cls, dataframe):
         """Initialize a Catalog instance from a `pandas.DataFrame` instance.
-        
+
         Parameters
         ----------
         dataframe : `pandas.DataFrame`
@@ -509,7 +509,7 @@ class Catalog(object):
     # ---------------------------------------------------------
     #                  Plotting methods
     # ---------------------------------------------------------
-    def plot_time_statistics(self, UTC_local_corr=0., figsize=(16, 7), **kwargs):
+    def plot_time_statistics(self, UTC_local_corr=0.0, figsize=(16, 7), **kwargs):
         """Plot the histograms of time of the day and day of the week.
 
         Parameters
@@ -536,8 +536,9 @@ class Catalog(object):
         axes[0].set_xlabel("Day of the Week")
         axes[0].set_ylabel("Event Count")
 
-        ((self.catalog["origin_time"].dt.hour + UTC_local_corr)%24)\
-                .hist(bins=np.arange(25), ax=axes[1])
+        ((self.catalog["origin_time"].dt.hour + UTC_local_corr) % 24).hist(
+            bins=np.arange(25), ax=axes[1]
+        )
         axes[1].set_xlabel("Hour of the Day")
         axes[1].set_ylabel("Event Count")
         return fig
@@ -647,7 +648,10 @@ class Catalog(object):
             ):
                 for i in range(len(self.longitude)):
                     row = self.catalog.iloc[i]
-                    longitude_ellipse, latitude_ellipse = plotting_utils.uncertainty_ellipse(
+                    (
+                        longitude_ellipse,
+                        latitude_ellipse,
+                    ) = plotting_utils.uncertainty_ellipse(
                         row.hmax_unc,
                         row.hmin_unc,
                         row.az_hmax_unc,
@@ -655,7 +659,7 @@ class Catalog(object):
                         row.latitude,
                     )
                     color = scalar_map.to_rgba(self.depth[i])
-                    if color[:3] == (1., 1., 1.):
+                    if color[:3] == (1.0, 1.0, 1.0):
                         # white!
                         color = "dimgrey"
                     ax.plot(
@@ -683,7 +687,9 @@ class Catalog(object):
         ax.legend(loc="lower right")
         if depth_colorbar:
             ax_divider = make_axes_locatable(ax)
-            cax = ax_divider.append_axes("right", size="2%", pad=0.08, axes_class=plt.Axes)
+            cax = ax_divider.append_axes(
+                "right", size="2%", pad=0.08, axes_class=plt.Axes
+            )
             plt.colorbar(scalar_map, cax, orientation="vertical", label="Depth (km)")
         return ax.get_figure()
 
@@ -835,8 +841,7 @@ class Data(object):
         priority="HH",
         verbose=True,
     ):
-        """Arguments go to `BPMF.utils.get_np_array`.
-        """
+        """Arguments go to `BPMF.utils.get_np_array`."""
         if not hasattr(self, "traces"):
             print("You should call read_waveforms first.")
             return None
@@ -997,7 +1002,7 @@ class Event(object):
             Event latitude. Default is None.
         longitude : float, optional
             Event longitude. Default is None.
-        depth : float, optional 
+        depth : float, optional
             Event depth. Default is None.
         sampling_rate : float, optionak
             Sampling rate (Hz) of the waveforms. It should be different from
@@ -1289,14 +1294,12 @@ class Event(object):
             )
             return
 
-
     @property
     def sr(self):
         return self.sampling_rate
 
     def get_np_array(self, stations, components=None, priority="HH", verbose=True):
-        """Arguments are passed to `BPMF.utils.get_np_array`.
-        """
+        """Arguments are passed to `BPMF.utils.get_np_array`."""
         if not hasattr(self, "traces"):
             print("You should call read_waveforms first.")
             return None
@@ -1335,10 +1338,9 @@ class Event(object):
         """
         waveforms = self.get_np_array(stations, components=components)
         peak_amplitudes = np.max(
-                np.abs(waveforms - np.mean(waveforms, axis=-1, keepdims=True)), axis=-1
-                )
+            np.abs(waveforms - np.mean(waveforms, axis=-1, keepdims=True)), axis=-1
+        )
         return peak_amplitudes
-
 
     def hor_ver_uncertainties(self, mode="intersection"):
         """
@@ -1427,7 +1429,7 @@ class Event(object):
         self._hmin_unc = hmin_unc
         self._vmax_unc = np.max(vertical_unc)
         self._pl_vmax_unc = np.rad2deg(np.arccos(v[2, vertical_unc.argmax()]))
-        self._pl_vmax_unc = min(self._pl_vmax_unc, 180. - self._pl_vmax_unc)
+        self._pl_vmax_unc = min(self._pl_vmax_unc, 180.0 - self._pl_vmax_unc)
         self._az_hmax_unc = az_hmax
         self._az_hmin_unc = az_hmin
 
@@ -1563,6 +1565,7 @@ class Event(object):
 
         if ml_model is None:
             import seisbench.models as sbm
+
             ml_model = sbm.PhaseNet.from_pretrained(ml_model_name)
             ml_model.eval()
 
@@ -1588,49 +1591,40 @@ class Event(object):
             sampling_rate0 = float(self.sampling_rate)
             self.sampling_rate = self.sr * upsampling / downsampling
         data_arr_n = utils.normalize_batch(
-                data_arr, 
-                normalization_window_sample=kwargs.get(
-                    "normalization_window_sample", data_arr.shape[-1]
-                    )
-                )
+            data_arr,
+            normalization_window_sample=kwargs.get(
+                "normalization_window_sample", data_arr.shape[-1]
+            ),
+        )
         closest_pow2 = int(np.log2(data_arr_n.shape[-1])) + 1
         diff = 2**closest_pow2 - data_arr_n.shape[-1]
-        left = diff//2
-        right = diff//2 + diff%2
-        data_arr_n = np.pad(
-                data_arr_n,
-                ((0, 0), (0, 0), (left, right)),
-                mode="reflect"
-                )
+        left = diff // 2
+        right = diff // 2 + diff % 2
+        data_arr_n = np.pad(data_arr_n, ((0, 0), (0, 0), (left, right)), mode="reflect")
         with no_grad():
-            ml_probas = ml_model(
-                    from_numpy(data_arr_n).float()
-                    )
+            ml_probas = ml_model(from_numpy(data_arr_n).float())
             ml_probas = ml_probas.detach().numpy()
         if keep_probability_time_series:
             self.probability_time_series = pd.DataFrame(
-                    index=self.stations,
-                    columns=["P", "S"]
-                    )
-            times = (
-                    np.arange(data_arr_n.shape[-1] - left - right).astype("float64")
-                    /
-                    float(self.sampling_rate)
-                    )
-            if times[1] > 1.e-3:
+                index=self.stations, columns=["P", "S"]
+            )
+            times = np.arange(data_arr_n.shape[-1] - left - right).astype(
+                "float64"
+            ) / float(self.sampling_rate)
+            if times[1] > 1.0e-3:
                 times = (1000 * times).astype("timedelta64[ms]")
             else:
                 times = (1e9 * times).astype("timedelta64[ns]")
             self.probability_times = (
-                    np.datetime64(self.traces[0].stats.starttime) + times
-                    )
+                np.datetime64(self.traces[0].stats.starttime) + times
+            )
             for s, sta in enumerate(self.stations):
-                self.probability_time_series.loc[
-                        sta, "P"
-                        ] = ml_probas[s, ml_p_index, left:-right]
-                self.probability_time_series.loc[
-                        sta, "S"
-                        ] = ml_probas[s, ml_s_index, left:-right]
+                self.probability_time_series.loc[sta, "P"] = ml_probas[
+                    s, ml_p_index, left:-right
+                ]
+                self.probability_time_series.loc[sta, "S"] = ml_probas[
+                    s, ml_s_index, left:-right
+                ]
         # find picks and store in dictionaries
         picks = {}
         picks["P_picks"] = {}
@@ -1639,11 +1633,13 @@ class Event(object):
         picks["S_proba"] = {}
         for s, sta in enumerate(self.stations):
             picks["P_proba"][sta], picks["P_picks"][sta] = utils.trigger_picks(
-                    ml_probas[s, ml_p_index, left:-right], threshold_P, 
-                    )
+                ml_probas[s, ml_p_index, left:-right],
+                threshold_P,
+            )
             picks["S_proba"][sta], picks["S_picks"][sta] = utils.trigger_picks(
-                    ml_probas[s, ml_s_index, left:-right], threshold_S, 
-                    )
+                ml_probas[s, ml_s_index, left:-right],
+                threshold_S,
+            )
         if use_apriori_picks and hasattr(self, "arrival_times"):
             columns = []
             if "P" in self.phases:
@@ -1651,7 +1647,7 @@ class Event(object):
             if "S" in self.phases:
                 columns.append("S")
             prior_knowledge = pd.DataFrame(columns=columns)
-            #for sta in self.stations:
+            # for sta in self.stations:
             for sta in self.arrival_times.index:
                 for ph in prior_knowledge.columns:
                     prior_knowledge.loc[sta, ph] = utils.sec_to_samp(
@@ -1764,6 +1760,7 @@ class Event(object):
         """
         from obspy import Stream
         from functools import partial
+
         if n_threads != 1:
             from concurrent.futures import ThreadPoolExecutor
 
@@ -1789,27 +1786,26 @@ class Event(object):
                     pick = self.origin_time - offset_ot
                 for cp_alias in component_aliases[comp]:
                     reading_task_list.append(
-                            partial(
-                                data_reader,
-                                where=self.where,
-                                station=sta,
-                                channel=cp_alias,
-                                starttime=pick,
-                                endtime=pick + duration,
-                                **reader_kwargs,
-                                )
-                            )
+                        partial(
+                            data_reader,
+                            where=self.where,
+                            station=sta,
+                            channel=cp_alias,
+                            starttime=pick,
+                            endtime=pick + duration,
+                            **reader_kwargs,
+                        )
+                    )
         if n_threads != 1:
             if n_threads in [0, None, "all"]:
                 # n_threads = None means use all CPUs
                 n_threads = None
             with ThreadPoolExecutor(max_workers=n_threads) as executor:
                 traces_ = list(
-                        executor.map(
-                            lambda i: reading_task_list[i](),
-                            range(len(reading_task_list))
-                            )
-                        )
+                    executor.map(
+                        lambda i: reading_task_list[i](), range(len(reading_task_list))
+                    )
+                )
             for tr in traces_:
                 self.traces += tr
         else:
@@ -1870,7 +1866,7 @@ class Event(object):
         component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
         waveform_features=None,
         uncertainty_method="spatial",
-        restricted_domain_side_km=100.,
+        restricted_domain_side_km=100.0,
         device="cpu",
         **kwargs,
     ):
@@ -1949,8 +1945,8 @@ class Event(object):
         elif uncertainty_method == "temporal":
             reduce = "max"
         beamformer.backproject(
-                waveform_features, device=device, reduce=reduce, out_of_bounds=out_of_bounds
-                )
+            waveform_features, device=device, reduce=reduce, out_of_bounds=out_of_bounds
+        )
         # find where the maximum focusing occurred
         if uncertainty_method == "spatial":
             src_idx, time_idx = np.unravel_index(
@@ -1970,10 +1966,10 @@ class Event(object):
         if uncertainty_method == "spatial":
             # 1) define a restricted domain
             domain = beamformer._rectangular_domain(
-                    self.longitude,
-                    self.latitude,
-                    side_km=restricted_domain_side_km,
-                    )
+                self.longitude,
+                self.latitude,
+                side_km=restricted_domain_side_km,
+            )
             # 2) compute likelihood
             likelihood = beamformer._likelihood(beamformer.beam[:, time_idx])
             likelihood_domain = domain
@@ -1982,29 +1978,29 @@ class Event(object):
             effective_kT = kwargs.get("effective_kT", 0.33)
             gibbs_cutoff = kwargs.get("gibbs_cutoff", 0.25)
             gibbs_weight = np.exp(
-                    -(beamformer.maxbeam.max() - beamformer.maxbeam) / effective_kT
-                    )
+                -(beamformer.maxbeam.max() - beamformer.maxbeam) / effective_kT
+            )
             domain = beamformer.maxbeam_sources[gibbs_weight > gibbs_cutoff]
             likelihood = gibbs_weight
             likelihood_domain = gibbs_weight > gibbs_cutoff
         beamformer.likelihood = likelihood
         # 3) compute uncertainty
         hunc, vunc = beamformer._compute_location_uncertainty(
-                self.longitude,
-                self.latitude,
-                self.depth,
-                likelihood[likelihood_domain],
-                domain,
-                )
+            self.longitude,
+            self.latitude,
+            self.depth,
+            likelihood[likelihood_domain],
+            domain,
+        )
         # 4) set attributes
         self._hmax_unc = hunc
         self._hmin_unc = hunc
-        self._az_hmax_unc = 0.
-        self._az_hmin_unc = 0.
+        self._az_hmax_unc = 0.0
+        self._az_hmin_unc = 0.0
         self._vmax_unc = vunc
         self.set_aux_data(
-                {"hmax_unc": hunc, "hmin_unc": hunc, "az_hmax_unc": 0., "vmax_unc": vunc}
-                )
+            {"hmax_unc": hunc, "hmin_unc": hunc, "az_hmax_unc": 0.0, "vmax_unc": vunc}
+        )
         # fill arrival time attribute
         self.arrival_times = pd.DataFrame(
             index=beamformer.network.stations,
@@ -2026,13 +2022,13 @@ class Event(object):
                     self.origin_time + self.arrival_times.loc[sta, f"{ph}_tt_sec"]
                 )
         for ph in beamformer.phases:
-            self.arrival_times[f"{ph}_tt_sec"] = (
-                    self.arrival_times[f"{ph}_tt_sec"].astype("float32")
-                    )
+            self.arrival_times[f"{ph}_tt_sec"] = self.arrival_times[
+                f"{ph}_tt_sec"
+            ].astype("float32")
 
     def relocate_NLLoc(
-            self, stations=None, method="EDT", verbose=0, cleanup_out_dir=True, **kwargs
-            ):
+        self, stations=None, method="EDT", verbose=0, cleanup_out_dir=True, **kwargs
+    ):
         """
         Relocate the event using NonLinLoc (NLLoc) based on the provided picks.
 
@@ -2201,7 +2197,7 @@ class Event(object):
                 # use a minimum value for predicted_tt of a few samples
                 # to avoid issues arising when using self.set_arrival_times_to_moveouts
                 # because, by definition of a moveout, the min moveout is 0
-                predicted_tt = max(predicted_tt, 5/self.sampling_rate)
+                predicted_tt = max(predicted_tt, 5 / self.sampling_rate)
                 diff_percent = (
                     100.0 * abs((pick - predicted).total_seconds()) / predicted_tt
                 )
@@ -2381,9 +2377,9 @@ class Event(object):
                 self.arrival_times.loc[sta, field1] = (
                     self.origin_time + self.moveouts.loc[sta, f"moveouts_{ph}"]
                 )
-                self.arrival_times.loc[sta, field2] = (
-                        self.moveouts.loc[sta, f"moveouts_{ph}"]
-                        )
+                self.arrival_times.loc[sta, field2] = self.moveouts.loc[
+                    sta, f"moveouts_{ph}"
+                ]
 
     def set_moveouts_to_empirical_times(self):
         """Set moveouts equal to picks, if available."""
@@ -2451,7 +2447,7 @@ class Event(object):
             network.longitude.values,
             network.latitude.values,
             network.depth.values,
-            return_epicentral_distances=True
+            return_epicentral_distances=True,
         )
         self._source_receiver_dist = pd.Series(
             index=network.stations,
@@ -2464,14 +2460,14 @@ class Event(object):
             name="source-receiver epicentral distance (km)",
         )
         if not hasattr(self, "network_stations"):
-            #self.network_stations = self.stations.copy() # why this line?
+            # self.network_stations = self.stations.copy() # why this line?
             self.network_stations = network.stations.values.astype("U")
         self._source_receiver_dist = self.source_receiver_dist.loc[
             self.network_stations
         ]
-        self._source_receiver_epicentral_dist = self.source_receiver_epicentral_dist.loc[
-            self.network_stations
-        ]
+        self._source_receiver_epicentral_dist = (
+            self.source_receiver_epicentral_dist.loc[self.network_stations]
+        )
 
     def trim_waveforms(self, starttime=None, endtime=None):
         """
@@ -2521,9 +2517,10 @@ class Event(object):
             for ph in self.phases:
                 if pd.isnull(self.picks.loc[station, f"{ph.upper()}_abs_picks"]):
                     continue
-                self.picks.loc[station, f"{ph.upper()}_picks_sec"] = np.float32(udt(
-                    self.picks.loc[station, f"{ph.upper()}_abs_picks"]
-                ) - udt(self.origin_time))
+                self.picks.loc[station, f"{ph.upper()}_picks_sec"] = np.float32(
+                    udt(self.picks.loc[station, f"{ph.upper()}_abs_picks"])
+                    - udt(self.origin_time)
+                )
 
     def update_travel_times(self):
         """
@@ -2591,9 +2588,7 @@ class Event(object):
                     elif key in fdb["aux_data"] and overwrite:
                         # overwrite it
                         del fdb["aux_data"]
-                    fdb["aux_data"].create_dataset(
-                            key, data=self.aux_data[key]
-                            )
+                    fdb["aux_data"].create_dataset(key, data=self.aux_data[key])
         except Exception as e:
             os.remove(lock_file)
             raise (e)
@@ -2608,8 +2603,7 @@ class Event(object):
         gid=None,
         hdf5_file=None,
     ):
-        """See `Event.write`.
-        """
+        """See `Event.write`."""
         output_where = os.path.join(db_path, db_filename)
         attributes = [
             "origin_time",
@@ -2636,9 +2630,7 @@ class Event(object):
         if gid is not None:
             if gid in hdf5_file:
                 # overwrite existing detection with same id
-                print(
-                    f"Found existing event {gid} in {output_where}. Overwrite it."
-                )
+                print(f"Found existing event {gid} in {output_where}. Overwrite it.")
                 del hdf5_file[gid]
             hdf5_file.create_group(gid)
             f = hdf5_file[gid]
@@ -2755,17 +2747,15 @@ class Event(object):
           actual writing operation. **BUT** the queueing is still not bullet-proof.
         """
         from functools import partial
-        func = partial(
-                self._write,
-                db_path="",
-                save_waveforms=save_waveforms,
-                gid=gid,
-                hdf5_file=hdf5_file
-                )
-        utils.read_write_waiting_list(
-                func, os.path.join(db_path, db_filename)
-                )
 
+        func = partial(
+            self._write,
+            db_path="",
+            save_waveforms=save_waveforms,
+            gid=gid,
+            hdf5_file=hdf5_file,
+        )
+        utils.read_write_waiting_list(func, os.path.join(db_path, db_filename))
 
     # -----------------------------------------------------------
     #            plotting method(s)
@@ -2850,42 +2840,55 @@ class Event(object):
                 # channel-specific num_samples
                 num_samples = min(len(time), len(tr.data))
                 axes[s, c].plot(
-                    time[: num_samples], tr.data[: num_samples] * gain, color="k"
+                    time[:num_samples], tr.data[:num_samples] * gain, color="k"
                 )
                 for ph in ["P", "S"]:
                     # plot the P-/S-wave ML probabilities
                     if plot_probabilities:
                         axb = axes[s, c].twinx()
                         ylim = axes[s, c].get_ylim()
-                        axb.set_ylim(-1.05 * abs(ylim[0])/abs(ylim[1]), 1.05)
-                    if plot_probabilities and hasattr(self, "probability_time_series") and (
-                            sta in self.probability_time_series[ph].dropna().index
-                            ):
-                        selection = (
-                                (self.probability_times >= time[0])
-                                &
-                                (self.probability_times <= time[-1])
-                                )
-                        axb.plot(
-                                self.probability_times[selection],
-                                self.probability_time_series.loc[sta, ph][selection],
-                                color=pick_colors[ph],
-                                lw=0.75
-                                )
-                    # plot the picks
-                    if plot_picks and hasattr(self, "picks") and (
-                        sta in self.picks[f"{ph}_abs_picks"].dropna().index
+                        axb.set_ylim(-1.05 * abs(ylim[0]) / abs(ylim[1]), 1.05)
+                    if (
+                        plot_probabilities
+                        and hasattr(self, "probability_time_series")
+                        and (sta in self.probability_time_series[ph].dropna().index)
                     ):
-                        for ph_pick in np.atleast_1d(self.picks.loc[sta, f"{ph}_abs_picks"]):
+                        selection = (self.probability_times >= time[0]) & (
+                            self.probability_times <= time[-1]
+                        )
+                        axb.plot(
+                            self.probability_times[selection],
+                            self.probability_time_series.loc[sta, ph][selection],
+                            color=pick_colors[ph],
+                            lw=0.75,
+                        )
+                    # plot the picks
+                    if (
+                        plot_picks
+                        and hasattr(self, "picks")
+                        and (sta in self.picks[f"{ph}_abs_picks"].dropna().index)
+                    ):
+                        for ph_pick in np.atleast_1d(
+                            self.picks.loc[sta, f"{ph}_abs_picks"]
+                        ):
                             axes[s, c].axvline(
-                                    np.datetime64(ph_pick), color=pick_colors[ph], lw=1.00, ls="--"
-                                    )
+                                np.datetime64(ph_pick),
+                                color=pick_colors[ph],
+                                lw=1.00,
+                                ls="--",
+                            )
                     # plot the theoretical arrival times
-                    if plot_predicted_arrivals and hasattr(self, "arrival_times") and (sta in self.arrival_times.index):
+                    if (
+                        plot_predicted_arrivals
+                        and hasattr(self, "arrival_times")
+                        and (sta in self.arrival_times.index)
+                    ):
                         ph_pick = np.datetime64(
                             self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"]
                         )
-                        axes[s, c].axvline(ph_pick, color=predicted_arrival_colors[ph], lw=1.25)
+                        axes[s, c].axvline(
+                            ph_pick, color=predicted_arrival_colors[ph], lw=1.25
+                        )
                 axes[s, c].text(
                     0.05, 0.05, f"{sta}.{cp_alias}", transform=axes[s, c].transAxes
                 )
@@ -3027,7 +3030,7 @@ class Template(Event):
             "hmax_unc",
             "hmin_unc",
             "vmax_unc",
-            "az_hmax_unc"
+            "az_hmax_unc",
         ]
         select = lambda str: str.startswith("phase_on_comp")
         aux_data_to_keep += list(filter(select, event.aux_data.keys()))
@@ -3334,6 +3337,7 @@ class Template(Event):
         fill_value=np.nan,
         return_events=False,
         check_summary_file=True,
+        compute_return_times=True,
     ):
         """
         Build a Catalog instance from detection data.
@@ -3368,6 +3372,10 @@ class Template(Event):
             If True, it checks if the summary HDF5 file already exists and reads from
             it using the standard naming convention. If False, it builds the catalog
             from the detection output. Defaults to True.
+        compute_return_times : bool, optional
+            If True, it computes inter-event times. Because events detected with the
+            same template are co-located, these inter-event times can be called
+            return times.
 
         Notes
         -----
@@ -3447,6 +3455,17 @@ class Template(Event):
                 **{key: catalog[key] for key in extra_attributes},
                 event_ids=[f"{self.tid}.{i:d}" for i in range(len(catalog["depth"]))],
             )
+        if compute_return_times:
+            timestamps_sec = (
+                self.catalog.catalog["origin_time"]
+                .values.astype("datetime64[ms]")
+                .astype("float64")
+                / 1000.0
+            )
+            return_times_sec = np.hstack(
+                (np.nan, timestamps_sec[1:] - timestamps_sec[:-1])
+            )
+            self.catalog.catalog["return_time"] = return_times_sec
         if return_events:
             return events
 
@@ -3562,7 +3581,7 @@ class Template(Event):
             stations = event.stations
         else:
             stations = kwargs.get("stations", None)
-        #stations = event.stations
+        # stations = event.stations
         axes = fig.get_axes()
         cc, n_channels = 0.0, 0
         for s, sta in enumerate(stations):
@@ -3654,9 +3673,11 @@ class Template(Event):
         if not hasattr(self, "catalog"):
             print("Call `read_catalog` first.")
             return
-        rt = (
-            self.catalog.origin_time[1:] - self.catalog.origin_time[:-1]
-        ).astype("timedelta64[ns]").astype("float64") / 1.0e9  # in sec
+        rt = (self.catalog.origin_time[1:] - self.catalog.origin_time[:-1]).astype(
+            "timedelta64[ns]"
+        ).astype(
+            "float64"
+        ) / 1.0e9  # in sec
         if unique and "unique_event" in self.catalog.catalog:
             unique_event = self.catalog.catalog["unique_event"].values
             time = self.catalog.origin_time[1:][unique_event[1:]]
@@ -4016,7 +4037,7 @@ class TemplateGroup(Family):
         gids : list of str, optional
             If provided, this should be a list of group IDs where the
             template data is stored in their HDF5 files.
-        
+
         Returns
         -------
         template_group : TemplateGroup instance
@@ -4282,7 +4303,7 @@ class TemplateGroup(Family):
         compute_from_scratch=False,
         device="cpu",
         progress=False,
-        output_filename="intertp_cc.h5"
+        output_filename="intertp_cc.h5",
     ):
         """
         Compute the pairwise template cross-correlations (CCs).
@@ -4350,7 +4371,7 @@ class TemplateGroup(Family):
             compute_from_scratch = True
         if compute_from_scratch:
             # compute from scratch
-            #self.n_closest_stations(n_stations)
+            # self.n_closest_stations(n_stations)
             print("Computing the similarity matrix...")
             # format arrays for FMF
             data_arr = self.waveforms_arr.copy()
@@ -4369,16 +4390,19 @@ class TemplateGroup(Family):
                 # apply similar approach than Event.n_closest_stations
                 station_pool = template.network_stations[template.availability]
                 closest_stations = (
-                        template.source_receiver_dist\
-                                .loc[station_pool].sort_values().index[:n_stations]
-                        )
+                    template.source_receiver_dist.loc[station_pool]
+                    .sort_values()
+                    .index[:n_stations]
+                )
                 # make sure we return a n_stations-vector
                 if len(closest_stations) < n_stations:
                     missing = n_stations - len(closest_stations)
                     closest_stations = np.hstack(
                         (
                             closest_stations,
-                            template.source_receiver_dist.drop(closest_stations, axis="rows")
+                            template.source_receiver_dist.drop(
+                                closest_stations, axis="rows"
+                            )
                             .sort_values()
                             .index[:missing],
                         )
@@ -4386,8 +4410,8 @@ class TemplateGroup(Family):
                 for s, sta in enumerate(template.network_stations):
                     if sta in closest_stations:
                         weights[:, s, :] = np.int32(
-                                template.availability_per_cha.loc[sta].values
-                                )
+                            template.availability_per_cha.loc[sta].values
+                        )
                 weights /= np.sum(weights, axis=(1, 2), keepdims=True)
                 above_thrs = self.ellipsoid_dist[self.tids[t]] > distance_threshold
                 weights[above_thrs, ...] = 0.0
@@ -4484,6 +4508,7 @@ class TemplateGroup(Family):
         disable = np.bitwise_not(progress)
         if n_threads != 1:
             from concurrent.futures import ThreadPoolExecutor
+
             # cannot use tqdm with parallel execution
             disable = True
             if n_threads in [0, None, "all"]:
@@ -4491,11 +4516,11 @@ class TemplateGroup(Family):
                 n_threads = None
             with ThreadPoolExecutor(max_workers=n_threads) as executor:
                 executor.map(
-                        lambda tp: tp.read_waveforms(
-                            stations=self.stations, components=self.components
-                            ),
-                        self.templates
-                        )
+                    lambda tp: tp.read_waveforms(
+                        stations=self.stations, components=self.components
+                    ),
+                    self.templates,
+                )
         else:
             for tp in tqdm(self.templates, desc="Reading waveforms", disable=disable):
                 tp.read_waveforms(stations=self.stations, components=self.components)
@@ -4776,7 +4801,7 @@ class TemplateGroup(Family):
                     np.where(
                         (
                             (ellips_dist < distance_criterion)
-                            #| (speed_diff < speed_criterion)
+                            # | (speed_diff < speed_criterion)
                         )
                         & (similarities >= similarity_criterion)
                     )[0]
@@ -4820,7 +4845,7 @@ class TemplateGroup(Family):
 
         Returns
         ---------
-        fig : matplotlib.pyplot.Figure 
+        fig : matplotlib.pyplot.Figure
             The figure showing the detected event.
         """
         tid, evidx = self.catalog.catalog.index[idx].split(".")
@@ -4840,7 +4865,7 @@ class TemplateGroup(Family):
 
         Parameters
         -----------
-        figsize : tuple of floats, optional 
+        figsize : tuple of floats, optional
             Size in inches of the figure (width, height).
             Defaults to (15, 7).
         progress : boolean, optional
@@ -5083,6 +5108,7 @@ class Stack(Event):
 
         if ml_model is None:
             import seisbench.models as sbm
+
             ml_model = sbm.PhaseNet.from_pretrained(ml_model_name)
             ml_model.eval()
 
@@ -5113,21 +5139,17 @@ class Stack(Event):
             num_events, num_stations = data_arr.shape[:2]
             num_traces = num_events * num_stations
             data_arr_n = utils.normalize_batch(
-                    data_arr.reshape(num_traces, data_arr.shape[2], data_arr.shape[3])
-                    )
+                data_arr.reshape(num_traces, data_arr.shape[2], data_arr.shape[3])
+            )
             closest_pow2 = int(np.log2(data_arr_n.shape[-1])) + 1
             diff = 2**closest_pow2 - data_arr_n.shape[-1]
-            left = diff//2
-            right = diff//2 + diff%2
+            left = diff // 2
+            right = diff // 2 + diff % 2
             data_arr_n = np.pad(
-                    data_arr_n,
-                    ((0, 0), (0, 0), (left, right)),
-                    mode="reflect"
-                    )
+                data_arr_n, ((0, 0), (0, 0), (left, right)), mode="reflect"
+            )
             with no_grad():
-                ml_probas = ml_model(
-                        from_numpy(data_arr_n).float()
-                        )
+                ml_probas = ml_model(from_numpy(data_arr_n).float())
                 ml_probas = ml_probas.detach().numpy()
             # find picks and sotre in dictionaries
             picks = {}
@@ -5141,27 +5163,21 @@ class Stack(Event):
                 for n in range(num_events):
                     tr_idx = s * num_events + n
                     P_proba, P_pick = utils.trigger_picks(
-                            ml_probas[tr_idx, ml_p_index, left:-right], threshold_P, 
-                            )
+                        ml_probas[tr_idx, ml_p_index, left:-right],
+                        threshold_P,
+                    )
                     picks["P_proba"][sta].append(P_proba)
                     picks["P_picks"][sta].append(P_pick)
                     S_proba, S_pick = utils.trigger_picks(
-                            ml_probas[tr_idx, ml_s_index, left:-right], threshold_S, 
-                            )
+                        ml_probas[tr_idx, ml_s_index, left:-right],
+                        threshold_S,
+                    )
                     picks["S_proba"][sta].append(S_proba)
                     picks["S_picks"][sta].append(S_pick)
-                picks["P_proba"][sta] = np.atleast_1d(
-                        np.hstack(picks["P_proba"][sta])
-                        )
-                picks["S_proba"][sta] = np.atleast_1d(
-                        np.hstack(picks["S_proba"][sta])
-                        )
-                picks["P_picks"][sta] = np.atleast_1d(
-                        np.hstack(picks["P_picks"][sta])
-                        )
-                picks["S_picks"][sta] = np.atleast_1d(
-                        np.hstack(picks["S_picks"][sta])
-                        )
+                picks["P_proba"][sta] = np.atleast_1d(np.hstack(picks["P_proba"][sta]))
+                picks["S_proba"][sta] = np.atleast_1d(np.hstack(picks["S_proba"][sta]))
+                picks["P_picks"][sta] = np.atleast_1d(np.hstack(picks["P_picks"][sta]))
+                picks["S_picks"][sta] = np.atleast_1d(np.hstack(picks["S_picks"][sta]))
 
             # format picks in pandas DataFrame
             pandas_picks = {"stations": self.stations}
@@ -5171,23 +5187,27 @@ class Stack(Event):
                 abs_picks = np.zeros(len(self.stations), dtype=object)
                 for s, sta in enumerate(self.stations):
                     if sta in picks[f"{ph}_picks"].keys():
-                        rel_picks_sec[s] = np.float32(picks[f"{ph}_picks"][sta]) / self.sr
+                        rel_picks_sec[s] = (
+                            np.float32(picks[f"{ph}_picks"][sta]) / self.sr
+                        )
                         proba_picks[s] = np.float32(picks[f"{ph}_proba"][sta])
-                        abs_picks[s] = np.asarray([
-                            np.datetime64(
-                                self.traces.select(station=sta)[0].stats.starttime
-                                +
-                                rel_pick,
-                                "ms"
-                                ) for rel_pick in rel_picks_sec[s]
-                        ])
+                        abs_picks[s] = np.asarray(
+                            [
+                                np.datetime64(
+                                    self.traces.select(station=sta)[0].stats.starttime
+                                    + rel_pick,
+                                    "ms",
+                                )
+                                for rel_pick in rel_picks_sec[s]
+                            ]
+                        )
                 pandas_picks[f"{ph}_picks_sec"] = rel_picks_sec
                 pandas_picks[f"{ph}_probas"] = proba_picks
                 pandas_picks[f"{ph}_abs_picks"] = abs_picks
 
             self.picks = pd.DataFrame(pandas_picks)
             self.picks.set_index("stations", inplace=True)
-            #self.picks.replace(0.0, np.nan, inplace=True)
+            # self.picks.replace(0.0, np.nan, inplace=True)
             if upsampling > 1 or downsampling > 1:
                 # reset the sampling rate to initial value
                 self.sampling_rate = sampling_rate0
