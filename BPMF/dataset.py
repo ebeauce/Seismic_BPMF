@@ -921,7 +921,8 @@ class Data(object):
                         tr = tr[0]
                     else:
                         continue
-                    if np.sum(tr.data != 0.0):
+                    # compare 1 + abs(sum) to closest representable number 
+                    if np.sum((1. + abs(tr.data)) > (1. + np.finfo(tr.data.dtype).eps)):
                         availability[s] = True
                         break
             self.availability_per_cha[cp] = availability
@@ -2320,7 +2321,7 @@ class Event(object):
                         tr = tr[0]
                     else:
                         continue
-                    if np.sum(tr.data != 0.0):
+                    if np.sum((1. + abs(tr.data)) > (1. + np.finfo(tr.data.dtype).eps)):
                         availability[s] = True
                         break
             self._availability_per_cha[cp] = availability
