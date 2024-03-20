@@ -410,6 +410,7 @@ def write_NLLoc_control(
     angle_grid="ANGLES_NO",
     grid="MISFIT",
     locsearch="OCT",
+    phases=["P", "S"],
     n_depth_points=None,
     **kwargs,
 ):
@@ -462,6 +463,9 @@ def write_NLLoc_control(
                and grid search that allows the efficient search for the global
                minimum. See 'http://alomax.free.fr/nlloc/octtree/OctTree.html'
                for more details. This is the default option.
+    phases : list of str, optional
+        List of phases used by NonLinLoc. This list includes either "P", "S"
+        or both. Defaults to ["P", "S"].
     n_depth_points : int or None, optional
         If not None, only the first `n_depth_points` points are kept along 
         the depth axis in the grid.
@@ -582,7 +586,6 @@ def write_NLLoc_control(
         iRejectDuplicateArrivals,
     ]
     fc.write("LOCMETH " + " ".join([str(p) for p in params]) + "\n")
-    # fc.write(f"LOCMETH {method} 5000 6 -1 -1 -1 6 -1 1\n")
     # --------------------------------------------------------------
     #              LOCGAU parameters
     SigmaTime = kwargs.get("SigmaTime", 0.2)
@@ -595,9 +598,8 @@ def write_NLLoc_control(
     SigmaTmax = kwargs.get("SigmaTmax", 10.0)
     fc.write(f"LOCGAU2 {SigmaTfraction} {SigmaTmin} {SigmaTmax}\n")
     # --------------------------------------------------------------
-    fc.write("LOCPHASEID  P\n")
-    # --------------------------------------------------------------
-    fc.write("LOCPHASEID  S\n")
+    for ph in phases:
+        fc.write(f"LOCPHASEID  {ph.upper()}\n")
     # --------------------------------------------------------------
     #         LOCQUAL2ERR parameters
     #  define 5 levels of quality
