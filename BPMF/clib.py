@@ -32,12 +32,20 @@ if cpu_loaded:
 
     _libc.find_similar_moveouts.argtypes = [
         C.POINTER(C.c_float),  # moveouts
-        C.c_float,  # average absolute time difference threshold
+        C.POINTER(C.c_float),  # source_longitude
+        C.POINTER(C.c_float),  # source_latitude
+        C.POINTER(C.c_float),  # cell_longitude
+        C.POINTER(C.c_float),  # cell_latitude
+        C.c_float,  # rms time difference threshold
         C.c_size_t,  # number of grid points
         C.c_size_t,  # number of stations
-        C.c_size_t,  # number of nearest neighbors
+        C.c_size_t,  # number of cells in longitude
+        C.c_size_t,  # number of cells in latitude
+        C.c_size_t,  # number of stations for diff
+        C.c_int, # num threads
         C.POINTER(C.c_int),  # output pointer: redundant sources
     ]
+
 
     _libc.select_cc_indexes.argtypes = [
         C.POINTER(C.c_float),  # CCs
@@ -65,7 +73,16 @@ def kurtosis(signal, W):
     return Kurto.reshape(n_stations, n_components, length)
 
 
-def find_similar_sources(moveouts, threshold, n_nearest_neighbors=200):
+def find_similar_sources(
+        moveouts,
+        source_longitude,
+        source_latitude,
+        cell_longitude,
+        cell_latitude,
+        threshold,
+        num_threads=None,
+        num_stations_for_diff=None,
+        ):
     """
     Find sources with similar moveouts so that users can discard
     some of them during the computation of the network response,
@@ -79,11 +96,6 @@ def find_similar_sources(moveouts, threshold, n_nearest_neighbors=200):
     threshold: scalar float
         The station average time difference tolerance to consider
         two sources as being redundant.
-    n_nearest_neighbors: scalar int, default to 200
-        Check redundancy in chunks of `n_nearest_neighbors` contiguous sources
-        before starting the all pair-wise computation. If the moveouts are
-        ordered such that contiguous elements correspond to proximal grid
-        sources, then this can considerably speed up the computation.
 
     Returns
     -------------
@@ -93,20 +105,45 @@ def find_similar_sources(moveouts, threshold, n_nearest_neighbors=200):
     """
     n_sources = moveouts.shape[0]
     n_stations = moveouts.shape[1]
+    n_cells_longitude = len(cell_longitude) - 1
+    n_cells_latitude = len(cell_latitude) - 1
+
+    if num_stations_for_diff is None:
+        num_stations_for_diff = n_stations
+
     if moveouts.dtype in (np.int32, np.int64):
         print("Integer typed moveouts detected. Are you sure these are in" " seconds?")
-    # format moveouts
+
+    if num_threads is None:
+        # set num_threads to -1 so that the C routine
+        # understands to use all CPUs
+        #num_threads = os.cpu_count()
+        num_threads = int(os.environ.get("OMP_NUM_THREADS", os.cpu_count()))
+
+    # format input arrays
     moveouts = np.float32(moveouts.flatten())
+    source_longitude = np.float32(source_longitude)
+    source_latitude = np.float32(source_latitude)
+    cell_longitude = np.float32(cell_longitude)
+    cell_latitude = np.float32(cell_latitude)
+
     # initialize the output pointer
     redundant_sources = np.zeros(n_sources, dtype=np.int32)
-    n_nearest_neighbors = min(n_sources, n_nearest_neighbors)
+
     # call the C function:
     _libc.find_similar_moveouts(
         moveouts.ctypes.data_as(C.POINTER(C.c_float)),
+        source_longitude.ctypes.data_as(C.POINTER(C.c_float)),
+        source_latitude.ctypes.data_as(C.POINTER(C.c_float)),
+        cell_longitude.ctypes.data_as(C.POINTER(C.c_float)),
+        cell_latitude.ctypes.data_as(C.POINTER(C.c_float)),
         np.float32(threshold),
         int(n_sources),
         int(n_stations),
-        int(n_nearest_neighbors),
+        int(n_cells_longitude),
+        int(n_cells_latitude),
+        int(num_stations_for_diff),
+        int(num_threads),
         redundant_sources.ctypes.data_as(C.POINTER(C.c_int)),
     )
     return redundant_sources.astype(bool)
