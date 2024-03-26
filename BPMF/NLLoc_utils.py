@@ -411,6 +411,7 @@ def write_NLLoc_control(
     grid="MISFIT",
     locsearch="OCT",
     phases=["P", "S"],
+    excluded_obs={},
     n_depth_points=None,
     **kwargs,
 ):
@@ -466,6 +467,10 @@ def write_NLLoc_control(
     phases : list of str, optional
         List of phases used by NonLinLoc. This list includes either "P", "S"
         or both. Defaults to ["P", "S"].
+    excluded_obs : dict, optional
+        Excluded observations using NLLoc's LOCEXCLUDE command:
+            `LOCEXCLUDE sta ph`
+        and `excluded_obs[sta] = ph`. Defaults to an empty dictionary.
     n_depth_points : int or None, optional
         If not None, only the first `n_depth_points` points are kept along 
         the depth axis in the grid.
@@ -617,3 +622,6 @@ def write_NLLoc_control(
     cutoffDist = kwargs.get("cutoffDist", 10000000.0)
     useStationsDensity = int(kwargs.setdefault("useStationsDensity", 1))
     fc.write(f"LOCSTAWT {useStationsDensity} {cutoffDist}\n")
+    # --------------------------------------------------------------
+    for sta, ph in excluded_obs.items():
+        fc.write(f"LOCEXCLUDE {sta} {ph}\n")

@@ -921,8 +921,10 @@ class Data(object):
                         tr = tr[0]
                     else:
                         continue
-                    # compare 1 + abs(sum) to closest representable number 
-                    if np.sum((1. + abs(tr.data)) > (1. + np.finfo(tr.data.dtype).eps)):
+                    # compare 1 + abs(sum) to closest representable number
+                    if np.sum(
+                        (1.0 + abs(tr.data)) > (1.0 + np.finfo(tr.data.dtype).eps)
+                    ):
                         availability[s] = True
                         break
             self.availability_per_cha[cp] = availability
@@ -2028,7 +2030,13 @@ class Event(object):
             ].astype("float32")
 
     def relocate_NLLoc(
-        self, stations=None, method="EDT", verbose=0, cleanup_out_dir=True, **kwargs
+        self,
+        stations=None,
+        method="EDT",
+        max_epicentral_dist_km_S=None,
+        verbose=0,
+        cleanup_out_dir=True,
+        **kwargs,
     ):
         """
         Relocate the event using NonLinLoc (NLLoc) based on the provided picks.
@@ -2073,13 +2081,26 @@ class Event(object):
         ctrl_fn = os.path.join(self.id, self.id + ".in")
         out_basename = os.path.join(self.id, self.id + "_out")
         obs_fn = os.path.join(self.id, self.id + ".obs")
+        # exclude S picks on remote stations if requested
+        excluded_obs = {}
+        if (self.source_receiver_epicentral_dist is not None) and (
+            max_epicentral_dist_km_S is not None
+        ):
+            for sta in self.source_receiver_epicentral_dist.index:
+                if (
+                    self.source_receiver_epicentral_dist.loc[sta]
+                    > max_epicentral_dist_km_S
+                ):
+                    excluded_obs[sta] = "S"
         # write obs file
         if os.path.isfile(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn)):
             os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn))
-        NLLoc_utils.write_NLLoc_obs(self.origin_time, self.picks, stations, obs_fn)
+        NLLoc_utils.write_NLLoc_obs(
+            self.origin_time, self.picks, stations, obs_fn,
+        )
         # write control file
         NLLoc_utils.write_NLLoc_control(
-            ctrl_fn, out_basename, obs_fn, method=method, **kwargs
+            ctrl_fn, out_basename, obs_fn, method=method, excluded_obs=excluded_obs, **kwargs
         )
         if verbose == 0:
             # run NLLoc
@@ -2321,7 +2342,9 @@ class Event(object):
                         tr = tr[0]
                     else:
                         continue
-                    if np.sum((1. + abs(tr.data)) > (1. + np.finfo(tr.data.dtype).eps)):
+                    if np.sum(
+                        (1.0 + abs(tr.data)) > (1.0 + np.finfo(tr.data.dtype).eps)
+                    ):
                         availability[s] = True
                         break
             self._availability_per_cha[cp] = availability
