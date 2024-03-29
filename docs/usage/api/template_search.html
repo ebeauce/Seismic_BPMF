@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BPMF.template_search &mdash; BPMF 2.0.0 documentation</title>
@@ -12,9 +12,9 @@
   <![endif]-->
   
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/documentation_options.js?v=51b770b3"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -33,6 +33,7 @@
           
           <a href="../../index.html" class="icon icon-home">
             BPMF
+              <img src="../../_static/bpmf.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -100,50 +101,41 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="module-BPMF.template_search">
-<span id="bpmf-template-search"></span><h1>BPMF.template_search<a class="headerlink" href="#module-BPMF.template_search" title="Permalink to this heading"></a></h1>
+  <section id="module-BPMF.template_search">
+<span id="bpmf-template-search"></span><h1>BPMF.template_search<a class="headerlink" href="#module-BPMF.template_search" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">Beamformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">travel_times</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moveouts_relative_to_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">Beamformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">travel_times</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moveouts_relative_to_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class for backprojecting waveform features with beamforming.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.backproject">
-<span class="sig-name descname"><span class="pre">backproject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waveform_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'max'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_of_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.backproject"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.backproject" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">backproject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waveform_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'max'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_of_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.backproject"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.backproject" title="Link to this definition"></a></dt>
 <dd><p>Backproject the waveform features.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>waveform_features</strong> (<em>(</em><em>n_stations</em><em>, </em><em>n_components</em><em>, </em><em>n_samples</em><em>) </em><em>numpy.ndarray</em>) – Features of the waveform time series used for the
 backprojection onto the grid of theoretical sources.</p></li>
-<li><p><strong>device</strong> (<em>string</em><em>, </em><em>default to 'cpu'</em>) – Either ‘cpu’ or ‘gpu’, depending on the available hardware and
+<li><p><strong>device</strong> (<em>string</em><em>, </em><em>defaults to 'cpu'</em>) – Either ‘cpu’ or ‘gpu’, depending on the available hardware and
 user’s preferences.</p></li>
-<li><p><strong>reduce</strong> (<em>string</em><em>, </em><em>default to 'max'</em>) – Either ‘max’ or ‘none’. If ‘max’, returns the maximum beam at every
+<li><p><strong>reduce</strong> (<em>string</em><em>, </em><em>defaults to 'max'</em>) – Either ‘max’ or ‘none’. If ‘max’, returns the maximum beam at every
 time. If ‘none’, returns the full space-time beam.</p></li>
+<li><p><strong>out_of_bounds</strong> (<em>string</em><em>, </em><em>defaults to 'strict'</em>) – <p>Either ‘strict’ (default) or ‘flexible’.
+- ‘strict’: A beam is computed if and only if the moveouts point to a</p>
+<blockquote>
+<div><p>valid sample (that is, within the bounds of the data stream) for every
+channel used in the beam.</p>
+</div></blockquote>
+<ul>
+<li><p>’flexbile’: A beam is computed as long as the moveouts point to a
+valid sample for at least one channel. This option is particularly
+useful for real time applications where an event might have been
+recorded at the closest stations but not yet at the more distant ones.</p></li>
+</ul>
+</p></li>
+<li><p><strong>num_threads</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>defaults to None</em>) – Number of threads for CPU parallelization. If None (default), uses one thread
+per available (visible) CPU.</p></li>
 </ul>
 </dd>
 </dl>
@@ -151,7 +143,7 @@ time. If ‘none’, returns the full space-time beam.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.find_detections">
-<span class="sig-name descname"><span class="pre">find_detections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detection_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_interevent_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.find_detections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.find_detections" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">find_detections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detection_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_interevent_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.find_detections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.find_detections" title="Link to this definition"></a></dt>
 <dd><p>Analyze the composite network response to find detections.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -176,32 +168,32 @@ each theoretical source.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.moveouts">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">moveouts</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.moveouts" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">moveouts</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.moveouts" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.n_phases">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_phases</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.n_phases" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_phases</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.n_phases" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.n_sources">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_sources</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.n_sources" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_sources</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.n_sources" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.n_stations">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_stations</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.n_stations" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_stations</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.n_stations" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.num_sources">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_sources</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.num_sources" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_sources</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.num_sources" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.plot_detection">
-<span class="sig-name descname"><span class="pre">plot_detection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">20)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'E':</span> <span class="pre">['E',</span> <span class="pre">'2'],</span> <span class="pre">'N':</span> <span class="pre">['N',</span> <span class="pre">'1'],</span> <span class="pre">'Z':</span> <span class="pre">['Z']}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.plot_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.plot_detection" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_detection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">20)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'E':</span> <span class="pre">['E',</span> <span class="pre">'2'],</span> <span class="pre">'N':</span> <span class="pre">['N',</span> <span class="pre">'1'],</span> <span class="pre">'Z':</span> <span class="pre">['Z']}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.plot_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.plot_detection" title="Link to this definition"></a></dt>
 <dd><p>Plot a detection and the maximum beam.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -228,13 +220,13 @@ stations will be plotted.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.plot_likelihood">
-<span class="sig-name descname"><span class="pre">plot_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">likelihood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.plot_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.plot_likelihood" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">likelihood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.plot_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.plot_likelihood" title="Link to this definition"></a></dt>
 <dd><p>Plot likelihood (beam) slices at a given time.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.plot_maxbeam">
-<span class="sig-name descname"><span class="pre">plot_maxbeam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.plot_maxbeam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.plot_maxbeam" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_maxbeam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.plot_maxbeam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.plot_maxbeam" title="Link to this definition"></a></dt>
 <dd><p>Plot the composite network response.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -255,19 +247,19 @@ stations will be plotted.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.remove_baseline">
-<span class="sig-name descname"><span class="pre">remove_baseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attribute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'composite'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.remove_baseline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.remove_baseline" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">remove_baseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attribute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'composite'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.remove_baseline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.remove_baseline" title="Link to this definition"></a></dt>
 <dd><p>Remove baseline from network response</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.return_pd_series">
-<span class="sig-name descname"><span class="pre">return_pd_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'maxbeam'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.return_pd_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.return_pd_series" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">return_pd_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'maxbeam'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.return_pd_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.return_pd_series" title="Link to this definition"></a></dt>
 <dd><p>Return the network response as a Pandas.Series.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.set_data">
-<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_data" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_data" title="Link to this definition"></a></dt>
 <dd><p>Attribute <cite>data</cite> to the class instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -278,7 +270,7 @@ stations will be plotted.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.set_network">
-<span class="sig-name descname"><span class="pre">set_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_network" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_network" title="Link to this definition"></a></dt>
 <dd><p>Attribute <cite>network</cite> to the class instance.</p>
 <p><cite>network</cite> determines which stations are included in the computation
 of the beams. All arrays with a station axis are ordered according to
@@ -294,7 +286,7 @@ a subset of the data stored in <cite>data</cite>.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.set_phases">
-<span class="sig-name descname"><span class="pre">set_phases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phases</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_phases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_phases" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_phases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phases</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_phases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_phases" title="Link to this definition"></a></dt>
 <dd><p>Attach <cite>phases</cite> to the class instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -307,7 +299,7 @@ the travel time table. <cite>phases</cite> determines the order in which
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.set_source_coordinates">
-<span class="sig-name descname"><span class="pre">set_source_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_coords</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_source_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_source_coordinates" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_source_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_coords</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_source_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_source_coordinates" title="Link to this definition"></a></dt>
 <dd><p>Attribute <cite>_source_coordinates</cite> to the class instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -318,7 +310,7 @@ the travel time table. <cite>phases</cite> determines the order in which
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.set_travel_times">
-<span class="sig-name descname"><span class="pre">set_travel_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">travel_times</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_travel_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_travel_times" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_travel_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">travel_times</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_travel_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_travel_times" title="Link to this definition"></a></dt>
 <dd><p>Attaches <cite>travel_times</cite> to the class instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -329,7 +321,7 @@ the travel time table. <cite>phases</cite> determines the order in which
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.set_weights">
-<span class="sig-name descname"><span class="pre">set_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights_phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_weights" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights_phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_weights" title="Link to this definition"></a></dt>
 <dd><p>Set the weights required by <cite>beampower</cite>.</p>
 <dl class="simple">
 <dt>weights_phases: (n_stations, n_channels, n_phases) np.ndarray, optional</dt><dd><p>Weight given to each station and channel for a given phase. For
@@ -344,7 +336,7 @@ source-receiver distance.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.set_weights_sources">
-<span class="sig-name descname"><span class="pre">set_weights_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_max_stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_min_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_weights_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_weights_sources" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_weights_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_max_stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_min_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_weights_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_weights_sources" title="Link to this definition"></a></dt>
 <dd><p>Set network-geometry-based weights of each source-receiver pair.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -356,23 +348,23 @@ the <cite>n_max_stations</cite> stations will be set a weight &gt; 0.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.smooth_maxbeam">
-<span class="sig-name descname"><span class="pre">smooth_maxbeam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.smooth_maxbeam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.smooth_maxbeam" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">smooth_maxbeam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.smooth_maxbeam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.smooth_maxbeam" title="Link to this definition"></a></dt>
 <dd><p>Smooth the network response with a gaussian kernel.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.source_coordinates">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_coordinates</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.source_coordinates" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_coordinates</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.source_coordinates" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.stations">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stations</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.stations" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stations</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.stations" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.weights_station_density">
-<span class="sig-name descname"><span class="pre">weights_station_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoff_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.weights_station_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.weights_station_density" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">weights_station_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoff_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.weights_station_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.weights_station_density" title="Link to this definition"></a></dt>
 <dd><p>Compute station weights to balance station density.</p>
 <p>Areas of high station density produce stronger network responses than
 areas with sparse coverage, and thus might prevent detecting earthquakes
@@ -403,12 +395,12 @@ If None, <cite>cutoff_dist</cite> is set to the median interstation distance.</p
 
 <dl class="py class">
 <dt class="sig sig-object py" id="BPMF.template_search.TravelTimes">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">TravelTimes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tt_folder_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#TravelTimes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.TravelTimes" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">TravelTimes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tt_folder_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#TravelTimes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.TravelTimes" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class for handling travel time tables.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.convert_to_samples">
-<span class="sig-name descname"><span class="pre">convert_to_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_tt_seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#TravelTimes.convert_to_samples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.TravelTimes.convert_to_samples" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">convert_to_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_tt_seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#TravelTimes.convert_to_samples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.TravelTimes.convert_to_samples" title="Link to this definition"></a></dt>
 <dd><p>Creates a new <cite>self.travel_times_samp</cite> attribute.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -423,7 +415,7 @@ necessary to save memory.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.get_travel_times_array">
-<span class="sig-name descname"><span class="pre">get_travel_times_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'seconds'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_to_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#TravelTimes.get_travel_times_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.TravelTimes.get_travel_times_array" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_travel_times_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'seconds'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_to_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#TravelTimes.get_travel_times_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.TravelTimes.get_travel_times_array" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -443,22 +435,22 @@ earliest phase for each source.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.n_sources">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_sources</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.n_sources" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_sources</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.n_sources" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.num_sources">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_sources</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.num_sources" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_sources</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.num_sources" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.phases">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">phases</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.phases" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">phases</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.phases" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_indexes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#TravelTimes.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.TravelTimes.read" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_indexes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#TravelTimes.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.TravelTimes.read" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -476,24 +468,24 @@ stations are read.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.source_coords">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_coords</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.source_coords" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_coords</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.source_coords" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.tts">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tts</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.tts" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tts</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.tts" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.template_search.baseline">
-<span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">baseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#baseline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.baseline" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">baseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#baseline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.baseline" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.template_search.envelope">
-<span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">envelope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#envelope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.envelope" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">envelope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#envelope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.envelope" title="Link to this definition"></a></dt>
 <dd><p>Compute the envelope of trace.</p>
 <p>The envelope is defined as the modulus of the complex
 analytical signal (a signal whose Fourier transform only has
@@ -513,7 +505,7 @@ energy in positive frequencies).</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.template_search.envelope_parallel">
-<span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">envelope_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traces</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#envelope_parallel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.envelope_parallel" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">envelope_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traces</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#envelope_parallel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.envelope_parallel" title="Link to this definition"></a></dt>
 <dd><p>Compute the envelope of traces.</p>
 <p>The envelope is defined as the modulus of the complex
 analytical signal (a signal whose Fourier transform only has
@@ -533,7 +525,7 @@ energy in positive frequencies).</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.template_search.saturated_envelopes">
-<span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">saturated_envelopes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traces</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-11</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_dynamic_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#saturated_envelopes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.saturated_envelopes" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">saturated_envelopes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traces</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-11</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_dynamic_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#saturated_envelopes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.saturated_envelopes" title="Link to this definition"></a></dt>
 <dd><p>Compute the saturated envelopes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -551,7 +543,7 @@ energy signals such as spikes.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.template_search.time_dependent_threshold">
-<span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">time_dependent_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network_response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CNR_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#time_dependent_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.time_dependent_threshold" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">time_dependent_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network_response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CNR_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#time_dependent_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.time_dependent_threshold" title="Link to this definition"></a></dt>
 <dd><p>Compute a time-dependent detection threshold.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -577,7 +569,7 @@ defines the detection threshold.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.template_search.time_dependent_threshold_pd">
-<span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">time_dependent_threshold_pd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network_response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#time_dependent_threshold_pd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.time_dependent_threshold_pd" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">time_dependent_threshold_pd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network_response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#time_dependent_threshold_pd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.time_dependent_threshold_pd" title="Link to this definition"></a></dt>
 <dd><p>Calculate a time dependent detection threshold
 using the rolling function from pandas.</p>
 <dl class="field-list simple">

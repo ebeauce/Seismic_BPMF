@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude &mdash; BPMF 2.0.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/documentation_options.js?v=51b770b3"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -35,6 +36,7 @@
           
           <a href="../../index.html" class="icon icon-home">
             BPMF
+              <img src="../../_static/bpmf.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -68,7 +70,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#Load-the-metadata-of-the-previously-detected-events">Load the metadata of the previously detected events</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Example-with-a-single-event">Example with a single event</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Repeat-the-same-processing-for-every-event">Repeat the same processing for every event</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#To-be-continued…">To be continued…</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#To-be-continued...">To be continued…</a></li>
 </ul>
 </li>
 </ul>
@@ -101,294 +103,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars and line breaks on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-    white-space: pre;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-.jp-RenderedHTMLCommon table,
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-.jp-RenderedHTMLCommon thead,
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-.jp-RenderedHTMLCommon tr,
-.jp-RenderedHTMLCommon th,
-.jp-RenderedHTMLCommon td,
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-.jp-RenderedHTMLCommon th,
-div.rendered_html th {
-  font-weight: bold;
-}
-.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-.jp-RenderedHTMLCommon tbody tr:hover,
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="Earthquake-Magnitudes:-Seismic-Moment,-Moment-Magnitude-and-Local-Magnitude">
-<h1>Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude<a class="headerlink" href="#Earthquake-Magnitudes:-Seismic-Moment,-Moment-Magnitude-and-Local-Magnitude" title="Permalink to this heading"></a></h1>
+  <section id="Earthquake-Magnitudes:-Seismic-Moment,-Moment-Magnitude-and-Local-Magnitude">
+<h1>Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude<a class="headerlink" href="#Earthquake-Magnitudes:-Seismic-Moment,-Moment-Magnitude-and-Local-Magnitude" title="Link to this heading"></a></h1>
 <section id="Introduction">
-<h2>Introduction<a class="headerlink" href="#Introduction" title="Permalink to this heading"></a></h2>
+<h2>Introduction<a class="headerlink" href="#Introduction" title="Link to this heading"></a></h2>
 <p>There exist several magnitude scales that measure the size of an earthquake. The local magnitude <span class="math notranslate nohighlight">\(M_L\)</span>, or Richter’s magnitude, is often used for small events because it is easy to calculate (however, uncertainties are often large!). The moment magnitude <span class="math notranslate nohighlight">\(M_w\)</span> is the only magnitude that relates unambiguously to some physical earthquake parameter, the seismic moment <span class="math notranslate nohighlight">\(M_0\)</span>. Estimating the moment magnitude <span class="math notranslate nohighlight">\(M_w\)</span> requires to observe the low-frequency part of the radiated
 waveform spectrum, which is often challenging for small events for which low frequencies are under the noise level. In this notebook, we will see how to use tools from the <code class="docutils literal notranslate"><span class="pre">BPMF.spectrum</span></code> module to estimate moment and local magnitudes.</p>
 </section>
 <section id="Moment-Magnitude-M_w">
-<h2>Moment Magnitude <span class="math notranslate nohighlight">\(M_w\)</span><a class="headerlink" href="#Moment-Magnitude-M_w" title="Permalink to this heading"></a></h2>
+<h2>Moment Magnitude <span class="math notranslate nohighlight">\(M_w\)</span><a class="headerlink" href="#Moment-Magnitude-M_w" title="Link to this heading"></a></h2>
 <p>For events that were accurately relocated (<span class="math notranslate nohighlight">\(h_{max,unc} &lt; 5\)</span> km) with <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>, we can try to estimate their seismic moment <span class="math notranslate nohighlight">\(M_0\)</span> and moment magnitude <span class="math notranslate nohighlight">\(M_w\)</span> by fitting their network-averaged, path-corrected displacement spectrum with the omega-square model (Brune or Boatwright model).</p>
 <p>We recall that (note that <span class="math notranslate nohighlight">\(\log\)</span> is the base 10 logarithm):</p>
 <div class="math notranslate nohighlight">
@@ -413,7 +136,7 @@ factor. Two special cases of (2) are: - The Brune spectrum (<span class="math no
 distance). More details in Aki and Richards, 2002 and Boatwright, 1978.</p>
 </section>
 <section id="Local-Magnitude-M_L">
-<h2>Local Magnitude <span class="math notranslate nohighlight">\(M_L\)</span><a class="headerlink" href="#Local-Magnitude-M_L" title="Permalink to this heading"></a></h2>
+<h2>Local Magnitude <span class="math notranslate nohighlight">\(M_L\)</span><a class="headerlink" href="#Local-Magnitude-M_L" title="Link to this heading"></a></h2>
 <p>The local magnitude was initially introduced by Richter as the log ratio of peak displacement amplitudes between two earthquakes:</p>
 <div class="math notranslate nohighlight">
 \[M_L = \log \left( \dfrac{A(X)}{A_0(X)} \right),\quad (6)\]</div>
@@ -427,12 +150,12 @@ distance). More details in Aki and Richards, 2002 and Boatwright, 1978.</p>
 <p>where <span class="math notranslate nohighlight">\(r\)</span> is the source-receiver hypocentral distance and <span class="math notranslate nohighlight">\(C\)</span> is a calibration constant. In Equation (8), attenuation is neglected. For small earthquakes and low noise seismograms, <span class="math notranslate nohighlight">\(M_L \propto \log M_0\)</span>.</p>
 </section>
 <section id="References">
-<h2>References<a class="headerlink" href="#References" title="Permalink to this heading"></a></h2>
+<h2>References<a class="headerlink" href="#References" title="Link to this heading"></a></h2>
 <p>Aki, K., &amp; Richards, P. G. (2002). Quantitative seismology.</p>
 <p>Boatwright, J. (1978). Detailed spectral analysis of two small New York State earthquakes. Bulletin of the Seismological Society of America, 68(4), 1117-1131.</p>
 <p>Shearer, Peter M. Introduction to seismology. Cambridge university press, 2019.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
@@ -452,7 +175,7 @@ distance). More details in Aki and Richards, 2002 and Boatwright, 1978.</p>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">INPUT_DB_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;final_catalog.h5&quot;</span>
@@ -461,7 +184,7 @@ distance). More details in Aki and Richards, 2002 and Boatwright, 1978.</p>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">net</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Network</span><span class="p">(</span><span class="n">NETWORK_FILENAME</span><span class="p">)</span>
@@ -471,10 +194,10 @@ distance). More details in Aki and Richards, 2002 and Boatwright, 1978.</p>
 </div>
 </section>
 <section id="Load-the-metadata-of-the-previously-detected-events">
-<h2>Load the metadata of the previously detected events<a class="headerlink" href="#Load-the-metadata-of-the-previously-detected-events" title="Permalink to this heading"></a></h2>
+<h2>Load the metadata of the previously detected events<a class="headerlink" href="#Load-the-metadata-of-the-previously-detected-events" title="Link to this heading"></a></h2>
 <p>This is similar to what we did in 6_relocate.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span> <span class="o">=</span> <span class="p">[]</span>
@@ -507,11 +230,11 @@ distance). More details in Aki and Richards, 2002 and Boatwright, 1978.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Loaded 66 events.
+Loaded 63 events.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ev</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
@@ -524,81 +247,78 @@ Loaded 66 events.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0 2012-07-26T00:58:16.320000Z
-1 2012-07-26T01:15:54.240000Z
-2 2012-07-26T01:15:54.320000Z
-3 2012-07-26T01:16:29.800000Z
-4 2012-07-26T01:16:54.440000Z
-5 2012-07-26T01:18:32.720000Z
-6 2012-07-26T01:39:51.200000Z
-7 2012-07-26T01:47:30.280000Z
-8 2012-07-26T02:22:49.640000Z
-9 2012-07-26T01:02:53.520000Z
-10 2012-07-26T03:00:38.960000Z
-11 2012-07-26T03:32:51.000000Z
-12 2012-07-26T03:38:13.400000Z
-13 2012-07-26T01:10:22.040000Z
-14 2012-07-26T01:15:15.880000Z
-15 2012-07-26T13:35:26.320000Z
-16 2012-07-26T09:21:39.640000Z
-17 2012-07-26T09:28:48.560000Z
-18 2012-07-26T10:07:23.800000Z
-19 2012-07-26T16:27:17.800000Z
-20 2012-07-26T11:55:35.080000Z
-21 2012-07-26T00:58:11.080000Z
-22 2012-07-26T01:15:15.200000Z
-23 2012-07-26T01:22:37.880000Z
-24 2012-07-26T01:42:22.800000Z
-25 2012-07-26T01:52:36.960000Z
-26 2012-07-26T00:59:12.800000Z
-27 2012-07-26T02:24:36.440000Z
-28 2012-07-26T03:05:35.080000Z
-29 2012-07-26T04:45:03.960000Z
-30 2012-07-26T13:48:32.800000Z
-31 2012-07-26T13:50:18.560000Z
-32 2012-07-26T13:51:58.560000Z
-33 2012-07-26T13:53:31.640000Z
-34 2012-07-26T13:54:54.760000Z
-35 2012-07-26T13:56:54.240000Z
-36 2012-07-26T01:03:47.000000Z
-37 2012-07-26T01:09:16.320000Z
-38 2012-07-26T01:09:25.960000Z
-39 2012-07-26T01:10:44.200000Z
-40 2012-07-26T01:12:32.960000Z
-41 2012-07-26T15:06:20.040000Z
-42 2012-07-26T17:28:21.000000Z
-43 2012-07-26T00:20:47.480000Z
-44 2012-07-26T01:58:19.800000Z
-45 2012-07-26T02:35:01.160000Z
-46 2012-07-26T01:35:14.720000Z
-47 2012-07-26T14:38:50.760000Z
-48 2012-07-26T04:43:38.640000Z
-49 2012-07-26T04:46:49.480000Z
-50 2012-07-26T04:51:06.800000Z
-51 2012-07-26T04:48:38.400000Z
-52 2012-07-26T14:49:28.320000Z
-53 2012-07-26T03:08:33.640000Z
-54 2012-07-26T03:10:54.920000Z
-55 2012-07-26T04:30:33.400000Z
-56 2012-07-26T05:22:04.320000Z
-57 2012-07-26T05:45:45.880000Z
-58 2012-07-26T05:46:59.080000Z
-59 2012-07-26T05:57:16.320000Z
-60 2012-07-26T08:07:38.680000Z
-61 2012-07-26T08:08:25.680000Z
-62 2012-07-26T10:16:45.640000Z
-63 2012-07-26T10:53:46.440000Z
-64 2012-07-26T11:02:24.200000Z
-65 2012-07-26T01:52:27.800000Z
+0 2012-07-26T01:15:35.080000Z
+1 2012-07-26T01:15:54.160000Z
+2 2012-07-26T01:16:30.000000Z
+3 2012-07-26T01:52:36.240000Z
+4 2012-07-26T01:02:53.280000Z
+5 2012-07-26T01:03:46.920000Z
+6 2012-07-26T01:09:16.240000Z
+7 2012-07-26T01:15:14.640000Z
+8 2012-07-26T13:35:24.240000Z
+9 2012-07-26T14:49:28.480000Z
+10 2012-07-26T04:48:38.560000Z
+11 2012-07-26T03:08:33.520000Z
+12 2012-07-26T03:10:55.160000Z
+13 2012-07-26T04:30:33.640000Z
+14 2012-07-26T05:22:04.560000Z
+15 2012-07-26T05:45:46.080000Z
+16 2012-07-26T05:46:59.320000Z
+17 2012-07-26T05:57:16.560000Z
+18 2012-07-26T08:07:38.920000Z
+19 2012-07-26T08:08:25.760000Z
+20 2012-07-26T10:16:45.880000Z
+21 2012-07-26T10:53:46.680000Z
+22 2012-07-26T11:02:23.680000Z
+23 2012-07-26T09:21:39.400000Z
+24 2012-07-26T09:28:48.320000Z
+25 2012-07-26T10:07:23.720000Z
+26 2012-07-26T16:26:52.560000Z
+27 2012-07-26T11:55:36.720000Z
+28 2012-07-26T00:58:10.880000Z
+29 2012-07-26T01:12:32.760000Z
+30 2012-07-26T01:42:22.560000Z
+31 2012-07-26T03:05:34.920000Z
+32 2012-07-26T03:32:51.040000Z
+33 2012-07-26T13:48:32.480000Z
+34 2012-07-26T13:56:54.240000Z
+35 2012-07-26T01:06:17.760000Z
+36 2012-07-26T01:09:25.760000Z
+37 2012-07-26T00:58:16.680000Z
+38 2012-07-26T01:52:28.000000Z
+39 2012-07-26T02:22:49.960000Z
+40 2012-07-26T03:00:38.800000Z
+41 2012-07-26T13:51:58.200000Z
+42 2012-07-26T13:54:54.040000Z
+43 2012-07-26T01:15:15.400000Z
+44 2012-07-26T01:18:32.760000Z
+45 2012-07-26T01:22:37.680000Z
+46 2012-07-26T00:59:12.560000Z
+47 2012-07-26T02:24:34.720000Z
+48 2012-07-26T04:45:03.760000Z
+49 2012-07-26T13:50:18.320000Z
+50 2012-07-26T13:53:31.480000Z
+51 2012-07-26T01:10:21.960000Z
+52 2012-07-26T01:10:44.040000Z
+53 2012-07-26T15:06:20.200000Z
+54 2012-07-26T17:28:21.640000Z
+55 2012-07-26T01:57:57.400000Z
+56 2012-07-26T02:35:01.080000Z
+57 2012-07-26T01:35:15.320000Z
+58 2012-07-26T02:43:20.880000Z
+59 2012-07-26T14:38:50.160000Z
+60 2012-07-26T04:43:38.000000Z
+61 2012-07-26T04:46:48.880000Z
+62 2012-07-26T04:51:06.240000Z
 </pre></div></div>
 </div>
 </section>
 <section id="Example-with-a-single-event">
-<h2>Example with a single event<a class="headerlink" href="#Example-with-a-single-event" title="Permalink to this heading"></a></h2>
+<h2>Example with a single event<a class="headerlink" href="#Example-with-a-single-event" title="Link to this heading"></a></h2>
 <p>In this section, we will demonstrate the workflow we adopt to compute the moment magnitude of each event. It consists in: - Extracting short windows around the P and S waves, as well as a noise window taken before the P wave. - Computing the velocity noise/P/S spectra on each channel. - Correcting for the path effects (geometrical spreading and attenuation). - Averaging the velocity over the network and integrating to get the displacement spectrum. - Fitting the displacement spectrum with a
 model of our choice (here, the Boatwright model).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#         waveform extraction parameters</span>
@@ -630,16 +350,16 @@ model of our choice (here, the Boatwright model).</p>
 <span class="n">SNR_THRESHOLD</span> <span class="o">=</span> <span class="mf">10.</span>
 <span class="n">MIN_NUM_VALID_CHANNELS_PER_FREQ_BIN</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">MIN_FRACTION_VALID_POINTS_BELOW_FC</span> <span class="o">=</span> <span class="mf">0.20</span>
-<span class="n">MAX_RELATIVE_DISTANCE_ERR_PCT</span> <span class="o">=</span> <span class="mf">33.</span>
+<span class="n">MAX_RELATIVE_DISTANCE_ERR_PCT</span> <span class="o">=</span> <span class="mf">30.</span>
 <span class="n">NUM_CHANNEL_WEIGHTED_FIT</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">13</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">51</span>
 <span class="n">event</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">EVENT_IDX</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The maximum horizontal location uncertainty of event </span><span class="si">{</span><span class="n">EVENT_IDX</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">hmax_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">km.&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The minimum horizontal location uncertainty of event </span><span class="si">{</span><span class="n">EVENT_IDX</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">hmin_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">km.&quot;</span><span class="p">)</span>
@@ -652,14 +372,14 @@ model of our choice (here, the Boatwright model).</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The maximum horizontal location uncertainty of event 13 is 2.12km.
-The minimum horizontal location uncertainty of event 13 is 1.73km.
-The maximum vertical location uncertainty is 3.00km.
+The maximum horizontal location uncertainty of event 51 is 1.61km.
+The minimum horizontal location uncertainty of event 51 is 0.81km.
+The maximum vertical location uncertainty is 1.35km.
 </pre></div></div>
 </div>
 <p>In the following, we define 3 <code class="docutils literal notranslate"><span class="pre">obspy.Stream</span></code> instances with the noise, P-wave and S-wave traces. Here, it is important to identify the clipped waveforms and set them to zero so that we don’t use them in the future. The identification of clipped waveforms is based on a simple kurtosis test (kurtosis is low for clipped waveforms because the extremum values are often reached).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#                 extract waveforms</span>
@@ -703,7 +423,7 @@ The maximum vertical location uncertainty is 3.00km.
 </div>
 <p>We can now compute the velocity spectra on each channel.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spectrum</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">)</span>
@@ -720,7 +440,7 @@ The maximum vertical location uncertainty is 3.00km.
 </div>
 <p>Let’s plot the velocity spectra and the signal-to-noise ratio (SNR) spectra.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">phase_to_plot</span> <span class="o">=</span> <span class="s2">&quot;s&quot;</span>
@@ -743,7 +463,7 @@ The maximum vertical location uncertainty is 3.00km.
 <p>Aki, K. (1980). Attenuation of shear-waves in the lithosphere for frequencies from 0.05 to 25 Hz. Physics of the Earth and Planetary Interiors, 21(1), 50-60.</p>
 <p>Izgi, G., Eken, T., Gaebler, P., Eulenfeld, T., &amp; Taymaz, T. (2020). Crustal seismic attenuation parameters in the western region of the North Anatolian Fault Zone. Journal of Geodynamics, 134, 101694.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Q_1Hz</span> <span class="o">=</span> <span class="mf">33.</span>
@@ -753,10 +473,10 @@ The maximum vertical location uncertainty is 3.00km.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spectrum</span><span class="o">.</span><span class="n">set_Q_model</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spectrum</span><span class="o">.</span><span class="n">attenuation_Q_model</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
 <span class="n">spectrum</span><span class="o">.</span><span class="n">compute_correction_factor</span><span class="p">(</span>
     <span class="n">RHO_SOURCE_KGM3</span><span class="p">,</span> <span class="n">RHO_RECEIVER_KGM3</span><span class="p">,</span>
     <span class="n">VP_SOURCE_MS</span><span class="p">,</span> <span class="n">VP_RECEIVER_MS</span><span class="p">,</span>
@@ -766,7 +486,7 @@ The maximum vertical location uncertainty is 3.00km.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">source_parameters</span> <span class="o">=</span> <span class="p">{}</span>
@@ -821,16 +541,10 @@ The maximum vertical location uncertainty is 3.00km.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Source-receiver distance relative error is too high: 33.42
-Source-receiver distance relative error is too high: 33.42
-Source-receiver distance relative error is too high: 33.42
-Relative error on M0: 3.53%
-Relative error on fc: 2.68%
-Source-receiver distance relative error is too high: 33.42
-Source-receiver distance relative error is too high: 33.42
-Source-receiver distance relative error is too high: 33.42
-Relative error on M0: 4.23%
-Relative error on fc: 2.99%
+Relative error on M0: 4.30%
+Relative error on fc: 2.96%
+Relative error on M0: 4.33%
+Relative error on fc: 2.95%
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -847,6 +561,23 @@ Relative error on fc: 2.99%
 <img alt="../../_images/tutorial_notebooks_10_magnitudes_19_2.png" src="../../_images/tutorial_notebooks_10_magnitudes_19_2.png" />
 </div>
 </div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spectrum</span><span class="o">.</span><span class="n">average_s_spectrum</span><span class="p">[</span><span class="s2">&quot;num_valid_channels&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+dtype(&#39;int64&#39;)
+</pre></div></div>
+</div>
 <p>To get a single final estimate of the moment magnitude <span class="math notranslate nohighlight">\(M_w\)</span>, we average the P- and S-wave estimates. Thus,</p>
 <div class="math notranslate nohighlight">
 \[M_w = \frac{1}{2} (M_w^P + M_w^S).\quad (7)\]</div>
@@ -854,7 +585,7 @@ Relative error on fc: 2.99%
 <div class="math notranslate nohighlight">
 \[d M_w = \frac{1}{3} \left( \frac{dM_0^P}{M_0^P} + \frac{dM_0^S}{M_0^S} \right)\]</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Mw_exists</span> <span class="o">=</span> <span class="kc">False</span>
@@ -888,34 +619,34 @@ Relative error on fc: 2.99%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The P-S averaged moment magnitude is 2.98 +/- 0.03
+The P-S averaged moment magnitude is 2.92 +/- 0.03
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;M0_p&#39;: 80459275651239.78,
- &#39;Mw_p&#39;: 3.203717412293662,
- &#39;fc_p&#39;: 7.583974223366631,
- &#39;M0_err_p&#39;: 2838966352570.8267,
- &#39;fc_err_p&#39;: 0.2032629644982776,
- &#39;M0_s&#39;: 16648575393989.844,
- &#39;Mw_s&#39;: 2.7475847181211535,
- &#39;fc_s&#39;: 6.72861662942346,
- &#39;M0_err_s&#39;: 704897217114.1648,
- &#39;fc_err_s&#39;: 0.2013588102413158,
- &#39;Mw&#39;: 2.9756510652074075,
- &#39;Mw_err&#39;: 0.02587476826881796}
+{&#39;M0_p&#39;: 61293133165391.625,
+ &#39;Mw_p&#39;: 3.124941214709658,
+ &#39;fc_p&#39;: 6.814075546198474,
+ &#39;M0_err_p&#39;: 2638596074069.329,
+ &#39;fc_err_p&#39;: 0.20183845562521813,
+ &#39;M0_s&#39;: 14546431579214.889,
+ &#39;Mw_s&#39;: 2.708504312362316,
+ &#39;fc_s&#39;: 6.609547421468031,
+ &#39;M0_err_s&#39;: 629342178511.7545,
+ &#39;fc_err_s&#39;: 0.19527027928263765,
+ &#39;Mw&#39;: 2.916722763535987,
+ &#39;Mw_err&#39;: 0.028771057541407026}
 </pre></div></div>
 </div>
 </section>
 <section id="Repeat-the-same-processing-for-every-event">
-<h2>Repeat the same processing for every event<a class="headerlink" href="#Repeat-the-same-processing-for-every-event" title="Permalink to this heading"></a></h2>
+<h2>Repeat the same processing for every event<a class="headerlink" href="#Repeat-the-same-processing-for-every-event" title="Link to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#         waveform extraction parameters</span>
@@ -947,7 +678,7 @@ The P-S averaged moment magnitude is 2.98 +/- 0.03
 <span class="n">SNR_THRESHOLD</span> <span class="o">=</span> <span class="mf">10.</span>
 <span class="n">MIN_NUM_VALID_CHANNELS_PER_FREQ_BIN</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">MIN_FRACTION_VALID_POINTS_BELOW_FC</span> <span class="o">=</span> <span class="mf">0.20</span>
-<span class="n">MAX_RELATIVE_DISTANCE_ERR_PCT</span> <span class="o">=</span> <span class="mf">33.</span>
+<span class="n">MAX_RELATIVE_DISTANCE_ERR_PCT</span> <span class="o">=</span> <span class="mf">30.</span>
 <span class="n">NUM_CHANNEL_WEIGHTED_FIT</span> <span class="o">=</span> <span class="kc">True</span>
 
 <span class="c1">#                   attenuation model</span>
@@ -957,9 +688,8 @@ The P-S averaged moment magnitude is 2.98 +/- 0.03
 </pre></div>
 </div>
 </div>
-<p>Let’s run the magnitude computation code for every event. If fitting the network-averaged displacement spectrum is not possible because of poor SNR or location, or if the inverted parameters’ errors are too large then the moment magnitude cannot be estimated and the returned value is <code class="docutils literal notranslate"><span class="pre">nan</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
@@ -1013,7 +743,7 @@ The P-S averaged moment magnitude is 2.98 +/- 0.03
     <span class="n">spectrum</span><span class="o">.</span><span class="n">compute_signal_to_noise_ratio</span><span class="p">(</span><span class="s2">&quot;p&quot;</span><span class="p">)</span>
     <span class="n">spectrum</span><span class="o">.</span><span class="n">compute_signal_to_noise_ratio</span><span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
 
-    <span class="n">spectrum</span><span class="o">.</span><span class="n">set_Q_model</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+    <span class="n">spectrum</span><span class="o">.</span><span class="n">attenuation_Q_model</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
     <span class="n">spectrum</span><span class="o">.</span><span class="n">compute_correction_factor</span><span class="p">(</span>
         <span class="n">RHO_SOURCE_KGM3</span><span class="p">,</span> <span class="n">RHO_RECEIVER_KGM3</span><span class="p">,</span>
         <span class="n">VP_SOURCE_MS</span><span class="p">,</span> <span class="n">VP_RECEIVER_MS</span><span class="p">,</span>
@@ -1099,19 +829,26 @@ The P-S averaged moment magnitude is 2.98 +/- 0.03
 <div class="highlight"><pre>
 ========================
 Processing event 0
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 1
+Not enough valid points! (Only 9.00%)
+Not enough valid points! (Only 12.00%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 2
-Spectrum is below SNR threshold everywhere, cannot fit it.
-Spectrum is below SNR threshold everywhere, cannot fit it.
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 3
-Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 4
@@ -1123,17 +860,17 @@ Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 6
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 7
-Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 8
-Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 9
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 10
@@ -1142,7 +879,6 @@ Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 11
-Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 12
@@ -1150,12 +886,15 @@ Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 13
-The P-S averaged moment magnitude is 2.98 +/- 0.03
+Class instance does not have a `cov_mat` attribute.
+The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 14
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 15
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 16
@@ -1167,16 +906,16 @@ Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 18
-Spectrum is below SNR threshold everywhere, cannot fit it.
-Spectrum is below SNR threshold everywhere, cannot fit it.
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 19
+Not enough valid points! (Only 25.00%)
+Not enough valid points! (Only 36.00%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 20
-Spectrum is below SNR threshold everywhere, cannot fit it.
-Spectrum is below SNR threshold everywhere, cannot fit it.
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 21
@@ -1184,6 +923,7 @@ Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 22
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 23
@@ -1195,6 +935,8 @@ Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 25
+Not enough valid points! (Only 41.00%)
+Not enough valid points! (Only 42.00%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 26
@@ -1202,6 +944,7 @@ Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 27
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 28
@@ -1213,22 +956,27 @@ Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 30
-The P-S averaged moment magnitude is 2.92 +/- 0.03
+Class instance does not have a `cov_mat` attribute.
+The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 31
 Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 32
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 33
-The P-S averaged moment magnitude is nan +/- nan
+The P-S averaged moment magnitude is 2.92 +/- 0.03
 ========================
 Processing event 34
+Spectrum is below SNR threshold everywhere, cannot fit it.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 35
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 36
@@ -1244,23 +992,23 @@ Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 39
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 40
 Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
+Processing event 40
+Not enough valid points! (Only 22.00%)
+Not enough valid points! (Only 31.00%)
+The P-S averaged moment magnitude is nan +/- nan
+========================
 Processing event 41
-Spectrum is below SNR threshold everywhere, cannot fit it.
-Spectrum is below SNR threshold everywhere, cannot fit it.
+Not enough valid points! (Only 31.00%)
+Not enough valid points! (Only 37.00%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 42
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 43
-Spectrum is below SNR threshold everywhere, cannot fit it.
-Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 44
@@ -1268,6 +1016,7 @@ Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 45
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 46
@@ -1275,10 +1024,10 @@ Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 47
-Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 48
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 49
@@ -1286,17 +1035,18 @@ Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 50
-Class instance does not have a `cov_mat` attribute.
-The P-S averaged moment magnitude is nan +/- nan
+Not enough valid points! (Only 47.00%)
+The P-S averaged moment magnitude is 2.71 +/- 0.05
 ========================
 Processing event 51
-The P-S averaged moment magnitude is nan +/- nan
+The P-S averaged moment magnitude is 2.92 +/- 0.03
 ========================
 Processing event 52
-Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 53
+Spectrum is below SNR threshold everywhere, cannot fit it.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 54
@@ -1308,7 +1058,6 @@ Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 56
-Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 57
@@ -1324,36 +1073,18 @@ Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 60
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 61
-Spectrum is below SNR threshold everywhere, cannot fit it.
-Spectrum is below SNR threshold everywhere, cannot fit it.
+Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 62
 Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 63
-Class instance does not have a `cov_mat` attribute.
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 64
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 65
-Class instance does not have a `cov_mat` attribute.
-The P-S averaged moment magnitude is nan +/- nan
 </pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_10_magnitudes_25_1.png" src="../../_images/tutorial_notebooks_10_magnitudes_25_1.png" />
-</div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
@@ -1369,15 +1100,29 @@ The P-S averaged moment magnitude is nan +/- nan
 <img alt="../../_images/tutorial_notebooks_10_magnitudes_25_3.png" src="../../_images/tutorial_notebooks_10_magnitudes_25_3.png" />
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <img alt="../../_images/tutorial_notebooks_10_magnitudes_25_4.png" src="../../_images/tutorial_notebooks_10_magnitudes_25_4.png" />
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_10_magnitudes_25_5.png" src="../../_images/tutorial_notebooks_10_magnitudes_25_5.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_10_magnitudes_25_6.png" src="../../_images/tutorial_notebooks_10_magnitudes_25_6.png" />
+</div>
+</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># for event in backprojection_events:</span>
@@ -1405,8 +1150,8 @@ The P-S averaged moment magnitude is nan +/- nan
 </pre></div></div>
 </div>
 </section>
-<section id="To-be-continued…">
-<h2>To be continued…<a class="headerlink" href="#To-be-continued…" title="Permalink to this heading"></a></h2>
+<section id="To-be-continued...">
+<h2>To be continued…<a class="headerlink" href="#To-be-continued..." title="Link to this heading"></a></h2>
 <p>Work-in-progress!</p>
 </section>
 </section>

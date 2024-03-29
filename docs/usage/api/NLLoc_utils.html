@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BPMF.NLLoc_utils &mdash; BPMF 2.0.0 documentation</title>
@@ -12,9 +12,9 @@
   <![endif]-->
   
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/documentation_options.js?v=51b770b3"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -33,6 +33,7 @@
           
           <a href="../../index.html" class="icon icon-home">
             BPMF
+              <img src="../../_static/bpmf.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -97,35 +98,11 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="module-BPMF.NLLoc_utils">
-<span id="bpmf-nlloc-utils"></span><h1>BPMF.NLLoc_utils<a class="headerlink" href="#module-BPMF.NLLoc_utils" title="Permalink to this heading"></a></h1>
+  <section id="module-BPMF.NLLoc_utils">
+<span id="bpmf-nlloc-utils"></span><h1>BPMF.NLLoc_utils<a class="headerlink" href="#module-BPMF.NLLoc_utils" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.NLLoc_utils.load_pykonal_tts">
-<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">load_pykonal_tts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#load_pykonal_tts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.load_pykonal_tts" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">load_pykonal_tts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#load_pykonal_tts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.load_pykonal_tts" title="Link to this definition"></a></dt>
 <dd><p>Load the travel-time grid computed with Pykonal.</p>
 <p>Load the travel times previously computed with Pykonal and reformat the axes
 to follow NLLoc’s convention.</p>
@@ -153,7 +130,7 @@ made of sub-dictionaries, one for each station: e.g.
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.NLLoc_utils.read_NLLoc_outputs">
-<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">read_NLLoc_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#read_NLLoc_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.read_NLLoc_outputs" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">read_NLLoc_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#read_NLLoc_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.read_NLLoc_outputs" title="Link to this definition"></a></dt>
 <dd><p>Read the NLLoc output hyp file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -175,13 +152,62 @@ made of sub-dictionaries, one for each station: e.g.
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.NLLoc_utils.write_NLLoc_control">
-<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">write_NLLoc_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctrl_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TRANS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'GLOBAL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">author</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Eric</span> <span class="pre">Beauce'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">affiliation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Lamont-Doherty</span> <span class="pre">Earth</span> <span class="pre">Observatory'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLLoc_input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLLoc_output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLLoc_basename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_node_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EDT_OT_WT_ML'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ANGLES_NO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MISFIT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_depth_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#write_NLLoc_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.write_NLLoc_control" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">write_NLLoc_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctrl_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TRANS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'GLOBAL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLLoc_input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLLoc_output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLLoc_basename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EDT_OT_WT_ML'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ANGLES_NO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MISFIT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locsearch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'OCT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_depth_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#write_NLLoc_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.write_NLLoc_control" title="Link to this definition"></a></dt>
 <dd><p>Write the NLLoc control file.</p>
+<p>All input and output files created here for NLLoc will be deleted.
+Note that all additional key-word arguments to NLLoc, using the same
+parameter names as in NLLoc (<a class="reference external" href="http://alomax.free.fr/nlloc/">http://alomax.free.fr/nlloc/</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ctrl_filename</strong> (<em>str</em>) – Name of the control file.</p></li>
+<li><p><strong>out_filename</strong> (<em>str</em>) – Name of NLLoc’s output file.</p></li>
+<li><p><strong>obs_filename</strong> (<em>str</em>) – Name of the input observation file.</p></li>
+<li><p><strong>TRANS</strong> (<em>str</em><em>, </em><em>optional</em>) – Geographic transformation. See NLLoc’s documentation.
+Defaults to ‘GLOBAL’.</p></li>
+<li><p><strong>NLLoc_input_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to NLLoc’s input files, that is, travel-time tables.
+Defaults to ‘cfg.NLLOC_INPUT_PATH’.</p></li>
+<li><p><strong>NLLoc_output_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to NLLoc’s output files, that is, the results of location.
+Defaults to ‘cfg.NLLOC_OUTPUT_PATH’.</p></li>
+<li><p><strong>NLLoc_basename</strong> (<em>str</em><em>, </em><em>optional</em>) – Basename of the travel-time files. If you have multiple travel-time
+grids at the same <cite>NLLoc_input_path</cite> directory, use this argument to
+use one or the other. Defaults to ‘cfg.NLLOC_BASENAME’.</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the loss function. See NLLoc’s documentation.
+Defaults to ‘EDT_OT_WT_ML’.</p></li>
+<li><p><strong>angle_grid</strong> (<em>str</em><em>, </em><em>optional</em>) – Alias for the ‘angleMode’ parameter of the ‘LOCANGLES’ command in the
+NLLoc control file. See NLLoc’s documentation.
+Defaults to ‘ANGLES_NO’.</p></li>
+<li><p><strong>grid</strong> (<em>str</em><em>, </em><em>optional</em>) – Either of ‘MISFIT’ (default) or ‘PROB_DENSITY’. Alias for the
+‘gridType’ parameter of the ‘LOCGRID’ command in the NLLoc control
+file. See NLLoc’s documentation.</p></li>
+<li><p><strong>locsearch</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Either of ‘GRID’, ‘MET’ or ‘OCT’ (default). This parameter goes to the
+LOCSEARCH command in the NLLoc control file. It determines how the loss
+function is minimizes:
+- GRID: Grid search (very computationally expensive).
+- MET: Metropolis algorithm (MCMC). Efficient but may be stuck in a</p>
+<blockquote>
+<div><p>local minimum.</p>
+</div></blockquote>
+<ul>
+<li><dl class="simple">
+<dt>OCT: Oct tree importance sampling algorithm. This is a mix of sampling</dt><dd><p>and grid search that allows the efficient search for the global
+minimum. See ‘<a class="reference external" href="http://alomax.free.fr/nlloc/octtree/OctTree.html">http://alomax.free.fr/nlloc/octtree/OctTree.html</a>’
+for more details. This is the default option.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+<li><p><strong>n_depth_points</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – If not None, only the first <cite>n_depth_points</cite> points are kept along
+the depth axis in the grid.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.NLLoc_utils.write_NLLoc_inputs">
-<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">write_NLLoc_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#write_NLLoc_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.write_NLLoc_inputs" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">write_NLLoc_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#write_NLLoc_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.write_NLLoc_inputs" title="Link to this definition"></a></dt>
 <dd><p>Write the hdr and buf travel-time files for NLLoc.</p>
 <p>Write the hdr and buf NLLoc files assuming the GLOBAL mode. In this mode,
 coordinates are given in geographic coordinates: longitude, latitude and
@@ -207,7 +233,7 @@ made of sub-dictionaries, one for each station: e.g.
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.NLLoc_utils.write_NLLoc_obs">
-<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">write_NLLoc_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">picks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.04</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#write_NLLoc_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.write_NLLoc_obs" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">write_NLLoc_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">picks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.04</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#write_NLLoc_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.write_NLLoc_obs" title="Link to this definition"></a></dt>
 <dd><p>Write the .obs file for NLLoc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

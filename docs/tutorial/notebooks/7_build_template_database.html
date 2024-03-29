@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Build Template Database &mdash; BPMF 2.0.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/documentation_options.js?v=51b770b3"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -35,6 +36,7 @@
           
           <a href="../../index.html" class="icon icon-home">
             BPMF
+              <img src="../../_static/bpmf.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -97,287 +99,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars and line breaks on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-    white-space: pre;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-.jp-RenderedHTMLCommon table,
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-.jp-RenderedHTMLCommon thead,
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-.jp-RenderedHTMLCommon tr,
-.jp-RenderedHTMLCommon th,
-.jp-RenderedHTMLCommon td,
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-.jp-RenderedHTMLCommon th,
-div.rendered_html th {
-  font-weight: bold;
-}
-.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-.jp-RenderedHTMLCommon tbody tr:hover,
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="Build-Template-Database">
-<h1>Build Template Database<a class="headerlink" href="#Build-Template-Database" title="Permalink to this heading"></a></h1>
+  <section id="Build-Template-Database">
+<h1>Build Template Database<a class="headerlink" href="#Build-Template-Database" title="Link to this heading"></a></h1>
 <p>In this notebook, we use the events detected in notebook 5, and further characterized in notebooks 6 ands 7, to build a database of template events. This step consists mostly in building data and metadata files but also allows the selection of events based on quality and the grouping of similar events. We want to avoid having too many similar templates in the database as it means useless, redundant computation in the template matching process (similar templates detect the same events).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -430,7 +153,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <section id="Read-the-database-of-detected-events">
-<h2>Read the database of detected events<a class="headerlink" href="#Read-the-database-of-detected-events" title="Permalink to this heading"></a></h2>
+<h2>Read the database of detected events<a class="headerlink" href="#Read-the-database-of-detected-events" title="Link to this heading"></a></h2>
 <p>We read the database of events detected with backprojection and, with them, create <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Template</span></code> instances.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -491,16 +214,7 @@ Checking reloc_bp.h5...
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
- 59%|█████▉    | 10/17 [00:01&lt;00:00,  9.85it/s]
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Does not have a `arrival_times` attribute.
-Does not have a `arrival_times` attribute.
+  0%|          | 0/17 [00:00&lt;?, ?it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -508,12 +222,12 @@ Does not have a `arrival_times` attribute.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|██████████| 17/17 [00:01&lt;00:00,  9.33it/s]
+100%|██████████| 17/17 [00:02&lt;00:00,  7.41it/s]
 </pre></div></div>
 </div>
 </section>
 <section id="Remove-redundant-templates">
-<h2>Remove redundant templates<a class="headerlink" href="#Remove-redundant-templates" title="Permalink to this heading"></a></h2>
+<h2>Remove redundant templates<a class="headerlink" href="#Remove-redundant-templates" title="Link to this heading"></a></h2>
 <p>We first create an <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.TemplateGroup</span></code> instance with the templates built in the previous cell. This class offers a number of methods to operate on groups of templates.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -565,23 +279,16 @@ Does not have a `arrival_times` attribute.
 <div class="highlight"><pre>
 Computing the similarity matrix...
 Computing the inter-template directional errors...
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/ebeauce/miniconda3/envs/hy7_py310/lib/python3.10/site-packages/BPMF/dataset.py:4212: RuntimeWarning: invalid value encountered in divide
-  unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[
+Computed inter-template CCs in 0.15sec.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Computed inter-template CCs in 2.60sec.
+/home/ebeauce/miniconda3/envs/hy7_py310/lib/python3.10/site-packages/BPMF/dataset.py:4169: RuntimeWarning: invalid value encountered in divide
+  unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -638,341 +345,341 @@ Computed inter-template CCs in 2.60sec.
     <tr>
       <th>0</th>
       <td>1.000000</td>
-      <td>0.717798</td>
-      <td>0.0</td>
-      <td>0.737527</td>
-      <td>0.578534</td>
-      <td>0.755815</td>
-      <td>0.375677</td>
+      <td>0.745198</td>
+      <td>0.162663</td>
+      <td>0.489752</td>
       <td>0.000000</td>
-      <td>0.187704</td>
+      <td>0.751065</td>
+      <td>0.433426</td>
       <td>0.000000</td>
-      <td>0.144533</td>
-      <td>0.697086</td>
-      <td>0.120413</td>
-      <td>0.122103</td>
-      <td>0.444172</td>
-      <td>0.306952</td>
-      <td>0.000000</td>
+      <td>0.187433</td>
+      <td>0.132249</td>
+      <td>0.173695</td>
+      <td>0.691722</td>
+      <td>0.297668</td>
+      <td>0.417570</td>
+      <td>0.482067</td>
+      <td>0.333438</td>
+      <td>0.165799</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.717798</td>
+      <td>0.745198</td>
       <td>1.000000</td>
-      <td>0.0</td>
-      <td>0.672207</td>
-      <td>0.469110</td>
-      <td>0.702394</td>
-      <td>0.451556</td>
       <td>0.000000</td>
-      <td>0.178191</td>
+      <td>0.451443</td>
       <td>0.000000</td>
-      <td>0.139853</td>
-      <td>0.579034</td>
-      <td>0.144914</td>
-      <td>0.130597</td>
-      <td>0.395351</td>
-      <td>0.285156</td>
+      <td>0.697121</td>
+      <td>0.455028</td>
       <td>0.000000</td>
+      <td>0.186291</td>
+      <td>0.151569</td>
+      <td>0.204040</td>
+      <td>0.583336</td>
+      <td>0.309618</td>
+      <td>0.376188</td>
+      <td>0.440005</td>
+      <td>0.294525</td>
+      <td>0.157504</td>
     </tr>
     <tr>
       <th>2</th>
+      <td>0.162663</td>
       <td>0.000000</td>
+      <td>1.000000</td>
       <td>0.000000</td>
-      <td>1.0</td>
+      <td>0.156482</td>
+      <td>0.169598</td>
+      <td>0.140515</td>
       <td>0.000000</td>
+      <td>0.152657</td>
+      <td>0.169002</td>
       <td>0.000000</td>
+      <td>0.163741</td>
       <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
+      <td>0.154538</td>
+      <td>0.165371</td>
+      <td>0.146140</td>
+      <td>0.171176</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.737527</td>
-      <td>0.672207</td>
-      <td>0.0</td>
+      <td>0.489752</td>
+      <td>0.451443</td>
+      <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.538896</td>
-      <td>0.810682</td>
-      <td>0.488119</td>
       <td>0.000000</td>
-      <td>0.191968</td>
+      <td>0.550850</td>
+      <td>0.402199</td>
       <td>0.000000</td>
-      <td>0.123467</td>
-      <td>0.616933</td>
-      <td>0.116458</td>
-      <td>0.107996</td>
-      <td>0.431973</td>
-      <td>0.337151</td>
-      <td>0.000000</td>
+      <td>0.169801</td>
+      <td>0.146803</td>
+      <td>0.149911</td>
+      <td>0.423282</td>
+      <td>0.445811</td>
+      <td>0.348178</td>
+      <td>0.357582</td>
+      <td>0.319644</td>
+      <td>0.139809</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.578534</td>
-      <td>0.469110</td>
-      <td>0.0</td>
-      <td>0.538896</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.156482</td>
+      <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.579089</td>
-      <td>0.474746</td>
       <td>0.000000</td>
-      <td>0.193557</td>
       <td>0.000000</td>
-      <td>0.138974</td>
-      <td>0.595992</td>
-      <td>0.131252</td>
-      <td>0.136173</td>
-      <td>0.442094</td>
-      <td>0.303192</td>
       <td>0.000000</td>
+      <td>0.187234</td>
+      <td>0.136836</td>
+      <td>0.171432</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.142375</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>0.755815</td>
-      <td>0.702394</td>
-      <td>0.0</td>
-      <td>0.810682</td>
-      <td>0.579089</td>
+      <td>0.751065</td>
+      <td>0.697121</td>
+      <td>0.169598</td>
+      <td>0.550850</td>
+      <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.513724</td>
+      <td>0.573692</td>
       <td>0.000000</td>
-      <td>0.190828</td>
-      <td>0.000000</td>
-      <td>0.124811</td>
-      <td>0.585600</td>
-      <td>0.127717</td>
-      <td>0.106193</td>
-      <td>0.456569</td>
-      <td>0.309687</td>
-      <td>0.000000</td>
+      <td>0.177688</td>
+      <td>0.128839</td>
+      <td>0.163332</td>
+      <td>0.581510</td>
+      <td>0.316958</td>
+      <td>0.426413</td>
+      <td>0.457873</td>
+      <td>0.322279</td>
+      <td>0.143578</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>0.375677</td>
-      <td>0.451556</td>
-      <td>0.0</td>
-      <td>0.488119</td>
-      <td>0.474746</td>
-      <td>0.513724</td>
+      <td>0.433426</td>
+      <td>0.455028</td>
+      <td>0.140515</td>
+      <td>0.402199</td>
+      <td>0.000000</td>
+      <td>0.573692</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.168883</td>
-      <td>0.000000</td>
-      <td>0.162355</td>
-      <td>0.449575</td>
-      <td>0.154345</td>
-      <td>0.143481</td>
-      <td>0.327158</td>
-      <td>0.295314</td>
-      <td>0.000000</td>
+      <td>0.181900</td>
+      <td>0.174854</td>
+      <td>0.179139</td>
+      <td>0.492894</td>
+      <td>0.288432</td>
+      <td>0.351653</td>
+      <td>0.395676</td>
+      <td>0.294420</td>
+      <td>0.159435</td>
     </tr>
     <tr>
       <th>7</th>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.0</td>
+      <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.000000</td>
-      <td>0.184398</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
+      <td>0.193355</td>
+      <td>0.167718</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.184413</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.197122</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>0.187704</td>
-      <td>0.178191</td>
-      <td>0.0</td>
-      <td>0.191968</td>
-      <td>0.193557</td>
-      <td>0.190828</td>
-      <td>0.168883</td>
-      <td>0.000000</td>
+      <td>0.187433</td>
+      <td>0.186291</td>
+      <td>0.152657</td>
+      <td>0.169801</td>
+      <td>0.187234</td>
+      <td>0.177688</td>
+      <td>0.181900</td>
+      <td>0.193355</td>
       <td>1.000000</td>
-      <td>0.000000</td>
-      <td>0.192600</td>
-      <td>0.210718</td>
-      <td>0.164145</td>
-      <td>0.172923</td>
-      <td>0.177483</td>
-      <td>0.170825</td>
-      <td>0.000000</td>
+      <td>0.193144</td>
+      <td>0.187271</td>
+      <td>0.204847</td>
+      <td>0.199492</td>
+      <td>0.152425</td>
+      <td>0.149325</td>
+      <td>0.163335</td>
+      <td>0.171001</td>
     </tr>
     <tr>
       <th>9</th>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.184398</td>
-      <td>0.000000</td>
+      <td>0.132249</td>
+      <td>0.151569</td>
+      <td>0.169002</td>
+      <td>0.146803</td>
+      <td>0.136836</td>
+      <td>0.128839</td>
+      <td>0.174854</td>
+      <td>0.167718</td>
+      <td>0.193144</td>
       <td>1.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.174151</td>
+      <td>0.169805</td>
+      <td>0.167378</td>
+      <td>0.167384</td>
+      <td>0.172907</td>
+      <td>0.151373</td>
+      <td>0.152229</td>
+      <td>0.179561</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>0.144533</td>
-      <td>0.139853</td>
-      <td>0.0</td>
-      <td>0.123467</td>
-      <td>0.138974</td>
-      <td>0.124811</td>
-      <td>0.162355</td>
+      <td>0.173695</td>
+      <td>0.204040</td>
       <td>0.000000</td>
-      <td>0.192600</td>
+      <td>0.149911</td>
+      <td>0.171432</td>
+      <td>0.163332</td>
+      <td>0.179139</td>
       <td>0.000000</td>
+      <td>0.187271</td>
+      <td>0.169805</td>
       <td>1.000000</td>
-      <td>0.161770</td>
-      <td>0.360683</td>
-      <td>0.285542</td>
-      <td>0.134374</td>
-      <td>0.136836</td>
-      <td>0.000000</td>
+      <td>0.188334</td>
+      <td>0.165065</td>
+      <td>0.181436</td>
+      <td>0.146070</td>
+      <td>0.155118</td>
+      <td>0.164733</td>
     </tr>
     <tr>
       <th>11</th>
-      <td>0.697086</td>
-      <td>0.579034</td>
-      <td>0.0</td>
-      <td>0.616933</td>
-      <td>0.595992</td>
-      <td>0.585600</td>
-      <td>0.449575</td>
+      <td>0.691722</td>
+      <td>0.583336</td>
+      <td>0.163741</td>
+      <td>0.423282</td>
       <td>0.000000</td>
-      <td>0.210718</td>
+      <td>0.581510</td>
+      <td>0.492894</td>
       <td>0.000000</td>
-      <td>0.161770</td>
+      <td>0.204847</td>
+      <td>0.167378</td>
+      <td>0.188334</td>
       <td>1.000000</td>
-      <td>0.139791</td>
-      <td>0.127139</td>
-      <td>0.478105</td>
-      <td>0.307482</td>
-      <td>0.000000</td>
+      <td>0.313229</td>
+      <td>0.435087</td>
+      <td>0.503254</td>
+      <td>0.332503</td>
+      <td>0.149142</td>
     </tr>
     <tr>
       <th>12</th>
-      <td>0.120413</td>
-      <td>0.144914</td>
-      <td>0.0</td>
-      <td>0.116458</td>
-      <td>0.131252</td>
-      <td>0.127717</td>
-      <td>0.154345</td>
+      <td>0.297668</td>
+      <td>0.309618</td>
       <td>0.000000</td>
-      <td>0.164145</td>
+      <td>0.445811</td>
       <td>0.000000</td>
-      <td>0.360683</td>
-      <td>0.139791</td>
+      <td>0.316958</td>
+      <td>0.288432</td>
+      <td>0.000000</td>
+      <td>0.199492</td>
+      <td>0.167384</td>
+      <td>0.165065</td>
+      <td>0.313229</td>
       <td>1.000000</td>
-      <td>0.365432</td>
-      <td>0.124670</td>
-      <td>0.135470</td>
-      <td>0.000000</td>
+      <td>0.367145</td>
+      <td>0.263499</td>
+      <td>0.289228</td>
+      <td>0.179794</td>
     </tr>
     <tr>
       <th>13</th>
-      <td>0.122103</td>
-      <td>0.130597</td>
-      <td>0.0</td>
-      <td>0.107996</td>
-      <td>0.136173</td>
-      <td>0.106193</td>
-      <td>0.143481</td>
+      <td>0.417570</td>
+      <td>0.376188</td>
+      <td>0.154538</td>
+      <td>0.348178</td>
       <td>0.000000</td>
-      <td>0.172923</td>
+      <td>0.426413</td>
+      <td>0.351653</td>
       <td>0.000000</td>
-      <td>0.285542</td>
-      <td>0.127139</td>
-      <td>0.365432</td>
+      <td>0.152425</td>
+      <td>0.172907</td>
+      <td>0.181436</td>
+      <td>0.435087</td>
+      <td>0.367145</td>
       <td>1.000000</td>
-      <td>0.109537</td>
-      <td>0.136849</td>
-      <td>0.000000</td>
+      <td>0.351013</td>
+      <td>0.301293</td>
+      <td>0.152648</td>
     </tr>
     <tr>
       <th>14</th>
-      <td>0.444172</td>
-      <td>0.395351</td>
-      <td>0.0</td>
-      <td>0.431973</td>
-      <td>0.442094</td>
-      <td>0.456569</td>
-      <td>0.327158</td>
+      <td>0.482067</td>
+      <td>0.440005</td>
+      <td>0.165371</td>
+      <td>0.357582</td>
       <td>0.000000</td>
-      <td>0.177483</td>
+      <td>0.457873</td>
+      <td>0.395676</td>
       <td>0.000000</td>
-      <td>0.134374</td>
-      <td>0.478105</td>
-      <td>0.124670</td>
-      <td>0.109537</td>
+      <td>0.149325</td>
+      <td>0.151373</td>
+      <td>0.146070</td>
+      <td>0.503254</td>
+      <td>0.263499</td>
+      <td>0.351013</td>
       <td>1.000000</td>
-      <td>0.298881</td>
-      <td>0.000000</td>
+      <td>0.308089</td>
+      <td>0.147887</td>
     </tr>
     <tr>
       <th>15</th>
-      <td>0.306952</td>
-      <td>0.285156</td>
-      <td>0.0</td>
-      <td>0.337151</td>
-      <td>0.303192</td>
-      <td>0.309687</td>
-      <td>0.295314</td>
+      <td>0.333438</td>
+      <td>0.294525</td>
+      <td>0.146140</td>
+      <td>0.319644</td>
       <td>0.000000</td>
-      <td>0.170825</td>
+      <td>0.322279</td>
+      <td>0.294420</td>
       <td>0.000000</td>
-      <td>0.136836</td>
-      <td>0.307482</td>
-      <td>0.135470</td>
-      <td>0.136849</td>
-      <td>0.298881</td>
+      <td>0.163335</td>
+      <td>0.152229</td>
+      <td>0.155118</td>
+      <td>0.332503</td>
+      <td>0.289228</td>
+      <td>0.301293</td>
+      <td>0.308089</td>
       <td>1.000000</td>
-      <td>0.000000</td>
+      <td>0.150512</td>
     </tr>
     <tr>
       <th>16</th>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.184413</td>
-      <td>0.000000</td>
-      <td>0.174151</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
+      <td>0.165799</td>
+      <td>0.157504</td>
+      <td>0.171176</td>
+      <td>0.139809</td>
+      <td>0.142375</td>
+      <td>0.143578</td>
+      <td>0.159435</td>
+      <td>0.197122</td>
+      <td>0.171001</td>
+      <td>0.179561</td>
+      <td>0.164733</td>
+      <td>0.149142</td>
+      <td>0.179794</td>
+      <td>0.152648</td>
+      <td>0.147887</td>
+      <td>0.150512</td>
       <td>1.000000</td>
     </tr>
   </tbody>
@@ -1040,15 +747,19 @@ Computed inter-template CCs in 2.60sec.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Template 0 is similar to: Int64Index([0, 1, 3, 4, 5, 11], dtype=&#39;int64&#39;)
-Keeping only Template 0
+Template 0 is similar to: Int64Index([0, 1, 5, 11], dtype=&#39;int64&#39;)
+Keeping only Template 1
+Template 3 is similar to: Int64Index([3, 5], dtype=&#39;int64&#39;)
+Keeping only Template 5
 Template 6 is similar to: Int64Index([5, 6], dtype=&#39;int64&#39;)
 Keeping only Template 5
+Template 14 is similar to: Int64Index([11, 14], dtype=&#39;int64&#39;)
+Keeping only Template 14
 </pre></div></div>
 </div>
 </section>
 <section id="Plot-the-similar-templates">
-<h2>Plot the similar templates<a class="headerlink" href="#Plot-the-similar-templates" title="Permalink to this heading"></a></h2>
+<h2>Plot the similar templates<a class="headerlink" href="#Plot-the-similar-templates" title="Link to this heading"></a></h2>
 <p>How good was our criterion to group similar templates together? Let’s check the waveforms of the similar templates. The previous cell told us that template 0 is similar to templates 1, 3, 11 and 13.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
@@ -1145,7 +856,7 @@ Text(0, 0.5, &#39;Velocity (AU)&#39;)
 <p>The similarity of these templates would make them detect the same events and thus, spending time on redundant computation and writing redundant info in databases.</p>
 </section>
 <section id="Save-the-non-redundant-templates-in-a-database">
-<h2>Save the non-redundant templates in a database<a class="headerlink" href="#Save-the-non-redundant-templates-in-a-database" title="Permalink to this heading"></a></h2>
+<h2>Save the non-redundant templates in a database<a class="headerlink" href="#Save-the-non-redundant-templates-in-a-database" title="Link to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>

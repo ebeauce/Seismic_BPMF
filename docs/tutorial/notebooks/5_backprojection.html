@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Backprojection of the Seismic Wavefield &mdash; BPMF 2.0.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/documentation_options.js?v=51b770b3"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -35,6 +36,7 @@
           
           <a href="../../index.html" class="icon icon-home">
             BPMF
+              <img src="../../_static/bpmf.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -104,288 +106,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars and line breaks on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-    white-space: pre;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-.jp-RenderedHTMLCommon table,
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-.jp-RenderedHTMLCommon thead,
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-.jp-RenderedHTMLCommon tr,
-.jp-RenderedHTMLCommon th,
-.jp-RenderedHTMLCommon td,
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-.jp-RenderedHTMLCommon th,
-div.rendered_html th {
-  font-weight: bold;
-}
-.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-.jp-RenderedHTMLCommon tbody tr:hover,
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="Backprojection-of-the-Seismic-Wavefield">
-<h1>Backprojection of the Seismic Wavefield<a class="headerlink" href="#Backprojection-of-the-Seismic-Wavefield" title="Permalink to this heading"></a></h1>
-<p>In this notebook, we use the powerful deep neural network PhaseNet <a class="reference external" href="https://academic.oup.com/gji/article/216/1/261/5129142">Zhu et al. 2019</a> to compute waveform features that are optimized for earthquake detection and location. The backprojection is done on these waveform features rather than the waveforms themselves. The efficient core backprojection routine used by <code class="docutils literal notranslate"><span class="pre">BPMF</span></code> is implemented in our python package <code class="docutils literal notranslate"><span class="pre">`beampower</span></code> &lt;<a class="reference external" href="https://github.com/ebeauce/beampower">https://github.com/ebeauce/beampower</a>&gt;`__.</p>
+  <section id="Backprojection-of-the-Seismic-Wavefield">
+<h1>Backprojection of the Seismic Wavefield<a class="headerlink" href="#Backprojection-of-the-Seismic-Wavefield" title="Link to this heading"></a></h1>
+<p>In this notebook, we use the powerful deep neural network PhaseNet <a class="reference external" href="https://academic.oup.com/gji/article/216/1/261/5129142">Zhu et al. 2019</a> to compute waveform features that are optimized for earthquake detection and location. The backprojection is done on these waveform features rather than the waveforms themselves. The efficient core backprojection routine used by <code class="docutils literal notranslate"><span class="pre">BPMF</span></code> is implemented in our python package <code class="docutils literal notranslate"><span class="pre">`beampower</span></code> &lt;<a class="reference external" href="https://github.com/ebeauce/beampower">https://github.com/ebeauce/beampower</a>&gt;`__.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -454,7 +177,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <section id="Load-metadata">
-<h2>Load metadata<a class="headerlink" href="#Load-metadata" title="Permalink to this heading"></a></h2>
+<h2>Load metadata<a class="headerlink" href="#Load-metadata" title="Link to this heading"></a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -789,7 +512,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </section>
 <section id="Load-the-data">
-<h2>Load the data<a class="headerlink" href="#Load-the-data" title="Permalink to this heading"></a></h2>
+<h2>Load the data<a class="headerlink" href="#Load-the-data" title="Link to this heading"></a></h2>
 <p>The following piece of code is written to process a single day, but you could loop over as many days as necessary.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -879,7 +602,7 @@ YH.DE07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 
 </div>
 </section>
 <section id="Compute-the-waveform-features">
-<h2>Compute the waveform features<a class="headerlink" href="#Compute-the-waveform-features" title="Permalink to this heading"></a></h2>
+<h2>Compute the waveform features<a class="headerlink" href="#Compute-the-waveform-features" title="Link to this heading"></a></h2>
 <p>The goal is to compute the <code class="docutils literal notranslate"><span class="pre">waveform_features</span></code> numpy.ndarray with dimension <code class="docutils literal notranslate"><span class="pre">(n_stations,</span> <span class="pre">n_channels,</span> <span class="pre">n_times)</span></code>.</p>
 <p>Here, we demonstrate how a single-station deep neural network detector can be turned into an array detector with backprojection.</p>
 <p><em>Note:</em> we use <code class="docutils literal notranslate"><span class="pre">phasenet</span></code> from <a class="reference external" href="https://github.com/ebeauce/PhaseNet">https://github.com/ebeauce/PhaseNet</a> to access the wrapper module <code class="docutils literal notranslate"><span class="pre">phasenet.wrapper</span></code>.</p>
@@ -1066,7 +789,7 @@ Text(0.5, 0, &#39;Time (samples)&#39;)
 <p>See that the number of channels in <code class="docutils literal notranslate"><span class="pre">waveform_features</span></code> is only 2. This is because <code class="docutils literal notranslate"><span class="pre">phasenet</span></code> returned a time series of P-arrival probability <code class="docutils literal notranslate"><span class="pre">waveform_features[:,</span> <span class="pre">0,</span> <span class="pre">:]</span></code> and a time series of S-arrival probability <code class="docutils literal notranslate"><span class="pre">waveform_features[:,</span> <span class="pre">1,</span> <span class="pre">:]</span></code>.</p>
 </section>
 <section id="Initialize-the-Beamformer-instance">
-<h2>Initialize the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance<a class="headerlink" href="#Initialize-the-Beamformer-instance" title="Permalink to this heading"></a></h2>
+<h2>Initialize the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance<a class="headerlink" href="#Initialize-the-Beamformer-instance" title="Link to this heading"></a></h2>
 <p>The initialization of the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance only requires the table of travel times and the corresponding source coordinates. The sampling rate is used to convert the travel time table, in seconds, to a <em>moveout</em> table, in samples. Note that the moveouts are all taken relative to the first P-wave arrival for each source.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
@@ -1085,7 +808,7 @@ Text(0.5, 0, &#39;Time (samples)&#39;)
 </div>
 </section>
 <section id="Inform-the-Beamformer-instance-of-the-data-and-metadata">
-<h2>Inform the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance of the data and metadata<a class="headerlink" href="#Inform-the-Beamformer-instance-of-the-data-and-metadata" title="Permalink to this heading"></a></h2>
+<h2>Inform the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance of the data and metadata<a class="headerlink" href="#Inform-the-Beamformer-instance-of-the-data-and-metadata" title="Link to this heading"></a></h2>
 <p>Before using the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance to backproject the wavefield, we need to set a number of important attributes to the instance. First, we attach the <code class="docutils literal notranslate"><span class="pre">Data</span></code> instance to the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance so that <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code>’s methods can read the <code class="docutils literal notranslate"><span class="pre">Data</span></code> instance’s attributes. Second, we attach the <code class="docutils literal notranslate"><span class="pre">Network</span></code> instance corresponding to the set of stations that we are going to use for this backprojection.</p>
 <p><strong>N.B.:</strong> The <code class="docutils literal notranslate"><span class="pre">Network</span></code> instance can be a subset of the total network represented in the travel time table! It means that you can initialize the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance once and for all and then process different time periods when the operating stations might be a subset of the total network.</p>
 <div class="nbinput nblast docutils container">
@@ -1103,7 +826,7 @@ Text(0.5, 0, &#39;Time (samples)&#39;)
 </div>
 </section>
 <section id="Define-the-phase-specific-weights">
-<h2>Define the phase-specific weights<a class="headerlink" href="#Define-the-phase-specific-weights" title="Permalink to this heading"></a></h2>
+<h2>Define the phase-specific weights<a class="headerlink" href="#Define-the-phase-specific-weights" title="Link to this heading"></a></h2>
 <p>We recall that the definition of a beam is:</p>
 <div class="math notranslate nohighlight">
 \[b_k(t) = \sum_{s, c, p} \mathcal{U}_{s, c}(t + \tau_{s, p}^{(k)}),\]</div>
@@ -1149,7 +872,7 @@ The shape of weights_phases is:  (8, 2, 2)
 </div>
 </section>
 <section id="Define-the-source-specific-weights">
-<h2>Define the source-specific weights<a class="headerlink" href="#Define-the-source-specific-weights" title="Permalink to this heading"></a></h2>
+<h2>Define the source-specific weights<a class="headerlink" href="#Define-the-source-specific-weights" title="Link to this heading"></a></h2>
 <p>When using a grid covering a large geographical region, all stations may not be relevant to every source (grid point). Small earthquakes occurring at one end of the region are unlikely to be recorded by stations at the other end of the region. In order to only use the relevant data to each source, we define the source-specific weights <span class="math notranslate nohighlight">\(\beta_{k, s}\)</span> and modify the definition of the beam:</p>
 <div class="math notranslate nohighlight">
 \[b_k(t) = \sum_{s, c, p} \beta_{k, s} \alpha_{s, c, p} \mathcal{U}_{s, c}(t + \tau_{s, p}^{(k)}),\]</div>
@@ -1166,7 +889,7 @@ The shape of weights_phases is:  (8, 2, 2)
 </div>
 </section>
 <section id="Run-the-backprojection">
-<h2>Run the backprojection<a class="headerlink" href="#Run-the-backprojection" title="Permalink to this heading"></a></h2>
+<h2>Run the backprojection<a class="headerlink" href="#Run-the-backprojection" title="Link to this heading"></a></h2>
 <p>We are now ready to run the backprojection at all times <span class="math notranslate nohighlight">\(t\)</span>:</p>
 <div class="math notranslate nohighlight">
 \[b^*(t) = \underset{k}{\max} \lbrace b_k(t) \rbrace\]</div>
@@ -1209,7 +932,7 @@ No artists with labels found to put in legend.  Note that artists whose label st
 </div>
 </section>
 <section id="Define-the-earthquake-detections">
-<h2>Define the earthquake detections<a class="headerlink" href="#Define-the-earthquake-detections" title="Permalink to this heading"></a></h2>
+<h2>Define the earthquake detections<a class="headerlink" href="#Define-the-earthquake-detections" title="Link to this heading"></a></h2>
 <p>Detecting earthquakes based on the maximum beam computed above relies on the somewhat arbitrary task of defining a detection threshold. When stacking many time series, we may expect the sum to nearly be normally distributed according to the <a class="reference external" href="https://en.wikipedia.org/wiki/Central_limit_theorem">central limit theorem</a>. However, when using PhaseNet to compute the waveform features, the distribution of the maximum beam is often far from a normal distribution and the definition of a detection
 threshold based on gaussian p-values is not a valid approach.</p>
 <p>The detection threshold used in this example was derived purely empirically by a trial-and-error procedure, manually checking the presence of false positive detections. Here, we use a threshold = 2, <strong>but this threshold depends on the number of operating stations and how PhaseNet performs on the data set</strong>. As you will see in the following cells, this choice is quite conservative; don’t hesitate playing with the threshold and lowering it.</p>
@@ -1254,7 +977,7 @@ Extracted 17 events.
 <p>At this stage, we could save the metadata of each detected event and go to the next notebook, but we will first look at the waveforms of the detected events.</p>
 </section>
 <section id="Extract-the-detected-events-from-the-continuous-data">
-<h2>Extract the detected events from the continuous data<a class="headerlink" href="#Extract-the-detected-events-from-the-continuous-data" title="Permalink to this heading"></a></h2>
+<h2>Extract the detected events from the continuous data<a class="headerlink" href="#Extract-the-detected-events-from-the-continuous-data" title="Link to this heading"></a></h2>
 <p>Each detected earthquake is returned as an instance of the <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event</span></code> class.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
@@ -1343,7 +1066,7 @@ Extracted 17 events.
 </div>
 </section>
 <section id="Store-the-metadata-of-the-detected-earthquakes-in-a-database">
-<h2>Store the metadata of the detected earthquakes in a database<a class="headerlink" href="#Store-the-metadata-of-the-detected-earthquakes-in-a-database" title="Permalink to this heading"></a></h2>
+<h2>Store the metadata of the detected earthquakes in a database<a class="headerlink" href="#Store-the-metadata-of-the-detected-earthquakes-in-a-database" title="Link to this heading"></a></h2>
 <p>By calling the <code class="docutils literal notranslate"><span class="pre">Event.write</span></code> method for each detection, we save their metadata in a hdf5 file located at <code class="docutils literal notranslate"><span class="pre">BPMF.cfg.OUTPUT_PATH/OUTPUT_DB_FILENAME</span></code>. Each event is stored in a separate hdf5 group with name defined as <code class="docutils literal notranslate"><span class="pre">detections[i].id</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pre-requisites &mdash; BPMF 2.0.0 documentation</title>
@@ -12,9 +12,9 @@
   <![endif]-->
   
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/documentation_options.js?v=51b770b3"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -33,6 +33,7 @@
           
           <a href="../index.html" class="icon icon-home">
             BPMF
+              <img src="../_static/bpmf.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -102,37 +103,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="pre-requisites">
-<h1>Pre-requisites<a class="headerlink" href="#pre-requisites" title="Permalink to this heading"></a></h1>
+  <section id="pre-requisites">
+<h1>Pre-requisites<a class="headerlink" href="#pre-requisites" title="Link to this heading"></a></h1>
 <p>The goal of this tutorial is to learm how to implement a full earthquake detection and location workflow with <code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code>.</p>
 <section id="environment">
-<h2>Environment<a class="headerlink" href="#environment" title="Permalink to this heading"></a></h2>
+<h2>Environment<a class="headerlink" href="#environment" title="Link to this heading"></a></h2>
 <section id="base">
-<h3>Base<a class="headerlink" href="#base" title="Permalink to this heading"></a></h3>
+<h3>Base<a class="headerlink" href="#base" title="Link to this heading"></a></h3>
 <p>Creating the virtual environment as described here is <em>essential</em> for running the tutorial successfully. We will use the python package manager <cite>Anaconda</cite>, or rather its ligther version <cite>Miniconda</cite>. Follow the instructions here <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">https://docs.conda.io/en/latest/miniconda.html</a> to install <cite>Miniconda</cite>.</p>
 <p>Once <cite>Anaconda</cite> or <cite>Miniconda</cite> is installed, you can use the <code class="xref py py-data docutils literal notranslate"><span class="pre">conda</span></code> commands. We will first make sure that <code class="xref py py-data docutils literal notranslate"><span class="pre">conda</span></code> uses packages from <code class="xref py py-data docutils literal notranslate"><span class="pre">conda-forge</span></code> when necessary:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>config<span class="w"> </span>--add<span class="w"> </span>channels<span class="w"> </span>conda-forge
@@ -157,7 +134,7 @@
 </div>
 </section>
 <section id="beampower">
-<h3>Beampower<a class="headerlink" href="#beampower" title="Permalink to this heading"></a></h3>
+<h3>Beampower<a class="headerlink" href="#beampower" title="Link to this heading"></a></h3>
 <p><code class="xref py py-data docutils literal notranslate"><span class="pre">beampower</span></code> is our package with C and CUDA-C routines for
 backprojection wrapped in Python code. You can download and install
 <code class="xref py py-data docutils literal notranslate"><span class="pre">beampower</span></code> with:</p>
@@ -169,7 +146,7 @@ backprojection wrapped in Python code. You can download and install
 information.</p>
 </section>
 <section id="fast-matched-filter">
-<h3>Fast Matched Filter<a class="headerlink" href="#fast-matched-filter" title="Permalink to this heading"></a></h3>
+<h3>Fast Matched Filter<a class="headerlink" href="#fast-matched-filter" title="Link to this heading"></a></h3>
 <p><code class="xref py py-data docutils literal notranslate"><span class="pre">fastmatchedfilter</span></code> is our package with C and CUDA-C routines for
 template matching wrappedin Python code. You can download and install
 <code class="xref py py-data docutils literal notranslate"><span class="pre">fastmatchedfilter</span></code>:</p>
@@ -180,14 +157,14 @@ template matching wrappedin Python code. You can download and install
 for more information.</p>
 </section>
 <section id="pykonal">
-<h3>PyKonal<a class="headerlink" href="#pykonal" title="Permalink to this heading"></a></h3>
+<h3>PyKonal<a class="headerlink" href="#pykonal" title="Link to this heading"></a></h3>
 <p>Then, download Pykonal from <a class="reference external" href="https://github.com/malcolmw/pykonal">https://github.com/malcolmw/pykonal</a>. Pykonal is the package we will use for computing the P- and S-wave travel times. Once downloaded and unpacked, go to Pykonal’s root folder and run:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>.
 </pre></div>
 </div>
 </section>
 <section id="phasenet">
-<h3>PhaseNet<a class="headerlink" href="#phasenet" title="Permalink to this heading"></a></h3>
+<h3>PhaseNet<a class="headerlink" href="#phasenet" title="Link to this heading"></a></h3>
 <p>Several important features of <code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code> relies on the deep neural network phase picker PhaseNet. In order to use PhaseNet, you have to install <code class="xref py py-data docutils literal notranslate"><span class="pre">seisbench</span></code> (<a class="reference external" href="https://github.com/seisbench/seisbench">https://github.com/seisbench/seisbench</a>), a convenient python package to run the most popular machine learning earthquake pickers/detectors. Simply run:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>seisbench
 </pre></div>
@@ -195,7 +172,7 @@ for more information.</p>
 <p>This should download the package <code class="xref py py-data docutils literal notranslate"><span class="pre">torch</span></code>.</p>
 </section>
 <section id="nonlinloc">
-<h3>NonLinLoc<a class="headerlink" href="#nonlinloc" title="Permalink to this heading"></a></h3>
+<h3>NonLinLoc<a class="headerlink" href="#nonlinloc" title="Link to this heading"></a></h3>
 <p>To benefit from the best location routines, you need to install the <code class="xref py py-data docutils literal notranslate"><span class="pre">NLLoc</span></code> software (<a class="reference external" href="http://alomax.free.fr/nlloc/">http://alomax.free.fr/nlloc/</a>). You can download <code class="xref py py-data docutils literal notranslate"><span class="pre">NLLoc</span></code> at <a class="reference external" href="http://alomax.free.fr/nlloc/soft7.00/tar/NLL7.00_src.tgz">http://alomax.free.fr/nlloc/soft7.00/tar/NLL7.00_src.tgz</a>. For Unix and Mac users, I recommend doing something along the lines (modify as necessary):</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mkdir<span class="w"> </span><span class="si">${</span><span class="nv">HOME</span><span class="si">}</span>/NLLoc
 <span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span><span class="si">${</span><span class="nv">HOME</span><span class="si">}</span>/NLLoc
@@ -217,11 +194,11 @@ for more information.</p>
 </section>
 </section>
 <section id="running-the-tutorial">
-<h2>Running the Tutorial<a class="headerlink" href="#running-the-tutorial" title="Permalink to this heading"></a></h2>
+<h2>Running the Tutorial<a class="headerlink" href="#running-the-tutorial" title="Link to this heading"></a></h2>
 <p>The tutorial is made of a series of Ipython notebooks that are meant to be run from 0 to 10.</p>
 </section>
 <section id="reference">
-<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this heading"></a></h2>
+<h2>Reference<a class="headerlink" href="#reference" title="Link to this heading"></a></h2>
 <p>Zhu, Weiqiang, and Gregory C. Beroza. “PhaseNet: a deep-neural-network-based seismic arrival-time picking method.” Geophysical Journal International 216, no. 1 (2019): 261-273.</p>
 </section>
 </section>
