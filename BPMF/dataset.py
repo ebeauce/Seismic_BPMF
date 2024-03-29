@@ -11,6 +11,8 @@ import pandas as pd
 import pathlib
 import copy
 import datetime
+import warnings
+
 from obspy import UTCDateTime as udt
 
 from abc import ABC, abstractmethod
@@ -921,10 +923,7 @@ class Data(object):
                         tr = tr[0]
                     else:
                         continue
-                    # compare 1 + abs(sum) to closest representable number
-                    if np.sum(
-                        (1.0 + abs(tr.data)) > (1.0 + np.finfo(tr.data.dtype).eps)
-                    ):
+                    if np.sum(tr.data.astype("float32") != 0.0):
                         availability[s] = True
                         break
             self.availability_per_cha[cp] = availability
@@ -1180,11 +1179,12 @@ class Event(object):
 
     @property
     def availability(self):
-        if hasattr(self, "aux_data") and "availability" in self.aux_data:
-            return self.aux_data["availability"].loc[self.stations]
-        else:
-            print("Call `self.set_availability` first.")
-            return
+        return self.availability_per_sta
+        # if hasattr(self, "aux_data") and "availability" in self.aux_data:
+        #    return self.aux_data["availability"].loc[self.stations]
+        # else:
+        #    print("Call `self.set_availability` first.")
+        #    return
 
     @property
     def availability_per_sta(self):
@@ -2096,11 +2096,19 @@ class Event(object):
         if os.path.isfile(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn)):
             os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn))
         NLLoc_utils.write_NLLoc_obs(
-            self.origin_time, self.picks, stations, obs_fn,
+            self.origin_time,
+            self.picks,
+            stations,
+            obs_fn,
         )
         # write control file
         NLLoc_utils.write_NLLoc_control(
-            ctrl_fn, out_basename, obs_fn, method=method, excluded_obs=excluded_obs, **kwargs
+            ctrl_fn,
+            out_basename,
+            obs_fn,
+            method=method,
+            excluded_obs=excluded_obs,
+            **kwargs,
         )
         if verbose == 0:
             # run NLLoc
@@ -2342,9 +2350,7 @@ class Event(object):
                         tr = tr[0]
                     else:
                         continue
-                    if np.sum(
-                        (1.0 + abs(tr.data)) > (1.0 + np.finfo(tr.data.dtype).eps)
-                    ):
+                    if np.sum(tr.data.astype("float32") != 0.0):
                         availability[s] = True
                         break
             self._availability_per_cha[cp] = availability
@@ -3195,6 +3201,83 @@ class Template(Event):
         return two_point_distance(
             self.longitude, self.latitude, self.depth, longitude, latitude, depth
         )
+
+    def find_monochromatic_traces(
+            self,
+            autocorr_peak_threshold=0.33,
+            num_peaks_criterion=5,
+            taper_pct=5.,
+            max_lag_samp=None,
+            verbose=True
+            ):
+        """
+        Detect traces in seismic waveforms with dominant monochromatic signals.
+
+        Parameters
+        ----------
+        autocorr_peak_threshold : float, optional
+            Threshold for peak detection in the autocorrelation function.
+            Default is 0.33.
+        num_peaks_criterion : int, optional
+            Minimum number of peaks required above the threshold for a trace
+            to be considered monochromatic. Default is 5.
+        taper_pct : float, optional
+            Percentage of the signal to taper at both ends using a Tukey
+            window function. Default is 5.0.
+        max_lag_samp : int or None, optional
+            Maximum lag samples to consider in the autocorrelation function.
+            If None, uses the entire autocorrelation. Default is None.
+        verbose : bool, optional
+            If True, displays a warning about the experimental nature of
+            the method. Default is True.
+
+        Returns
+        -------
+        monochromatic : pandas.DataFrame
+            A DataFrame indicating whether each trace is monochromatic or not.
+            Rows represent stations and columns represent components.
+        num_peaks_above_threshold : pandas.DataFrame
+            A DataFrame containing the number of peaks above the threshold
+            for each trace.
+        """
+        from scipy.signal import find_peaks
+        from scipy.signal.windows import tukey
+        if verbose:
+            warnings.warn("This is a highly experimental method!")
+
+        taper_window = tukey(self.waveforms_arr.shape[-1], alpha=taper_pct / 100.)
+
+        num_peaks_above_threshold = pd.DataFrame(
+                index=self.stations, columns=self.components
+                )
+        monochromatic = pd.DataFrame(
+                index=self.stations, columns=self.components, data=False
+                )
+        for s, sta in enumerate(self.stations):
+            for c, cha in enumerate(self.components):
+                x = self.waveforms_arr[s, c, :]
+                if x.sum() == 0.:
+                    continue
+                x_fft = np.fft.rfft(x * taper_window)
+                autocorr = np.fft.irfft(x_fft * np.conj(x_fft))
+                # re-order cross-corr (autocorr[len(autocorr)//2] is x-corr at lag 0, by construction)
+                #autocorr = np.hstack( (autocorr[len(autocorr)//2:], autocorr[:len(autocorr)//2]) )
+                autocorr = autocorr[:len(autocorr)//2]
+                if max_lag_samp is not None:
+                    autocorr = autocorr[:max_lag_samp]
+                    #lag_0_index = len(autocorr) // 2
+                    #autocorr = autocorr[lag_0_index - max_lag_samp : lag_0_index + max_lag_samp]
+                autocorr = np.abs(autocorr / autocorr.max())
+                peaks, peak_params = find_peaks(autocorr)
+                peak_values = autocorr[peaks]
+                num_peaks_above_threshold.loc[sta, cha] = np.sum(
+                        peak_values > autocorr_peak_threshold
+                        )
+                if num_peaks_above_threshold.loc[sta, cha] >= num_peaks_criterion:
+                    monochromatic.loc[sta, cha] = True
+        return monochromatic, num_peaks_above_threshold
+
+
 
     def n_best_SNR_stations(self, n, available_stations=None):
         """
