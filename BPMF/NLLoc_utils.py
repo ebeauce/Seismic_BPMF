@@ -410,6 +410,8 @@ def write_NLLoc_control(
     angle_grid="ANGLES_NO",
     grid="MISFIT",
     locsearch="OCT",
+    phases=["P", "S"],
+    excluded_obs={},
     n_depth_points=None,
     **kwargs,
 ):
@@ -462,6 +464,13 @@ def write_NLLoc_control(
                and grid search that allows the efficient search for the global
                minimum. See 'http://alomax.free.fr/nlloc/octtree/OctTree.html'
                for more details. This is the default option.
+    phases : list of str, optional
+        List of phases used by NonLinLoc. This list includes either "P", "S"
+        or both. Defaults to ["P", "S"].
+    excluded_obs : dict, optional
+        Excluded observations using NLLoc's LOCEXCLUDE command:
+            `LOCEXCLUDE sta ph`
+        and `excluded_obs[sta] = ph`. Defaults to an empty dictionary.
     n_depth_points : int or None, optional
         If not None, only the first `n_depth_points` points are kept along 
         the depth axis in the grid.
@@ -582,7 +591,6 @@ def write_NLLoc_control(
         iRejectDuplicateArrivals,
     ]
     fc.write("LOCMETH " + " ".join([str(p) for p in params]) + "\n")
-    # fc.write(f"LOCMETH {method} 5000 6 -1 -1 -1 6 -1 1\n")
     # --------------------------------------------------------------
     #              LOCGAU parameters
     SigmaTime = kwargs.get("SigmaTime", 0.2)
@@ -595,9 +603,8 @@ def write_NLLoc_control(
     SigmaTmax = kwargs.get("SigmaTmax", 10.0)
     fc.write(f"LOCGAU2 {SigmaTfraction} {SigmaTmin} {SigmaTmax}\n")
     # --------------------------------------------------------------
-    fc.write("LOCPHASEID  P\n")
-    # --------------------------------------------------------------
-    fc.write("LOCPHASEID  S\n")
+    for ph in phases:
+        fc.write(f"LOCPHASEID  {ph.upper()}\n")
     # --------------------------------------------------------------
     #         LOCQUAL2ERR parameters
     #  define 5 levels of quality
@@ -615,3 +622,6 @@ def write_NLLoc_control(
     cutoffDist = kwargs.get("cutoffDist", 10000000.0)
     useStationsDensity = int(kwargs.setdefault("useStationsDensity", 1))
     fc.write(f"LOCSTAWT {useStationsDensity} {cutoffDist}\n")
+    # --------------------------------------------------------------
+    for sta, ph in excluded_obs.items():
+        fc.write(f"LOCEXCLUDE {sta} {ph}\n")

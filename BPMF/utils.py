@@ -120,7 +120,7 @@ def lowpass_chebyshev_I(
 
 
 def lowpass_chebyshev_II(
-    X, freqmax, sampling_rate, order=10, min_attenuation_dB=40.0, zerophase=False
+    X, freqmax, sampling_rate, order=3, min_attenuation_dB=40.0, zerophase=False
 ):
     from scipy.signal import cheby2, sosfilt
 
@@ -417,7 +417,7 @@ def _preprocess_stream(
                 tr.data,
                 0.49 * target_SR,
                 tr.stats.sampling_rate,
-                order=10,
+                order=kwargs.get("antialiasing_filter_order", 4),
                 min_attenuation_dB=40.0,
                 zerophase=True,
             )
