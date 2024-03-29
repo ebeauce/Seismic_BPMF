@@ -1,7 +1,7 @@
 # Seismic_BPMF
 
 <p align="center">
-<img src="data/bpmf.svg" width=350>
+<img src="data/bpmf.svg" width=500>
 </p><br><br><br><br>
 
 
