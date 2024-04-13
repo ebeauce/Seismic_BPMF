@@ -99,6 +99,7 @@
 <li class="toctree-l2"><a class="reference internal" href="api/clib.html#BPMF.clib.find_similar_sources"><code class="docutils literal notranslate"><span class="pre">find_similar_sources()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/clib.html#BPMF.clib.kurtosis"><code class="docutils literal notranslate"><span class="pre">kurtosis()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/clib.html#BPMF.clib.select_cc_indexes"><code class="docutils literal notranslate"><span class="pre">select_cc_indexes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/clib.html#BPMF.clib.time_dependent_threshold"><code class="docutils literal notranslate"><span class="pre">time_dependent_threshold()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/dataset.html">BPMF.dataset</a><ul>
@@ -132,12 +133,14 @@
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.availability_per_sta"><code class="docutils literal notranslate"><span class="pre">Event.availability_per_sta</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.az_hmax_unc"><code class="docutils literal notranslate"><span class="pre">Event.az_hmax_unc</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.az_hmin_unc"><code class="docutils literal notranslate"><span class="pre">Event.az_hmin_unc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.compute_snr"><code class="docutils literal notranslate"><span class="pre">Event.compute_snr()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.get_np_array"><code class="docutils literal notranslate"><span class="pre">Event.get_np_array()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.get_peak_amplitudes"><code class="docutils literal notranslate"><span class="pre">Event.get_peak_amplitudes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.hmax_unc"><code class="docutils literal notranslate"><span class="pre">Event.hmax_unc</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.hmin_unc"><code class="docutils literal notranslate"><span class="pre">Event.hmin_unc</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.hor_ver_uncertainties"><code class="docutils literal notranslate"><span class="pre">Event.hor_ver_uncertainties()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.location"><code class="docutils literal notranslate"><span class="pre">Event.location</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.n_best_SNR_stations"><code class="docutils literal notranslate"><span class="pre">Event.n_best_SNR_stations()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.n_closest_stations"><code class="docutils literal notranslate"><span class="pre">Event.n_closest_stations()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.pick_PS_phases"><code class="docutils literal notranslate"><span class="pre">Event.pick_PS_phases()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.pl_vmax_unc"><code class="docutils literal notranslate"><span class="pre">Event.pl_vmax_unc</span></code></a></li>
@@ -157,6 +160,7 @@
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_moveouts_to_empirical_times"><code class="docutils literal notranslate"><span class="pre">Event.set_moveouts_to_empirical_times()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_moveouts_to_theoretical_times"><code class="docutils literal notranslate"><span class="pre">Event.set_moveouts_to_theoretical_times()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.set_source_receiver_dist"><code class="docutils literal notranslate"><span class="pre">Event.set_source_receiver_dist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.snr"><code class="docutils literal notranslate"><span class="pre">Event.snr</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.source_receiver_dist"><code class="docutils literal notranslate"><span class="pre">Event.source_receiver_dist</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.source_receiver_epicentral_dist"><code class="docutils literal notranslate"><span class="pre">Event.source_receiver_epicentral_dist</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.sr"><code class="docutils literal notranslate"><span class="pre">Event.sr</span></code></a></li>
@@ -165,6 +169,7 @@
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.update_picks"><code class="docutils literal notranslate"><span class="pre">Event.update_picks()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.update_travel_times"><code class="docutils literal notranslate"><span class="pre">Event.update_travel_times()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.vmax_unc"><code class="docutils literal notranslate"><span class="pre">Event.vmax_unc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.waveforms_arr"><code class="docutils literal notranslate"><span class="pre">Event.waveforms_arr</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.write"><code class="docutils literal notranslate"><span class="pre">Event.write()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Event.zero_out_clipped_waveforms"><code class="docutils literal notranslate"><span class="pre">Event.zero_out_clipped_waveforms()</span></code></a></li>
 </ul>
@@ -216,10 +221,10 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template"><code class="docutils literal notranslate"><span class="pre">Template</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.distance"><code class="docutils literal notranslate"><span class="pre">Template.distance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.find_monochromatic_traces"><code class="docutils literal notranslate"><span class="pre">Template.find_monochromatic_traces()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.init_from_event"><code class="docutils literal notranslate"><span class="pre">Template.init_from_event()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.moveouts_arr"><code class="docutils literal notranslate"><span class="pre">Template.moveouts_arr</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.moveouts_win"><code class="docutils literal notranslate"><span class="pre">Template.moveouts_win</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.n_best_SNR_stations"><code class="docutils literal notranslate"><span class="pre">Template.n_best_SNR_stations()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.plot_detection"><code class="docutils literal notranslate"><span class="pre">Template.plot_detection()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.plot_recurrence_times"><code class="docutils literal notranslate"><span class="pre">Template.plot_recurrence_times()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.read_catalog"><code class="docutils literal notranslate"><span class="pre">Template.read_catalog()</span></code></a></li>
@@ -227,7 +232,6 @@
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.read_waveforms"><code class="docutils literal notranslate"><span class="pre">Template.read_waveforms()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.template_idx"><code class="docutils literal notranslate"><span class="pre">Template.template_idx</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.tid"><code class="docutils literal notranslate"><span class="pre">Template.tid</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.waveforms_arr"><code class="docutils literal notranslate"><span class="pre">Template.waveforms_arr</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.write"><code class="docutils literal notranslate"><span class="pre">Template.write()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html#BPMF.dataset.Template.write_summary"><code class="docutils literal notranslate"><span class="pre">Template.write_summary()</span></code></a></li>
 </ul>
@@ -399,6 +403,7 @@
 <li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.round_time"><code class="docutils literal notranslate"><span class="pre">round_time()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.running_mad"><code class="docutils literal notranslate"><span class="pre">running_mad()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.sec_to_samp"><code class="docutils literal notranslate"><span class="pre">sec_to_samp()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.spectrogram"><code class="docutils literal notranslate"><span class="pre">spectrogram()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.time_range"><code class="docutils literal notranslate"><span class="pre">time_range()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.trigger_picks"><code class="docutils literal notranslate"><span class="pre">trigger_picks()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/utils.html#BPMF.utils.two_point_distance"><code class="docutils literal notranslate"><span class="pre">two_point_distance()</span></code></a></li>

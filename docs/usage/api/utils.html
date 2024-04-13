@@ -82,6 +82,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.round_time"><code class="docutils literal notranslate"><span class="pre">round_time()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.running_mad"><code class="docutils literal notranslate"><span class="pre">running_mad()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.sec_to_samp"><code class="docutils literal notranslate"><span class="pre">sec_to_samp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.spectrogram"><code class="docutils literal notranslate"><span class="pre">spectrogram()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.time_range"><code class="docutils literal notranslate"><span class="pre">time_range()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.trigger_picks"><code class="docutils literal notranslate"><span class="pre">trigger_picks()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.two_point_distance"><code class="docutils literal notranslate"><span class="pre">two_point_distance()</span></code></a></li>
@@ -287,7 +288,7 @@ The shape of the array is (n_sources, n_receivers).</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.donefun">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">donefun</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#donefun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.donefun" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">donefun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">french</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#donefun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.donefun" title="Link to this definition"></a></dt>
 <dd><p>Super useful function.</p>
 </dd></dl>
 
@@ -502,7 +503,7 @@ three (n_sources,) numpy.ndarray: <cite>source_coords[‘latitude’]</cite>,
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.lowpass_chebyshev_II">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">lowpass_chebyshev_II</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_attenuation_dB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#lowpass_chebyshev_II"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.lowpass_chebyshev_II" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">lowpass_chebyshev_II</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_attenuation_dB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#lowpass_chebyshev_II"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.lowpass_chebyshev_II" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -607,6 +608,41 @@ round the time.</p></li>
 <dt class="sig sig-object py" id="BPMF.utils.sec_to_samp">
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">sec_to_samp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#sec_to_samp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.sec_to_samp" title="Link to this definition"></a></dt>
 <dd><p>Convert seconds to samples taking into account rounding errors.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.utils.spectrogram">
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">spectrogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_duration_sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detrend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hann'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spectrum'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#spectrogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.spectrogram" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>window_duration_sec</strong> (<em>float</em>) – Duration of the sliding window, in seconds, of the
+short-time Fourier transform. This is later converted to
+samples to define the <cite>nperseg</cite> argument for <cite>scipy.signal.stft</cite>.</p></li>
+<li><p><strong>overlap</strong> (<em>float</em>) – Ratio of overlap, from 0 to 1, between subsequent windows. This is
+later converted to samples to define the <cite>noverlap</cite> argument for
+<cite>scipy.signal.stft</cite>.</p></li>
+<li><p><strong>detrend</strong> (<em>bool</em><em>, </em><em>optional</em>) – If False, no detrending is done. If it is a string or a function,
+detrending is done (see doc of <cite>scipy.signal.stft</cite>).
+Defaults to False.</p></li>
+<li><p><strong>window</strong> (<em>str</em><em> or </em><em>tuple</em><em> or </em><em>array-like</em><em>, </em><em>optional</em>) – The string is the name of the taper window to apply to each segment.
+See the doc of <cite>scipy.signal.stft</cite> for more details.</p></li>
+<li><p><strong>boundary</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Define how the time series are extended at the boundaries. See the
+doc of <cite>scipy.signal.stft</cite> for more details. Defaults to None (only
+valid segments are used).</p></li>
+<li><p><strong>padded</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, padding occurs after boundary extension. Defaults to False.</p></li>
+<li><p><strong>scaling</strong> (<em>str</em><em>, </em><em>optional</em>) – Either ‘spectrum’ or ‘psd’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>frequency</strong> (<em>numpy.ndarray</em>) – Frequencies, in Hertz, at which the spectra are estimated.</p></li>
+<li><p><strong>time</strong> (<em>numpy.ndarray</em>) – Times, in seconds, of the sliding windows.</p></li>
+<li><p><strong>spectrogram</strong> (<em>numpy.ndarray</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

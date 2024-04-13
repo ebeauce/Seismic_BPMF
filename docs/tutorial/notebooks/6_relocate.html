@@ -62,10 +62,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#Load-the-metadata-of-the-events-previously-detected-with-backprojection">Load the metadata of the events previously detected with backprojection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Relocation-1:-PhaseNet-picks-and-NonLinLoc">Relocation 1: PhaseNet picks and NonLinLoc</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#Automated-picking-and-relocation">Automated picking and relocation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Plot-the-new-locations">Plot the new locations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Gather-the-new-catalog,-clean-up-possible-multiples-and-plot-the-new-locations">Gather the new catalog, clean up possible multiples and plot the new locations</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#Remove-possible-multiple-detections">Remove possible multiple detections</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Save-the-relocated-events">Save the relocated events</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Relocation-2-(Bonus):-Locating-and-estimating-uncertainties-with-backprojection-on-a-fine-grid">Relocation 2 (Bonus): Locating and estimating uncertainties with backprojection on a fine grid</a></li>
 </ul>
@@ -599,7 +598,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-4.12sec to read the waveforms for all 17 detections.
+3.21sec to read the waveforms for all 17 detections.
 </pre></div></div>
 </div>
 <p>Let’s plot these short windows with <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.plot</span></code>.</p>
@@ -766,73 +765,73 @@ Picking P and S wave arrivals on detection 16
     <tr>
       <th>DD06</th>
       <td>20.330000</td>
-      <td>0.328967</td>
+      <td>0.427482</td>
       <td>2012-07-26T01:10:24.610000Z</td>
-      <td>22.370001</td>
-      <td>0.877815</td>
-      <td>2012-07-26T01:10:26.650001Z</td>
-    </tr>
-    <tr>
-      <th>SAUV</th>
-      <td>19.660000</td>
-      <td>0.826449</td>
-      <td>2012-07-26T01:10:23.940000Z</td>
-      <td>21.129999</td>
-      <td>0.794980</td>
-      <td>2012-07-26T01:10:25.409999Z</td>
-    </tr>
-    <tr>
-      <th>DC06</th>
-      <td>20.969999</td>
-      <td>0.847896</td>
-      <td>2012-07-26T01:10:25.249999Z</td>
-      <td>23.209999</td>
-      <td>0.888470</td>
-      <td>2012-07-26T01:10:27.489999Z</td>
+      <td>22.340000</td>
+      <td>0.876346</td>
+      <td>2012-07-26T01:10:26.620000Z</td>
     </tr>
     <tr>
       <th>DC08</th>
       <td>20.010000</td>
-      <td>0.782944</td>
+      <td>0.759057</td>
       <td>2012-07-26T01:10:24.290000Z</td>
       <td>22.010000</td>
-      <td>0.734966</td>
-      <td>2012-07-26T01:10:26.290000Z</td>
-    </tr>
-    <tr>
-      <th>SPNC</th>
-      <td>20.139999</td>
-      <td>0.928386</td>
-      <td>2012-07-26T01:10:24.419999Z</td>
-      <td>22.010000</td>
-      <td>0.922158</td>
+      <td>0.722221</td>
       <td>2012-07-26T01:10:26.290000Z</td>
     </tr>
     <tr>
       <th>DE08</th>
       <td>19.799999</td>
-      <td>0.400618</td>
+      <td>0.422192</td>
       <td>2012-07-26T01:10:24.079999Z</td>
       <td>21.950001</td>
-      <td>0.445783</td>
+      <td>0.460754</td>
       <td>2012-07-26T01:10:26.230001Z</td>
+    </tr>
+    <tr>
+      <th>SPNC</th>
+      <td>20.150000</td>
+      <td>0.936033</td>
+      <td>2012-07-26T01:10:24.430000Z</td>
+      <td>22.010000</td>
+      <td>0.915193</td>
+      <td>2012-07-26T01:10:26.290000Z</td>
+    </tr>
+    <tr>
+      <th>DC06</th>
+      <td>20.950001</td>
+      <td>0.876173</td>
+      <td>2012-07-26T01:10:25.230001Z</td>
+      <td>23.209999</td>
+      <td>0.897276</td>
+      <td>2012-07-26T01:10:27.489999Z</td>
+    </tr>
+    <tr>
+      <th>SAUV</th>
+      <td>19.660000</td>
+      <td>0.818781</td>
+      <td>2012-07-26T01:10:23.940000Z</td>
+      <td>21.129999</td>
+      <td>0.774574</td>
+      <td>2012-07-26T01:10:25.409999Z</td>
     </tr>
     <tr>
       <th>DC07</th>
       <td>20.410000</td>
-      <td>0.696282</td>
+      <td>0.711142</td>
       <td>2012-07-26T01:10:24.690000Z</td>
-      <td>22.250000</td>
-      <td>0.701232</td>
-      <td>2012-07-26T01:10:26.530000Z</td>
+      <td>22.240000</td>
+      <td>0.678000</td>
+      <td>2012-07-26T01:10:26.520000Z</td>
     </tr>
     <tr>
       <th>DE07</th>
-      <td>20.420000</td>
-      <td>0.964854</td>
-      <td>2012-07-26T01:10:24.700000Z</td>
+      <td>20.430000</td>
+      <td>0.958840</td>
+      <td>2012-07-26T01:10:24.710000Z</td>
       <td>22.570000</td>
-      <td>0.873087</td>
+      <td>0.861130</td>
       <td>2012-07-26T01:10:26.850000Z</td>
     </tr>
   </tbody>
@@ -865,7 +864,7 @@ Picking P and S wave arrivals on detection 16
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-4.11sec to read the waveforms for all 17 detections.
+3.30sec to read the waveforms for all 17 detections.
 </pre></div></div>
 </div>
 <p>The following plot shows: - the P-/S-wave arrival continuous probabilities (blue=P-wave, red=S-wave) computed by PhaseNet, - the PhaseNet picks with dashed vertical lines (blue=P-wave, red=S-wave), - the arrival times predicted by the backprojection location with solid vertical lines (purple=P-wave, orange=S-wave).</p>
@@ -916,7 +915,7 @@ Picking P and S wave arrivals on detection 16
          <span class="s2">&quot;backprojection_latitude&quot;</span><span class="p">:</span> <span class="n">ev</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
          <span class="s2">&quot;backprojection_depth&quot;</span><span class="p">:</span> <span class="n">ev</span><span class="o">.</span><span class="n">depth</span><span class="p">}</span>
     <span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="n">MINIMUM_NUM_STATIONS_W_PICKS</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="n">MINIMUM_NUM_STATIONS_W_PICKS</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Relocating event </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="c1"># first relocation, insensitive to outliers</span>
         <span class="n">ev</span><span class="o">.</span><span class="n">relocate</span><span class="p">(</span>
@@ -939,6 +938,7 @@ Relocating event 0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Relocating event 1
+Relocating event 2
 Relocating event 3
 Relocating event 4
 Relocating event 5
@@ -994,11 +994,11 @@ Relocating event 16
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The maximum horizontal location uncertainty of event 0 is 2.52km.
-The azimuth of the maximum horizontal uncertainty is 143.94degrees.
-The mainimumhorizontal location uncertainty of event 0 is 1.29km.
-The azimuth of the minimum horizontal uncertainty is 53.94degrees.
-The maximum vertical location uncertainty is 3.10km.
+The maximum horizontal location uncertainty of event 0 is 1.78km.
+The azimuth of the maximum horizontal uncertainty is 161.99degrees.
+The mainimumhorizontal location uncertainty of event 0 is 1.31km.
+The azimuth of the minimum horizontal uncertainty is 71.99degrees.
+The maximum vertical location uncertainty is 2.57km.
 </pre></div></div>
 </div>
 <p>Before plotting the map with the new locations, let’s make sure our locations are not unnecessarily biased by aberrant pick outliers. Even though we used <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>’s EDT method, which is robust to outliers, we can easily identify outliers and remove them.</p>
@@ -1013,7 +1013,7 @@ The maximum vertical location uncertainty is 3.10km.
         <span class="c1"># this variable was inserted into ev.aux_data if NLLoc successfully located the event</span>
         <span class="c1"># use predicted times to remove outlier picks</span>
         <span class="n">ev</span><span class="o">.</span><span class="n">remove_outlier_picks</span><span class="p">(</span><span class="n">max_diff_percent</span><span class="o">=</span><span class="n">MAX_TIME_DIFFERENT_PICKS_PREDICTED_PERCENT</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="n">MINIMUM_NUM_STATIONS_W_PICKS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="n">MINIMUM_NUM_STATIONS_W_PICKS</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Relocating event </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="c1"># first relocation, insensitive to outliers</span>
             <span class="n">ev</span><span class="o">.</span><span class="n">relocate</span><span class="p">(</span>
@@ -1076,14 +1076,19 @@ Relocating event 15
 <img alt="../../_images/tutorial_notebooks_6_relocate_36_0.svg" src="../../_images/tutorial_notebooks_6_relocate_36_0.svg" /></div>
 </div>
 </section>
-<section id="Plot-the-new-locations">
-<h3>Plot the new locations<a class="headerlink" href="#Plot-the-new-locations" title="Link to this heading"></a></h3>
+<section id="Gather-the-new-catalog,-clean-up-possible-multiples-and-plot-the-new-locations">
+<h3>Gather the new catalog, clean up possible multiples and plot the new locations<a class="headerlink" href="#Gather-the-new-catalog,-clean-up-possible-multiples-and-plot-the-new-locations" title="Link to this heading"></a></h3>
 <p>Just like before, we make a new instance of <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Catalog</span></code> to use the built-in plotting methods.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nlloc_catalog</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Catalog</span><span class="o">.</span><span class="n">read_from_events</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># --- update event ids now that we have our final locations</span>
+<span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">backprojection_events</span><span class="p">:</span>
+    <span class="n">ev</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">origin_time</span><span class="p">)</span>
+
+<span class="c1"># --- create a Catalog objet</span>
+<span class="n">nlloc_catalog</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Catalog</span><span class="o">.</span><span class="n">read_from_events</span><span class="p">(</span>
     <span class="n">backprojection_events</span><span class="p">,</span>
     <span class="n">extra_attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;hmax_unc&quot;</span><span class="p">,</span> <span class="s2">&quot;hmin_unc&quot;</span><span class="p">,</span> <span class="s2">&quot;az_hmax_unc&quot;</span><span class="p">,</span> <span class="s2">&quot;vmax_unc&quot;</span><span class="p">]</span>
     <span class="p">)</span>
@@ -1092,18 +1097,8 @@ Relocating event 15
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Class instance does not have a `cov_mat` attribute.
-Class instance does not have a `cov_mat` attribute.
-Class instance does not have a `cov_mat` attribute.
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1134,226 +1129,214 @@ Class instance does not have a `cov_mat` attribute.
       <th>az_hmax_unc</th>
       <th>vmax_unc</th>
     </tr>
+    <tr>
+      <th>event_id</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>30.346973</td>
-      <td>40.720312</td>
-      <td>10.136719</td>
-      <td>2012-07-26 01:10:21.960</td>
-      <td>2.518417</td>
-      <td>1.285020</td>
-      <td>143.935923</td>
-      <td>3.103828</td>
+      <th>2012-07-26T01:10:21.840000Z</th>
+      <td>30.322070</td>
+      <td>40.730625</td>
+      <td>12.117188</td>
+      <td>2012-07-26 01:10:21.840</td>
+      <td>1.779872</td>
+      <td>1.305840</td>
+      <td>161.988359</td>
+      <td>2.565296</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>30.345996</td>
-      <td>40.717813</td>
-      <td>9.425781</td>
-      <td>2012-07-26 01:15:54.160</td>
-      <td>1.271641</td>
-      <td>0.427939</td>
-      <td>88.574685</td>
-      <td>0.896188</td>
+      <th>2012-07-26T01:15:54.200000Z</th>
+      <td>30.343555</td>
+      <td>40.716875</td>
+      <td>9.070312</td>
+      <td>2012-07-26 01:15:54.200</td>
+      <td>2.077245</td>
+      <td>1.130659</td>
+      <td>90.589373</td>
+      <td>2.339978</td>
     </tr>
     <tr>
-      <th>2</th>
+      <th>2012-07-26T01:58:19.840000Z</th>
       <td>30.260000</td>
       <td>40.630000</td>
       <td>-0.500000</td>
-      <td>2012-07-26 01:57:57.400</td>
-      <td>15.000000</td>
-      <td>15.000000</td>
-      <td>0.000000</td>
-      <td>15.000000</td>
+      <td>2012-07-26 01:58:19.840</td>
+      <td>1.778483</td>
+      <td>0.702436</td>
+      <td>175.539454</td>
+      <td>2.400404</td>
     </tr>
     <tr>
-      <th>3</th>
-      <td>30.290820</td>
-      <td>40.668125</td>
-      <td>10.289062</td>
-      <td>2012-07-26 02:35:01.800</td>
-      <td>5.969763</td>
-      <td>2.651206</td>
-      <td>55.631341</td>
-      <td>6.419801</td>
+      <th>2012-07-26T02:35:01.120000Z</th>
+      <td>30.341602</td>
+      <td>40.718125</td>
+      <td>8.867188</td>
+      <td>2012-07-26 02:35:01.120</td>
+      <td>3.878430</td>
+      <td>1.763533</td>
+      <td>113.548582</td>
+      <td>5.734983</td>
     </tr>
     <tr>
-      <th>4</th>
-      <td>30.347949</td>
-      <td>40.717188</td>
-      <td>9.425781</td>
-      <td>2012-07-26 03:00:38.840</td>
-      <td>1.742560</td>
-      <td>0.510123</td>
-      <td>86.982220</td>
-      <td>1.341013</td>
+      <th>2012-07-26T03:00:38.760000Z</th>
+      <td>30.316211</td>
+      <td>40.718125</td>
+      <td>12.117188</td>
+      <td>2012-07-26 03:00:38.760</td>
+      <td>1.674063</td>
+      <td>1.431853</td>
+      <td>25.259715</td>
+      <td>3.172909</td>
     </tr>
     <tr>
-      <th>5</th>
-      <td>30.307422</td>
+      <th>2012-07-26T04:43:38.160000Z</th>
+      <td>30.315234</td>
       <td>40.713750</td>
-      <td>13.640625</td>
-      <td>2012-07-26 04:43:37.960</td>
-      <td>3.481115</td>
-      <td>0.890491</td>
-      <td>115.101542</td>
-      <td>2.132020</td>
+      <td>12.421875</td>
+      <td>2012-07-26 04:43:38.160</td>
+      <td>4.718800</td>
+      <td>1.679460</td>
+      <td>122.483911</td>
+      <td>4.514452</td>
     </tr>
     <tr>
-      <th>6</th>
-      <td>30.345508</td>
-      <td>40.716875</td>
-      <td>9.679688</td>
-      <td>2012-07-26 04:48:38.560</td>
-      <td>2.732841</td>
-      <td>0.712969</td>
-      <td>88.001687</td>
-      <td>5.909646</td>
+      <th>2012-07-26T04:48:38.400000Z</th>
+      <td>30.359180</td>
+      <td>40.714375</td>
+      <td>9.882812</td>
+      <td>2012-07-26 04:48:38.400</td>
+      <td>4.091946</td>
+      <td>1.587564</td>
+      <td>85.557525</td>
+      <td>4.705347</td>
     </tr>
     <tr>
-      <th>7</th>
-      <td>30.343066</td>
-      <td>40.717188</td>
-      <td>8.308594</td>
+      <th>2012-07-26T08:08:25.760000Z</th>
+      <td>30.337695</td>
+      <td>40.719375</td>
+      <td>8.664062</td>
       <td>2012-07-26 08:08:25.760</td>
-      <td>1.139092</td>
-      <td>0.587383</td>
-      <td>121.693317</td>
-      <td>1.735096</td>
+      <td>3.033962</td>
+      <td>1.372813</td>
+      <td>103.115926</td>
+      <td>3.483848</td>
     </tr>
     <tr>
-      <th>8</th>
-      <td>30.344043</td>
-      <td>40.717188</td>
-      <td>8.714844</td>
-      <td>2012-07-26 10:07:23.720</td>
-      <td>0.906514</td>
-      <td>0.475810</td>
-      <td>93.450266</td>
-      <td>1.502161</td>
+      <th>2012-07-26T10:07:23.760000Z</th>
+      <td>30.341113</td>
+      <td>40.715938</td>
+      <td>8.511719</td>
+      <td>2012-07-26 10:07:23.760</td>
+      <td>1.592323</td>
+      <td>0.957655</td>
+      <td>90.956024</td>
+      <td>2.790996</td>
     </tr>
     <tr>
-      <th>9</th>
+      <th>2012-07-26T11:55:36.200000Z</th>
       <td>30.290000</td>
       <td>40.620000</td>
       <td>0.000000</td>
-      <td>2012-07-26 11:55:36.720</td>
-      <td>15.000000</td>
-      <td>15.000000</td>
-      <td>0.000000</td>
-      <td>15.000000</td>
+      <td>2012-07-26 11:55:36.200</td>
+      <td>5.414679</td>
+      <td>0.868935</td>
+      <td>124.691332</td>
+      <td>1.100644</td>
     </tr>
     <tr>
-      <th>10</th>
-      <td>30.301074</td>
-      <td>40.765937</td>
+      <th>2012-07-26T13:35:26.440000Z</th>
+      <td>30.295215</td>
+      <td>40.799062</td>
       <td>-1.949219</td>
-      <td>2012-07-26 13:35:27.080</td>
-      <td>7.941277</td>
-      <td>2.101293</td>
-      <td>97.267133</td>
-      <td>5.842537</td>
+      <td>2012-07-26 13:35:26.440</td>
+      <td>3.780788</td>
+      <td>0.951556</td>
+      <td>87.980070</td>
+      <td>4.216654</td>
     </tr>
     <tr>
-      <th>11</th>
-      <td>30.310840</td>
-      <td>40.715938</td>
-      <td>12.066406</td>
-      <td>2012-07-26 13:48:32.520</td>
-      <td>1.950647</td>
-      <td>0.835797</td>
-      <td>83.180653</td>
-      <td>2.845355</td>
+      <th>2012-07-26T13:48:32.600000Z</th>
+      <td>30.316211</td>
+      <td>40.720625</td>
+      <td>11.304688</td>
+      <td>2012-07-26 13:48:32.600</td>
+      <td>1.428168</td>
+      <td>1.294981</td>
+      <td>38.195164</td>
+      <td>2.869099</td>
     </tr>
     <tr>
-      <th>12</th>
-      <td>30.325244</td>
-      <td>40.696406</td>
+      <th>2012-07-26T13:51:58.360000Z</th>
+      <td>30.308398</td>
+      <td>40.715625</td>
+      <td>12.320312</td>
+      <td>2012-07-26 13:51:58.360</td>
+      <td>1.634489</td>
+      <td>1.439889</td>
+      <td>29.107871</td>
+      <td>5.108501</td>
+    </tr>
+    <tr>
+      <th>2012-07-26T13:53:31.680000Z</th>
+      <td>30.324023</td>
+      <td>40.720625</td>
+      <td>9.273438</td>
+      <td>2012-07-26 13:53:31.680</td>
+      <td>1.547559</td>
+      <td>1.530669</td>
+      <td>156.791350</td>
+      <td>5.334101</td>
+    </tr>
+    <tr>
+      <th>2012-07-26T13:56:54.280000Z</th>
+      <td>30.342578</td>
+      <td>40.716250</td>
+      <td>8.765625</td>
+      <td>2012-07-26 13:56:54.280</td>
+      <td>2.667188</td>
+      <td>1.050842</td>
+      <td>80.353125</td>
+      <td>5.208330</td>
+    </tr>
+    <tr>
+      <th>2012-07-26T15:06:20.080000Z</th>
+      <td>30.328174</td>
+      <td>40.600156</td>
       <td>-1.974609</td>
-      <td>2012-07-26 13:51:58.680</td>
-      <td>2.236655</td>
-      <td>1.599394</td>
-      <td>96.861645</td>
-      <td>6.140975</td>
+      <td>2012-07-26 15:06:20.080</td>
+      <td>0.919964</td>
+      <td>0.627512</td>
+      <td>157.405152</td>
+      <td>0.419150</td>
     </tr>
     <tr>
-      <th>13</th>
-      <td>30.347949</td>
-      <td>40.719687</td>
-      <td>9.730469</td>
-      <td>2012-07-26 13:53:31.440</td>
-      <td>1.713164</td>
-      <td>0.521597</td>
-      <td>89.372650</td>
-      <td>1.265191</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>30.347461</td>
-      <td>40.716875</td>
-      <td>9.070312</td>
-      <td>2012-07-26 13:56:54.200</td>
-      <td>1.942820</td>
-      <td>0.516072</td>
-      <td>85.155465</td>
-      <td>3.418607</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>30.327563</td>
-      <td>40.600078</td>
-      <td>-1.987305</td>
-      <td>2012-07-26 15:06:20.160</td>
-      <td>0.416089</td>
-      <td>0.325587</td>
-      <td>150.388867</td>
-      <td>0.152786</td>
-    </tr>
-    <tr>
-      <th>16</th>
+      <th>2012-07-26T17:28:22.080000Z</th>
       <td>30.430000</td>
       <td>40.720000</td>
       <td>9.500000</td>
-      <td>2012-07-26 17:28:21.640</td>
-      <td>15.000000</td>
-      <td>15.000000</td>
-      <td>0.000000</td>
-      <td>15.000000</td>
+      <td>2012-07-26 17:28:22.080</td>
+      <td>4.777719</td>
+      <td>0.886096</td>
+      <td>48.619974</td>
+      <td>2.428971</td>
     </tr>
   </tbody>
 </table>
 </div></div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code> locations are able to resolve the location differences between events much better than the backprojection locations. However, limits remain due to: - Errors in picks. - Approximations in velocity model (1D model whereas the area is hghly heterogeneous!). - Earthquakes are located outside the network, so large uncertainties cannot be avoided.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span>
-    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">network</span><span class="o">=</span><span class="n">net</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">markersize_station</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">lat_margin</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">plot_uncertainties</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_axes</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s2">&quot;dimgrey&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mf">0.15</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_6_relocate_40_0.svg" src="../../_images/tutorial_notebooks_6_relocate_40_0.svg" /></div>
-</div>
-</section>
-</section>
-<section id="Remove-possible-multiple-detections">
-<h2>Remove possible multiple detections<a class="headerlink" href="#Remove-possible-multiple-detections" title="Link to this heading"></a></h2>
-<p>The backprojection method does not have good inter-event time resolution because of the large uncertainties on the event origin times. There always exists a relatively large trade-off between the origin time and the location so it happens to detect the same event several times in a row if <code class="docutils literal notranslate"><span class="pre">MINIMUM_INTEREVENT_TIME_SEC</span></code> was not set large enough in <code class="docutils literal notranslate"><span class="pre">5_backprojection.ipynb</span></code>. After relocation <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>, it is easier to identify such multiple detections.</p>
+<p>Remove possible multiple detections:</p>
+<p>The backprojection method does not have good inter-event time resolution because of the large uncertainties on the event origin times. There always exists a relatively large trade-off between the origin time and the location so it happens to detect the same event several times in a row if <code class="docutils literal notranslate"><span class="pre">MINIMUM_INTEREVENT_TIME_SEC</span></code> was not set large enough in <code class="docutils literal notranslate"><span class="pre">5_backprojection.ipynb</span></code>. After relocation with <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>, it is easier to identify such multiple detections.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># the criteria that determine whether two events are the same or not are of course somewhat arbitrary</span>
@@ -1364,16 +1347,37 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">n_events</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ---------------------------------------------------------</span>
+<span class="c1">#         Remove multiple detections of same event</span>
+<span class="c1"># ---------------------------------------------------------</span>
+
+<span class="c1"># --- build a dictionary where each entry is an event, for explicit indexing</span>
+<span class="n">backprojection_events_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">ev</span><span class="o">.</span><span class="n">id</span> <span class="p">:</span> <span class="n">ev</span> <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">backprojection_events</span><span class="p">}</span>
+
+
+<span class="n">keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">n_events</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">n_events</span><span class="p">):</span>
     <span class="n">previous_ev</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="k">while</span> <span class="ow">not</span> <span class="n">keep</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]:</span>
         <span class="n">previous_ev</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">previous_ev</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">break</span>
+    <span class="k">if</span> <span class="n">previous_ev</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># there is not previous event to compare with</span>
+        <span class="k">continue</span>
+    <span class="c1"># -----------------------------------------</span>
+    <span class="c1"># catalog row indexes and backprojection_events indexes do not always match</span>
+    <span class="c1"># because catalog is ordered chronologically and some events&#39; chronology</span>
+    <span class="c1"># might have swapped during NLLoc&#39;s location process</span>
+    <span class="c1"># -----------------------------------------</span>
+    <span class="n">event_id</span> <span class="o">=</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">det</span> <span class="o">=</span> <span class="n">backprojection_events_dict</span><span class="p">[</span><span class="n">event_id</span><span class="p">]</span>
+    <span class="n">previous_event_id</span> <span class="o">=</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span>
+    <span class="n">previous_det</span> <span class="o">=</span> <span class="n">backprojection_events_dict</span><span class="p">[</span><span class="n">previous_event_id</span><span class="p">]</span>
+
     <span class="n">dt_sec</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">origin_time</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="o">-</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">origin_time</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span>
@@ -1390,21 +1394,21 @@ Class instance does not have a `cov_mat` attribute.
             <span class="c1"># these two events are close in time but distant in space</span>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="p">(</span>
-            <span class="s2">&quot;NLLoc_reloc&quot;</span> <span class="ow">in</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">aux_data</span>
-            <span class="ow">and</span> <span class="s2">&quot;NLLoc_reloc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span><span class="o">.</span><span class="n">aux_data</span>
+            <span class="s2">&quot;NLLoc_reloc&quot;</span> <span class="ow">in</span> <span class="n">det</span><span class="o">.</span><span class="n">aux_data</span>
+            <span class="ow">and</span> <span class="s2">&quot;NLLoc_reloc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">previous_det</span><span class="o">.</span><span class="n">aux_data</span>
         <span class="p">):</span>
             <span class="n">keep</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="p">(</span>
-            <span class="s2">&quot;NLLoc_reloc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">aux_data</span>
-            <span class="ow">and</span> <span class="s2">&quot;NLLoc_reloc&quot;</span> <span class="ow">in</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span><span class="o">.</span><span class="n">aux_data</span>
+            <span class="s2">&quot;NLLoc_reloc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">det</span><span class="o">.</span><span class="n">aux_data</span>
+            <span class="ow">and</span> <span class="s2">&quot;NLLoc_reloc&quot;</span> <span class="ow">in</span> <span class="n">previous_det</span><span class="o">.</span><span class="n">aux_data</span>
         <span class="p">):</span>
             <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">elif</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">hmax_unc</span> <span class="o">&lt;</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span><span class="o">.</span><span class="n">hmax_unc</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">det</span><span class="o">.</span><span class="n">hmax_unc</span> <span class="o">&lt;</span> <span class="n">previous_det</span><span class="o">.</span><span class="n">hmax_unc</span><span class="p">:</span>
             <span class="n">keep</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">elif</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">hmax_unc</span> <span class="o">&gt;</span> <span class="n">backprojection_events</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">]</span><span class="o">.</span><span class="n">hmax_unc</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">det</span><span class="o">.</span><span class="n">hmax_unc</span> <span class="o">&gt;</span> <span class="n">previous_det</span><span class="o">.</span><span class="n">hmax_unc</span><span class="p">:</span>
             <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># if both backprojection_events[i] and backprojection_events[previous_ev] were not relocated with NLLoc,</span>
+            <span class="c1"># if both det and previous_det were not relocated with NLLoc,</span>
             <span class="c1"># then there origin times cannot be closer than MINIMUM_INTEREVENT_TIME_SEC</span>
             <span class="k">continue</span>
 
@@ -1415,7 +1419,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1447,218 +1451,255 @@ Class instance does not have a `cov_mat` attribute.
       <th>vmax_unc</th>
       <th>event_id</th>
     </tr>
+    <tr>
+      <th>event_id</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>30.346973</td>
-      <td>40.720312</td>
-      <td>10.136719</td>
-      <td>2012-07-26 01:10:21.960</td>
-      <td>2.518417</td>
-      <td>1.285020</td>
-      <td>143.935923</td>
-      <td>3.103828</td>
+      <th>2012-07-26T01:10:21.840000Z</th>
+      <td>30.322070</td>
+      <td>40.730625</td>
+      <td>12.117188</td>
+      <td>2012-07-26 01:10:21.840</td>
+      <td>1.779872</td>
+      <td>1.305840</td>
+      <td>161.988359</td>
+      <td>2.565296</td>
       <td>bp_0</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>30.345996</td>
-      <td>40.717813</td>
-      <td>9.425781</td>
-      <td>2012-07-26 01:15:54.160</td>
-      <td>1.271641</td>
-      <td>0.427939</td>
-      <td>88.574685</td>
-      <td>0.896188</td>
+      <th>2012-07-26T01:15:54.200000Z</th>
+      <td>30.343555</td>
+      <td>40.716875</td>
+      <td>9.070312</td>
+      <td>2012-07-26 01:15:54.200</td>
+      <td>2.077245</td>
+      <td>1.130659</td>
+      <td>90.589373</td>
+      <td>2.339978</td>
       <td>bp_1</td>
     </tr>
     <tr>
-      <th>2</th>
+      <th>2012-07-26T01:58:19.840000Z</th>
       <td>30.260000</td>
       <td>40.630000</td>
       <td>-0.500000</td>
-      <td>2012-07-26 01:57:57.400</td>
-      <td>15.000000</td>
-      <td>15.000000</td>
-      <td>0.000000</td>
-      <td>15.000000</td>
+      <td>2012-07-26 01:58:19.840</td>
+      <td>1.778483</td>
+      <td>0.702436</td>
+      <td>175.539454</td>
+      <td>2.400404</td>
       <td>bp_2</td>
     </tr>
     <tr>
-      <th>3</th>
-      <td>30.290820</td>
-      <td>40.668125</td>
-      <td>10.289062</td>
-      <td>2012-07-26 02:35:01.800</td>
-      <td>5.969763</td>
-      <td>2.651206</td>
-      <td>55.631341</td>
-      <td>6.419801</td>
+      <th>2012-07-26T02:35:01.120000Z</th>
+      <td>30.341602</td>
+      <td>40.718125</td>
+      <td>8.867188</td>
+      <td>2012-07-26 02:35:01.120</td>
+      <td>3.878430</td>
+      <td>1.763533</td>
+      <td>113.548582</td>
+      <td>5.734983</td>
       <td>bp_3</td>
     </tr>
     <tr>
-      <th>4</th>
-      <td>30.347949</td>
-      <td>40.717188</td>
-      <td>9.425781</td>
-      <td>2012-07-26 03:00:38.840</td>
-      <td>1.742560</td>
-      <td>0.510123</td>
-      <td>86.982220</td>
-      <td>1.341013</td>
+      <th>2012-07-26T03:00:38.760000Z</th>
+      <td>30.316211</td>
+      <td>40.718125</td>
+      <td>12.117188</td>
+      <td>2012-07-26 03:00:38.760</td>
+      <td>1.674063</td>
+      <td>1.431853</td>
+      <td>25.259715</td>
+      <td>3.172909</td>
       <td>bp_4</td>
     </tr>
     <tr>
-      <th>5</th>
-      <td>30.307422</td>
+      <th>2012-07-26T04:43:38.160000Z</th>
+      <td>30.315234</td>
       <td>40.713750</td>
-      <td>13.640625</td>
-      <td>2012-07-26 04:43:37.960</td>
-      <td>3.481115</td>
-      <td>0.890491</td>
-      <td>115.101542</td>
-      <td>2.132020</td>
+      <td>12.421875</td>
+      <td>2012-07-26 04:43:38.160</td>
+      <td>4.718800</td>
+      <td>1.679460</td>
+      <td>122.483911</td>
+      <td>4.514452</td>
       <td>bp_5</td>
     </tr>
     <tr>
-      <th>6</th>
-      <td>30.345508</td>
-      <td>40.716875</td>
-      <td>9.679688</td>
-      <td>2012-07-26 04:48:38.560</td>
-      <td>2.732841</td>
-      <td>0.712969</td>
-      <td>88.001687</td>
-      <td>5.909646</td>
+      <th>2012-07-26T04:48:38.400000Z</th>
+      <td>30.359180</td>
+      <td>40.714375</td>
+      <td>9.882812</td>
+      <td>2012-07-26 04:48:38.400</td>
+      <td>4.091946</td>
+      <td>1.587564</td>
+      <td>85.557525</td>
+      <td>4.705347</td>
       <td>bp_6</td>
     </tr>
     <tr>
-      <th>7</th>
-      <td>30.343066</td>
-      <td>40.717188</td>
-      <td>8.308594</td>
+      <th>2012-07-26T08:08:25.760000Z</th>
+      <td>30.337695</td>
+      <td>40.719375</td>
+      <td>8.664062</td>
       <td>2012-07-26 08:08:25.760</td>
-      <td>1.139092</td>
-      <td>0.587383</td>
-      <td>121.693317</td>
-      <td>1.735096</td>
+      <td>3.033962</td>
+      <td>1.372813</td>
+      <td>103.115926</td>
+      <td>3.483848</td>
       <td>bp_7</td>
     </tr>
     <tr>
-      <th>8</th>
-      <td>30.344043</td>
-      <td>40.717188</td>
-      <td>8.714844</td>
-      <td>2012-07-26 10:07:23.720</td>
-      <td>0.906514</td>
-      <td>0.475810</td>
-      <td>93.450266</td>
-      <td>1.502161</td>
+      <th>2012-07-26T10:07:23.760000Z</th>
+      <td>30.341113</td>
+      <td>40.715938</td>
+      <td>8.511719</td>
+      <td>2012-07-26 10:07:23.760</td>
+      <td>1.592323</td>
+      <td>0.957655</td>
+      <td>90.956024</td>
+      <td>2.790996</td>
       <td>bp_8</td>
     </tr>
     <tr>
-      <th>9</th>
+      <th>2012-07-26T11:55:36.200000Z</th>
       <td>30.290000</td>
       <td>40.620000</td>
       <td>0.000000</td>
-      <td>2012-07-26 11:55:36.720</td>
-      <td>15.000000</td>
-      <td>15.000000</td>
-      <td>0.000000</td>
-      <td>15.000000</td>
+      <td>2012-07-26 11:55:36.200</td>
+      <td>5.414679</td>
+      <td>0.868935</td>
+      <td>124.691332</td>
+      <td>1.100644</td>
       <td>bp_9</td>
     </tr>
     <tr>
-      <th>10</th>
-      <td>30.301074</td>
-      <td>40.765937</td>
+      <th>2012-07-26T13:35:26.440000Z</th>
+      <td>30.295215</td>
+      <td>40.799062</td>
       <td>-1.949219</td>
-      <td>2012-07-26 13:35:27.080</td>
-      <td>7.941277</td>
-      <td>2.101293</td>
-      <td>97.267133</td>
-      <td>5.842537</td>
+      <td>2012-07-26 13:35:26.440</td>
+      <td>3.780788</td>
+      <td>0.951556</td>
+      <td>87.980070</td>
+      <td>4.216654</td>
       <td>bp_10</td>
     </tr>
     <tr>
-      <th>11</th>
-      <td>30.310840</td>
-      <td>40.715938</td>
-      <td>12.066406</td>
-      <td>2012-07-26 13:48:32.520</td>
-      <td>1.950647</td>
-      <td>0.835797</td>
-      <td>83.180653</td>
-      <td>2.845355</td>
+      <th>2012-07-26T13:48:32.600000Z</th>
+      <td>30.316211</td>
+      <td>40.720625</td>
+      <td>11.304688</td>
+      <td>2012-07-26 13:48:32.600</td>
+      <td>1.428168</td>
+      <td>1.294981</td>
+      <td>38.195164</td>
+      <td>2.869099</td>
       <td>bp_11</td>
     </tr>
     <tr>
-      <th>12</th>
-      <td>30.325244</td>
-      <td>40.696406</td>
-      <td>-1.974609</td>
-      <td>2012-07-26 13:51:58.680</td>
-      <td>2.236655</td>
-      <td>1.599394</td>
-      <td>96.861645</td>
-      <td>6.140975</td>
+      <th>2012-07-26T13:51:58.360000Z</th>
+      <td>30.308398</td>
+      <td>40.715625</td>
+      <td>12.320312</td>
+      <td>2012-07-26 13:51:58.360</td>
+      <td>1.634489</td>
+      <td>1.439889</td>
+      <td>29.107871</td>
+      <td>5.108501</td>
       <td>bp_12</td>
     </tr>
     <tr>
-      <th>13</th>
-      <td>30.347949</td>
-      <td>40.719687</td>
-      <td>9.730469</td>
-      <td>2012-07-26 13:53:31.440</td>
-      <td>1.713164</td>
-      <td>0.521597</td>
-      <td>89.372650</td>
-      <td>1.265191</td>
+      <th>2012-07-26T13:53:31.680000Z</th>
+      <td>30.324023</td>
+      <td>40.720625</td>
+      <td>9.273438</td>
+      <td>2012-07-26 13:53:31.680</td>
+      <td>1.547559</td>
+      <td>1.530669</td>
+      <td>156.791350</td>
+      <td>5.334101</td>
       <td>bp_13</td>
     </tr>
     <tr>
-      <th>14</th>
-      <td>30.347461</td>
-      <td>40.716875</td>
-      <td>9.070312</td>
-      <td>2012-07-26 13:56:54.200</td>
-      <td>1.942820</td>
-      <td>0.516072</td>
-      <td>85.155465</td>
-      <td>3.418607</td>
+      <th>2012-07-26T13:56:54.280000Z</th>
+      <td>30.342578</td>
+      <td>40.716250</td>
+      <td>8.765625</td>
+      <td>2012-07-26 13:56:54.280</td>
+      <td>2.667188</td>
+      <td>1.050842</td>
+      <td>80.353125</td>
+      <td>5.208330</td>
       <td>bp_14</td>
     </tr>
     <tr>
-      <th>15</th>
-      <td>30.327563</td>
-      <td>40.600078</td>
-      <td>-1.987305</td>
-      <td>2012-07-26 15:06:20.160</td>
-      <td>0.416089</td>
-      <td>0.325587</td>
-      <td>150.388867</td>
-      <td>0.152786</td>
+      <th>2012-07-26T15:06:20.080000Z</th>
+      <td>30.328174</td>
+      <td>40.600156</td>
+      <td>-1.974609</td>
+      <td>2012-07-26 15:06:20.080</td>
+      <td>0.919964</td>
+      <td>0.627512</td>
+      <td>157.405152</td>
+      <td>0.419150</td>
       <td>bp_15</td>
     </tr>
     <tr>
-      <th>16</th>
+      <th>2012-07-26T17:28:22.080000Z</th>
       <td>30.430000</td>
       <td>40.720000</td>
       <td>9.500000</td>
-      <td>2012-07-26 17:28:21.640</td>
-      <td>15.000000</td>
-      <td>15.000000</td>
-      <td>0.000000</td>
-      <td>15.000000</td>
+      <td>2012-07-26 17:28:22.080</td>
+      <td>4.777719</td>
+      <td>0.886096</td>
+      <td>48.619974</td>
+      <td>2.428971</td>
       <td>bp_16</td>
     </tr>
   </tbody>
 </table>
 </div></div>
 </div>
+<p>The <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code> locations are able to resolve the location differences between events much better than the backprojection locations. However, limits remain due to: - Errors in picks. - Approximations in velocity model (1D model whereas the area is hghly heterogeneous!). - Earthquakes are located outside the network, so large uncertainties cannot be avoided.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">network</span><span class="o">=</span><span class="n">net</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">markersize_station</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">lat_margin</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">plot_uncertainties</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_axes</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s2">&quot;dimgrey&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mf">0.15</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_6_relocate_43_0.svg" src="../../_images/tutorial_notebooks_6_relocate_43_0.svg" /></div>
+</div>
+</section>
+</section>
+<section id="Save-the-relocated-events">
+<h2>Save the relocated events<a class="headerlink" href="#Save-the-relocated-events" title="Link to this heading"></a></h2>
+<p>Save all the events that were not identified as multiples to a hdf5 database.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
@@ -1667,21 +1708,16 @@ Class instance does not have a `cov_mat` attribute.
 </pre></div>
 </div>
 </div>
-</section>
-<section id="Save-the-relocated-events">
-<h2>Save the relocated events<a class="headerlink" href="#Save-the-relocated-events" title="Link to this heading"></a></h2>
-<p>Save all the events that were not identified as multiples to a hdf5 database.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ev</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-        <span class="n">ev</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">origin_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">)</span>
-        <span class="n">ev</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">)):</span>
+    <span class="n">evid</span> <span class="o">=</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">backprojection_events_dict</span><span class="p">[</span><span class="n">evid</span><span class="p">]</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
             <span class="n">OUTPUT_DB_FILENAME</span><span class="p">,</span>
             <span class="n">db_path</span><span class="o">=</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">OUTPUT_PATH</span><span class="p">,</span>
-            <span class="n">gid</span><span class="o">=</span><span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;event_id&quot;</span><span class="p">]</span>
+            <span class="n">gid</span><span class="o">=</span><span class="n">backprojection_events_dict</span><span class="p">[</span><span class="n">evid</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
             <span class="p">)</span>
 </pre></div>
 </div>
@@ -1692,7 +1728,7 @@ Class instance does not have a `cov_mat` attribute.
 <p>The goal of this section is to explore an alternative to the PhaseNet + NonLinLoc workflow solely based on the use backprojection. If a “sparse” grid was used for the purpose of earthquake detection, then a fine grid can be used here.</p>
 <p>In the following, we run a “vanilla” backprojection that backprojects the waveforms’ envelopes (as defined by the Hilbert transform).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PHASES: list of seismic phases to use for backprojection</span>
@@ -1708,7 +1744,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 <p>For backprojection, we need to load the travel time grid and set up the <code class="docutils literal notranslate"><span class="pre">BPMF.template_search.Beamformer</span></code> instance.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tts</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">template_search</span><span class="o">.</span><span class="n">TravelTimes</span><span class="p">(</span>
@@ -1723,7 +1759,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1757,7 +1793,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># relocation parameters</span>
@@ -1768,7 +1804,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># uncomment this section to perform the backprojection-based relocation</span>
@@ -1810,7 +1846,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">beam_relocated_event</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">[</span><span class="n">EVENT_IDX</span><span class="p">])</span>
@@ -1839,7 +1875,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dummy_catalog</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Catalog</span><span class="o">.</span><span class="n">read_from_events</span><span class="p">(</span>
@@ -1852,7 +1888,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1883,18 +1919,29 @@ Class instance does not have a `cov_mat` attribute.
       <th>az_hmax_unc</th>
       <th>vmax_unc</th>
     </tr>
+    <tr>
+      <th>event_id</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>30.346973</td>
-      <td>40.720312</td>
-      <td>10.136719</td>
-      <td>2012-07-26 01:10:21.960</td>
-      <td>2.518417</td>
-      <td>1.28502</td>
-      <td>143.935923</td>
-      <td>3.103828</td>
+      <th>2012-07-26T01:10:21.840000Z</th>
+      <td>30.32207</td>
+      <td>40.730625</td>
+      <td>12.117188</td>
+      <td>2012-07-26 01:10:21.840</td>
+      <td>1.779872</td>
+      <td>1.30584</td>
+      <td>161.988359</td>
+      <td>2.565296</td>
     </tr>
   </tbody>
 </table>
@@ -1902,7 +1949,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 <p>The difference between this backprojection and the “detection backprojection” of 5_backprojection is that, here, we stored the value of each beam of the 4D (x, y, z, time) grid! Below, we plot 3 slices of the (x, y, z, time=time of max beam) volume.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cartopy.crs</span> <span class="kn">import</span> <span class="n">PlateCarree</span>
@@ -2023,7 +2070,7 @@ Class instance does not have a `cov_mat` attribute.
 <p>where <span class="math notranslate nohighlight">\(e_{i,k^*}\)</span> is the epicentral distance between grid points <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(k^*\)</span> and <span class="math notranslate nohighlight">\(\Delta d_{i,k^*}\)</span> is the depth difference between grid points <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(k^*\)</span>.</p>
 <p>In this case, we assume the uncertainty ellipse to be isotropic, that is, <span class="math notranslate nohighlight">\(h_{max,unc} = h_{min,unc}\)</span>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
@@ -2041,11 +2088,11 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The maximum horizontal location uncertainty of event 0 is 2.52km.
-The azimuth of the maximum horizontal uncertainty is 143.94degrees.
-The mainimum horizontal location uncertainty of event 0 is 1.29km.
-The azimuth of the minimum horizontal uncertainty is 53.94degrees.
-The maximum vertical location uncertainty is 3.10km with 42.63degrees plunge.
+The maximum horizontal location uncertainty of event 0 is 1.78km.
+The azimuth of the maximum horizontal uncertainty is 161.99degrees.
+The mainimum horizontal location uncertainty of event 0 is 1.31km.
+The azimuth of the minimum horizontal uncertainty is 71.99degrees.
+The maximum vertical location uncertainty is 2.57km with 26.27degrees plunge.
 </pre></div></div>
 </div>
 </section>

@@ -558,12 +558,19 @@ Days to process:  DatetimeIndex([&#39;2012-07-26 00:00:00+00:00&#39;], dtype=&#3
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Reading data for 2012-07-26
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 24 Trace(s) in Stream:
 YH.DD06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DC08..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
@@ -652,8 +659,7 @@ PhaseNet(
     (4): ModuleList(
       (0): Conv1d(64, 128, kernel_size=(7,), stride=(1,), padding=same, bias=False)
       (1): BatchNorm1d(128, eps=0.001, momentum=0.1, affine=True, track_running_stats=True)
-      (2): None
-      (3): None
+      (2-3): 2 x None
     )
   )
   (up_branch): ModuleList(
@@ -741,7 +747,7 @@ The shape of waveform_features is:  (8, 2, 2160000)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">station_idx</span> <span class="o">=</span> <span class="mi">4</span>
@@ -772,7 +778,7 @@ Selected station is DC06
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1015,7 +1021,7 @@ Extracted 17 events.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-3.81sec to read the waveforms for all 17 detections.
+3.18sec to read the waveforms for all 17 detections.
 </pre></div></div>
 </div>
 <p>In the following, we use the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> method to plot the detected earthquakes (only works after calling <code class="docutils literal notranslate"><span class="pre">read_waveform</span></code> with each detection, see above cell). Because we declared in <code class="docutils literal notranslate"><span class="pre">PHASE_ON_COMP</span></code> using the S wave on the horizontal components and the P wave on the vertical components, the red vertical lines on the following plots show the predicted S-wave arrival on the horizontal components and the P-wave arrival on the vertical components.</p>

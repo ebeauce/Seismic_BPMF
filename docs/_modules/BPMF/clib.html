@@ -11,9 +11,9 @@
   <![endif]-->
   
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/documentation_options.js?v=51b770b3"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -30,6 +30,7 @@
           
           <a href="../../index.html" class="icon icon-home">
             BPMF
+              <img src="../../_static/bpmf.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -77,6 +78,8 @@
 <span class="kn">import</span> <span class="nn">ctypes</span> <span class="k">as</span> <span class="nn">C</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
 <span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">cfg</span>
 
 <span class="n">cpu_loaded</span> <span class="o">=</span> <span class="kc">False</span>
@@ -106,12 +109,20 @@
 
     <span class="n">_libc</span><span class="o">.</span><span class="n">find_similar_moveouts</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>  <span class="c1"># moveouts</span>
-        <span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">,</span>  <span class="c1"># average absolute time difference threshold</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>  <span class="c1"># source_longitude</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>  <span class="c1"># source_latitude</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>  <span class="c1"># cell_longitude</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>  <span class="c1"># cell_latitude</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">,</span>  <span class="c1"># rms time difference threshold</span>
         <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>  <span class="c1"># number of grid points</span>
         <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>  <span class="c1"># number of stations</span>
-        <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>  <span class="c1"># number of nearest neighbors</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>  <span class="c1"># number of cells in longitude</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>  <span class="c1"># number of cells in latitude</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>  <span class="c1"># number of stations for diff</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="c1"># num threads</span>
         <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">),</span>  <span class="c1"># output pointer: redundant sources</span>
     <span class="p">]</span>
+
 
     <span class="n">_libc</span><span class="o">.</span><span class="n">select_cc_indexes</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>  <span class="c1"># CCs</span>
@@ -121,8 +132,21 @@
         <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">),</span>  <span class="c1"># selected corr</span>
     <span class="p">]</span>
 
+    <span class="n">_libc</span><span class="o">.</span><span class="n">time_dependent_threshold</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>  <span class="c1"># input time series</span>
+            <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>  <span class="c1"># gaussian sample</span>
+            <span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">,</span>             <span class="c1"># num_dev</span>
+            <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>            <span class="c1"># num_samples</span>
+            <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>            <span class="c1"># half_window_samp</span>
+            <span class="n">C</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">,</span>            <span class="c1"># shift_samp</span>
+            <span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="c1"># num threads</span>
+            <span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">),</span>  <span class="c1"># output threshold</span>
+            <span class="p">]</span>
 
-<div class="viewcode-block" id="kurtosis"><a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.kurtosis">[docs]</a><span class="k">def</span> <span class="nf">kurtosis</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">W</span><span class="p">):</span>
+
+<div class="viewcode-block" id="kurtosis">
+<a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.kurtosis">[docs]</a>
+<span class="k">def</span> <span class="nf">kurtosis</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">W</span><span class="p">):</span>
     <span class="n">n_stations</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">n_components</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -139,7 +163,19 @@
     <span class="k">return</span> <span class="n">Kurto</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_stations</span><span class="p">,</span> <span class="n">n_components</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="find_similar_sources"><a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.find_similar_sources">[docs]</a><span class="k">def</span> <span class="nf">find_similar_sources</span><span class="p">(</span><span class="n">moveouts</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">n_nearest_neighbors</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+
+<div class="viewcode-block" id="find_similar_sources">
+<a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.find_similar_sources">[docs]</a>
+<span class="k">def</span> <span class="nf">find_similar_sources</span><span class="p">(</span>
+        <span class="n">moveouts</span><span class="p">,</span>
+        <span class="n">source_longitude</span><span class="p">,</span>
+        <span class="n">source_latitude</span><span class="p">,</span>
+        <span class="n">cell_longitude</span><span class="p">,</span>
+        <span class="n">cell_latitude</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="p">,</span>
+        <span class="n">num_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_stations_for_diff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find sources with similar moveouts so that users can discard</span>
 <span class="sd">    some of them during the computation of the network response,</span>
@@ -153,11 +189,6 @@
 <span class="sd">    threshold: scalar float</span>
 <span class="sd">        The station average time difference tolerance to consider</span>
 <span class="sd">        two sources as being redundant.</span>
-<span class="sd">    n_nearest_neighbors: scalar int, default to 200</span>
-<span class="sd">        Check redundancy in chunks of `n_nearest_neighbors` contiguous sources</span>
-<span class="sd">        before starting the all pair-wise computation. If the moveouts are</span>
-<span class="sd">        ordered such that contiguous elements correspond to proximal grid</span>
-<span class="sd">        sources, then this can considerably speed up the computation.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------------</span>
@@ -167,26 +198,54 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n_sources</span> <span class="o">=</span> <span class="n">moveouts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">n_stations</span> <span class="o">=</span> <span class="n">moveouts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">n_cells_longitude</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cell_longitude</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">n_cells_latitude</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cell_latitude</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">num_stations_for_diff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">num_stations_for_diff</span> <span class="o">=</span> <span class="n">n_stations</span>
+
     <span class="k">if</span> <span class="n">moveouts</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Integer typed moveouts detected. Are you sure these are in&quot;</span> <span class="s2">&quot; seconds?&quot;</span><span class="p">)</span>
-    <span class="c1"># format moveouts</span>
+
+    <span class="k">if</span> <span class="n">num_threads</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># set num_threads to -1 so that the C routine</span>
+        <span class="c1"># understands to use all CPUs</span>
+        <span class="c1">#num_threads = os.cpu_count()</span>
+        <span class="n">num_threads</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()))</span>
+
+    <span class="c1"># format input arrays</span>
     <span class="n">moveouts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">moveouts</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+    <span class="n">source_longitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">source_longitude</span><span class="p">)</span>
+    <span class="n">source_latitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">source_latitude</span><span class="p">)</span>
+    <span class="n">cell_longitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">cell_longitude</span><span class="p">)</span>
+    <span class="n">cell_latitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">cell_latitude</span><span class="p">)</span>
+
     <span class="c1"># initialize the output pointer</span>
     <span class="n">redundant_sources</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_sources</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
-    <span class="n">n_nearest_neighbors</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">n_sources</span><span class="p">,</span> <span class="n">n_nearest_neighbors</span><span class="p">)</span>
+
     <span class="c1"># call the C function:</span>
     <span class="n">_libc</span><span class="o">.</span><span class="n">find_similar_moveouts</span><span class="p">(</span>
         <span class="n">moveouts</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">)),</span>
+        <span class="n">source_longitude</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">)),</span>
+        <span class="n">source_latitude</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">)),</span>
+        <span class="n">cell_longitude</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">)),</span>
+        <span class="n">cell_latitude</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">)),</span>
         <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">threshold</span><span class="p">),</span>
         <span class="nb">int</span><span class="p">(</span><span class="n">n_sources</span><span class="p">),</span>
         <span class="nb">int</span><span class="p">(</span><span class="n">n_stations</span><span class="p">),</span>
-        <span class="nb">int</span><span class="p">(</span><span class="n">n_nearest_neighbors</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">n_cells_longitude</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">n_cells_latitude</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">num_stations_for_diff</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">num_threads</span><span class="p">),</span>
         <span class="n">redundant_sources</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">)),</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">redundant_sources</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="select_cc_indexes"><a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.select_cc_indexes">[docs]</a><span class="k">def</span> <span class="nf">select_cc_indexes</span><span class="p">(</span><span class="n">ccs</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">search_win</span><span class="p">):</span>
+
+<div class="viewcode-block" id="select_cc_indexes">
+<a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.select_cc_indexes">[docs]</a>
+<span class="k">def</span> <span class="nf">select_cc_indexes</span><span class="p">(</span><span class="n">ccs</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">search_win</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Select new event detection&#39;s correlation indexes.</span>
 
 <span class="sd">    Parameters</span>
@@ -218,6 +277,64 @@
         <span class="n">selection</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_int</span><span class="p">)),</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">selection</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="time_dependent_threshold">
+<a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.time_dependent_threshold">[docs]</a>
+<span class="k">def</span> <span class="nf">time_dependent_threshold</span><span class="p">(</span>
+        <span class="n">time_series</span><span class="p">,</span> <span class="n">sliding_window_samp</span><span class="p">,</span> <span class="n">num_dev</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.66</span><span class="p">,</span> <span class="n">threshold_type</span><span class="o">=</span><span class="s2">&quot;rms&quot;</span><span class="p">,</span>
+        <span class="n">white_noise</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Time dependent detection threshold.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    time_series : (n_correlations) array_like</span>
+<span class="sd">        The array of correlation coefficients calculated by</span>
+<span class="sd">        FMF (float 32).</span>
+<span class="sd">    sliding_window_samp : scalar integer</span>
+<span class="sd">        The size of the sliding window, in samples, used</span>
+<span class="sd">        to calculate the time dependent central tendency</span>
+<span class="sd">        and deviation of the time series.</span>
+<span class="sd">    overlap : scalar float, default to 0.75</span>
+<span class="sd">    threshold_type : string, default to &#39;rms&#39;</span>
+<span class="sd">        Either rms or mad, depending on which measure</span>
+<span class="sd">        of deviation you want to use.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    threshold: (n_correlations) array_like</span>
+<span class="sd">        Returns the time dependent threshold, with same</span>
+<span class="sd">        size </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">GAUSSIAN_SAMPLE_LEN</span> <span class="o">=</span> <span class="mi">500</span>
+    <span class="n">time_series</span> <span class="o">=</span> <span class="p">(</span><span class="n">time_series</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+    <span class="n">num_samples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_series</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">white_noise</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">white_noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">GAUSSIAN_SAMPLE_LEN</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">num_threads</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">num_threads</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+
+    <span class="n">threshold_type</span> <span class="o">=</span> <span class="n">threshold_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">half_window_samp</span> <span class="o">=</span> <span class="n">sliding_window_samp</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">shift_samp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">*</span> <span class="n">sliding_window_samp</span><span class="p">)</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="n">_libc</span><span class="o">.</span><span class="n">time_dependent_threshold</span><span class="p">(</span>
+            <span class="n">time_series</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">)),</span>
+            <span class="n">white_noise</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">)),</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">num_dev</span><span class="p">),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">num_samples</span><span class="p">),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">half_window_samp</span><span class="p">),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">shift_samp</span><span class="p">),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">num_threads</span><span class="p">),</span>
+            <span class="n">threshold</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">c_float</span><span class="p">))</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">threshold</span></div>
+
 </pre></div>
 
            </div>

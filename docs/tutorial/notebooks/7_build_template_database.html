@@ -214,7 +214,39 @@ Checking reloc_bp.h5...
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-  0%|          | 0/17 [00:00&lt;?, ?it/s]
+  6%|▌         | 1/17 [00:00&lt;00:05,  2.90it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 18%|█▊        | 3/17 [00:00&lt;00:02,  5.69it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Does not have a `arrival_times` attribute.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+100%|██████████| 17/17 [00:02&lt;00:00,  7.45it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Does not have a `arrival_times` attribute.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -222,7 +254,7 @@ Checking reloc_bp.h5...
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|██████████| 17/17 [00:02&lt;00:00,  7.41it/s]
+
 </pre></div></div>
 </div>
 </section>
@@ -279,16 +311,23 @@ Checking reloc_bp.h5...
 <div class="highlight"><pre>
 Computing the similarity matrix...
 Computing the inter-template directional errors...
-Computed inter-template CCs in 0.15sec.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/ebeauce/miniconda3/envs/hy7_py310/lib/python3.10/site-packages/BPMF/dataset.py:4436: RuntimeWarning: invalid value encountered in divide
+  unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
-/home/ebeauce/miniconda3/envs/hy7_py310/lib/python3.10/site-packages/BPMF/dataset.py:4169: RuntimeWarning: invalid value encountered in divide
-  unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[
+Computed inter-template CCs in 2.18sec.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -345,341 +384,341 @@ Computed inter-template CCs in 0.15sec.
     <tr>
       <th>0</th>
       <td>1.000000</td>
-      <td>0.745198</td>
-      <td>0.162663</td>
-      <td>0.489752</td>
+      <td>0.477128</td>
       <td>0.000000</td>
-      <td>0.751065</td>
-      <td>0.433426</td>
+      <td>0.412416</td>
+      <td>0.616547</td>
+      <td>0.346673</td>
+      <td>0.335522</td>
+      <td>0.379354</td>
+      <td>0.299425</td>
       <td>0.000000</td>
-      <td>0.187433</td>
-      <td>0.132249</td>
-      <td>0.173695</td>
-      <td>0.691722</td>
-      <td>0.297668</td>
-      <td>0.417570</td>
-      <td>0.482067</td>
-      <td>0.333438</td>
-      <td>0.165799</td>
+      <td>0.0</td>
+      <td>0.741204</td>
+      <td>0.532904</td>
+      <td>0.558584</td>
+      <td>0.317324</td>
+      <td>0.000000</td>
+      <td>0.175184</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.745198</td>
+      <td>0.477128</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.451443</td>
+      <td>0.468460</td>
+      <td>0.437401</td>
+      <td>0.319153</td>
+      <td>0.374733</td>
+      <td>0.434762</td>
+      <td>0.300028</td>
       <td>0.000000</td>
-      <td>0.697121</td>
-      <td>0.455028</td>
+      <td>0.0</td>
+      <td>0.493984</td>
+      <td>0.389494</td>
+      <td>0.671390</td>
+      <td>0.459654</td>
       <td>0.000000</td>
-      <td>0.186291</td>
-      <td>0.151569</td>
-      <td>0.204040</td>
-      <td>0.583336</td>
-      <td>0.309618</td>
-      <td>0.376188</td>
-      <td>0.440005</td>
-      <td>0.294525</td>
-      <td>0.157504</td>
+      <td>0.185049</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.162663</td>
+      <td>0.000000</td>
       <td>0.000000</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.156482</td>
-      <td>0.169598</td>
-      <td>0.140515</td>
       <td>0.000000</td>
-      <td>0.152657</td>
-      <td>0.169002</td>
       <td>0.000000</td>
-      <td>0.163741</td>
       <td>0.000000</td>
-      <td>0.154538</td>
-      <td>0.165371</td>
-      <td>0.146140</td>
-      <td>0.171176</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.174151</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.190878</td>
+      <td>0.000000</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.489752</td>
-      <td>0.451443</td>
+      <td>0.412416</td>
+      <td>0.468460</td>
       <td>0.000000</td>
       <td>1.000000</td>
+      <td>0.410000</td>
+      <td>0.323889</td>
+      <td>0.369112</td>
+      <td>0.381414</td>
+      <td>0.303599</td>
       <td>0.000000</td>
-      <td>0.550850</td>
-      <td>0.402199</td>
+      <td>0.0</td>
+      <td>0.410642</td>
+      <td>0.412339</td>
+      <td>0.461057</td>
+      <td>0.504043</td>
       <td>0.000000</td>
-      <td>0.169801</td>
-      <td>0.146803</td>
-      <td>0.149911</td>
-      <td>0.423282</td>
-      <td>0.445811</td>
-      <td>0.348178</td>
-      <td>0.357582</td>
-      <td>0.319644</td>
-      <td>0.139809</td>
+      <td>0.189004</td>
     </tr>
     <tr>
       <th>4</th>
+      <td>0.616547</td>
+      <td>0.437401</td>
       <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.156482</td>
-      <td>0.000000</td>
+      <td>0.410000</td>
       <td>1.000000</td>
+      <td>0.458776</td>
+      <td>0.349111</td>
+      <td>0.374305</td>
+      <td>0.286568</td>
       <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.584560</td>
+      <td>0.595355</td>
+      <td>0.407033</td>
+      <td>0.388314</td>
       <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.187234</td>
-      <td>0.136836</td>
-      <td>0.171432</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.142375</td>
+      <td>0.198617</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>0.751065</td>
-      <td>0.697121</td>
-      <td>0.169598</td>
-      <td>0.550850</td>
+      <td>0.346673</td>
+      <td>0.319153</td>
       <td>0.000000</td>
+      <td>0.323889</td>
+      <td>0.458776</td>
       <td>1.000000</td>
-      <td>0.573692</td>
+      <td>0.355300</td>
+      <td>0.269141</td>
+      <td>0.295206</td>
       <td>0.000000</td>
-      <td>0.177688</td>
-      <td>0.128839</td>
-      <td>0.163332</td>
-      <td>0.581510</td>
-      <td>0.316958</td>
-      <td>0.426413</td>
-      <td>0.457873</td>
-      <td>0.322279</td>
-      <td>0.143578</td>
+      <td>0.0</td>
+      <td>0.409151</td>
+      <td>0.379693</td>
+      <td>0.340360</td>
+      <td>0.288253</td>
+      <td>0.000000</td>
+      <td>0.182702</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>0.433426</td>
-      <td>0.455028</td>
-      <td>0.140515</td>
-      <td>0.402199</td>
+      <td>0.335522</td>
+      <td>0.374733</td>
       <td>0.000000</td>
-      <td>0.573692</td>
+      <td>0.369112</td>
+      <td>0.349111</td>
+      <td>0.355300</td>
       <td>1.000000</td>
+      <td>0.341919</td>
+      <td>0.287617</td>
       <td>0.000000</td>
-      <td>0.181900</td>
-      <td>0.174854</td>
-      <td>0.179139</td>
-      <td>0.492894</td>
-      <td>0.288432</td>
-      <td>0.351653</td>
-      <td>0.395676</td>
-      <td>0.294420</td>
-      <td>0.159435</td>
+      <td>0.0</td>
+      <td>0.352310</td>
+      <td>0.280423</td>
+      <td>0.389386</td>
+      <td>0.343758</td>
+      <td>0.000000</td>
+      <td>0.168698</td>
     </tr>
     <tr>
       <th>7</th>
+      <td>0.379354</td>
+      <td>0.434762</td>
       <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
+      <td>0.381414</td>
+      <td>0.374305</td>
+      <td>0.269141</td>
+      <td>0.341919</td>
       <td>1.000000</td>
-      <td>0.193355</td>
-      <td>0.167718</td>
+      <td>0.307829</td>
       <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.431928</td>
+      <td>0.369352</td>
+      <td>0.474225</td>
+      <td>0.397337</td>
       <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.197122</td>
+      <td>0.155042</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>0.187433</td>
-      <td>0.186291</td>
-      <td>0.152657</td>
-      <td>0.169801</td>
-      <td>0.187234</td>
-      <td>0.177688</td>
-      <td>0.181900</td>
-      <td>0.193355</td>
+      <td>0.299425</td>
+      <td>0.300028</td>
+      <td>0.000000</td>
+      <td>0.303599</td>
+      <td>0.286568</td>
+      <td>0.295206</td>
+      <td>0.287617</td>
+      <td>0.307829</td>
       <td>1.000000</td>
-      <td>0.193144</td>
-      <td>0.187271</td>
-      <td>0.204847</td>
-      <td>0.199492</td>
-      <td>0.152425</td>
-      <td>0.149325</td>
-      <td>0.163335</td>
-      <td>0.171001</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.340576</td>
+      <td>0.288347</td>
+      <td>0.312245</td>
+      <td>0.298257</td>
+      <td>0.000000</td>
+      <td>0.153908</td>
     </tr>
     <tr>
       <th>9</th>
-      <td>0.132249</td>
-      <td>0.151569</td>
-      <td>0.169002</td>
-      <td>0.146803</td>
-      <td>0.136836</td>
-      <td>0.128839</td>
-      <td>0.174854</td>
-      <td>0.167718</td>
-      <td>0.193144</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.174151</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.169805</td>
-      <td>0.167378</td>
-      <td>0.167384</td>
-      <td>0.172907</td>
-      <td>0.151373</td>
-      <td>0.152229</td>
-      <td>0.179561</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.183477</td>
+      <td>0.000000</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>0.173695</td>
-      <td>0.204040</td>
       <td>0.000000</td>
-      <td>0.149911</td>
-      <td>0.171432</td>
-      <td>0.163332</td>
-      <td>0.179139</td>
       <td>0.000000</td>
-      <td>0.187271</td>
-      <td>0.169805</td>
-      <td>1.000000</td>
-      <td>0.188334</td>
-      <td>0.165065</td>
-      <td>0.181436</td>
-      <td>0.146070</td>
-      <td>0.155118</td>
-      <td>0.164733</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>1.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
     </tr>
     <tr>
       <th>11</th>
-      <td>0.691722</td>
-      <td>0.583336</td>
-      <td>0.163741</td>
-      <td>0.423282</td>
+      <td>0.741204</td>
+      <td>0.493984</td>
       <td>0.000000</td>
-      <td>0.581510</td>
-      <td>0.492894</td>
+      <td>0.410642</td>
+      <td>0.584560</td>
+      <td>0.409151</td>
+      <td>0.352310</td>
+      <td>0.431928</td>
+      <td>0.340576</td>
       <td>0.000000</td>
-      <td>0.204847</td>
-      <td>0.167378</td>
-      <td>0.188334</td>
+      <td>0.0</td>
       <td>1.000000</td>
-      <td>0.313229</td>
-      <td>0.435087</td>
-      <td>0.503254</td>
-      <td>0.332503</td>
-      <td>0.149142</td>
+      <td>0.514565</td>
+      <td>0.669701</td>
+      <td>0.413737</td>
+      <td>0.000000</td>
+      <td>0.162423</td>
     </tr>
     <tr>
       <th>12</th>
-      <td>0.297668</td>
-      <td>0.309618</td>
+      <td>0.532904</td>
+      <td>0.389494</td>
       <td>0.000000</td>
-      <td>0.445811</td>
+      <td>0.412339</td>
+      <td>0.595355</td>
+      <td>0.379693</td>
+      <td>0.280423</td>
+      <td>0.369352</td>
+      <td>0.288347</td>
       <td>0.000000</td>
-      <td>0.316958</td>
-      <td>0.288432</td>
-      <td>0.000000</td>
-      <td>0.199492</td>
-      <td>0.167384</td>
-      <td>0.165065</td>
-      <td>0.313229</td>
+      <td>0.0</td>
+      <td>0.514565</td>
       <td>1.000000</td>
-      <td>0.367145</td>
-      <td>0.263499</td>
-      <td>0.289228</td>
-      <td>0.179794</td>
+      <td>0.451129</td>
+      <td>0.444074</td>
+      <td>0.000000</td>
+      <td>0.164250</td>
     </tr>
     <tr>
       <th>13</th>
-      <td>0.417570</td>
-      <td>0.376188</td>
-      <td>0.154538</td>
-      <td>0.348178</td>
+      <td>0.558584</td>
+      <td>0.671390</td>
       <td>0.000000</td>
-      <td>0.426413</td>
-      <td>0.351653</td>
+      <td>0.461057</td>
+      <td>0.407033</td>
+      <td>0.340360</td>
+      <td>0.389386</td>
+      <td>0.474225</td>
+      <td>0.312245</td>
       <td>0.000000</td>
-      <td>0.152425</td>
-      <td>0.172907</td>
-      <td>0.181436</td>
-      <td>0.435087</td>
-      <td>0.367145</td>
+      <td>0.0</td>
+      <td>0.669701</td>
+      <td>0.451129</td>
       <td>1.000000</td>
-      <td>0.351013</td>
-      <td>0.301293</td>
-      <td>0.152648</td>
+      <td>0.574083</td>
+      <td>0.000000</td>
+      <td>0.157772</td>
     </tr>
     <tr>
       <th>14</th>
-      <td>0.482067</td>
-      <td>0.440005</td>
-      <td>0.165371</td>
-      <td>0.357582</td>
+      <td>0.317324</td>
+      <td>0.459654</td>
       <td>0.000000</td>
-      <td>0.457873</td>
-      <td>0.395676</td>
+      <td>0.504043</td>
+      <td>0.388314</td>
+      <td>0.288253</td>
+      <td>0.343758</td>
+      <td>0.397337</td>
+      <td>0.298257</td>
       <td>0.000000</td>
-      <td>0.149325</td>
-      <td>0.151373</td>
-      <td>0.146070</td>
-      <td>0.503254</td>
-      <td>0.263499</td>
-      <td>0.351013</td>
+      <td>0.0</td>
+      <td>0.413737</td>
+      <td>0.444074</td>
+      <td>0.574083</td>
       <td>1.000000</td>
-      <td>0.308089</td>
-      <td>0.147887</td>
+      <td>0.000000</td>
+      <td>0.179577</td>
     </tr>
     <tr>
       <th>15</th>
-      <td>0.333438</td>
-      <td>0.294525</td>
-      <td>0.146140</td>
-      <td>0.319644</td>
       <td>0.000000</td>
-      <td>0.322279</td>
-      <td>0.294420</td>
       <td>0.000000</td>
-      <td>0.163335</td>
-      <td>0.152229</td>
-      <td>0.155118</td>
-      <td>0.332503</td>
-      <td>0.289228</td>
-      <td>0.301293</td>
-      <td>0.308089</td>
+      <td>0.190878</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.183477</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.150512</td>
+      <td>0.000000</td>
     </tr>
     <tr>
       <th>16</th>
-      <td>0.165799</td>
-      <td>0.157504</td>
-      <td>0.171176</td>
-      <td>0.139809</td>
-      <td>0.142375</td>
-      <td>0.143578</td>
-      <td>0.159435</td>
-      <td>0.197122</td>
-      <td>0.171001</td>
-      <td>0.179561</td>
-      <td>0.164733</td>
-      <td>0.149142</td>
-      <td>0.179794</td>
-      <td>0.152648</td>
-      <td>0.147887</td>
-      <td>0.150512</td>
+      <td>0.175184</td>
+      <td>0.185049</td>
+      <td>0.000000</td>
+      <td>0.189004</td>
+      <td>0.198617</td>
+      <td>0.182702</td>
+      <td>0.168698</td>
+      <td>0.155042</td>
+      <td>0.153908</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.162423</td>
+      <td>0.164250</td>
+      <td>0.157772</td>
+      <td>0.179577</td>
+      <td>0.000000</td>
       <td>1.000000</td>
     </tr>
   </tbody>
@@ -704,17 +743,18 @@ Computed inter-template CCs in 0.15sec.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">templates_filtered</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">tids_processed</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">tids_processed</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">template_group</span><span class="o">.</span><span class="n">tids</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">tids_processed</span><span class="p">:</span>
         <span class="k">continue</span>
     <span class="n">tt</span> <span class="o">=</span> <span class="n">template_group</span><span class="o">.</span><span class="n">tindexes</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span>
     <span class="n">similar</span> <span class="o">=</span> <span class="n">template_group</span><span class="o">.</span><span class="n">intertemplate_cc</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">SIMILARITY_THRESHOLD</span>
-    <span class="n">n_similar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">similar</span><span class="p">)</span>
+    <span class="n">similar_tids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">template_group</span><span class="o">.</span><span class="n">intertemplate_cc</span><span class="p">[</span><span class="n">similar</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="c1"># comment the following line for a more conservative linkage</span>
+    <span class="n">similar_tids</span><span class="o">.</span><span class="n">difference_update</span><span class="p">(</span><span class="n">tids_processed</span><span class="p">)</span>
+    <span class="n">n_similar</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">similar_tids</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">n_similar</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">similar_tids</span> <span class="o">=</span> <span class="n">template_group</span><span class="o">.</span><span class="n">intertemplate_cc</span><span class="p">[</span><span class="n">similar</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Template </span><span class="si">{</span><span class="n">tid</span><span class="si">}</span><span class="s2"> is similar to: </span><span class="si">{</span><span class="n">similar_tids</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">tids_processed</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">similar_tids</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
         <span class="n">best_tid</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span>
         <span class="n">best_unc</span> <span class="o">=</span> <span class="mf">10000000.0</span>
         <span class="k">for</span> <span class="n">tid_sim</span> <span class="ow">in</span> <span class="n">similar_tids</span><span class="p">:</span>
@@ -727,6 +767,10 @@ Computed inter-template CCs in 0.15sec.
                 <span class="n">best_unc</span> <span class="o">=</span> <span class="n">unc</span>
                 <span class="n">best_tid</span> <span class="o">=</span> <span class="n">tid_sim</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Keeping only Template </span><span class="si">{</span><span class="n">best_tid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1">## uncomment if you&#39;re using the more conservative linkage</span>
+        <span class="c1">#if best_tid in tids_processed:</span>
+        <span class="c1">#    continue</span>
+        <span class="n">tids_processed</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">similar_tids</span><span class="p">)</span>
         <span class="n">templates_filtered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">template_group</span><span class="o">.</span><span class="n">templates</span><span class="p">[</span>
                 <span class="n">template_group</span><span class="o">.</span><span class="n">tindexes</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">best_tid</span><span class="p">]</span>
@@ -737,7 +781,7 @@ Computed inter-template CCs in 0.15sec.
             <span class="sa">f</span><span class="s2">&quot;Problem with Template </span><span class="si">{</span><span class="n">tid</span><span class="si">}</span><span class="s2">, it should at least be similar with&quot;</span> <span class="s2">&quot; itself&quot;</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">tids_processed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tid</span><span class="p">)</span>
+        <span class="n">tids_processed</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tid</span><span class="p">)</span>
         <span class="n">templates_filtered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">template_group</span><span class="o">.</span><span class="n">templates</span><span class="p">[</span><span class="n">tt</span><span class="p">])</span>
 <br/></pre></div>
 </div>
@@ -747,13 +791,9 @@ Computed inter-template CCs in 0.15sec.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Template 0 is similar to: Int64Index([0, 1, 5, 11], dtype=&#39;int64&#39;)
-Keeping only Template 1
-Template 3 is similar to: Int64Index([3, 5], dtype=&#39;int64&#39;)
-Keeping only Template 5
-Template 6 is similar to: Int64Index([5, 6], dtype=&#39;int64&#39;)
-Keeping only Template 5
-Template 14 is similar to: Int64Index([11, 14], dtype=&#39;int64&#39;)
+Template 0 is similar to: {0, 4, 11, 12, 13}
+Keeping only Template 0
+Template 3 is similar to: {3, 14}
 Keeping only Template 14
 </pre></div></div>
 </div>
@@ -790,7 +830,7 @@ Text(0.5, 0.98, &#39;Template 0&#39;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tid</span> <span class="o">=</span> <span class="mi">1</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tid</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">template_group</span><span class="o">.</span><span class="n">templates</span><span class="p">[</span><span class="n">template_group</span><span class="o">.</span><span class="n">tindexes</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tid</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Template </span><span class="si">{</span><span class="n">tid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
@@ -802,7 +842,7 @@ Text(0.5, 0.98, &#39;Template 0&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Text(0.5, 0.98, &#39;Template 1&#39;)
+Text(0.5, 0.98, &#39;Template 4&#39;)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -818,7 +858,7 @@ Text(0.5, 0.98, &#39;Template 1&#39;)
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">hilbert</span>
 
-<span class="n">similar_tids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">]</span>
+<span class="n">similar_tids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">]</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="s2">&quot;waveforms_similar_templates&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">similar_tids</span><span class="p">:</span>

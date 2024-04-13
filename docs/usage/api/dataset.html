@@ -413,6 +413,16 @@ are synchronized.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="BPMF.dataset.Event.compute_snr">
+<span class="sig-name descname"><span class="pre">compute_snr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_window_sec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data_reader_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.compute_snr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.compute_snr" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>noise_window_sec</strong> (<em>float</em><em>, </em><em>optional</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Event.get_np_array">
 <span class="sig-name descname"><span class="pre">get_np_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'HH'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.get_np_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.get_np_array" title="Link to this definition"></a></dt>
 <dd><p>Arguments are passed to <cite>BPMF.utils.get_np_array</cite>.</p>
@@ -496,6 +506,25 @@ represents the longest semi-axis of the ellipsoid.</p>
 <dt class="sig sig-object py" id="BPMF.dataset.Event.location">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">location</span></span><a class="headerlink" href="#BPMF.dataset.Event.location" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.dataset.Event.n_best_SNR_stations">
+<span class="sig-name descname"><span class="pre">n_best_SNR_stations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.n_best_SNR_stations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.n_best_SNR_stations" title="Link to this definition"></a></dt>
+<dd><p>Adjust <cite>self.stations</cite> to the <cite>n</cite> best SNR stations.</p>
+<p>This function finds the <cite>n</cite> best stations based on signal-to-noise ratio (SNR)
+and modifies the <cite>self.stations</cite> attribute accordingly. The instance’s properties
+will also change to reflect the new selection of stations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>int</em>) – The number of best SNR stations to select.</p></li>
+<li><p><strong>available_stations</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>default None</em>) – The list of stations from which to search for the closest stations. If
+provided, only stations in this list will be considered. This can be used
+to exclude stations that are known to lack data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Event.n_closest_stations">
@@ -715,7 +744,7 @@ relocation method with the provided arguments and keyword arguments.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Event.relocate_NLLoc">
-<span class="sig-name descname"><span class="pre">relocate_NLLoc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EDT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup_out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.relocate_NLLoc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.relocate_NLLoc" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">relocate_NLLoc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EDT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_epicentral_dist_km_S</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup_out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.relocate_NLLoc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.relocate_NLLoc" title="Link to this definition"></a></dt>
 <dd><p>Relocate the event using NonLinLoc (NLLoc) based on the provided picks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -921,6 +950,11 @@ location and the stations in the network.</p></li>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="BPMF.dataset.Event.snr">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">snr</span></span><a class="headerlink" href="#BPMF.dataset.Event.snr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="BPMF.dataset.Event.source_receiver_dist">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_receiver_dist</span></span><a class="headerlink" href="#BPMF.dataset.Event.source_receiver_dist" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -1007,6 +1041,12 @@ by subtracting the origin time from the absolute times and update the
 <dt class="sig sig-object py" id="BPMF.dataset.Event.vmax_unc">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vmax_unc</span></span><a class="headerlink" href="#BPMF.dataset.Event.vmax_unc" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.dataset.Event.waveforms_arr">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">waveforms_arr</span></span><a class="headerlink" href="#BPMF.dataset.Event.waveforms_arr" title="Link to this definition"></a></dt>
+<dd><p>Return traces in numpy.ndarray.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Event.write">
@@ -1506,6 +1546,37 @@ the <cite>two_point_distance</cite> function from the <cite>utils</cite> module.
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="BPMF.dataset.Template.find_monochromatic_traces">
+<span class="sig-name descname"><span class="pre">find_monochromatic_traces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">autocorr_peak_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.33</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_peaks_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_lag_samp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Template.find_monochromatic_traces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Template.find_monochromatic_traces" title="Link to this definition"></a></dt>
+<dd><p>Detect traces in seismic waveforms with dominant monochromatic signals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>autocorr_peak_threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold for peak detection in the autocorrelation function.
+Default is 0.33.</p></li>
+<li><p><strong>num_peaks_criterion</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum number of peaks required above the threshold for a trace
+to be considered monochromatic. Default is 5.</p></li>
+<li><p><strong>taper_pct</strong> (<em>float</em><em>, </em><em>optional</em>) – Percentage of the signal to taper at both ends using a Tukey
+window function. Default is 5.0.</p></li>
+<li><p><strong>max_lag_samp</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Maximum lag samples to consider in the autocorrelation function.
+If None, uses the entire autocorrelation. Default is None.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, displays a warning about the experimental nature of
+the method. Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>monochromatic</strong> (<em>pandas.DataFrame</em>) – A DataFrame indicating whether each trace is monochromatic or not.
+Rows represent stations and columns represent components.</p></li>
+<li><p><strong>num_peaks_above_threshold</strong> (<em>pandas.DataFrame</em>) – A DataFrame containing the number of peaks above the threshold
+for each trace.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Template.init_from_event">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init_from_event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attach_waveforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Template.init_from_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Template.init_from_event" title="Link to this definition"></a></dt>
 <dd><p>Instantiate a Template object from an Event object.</p>
@@ -1540,25 +1611,6 @@ attached. Defaults to True.</p></li>
 <dt class="sig sig-object py" id="BPMF.dataset.Template.moveouts_win">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">moveouts_win</span></span><a class="headerlink" href="#BPMF.dataset.Template.moveouts_win" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="BPMF.dataset.Template.n_best_SNR_stations">
-<span class="sig-name descname"><span class="pre">n_best_SNR_stations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Template.n_best_SNR_stations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Template.n_best_SNR_stations" title="Link to this definition"></a></dt>
-<dd><p>Adjust <cite>self.stations</cite> to the <cite>n</cite> best SNR stations.</p>
-<p>This function finds the <cite>n</cite> best stations based on signal-to-noise ratio (SNR)
-and modifies the <cite>self.stations</cite> attribute accordingly. The instance’s properties
-will also change to reflect the new selection of stations.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>n</strong> (<em>int</em>) – The number of best SNR stations to select.</p></li>
-<li><p><strong>available_stations</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>default None</em>) – The list of stations from which to search for the closest stations. If
-provided, only stations in this list will be considered. This can be used
-to exclude stations that are known to lack data.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Template.plot_detection">
@@ -1614,7 +1666,7 @@ the waveforms. Defaults to 10.0.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Template.read_catalog">
-<span class="sig-name descname"><span class="pre">read_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_summary_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Template.read_catalog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Template.read_catalog" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">read_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_summary_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_return_times</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Template.read_catalog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Template.read_catalog" title="Link to this definition"></a></dt>
 <dd><p>Build a Catalog instance from detection data.</p>
 <p>This function builds a Catalog instance by reading detection data from a file
 specified by <cite>filename</cite> and <cite>db_path</cite>, or by checking for an existing summary
@@ -1639,6 +1691,9 @@ True if check_summary_file is set to False. Defaults to False.</p></li>
 <li><p><strong>check_summary_file</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it checks if the summary HDF5 file already exists and reads from
 it using the standard naming convention. If False, it builds the catalog
 from the detection output. Defaults to True.</p></li>
+<li><p><strong>compute_return_times</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, it computes inter-event times. Because events detected with the
+same template are co-located, these inter-event times can be called
+return times.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1712,12 +1767,6 @@ waveforms for the selected stations.</p></li>
 <dt class="sig sig-object py" id="BPMF.dataset.Template.tid">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tid</span></span><a class="headerlink" href="#BPMF.dataset.Template.tid" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="BPMF.dataset.Template.waveforms_arr">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">waveforms_arr</span></span><a class="headerlink" href="#BPMF.dataset.Template.waveforms_arr" title="Link to this definition"></a></dt>
-<dd><p>Return traces in numpy.ndarray.</p>
-</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Template.write">

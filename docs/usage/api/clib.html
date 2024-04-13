@@ -52,6 +52,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.clib.find_similar_sources"><code class="docutils literal notranslate"><span class="pre">find_similar_sources()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.clib.kurtosis"><code class="docutils literal notranslate"><span class="pre">kurtosis()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.clib.select_cc_indexes"><code class="docutils literal notranslate"><span class="pre">select_cc_indexes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.clib.time_dependent_threshold"><code class="docutils literal notranslate"><span class="pre">time_dependent_threshold()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="dataset.html">BPMF.dataset</a></li>
@@ -100,7 +101,7 @@
 <span id="bpmf-clib"></span><h1>BPMF.clib<a class="headerlink" href="#module-BPMF.clib" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.clib.find_similar_sources">
-<span class="sig-prename descclassname"><span class="pre">BPMF.clib.</span></span><span class="sig-name descname"><span class="pre">find_similar_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">moveouts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest_neighbors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/clib.html#find_similar_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.clib.find_similar_sources" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.clib.</span></span><span class="sig-name descname"><span class="pre">find_similar_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">moveouts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_stations_for_diff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/clib.html#find_similar_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.clib.find_similar_sources" title="Link to this definition"></a></dt>
 <dd><p>Find sources with similar moveouts so that users can discard
 some of them during the computation of the network response,
 and thus speedup the process.</p>
@@ -111,10 +112,6 @@ and thus speedup the process.</p>
 rather than the absolute travel times here.</p></li>
 <li><p><strong>threshold</strong> (<em>scalar float</em>) – The station average time difference tolerance to consider
 two sources as being redundant.</p></li>
-<li><p><strong>n_nearest_neighbors</strong> (<em>scalar int</em><em>, </em><em>default to 200</em>) – Check redundancy in chunks of <cite>n_nearest_neighbors</cite> contiguous sources
-before starting the all pair-wise computation. If the moveouts are
-ordered such that contiguous elements correspond to proximal grid
-sources, then this can considerably speed up the computation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -152,6 +149,33 @@ is a new event detection.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(n_corr,) bool <cite>numpy.ndarray</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.clib.time_dependent_threshold">
+<span class="sig-prename descclassname"><span class="pre">BPMF.clib.</span></span><span class="sig-name descname"><span class="pre">time_dependent_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sliding_window_samp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.66</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rms'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">white_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/clib.html#time_dependent_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.clib.time_dependent_threshold" title="Link to this definition"></a></dt>
+<dd><p>Time dependent detection threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_series</strong> (<em>(</em><em>n_correlations</em><em>) </em><em>array_like</em>) – The array of correlation coefficients calculated by
+FMF (float 32).</p></li>
+<li><p><strong>sliding_window_samp</strong> (<em>scalar integer</em>) – The size of the sliding window, in samples, used
+to calculate the time dependent central tendency
+and deviation of the time series.</p></li>
+<li><p><strong>overlap</strong> (<em>scalar float</em><em>, </em><em>default to 0.75</em>) – </p></li>
+<li><p><strong>threshold_type</strong> (<em>string</em><em>, </em><em>default to 'rms'</em>) – Either rms or mad, depending on which measure
+of deviation you want to use.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>threshold</strong> – Returns the time dependent threshold, with same
+size</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(n_correlations) array_like</p>
 </dd>
 </dl>
 </dd></dl>

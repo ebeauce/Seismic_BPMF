@@ -243,6 +243,8 @@
 </li>
       <li><a href="usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_signal_to_noise_ratio">compute_signal_to_noise_ratio() (BPMF.spectrum.Spectrum method)</a>
 </li>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.compute_snr">compute_snr() (BPMF.dataset.Event method)</a>
+</li>
       <li><a href="usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_spectrum">compute_spectrum() (BPMF.spectrum.Spectrum method)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Catalog.concatenate">concatenate() (BPMF.dataset.Catalog class method)</a>
@@ -323,14 +325,16 @@
 </li>
       <li><a href="usage/api/utils.html#BPMF.utils.fetch_detection_waveforms_refilter">fetch_detection_waveforms_refilter() (in module BPMF.utils)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.find_detections">find_detections() (BPMF.similarity_search.MatchedFilter method)</a>
 
       <ul>
         <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.find_detections">(BPMF.template_search.Beamformer method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Template.find_monochromatic_traces">find_monochromatic_traces() (BPMF.dataset.Template method)</a>
+</li>
       <li><a href="usage/api/clib.html#BPMF.clib.find_similar_sources">find_similar_sources() (in module BPMF.clib)</a>
 </li>
       <li><a href="usage/api/utils.html#BPMF.utils.find_template_clusters">find_template_clusters() (in module BPMF.utils)</a>
@@ -496,7 +500,7 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="usage/api/dataset.html#BPMF.dataset.Template.n_best_SNR_stations">n_best_SNR_stations() (BPMF.dataset.Template method)</a>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.n_best_SNR_stations">n_best_SNR_stations() (BPMF.dataset.Event method)</a>
 
       <ul>
         <li><a href="usage/api/dataset.html#BPMF.dataset.TemplateGroup.n_best_SNR_stations">(BPMF.dataset.TemplateGroup method)</a>
@@ -762,10 +766,10 @@
         <li><a href="usage/api/dataset.html#BPMF.dataset.Family.set_source_receiver_dist">(BPMF.dataset.Family method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage/api/spectrum.html#BPMF.spectrum.Spectrum.set_target_frequencies">set_target_frequencies() (BPMF.spectrum.Spectrum method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.set_travel_times">set_travel_times() (BPMF.template_search.Beamformer method)</a>
 </li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.set_weights">set_weights() (BPMF.template_search.Beamformer method)</a>
@@ -774,6 +778,8 @@
 </li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.smooth_maxbeam">smooth_maxbeam() (BPMF.template_search.Beamformer method)</a>
 </li>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.snr">snr (BPMF.dataset.Event property)</a>
+</li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.source_coordinates">source_coordinates (BPMF.template_search.Beamformer property)</a>
 </li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.TravelTimes.source_coords">source_coords (BPMF.template_search.TravelTimes property)</a>
@@ -781,6 +787,8 @@
       <li><a href="usage/api/dataset.html#BPMF.dataset.Event.source_receiver_dist">source_receiver_dist (BPMF.dataset.Event property)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Event.source_receiver_epicentral_dist">source_receiver_epicentral_dist (BPMF.dataset.Event property)</a>
+</li>
+      <li><a href="usage/api/utils.html#BPMF.utils.spectrogram">spectrogram() (in module BPMF.utils)</a>
 </li>
       <li><a href="usage/api/spectrum.html#BPMF.spectrum.Spectrum">Spectrum (class in BPMF.spectrum)</a>
 </li>
@@ -832,16 +840,18 @@
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Data.time">time (BPMF.dataset.Data property)</a>
 </li>
-      <li><a href="usage/api/similarity_search.html#BPMF.similarity_search.time_dependent_threshold">time_dependent_threshold() (in module BPMF.similarity_search)</a>
+      <li><a href="usage/api/clib.html#BPMF.clib.time_dependent_threshold">time_dependent_threshold() (in module BPMF.clib)</a>
 
       <ul>
+        <li><a href="usage/api/similarity_search.html#BPMF.similarity_search.time_dependent_threshold">(in module BPMF.similarity_search)</a>
+</li>
         <li><a href="usage/api/template_search.html#BPMF.template_search.time_dependent_threshold">(in module BPMF.template_search)</a>
 </li>
       </ul></li>
-      <li><a href="usage/api/template_search.html#BPMF.template_search.time_dependent_threshold_pd">time_dependent_threshold_pd() (in module BPMF.template_search)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usage/api/template_search.html#BPMF.template_search.time_dependent_threshold_pd">time_dependent_threshold_pd() (in module BPMF.template_search)</a>
+</li>
       <li><a href="usage/api/utils.html#BPMF.utils.time_range">time_range() (in module BPMF.utils)</a>
 </li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.TravelTimes">TravelTimes (class in BPMF.template_search)</a>
@@ -898,10 +908,10 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="usage/api/dataset.html#BPMF.dataset.Family.waveforms_arr">waveforms_arr (BPMF.dataset.Family property)</a>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.waveforms_arr">waveforms_arr (BPMF.dataset.Event property)</a>
 
       <ul>
-        <li><a href="usage/api/dataset.html#BPMF.dataset.Template.waveforms_arr">(BPMF.dataset.Template property)</a>
+        <li><a href="usage/api/dataset.html#BPMF.dataset.Family.waveforms_arr">(BPMF.dataset.Family property)</a>
 </li>
       </ul></li>
       <li><a href="usage/api/utils.html#BPMF.utils.weighted_linear_regression">weighted_linear_regression() (in module BPMF.utils)</a>
