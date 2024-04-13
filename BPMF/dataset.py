@@ -394,6 +394,7 @@ class Catalog(object):
             `Catalog` instance.
         """
         longitudes, latitudes, depths, origin_times = [], [], [], []
+        event_ids = []
         extra_attr = {}
         # initialize empty lists for extra requested attributes
         for attr in extra_attributes:
@@ -403,6 +404,7 @@ class Catalog(object):
             latitudes.append(event.latitude)
             depths.append(event.depth)
             origin_times.append(str(event.origin_time))
+            event_ids.append(event.id)
             for attr in extra_attributes:
                 if hasattr(event, attr):
                     extra_attr[attr].append(getattr(event, attr))
@@ -412,7 +414,14 @@ class Catalog(object):
                 else:
                     # attribute was not found, fill with default value
                     extra_attr[attr].append(fill_value)
-        return cls(longitudes, latitudes, depths, origin_times, **extra_attr)
+        return cls(
+            longitudes,
+            latitudes,
+            depths,
+            origin_times,
+            event_ids=event_ids,
+            **extra_attr,
+        )
 
     @classmethod
     def read_from_dataframe(cls, dataframe):
@@ -626,6 +635,11 @@ class Catalog(object):
                 min(self.latitude.tolist() + network.latitude.tolist()) - lat_margin,
                 max(self.latitude.tolist() + network.latitude.tolist()) + lat_margin,
             ]
+        # overwrite map extent if given
+        map_longitudes[0] = kwargs.get("lon_min", map_longitudes[0])
+        map_longitudes[1] = kwargs.get("lon_max", map_longitudes[1])
+        map_latitudes[0] = kwargs.get("lat_min", map_latitudes[0])
+        map_latitudes[1] = kwargs.get("lat_max", map_latitudes[1])
         ax = plotting_utils.initialize_map(
             map_longitudes, map_latitudes, figsize=figsize, map_axis=ax, **kwargs
         )
@@ -1133,9 +1147,14 @@ class Event(object):
         aux_data = {}
         if "aux_data" in f:
             for key in f["aux_data"].keys():
-                aux_data[key] = f["aux_data"][key][()]
-                if type(aux_data[key]) == bytes:
-                    aux_data[key] = aux_data[key].decode("utf-8")
+                if type(f["aux_data"][key]) == h5.Group:
+                    aux_data[key] = {}
+                    for key2 in f["aux_data"][key]:
+                        aux_data[key][key2] = f["aux_data"][key][key2][()]
+                else:
+                    aux_data[key] = f["aux_data"][key][()]
+                    if type(aux_data[key]) == bytes:
+                        aux_data[key] = aux_data[key].decode("utf-8")
         if "picks" in f:
             picks = {}
             for key in f["picks"].keys():
@@ -1180,11 +1199,6 @@ class Event(object):
     @property
     def availability(self):
         return self.availability_per_sta
-        # if hasattr(self, "aux_data") and "availability" in self.aux_data:
-        #    return self.aux_data["availability"].loc[self.stations]
-        # else:
-        #    print("Call `self.set_availability` first.")
-        #    return
 
     @property
     def availability_per_sta(self):
@@ -1276,6 +1290,22 @@ class Event(object):
         return [self.longitude, self.latitude, self.depth]
 
     @property
+    def snr(self):
+        if hasattr(self, "_snr"):
+            return self._snr
+        _snr = pd.DataFrame(
+            index=self.stations, columns=self.components, dtype=np.float32
+        )
+        for cp in self.components:
+            if hasattr(self, "aux_data") and f"snr_{cp}" in self.aux_data:
+                for sta in self.stations:
+                    _snr.loc[sta, cp] = self.aux_data[f"snr_{cp}"][sta]
+            else:
+                print("Call `self.compute_snr` first.")
+                return
+        return _snr
+
+    @property
     def source_receiver_dist(self):
         if hasattr(self, "_source_receiver_dist"):
             return self._source_receiver_dist[self.stations]
@@ -1300,6 +1330,55 @@ class Event(object):
     @property
     def sr(self):
         return self.sampling_rate
+
+    @property
+    def waveforms_arr(self):
+        """Return traces in numpy.ndarray."""
+        return utils.get_np_array(
+            self.traces,
+            self.stations,
+            components=self.components,
+            priority="HH",
+            component_aliases=self.component_aliases,
+            n_samples=self.n_samples,
+            verbose=True,
+        )
+
+    def compute_snr(self, noise_window_sec=5.0, **data_reader_kwargs):
+        """
+        Parameters
+        ----------
+        noise_window_sec : float, optional
+        """
+        if not hasattr(self, "availability_per_cha"):
+            self.set_availability()
+        data_reader_kwargs.setdefault("data_reader", self.data_reader)
+        noise = copy.deepcopy(self)
+        noise.read_waveforms(
+            int(noise_window_sec * noise.sr),
+            time_shifted=False,
+            offset_ot=noise_window_sec,
+            **data_reader_kwargs,
+        )
+        noise_std = np.std(noise.waveforms_arr, axis=-1)
+        noise_std[noise_std == 0.0] = 1.0
+        signal_std = np.std(self.waveforms_arr, axis=-1)
+
+        _snr = signal_std / noise_std
+        self._snr = pd.DataFrame(
+            columns=noise.components, index=noise.stations, data=_snr, dtype=np.float32
+        )
+
+        self.set_aux_data(
+            {
+                f"snr_{cp}": {
+                    sta: self._snr[cp].loc[sta] for sta in self._snr[cp].index
+                }
+                for cp in self.components
+            }
+        )
+
+        del noise
 
     def get_np_array(self, stations, components=None, priority="HH", verbose=True):
         """Arguments are passed to `BPMF.utils.get_np_array`."""
@@ -1435,6 +1514,48 @@ class Event(object):
         self._pl_vmax_unc = min(self._pl_vmax_unc, 180.0 - self._pl_vmax_unc)
         self._az_hmax_unc = az_hmax
         self._az_hmin_unc = az_hmin
+
+    def n_best_SNR_stations(self, n, available_stations=None):
+        """
+        Adjust `self.stations` to the `n` best SNR stations.
+
+        This function finds the `n` best stations based on signal-to-noise ratio (SNR)
+        and modifies the `self.stations` attribute accordingly. The instance's properties
+        will also change to reflect the new selection of stations.
+
+        Parameters
+        ----------
+        n : int
+            The number of best SNR stations to select.
+        available_stations : list of str, default None
+            The list of stations from which to search for the closest stations. If
+            provided, only stations in this list will be considered. This can be used
+            to exclude stations that are known to lack data.
+        """
+        # re-initialize the stations attribute
+        self.stations = np.array(self.network_stations, copy=True)
+        index_pool = np.arange(len(self.network_stations))
+        # limit the index pool to available stations
+        if available_stations is not None:
+            availability = np.in1d(
+                self.network_stations, available_stations.astype("U")
+            )
+            valid = availability & self.availability
+        else:
+            valid = self.availability
+        index_pool = index_pool[valid]
+        average_snr = self.snr.loc[self.stations].values.mean(1)
+        best_SNR_stations = index_pool[np.argsort(average_snr[index_pool])[::-1]]
+        # make sure we return a n-vector
+        if len(best_SNR_stations) < n:
+            missing = n - len(best_SNR_stations)
+            remaining_indexes = np.setdiff1d(
+                np.argsort(average_snr)[::-1], best_SNR_stations
+            )
+            best_SNR_stations = np.hstack(
+                (best_SNR_stations, remaining_indexes[:missing])
+            )
+        self.stations = self.network_stations[best_SNR_stations[:n]]
 
     def n_closest_stations(self, n, available_stations=None):
         """
@@ -1772,6 +1893,9 @@ class Event(object):
         if data_reader is None:
             print("You need to specify a data reader for the class instance.")
             return
+        if self.data_reader is None:
+            self.data_reader = data_reader
+
         self.traces = Stream()
         self.duration = duration
         self.n_samples = utils.sec_to_samp(self.duration, sr=self.sr)
@@ -2237,34 +2361,6 @@ class Event(object):
                     self.picks.loc[sta, f"{ph}_picks_sec"] = np.nan
                     self.picks.loc[sta, f"{ph}_probas"] = np.nan
 
-    def zero_out_clipped_waveforms(self, kurtosis_threshold=-1.0):
-        """
-        Find waveforms with anomalous statistic and zero them out.
-
-        This function identifies waveforms with a kurtosis value below the specified
-        threshold as anomalous and zeros out their data. The kurtosis of a waveform
-        is a measure of its statistical distribution, with a value of 0 indicating a
-        Gaussian distribution.
-
-        Parameters
-        ----------
-        kurtosis_threshold : float, optional
-            Threshold below which the kurtosis is considered anomalous. Waveforms
-            with a kurtosis value lower than this threshold will have their data
-            zeroed out. Default is -1.0.
-
-        Notes
-        -----
-        - This is an oversimplified technique to find clipped waveforms.
-        """
-        from scipy.stats import kurtosis
-
-        if not hasattr(self, "traces"):
-            return
-        for tr in self.traces:
-            if kurtosis(tr.data) < kurtosis_threshold:
-                tr.data = np.zeros(len(tr.data), dtype=tr.data.dtype)
-
     def remove_distant_stations(self, max_distance_km=50.0):
         """
         Remove picks on stations that are further than a given distance.
@@ -2625,6 +2721,37 @@ class Event(object):
         # remove lock file
         os.remove(lock_file)
 
+    def zero_out_clipped_waveforms(self, kurtosis_threshold=-1.0):
+        """
+        Find waveforms with anomalous statistic and zero them out.
+
+        This function identifies waveforms with a kurtosis value below the specified
+        threshold as anomalous and zeros out their data. The kurtosis of a waveform
+        is a measure of its statistical distribution, with a value of 0 indicating a
+        Gaussian distribution.
+
+        Parameters
+        ----------
+        kurtosis_threshold : float, optional
+            Threshold below which the kurtosis is considered anomalous. Waveforms
+            with a kurtosis value lower than this threshold will have their data
+            zeroed out. Default is -1.0.
+
+        Notes
+        -----
+        - This is an oversimplified technique to find clipped waveforms.
+        """
+        from scipy.stats import kurtosis
+
+        if not hasattr(self, "traces"):
+            return
+        for tr in self.traces:
+            if kurtosis(tr.data) < kurtosis_threshold:
+                tr.data = np.zeros(len(tr.data), dtype=tr.data.dtype)
+
+    # -----------------------------------------------------------
+    #               write method
+    # -----------------------------------------------------------
     def _write(
         self,
         db_filename,
@@ -2682,7 +2809,14 @@ class Event(object):
         if hasattr(self, "aux_data"):
             f.create_group("aux_data")
             for key in self.aux_data.keys():
-                f["aux_data"].create_dataset(key, data=self.aux_data[key])
+                if type(self.aux_data[key]) == dict:
+                    f["aux_data"].create_group(key)
+                    for key2 in self.aux_data[key]:
+                        f["aux_data"][key].create_dataset(
+                            key2, data=self.aux_data[key][key2]
+                            )
+                else:
+                    f["aux_data"].create_dataset(key, data=self.aux_data[key])
         if hasattr(self, "picks"):
             f.create_group("picks")
             f["picks"].create_dataset(
@@ -3064,6 +3198,8 @@ class Template(Event):
         ]
         select = lambda str: str.startswith("phase_on_comp")
         aux_data_to_keep += list(filter(select, event.aux_data.keys()))
+        select = lambda str: str.startswith("snr")
+        aux_data_to_keep += list(filter(select, event.aux_data.keys()))
         aux_data = {
             key: event.aux_data[key]
             for key in aux_data_to_keep
@@ -3160,19 +3296,6 @@ class Template(Event):
                 )
         return self._moveouts_win
 
-    @property
-    def waveforms_arr(self):
-        """Return traces in numpy.ndarray."""
-        return utils.get_np_array(
-            self.traces,
-            self.stations,
-            components=self.components,
-            priority="HH",
-            component_aliases=self.component_aliases,
-            n_samples=self.n_samples,
-            verbose=True,
-        )
-
     # methods
     def distance(self, longitude, latitude, depth):
         """
@@ -3203,13 +3326,13 @@ class Template(Event):
         )
 
     def find_monochromatic_traces(
-            self,
-            autocorr_peak_threshold=0.33,
-            num_peaks_criterion=5,
-            taper_pct=5.,
-            max_lag_samp=None,
-            verbose=True
-            ):
+        self,
+        autocorr_peak_threshold=0.33,
+        num_peaks_criterion=5,
+        taper_pct=5.0,
+        max_lag_samp=None,
+        verbose=True,
+    ):
         """
         Detect traces in seismic waveforms with dominant monochromatic signals.
 
@@ -3242,83 +3365,41 @@ class Template(Event):
         """
         from scipy.signal import find_peaks
         from scipy.signal.windows import tukey
+
         if verbose:
             warnings.warn("This is a highly experimental method!")
 
-        taper_window = tukey(self.waveforms_arr.shape[-1], alpha=taper_pct / 100.)
+        taper_window = tukey(self.waveforms_arr.shape[-1], alpha=taper_pct / 100.0)
 
         num_peaks_above_threshold = pd.DataFrame(
-                index=self.stations, columns=self.components
-                )
+            index=self.stations, columns=self.components
+        )
         monochromatic = pd.DataFrame(
-                index=self.stations, columns=self.components, data=False
-                )
+            index=self.stations, columns=self.components, data=False
+        )
         for s, sta in enumerate(self.stations):
             for c, cha in enumerate(self.components):
                 x = self.waveforms_arr[s, c, :]
-                if x.sum() == 0.:
+                if x.sum() == 0.0:
                     continue
                 x_fft = np.fft.rfft(x * taper_window)
                 autocorr = np.fft.irfft(x_fft * np.conj(x_fft))
                 # re-order cross-corr (autocorr[len(autocorr)//2] is x-corr at lag 0, by construction)
-                #autocorr = np.hstack( (autocorr[len(autocorr)//2:], autocorr[:len(autocorr)//2]) )
-                autocorr = autocorr[:len(autocorr)//2]
+                # autocorr = np.hstack( (autocorr[len(autocorr)//2:], autocorr[:len(autocorr)//2]) )
+                autocorr = autocorr[: len(autocorr) // 2]
                 if max_lag_samp is not None:
                     autocorr = autocorr[:max_lag_samp]
-                    #lag_0_index = len(autocorr) // 2
-                    #autocorr = autocorr[lag_0_index - max_lag_samp : lag_0_index + max_lag_samp]
+                    # lag_0_index = len(autocorr) // 2
+                    # autocorr = autocorr[lag_0_index - max_lag_samp : lag_0_index + max_lag_samp]
                 autocorr = np.abs(autocorr / autocorr.max())
                 peaks, peak_params = find_peaks(autocorr)
                 peak_values = autocorr[peaks]
                 num_peaks_above_threshold.loc[sta, cha] = np.sum(
-                        peak_values > autocorr_peak_threshold
-                        )
+                    peak_values > autocorr_peak_threshold
+                )
                 if num_peaks_above_threshold.loc[sta, cha] >= num_peaks_criterion:
                     monochromatic.loc[sta, cha] = True
         return monochromatic, num_peaks_above_threshold
-
-
-
-    def n_best_SNR_stations(self, n, available_stations=None):
-        """
-        Adjust `self.stations` to the `n` best SNR stations.
-
-        This function finds the `n` best stations based on signal-to-noise ratio (SNR)
-        and modifies the `self.stations` attribute accordingly. The instance's properties
-        will also change to reflect the new selection of stations.
-
-        Parameters
-        ----------
-        n : int
-            The number of best SNR stations to select.
-        available_stations : list of str, default None
-            The list of stations from which to search for the closest stations. If
-            provided, only stations in this list will be considered. This can be used
-            to exclude stations that are known to lack data.
-        """
-        # re-initialize the stations attribute
-        self.stations = np.array(self.network_stations, copy=True)
-        index_pool = np.arange(len(self.network_stations))
-        # limit the index pool to available stations
-        if available_stations is not None:
-            availability = np.in1d(
-                self.network_stations, available_stations.astype("U")
-            )
-            valid = availability & self.availability
-        else:
-            valid = self.availability
-        index_pool = index_pool[valid]
-        best_SNR_stations = index_pool[np.argsort(self.SNR[index_pool])[::-1]]
-        # make sure we return a n-vector
-        if len(best_SNR_stations) < n:
-            missing = n - len(best_SNR_stations)
-            remaining_indexes = np.setdiff1d(
-                np.argsort(self.SNR)[::-1], best_SNR_stations
-            )
-            best_SNR_stations = np.hstack(
-                (best_SNR_stations, remaining_indexes[:missing])
-            )
-        self.stations = self.network_stations[best_SNR_stations[:n]]
 
     def read_waveforms(self, stations=None, components=None):
         """
