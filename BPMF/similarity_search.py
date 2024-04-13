@@ -36,11 +36,12 @@ class MatchedFilter(object):
         step=cfg.MATCHED_FILTER_STEP_SAMP,
         max_memory=None,
         max_workers=None,
+        num_threads_threshold=None,
         anomalous_cdf_at_mean_plus_1sig=0.00,
-        window_for_validation_Tmax=100.,
+        window_for_validation_Tmax=100.0,
         offset_win_peak_amp_sec=1.0,
         duration_win_peak_amp_sec=3.0,
-        phase_on_comp_peak_amp={"N": "S", "E": "S", "Z": "P"}
+        phase_on_comp_peak_amp={"N": "S", "E": "S", "Z": "P"},
     ):
         """Instanciate a MatchedFilter object.
 
@@ -87,7 +88,7 @@ class MatchedFilter(object):
         anomalous_cdf_at_mean_plus_1sig: scalar float, optional
             Anomalous cumulative distribution function (cdf), between 0 and 1,
             at {mean + 1xsigma}(CC), default to 0.00. The CC distribution is
-            approximately gaussian and, therefore, the expected value of 
+            approximately gaussian and, therefore, the expected value of
             {mean + 1xsigma}(CC) is 0.78. If {mean + 1xsigma}(CC) is
             significantly lower than 0.78 in the vicinity of a CC(t) that
             exceeded `threshold`, that is, lower than
@@ -127,12 +128,14 @@ class MatchedFilter(object):
         if max_workers is None:
             max_workers = 1
         self.max_workers = max_workers
+        if num_threads_threshold is None:
+            num_threads_threshold = max(1, os.cpu_count() // max_workers)
+        self.num_threads_threshold = num_threads_threshold
         self.anomalous_cdf_at_mean_plus_1sig = anomalous_cdf_at_mean_plus_1sig
         self.window_for_validation_Tmax = window_for_validation_Tmax
         self.offset_win_peak_amp_sec = offset_win_peak_amp_sec
         self.duration_win_peak_amp_sec = duration_win_peak_amp_sec
         self.phase_on_comp_peak_amp = phase_on_comp_peak_amp
-
 
     # properties
     @property
@@ -166,11 +169,11 @@ class MatchedFilter(object):
             self.stations, components=self.components
         )
         self.offset_win_peak_amp_samp = utils.sec_to_samp(
-                self.offset_win_peak_amp_sec, sr=self.data.sr
-                )
+            self.offset_win_peak_amp_sec, sr=self.data.sr
+        )
         self.duration_win_peak_amp_samp = utils.sec_to_samp(
-                self.duration_win_peak_amp_sec, sr=self.data.sr
-                )
+            self.duration_win_peak_amp_sec, sr=self.data.sr
+        )
         if self.normalize:
             norm = np.std(self.data_arr, axis=-1, keepdims=True)
             norm[norm == 0.0] = 1.0
@@ -178,13 +181,13 @@ class MatchedFilter(object):
             self.data_arr /= norm
 
     def select_cc_indexes(
-            self,
-            cc_t,
-            threshold,
-            search_win,
-            anomalous_cdf_at_mean_plus_1sig=0.50,
-            window_for_validation_Tmax=100.,
-            ):
+        self,
+        cc_t,
+        threshold,
+        search_win,
+        anomalous_cdf_at_mean_plus_1sig=0.50,
+        window_for_validation_Tmax=100.0,
+    ):
         """Select the peaks in the CC time series.
 
         Parameters
@@ -198,7 +201,7 @@ class MatchedFilter(object):
         anomalous_cdf_at_mean_plus_1sig: scalar float, optional
             Anomalous cumulative distribution function (cdf), between 0 and 1,
             at {mean + 1xsigma}(CC), default to 0.50. The CC distribution is
-            approximately gaussian and, therefore, the expected value of 
+            approximately gaussian and, therefore, the expected value of
             {mean + 1xsigma}(CC) is 0.78. If {mean + 1xsigma}(CC) is
             significantly lower than 0.78 in the vicinity of a CC(t) that
             exceeded `threshold`, that is, lower than
@@ -223,9 +226,7 @@ class MatchedFilter(object):
         step = self.step
         cc_detections = cc_t > threshold
         cc_idx = np.where(cc_detections)[0]
-        WINDOW_FOR_VALIDATION = int(
-                1.0 / cfg.MIN_FREQ_HZ * window_for_validation_Tmax
-                )
+        WINDOW_FOR_VALIDATION = int(1.0 / cfg.MIN_FREQ_HZ * window_for_validation_Tmax)
         cc_at_mean_plus_1sig = threshold / cfg.N_DEV_MF_THRESHOLD
 
         if self.threshold_type == "mad":
@@ -245,7 +246,7 @@ class MatchedFilter(object):
                 n_rm += 1
         cc_idx = np.asarray(cc_idx)
 
-        if anomalous_cdf_at_mean_plus_1sig > 0.:
+        if anomalous_cdf_at_mean_plus_1sig > 0.0:
             # test the validity of detection threshold?
             valid_detections = np.ones(len(cc_idx), dtype=bool)
             for i in range(len(cc_idx)):
@@ -254,12 +255,12 @@ class MatchedFilter(object):
                 if idx1 >= len(cc_t):
                     idx1 = len(cc_t) - 1
                     idx0 = idx1 - WINDOW_FOR_VALIDATION
-                cc1 = cc_t[idx0:idx1][:WINDOW_FOR_VALIDATION//2]
-                cc2 = cc_t[idx0:idx1][WINDOW_FOR_VALIDATION//2:]
+                cc1 = cc_t[idx0:idx1][: WINDOW_FOR_VALIDATION // 2]
+                cc2 = cc_t[idx0:idx1][WINDOW_FOR_VALIDATION // 2 :]
                 frac = min(
-                        np.sum(cc1 < cc_at_mean_plus_1sig[cc_idx[i]]) / float(len(cc1)),
-                        np.sum(cc2 < cc_at_mean_plus_1sig[cc_idx[i]]) / float(len(cc2))
-                        )
+                    np.sum(cc1 < cc_at_mean_plus_1sig[cc_idx[i]]) / float(len(cc1)),
+                    np.sum(cc2 < cc_at_mean_plus_1sig[cc_idx[i]]) / float(len(cc2)),
+                )
                 if frac < anomalous_cdf_at_mean_plus_1sig:
                     # an anomalous amount of CCs are above +1sig
                     # the detection threshold most likely failed (gap in data?)
@@ -408,16 +409,13 @@ class MatchedFilter(object):
         sr = self.data.sr
         detections = {}
         tids = list(self.cc.keys())
-        # for t, tid in enumerate(tids):
-        #    # t: index in this run's loop
-        #    # tt: index in the self.template_group.templates list
-        #    # tid: template id
-        #    detections_t, tid = self._find_detections_t(t, tid)
-        # detections[tid] = detections_t
-        with concurrent.futures.ThreadPoolExecutor(
-            max_workers=min(len(tids), self.max_workers)
-        ) as executor:
-            output = list(executor.map(self._find_detections_t, tids))
+        if self.max_workers == 1:
+            output = list(map(self._find_detections_t, tids))
+        else:
+            with concurrent.futures.ThreadPoolExecutor(
+                max_workers=min(len(tids), self.max_workers)
+            ) as executor:
+                output = list(executor.map(self._find_detections_t, tids))
         detections.update({output[i][1]: output[i][0] for i in range(len(output))})
         if verbose > 0:
             for tid in tids:
@@ -448,8 +446,9 @@ class MatchedFilter(object):
                 cc_t,
                 utils.sec_to_samp(self.threshold_window_dur, sr=self.data.sr),
                 threshold_type=self.threshold_type,
-                white_noise=self.white_noise,
+                #white_noise=self.white_noise,
                 overlap=self.overlap,
+                num_threads=self.num_threads_threshold
             )
             # saturate threshold as requested by the user
             threshold = np.minimum(self.max_CC_threshold * np.sum(weights_t), threshold)
@@ -484,12 +483,12 @@ class MatchedFilter(object):
         )
         search_win /= self.step  # time in correlation steps units
         cc_idx = self.select_cc_indexes(
-                cc_t,
-                threshold,
-                search_win,
-                anomalous_cdf_at_mean_plus_1sig=self.anomalous_cdf_at_mean_plus_1sig,
-                window_for_validation_Tmax=self.window_for_validation_Tmax,
-                )
+            cc_t,
+            threshold,
+            search_win,
+            anomalous_cdf_at_mean_plus_1sig=self.anomalous_cdf_at_mean_plus_1sig,
+            window_for_validation_Tmax=self.window_for_validation_Tmax,
+        )
         detection_indexes = cc_idx * self.step
         # ----------------------------------------------------------
         n_detections = len(detection_indexes)
@@ -524,26 +523,24 @@ class MatchedFilter(object):
             )
             if self.extract_peak_amplitudes:
                 peak_amplitudes = np.zeros(
-                        (len(self.stations), len(self.components)), dtype=np.float32
-                        )
+                    (len(self.stations), len(self.components)), dtype=np.float32
+                )
                 for s, sta in enumerate(self.stations):
                     for c, cp in enumerate(self.components):
                         ph = self.phase_on_comp_peak_amp[cp].upper()
                         mv_sc = utils.sec_to_samp(
-                                template.moveouts.loc[sta, f"moveouts_{ph}"],
-                                sr=self.data.sr
-                                )
+                            template.moveouts.loc[sta, f"moveouts_{ph}"],
+                            sr=self.data.sr,
+                        )
                         time_idx1 = (
-                                detection_indexes[i]
-                                + mv_sc
-                                - self.offset_win_peak_amp_samp
-                                )
+                            detection_indexes[i] + mv_sc - self.offset_win_peak_amp_samp
+                        )
                         time_idx2 = time_idx1 + self.duration_win_peak_amp_samp
                         win_peak_amp = self.data_arr[s, c, time_idx1:time_idx2]
                         if len(win_peak_amp) > 0:
                             peak_amplitudes[s, c] = (
-                                    win_peak_amp.max() * self.data_norm[s, c]
-                                    )
+                                win_peak_amp.max() * self.data_norm[s, c]
+                            )
             aux_data = {}
             aux_data["cc"] = cc_t[cc_idx[i]]
             aux_data["n_threshold"] = cc_t[cc_idx[i]] / threshold[cc_idx[i]]
@@ -565,7 +562,7 @@ class MatchedFilter(object):
         sanity_check=True,
         extract_peak_amplitudes=True,
         verbose=0,
-        **kwargs
+        **kwargs,
     ):
         """Run the matched-filter search.
 
@@ -597,7 +594,9 @@ class MatchedFilter(object):
             all events detected with template `tid`.
         """
         if "anomalous_cdf_at_mean_plus_1sig" in kwargs:
-            self.anomalous_cdf_at_mean_plus_1sig = kwargs["anomalous_cdf_at_mean_plus_1sig"]
+            self.anomalous_cdf_at_mean_plus_1sig = kwargs[
+                "anomalous_cdf_at_mean_plus_1sig"
+            ]
         if "window_for_validation_Tmax" in kwargs:
             self.window_for_validation_Tmax = kwargs["window_for_validation_Tmax"]
         self.extract_peak_amplitudes = extract_peak_amplitudes
@@ -667,9 +666,9 @@ class MatchedFilter(object):
         if ax is None:
             # plot the correlation coefficients
             fig = plt.figure(
-                    f"correlation_coefficients_tp{tid}",
-                    figsize=kwargs.get("figsize", (15, 7))
-                    )
+                f"correlation_coefficients_tp{tid}",
+                figsize=kwargs.get("figsize", (15, 7)),
+            )
             ax = fig.add_subplot(111)
         else:
             fig = ax.get_figure()
@@ -707,17 +706,17 @@ class MatchedFilter(object):
             : len(cc_t)
         ]
         ax.plot(
-                self.data.time[time_indexes],
-                cc_t,
-                rasterized=kwargs.get("rasterized", True)
-                )
+            self.data.time[time_indexes],
+            cc_t,
+            rasterized=kwargs.get("rasterized", True),
+        )
         ax.plot(
             self.data.time[time_indexes],
             detection_threshold,
             color="C3",
             ls="--",
             label="Detection Threshold",
-            rasterized=kwargs.get("rasterized", True)
+            rasterized=kwargs.get("rasterized", True),
         )
         if len(cc_idx) > 0:
             ax.plot(
@@ -861,8 +860,93 @@ class MatchedFilter(object):
         return fig
 
 
+# def time_dependent_threshold(
+#    time_series, sliding_window, overlap=0.66, threshold_type="rms", white_noise=None
+# ):
+#    """
+#    Time dependent detection threshold.
+#
+#    Parameters
+#    -----------
+#    time_series: (n_correlations) array_like
+#        The array of correlation coefficients calculated by
+#        FMF (float 32).
+#    sliding_window: scalar integer
+#        The size of the sliding window, in samples, used
+#        to calculate the time dependent central tendency
+#        and deviation of the time series.
+#    overlap: scalar float, default to 0.75
+#    threshold_type: string, default to 'rms'
+#        Either rms or mad, depending on which measure
+#        of deviation you want to use.
+#    white_noise: `numpy.ndarray` or None, default to None
+#        If not None, `white_noise` is a vector of random values sampled from the
+#        standard normal distribution. It is used to fill zeros in the CC time
+#        series. If None, a random vector is generated from scratch.
+#
+#    Returns
+#    ----------
+#    threshold: (n_correlations) array_like
+#        Returns the time dependent threshold, with same
+#        size as the input time series.
+#    """
+#
+#    time_series = time_series.copy()
+#    threshold_type = threshold_type.lower()
+#    n_samples = len(time_series)
+#    half_window = sliding_window // 2
+#    shift = int((1.0 - overlap) * sliding_window)
+#    zeros = time_series == 0.0
+#    n_zeros = np.sum(zeros)
+#    if white_noise is None:
+#        white_noise = np.random.normal(size=n_zeros).astype("float32")
+#    if threshold_type == "rms":
+#        default_center = time_series[~zeros].mean()
+#        default_deviation = np.std(time_series[~zeros])
+#        # note: white_noise[n_zeros] is necessary in case white_noise
+#        # was not None
+#        time_series[zeros] = (
+#                white_noise[:n_zeros] * default_deviation + default_center
+#        )
+#        time_series_win = np.lib.stride_tricks.sliding_window_view(
+#            time_series, sliding_window
+#        )[::shift, :]
+#        center = np.mean(time_series_win, axis=-1)
+#        deviation = np.std(time_series_win, axis=-1)
+#    elif threshold_type == "mad":
+#        default_center = np.median(time_series[~zeros])
+#        default_deviation = np.median(np.abs(time_series[~zeros] - default_center))
+#        time_series[zeros] = (
+#                white_noise[:n_zeros] * default_deviation + default_center
+#        )
+#        time_series_win = np.lib.stride_tricks.sliding_window_view(
+#            time_series, sliding_window
+#        )[::shift, :]
+#        center = np.median(time_series_win, axis=-1)
+#        deviation = np.median(
+#            np.abs(time_series_win - center[:, np.newaxis]), axis=-1
+#        )
+#    threshold = center + cfg.N_DEV_MF_THRESHOLD * deviation
+#    threshold[1:] = np.maximum(threshold[:-1], threshold[1:])
+#    threshold[:-1] = np.maximum(threshold[:-1], threshold[1:])
+#    time = np.arange(half_window, n_samples - (sliding_window - half_window))
+#    indexes_l = time // shift
+#    indexes_l[indexes_l >= len(threshold)] = len(threshold) - 1
+#    #breakpoint()
+#    threshold = threshold[indexes_l]
+#    threshold = np.hstack(
+#        (
+#            threshold[0] * np.ones(half_window, dtype=np.float32),
+#            threshold,
+#            threshold[-1] * np.ones(sliding_window - half_window, dtype=np.float32),
+#        )
+#    )
+#    return threshold
+
+
 def time_dependent_threshold(
-    time_series, sliding_window, overlap=0.66, threshold_type="rms", white_noise=None
+    time_series, sliding_window, overlap=0.66, threshold_type="rms", white_noise=None,
+    num_threads=None
 ):
     """
     Time dependent detection threshold.
@@ -892,8 +976,19 @@ def time_dependent_threshold(
         size as the input time series.
     """
 
-    time_series = time_series.copy()
     threshold_type = threshold_type.lower()
+    if threshold_type == "rms":
+        threshold = clib.time_dependent_threshold(
+            time_series,
+            sliding_window,
+            cfg.N_DEV_MF_THRESHOLD,
+            overlap=overlap,
+            white_noise=white_noise,
+            num_threads=num_threads
+        )
+        return threshold
+
+    time_series = time_series.copy()
     n_samples = len(time_series)
     half_window = sliding_window // 2
     shift = int((1.0 - overlap) * sliding_window)
@@ -901,38 +996,24 @@ def time_dependent_threshold(
     n_zeros = np.sum(zeros)
     if white_noise is None:
         white_noise = np.random.normal(size=n_zeros).astype("float32")
-    if threshold_type == "rms":
-        default_center = time_series[~zeros].mean()
-        default_deviation = np.std(time_series[~zeros])
-        # note: white_noise[n_zeros] is necessary in case white_noise
-        # was not None
-        time_series[zeros] = (
-                white_noise[:n_zeros] * default_deviation + default_center
-        )
-        time_series_win = np.lib.stride_tricks.sliding_window_view(
-            time_series, sliding_window
-        )[::shift, :]
-        center = np.mean(time_series_win, axis=-1)
-        deviation = np.std(time_series_win, axis=-1)
-    elif threshold_type == "mad":
-        default_center = np.median(time_series[~zeros])
-        default_deviation = np.median(np.abs(time_series[~zeros] - default_center))
-        time_series[zeros] = (
-                white_noise[:n_zeros] * default_deviation + default_center
-        )
-        time_series_win = np.lib.stride_tricks.sliding_window_view(
-            time_series, sliding_window
-        )[::shift, :]
-        center = np.median(time_series_win, axis=-1)
-        deviation = np.median(
-            np.abs(time_series_win - center[:, np.newaxis]), axis=-1
-        )
+
+    # method is "mad"
+    default_center = np.median(time_series[~zeros])
+    default_deviation = np.median(np.abs(time_series[~zeros] - default_center))
+    time_series[zeros] = white_noise[:n_zeros] * default_deviation + default_center
+    time_series_win = np.lib.stride_tricks.sliding_window_view(
+        time_series, sliding_window
+    )[::shift, :]
+    center = np.median(time_series_win, axis=-1)
+    deviation = np.median(np.abs(time_series_win - center[:, np.newaxis]), axis=-1)
+
     threshold = center + cfg.N_DEV_MF_THRESHOLD * deviation
     threshold[1:] = np.maximum(threshold[:-1], threshold[1:])
     threshold[:-1] = np.maximum(threshold[:-1], threshold[1:])
     time = np.arange(half_window, n_samples - (sliding_window - half_window))
     indexes_l = time // shift
     indexes_l[indexes_l >= len(threshold)] = len(threshold) - 1
+    # breakpoint()
     threshold = threshold[indexes_l]
     threshold = np.hstack(
         (
@@ -942,5 +1023,3 @@ def time_dependent_threshold(
         )
     )
     return threshold
-
-
