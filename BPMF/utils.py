@@ -1750,12 +1750,23 @@ def two_point_distance(lon_1, lat_1, depth_1, lon_2, lat_2, depth_2):
     return dist
 
 
-def donefun():
+def donefun(french=False):
     """
     Super useful function.
     """
+    if not french:
+        msg = "ALL DONE!"
+    else:
+        from random import random
+        r = random()
+        if r < 0.33:
+            msg = "HOP LÀ!"
+        elif r < 0.66:
+            msg = "VOILÀ!"
+        else:
+            msg = "BIM!"
     print(
-        """⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+        f"""⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
     ⠀⠀⠀⠀⠀⠀⢀⡤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀
     ⠀⠀⠀⠀⠀⢀⡏⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⣀⠴⠋⠉⠉⡆⠀⠀⠀⠀⠀
     ⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠈⠉⠉⠙⠓⠚⠁⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀
@@ -1764,7 +1775,7 @@ def donefun():
     ⢠⣤⣶⣾⣧⣤⣤⣀⡀⠀⠀⠀⠀⠈⠀⠀⠀⢀⡤⠴⠶⠤⢤⡀⣧⣀⣀⠀
     ⠻⠶⣾⠁⠀⠀⠀⠀⠙⣆⠀⠀⠀⠀⠀⠀⣰⠋⠀⠀⠀⠀⠀⢹⣿⣭⣽⠇
     ⠀⠀⠙⠤⠴⢤⡤⠤⠤⠋⠉⠉⠉⠉⠉⠉⠉⠳⠖⠦⠤⠶⠦⠞⠁⠀⠀⠀
-                ALL DONE!⠀⠀⠀⠀
+                ⠀{msg}⠀⠀⠀
     """
     )
 
