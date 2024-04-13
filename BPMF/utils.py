@@ -1759,12 +1759,14 @@ def donefun(french=False):
     else:
         from random import random
         r = random()
-        if r < 0.33:
+        if r < 0.25:
             msg = "HOP LÀ!"
-        elif r < 0.66:
+        elif r < 0.50:
             msg = "VOILÀ!"
-        else:
+        elif r < 0.75:
             msg = "BIM!"
+        else:
+            msg = "STYLÉ!"
     print(
         f"""⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
     ⠀⠀⠀⠀⠀⠀⢀⡤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀
