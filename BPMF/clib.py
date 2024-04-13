@@ -3,6 +3,8 @@ import os
 import ctypes as C
 import numpy as np
 import datetime as dt
+import warnings
+
 from .config import cfg
 
 cpu_loaded = False
@@ -54,6 +56,17 @@ if cpu_loaded:
         C.c_size_t,  # length of CCs
         C.POINTER(C.c_int),  # selected corr
     ]
+
+    _libc.time_dependent_threshold.argtypes = [
+            C.POINTER(C.c_float),  # input time series
+            C.POINTER(C.c_float),  # gaussian sample
+            C.c_float,             # num_dev
+            C.c_size_t,            # num_samples
+            C.c_size_t,            # half_window_samp
+            C.c_size_t,            # shift_samp
+            C.c_int, # num threads
+            C.POINTER(C.c_float),  # output threshold
+            ]
 
 
 def kurtosis(signal, W):
@@ -181,3 +194,57 @@ def select_cc_indexes(ccs, threshold, search_win):
         selection.ctypes.data_as(C.POINTER(C.c_int)),
     )
     return selection.astype(bool)
+
+def time_dependent_threshold(
+        time_series, sliding_window_samp, num_dev, overlap=0.66, threshold_type="rms",
+        white_noise=None, num_threads=None
+        ):
+    """
+    Time dependent detection threshold.
+
+    Parameters
+    -----------
+    time_series : (n_correlations) array_like
+        The array of correlation coefficients calculated by
+        FMF (float 32).
+    sliding_window_samp : scalar integer
+        The size of the sliding window, in samples, used
+        to calculate the time dependent central tendency
+        and deviation of the time series.
+    overlap : scalar float, default to 0.75
+    threshold_type : string, default to 'rms'
+        Either rms or mad, depending on which measure
+        of deviation you want to use.
+
+    Returns
+    ----------
+    threshold: (n_correlations) array_like
+        Returns the time dependent threshold, with same
+        size 
+    """
+    GAUSSIAN_SAMPLE_LEN = 500
+    time_series = (time_series.copy())
+    num_samples = len(time_series)
+    if white_noise is None:
+        white_noise = np.random.normal(size=GAUSSIAN_SAMPLE_LEN).astype("float32")
+
+    if num_threads is None:
+        num_threads = os.cpu_count()
+
+    threshold_type = threshold_type.lower()
+    half_window_samp = sliding_window_samp // 2
+    shift_samp = int((1.0 - overlap) * sliding_window_samp)
+    threshold = np.zeros(num_samples, dtype=np.float32)
+
+    _libc.time_dependent_threshold(
+            time_series.astype("float32").ctypes.data_as(C.POINTER(C.c_float)),
+            white_noise.astype("float32").ctypes.data_as(C.POINTER(C.c_float)),
+            float(num_dev),
+            int(num_samples),
+            int(half_window_samp),
+            int(shift_samp),
+            int(num_threads),
+            threshold.ctypes.data_as(C.POINTER(C.c_float))
+            )
+
+    return threshold
