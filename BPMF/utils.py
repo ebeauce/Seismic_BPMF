@@ -369,6 +369,7 @@ def _preprocess_stream(
             # don't include this trace
             if verbose:
                 print(f"Too much gap duration on {trace_id}.")
+                print(f"Duration is: {trace_duration:.2f}s (min is {minimum_length * target_duration:.2f}s)")
             continue
         # split will lose information about start and end times
         # if the start or the end is masked
@@ -389,10 +390,11 @@ def _preprocess_stream(
         for gap in tr.get_gaps():
             gap_duration += gap[6]
         if (target_duration is not None) and (
-            gap_duration > minimum_length * target_duration
+            gap_duration > (1. - minimum_length) * target_duration
         ):
             if verbose:
                 print(f"Too much gap duration on {trace_id}.")
+                print(f"Duration is: {trace_duration:.2f}s (min is {(1. - minimum_length) * target_duration:.2f}s)")
             continue
         tr.detrend("constant")
         tr.detrend("linear")
@@ -1624,6 +1626,70 @@ def running_mad(time_series, window, n_mad=10.0, overlap=0.75):
     full_time = np.arange(0, len(time_series))
     running_stat = interpolator(full_time)
     return running_stat
+
+def spectrogram(
+        x,
+        window_duration_sec,
+        overlap,
+        sampling_rate,
+        detrend=False,
+        window="hann",
+        nfft=None,
+        boundary=None,
+        padded=False,
+        scaling="spectrum"
+        ):
+    """
+    Parameters
+    ----------
+    window_duration_sec : float
+        Duration of the sliding window, in seconds, of the
+        short-time Fourier transform. This is later converted to
+        samples to define the `nperseg` argument for `scipy.signal.stft`.
+    overlap : float
+        Ratio of overlap, from 0 to 1, between subsequent windows. This is
+        later converted to samples to define the `noverlap` argument for
+        `scipy.signal.stft`.
+    detrend : bool, optional
+        If False, no detrending is done. If it is a string or a function,
+        detrending is done (see doc of `scipy.signal.stft`).
+        Defaults to False.
+    window : str or tuple or array-like, optional
+        The string is the name of the taper window to apply to each segment.
+        See the doc of `scipy.signal.stft` for more details.
+    boundary : str or None, optional
+        Define how the time series are extended at the boundaries. See the
+        doc of `scipy.signal.stft` for more details. Defaults to None (only
+        valid segments are used).
+    padded : bool, optional
+        If True, padding occurs after boundary extension. Defaults to False.
+    scaling : str, optional
+        Either 'spectrum' or 'psd'.
+
+    Returns
+    -------
+    frequency : numpy.ndarray
+        Frequencies, in Hertz, at which the spectra are estimated.
+    time : numpy.ndarray
+        Times, in seconds, of the sliding windows.
+    spectrogram : numpy.ndarray
+    """
+    from scipy.signal import stft
+
+    stft_params = {}
+    stft_params["nperseg"] = int(window_duration_sec * sampling_rate)
+    stft_params["noverlap"] = int(overlap * stft_params["nperseg"])
+    stft_params["detrend"] = detrend
+    stft_params["window"] = window
+    stft_params["nfft"] = nfft
+    stft_params["boundary"] = boundary
+    stft_params["padded"] = padded
+    stft_params["scaling"] = scaling
+
+    frequency, time, spec = stft(
+            x, sampling_rate, **stft_params
+            )
+    return frequency, time, np.abs(spec)
 
 def two_point_epicentral_distance(lon_1, lat_1, lon_2, lat_2):
     """Compute the distance between two points.
