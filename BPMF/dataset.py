@@ -2207,7 +2207,7 @@ class Event(object):
         obs_fn = os.path.join(self.id, self.id + ".obs")
         # exclude S picks on remote stations if requested
         excluded_obs = {}
-        if (self.source_receiver_epicentral_dist is not None) and (
+        if hasattr(self, "_source_receiver_epicentral_dist") and (
             max_epicentral_dist_km_S is not None
         ):
             for sta in self.source_receiver_epicentral_dist.index:
