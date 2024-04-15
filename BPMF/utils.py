@@ -436,7 +436,7 @@ def _preprocess_stream(
                 tr.resample(target_SR, no_filter=True)
         elif sr_ratio < 1:
             if verbose:
-                print("Sampling rate is too high on {tr.id}.")
+                print(f"Sampling rate is too high on {tr.id}.")
                 print(tr)
             preprocessed_stream.remove(tr)
             continue
