@@ -159,6 +159,7 @@ def preprocess_stream(
     verbose=True,
     SR_decimals=1,
     decimation_method="simple",
+    allow_oversampling=False,
     unit="VEL",
     n_threads=1,
     **kwargs,
@@ -198,6 +199,10 @@ def preprocess_stream(
         The number of decimals to round sampling rate values to.
     decimation_method : str, optional
         The method used for decimation.
+    allow_oversampling : bool, optional
+        If True, raw traces that have a sampling rate lower than the target
+        sampling rate will be oversampled instead of being discarded.Defaults
+        to False.
     unit : str, optional
         The unit of the data.
     n_threads : int, optional
@@ -228,6 +233,7 @@ def preprocess_stream(
         verbose=verbose,
         SR_decimals=SR_decimals,
         decimation_method=decimation_method,
+        allow_oversampling=allow_oversampling,
         unit=unit,
         **kwargs,
     )
@@ -319,6 +325,7 @@ def _preprocess_stream(
     decimation_method="simple",
     unit="VEL",
     pre_filt=None,
+    allow_oversampling=False,
     **kwargs,
 ):
     """
@@ -394,7 +401,7 @@ def _preprocess_stream(
         ):
             if verbose:
                 print(f"Too much gap duration on {trace_id}.")
-                print(f"Duration is: {trace_duration:.2f}s (min is {(1. - minimum_length) * target_duration:.2f}s)")
+                print(f"Gap duration is: {trace_duration:.2f}s (max is {(1. - minimum_length) * target_duration:.2f}s)")
             continue
         tr.detrend("constant")
         tr.detrend("linear")
@@ -434,6 +441,8 @@ def _preprocess_stream(
                 tr.resample(target_SR, no_filter=True)
             else:
                 tr.resample(target_SR, no_filter=True)
+        elif sr_ratio < 1 and allow_oversampling:
+            tr.resample(target_SR, no_filter=True)
         elif sr_ratio < 1:
             if verbose:
                 print(f"Sampling rate is too high on {tr.id}.")
