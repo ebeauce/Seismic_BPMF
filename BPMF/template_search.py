@@ -623,6 +623,7 @@ class Beamformer(object):
                 keepdims=True,
             )
             weights_sources[self.moveouts[:, :, 0] > cutoff_mv] = 0.0
+        weights_sources[:, ~operational_stations] = 0.
         if n_min_stations > 0:
             n_stations_per_source = np.sum(weights_sources > 0.0, axis=-1)
             weights_sources[n_stations_per_source < n_min_stations, :] = 0.0
