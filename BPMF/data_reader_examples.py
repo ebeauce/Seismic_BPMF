@@ -1,3 +1,5 @@
+import numpy as np
+
 def data_reader_template(
     where,
     network="*",
@@ -110,8 +112,8 @@ def data_reader_pyasdf(
 def data_reader_mseed(
     where,
     network="*",
-    station="*",
-    channel="*",
+    stations=["*"],
+    channels=["*"],
     location="*",
     starttime=None,
     endtime=None,
@@ -134,9 +136,9 @@ def data_reader_mseed(
         Path to data file or root data folder.
     network: string or list, optional
         Code(s) of the target network(s).
-    station: string or list, optional
+    stations: string or list, optional
         Code(s) of the target station(s).
-    channel: string or list, optional
+    channels: string or list, optional
         Code(s) of the target channel(s).
     location: string or list, optional
         Code(s) of the target location(s).
@@ -164,20 +166,29 @@ def data_reader_mseed(
 
     from obspy import Stream, read, read_inventory
 
+    if not isinstance(stations, list) and not isinstance(stations, np.ndarray):
+        stations = [stations]
+
     traces = Stream()
     # read your data into traces
+    #data_files = []
     if data_files is None:
-        data_files = glob.glob(
-            os.path.join(where, data_folder,
-                f"{network}.{station}.{location}.*[!0,1,2,3,4,5,6,7,8,9]{channel}[_.]*")
-        )
+        data_files = []
+        for sta in stations:
+            for cha in channels:
+                data_files.append(glob.glob(
+                    os.path.join(where, data_folder,
+                        f"{network}.{sta}.{location}.{cha}[_.]*")
+                ))
+    resp_files = set()
     for fname in data_files:
         traces += read(fname, starttime=starttime, endtime=endtime, **kwargs)
-    if attach_response:
-        resp_files = glob.glob(
-            os.path.join(where, "resp", f"{network}.{station}.xml")
-        )
-        invs = list(map(read_inventory, resp_files))
-        traces.attach_response(invs)
+        if attach_response:
+            resp_files.add(glob.glob(
+                os.path.join(where, "resp", f"{network}.{sta}.xml")
+            ))
+    invs = list(map(read_inventory, resp_files))
+    #print(sta, resp_files, invs)
+    traces.attach_response(invs)
     return traces
 
