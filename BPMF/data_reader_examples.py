@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def data_reader_template(
     where,
     network="*",
@@ -8,7 +9,7 @@ def data_reader_template(
     location="*",
     starttime="*",
     endtime="*",
-    **kwargs
+    **kwargs,
 ):
     """Data reader for BPMF.
 
@@ -42,6 +43,7 @@ def data_reader_template(
     # read your data into traces
     return traces
 
+
 def data_reader_pyasdf(
     where,
     network="*",
@@ -51,7 +53,7 @@ def data_reader_pyasdf(
     starttime="*",
     endtime="*",
     tag="raw",
-    **kwargs
+    **kwargs,
 ):
     """Data reader for BPMF based on the ASDF format.
 
@@ -92,7 +94,7 @@ def data_reader_pyasdf(
             ds.q.location == location,
         ):
             for tr in getattr(station_, tag):
-                #traces += tr.slice(starttime=starttime,
+                # traces += tr.slice(starttime=starttime,
                 #        endtime=endtime, nearest_sample=True)
                 net = tr.stats.network
                 sta = tr.stats.station
@@ -109,6 +111,7 @@ def data_reader_pyasdf(
                 )
     return traces
 
+
 def data_reader_mseed(
     where,
     network="*",
@@ -120,7 +123,7 @@ def data_reader_mseed(
     attach_response=False,
     data_folder="",
     data_files=None,
-    **kwargs
+    **kwargs,
 ):
     """Data reader for BPMF.
 
@@ -171,24 +174,26 @@ def data_reader_mseed(
 
     traces = Stream()
     # read your data into traces
-    #data_files = []
+    # data_files = []
     if data_files is None:
         data_files = []
         for sta in stations:
             for cha in channels:
-                data_files.append(glob.glob(
-                    os.path.join(where, data_folder,
-                        f"{network}.{sta}.{location}.{cha}[_.]*")
-                ))
+                data_files.extend(
+                    glob.glob(
+                        os.path.join(
+                            where, data_folder, f"{network}.{sta}.{location}.{cha}[_.]*"
+                        )
+                    )
+                )
     resp_files = set()
     for fname in data_files:
         traces += read(fname, starttime=starttime, endtime=endtime, **kwargs)
         if attach_response:
-            resp_files.add(glob.glob(
-                os.path.join(where, "resp", f"{network}.{sta}.xml")
-            ))
+            resp_files.update(
+                set(glob.glob(os.path.join(where, "resp", f"{network}.{sta}.xml")))
+            )
     invs = list(map(read_inventory, resp_files))
-    #print(sta, resp_files, invs)
+    # print(sta, resp_files, invs)
     traces.attach_response(invs)
     return traces
-
