@@ -186,14 +186,15 @@ def data_reader_mseed(
                         )
                     )
                 )
-    resp_files = set()
-    for fname in data_files:
-        traces += read(fname, starttime=starttime, endtime=endtime, **kwargs)
-        if attach_response:
-            resp_files.update(
-                set(glob.glob(os.path.join(where, "resp", f"{network}.{sta}.xml")))
-            )
-    invs = list(map(read_inventory, resp_files))
-    # print(sta, resp_files, invs)
-    traces.attach_response(invs)
+    if attach_response:
+        resp_files = set()
+        for fname in data_files:
+            traces += read(fname, starttime=starttime, endtime=endtime, **kwargs)
+            if attach_response:
+                resp_files.update(
+                    set(glob.glob(os.path.join(where, "resp", f"{network}.{sta}.xml")))
+                )
+        invs = list(map(read_inventory, resp_files))
+        # print(sta, resp_files, invs)
+        traces.attach_response(invs)
     return traces
