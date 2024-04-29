@@ -499,7 +499,7 @@ class MatchedFilter(object):
         # give template's attributes to each detection
         template = self.template_group.templates[tt]
         # make sure stations and mv are consistent
-        stations = self.stations.values.astype("U")
+        stations = self.stations
         latitude = template.latitude
         longitude = template.longitude
         depth = template.depth

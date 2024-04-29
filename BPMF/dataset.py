@@ -47,7 +47,7 @@ class Network(object):
 
     @property
     def stations(self):
-        return self.metadata["stations"]
+        return self.metadata["stations"].values.astype("U")
 
     @property
     def station_indexes(self):
@@ -55,23 +55,23 @@ class Network(object):
 
     @property
     def networks(self):
-        return self.metadata["networks"]
+        return self.metadata["networks"].values.astype("U")
 
     @property
     def latitude(self):
-        return self.metadata["latitude"]
+        return self.metadata["latitude"].values.astype("float64")
 
     @property
     def longitude(self):
-        return self.metadata["longitude"]
+        return self.metadata["longitude"].values.astype("float64")
 
     @property
     def depth(self):
-        return self.metadata["depth_km"]
+        return self.metadata["depth_km"].values.astype("float64")
 
     @property
     def elevation(self):
-        return self.metadata["elevation_m"]
+        return self.metadata["elevation_m"].values.astype("float64")
 
     def box(self, lat_min, lat_max, lon_min, lon_max):
         """Geographical selection of sub-network.
@@ -212,8 +212,8 @@ class Network(object):
                     np.array([[self.longitude[s], self.latitude[s]]]),
                     np.hstack(
                         (
-                            self.longitude.values.reshape(-1, 1),
-                            self.latitude.values.reshape(-1, 1),
+                            self.longitude.reshape(-1, 1),
+                            self.latitude.reshape(-1, 1),
                         )
                     ),
                 )
@@ -1916,8 +1916,8 @@ class Event(object):
                         partial(
                             data_reader,
                             where=self.where,
-                            station=sta,
-                            channel=cp_alias,
+                            stations=sta,
+                            channels=f"*{cp_alias}",
                             starttime=pick,
                             endtime=pick + duration,
                             **reader_kwargs,
@@ -2570,9 +2570,9 @@ class Event(object):
             [self.longitude],
             [self.latitude],
             [self.depth],
-            network.longitude.values,
-            network.latitude.values,
-            network.depth.values,
+            network.longitude,
+            network.latitude,
+            network.depth,
             return_epicentral_distances=True,
         )
         self._source_receiver_dist = pd.Series(
@@ -2587,7 +2587,7 @@ class Event(object):
         )
         if not hasattr(self, "network_stations"):
             # self.network_stations = self.stations.copy() # why this line?
-            self.network_stations = network.stations.values.astype("U")
+            self.network_stations = network.stations.astype("U")
         self._source_receiver_dist = self.source_receiver_dist.loc[
             self.network_stations
         ]
