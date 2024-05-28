@@ -572,7 +572,7 @@ def write_NLLoc_control(
     # --------------------------------------------------------------
     #               LOCMETH parameters
     maxDistStaGrid = kwargs.get("maxDistStaGrid", 5000)
-    minNumberPhases = kwargs.get("minNumberPhases", 6)
+    minNumberPhases = kwargs.get("minNumberPhases", 0)
     maxNumberPhases = kwargs.get("maxNumberPhases", -1)
     minNumberSphases = kwargs.get("minNumberSphases", -1)
     VpVsRatio = kwargs.get("VpVsRatio", -1)
@@ -593,9 +593,9 @@ def write_NLLoc_control(
     fc.write("LOCMETH " + " ".join([str(p) for p in params]) + "\n")
     # --------------------------------------------------------------
     #              LOCGAU parameters
-    SigmaTime = kwargs.get("SigmaTime", 0.2)
+    SigmaTime = kwargs.get("SigmaTime", 0.02)
     CorrLen = kwargs.get("CorrLen", 5.0)
-    fc.write("LOCGAU  0.2  5.0\n")
+    fc.write(f"LOCGAU  {SigmaTime}  {CorrLen}\n")
     # --------------------------------------------------------------
     #             LOCGAU2 parameters
     SigmaTfraction = kwargs.get("SigmaTfraction", 0.05)
