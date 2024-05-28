@@ -1912,12 +1912,13 @@ class Event(object):
                 else:
                     pick = self.origin_time - offset_ot
                 for cp_alias in component_aliases[comp]:
+                    # note: here, we
                     reading_task_list.append(
                         partial(
                             data_reader,
                             where=self.where,
                             stations=sta,
-                            channels=f"*{cp_alias}",
+                            channels=f"{cp_alias}",
                             starttime=pick,
                             endtime=pick + duration,
                             **reader_kwargs,
