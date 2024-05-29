@@ -1674,6 +1674,13 @@ class Event(object):
         ml_model_name : str, optional
             Name of the pre-trained PhaseNet model to load if `ml_model`
             is not provided. (default "original")
+        keep_probability_time_series : bool, optional
+            If True, the phase probability time series are stored in a
+            new class attribute, `self.probability_time_series`. (default True)
+        phase_probability_time_series : `BPMF.dataset.WaveformTransform`, optional
+            If different from None, the phase probabilities are not re-computed
+            but, instead, are fetched from an existing
+            `BPMF.dataset.WaveformTransform` instance. (default None)
         **kwargs : dict, optional
             Extra keyword arguments passed to `Event.read_waveforms`.
 
@@ -1697,10 +1704,10 @@ class Event(object):
         ml_p_index = kwargs.get("ml_P_index", 1)
         ml_s_index = kwargs.get("ml_S_index", 2)
 
-        # shorter alias
-        phase_proba = phase_probability_time_series
+        ## shorter alias
+        #phase_proba = phase_probability_time_series
 
-        if phase_proba is None:
+        if phase_probability_time_series is None:
             if kwargs.get("read_waveforms", True):
                 # read waveforms in picking mode, i.e. with `time_shifted`=False
                 self.read_waveforms(
@@ -1736,28 +1743,52 @@ class Event(object):
                 phase_proba = ml_model(from_numpy(data_arr_n).float())
                 phase_proba = phase_proba.detach().numpy()
             # trim edges
-            #phase_proba = phase_proba[:, :, left:-right]
-        if keep_probability_time_series:
-            self.probability_time_series = pd.DataFrame(
-                index=self.stations, columns=["P", "S"]
-            )
-            times = np.arange(phase_proba.shape[-1] - left - right).astype(
-                "float64"
-            ) / float(self.sampling_rate)
-            if times[1] > 1.0e-3:
-                times = (1000 * times).astype("timedelta64[ms]")
-            else:
-                times = (1e9 * times).astype("timedelta64[ns]")
-            self.probability_times = (
-                np.datetime64(self.traces[0].stats.starttime) + times
-            )
-            for s, sta in enumerate(self.stations):
-                self.probability_time_series.loc[sta, "P"] = phase_proba[
-                    s, ml_p_index, left:-right
-                ]
-                self.probability_time_series.loc[sta, "S"] = phase_proba[
-                    s, ml_s_index, left:-right
-                ]
+            phase_proba = phase_proba[:, :, left:-right]
+
+            # define traces variable for later
+            traces = self.traces
+
+            if keep_probability_time_series:
+                self.probability_time_series = pd.DataFrame(
+                    index=self.stations, columns=["P", "S"]
+                )
+                times = np.arange(phase_proba.shape[-1]).astype(
+                    "float64"
+                ) / float(self.sampling_rate)
+                if times[1] > 1.0e-3:
+                    times = (1000 * times).astype("timedelta64[ms]")
+                else:
+                    times = (1e9 * times).astype("timedelta64[ns]")
+                self.probability_times = (
+                    np.datetime64(self.traces[0].stats.starttime) + times
+                )
+                for s, sta in enumerate(self.stations):
+                    self.probability_time_series.loc[sta, "P"] = phase_proba[
+                            s, ml_p_index, :
+                    ]
+                    self.probability_time_series.loc[sta, "S"] = phase_proba[
+                            s, ml_s_index, :
+                    ]
+
+        else:
+            # use the WaveformTransform instance in `phase_probability_time_series` to
+            # retrieve the pre-computed probabilities at the times of the event
+            if upsampling > 1 or downsampling > 1:
+                # momentarily update samping_rate
+                sampling_rate0 = float(self.sampling_rate)
+                self.sampling_rate = self.sr * upsampling / downsampling
+
+            phase_probabilities_event = phase_probability_time_series.slice(
+                    self.origin_time - offset_ot,
+                    duration=duration,
+                    stations=self.stations,
+                    )
+            phase_proba = phase_probabilities_event.transform_arr
+            if keep_probability_time_series:
+                self.probability_times = phase_probabilities_event.time
+                self.probability_time_series = phase_probabilities_event.data_frame_view()
+            # define traces variable for later
+            traces = phase_probabilities_event.transform
         # find picks and store in dictionaries
         picks = {}
         picks["P_picks"] = {}
@@ -1766,11 +1797,11 @@ class Event(object):
         picks["S_proba"] = {}
         for s, sta in enumerate(self.stations):
             picks["P_proba"][sta], picks["P_picks"][sta] = utils.trigger_picks(
-                phase_proba[s, ml_p_index, left:-right],
+                    phase_proba[s, ml_p_index, :],
                 threshold_P,
             )
             picks["S_proba"][sta], picks["S_picks"][sta] = utils.trigger_picks(
-                phase_proba[s, ml_s_index, left:-right],
+                    phase_proba[s, ml_s_index, :],
                 threshold_S,
             )
         if use_apriori_picks and hasattr(self, "arrival_times"):
@@ -1785,7 +1816,7 @@ class Event(object):
                 for ph in prior_knowledge.columns:
                     prior_knowledge.loc[sta, ph] = utils.sec_to_samp(
                         udt(self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"])
-                        - self.traces[0].stats.starttime,
+                        - traces[0].stats.starttime,
                         sr=self.sampling_rate,
                     )
         else:
@@ -1810,7 +1841,7 @@ class Event(object):
                     proba_picks[s] = picks[f"{ph}_proba"][sta][0]
                     if proba_picks[s] > 0.0:
                         abs_picks[s] = (
-                            self.traces.select(station=sta)[0].stats.starttime
+                            traces.select(station=sta)[0].stats.starttime
                             + rel_picks_sec[s]
                         )
             pandas_picks[f"{ph}_picks_sec"] = rel_picks_sec
