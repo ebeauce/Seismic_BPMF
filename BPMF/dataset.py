@@ -1625,6 +1625,7 @@ class Event(object):
         ml_model=None,
         ml_model_name="original",
         keep_probability_time_series=False,
+        phase_probability_time_series=None,
         **kwargs,
     ):
         """
@@ -1696,43 +1697,51 @@ class Event(object):
         ml_p_index = kwargs.get("ml_P_index", 1)
         ml_s_index = kwargs.get("ml_S_index", 2)
 
-        if kwargs.get("read_waveforms", True):
-            # read waveforms in picking mode, i.e. with `time_shifted`=False
-            self.read_waveforms(
-                duration,
-                offset_ot=offset_ot,
-                phase_on_comp=phase_on_comp,
-                component_aliases=component_aliases,
-                time_shifted=False,
-                **kwargs,
-            )
-        data_arr = self.get_np_array(self.stations, components=["N", "E", "Z"])
-        if upsampling > 1 or downsampling > 1:
-            from scipy.signal import resample_poly
+        # shorter alias
+        phase_proba = phase_probability_time_series
 
-            data_arr = resample_poly(data_arr, upsampling, downsampling, axis=-1)
-            # momentarily update samping_rate
-            sampling_rate0 = float(self.sampling_rate)
-            self.sampling_rate = self.sr * upsampling / downsampling
-        data_arr_n = utils.normalize_batch(
-            data_arr,
-            normalization_window_sample=kwargs.get(
-                "normalization_window_sample", data_arr.shape[-1]
-            ),
-        )
-        closest_pow2 = int(np.log2(data_arr_n.shape[-1])) + 1
-        diff = 2**closest_pow2 - data_arr_n.shape[-1]
-        left = diff // 2
-        right = diff // 2 + diff % 2
-        data_arr_n = np.pad(data_arr_n, ((0, 0), (0, 0), (left, right)), mode="reflect")
-        with no_grad():
-            ml_probas = ml_model(from_numpy(data_arr_n).float())
-            ml_probas = ml_probas.detach().numpy()
+        if phase_proba is None:
+            if kwargs.get("read_waveforms", True):
+                # read waveforms in picking mode, i.e. with `time_shifted`=False
+                self.read_waveforms(
+                    duration,
+                    offset_ot=offset_ot,
+                    phase_on_comp=phase_on_comp,
+                    component_aliases=component_aliases,
+                    time_shifted=False,
+                    **kwargs,
+                )
+            data_arr = self.get_np_array(self.stations, components=["N", "E", "Z"])
+            if upsampling > 1 or downsampling > 1:
+                from scipy.signal import resample_poly
+
+                data_arr = resample_poly(data_arr, upsampling, downsampling, axis=-1)
+                # momentarily update samping_rate
+                sampling_rate0 = float(self.sampling_rate)
+                self.sampling_rate = self.sr * upsampling / downsampling
+            data_arr_n = utils.normalize_batch(
+                data_arr,
+                normalization_window_sample=kwargs.get(
+                    "normalization_window_sample", data_arr.shape[-1]
+                ),
+            )
+            closest_pow2 = int(np.log2(data_arr_n.shape[-1])) + 1
+            diff = 2**closest_pow2 - data_arr_n.shape[-1]
+            left = diff // 2
+            right = diff // 2 + diff % 2
+            data_arr_n = np.pad(
+                data_arr_n, ((0, 0), (0, 0), (left, right)), mode="reflect"
+            )
+            with no_grad():
+                phase_proba = ml_model(from_numpy(data_arr_n).float())
+                phase_proba = phase_proba.detach().numpy()
+            # trim edges
+            #phase_proba = phase_proba[:, :, left:-right]
         if keep_probability_time_series:
             self.probability_time_series = pd.DataFrame(
                 index=self.stations, columns=["P", "S"]
             )
-            times = np.arange(data_arr_n.shape[-1] - left - right).astype(
+            times = np.arange(phase_proba.shape[-1] - left - right).astype(
                 "float64"
             ) / float(self.sampling_rate)
             if times[1] > 1.0e-3:
@@ -1743,10 +1752,10 @@ class Event(object):
                 np.datetime64(self.traces[0].stats.starttime) + times
             )
             for s, sta in enumerate(self.stations):
-                self.probability_time_series.loc[sta, "P"] = ml_probas[
+                self.probability_time_series.loc[sta, "P"] = phase_proba[
                     s, ml_p_index, left:-right
                 ]
-                self.probability_time_series.loc[sta, "S"] = ml_probas[
+                self.probability_time_series.loc[sta, "S"] = phase_proba[
                     s, ml_s_index, left:-right
                 ]
         # find picks and store in dictionaries
@@ -1757,11 +1766,11 @@ class Event(object):
         picks["S_proba"] = {}
         for s, sta in enumerate(self.stations):
             picks["P_proba"][sta], picks["P_picks"][sta] = utils.trigger_picks(
-                ml_probas[s, ml_p_index, left:-right],
+                phase_proba[s, ml_p_index, left:-right],
                 threshold_P,
             )
             picks["S_proba"][sta], picks["S_picks"][sta] = utils.trigger_picks(
-                ml_probas[s, ml_s_index, left:-right],
+                phase_proba[s, ml_s_index, left:-right],
                 threshold_S,
             )
         if use_apriori_picks and hasattr(self, "arrival_times"):
@@ -2815,7 +2824,7 @@ class Event(object):
                     for key2 in self.aux_data[key]:
                         f["aux_data"][key].create_dataset(
                             key2, data=self.aux_data[key][key2]
-                            )
+                        )
                 else:
                     f["aux_data"].create_dataset(key, data=self.aux_data[key])
         if hasattr(self, "picks"):
@@ -5408,3 +5417,115 @@ class Stack(Event):
                 threshold_S=threshold_S,
                 read_waveforms=False,
             )
+
+
+class WaveformTransform(object):
+    def __init__(
+        self, transform_arr, stations, components, starttime, sampling_rate_hz
+    ):
+        self.stations = stations
+        self.components = components
+        self.transform_arr = transform_arr
+        self.starttime = starttime
+        self.n_samples = transform_arr.shape[-1]
+        self.sampling_rate = sampling_rate_hz
+        self.transform = obs.Stream()
+        for s in range(len(self.stations)):
+            for c in range(len(self.components)):
+                tr = obs.Trace(data=transform_arr[s, c, :])
+                tr.stats.station = stations[s]
+                tr.stats.channel = components[c]
+                tr.stats.sampling_rate = sampling_rate_hz
+                tr.stats.starttime = starttime
+                self.transform += tr
+
+    @property
+    def sr(self):
+        return self.sampling_rate
+
+    @property
+    def delta(self):
+        return 1.0 / self.sampling_rate
+
+    @property
+    def duration(self):
+        return self.n_samples / self.sampling_rate
+
+    @property
+    def time(self):
+        if not hasattr(self, "sampling_rate"):
+            print("You need to define the instance's sampling rate first.")
+            return
+        if not hasattr(self, "_time"):
+            self._time = utils.time_range(
+                self.starttime, self.starttime + self.duration, 1.0 / self.sr, unit="ms"
+            )
+        return self._time
+
+    def data_frame_view(self):
+        df = pd.DataFrame(index=self.stations, columns=self.components)
+        for s, sta in enumerate(df.index):
+            for p, ph in enumerate(df.columns):
+                df.loc[sta, ph] = self.transform_arr[s, p, :]
+        return df
+
+    def get_np_array(
+        self,
+        stations,
+        components=None,
+        verbose=True,
+    ):
+        """Arguments go to `BPMF.utils.get_np_array`."""
+        if components is None:
+            self.components = components
+        component_aliases = {ph: ph for ph in components}
+        return utils.get_np_array(
+            self.transform,
+            stations,
+            components=components,
+            component_aliases=component_aliases,
+            n_samples=self.n_samples,
+            verbose=verbose,
+        )
+
+    def slice(
+        self,
+        starttime,
+        duration=None,
+        num_samples=None,
+        stations=None,
+        components=None,
+    ):
+        """ """
+        if duration is None and num_samples is None:
+            print("One of `duration` or `num_samples` must be specified.")
+            return
+        if duration is None:
+            duration = num_samples / self.sampling_rate
+        if num_samples is None:
+            num_samples = int(duration * self.sampling_rate)
+        # first, slice using obspy.Stream's method
+        slice_ = self.transform.slice(
+            starttime=starttime, endtime=starttime + duration + self.delta
+        )
+        # for tr in slice_:
+        #     tr.data = tr.data[:num_samples]
+        # then, format the output
+        if stations is None:
+            stations = self.stations
+        if components is None:
+            components = self.components
+        component_aliases = {ph: ph for ph in components}
+        transform_arr = utils.get_np_array(
+            slice_,
+            stations,
+            components=components,
+            component_aliases=component_aliases,
+            n_samples=num_samples,
+        )
+        # return a new class instance
+        new_instance = WaveformTransform(
+            transform_arr, stations, components, starttime, self.sr
+        )
+        return new_instance
+
