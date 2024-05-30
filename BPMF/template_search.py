@@ -219,6 +219,173 @@ class TravelTimes(object):
             tts = tts - np.min(tts, axis=(1, 2), keepdims=True)
         return tts
 
+class WaveformTransform(object):
+    """Class for waveform transform.
+
+    """
+    def __init__(
+        self, transform_arr, stations, components, starttime, sampling_rate_hz
+    ):
+        """Initializes an instance that represents the transformed wavefield.
+
+        Two important class attributes are:
+        - transform_arr : Same as the input argument with the same name.
+        - transform : Transformed wavefield represented as a `obspy.Stream`.
+
+        Parameters
+        ----------
+        transform_arr : numpy.ndarray
+            (num_stations, num_components, num_samples) `numpy.ndarray` with
+            some transform of the wavefield.
+        stations : array-like
+            Station names of the first axis of `transform_arr`.
+        components : array-like
+            Component names of the second axis of `transform_arr`.
+        starttime : `obspy.UTCDateTime`
+            Start time of `transform_arr`.
+        sampling_rate_hz : float
+            Sampling rate, in Hertz, of the time series in `transform_arr`.
+        """
+        self.stations = stations
+        self.components = components
+        self.transform_arr = transform_arr
+        self.starttime = starttime
+        self.n_samples = transform_arr.shape[-1]
+        self.sampling_rate = sampling_rate_hz
+        self.transform = obs.Stream()
+        for s in range(len(self.stations)):
+            for c in range(len(self.components)):
+                tr = obs.Trace(data=transform_arr[s, c, :])
+                tr.stats.station = stations[s]
+                tr.stats.channel = components[c]
+                tr.stats.sampling_rate = sampling_rate_hz
+                tr.stats.starttime = starttime
+                self.transform += tr
+
+    @property
+    def sr(self):
+        return self.sampling_rate
+
+    @property
+    def delta(self):
+        return 1.0 / self.sampling_rate
+
+    @property
+    def duration(self):
+        return self.n_samples / self.sampling_rate
+
+    @property
+    def time(self):
+        if not hasattr(self, "sampling_rate"):
+            print("You need to define the instance's sampling rate first.")
+            return
+        if not hasattr(self, "_time"):
+            self._time = utils.time_range(
+                self.starttime, self.starttime + self.duration, 1.0 / self.sr, unit="ms"
+            )
+        return self._time
+
+    def data_frame_view(self):
+        """Returns `self.transform_arr` as a `pandas.DataFrame`.
+
+        The data frame's columns are the component names and the
+        rows are the station names.
+        """
+        df = pd.DataFrame(index=self.stations, columns=self.components)
+        for s, sta in enumerate(df.index):
+            for p, ph in enumerate(df.columns):
+                df.loc[sta, ph] = self.transform_arr[s, p, :]
+        return df
+
+    def get_np_array(
+        self,
+        stations,
+        components=None,
+        verbose=True,
+    ):
+        """Arguments go to `BPMF.utils.get_np_array`."""
+        if components is None:
+            self.components = components
+        component_aliases = {ph: ph for ph in components}
+        return utils.get_np_array(
+            self.transform,
+            stations,
+            components=components,
+            component_aliases=component_aliases,
+            n_samples=self.n_samples,
+            verbose=verbose,
+        )
+
+    def slice(
+        self,
+        starttime,
+        duration=None,
+        num_samples=None,
+        stations=None,
+        components=None,
+    ):
+        """Returns a new `WaveformTransform` instance at the requested time.
+
+        Note that either `duration` or `num_samples` must be different
+        from None.
+
+        Parameters
+        ----------
+        starttime : `obspy.UTCDateTime`
+            Time at which slicing starts.
+        duration : float, optional
+            If not None, this is the duration, in seconds, of the slice.
+            Defaults to None, in which case `duration` is calculated from
+            `num_samples` and `self.sampling_rate`.
+        num_samples : int, optional
+            If not None, this is the duration, in samples, of the slice.
+            Defaults to None, in which case `num_samples` is calculated
+            from `duration` and `self.sampling_rate`.
+        stations : array-like, optional
+            Names of the stations to use in the slice. Defaults to None,
+            in which case `stations` is taken to be the same as `self.stations`.
+        components : array-like, optional
+            Names of the components to use in the slice. Defaults to None,
+            in which case `components` is taken to be the same as
+            `self.components`.
+        
+        Returns
+        -------
+        new_instance : `BPMF.template_search.WaveformTransform`
+            The new `WaveformTransform` instance sliced from `self`.
+        """
+        if duration is None and num_samples is None:
+            print("One of `duration` or `num_samples` must be specified.")
+            return
+        if duration is None:
+            duration = num_samples / self.sampling_rate
+        if num_samples is None:
+            num_samples = int(duration * self.sampling_rate)
+        # first, slice using obspy.Stream's method
+        slice_ = self.transform.slice(
+            starttime=starttime, endtime=starttime + duration + self.delta
+        )
+        # for tr in slice_:
+        #     tr.data = tr.data[:num_samples]
+        # then, format the output
+        if stations is None:
+            stations = self.stations
+        if components is None:
+            components = self.components
+        component_aliases = {ph: ph for ph in components}
+        transform_arr = utils.get_np_array(
+            slice_,
+            stations,
+            components=components,
+            component_aliases=component_aliases,
+            n_samples=num_samples,
+        )
+        # return a new class instance
+        new_instance = WaveformTransform(
+            transform_arr, stations, components, starttime, self.sr
+        )
+        return new_instance
+
 
 class Beamformer(object):
     """Class for backprojecting waveform features with beamforming."""
