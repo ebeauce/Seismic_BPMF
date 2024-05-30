@@ -299,8 +299,8 @@ def write_NLLoc_obs(
         # if st not in stations_to_use:
         #    continue
         if st in picks["P_abs_picks"].dropna().index:
-            if "P_err" in picks.columns:
-                err = min(err_min, picks.loc[st, "P_err"])
+            if "P_unc_sec" in picks.columns:
+                err = min(err_min, picks.loc[st, "P_unc_sec"])
             else:
                 err = err_min
             P_arrival_time = udt(picks.loc[st]["P_abs_picks"])
@@ -347,8 +347,8 @@ def write_NLLoc_obs(
                 )
             )
         if st in picks["S_abs_picks"].dropna().index:
-            if "S_err" in picks.columns:
-                err = min(err_min, picks.loc[st, "S_err"])
+            if "S_unc_sec" in picks.columns:
+                err = min(err_min, picks.loc[st, "S_unc_sec"])
             else:
                 err = err_min
             S_arrival_time = udt(picks.loc[st]["S_abs_picks"])

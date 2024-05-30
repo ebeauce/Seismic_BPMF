@@ -1705,7 +1705,7 @@ class Event(object):
         ml_s_index = kwargs.get("ml_S_index", 2)
 
         ## shorter alias
-        #phase_proba = phase_probability_time_series
+        # phase_proba = phase_probability_time_series
 
         if phase_probability_time_series is None:
             if kwargs.get("read_waveforms", True):
@@ -1752,9 +1752,9 @@ class Event(object):
                 self.probability_time_series = pd.DataFrame(
                     index=self.stations, columns=["P", "S"]
                 )
-                times = np.arange(phase_proba.shape[-1]).astype(
-                    "float64"
-                ) / float(self.sampling_rate)
+                times = np.arange(phase_proba.shape[-1]).astype("float64") / float(
+                    self.sampling_rate
+                )
                 if times[1] > 1.0e-3:
                     times = (1000 * times).astype("timedelta64[ms]")
                 else:
@@ -1764,10 +1764,10 @@ class Event(object):
                 )
                 for s, sta in enumerate(self.stations):
                     self.probability_time_series.loc[sta, "P"] = phase_proba[
-                            s, ml_p_index, :
+                        s, ml_p_index, :
                     ]
                     self.probability_time_series.loc[sta, "S"] = phase_proba[
-                            s, ml_s_index, :
+                        s, ml_s_index, :
                     ]
 
         else:
@@ -1779,31 +1779,46 @@ class Event(object):
                 self.sampling_rate = self.sr * upsampling / downsampling
 
             phase_probabilities_event = phase_probability_time_series.slice(
-                    self.origin_time - offset_ot,
-                    duration=duration,
-                    stations=self.stations,
-                    )
+                self.origin_time - offset_ot,
+                duration=duration,
+                stations=self.stations,
+            )
             phase_proba = phase_probabilities_event.transform_arr
             if keep_probability_time_series:
                 self.probability_times = phase_probabilities_event.time
-                self.probability_time_series = phase_probabilities_event.data_frame_view()
+                self.probability_time_series = (
+                    phase_probabilities_event.data_frame_view()
+                )
             # define traces variable for later
             traces = phase_probabilities_event.transform
         # find picks and store in dictionaries
-        picks = {}
-        picks["P_picks"] = {}
-        picks["P_proba"] = {}
-        picks["S_picks"] = {}
-        picks["S_proba"] = {}
+        # picks = {}
+        # picks["P_picks"] = {}
+        # picks["P_proba"] = {}
+        # picks["S_picks"] = {}
+        # picks["S_proba"] = {}
+
+        # picks["P_proba"][sta], picks["P_picks"][sta] = utils.trigger_picks(
+        #    phase_proba[s, ml_p_index, :],
+        #    threshold_P,
+        # )
+        # picks["S_proba"][sta], picks["S_picks"][sta] = utils.trigger_picks(
+        #    phase_proba[s, ml_s_index, :],
+        #    threshold_S,
+        # )
+        # find candidate picks and store them in pandas.DataFrame
+        picks = pd.DataFrame(
+            index=self.stations,
+            columns=["P_probas", "P_picks", "P_unc", "S_probas", "S_picks", "S_unc"],
+        )
         for s, sta in enumerate(self.stations):
-            picks["P_proba"][sta], picks["P_picks"][sta] = utils.trigger_picks(
-                    phase_proba[s, ml_p_index, :],
-                threshold_P,
+            picks.loc[sta, ["P_probas", "P_picks", "P_unc"]] = utils.find_picks(
+                phase_proba[s, ml_p_index, :], threshold_P
             )
-            picks["S_proba"][sta], picks["S_picks"][sta] = utils.trigger_picks(
-                    phase_proba[s, ml_s_index, :],
-                threshold_S,
+            picks.loc[sta, ["S_probas", "S_picks", "S_unc"]] = utils.find_picks(
+                phase_proba[s, ml_s_index, :], threshold_S
             )
+        # now, only keep the best P and S picks
         if use_apriori_picks and hasattr(self, "arrival_times"):
             columns = []
             if "P" in self.phases:
@@ -1829,27 +1844,54 @@ class Event(object):
             prior_knowledge=prior_knowledge,
             search_win_samp=search_win_samp,
         )
-        # format picks in pandas DataFrame
-        pandas_picks = {"stations": self.stations}
-        for ph in ["P", "S"]:
-            rel_picks_sec = np.zeros(len(self.stations), dtype=np.float32)
-            proba_picks = np.zeros(len(self.stations), dtype=np.float32)
-            abs_picks = np.zeros(len(self.stations), dtype=object)
-            for s, sta in enumerate(self.stations):
-                if sta in picks[f"{ph}_picks"].keys():
-                    rel_picks_sec[s] = picks[f"{ph}_picks"][sta][0] / self.sr
-                    proba_picks[s] = picks[f"{ph}_proba"][sta][0]
-                    if proba_picks[s] > 0.0:
-                        abs_picks[s] = (
-                            traces.select(station=sta)[0].stats.starttime
-                            + rel_picks_sec[s]
-                        )
-            pandas_picks[f"{ph}_picks_sec"] = rel_picks_sec
-            pandas_picks[f"{ph}_probas"] = proba_picks
-            pandas_picks[f"{ph}_abs_picks"] = abs_picks
-        self.picks = pd.DataFrame(pandas_picks)
-        self.picks.set_index("stations", inplace=True)
-        self.picks.replace(0.0, np.nan, inplace=True)
+        # express picks in seconds and absolute times
+        picks["P_picks"] = picks["P_picks"] / self.sr
+        picks["S_picks"] = picks["S_picks"] / self.sr
+        picks["P_unc"] = picks["P_unc"] / self.sr
+        picks["S_unc"] = picks["S_unc"] / self.sr
+
+        picks.rename(
+            columns={
+                "P_picks": "P_picks_sec",
+                "P_unc": "P_unc_sec",
+                "S_picks": "S_picks_sec",
+                "S_unc": "S_unc_sec",
+            },
+            inplace=True,
+        )
+        for sta in picks.index:
+            for ph in ["P", "S"]:
+                if pd.isna(picks.loc[sta, f"{ph}_picks_sec"]):
+                    continue
+                abs_pick = (
+                    traces.select(station=sta)[0].stats.starttime
+                    + picks.loc[sta, f"{ph}_picks_sec"]
+                )
+                picks.loc[sta, f"{ph}_abs_picks"] = abs_pick
+
+        ## format picks in pandas DataFrame
+        # pandas_picks = {"stations": self.stations}
+        # for ph in ["P", "S"]:
+        #    rel_picks_sec = np.zeros(len(self.stations), dtype=np.float32)
+        #    proba_picks = np.zeros(len(self.stations), dtype=np.float32)
+        #    abs_picks = np.zeros(len(self.stations), dtype=object)
+        #    for s, sta in enumerate(self.stations):
+        #        if sta in picks[f"{ph}_picks"].keys():
+        #            rel_picks_sec[s] = picks[f"{ph}_picks"][sta][0] / self.sr
+        #            proba_picks[s] = picks[f"{ph}_proba"][sta][0]
+        #            if proba_picks[s] > 0.0:
+        #                abs_picks[s] = (
+        #                    traces.select(station=sta)[0].stats.starttime
+        #                    + rel_picks_sec[s]
+        #                )
+        #    pandas_picks[f"{ph}_picks_sec"] = rel_picks_sec
+        #    pandas_picks[f"{ph}_probas"] = proba_picks
+        #    pandas_picks[f"{ph}_abs_picks"] = abs_picks
+        # self.picks = pd.DataFrame(pandas_picks)
+        # self.picks.set_index("stations", inplace=True)
+        self.picks = picks
+        self.picks.index.name = "stations"
+        # self.picks.replace(0.0, np.nan, inplace=True)
         if upsampling > 1 or downsampling > 1:
             # reset the sampling rate to initial value
             self.sampling_rate = sampling_rate0
@@ -3073,8 +3115,8 @@ class Event(object):
                         and hasattr(self, "picks")
                         and (sta in self.picks[f"{ph}_abs_picks"].dropna().index)
                     ):
-                        for ph_pick in np.atleast_1d(
-                            self.picks.loc[sta, f"{ph}_abs_picks"]
+                        for i, ph_pick in enumerate(
+                            np.atleast_1d(self.picks.loc[sta, f"{ph}_abs_picks"])
                         ):
                             axes[s, c].axvline(
                                 np.datetime64(ph_pick),
@@ -3082,6 +3124,17 @@ class Event(object):
                                 lw=1.00,
                                 ls="--",
                             )
+                            if f"{ph}_unc_sec" in self.picks:
+                                unc = np.atleast_1d(
+                                    self.picks.loc[sta, f"{ph}_unc_sec"]
+                                )[i]
+                                axes[s, c].fill_betweenx(
+                                    axes[s, c].get_ylim(),
+                                    np.datetime64(udt(ph_pick) - unc / 2.0),
+                                    np.datetime64(udt(ph_pick) + unc / 2.0),
+                                    color=pick_colors[ph],
+                                    alpha=0.25,
+                                )
                     # plot the theoretical arrival times
                     if (
                         plot_predicted_arrivals
@@ -5448,5 +5501,3 @@ class Stack(Event):
                 threshold_S=threshold_S,
                 read_waveforms=False,
             )
-
-

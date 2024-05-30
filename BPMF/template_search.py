@@ -4,9 +4,10 @@ import sys
 from .config import cfg
 from . import clib, utils, dataset
 
-import numpy as np
-import pandas as pd
 import matplotlib.pylab as plt
+import numpy as np
+import obspy as obs
+import pandas as pd
 
 import beampower as bp
 
