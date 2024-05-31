@@ -1862,6 +1862,7 @@ class Event(object):
         for sta in picks.index:
             for ph in ["P", "S"]:
                 if pd.isna(picks.loc[sta, f"{ph}_picks_sec"]):
+                    picks.loc[sta, f"{ph}_abs_picks"] = np.nan
                     continue
                 abs_pick = (
                     traces.select(station=sta)[0].stats.starttime

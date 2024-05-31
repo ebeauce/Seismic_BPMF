@@ -306,7 +306,7 @@ class WaveformTransform(object):
     ):
         """Arguments go to `BPMF.utils.get_np_array`."""
         if components is None:
-            self.components = components
+            components = self.components
         component_aliases = {ph: ph for ph in components}
         return utils.get_np_array(
             self.transform,
