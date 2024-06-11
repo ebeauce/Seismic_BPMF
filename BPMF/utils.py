@@ -5,6 +5,7 @@ import numpy as np
 import h5py as h5
 import pandas as pd
 import pathlib
+import warnings
 
 import obspy as obs
 from scipy.signal import find_peaks, peak_widths
@@ -625,18 +626,29 @@ def SVDWF(
     Implementation of the Singular Value Decomposition Wiener Filter (SVDWF)
     described in Moreau et al 2017.
 
+    Note: The SVD-WF-filtered matrix is filtered between `freqmin` and
+    `freqmax` before being returned.
+
     Parameters
     ----------
-    matrix: (n x m) numpy array
+    matrix : (n x m) numpy.ndarray
         n is the number of events, m is the number of time samples
         per event.
-    n_singular_values: scalar float
+    expl_var : float, optional
+        Fraction of the total variance explained by the retained
+        singular vectors. Defaults to 0.4.
+    max_singular_values : int, optional
         Number of singular values to retain in the
-        SVD decomposition of matrix.
-    max_freq: scalar float, default to cfg.MAX_FREQ_HZ
-        The maximum frequency of the data, or maximum target
-        frequency, is used to determined the size in the
-        time axis of the Wiener filter.
+        SVD decomposition of matrix. Defaults to 5.
+    freqmin : float, optional
+        Minimum target frequency, in Hz. Defaults to `BPMF.cfg.MIN_FREQ_HZ`.
+    freqmax : float, optional
+        Maximum target frequency, in Hz. Defaults to `BPMF.cfg.MAX_FREQ_HZ`.
+    sampling_rate : float, optional
+        Sampling rate of `matrix`. Defaults to `BPMF.cfg.SAMPLING_RATE_HZ`.
+    wiener_filter_colsize : int, optional
+        Size of the wiener filter in the outermost dimension, that is, the
+        event axis. Defaults to None, in which case the filter has length `n`.
 
     Returns
     --------
@@ -724,6 +736,10 @@ def fetch_detection_waveforms(
 ):
     from itertools import groupby
     from operator import itemgetter
+
+    warnings.warn(
+            "Deprecated function! (Old, under construction or experimental)"
+            )
 
     if catalog is None:
         cat = dataset.Catalog(f"multiplets{tid}catalog.h5", db_path_M)
@@ -818,6 +834,10 @@ def fetch_detection_waveforms_refilter(
     # sys.path.append(os.path.join(cfg.base, 'earthquake_location_eb'))
     # import relocation_utils
     from . import event_extraction
+
+    warnings.warn(
+            "Deprecated function! (Old, under construction or experimental)"
+            )
 
     cat = dataset.Catalog(f"multiplets{tid}catalog.h5", db_path_M)
     cat.read_data()
@@ -975,6 +995,9 @@ def SVDWF_multiplets(
         an attribute. See also all the useful metadata in
         the attributes.
     """
+    warnings.warn(
+            "Deprecated function! (Old, under construction or experimental)"
+            )
 
     # -----------------------------------------------------------------------------------------------
     T = dataset.Template("template{:d}".format(tid), db_path_T, db_path=db_path)
@@ -1117,6 +1140,10 @@ def find_template_clusters(
     """
     from scipy.spatial.distance import squareform
     from scipy.cluster import hierarchy
+
+    warnings.warn(
+            "Deprecated function! (Old, under construction or experimental)"
+            )
 
     # first, transform the CC matrix into a condensed matrix
     np.fill_diagonal(TpGroup.intertp_cc.values, 1.0)
@@ -1964,30 +1991,30 @@ def normalize_batch(seismogram, normalization_window_sample=3000, overlap=0.50):
 
     return seismogram
 
-def trigger_picks(
-        probability,
-        threshold,
-        minimum_peak_distance_samp=int(1. * cfg.SAMPLING_RATE_HZ)
-        ):
-    """
-    Parameters
-    ----------
-    probability : 1D array_like
-    threshold : float
-    minimum_peak_distance_samp : integer
-
-    Returns
-    -------
-    probability_at_peak : 1D array_like
-    peak_indexes : 1D array_like
-    """
-    peak_indexes = _detect_peaks(
-            probability, mph=threshold, mpd=minimum_peak_distance_samp
-            )
-    return (
-            np.atleast_1d(probability[peak_indexes]),
-            np.atleast_1d(peak_indexes)
-            )
+#def trigger_picks(
+#        probability,
+#        threshold,
+#        minimum_peak_distance_samp=int(1. * cfg.SAMPLING_RATE_HZ)
+#        ):
+#    """
+#    Parameters
+#    ----------
+#    probability : 1D array_like
+#    threshold : float
+#    minimum_peak_distance_samp : integer
+#
+#    Returns
+#    -------
+#    probability_at_peak : 1D array_like
+#    peak_indexes : 1D array_like
+#    """
+#    peak_indexes = _detect_peaks(
+#            probability, mph=threshold, mpd=minimum_peak_distance_samp
+#            )
+#    return (
+#            np.atleast_1d(probability[peak_indexes]),
+#            np.atleast_1d(peak_indexes)
+#            )
 
 def find_picks(
         phase_probability, threshold, **kwargs
@@ -1997,6 +2024,9 @@ def find_picks(
     Phase picks are given by the peaks exceeding `threshold` in 
     the time series `phase_probability`. The probability neighborhood
     around each peak is used as the pdf of a given pick measurement.
+
+    Note: Additional key-word arguments are passed to
+    'scipy.signal.find_peaks'.
 
     Parameters
     ----------
@@ -2157,6 +2187,9 @@ def _detect_peaks(
 ):
 
     """Detect peaks in data based on their amplitude and other features.
+
+    Note: Will be removed in future versions because all these features are
+    now implemented in `scipy.signal.find_peaks`.
 
     Parameters
     ----------

@@ -1704,9 +1704,6 @@ class Event(object):
         ml_p_index = kwargs.get("ml_P_index", 1)
         ml_s_index = kwargs.get("ml_S_index", 2)
 
-        ## shorter alias
-        # phase_proba = phase_probability_time_series
-
         if phase_probability_time_series is None:
             if kwargs.get("read_waveforms", True):
                 # read waveforms in picking mode, i.e. with `time_shifted`=False
@@ -1791,21 +1788,6 @@ class Event(object):
                 )
             # define traces variable for later
             traces = phase_probabilities_event.transform
-        # find picks and store in dictionaries
-        # picks = {}
-        # picks["P_picks"] = {}
-        # picks["P_proba"] = {}
-        # picks["S_picks"] = {}
-        # picks["S_proba"] = {}
-
-        # picks["P_proba"][sta], picks["P_picks"][sta] = utils.trigger_picks(
-        #    phase_proba[s, ml_p_index, :],
-        #    threshold_P,
-        # )
-        # picks["S_proba"][sta], picks["S_picks"][sta] = utils.trigger_picks(
-        #    phase_proba[s, ml_s_index, :],
-        #    threshold_S,
-        # )
         # find candidate picks and store them in pandas.DataFrame
         picks = pd.DataFrame(
             index=self.stations,
@@ -1870,26 +1852,6 @@ class Event(object):
                 )
                 picks.loc[sta, f"{ph}_abs_picks"] = abs_pick
 
-        ## format picks in pandas DataFrame
-        # pandas_picks = {"stations": self.stations}
-        # for ph in ["P", "S"]:
-        #    rel_picks_sec = np.zeros(len(self.stations), dtype=np.float32)
-        #    proba_picks = np.zeros(len(self.stations), dtype=np.float32)
-        #    abs_picks = np.zeros(len(self.stations), dtype=object)
-        #    for s, sta in enumerate(self.stations):
-        #        if sta in picks[f"{ph}_picks"].keys():
-        #            rel_picks_sec[s] = picks[f"{ph}_picks"][sta][0] / self.sr
-        #            proba_picks[s] = picks[f"{ph}_proba"][sta][0]
-        #            if proba_picks[s] > 0.0:
-        #                abs_picks[s] = (
-        #                    traces.select(station=sta)[0].stats.starttime
-        #                    + rel_picks_sec[s]
-        #                )
-        #    pandas_picks[f"{ph}_picks_sec"] = rel_picks_sec
-        #    pandas_picks[f"{ph}_probas"] = proba_picks
-        #    pandas_picks[f"{ph}_abs_picks"] = abs_picks
-        # self.picks = pd.DataFrame(pandas_picks)
-        # self.picks.set_index("stations", inplace=True)
         self.picks = picks
         self.picks.index.name = "stations"
         # self.picks.replace(0.0, np.nan, inplace=True)
