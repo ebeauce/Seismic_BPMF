@@ -299,8 +299,8 @@ def write_NLLoc_obs(
         # if st not in stations_to_use:
         #    continue
         if st in picks["P_abs_picks"].dropna().index:
-            if "P_err" in picks.columns:
-                err = min(err_min, picks.loc[st, "P_err"])
+            if "P_unc_sec" in picks.columns:
+                err = min(err_min, picks.loc[st, "P_unc_sec"])
             else:
                 err = err_min
             P_arrival_time = udt(picks.loc[st]["P_abs_picks"])
@@ -347,8 +347,8 @@ def write_NLLoc_obs(
                 )
             )
         if st in picks["S_abs_picks"].dropna().index:
-            if "S_err" in picks.columns:
-                err = min(err_min, picks.loc[st, "S_err"])
+            if "S_unc_sec" in picks.columns:
+                err = min(err_min, picks.loc[st, "S_unc_sec"])
             else:
                 err = err_min
             S_arrival_time = udt(picks.loc[st]["S_abs_picks"])
@@ -572,7 +572,7 @@ def write_NLLoc_control(
     # --------------------------------------------------------------
     #               LOCMETH parameters
     maxDistStaGrid = kwargs.get("maxDistStaGrid", 5000)
-    minNumberPhases = kwargs.get("minNumberPhases", 6)
+    minNumberPhases = kwargs.get("minNumberPhases", 0)
     maxNumberPhases = kwargs.get("maxNumberPhases", -1)
     minNumberSphases = kwargs.get("minNumberSphases", -1)
     VpVsRatio = kwargs.get("VpVsRatio", -1)
@@ -593,9 +593,9 @@ def write_NLLoc_control(
     fc.write("LOCMETH " + " ".join([str(p) for p in params]) + "\n")
     # --------------------------------------------------------------
     #              LOCGAU parameters
-    SigmaTime = kwargs.get("SigmaTime", 0.2)
+    SigmaTime = kwargs.get("SigmaTime", 0.02)
     CorrLen = kwargs.get("CorrLen", 5.0)
-    fc.write("LOCGAU  0.2  5.0\n")
+    fc.write(f"LOCGAU  {SigmaTime}  {CorrLen}\n")
     # --------------------------------------------------------------
     #             LOCGAU2 parameters
     SigmaTfraction = kwargs.get("SigmaTfraction", 0.05)

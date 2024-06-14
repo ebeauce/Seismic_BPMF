@@ -123,6 +123,7 @@ def data_reader_mseed(
     attach_response=False,
     data_folder="",
     data_files=None,
+    channel_template_str="[A-Z][A-Z]",
     **kwargs,
 ):
     """Data reader for BPMF.
@@ -135,29 +136,34 @@ def data_reader_mseed(
 
     Parameters
     -----------
-    where: string
+    where : str
         Path to data file or root data folder.
-    network: string or list, optional
+    network : str or list, optional
         Code(s) of the target network(s).
-    stations: string or list, optional
+    stations : str or list, optional
         Code(s) of the target station(s).
-    channels: string or list, optional
+    channels : str or list, optional
         Code(s) of the target channel(s).
-    location: string or list, optional
+    location : str or list, optional
         Code(s) of the target location(s).
-    starttime: string or obspy.UTCDateTime, optional
+    starttime : str or obspy.UTCDateTime, optional
         Target start time.
-    endtime: string or obspy.UTCDateTime, optional
+    endtime : str or obspy.UTCDateTime, optional
         Target end time.
-    attach_response: boolean, optional
+    attach_response : bool, optional
         If True, find the instrument response from the xml files
         and attach it to the obspy.Stream output instance.
-    data_folder: string, optional
+    data_folder : str, optional
         If given, is the child folder in `where` containing
         the mseed files to read.
-    data_files: list of strings, optional
-        If not None, is the list of full paths to the data files
+    data_files : list, optional
+        If not None, is the list of full paths (str) to the data files
         to read.
+    channel_template_str : str, optional
+        Data files are searched assuming the following naming convention:
+        `full_channel_name = channel_template_str + channels[i]`
+        By default, `channel_template_str='[A-Z][A-Z]'`, meaning that
+        it is assumed that channel names start with two letters.
 
     Returns
     -------
@@ -181,6 +187,7 @@ def data_reader_mseed(
         data_files = []
         for sta in stations:
             for cha in channels:
+                cha = channel_template_str + cha 
                 data_files.extend(
                     glob.glob(
                         os.path.join(

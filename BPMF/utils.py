@@ -5,8 +5,10 @@ import numpy as np
 import h5py as h5
 import pandas as pd
 import pathlib
+import warnings
 
 import obspy as obs
+from scipy.signal import find_peaks, peak_widths
 from obspy.core import UTCDateTime as udt
 from time import time as give_time
 
@@ -624,18 +626,29 @@ def SVDWF(
     Implementation of the Singular Value Decomposition Wiener Filter (SVDWF)
     described in Moreau et al 2017.
 
+    Note: The SVD-WF-filtered matrix is filtered between `freqmin` and
+    `freqmax` before being returned.
+
     Parameters
     ----------
-    matrix: (n x m) numpy array
+    matrix : (n x m) numpy.ndarray
         n is the number of events, m is the number of time samples
         per event.
-    n_singular_values: scalar float
+    expl_var : float, optional
+        Fraction of the total variance explained by the retained
+        singular vectors. Defaults to 0.4.
+    max_singular_values : int, optional
         Number of singular values to retain in the
-        SVD decomposition of matrix.
-    max_freq: scalar float, default to cfg.MAX_FREQ_HZ
-        The maximum frequency of the data, or maximum target
-        frequency, is used to determined the size in the
-        time axis of the Wiener filter.
+        SVD decomposition of matrix. Defaults to 5.
+    freqmin : float, optional
+        Minimum target frequency, in Hz. Defaults to `BPMF.cfg.MIN_FREQ_HZ`.
+    freqmax : float, optional
+        Maximum target frequency, in Hz. Defaults to `BPMF.cfg.MAX_FREQ_HZ`.
+    sampling_rate : float, optional
+        Sampling rate of `matrix`. Defaults to `BPMF.cfg.SAMPLING_RATE_HZ`.
+    wiener_filter_colsize : int, optional
+        Size of the wiener filter in the outermost dimension, that is, the
+        event axis. Defaults to None, in which case the filter has length `n`.
 
     Returns
     --------
@@ -723,6 +736,10 @@ def fetch_detection_waveforms(
 ):
     from itertools import groupby
     from operator import itemgetter
+
+    warnings.warn(
+            "Deprecated function! (Old, under construction or experimental)"
+            )
 
     if catalog is None:
         cat = dataset.Catalog(f"multiplets{tid}catalog.h5", db_path_M)
@@ -817,6 +834,10 @@ def fetch_detection_waveforms_refilter(
     # sys.path.append(os.path.join(cfg.base, 'earthquake_location_eb'))
     # import relocation_utils
     from . import event_extraction
+
+    warnings.warn(
+            "Deprecated function! (Old, under construction or experimental)"
+            )
 
     cat = dataset.Catalog(f"multiplets{tid}catalog.h5", db_path_M)
     cat.read_data()
@@ -974,6 +995,9 @@ def SVDWF_multiplets(
         an attribute. See also all the useful metadata in
         the attributes.
     """
+    warnings.warn(
+            "Deprecated function! (Old, under construction or experimental)"
+            )
 
     # -----------------------------------------------------------------------------------------------
     T = dataset.Template("template{:d}".format(tid), db_path_T, db_path=db_path)
@@ -1116,6 +1140,10 @@ def find_template_clusters(
     """
     from scipy.spatial.distance import squareform
     from scipy.cluster import hierarchy
+
+    warnings.warn(
+            "Deprecated function! (Old, under construction or experimental)"
+            )
 
     # first, transform the CC matrix into a condensed matrix
     np.fill_diagonal(TpGroup.intertp_cc.values, 1.0)
@@ -1963,30 +1991,81 @@ def normalize_batch(seismogram, normalization_window_sample=3000, overlap=0.50):
 
     return seismogram
 
-def trigger_picks(
-        probability,
-        threshold,
-        minimum_peak_distance_samp=int(1. * cfg.SAMPLING_RATE_HZ)
+#def trigger_picks(
+#        probability,
+#        threshold,
+#        minimum_peak_distance_samp=int(1. * cfg.SAMPLING_RATE_HZ)
+#        ):
+#    """
+#    Parameters
+#    ----------
+#    probability : 1D array_like
+#    threshold : float
+#    minimum_peak_distance_samp : integer
+#
+#    Returns
+#    -------
+#    probability_at_peak : 1D array_like
+#    peak_indexes : 1D array_like
+#    """
+#    peak_indexes = _detect_peaks(
+#            probability, mph=threshold, mpd=minimum_peak_distance_samp
+#            )
+#    return (
+#            np.atleast_1d(probability[peak_indexes]),
+#            np.atleast_1d(peak_indexes)
+#            )
+
+def find_picks(
+        phase_probability, threshold, **kwargs
         ):
-    """
+    """Find phase picks from time series of phase probability.
+
+    Phase picks are given by the peaks exceeding `threshold` in 
+    the time series `phase_probability`. The probability neighborhood
+    around each peak is used as the pdf of a given pick measurement.
+
+    Note: Additional key-word arguments are passed to
+    'scipy.signal.find_peaks'.
+
     Parameters
     ----------
-    probability : 1D array_like
+    phase_probability : array-like
+        Probability time series of observing the arrival of a 
+        given seismic phase.
     threshold : float
-    minimum_peak_distance_samp : integer
+        Value above which peaks are taken to be candidate phase picks.
 
     Returns
     -------
-    probability_at_peak : 1D array_like
-    peak_indexes : 1D array_like
+    peaks_value : `numpy.ndarray`
+        Probability value of the selected peaks.
+    peaks_mean : `numpy.ndarray`
+        Expected pick timing, in samples.
+    peaks_std : `numpy.ndarray`
+        Uncertainty on pick timing, in samples.
     """
-    peak_indexes = _detect_peaks(
-            probability, mph=threshold, mpd=minimum_peak_distance_samp
+    # set the width kwarg to 1 if not defined
+    # so that `properties` has peak width info
+    kwargs.setdefault("width", 1)
+    peak_indexes, peak_properties = find_peaks(
+            phase_probability, height=threshold, **kwargs
             )
-    return (
-            np.atleast_1d(probability[peak_indexes]),
-            np.atleast_1d(peak_indexes)
-            )
+    peaks_value, peaks_mean, peaks_std = [], [], []
+    for i in range(len(peak_indexes)):
+        idx1 = int(peak_properties["left_ips"][i])
+        idx2 = int(peak_properties["right_ips"][i])
+        samples = np.arange(idx1, idx2+1)
+        prob = phase_probability[samples]
+        
+        mean = np.sum(samples * prob) / prob.sum()
+        std = np.sqrt(np.sum((samples - mean)**2) / prob.sum())
+        
+        peaks_mean.append(mean)
+        peaks_std.append(std)
+        peaks_value.append(phase_probability[peak_indexes[i]])
+        
+    return np.asarray(peaks_value), np.asarray(peaks_mean), np.asarray(peaks_std)
 
 def get_picks(
         picks,
@@ -1994,13 +2073,12 @@ def get_picks(
         prior_knowledge=None,
         search_win_samp=int(4. * cfg.SAMPLING_RATE_HZ)
         ):
-
     """Select a single P- and S-pick on each 3-comp seismogram.
     
     Parameters
     ----------
-    picks: dictionary
-        Dictionary returned by `automatic_picking`.
+    picks : `pandas.DataFrame` 
+        `pandas.DataFrame` as formatted in `BPMF.dataset.pick_PS_phases`.
     buffer_length: scalar int, optional
         Picks that are before this buffer length, in samples, are discarded.
     prior_knowledge: pandas.DataFrame, optional
@@ -2012,44 +2090,44 @@ def get_picks(
     search_win_samp: scalar int, optional
         Standard deviation, in samples, used in the gaussian weights.
     """
-    for st in picks["P_picks"].keys():
-        if prior_knowledge is not None and st in prior_knowledge.index:
-            prior_P = prior_knowledge.loc[st, "P"]
-            prior_S = prior_knowledge.loc[st, "S"]
+    columns = ["_picks", "_probas", "_unc"]
+    phases = ["P", "S"]
+    p_columns = ["P" + col for col in columns]
+    s_columns = ["S" + col for col in columns]
+    for sta in picks.index:
+        if prior_knowledge is not None and sta in prior_knowledge.index:
+            prior_P = prior_knowledge.loc[sta, "P"]
+            prior_S = prior_knowledge.loc[sta, "S"]
         else:
             prior_P, prior_S = None, None
         #for n in range(len(picks["P_picks"][st])):
         # ----------------
         # remove picks from the buffer length
-        valid_P_picks = picks["P_picks"][st] > int(buffer_length)
-        valid_S_picks = picks["S_picks"][st] > int(buffer_length)
-        picks["P_picks"][st] = picks["P_picks"][st][valid_P_picks]
-        picks["S_picks"][st] = picks["S_picks"][st][valid_S_picks]
-        picks["P_proba"][st] = picks["P_proba"][st][valid_P_picks]
-        picks["S_proba"][st] = picks["S_proba"][st][valid_S_picks]
+        for ph in phases:
+            valid_picks = picks.loc[sta, f"{ph}_picks"] > int(buffer_length)
+            for col in columns:
+                picks.loc[sta, f"{ph}{col}"] = picks.loc[sta, f"{ph}{col}"][valid_picks]
         search_S_pick = True
         search_P_pick = True
-        if len(picks["S_picks"][st]) == 0:
+        if len(picks.loc[sta, "S_picks"]) == 0:
             # if no valid S pick: fill in with nan
-            picks["S_picks"][st] = np.nan
-            picks["S_proba"][st] = np.nan
+            picks.loc[sta, s_columns] = np.nan
             search_S_pick = False
-        if len(picks["P_picks"][st]) == 0:
+        if len(picks.loc[sta, "P_picks"]) == 0:
             # if no valid P pick: fill in with nan
-            picks["P_picks"][st] = np.nan
-            picks["P_proba"][st] = np.nan
+            picks.loc[sta, p_columns] = np.nan
             search_P_pick = False
         if search_S_pick:
             if prior_S is None:
                 # take only the highest probability trigger
-                best_S_trigger = picks["S_proba"][st].argmax()
+                best_S_trigger = picks.loc[sta, "S_probas"].argmax()
             else:
                 # use a priori picks
                 tapered_S_probas = (
-                        picks["S_proba"][st]
+                        picks.loc[sta, "S_probas"]
                         *
                         np.exp(
-                            -(picks["S_picks"][st] - prior_S)**2/(2.*search_win_samp**2)
+                            -(picks.loc[sta, "S_picks"] - prior_S)**2/(2.*search_win_samp**2)
                             )
                         )
                 best_S_trigger = tapered_S_probas.argmax()
@@ -2057,32 +2135,30 @@ def get_picks(
                 #if abs(picks["S_picks"][st][best_S_trigger] - prior_S) > 4 * search_win_samp:
                 #    best_S_trigger = np.nan
             if np.isnan(best_S_trigger):
-                picks["S_picks"][st] = np.nan 
-                picks["S_proba"][st] = np.nan 
+                picks.loc[sta, s_columns] = np.nan
             else:
-                picks["S_picks"][st] = picks["S_picks"][st][best_S_trigger]
-                picks["S_proba"][st] = picks["S_proba"][st][best_S_trigger]
+                for col in s_columns:
+                    picks.loc[sta, col] = picks.loc[sta, col][best_S_trigger]
             # update P picks: keep only those that are before the best S pick
             if search_P_pick:
-                valid_P_picks = picks["P_picks"][st] < picks["S_picks"][st]
-                picks["P_picks"][st] = picks["P_picks"][st][valid_P_picks]
-                picks["P_proba"][st] = picks["P_proba"][st][valid_P_picks]
-                if len(picks["P_picks"][st]) == 0:
+                valid_P_picks = picks.loc[sta, "P_picks"] < picks.loc[sta, "S_picks"]
+                for col in p_columns:
+                    picks.loc[sta, col] = picks.loc[sta, col][valid_P_picks]
+                if len(picks.loc[sta, "P_picks"]) == 0:
                     # if no valid P pick: fill in with nan
-                    picks["P_picks"][st] = np.nan
-                    picks["P_proba"][st] = np.nan
+                    picks.loc[sta, p_columns] = np.nan
                     search_P_pick = False
         if search_P_pick:
             if prior_P is None:
                 # take only the highest probability trigger
-                best_P_trigger = picks["P_proba"][st].argmax()
+                best_P_trigger = picks.loc[sta, "P_probas"].argmax()
             else:
                 # use a priori picks
                 tapered_P_probas = (
-                        picks["P_proba"][st]
+                        picks.loc[sta, "P_probas"]
                         *
                         np.exp(
-                            -(picks["P_picks"][st] - prior_P)**2/(2.*search_win_samp**2)
+                            -(picks.loc[sta, "P_picks"] - prior_P)**2/(2.*search_win_samp**2)
                             )
                         )
                 best_P_trigger = tapered_P_probas.argmax()
@@ -2090,16 +2166,12 @@ def get_picks(
                 #if abs(picks["P_picks"][st][best_P_trigger] - prior_P) > 4 * search_win_samp:
                 #    best_P_trigger = np.nan
             if np.isnan(best_P_trigger):
-                picks["P_picks"][st] = np.nan 
-                picks["P_proba"][st] = np.nan 
+                picks.loc[sta, p_columns] = np.nan
             else:
-                picks["P_picks"][st] = picks["P_picks"][st][best_P_trigger]
-                picks["P_proba"][st] = picks["P_proba"][st][best_P_trigger]
-        # convert picks to float to allow NaNs
-        picks["P_picks"][st] = np.atleast_1d(np.float32(picks["P_picks"][st]))
-        picks["S_picks"][st] = np.atleast_1d(np.float32(picks["S_picks"][st]))
-        picks["P_proba"][st] = np.atleast_1d(np.float32(picks["P_proba"][st]))
-        picks["S_proba"][st] = np.atleast_1d(np.float32(picks["S_proba"][st]))
+                for col in p_columns:
+                    picks.loc[sta, col] = picks.loc[sta, col][best_P_trigger]
+    for col in picks:
+        picks[col] = np.float32(picks[col])
     return picks
 
 def _detect_peaks(
@@ -2115,6 +2187,9 @@ def _detect_peaks(
 ):
 
     """Detect peaks in data based on their amplitude and other features.
+
+    Note: Will be removed in future versions because all these features are
+    now implemented in `scipy.signal.find_peaks`.
 
     Parameters
     ----------
