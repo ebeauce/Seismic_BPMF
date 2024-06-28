@@ -199,6 +199,9 @@ def data_reader_mseed(
     for fname in data_files:
         #print(f"Reading from {fname}...")
         tr = read(fname, starttime=starttime, endtime=endtime, **kwargs)
+        if len(tr) == 0:
+            # typically because starttime-endtime falls into a gap
+            continue
         traces += tr
         network, sta = tr[0].stats.network, tr[0].stats.station
         if attach_response:
