@@ -66,7 +66,8 @@
 <li class="toctree-l2"><a class="reference internal" href="7_build_template_database.html">Build Template Database</a></li>
 <li class="toctree-l2"><a class="reference internal" href="8_template_matching.html">Template Matching</a></li>
 <li class="toctree-l2"><a class="reference internal" href="9_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html">Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html">Reminders on Earthquake Magnitudes:Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html#Magnitude-Computation">Magnitude Computation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
@@ -248,52 +249,12 @@ DatetimeIndex([&#39;2012-07-26&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
   </thead>
   <tbody>
     <tr>
-      <th>YH.DD06</th>
+      <th>YH.DE07</th>
       <td>YH</td>
-      <td>DD06</td>
-      <td>30.31777</td>
-      <td>40.623539</td>
-      <td>182.0</td>
-    </tr>
-    <tr>
-      <th>YH.SAUV</th>
-      <td>YH</td>
-      <td>SAUV</td>
-      <td>30.3272</td>
-      <td>40.7402</td>
-      <td>170.0</td>
-    </tr>
-    <tr>
-      <th>YH.DC06</th>
-      <td>YH</td>
-      <td>DC06</td>
-      <td>30.265751</td>
-      <td>40.616718</td>
-      <td>555.0</td>
-    </tr>
-    <tr>
-      <th>YH.DC08</th>
-      <td>YH</td>
-      <td>DC08</td>
-      <td>30.25013</td>
-      <td>40.744438</td>
-      <td>162.0</td>
-    </tr>
-    <tr>
-      <th>YH.SPNC</th>
-      <td>YH</td>
-      <td>SPNC</td>
-      <td>30.3083</td>
-      <td>40.686001</td>
-      <td>190.0</td>
-    </tr>
-    <tr>
-      <th>YH.DE08</th>
-      <td>YH</td>
-      <td>DE08</td>
-      <td>30.406469</td>
-      <td>40.748562</td>
-      <td>31.0</td>
+      <td>DE07</td>
+      <td>30.411539</td>
+      <td>40.679661</td>
+      <td>40.0</td>
     </tr>
     <tr>
       <th>YH.DC07</th>
@@ -304,12 +265,52 @@ DatetimeIndex([&#39;2012-07-26&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
       <td>164.0</td>
     </tr>
     <tr>
-      <th>YH.DE07</th>
+      <th>YH.DC08</th>
       <td>YH</td>
-      <td>DE07</td>
-      <td>30.411539</td>
-      <td>40.679661</td>
-      <td>40.0</td>
+      <td>DC08</td>
+      <td>30.25013</td>
+      <td>40.744438</td>
+      <td>162.0</td>
+    </tr>
+    <tr>
+      <th>YH.DE08</th>
+      <td>YH</td>
+      <td>DE08</td>
+      <td>30.406469</td>
+      <td>40.748562</td>
+      <td>31.0</td>
+    </tr>
+    <tr>
+      <th>YH.SPNC</th>
+      <td>YH</td>
+      <td>SPNC</td>
+      <td>30.3083</td>
+      <td>40.686001</td>
+      <td>190.0</td>
+    </tr>
+    <tr>
+      <th>YH.DC06</th>
+      <td>YH</td>
+      <td>DC06</td>
+      <td>30.265751</td>
+      <td>40.616718</td>
+      <td>555.0</td>
+    </tr>
+    <tr>
+      <th>YH.SAUV</th>
+      <td>YH</td>
+      <td>SAUV</td>
+      <td>30.3272</td>
+      <td>40.7402</td>
+      <td>170.0</td>
+    </tr>
+    <tr>
+      <th>YH.DD06</th>
+      <td>YH</td>
+      <td>DD06</td>
+      <td>30.31777</td>
+      <td>40.623539</td>
+      <td>182.0</td>
     </tr>
   </tbody>
 </table>
@@ -346,14 +347,14 @@ DatetimeIndex([&#39;2012-07-26&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>YH.DD06</th>
-      <th>YH.SAUV</th>
-      <th>YH.DC06</th>
-      <th>YH.DC08</th>
-      <th>YH.SPNC</th>
-      <th>YH.DE08</th>
-      <th>YH.DC07</th>
       <th>YH.DE07</th>
+      <th>YH.DC07</th>
+      <th>YH.DC08</th>
+      <th>YH.DE08</th>
+      <th>YH.SPNC</th>
+      <th>YH.DC06</th>
+      <th>YH.SAUV</th>
+      <th>YH.DD06</th>
     </tr>
   </thead>
   <tbody>
@@ -436,16 +437,8 @@ DatetimeIndex([&#39;2012-07-26&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-stations
-DD06    DD06
-SAUV    SAUV
-DC06    DC06
-DC08    DC08
-SPNC    SPNC
-DE08    DE08
-DC07    DC07
-DE07    DE07
-Name: stations, dtype: object
+array([&#39;DE07&#39;, &#39;DC07&#39;, &#39;DC08&#39;, &#39;DE08&#39;, &#39;SPNC&#39;, &#39;DC06&#39;, &#39;SAUV&#39;, &#39;DD06&#39;],
+      dtype=&#39;&lt;U4&#39;)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -479,115 +472,104 @@ Name: stations, dtype: object
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
-      <th>stations</th>
-      <th>DD06</th>
-      <th>SAUV</th>
-      <th>DC06</th>
-      <th>DC08</th>
-      <th>SPNC</th>
-      <th>DE08</th>
-      <th>DC07</th>
+      <th></th>
       <th>DE07</th>
-    </tr>
-    <tr>
-      <th>stations</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
+      <th>DC07</th>
+      <th>DC08</th>
+      <th>DE08</th>
+      <th>SPNC</th>
+      <th>DC06</th>
+      <th>SAUV</th>
+      <th>DD06</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>DD06</th>
+      <th>DE07</th>
       <td>0.000000</td>
-      <td>12.978986</td>
-      <td>4.507919</td>
-      <td>14.591825</td>
-      <td>6.982891</td>
-      <td>15.774078</td>
-      <td>8.015674</td>
-      <td>10.079368</td>
-    </tr>
-    <tr>
-      <th>SAUV</th>
-      <td>12.979910</td>
-      <td>0.000000</td>
-      <td>14.676627</td>
-      <td>6.525864</td>
-      <td>6.228594</td>
-      <td>6.748812</td>
-      <td>10.842688</td>
-      <td>9.790711</td>
-    </tr>
-    <tr>
-      <th>DC06</th>
-      <td>4.424402</td>
-      <td>14.650371</td>
-      <td>0.000000</td>
-      <td>14.230564</td>
-      <td>8.472197</td>
-      <td>18.850665</td>
-      <td>5.904608</td>
-      <td>14.155945</td>
-    </tr>
-    <tr>
-      <th>DC08</th>
-      <td>14.593195</td>
-      <td>6.527089</td>
-      <td>14.258154</td>
-      <td>0.000000</td>
-      <td>8.142368</td>
-      <td>13.206857</td>
-      <td>8.616882</td>
-      <td>15.415829</td>
-    </tr>
-    <tr>
-      <th>SPNC</th>
-      <td>6.981746</td>
-      <td>6.225382</td>
-      <td>8.515170</td>
-      <td>8.138928</td>
-      <td>0.000000</td>
-      <td>10.812369</td>
-      <td>5.970570</td>
-      <td>8.747317</td>
-    </tr>
-    <tr>
-      <th>DE08</th>
-      <td>15.783648</td>
-      <td>6.769376</td>
-      <td>18.878441</td>
-      <td>13.216772</td>
-      <td>10.827065</td>
-      <td>0.000000</td>
-      <td>16.576421</td>
-      <td>7.663916</td>
+      <td>14.388528</td>
+      <td>15.420268</td>
+      <td>7.663334</td>
+      <td>8.757172</td>
+      <td>14.183476</td>
+      <td>9.798210</td>
+      <td>10.087409</td>
     </tr>
     <tr>
       <th>DC07</th>
-      <td>8.017919</td>
-      <td>10.843241</td>
-      <td>5.970460</td>
-      <td>8.616650</td>
-      <td>5.974924</td>
-      <td>16.568395</td>
+      <td>14.388528</td>
       <td>0.000000</td>
-      <td>14.383684</td>
+      <td>8.616766</td>
+      <td>16.572942</td>
+      <td>5.972804</td>
+      <td>5.950485</td>
+      <td>10.842966</td>
+      <td>8.016817</td>
     </tr>
     <tr>
-      <th>DE07</th>
-      <td>10.093446</td>
-      <td>9.803980</td>
-      <td>14.192278</td>
-      <td>15.423741</td>
-      <td>8.764449</td>
-      <td>7.662741</td>
-      <td>14.392302</td>
+      <th>DC08</th>
+      <td>15.420268</td>
+      <td>8.616766</td>
+      <td>0.000000</td>
+      <td>13.212465</td>
+      <td>8.140696</td>
+      <td>14.249786</td>
+      <td>6.526482</td>
+      <td>14.592524</td>
+    </tr>
+    <tr>
+      <th>DE08</th>
+      <td>7.663334</td>
+      <td>16.572942</td>
+      <td>13.212465</td>
+      <td>0.000000</td>
+      <td>10.820888</td>
+      <td>18.871834</td>
+      <td>6.760531</td>
+      <td>15.779586</td>
+    </tr>
+    <tr>
+      <th>SPNC</th>
+      <td>8.757172</td>
+      <td>5.972804</td>
+      <td>8.140696</td>
+      <td>10.820888</td>
+      <td>0.000000</td>
+      <td>8.501549</td>
+      <td>6.227020</td>
+      <td>6.982323</td>
+    </tr>
+    <tr>
+      <th>DC06</th>
+      <td>14.183476</td>
+      <td>5.950485</td>
+      <td>14.249786</td>
+      <td>18.871834</td>
+      <td>8.501549</td>
+      <td>0.000000</td>
+      <td>14.668558</td>
+      <td>4.481904</td>
+    </tr>
+    <tr>
+      <th>SAUV</th>
+      <td>9.798210</td>
+      <td>10.842966</td>
+      <td>6.526482</td>
+      <td>6.760531</td>
+      <td>6.227020</td>
+      <td>14.668558</td>
+      <td>0.000000</td>
+      <td>12.979454</td>
+    </tr>
+    <tr>
+      <th>DD06</th>
+      <td>10.087409</td>
+      <td>8.016817</td>
+      <td>14.592524</td>
+      <td>15.779586</td>
+      <td>6.982323</td>
+      <td>4.481904</td>
+      <td>12.979454</td>
       <td>0.000000</td>
     </tr>
   </tbody>

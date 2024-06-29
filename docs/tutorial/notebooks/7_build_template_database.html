@@ -68,7 +68,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="8_template_matching.html">Template Matching</a></li>
 <li class="toctree-l2"><a class="reference internal" href="9_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html">Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html">Reminders on Earthquake Magnitudes:Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html#Magnitude-Computation">Magnitude Computation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
@@ -126,7 +127,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&quot;svg&quot;]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># %config InlineBackend.figure_formats = [&quot;svg&quot;]</span>
 </pre></div>
 </div>
 </div>
@@ -162,6 +163,8 @@
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># HMAX_LOCATION_UNCERTAINTY_KM: All events with hmax_unc &lt; HMAX_LOCATION_UNCERTAINTY_KM will be selected</span>
 <span class="c1">#                               as candidate template events</span>
 <span class="n">HMAX_LOCATION_UNCERTAINTY_KM</span> <span class="o">=</span> <span class="mf">5.0</span>
+<span class="c1"># NOISE_WINDOW_FOR_SNR_SEC: Duration, in seconds, of the window taken before the event&#39;s origin time</span>
+<span class="n">NOISE_WINDOW_FOR_SNR_SEC</span> <span class="o">=</span> <span class="mf">5.0</span>
 </pre></div>
 </div>
 </div>
@@ -193,6 +196,16 @@
             <span class="n">data_reader</span><span class="o">=</span><span class="n">data_reader_mseed</span><span class="p">,</span>
             <span class="n">n_threads</span><span class="o">=</span><span class="mi">4</span>
         <span class="p">)</span>
+        <span class="c1"># computing the signal-to-noise ratio here may add a lot of</span>
+        <span class="c1"># computation time if you&#39;re scanning through a lot of events,</span>
+        <span class="c1"># but it greatly helps with choosing the best stations for</span>
+        <span class="c1"># template matching, in the following</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">set_availability</span><span class="p">()</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">compute_snr</span><span class="p">(</span>
+                <span class="n">noise_window</span><span class="o">=</span><span class="n">NOISE_WINDOW_FOR_SNR_SEC</span><span class="p">,</span>
+                <span class="n">data_folder</span><span class="o">=</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+                <span class="n">data_reader</span><span class="o">=</span><span class="n">data_reader_mseed</span><span class="p">,</span>
+                <span class="p">)</span>
         <span class="n">template</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Template</span><span class="o">.</span><span class="n">init_from_event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
         <span class="n">template</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">tid</span>
         <span class="n">template</span><span class="o">.</span><span class="n">set_aux_data</span><span class="p">({</span><span class="s2">&quot;tid&quot;</span><span class="p">:</span> <span class="n">tid</span><span class="p">})</span>
@@ -214,15 +227,7 @@ Checking reloc_bp.h5...
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-  6%|▌         | 1/17 [00:00&lt;00:05,  2.90it/s]
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
- 18%|█▊        | 3/17 [00:00&lt;00:02,  5.69it/s]
+ 12%|█▏        | 2/17 [00:00&lt;00:04,  3.09it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -238,7 +243,39 @@ Does not have a `arrival_times` attribute.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|██████████| 17/17 [00:02&lt;00:00,  7.45it/s]
+ 18%|█▊        | 3/17 [00:00&lt;00:04,  3.44it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Does not have a `arrival_times` attribute.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 53%|█████▎    | 9/17 [00:02&lt;00:02,  3.96it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Does not have a `arrival_times` attribute.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 94%|█████████▍| 16/17 [00:04&lt;00:00,  4.03it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -254,7 +291,7 @@ Does not have a `arrival_times` attribute.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-
+100%|██████████| 17/17 [00:04&lt;00:00,  3.86it/s]
 </pre></div></div>
 </div>
 </section>
@@ -307,18 +344,9 @@ Does not have a `arrival_times` attribute.
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Computing the similarity matrix...
-Computing the inter-template directional errors...
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ebeauce/miniconda3/envs/hy7_py310/lib/python3.10/site-packages/BPMF/dataset.py:4436: RuntimeWarning: invalid value encountered in divide
+/home/ebeauce/software/Seismic_BPMF/BPMF/dataset.py:4493: RuntimeWarning: invalid value encountered in true_divide
   unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[
 </pre></div></div>
 </div>
@@ -327,7 +355,9 @@ Computing the inter-template directional errors...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Computed inter-template CCs in 2.18sec.
+Computing the similarity matrix...
+Computing the inter-template directional errors...
+Computed inter-template CCs in 0.10sec.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -384,42 +414,42 @@ Computed inter-template CCs in 2.18sec.
     <tr>
       <th>0</th>
       <td>1.000000</td>
-      <td>0.477128</td>
+      <td>0.492278</td>
       <td>0.000000</td>
-      <td>0.412416</td>
-      <td>0.616547</td>
-      <td>0.346673</td>
-      <td>0.335522</td>
-      <td>0.379354</td>
-      <td>0.299425</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.741204</td>
-      <td>0.532904</td>
-      <td>0.558584</td>
-      <td>0.317324</td>
+      <td>0.609729</td>
+      <td>0.332857</td>
+      <td>0.361573</td>
+      <td>0.390337</td>
+      <td>0.301650</td>
       <td>0.000000</td>
-      <td>0.175184</td>
+      <td>0.000000</td>
+      <td>0.754384</td>
+      <td>0.519809</td>
+      <td>0.719606</td>
+      <td>0.370723</td>
+      <td>0.000000</td>
+      <td>0.195433</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.477128</td>
+      <td>0.492278</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.468460</td>
-      <td>0.437401</td>
-      <td>0.319153</td>
-      <td>0.374733</td>
-      <td>0.434762</td>
-      <td>0.300028</td>
+      <td>0.187213</td>
+      <td>0.565095</td>
+      <td>0.411928</td>
+      <td>0.382834</td>
+      <td>0.453597</td>
+      <td>0.307070</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.493984</td>
-      <td>0.389494</td>
-      <td>0.671390</td>
-      <td>0.459654</td>
       <td>0.000000</td>
-      <td>0.185049</td>
+      <td>0.482994</td>
+      <td>0.357882</td>
+      <td>0.489115</td>
+      <td>0.472800</td>
+      <td>0.000000</td>
+      <td>0.178264</td>
     </tr>
     <tr>
       <th>2</th>
@@ -428,157 +458,157 @@ Computed inter-template CCs in 2.18sec.
       <td>1.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
+      <td>0.194202</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.180455</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.174151</td>
-      <td>0.0</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.190878</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.412416</td>
-      <td>0.468460</td>
+      <td>0.000000</td>
+      <td>0.187213</td>
       <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.410000</td>
-      <td>0.323889</td>
-      <td>0.369112</td>
-      <td>0.381414</td>
-      <td>0.303599</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.410642</td>
-      <td>0.412339</td>
-      <td>0.461057</td>
-      <td>0.504043</td>
+      <td>0.178173</td>
+      <td>0.172453</td>
+      <td>0.151518</td>
       <td>0.000000</td>
-      <td>0.189004</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.176006</td>
+      <td>0.000000</td>
+      <td>0.193301</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.616547</td>
-      <td>0.437401</td>
+      <td>0.609729</td>
+      <td>0.565095</td>
       <td>0.000000</td>
-      <td>0.410000</td>
+      <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.458776</td>
-      <td>0.349111</td>
-      <td>0.374305</td>
-      <td>0.286568</td>
+      <td>0.439895</td>
+      <td>0.444787</td>
+      <td>0.487140</td>
+      <td>0.337587</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.584560</td>
-      <td>0.595355</td>
-      <td>0.407033</td>
-      <td>0.388314</td>
       <td>0.000000</td>
-      <td>0.198617</td>
+      <td>0.567154</td>
+      <td>0.473492</td>
+      <td>0.536317</td>
+      <td>0.514677</td>
+      <td>0.000000</td>
+      <td>0.214054</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>0.346673</td>
-      <td>0.319153</td>
-      <td>0.000000</td>
-      <td>0.323889</td>
-      <td>0.458776</td>
+      <td>0.332857</td>
+      <td>0.411928</td>
+      <td>0.194202</td>
+      <td>0.178173</td>
+      <td>0.439895</td>
       <td>1.000000</td>
-      <td>0.355300</td>
-      <td>0.269141</td>
-      <td>0.295206</td>
-      <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.409151</td>
-      <td>0.379693</td>
-      <td>0.340360</td>
-      <td>0.288253</td>
-      <td>0.000000</td>
-      <td>0.182702</td>
+      <td>0.442811</td>
+      <td>0.342537</td>
+      <td>0.315133</td>
+      <td>0.161617</td>
+      <td>0.175915</td>
+      <td>0.358923</td>
+      <td>0.274556</td>
+      <td>0.339257</td>
+      <td>0.370628</td>
+      <td>0.185957</td>
+      <td>0.216613</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>0.335522</td>
-      <td>0.374733</td>
+      <td>0.361573</td>
+      <td>0.382834</td>
       <td>0.000000</td>
-      <td>0.369112</td>
-      <td>0.349111</td>
-      <td>0.355300</td>
+      <td>0.172453</td>
+      <td>0.444787</td>
+      <td>0.442811</td>
       <td>1.000000</td>
-      <td>0.341919</td>
-      <td>0.287617</td>
+      <td>0.353616</td>
+      <td>0.314060</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.352310</td>
-      <td>0.280423</td>
-      <td>0.389386</td>
-      <td>0.343758</td>
       <td>0.000000</td>
-      <td>0.168698</td>
+      <td>0.367496</td>
+      <td>0.296924</td>
+      <td>0.340311</td>
+      <td>0.361826</td>
+      <td>0.000000</td>
+      <td>0.186617</td>
     </tr>
     <tr>
       <th>7</th>
-      <td>0.379354</td>
-      <td>0.434762</td>
+      <td>0.390337</td>
+      <td>0.453597</td>
       <td>0.000000</td>
-      <td>0.381414</td>
-      <td>0.374305</td>
-      <td>0.269141</td>
-      <td>0.341919</td>
+      <td>0.151518</td>
+      <td>0.487140</td>
+      <td>0.342537</td>
+      <td>0.353616</td>
       <td>1.000000</td>
-      <td>0.307829</td>
+      <td>0.301116</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.431928</td>
-      <td>0.369352</td>
-      <td>0.474225</td>
-      <td>0.397337</td>
       <td>0.000000</td>
-      <td>0.155042</td>
+      <td>0.390978</td>
+      <td>0.351354</td>
+      <td>0.345460</td>
+      <td>0.412677</td>
+      <td>0.000000</td>
+      <td>0.161650</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>0.299425</td>
-      <td>0.300028</td>
+      <td>0.301650</td>
+      <td>0.307070</td>
       <td>0.000000</td>
-      <td>0.303599</td>
-      <td>0.286568</td>
-      <td>0.295206</td>
-      <td>0.287617</td>
-      <td>0.307829</td>
+      <td>0.000000</td>
+      <td>0.337587</td>
+      <td>0.315133</td>
+      <td>0.314060</td>
+      <td>0.301116</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.340576</td>
-      <td>0.288347</td>
-      <td>0.312245</td>
-      <td>0.298257</td>
       <td>0.000000</td>
-      <td>0.153908</td>
+      <td>0.337232</td>
+      <td>0.279402</td>
+      <td>0.293451</td>
+      <td>0.315505</td>
+      <td>0.000000</td>
+      <td>0.166269</td>
     </tr>
     <tr>
       <th>9</th>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.174151</td>
+      <td>0.180455</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.000000</td>
+      <td>0.161617</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.0</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.183477</td>
+      <td>0.000000</td>
+      <td>0.192309</td>
       <td>0.000000</td>
     </tr>
     <tr>
@@ -588,12 +618,12 @@ Computed inter-template CCs in 2.18sec.
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
+      <td>0.175915</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.000000</td>
-      <td>1.0</td>
+      <td>1.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
@@ -603,97 +633,97 @@ Computed inter-template CCs in 2.18sec.
     </tr>
     <tr>
       <th>11</th>
-      <td>0.741204</td>
-      <td>0.493984</td>
+      <td>0.754384</td>
+      <td>0.482994</td>
       <td>0.000000</td>
-      <td>0.410642</td>
-      <td>0.584560</td>
-      <td>0.409151</td>
-      <td>0.352310</td>
-      <td>0.431928</td>
-      <td>0.340576</td>
       <td>0.000000</td>
-      <td>0.0</td>
+      <td>0.567154</td>
+      <td>0.358923</td>
+      <td>0.367496</td>
+      <td>0.390978</td>
+      <td>0.337232</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.514565</td>
-      <td>0.669701</td>
-      <td>0.413737</td>
+      <td>0.481450</td>
+      <td>0.817688</td>
+      <td>0.422008</td>
       <td>0.000000</td>
-      <td>0.162423</td>
+      <td>0.204009</td>
     </tr>
     <tr>
       <th>12</th>
-      <td>0.532904</td>
-      <td>0.389494</td>
+      <td>0.519809</td>
+      <td>0.357882</td>
       <td>0.000000</td>
-      <td>0.412339</td>
-      <td>0.595355</td>
-      <td>0.379693</td>
-      <td>0.280423</td>
-      <td>0.369352</td>
-      <td>0.288347</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.514565</td>
+      <td>0.473492</td>
+      <td>0.274556</td>
+      <td>0.296924</td>
+      <td>0.351354</td>
+      <td>0.279402</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.481450</td>
       <td>1.000000</td>
-      <td>0.451129</td>
-      <td>0.444074</td>
+      <td>0.588040</td>
+      <td>0.410869</td>
       <td>0.000000</td>
-      <td>0.164250</td>
+      <td>0.188014</td>
     </tr>
     <tr>
       <th>13</th>
-      <td>0.558584</td>
-      <td>0.671390</td>
+      <td>0.719606</td>
+      <td>0.489115</td>
       <td>0.000000</td>
-      <td>0.461057</td>
-      <td>0.407033</td>
-      <td>0.340360</td>
-      <td>0.389386</td>
-      <td>0.474225</td>
-      <td>0.312245</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.669701</td>
-      <td>0.451129</td>
+      <td>0.536317</td>
+      <td>0.339257</td>
+      <td>0.340311</td>
+      <td>0.345460</td>
+      <td>0.293451</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.817688</td>
+      <td>0.588040</td>
       <td>1.000000</td>
-      <td>0.574083</td>
+      <td>0.463257</td>
       <td>0.000000</td>
-      <td>0.157772</td>
+      <td>0.203328</td>
     </tr>
     <tr>
       <th>14</th>
-      <td>0.317324</td>
-      <td>0.459654</td>
+      <td>0.370723</td>
+      <td>0.472800</td>
       <td>0.000000</td>
-      <td>0.504043</td>
-      <td>0.388314</td>
-      <td>0.288253</td>
-      <td>0.343758</td>
-      <td>0.397337</td>
-      <td>0.298257</td>
+      <td>0.176006</td>
+      <td>0.514677</td>
+      <td>0.370628</td>
+      <td>0.361826</td>
+      <td>0.412677</td>
+      <td>0.315505</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.413737</td>
-      <td>0.444074</td>
-      <td>0.574083</td>
+      <td>0.000000</td>
+      <td>0.422008</td>
+      <td>0.410869</td>
+      <td>0.463257</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.179577</td>
+      <td>0.189606</td>
     </tr>
     <tr>
       <th>15</th>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.190878</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
+      <td>0.185957</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.183477</td>
-      <td>0.0</td>
+      <td>0.192309</td>
+      <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
@@ -703,21 +733,21 @@ Computed inter-template CCs in 2.18sec.
     </tr>
     <tr>
       <th>16</th>
-      <td>0.175184</td>
-      <td>0.185049</td>
+      <td>0.195433</td>
+      <td>0.178264</td>
       <td>0.000000</td>
-      <td>0.189004</td>
-      <td>0.198617</td>
-      <td>0.182702</td>
-      <td>0.168698</td>
-      <td>0.155042</td>
-      <td>0.153908</td>
+      <td>0.193301</td>
+      <td>0.214054</td>
+      <td>0.216613</td>
+      <td>0.186617</td>
+      <td>0.161650</td>
+      <td>0.166269</td>
       <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.162423</td>
-      <td>0.164250</td>
-      <td>0.157772</td>
-      <td>0.179577</td>
+      <td>0.000000</td>
+      <td>0.204009</td>
+      <td>0.188014</td>
+      <td>0.203328</td>
+      <td>0.189606</td>
       <td>0.000000</td>
       <td>1.000000</td>
     </tr>
@@ -793,8 +823,6 @@ Computed inter-template CCs in 2.18sec.
 <div class="highlight"><pre>
 Template 0 is similar to: {0, 4, 11, 12, 13}
 Keeping only Template 0
-Template 3 is similar to: {3, 14}
-Keeping only Template 14
 </pre></div></div>
 </div>
 </section>
@@ -824,7 +852,8 @@ Text(0.5, 0.98, &#39;Template 0&#39;)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_7_build_template_database_17_1.svg" src="../../_images/tutorial_notebooks_7_build_template_database_17_1.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_7_build_template_database_17_1.png" src="../../_images/tutorial_notebooks_7_build_template_database_17_1.png" />
+</div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
@@ -849,7 +878,8 @@ Text(0.5, 0.98, &#39;Template 4&#39;)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_7_build_template_database_18_1.svg" src="../../_images/tutorial_notebooks_7_build_template_database_18_1.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_7_build_template_database_18_1.png" src="../../_images/tutorial_notebooks_7_build_template_database_18_1.png" />
+</div>
 </div>
 <p>Let’s plot the waveforms of all the templates similar to template 0 on SAUV.E .</p>
 <div class="nbinput docutils container">
@@ -891,13 +921,14 @@ Text(0, 0.5, &#39;Velocity (AU)&#39;)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_7_build_template_database_20_1.svg" src="../../_images/tutorial_notebooks_7_build_template_database_20_1.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_7_build_template_database_20_1.png" src="../../_images/tutorial_notebooks_7_build_template_database_20_1.png" />
+</div>
 </div>
 <p>The similarity of these templates would make them detect the same events and thus, spending time on redundant computation and writing redundant info in databases.</p>
 </section>
 <section id="Save-the-non-redundant-templates-in-a-database">
 <h2>Save the non-redundant templates in a database<a class="headerlink" href="#Save-the-non-redundant-templates-in-a-database" title="Link to this heading"></a></h2>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
@@ -917,6 +948,17 @@ Text(0, 0.5, &#39;Velocity (AU)&#39;)
     <span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/ebeauce/miniconda3/envs/py310/lib/python3.10/site-packages/pandas/core/indexes/extension.py:101: FutureWarning: In a future version, the Index constructor will not infer numeric dtypes when passed object-dtype sequences (matching Series behavior)
+  return Index(result, name=self.name)
+/home/ebeauce/miniconda3/envs/py310/lib/python3.10/site-packages/pandas/core/indexes/extension.py:101: FutureWarning: In a future version, the Index constructor will not infer numeric dtypes when passed object-dtype sequences (matching Series behavior)
+  return Index(result, name=self.name)
+</pre></div></div>
 </div>
 </section>
 </section>

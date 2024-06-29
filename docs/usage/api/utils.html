@@ -67,6 +67,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.extract_colors_from_tree"><code class="docutils literal notranslate"><span class="pre">extract_colors_from_tree()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.fetch_detection_waveforms"><code class="docutils literal notranslate"><span class="pre">fetch_detection_waveforms()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.fetch_detection_waveforms_refilter"><code class="docutils literal notranslate"><span class="pre">fetch_detection_waveforms_refilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.find_picks"><code class="docutils literal notranslate"><span class="pre">find_picks()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.find_template_clusters"><code class="docutils literal notranslate"><span class="pre">find_template_clusters()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.get_moveout_array"><code class="docutils literal notranslate"><span class="pre">get_moveout_array()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.get_np_array"><code class="docutils literal notranslate"><span class="pre">get_np_array()</span></code></a></li>
@@ -84,7 +85,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.sec_to_samp"><code class="docutils literal notranslate"><span class="pre">sec_to_samp()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.spectrogram"><code class="docutils literal notranslate"><span class="pre">spectrogram()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.time_range"><code class="docutils literal notranslate"><span class="pre">time_range()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.trigger_picks"><code class="docutils literal notranslate"><span class="pre">trigger_picks()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.two_point_distance"><code class="docutils literal notranslate"><span class="pre">two_point_distance()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.two_point_epicentral_distance"><code class="docutils literal notranslate"><span class="pre">two_point_epicentral_distance()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.utils.weighted_linear_regression"><code class="docutils literal notranslate"><span class="pre">weighted_linear_regression()</span></code></a></li>
@@ -132,16 +132,22 @@
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">SVDWF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expl_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_singular_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wiener_filter_colsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#SVDWF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.SVDWF" title="Link to this definition"></a></dt>
 <dd><p>Implementation of the Singular Value Decomposition Wiener Filter (SVDWF)
 described in Moreau et al 2017.</p>
+<p>Note: The SVD-WF-filtered matrix is filtered between <cite>freqmin</cite> and
+<cite>freqmax</cite> before being returned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>matrix</strong> (<em>(</em><em>n x m</em><em>) </em><em>numpy array</em>) – n is the number of events, m is the number of time samples
+<li><p><strong>matrix</strong> (<em>(</em><em>n x m</em><em>) </em><em>numpy.ndarray</em>) – n is the number of events, m is the number of time samples
 per event.</p></li>
-<li><p><strong>n_singular_values</strong> (<em>scalar float</em>) – Number of singular values to retain in the
-SVD decomposition of matrix.</p></li>
-<li><p><strong>max_freq</strong> (<em>scalar float</em><em>, </em><em>default to cfg.MAX_FREQ_HZ</em>) – The maximum frequency of the data, or maximum target
-frequency, is used to determined the size in the
-time axis of the Wiener filter.</p></li>
+<li><p><strong>expl_var</strong> (<em>float</em><em>, </em><em>optional</em>) – Fraction of the total variance explained by the retained
+singular vectors. Defaults to 0.4.</p></li>
+<li><p><strong>max_singular_values</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of singular values to retain in the
+SVD decomposition of matrix. Defaults to 5.</p></li>
+<li><p><strong>freqmin</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum target frequency, in Hz. Defaults to <cite>BPMF.cfg.MIN_FREQ_HZ</cite>.</p></li>
+<li><p><strong>freqmax</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum target frequency, in Hz. Defaults to <cite>BPMF.cfg.MAX_FREQ_HZ</cite>.</p></li>
+<li><p><strong>sampling_rate</strong> (<em>float</em><em>, </em><em>optional</em>) – Sampling rate of <cite>matrix</cite>. Defaults to <cite>BPMF.cfg.SAMPLING_RATE_HZ</cite>.</p></li>
+<li><p><strong>wiener_filter_colsize</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of the wiener filter in the outermost dimension, that is, the
+event axis. Defaults to None, in which case the filter has length <cite>n</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -213,6 +219,8 @@ the Nyquist frequency is half the sampling rate.</p></li>
 <li><p><strong>taper_alpha</strong> (<em>scalar float</em><em>, </em><em>default to 0.01</em><em>,</em>) – Defines the sharpness of the edges of the taper
 function. We use the tukey window function. The
 default value of 0.01 produces sharp windows.</p></li>
+<li><p><strong>zerophase</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the filter is applied in the forward and
+reverse direction to cancel out phase shifting.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -364,6 +372,34 @@ is colored in ‘C0’.</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="BPMF.utils.find_picks">
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">find_picks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase_probability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#find_picks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.find_picks" title="Link to this definition"></a></dt>
+<dd><p>Find phase picks from time series of phase probability.</p>
+<p>Phase picks are given by the peaks exceeding <cite>threshold</cite> in
+the time series <cite>phase_probability</cite>. The probability neighborhood
+around each peak is used as the pdf of a given pick measurement.</p>
+<p>Note: Additional key-word arguments are passed to
+‘scipy.signal.find_peaks’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phase_probability</strong> (<em>array-like</em>) – Probability time series of observing the arrival of a
+given seismic phase.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – Value above which peaks are taken to be candidate phase picks.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>peaks_value</strong> (<cite>numpy.ndarray</cite>) – Probability value of the selected peaks.</p></li>
+<li><p><strong>peaks_mean</strong> (<cite>numpy.ndarray</cite>) – Expected pick timing, in samples.</p></li>
+<li><p><strong>peaks_std</strong> (<cite>numpy.ndarray</cite>) – Uncertainty on pick timing, in samples.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.find_template_clusters">
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">find_template_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">TpGroup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'single'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'correlation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'distance'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clustering_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.33</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_singleton</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dimgray'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_dendogram</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#find_template_clusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.find_template_clusters" title="Link to this definition"></a></dt>
 <dd><p>Find non-overlapping groups of similar templates
@@ -436,7 +472,7 @@ the length of the first trace.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>picks</strong> (<em>dictionary</em>) – Dictionary returned by <cite>automatic_picking</cite>.</p></li>
+<li><p><strong>picks</strong> (<cite>pandas.DataFrame</cite>) – <cite>pandas.DataFrame</cite> as formatted in <cite>BPMF.dataset.pick_PS_phases</cite>.</p></li>
 <li><p><strong>buffer_length</strong> (<em>scalar int</em><em>, </em><em>optional</em>) – Picks that are before this buffer length, in samples, are discarded.</p></li>
 <li><p><strong>prior_knowledge</strong> (<em>pandas.DataFrame</em><em>, </em><em>optional</em>) – If given, picks that are closer to the a priori pick
 (for example, given by a preliminary location) will be given
@@ -445,6 +481,12 @@ pick probabilities are multiplied by gaussian weights and the highest
 modified pick probability is selected.</p></li>
 <li><p><strong>search_win_samp</strong> (<em>scalar int</em><em>, </em><em>optional</em>) – Standard deviation, in samples, used in the gaussian weights.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>picks</strong> – <cite>pandas.DataFrame</cite> with a single P- and S-wave pick per channel.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>pandas.DataFrame</cite></p>
 </dd>
 </dl>
 </dd></dl>
@@ -499,12 +541,53 @@ three (n_sources,) numpy.ndarray: <cite>source_coords[‘latitude’]</cite>,
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.lowpass_chebyshev_I">
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">lowpass_chebyshev_I</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_ripple</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#lowpass_chebyshev_I"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.lowpass_chebyshev_I" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Apply low-pass type I Chebyshev filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>array-like</em>) – 1D array-like with data to filter.</p></li>
+<li><p><strong>freqmax</strong> (<em>float</em>) – High cut-off frequency, in Hz.</p></li>
+<li><p><strong>sampling_rate</strong> (<em>float</em>) – Sampling rate, in Hz, of <cite>X</cite>.</p></li>
+<li><p><strong>order</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of the filter. Defaults to 8.</p></li>
+<li><p><strong>max_ripple</strong> (<em>int</em><em>, </em><em>optional</em>) – Defaults to 5.</p></li>
+<li><p><strong>zerophase</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the filter is applied in the forward and
+reverse direction to cancel out phase shifting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>X</strong> – 1D array-like with filtered data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array-like</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.lowpass_chebyshev_II">
 <span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">lowpass_chebyshev_II</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_attenuation_dB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#lowpass_chebyshev_II"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.lowpass_chebyshev_II" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Apply low-pass type II Chebyshev filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>array-like</em>) – 1D array-like with data to filter.</p></li>
+<li><p><strong>freqmax</strong> (<em>float</em>) – High cut-off frequency, in Hz.</p></li>
+<li><p><strong>sampling_rate</strong> (<em>float</em>) – Sampling rate, in Hz, of <cite>X</cite>.</p></li>
+<li><p><strong>order</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of the filter. Defaults to 3.</p></li>
+<li><p><strong>min_attenuation_dB</strong> (<em>float</em><em>, </em><em>optional</em>) – The minimum attenuation required in the stop band, in decibels.
+Defaults to 40.</p></li>
+<li><p><strong>zerophase</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the filter is applied in the forward and
+reverse direction to cancel out phase shifting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>X</strong> – 1D array-like with filtered data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array-like</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.max_norm">
@@ -537,7 +620,7 @@ Default is 3000 (like in Zhu et al. 2019).</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.utils.preprocess_stream">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">preprocess_stream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_SR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_response</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_sensitivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_resp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_starttime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_endtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_chunk_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SR_decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'VEL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#preprocess_stream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.preprocess_stream" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">preprocess_stream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_SR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_response</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_sensitivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_resp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_starttime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_endtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_chunk_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SR_decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_oversampling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'VEL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#preprocess_stream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.preprocess_stream" title="Link to this definition"></a></dt>
 <dd><p>Preprocesses a stream of seismic data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -556,7 +639,10 @@ Default is 3000 (like in Zhu et al. 2019).</p></li>
 <li><p><strong>minimum_chunk_duration</strong> (<em>float</em><em>, </em><em>optional</em>) – The minimum duration of each data chunk.</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to print verbose output during processing.</p></li>
 <li><p><strong>SR_decimals</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of decimals to round sampling rate values to.</p></li>
-<li><p><strong>decimation_method</strong> (<em>str</em><em>, </em><em>optional</em>) – The method used for decimation.</p></li>
+<li><p><strong>decimation_method</strong> (<em>str</em><em>, </em><em>optional</em>) – The method used for decimation. Either ‘simple’ or ‘fourier’.</p></li>
+<li><p><strong>allow_oversampling</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, raw traces that have a sampling rate lower than the target
+sampling rate will be oversampled instead of being discarded.Defaults
+to False.</p></li>
 <li><p><strong>unit</strong> (<em>str</em><em>, </em><em>optional</em>) – The unit of the data.</p></li>
 <li><p><strong>n_threads</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of threads over which preprocesing is parallelized.</p></li>
 <li><p><strong>**kwargs</strong> (<em>dict</em>) – Other keyword arguments to pass to the function.</p></li>
@@ -664,27 +750,6 @@ valid segments are used).</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(n_samples,) numpy.ndarray of numpy.datetime64</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="BPMF.utils.trigger_picks">
-<span class="sig-prename descclassname"><span class="pre">BPMF.utils.</span></span><span class="sig-name descname"><span class="pre">trigger_picks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">probability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_peak_distance_samp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/utils.html#trigger_picks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.utils.trigger_picks" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>probability</strong> (<em>1D array_like</em>) – </p></li>
-<li><p><strong>threshold</strong> (<em>float</em>) – </p></li>
-<li><p><strong>minimum_peak_distance_samp</strong> (<em>integer</em>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>probability_at_peak</strong> (<em>1D array_like</em>)</p></li>
-<li><p><strong>peak_indexes</strong> (<em>1D array_like</em>)</p></li>
-</ul>
-</p>
 </dd>
 </dl>
 </dd></dl>

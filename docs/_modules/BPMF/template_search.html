@@ -79,9 +79,10 @@
 <span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">cfg</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">clib</span><span class="p">,</span> <span class="n">utils</span><span class="p">,</span> <span class="n">dataset</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">obspy</span> <span class="k">as</span> <span class="nn">obs</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">import</span> <span class="nn">beampower</span> <span class="k">as</span> <span class="nn">bp</span>
 
@@ -303,6 +304,185 @@
         <span class="k">if</span> <span class="n">relative_to_first</span><span class="p">:</span>
             <span class="n">tts</span> <span class="o">=</span> <span class="n">tts</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">tts</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tts</span></div>
+</div>
+
+
+<div class="viewcode-block" id="WaveformTransform">
+<a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.WaveformTransform">[docs]</a>
+<span class="k">class</span> <span class="nc">WaveformTransform</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for waveform transform.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">transform_arr</span><span class="p">,</span> <span class="n">stations</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">starttime</span><span class="p">,</span> <span class="n">sampling_rate_hz</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes an instance that represents the transformed wavefield.</span>
+
+<span class="sd">        Two important class attributes are:</span>
+<span class="sd">        - transform_arr : Same as the input argument with the same name.</span>
+<span class="sd">        - transform : Transformed wavefield represented as a `obspy.Stream`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        transform_arr : numpy.ndarray</span>
+<span class="sd">            (num_stations, num_components, num_samples) `numpy.ndarray` with</span>
+<span class="sd">            some transform of the wavefield.</span>
+<span class="sd">        stations : array-like</span>
+<span class="sd">            Station names of the first axis of `transform_arr`.</span>
+<span class="sd">        components : array-like</span>
+<span class="sd">            Component names of the second axis of `transform_arr`.</span>
+<span class="sd">        starttime : `obspy.UTCDateTime`</span>
+<span class="sd">            Start time of `transform_arr`.</span>
+<span class="sd">        sampling_rate_hz : float</span>
+<span class="sd">            Sampling rate, in Hertz, of the time series in `transform_arr`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stations</span> <span class="o">=</span> <span class="n">stations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">components</span> <span class="o">=</span> <span class="n">components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transform_arr</span> <span class="o">=</span> <span class="n">transform_arr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">starttime</span> <span class="o">=</span> <span class="n">starttime</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">transform_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">sampling_rate_hz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">)):</span>
+                <span class="n">tr</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">Trace</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">transform_arr</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="p">:])</span>
+                <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span> <span class="o">=</span> <span class="n">stations</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+                <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+                <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">sampling_rate_hz</span>
+                <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span> <span class="o">=</span> <span class="n">starttime</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">+=</span> <span class="n">tr</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">delta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sampling_rate&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to define the instance&#39;s sampling rate first.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_time&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_time</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">time_range</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">starttime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">starttime</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sr</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;ms&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time</span>
+
+<div class="viewcode-block" id="WaveformTransform.data_frame_view">
+<a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.WaveformTransform.data_frame_view">[docs]</a>
+    <span class="k">def</span> <span class="nf">data_frame_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns `self.transform_arr` as a `pandas.DataFrame`.</span>
+
+<span class="sd">        The data frame&#39;s columns are the component names and the</span>
+<span class="sd">        rows are the station names.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">ph</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">ph</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_arr</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="WaveformTransform.get_np_array">
+<a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.WaveformTransform.get_np_array">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_np_array</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">stations</span><span class="p">,</span>
+        <span class="n">components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Arguments go to `BPMF.utils.get_np_array`.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">components</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">components</span>
+        <span class="n">component_aliases</span> <span class="o">=</span> <span class="p">{</span><span class="n">ph</span><span class="p">:</span> <span class="n">ph</span> <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">components</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_np_array</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span>
+            <span class="n">stations</span><span class="p">,</span>
+            <span class="n">components</span><span class="o">=</span><span class="n">components</span><span class="p">,</span>
+            <span class="n">component_aliases</span><span class="o">=</span><span class="n">component_aliases</span><span class="p">,</span>
+            <span class="n">n_samples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="WaveformTransform.slice">
+<a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.WaveformTransform.slice">[docs]</a>
+    <span class="k">def</span> <span class="nf">slice</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">starttime</span><span class="p">,</span>
+        <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">stations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a new `WaveformTransform` instance at the requested time.</span>
+
+<span class="sd">        Note that either `duration` or `num_samples` must be different</span>
+<span class="sd">        from None.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        starttime : `obspy.UTCDateTime`</span>
+<span class="sd">            Time at which slicing starts.</span>
+<span class="sd">        duration : float, optional</span>
+<span class="sd">            If not None, this is the duration, in seconds, of the slice.</span>
+<span class="sd">            Defaults to None, in which case `duration` is calculated from</span>
+<span class="sd">            `num_samples` and `self.sampling_rate`.</span>
+<span class="sd">        num_samples : int, optional</span>
+<span class="sd">            If not None, this is the duration, in samples, of the slice.</span>
+<span class="sd">            Defaults to None, in which case `num_samples` is calculated</span>
+<span class="sd">            from `duration` and `self.sampling_rate`.</span>
+<span class="sd">        stations : array-like, optional</span>
+<span class="sd">            Names of the stations to use in the slice. Defaults to None,</span>
+<span class="sd">            in which case `stations` is taken to be the same as `self.stations`.</span>
+<span class="sd">        components : array-like, optional</span>
+<span class="sd">            Names of the components to use in the slice. Defaults to None,</span>
+<span class="sd">            in which case `components` is taken to be the same as</span>
+<span class="sd">            `self.components`.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        new_instance : `BPMF.template_search.WaveformTransform`</span>
+<span class="sd">            The new `WaveformTransform` instance sliced from `self`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_samples</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;One of `duration` or `num_samples` must be specified.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">duration</span> <span class="o">=</span> <span class="n">num_samples</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span>
+        <span class="k">if</span> <span class="n">num_samples</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">duration</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
+        <span class="c1"># first, slice using obspy.Stream&#39;s method</span>
+        <span class="n">slice_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span>
+            <span class="n">starttime</span><span class="o">=</span><span class="n">starttime</span><span class="p">,</span> <span class="n">endtime</span><span class="o">=</span><span class="n">starttime</span> <span class="o">+</span> <span class="n">duration</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span>
+        <span class="p">)</span>
+        <span class="c1"># for tr in slice_:</span>
+        <span class="c1">#     tr.data = tr.data[:num_samples]</span>
+        <span class="c1"># then, format the output</span>
+        <span class="k">if</span> <span class="n">stations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">stations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span>
+        <span class="k">if</span> <span class="n">components</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">components</span>
+        <span class="n">component_aliases</span> <span class="o">=</span> <span class="p">{</span><span class="n">ph</span><span class="p">:</span> <span class="n">ph</span> <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">components</span><span class="p">}</span>
+        <span class="n">transform_arr</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_np_array</span><span class="p">(</span>
+            <span class="n">slice_</span><span class="p">,</span>
+            <span class="n">stations</span><span class="p">,</span>
+            <span class="n">components</span><span class="o">=</span><span class="n">components</span><span class="p">,</span>
+            <span class="n">component_aliases</span><span class="o">=</span><span class="n">component_aliases</span><span class="p">,</span>
+            <span class="n">n_samples</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># return a new class instance</span>
+        <span class="n">new_instance</span> <span class="o">=</span> <span class="n">WaveformTransform</span><span class="p">(</span>
+            <span class="n">transform_arr</span><span class="p">,</span> <span class="n">stations</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">starttime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sr</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_instance</span></div>
 </div>
 
 
@@ -747,6 +927,7 @@
                 <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">weights_sources</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">moveouts</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">cutoff_mv</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">weights_sources</span><span class="p">[:,</span> <span class="o">~</span><span class="n">operational_stations</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
         <span class="k">if</span> <span class="n">n_min_stations</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">n_stations_per_source</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_sources</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">weights_sources</span><span class="p">[</span><span class="n">n_stations_per_source</span> <span class="o">&lt;</span> <span class="n">n_min_stations</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>

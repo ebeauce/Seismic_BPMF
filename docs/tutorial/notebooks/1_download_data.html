@@ -69,7 +69,8 @@
 <li class="toctree-l2"><a class="reference internal" href="7_build_template_database.html">Build Template Database</a></li>
 <li class="toctree-l2"><a class="reference internal" href="8_template_matching.html">Template Matching</a></li>
 <li class="toctree-l2"><a class="reference internal" href="9_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html">Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html">Reminders on Earthquake Magnitudes:Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html#Magnitude-Computation">Magnitude Computation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
@@ -185,8 +186,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-[2023-07-06 14:30:07,633] - obspy.clients.fdsn.mass_downloader - INFO: Initializing FDSN client(s) for IRIS.
-[2023-07-06 14:30:07,941] - obspy.clients.fdsn.mass_downloader - INFO: Successfully initialized 1 client(s): IRIS.
+[2024-06-27 10:17:47,808] - obspy.clients.fdsn.mass_downloader - INFO: Initializing FDSN client(s) for IRIS.
+[2024-06-27 10:17:48,113] - obspy.clients.fdsn.mass_downloader - INFO: Successfully initialized 1 client(s): IRIS.
 </pre></div></div>
 </div>
 </section>
@@ -204,7 +205,7 @@
     <span class="n">restrictions</span><span class="p">,</span>
     <span class="n">mseed_storage</span><span class="o">=</span><span class="n">dirpath_raw_waveforms</span><span class="p">,</span>
     <span class="n">stationxml_storage</span><span class="o">=</span><span class="n">dirpath_resp_files</span><span class="p">,</span>
-    <span class="n">threads_per_client</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">threads_per_client</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -214,40 +215,40 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-[2023-07-06 14:30:10,708] - obspy.clients.fdsn.mass_downloader - INFO: Total acquired or preexisting stations: 0
-[2023-07-06 14:30:10,709] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Requesting reliable availability.
-[2023-07-06 14:30:11,159] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully requested availability (0.45 seconds)
-[2023-07-06 14:30:11,161] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Found 8 stations (24 channels).
-[2023-07-06 14:30:11,199] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Will attempt to download data from 8 stations.
-[2023-07-06 14:30:11,205] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Status for 24 time intervals/channels before downloading: NEEDS_DOWNLOADING
-[2023-07-06 14:31:33,072] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2023-07-06 14:32:02,464] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2023-07-06 14:32:10,280] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2023-07-06 14:32:11,203] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2023-07-06 14:33:22,927] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 1 channels (of 1)
-[2023-07-06 14:33:25,448] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 1 channels (of 1)
-[2023-07-06 14:33:34,430] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2023-07-06 14:33:59,062] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2023-07-06 14:34:35,089] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 1 channels (of 1)
-[2023-07-06 14:35:25,673] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
-[2023-07-06 14:35:25,674] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Launching basic QC checks...
-[2023-07-06 14:35:26,452] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Downloaded 229.3 MB [746.52 KB/sec] of data, 0.0 MB of which were discarded afterwards.
-[2023-07-06 14:35:26,453] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Status for 24 time intervals/channels after downloading: DOWNLOADED
-[2023-07-06 14:35:26,804] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.DC07.xml&#39;.
-[2023-07-06 14:35:26,809] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.DC06.xml&#39;.
-[2023-07-06 14:35:26,811] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.DC08.xml&#39;.
-[2023-07-06 14:35:27,044] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.DE07.xml&#39;.
-[2023-07-06 14:35:27,047] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.DD06.xml&#39;.
-[2023-07-06 14:35:27,051] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.DE08.xml&#39;.
-[2023-07-06 14:35:27,282] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.SPNC.xml&#39;.
-[2023-07-06 14:35:27,351] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.SAUV.xml&#39;.
-[2023-07-06 14:35:27,386] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Downloaded 8 station files [2.0 MB] in 0.9 seconds [2307.39 KB/sec].
-[2023-07-06 14:35:27,387] - obspy.clients.fdsn.mass_downloader - INFO: ============================== Final report
-[2023-07-06 14:35:27,388] - obspy.clients.fdsn.mass_downloader - INFO: 0 MiniSEED files [0.0 MB] already existed.
-[2023-07-06 14:35:27,389] - obspy.clients.fdsn.mass_downloader - INFO: 0 StationXML files [0.0 MB] already existed.
-[2023-07-06 14:35:27,391] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Acquired 24 MiniSEED files [229.3 MB].
-[2023-07-06 14:35:27,391] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Acquired 8 StationXML files [2.0 MB].
-[2023-07-06 14:35:27,392] - obspy.clients.fdsn.mass_downloader - INFO: Downloaded 231.3 MB in total.
+[2024-06-27 10:17:48,120] - obspy.clients.fdsn.mass_downloader - INFO: Total acquired or preexisting stations: 0
+[2024-06-27 10:17:48,121] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Requesting reliable availability.
+[2024-06-27 10:17:48,568] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully requested availability (0.45 seconds)
+[2024-06-27 10:17:48,570] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Found 8 stations (24 channels).
+[2024-06-27 10:17:48,596] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Will attempt to download data from 8 stations.
+[2024-06-27 10:17:48,602] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Status for 24 time intervals/channels before downloading: NEEDS_DOWNLOADING
+[2024-06-27 10:19:00,129] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 1 channels (of 1)
+[2024-06-27 10:19:00,878] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 1 channels (of 1)
+[2024-06-27 10:19:02,213] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 1 channels (of 1)
+[2024-06-27 10:19:09,362] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2024-06-27 10:19:38,562] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2024-06-27 10:19:44,326] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2024-06-27 10:19:46,561] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2024-06-27 10:19:47,677] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2024-06-27 10:19:49,425] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2024-06-27 10:19:49,612] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded 3 channels (of 3)
+[2024-06-27 10:19:49,613] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Launching basic QC checks...
+[2024-06-27 10:19:49,750] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Downloaded 229.3 MB [1939.99 KB/sec] of data, 0.0 MB of which were discarded afterwards.
+[2024-06-27 10:19:49,751] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Status for 24 time intervals/channels after downloading: DOWNLOADED
+[2024-06-27 10:19:51,004] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.DC08.xml&#39;.
+[2024-06-27 10:19:51,074] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.DC07.xml&#39;.
+[2024-06-27 10:19:51,280] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.DC06.xml&#39;.
+[2024-06-27 10:19:52,254] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.DD06.xml&#39;.
+[2024-06-27 10:19:52,322] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.DE07.xml&#39;.
+[2024-06-27 10:19:52,805] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.DE08.xml&#39;.
+[2024-06-27 10:19:53,366] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.SPNC.xml&#39;.
+[2024-06-27 10:19:53,709] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Successfully downloaded &#39;../BPMF_data/2012/20120726/resp/YH.SAUV.xml&#39;.
+[2024-06-27 10:19:53,745] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Downloaded 8 station files [2.0 MB] in 4.0 seconds [521.90 KB/sec].
+[2024-06-27 10:19:53,747] - obspy.clients.fdsn.mass_downloader - INFO: ============================== Final report
+[2024-06-27 10:19:53,747] - obspy.clients.fdsn.mass_downloader - INFO: 0 MiniSEED files [0.0 MB] already existed.
+[2024-06-27 10:19:53,748] - obspy.clients.fdsn.mass_downloader - INFO: 0 StationXML files [0.0 MB] already existed.
+[2024-06-27 10:19:53,748] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Acquired 24 MiniSEED files [229.3 MB].
+[2024-06-27 10:19:53,749] - obspy.clients.fdsn.mass_downloader - INFO: Client &#39;IRIS&#39; - Acquired 8 StationXML files [2.0 MB].
+[2024-06-27 10:19:53,749] - obspy.clients.fdsn.mass_downloader - INFO: Downloaded 231.3 MB in total.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -256,11 +257,11 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;IRIS&#39;: &lt;obspy.clients.fdsn.mass_downloader.download_helpers.ClientDownloadHelper at 0x7f6ec5a83ee0&gt;}
+{&#39;IRIS&#39;: &lt;obspy.clients.fdsn.mass_downloader.download_helpers.ClientDownloadHelper at 0x7fef0022b580&gt;}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># check the files in DIRPATH_WAVEFORMS</span>
@@ -269,35 +270,35 @@
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;../BPMF_data/2012/20120726/raw/YH.DC08..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DC07..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.SAUV..HHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DC08..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.SPNC..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DE08..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DE07..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DE07..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DD06..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DD06..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DC06..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DC06..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DC06..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DE08..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DE08..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
+[&#39;../BPMF_data/2012/20120726/raw/YH.DE08..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120726/raw/YH.DE07..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DE08..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120726/raw/YH.DD06..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC07..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.SAUV..HHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120726/raw/YH.DC07..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120726/raw/YH.SAUV..HHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120726/raw/YH.DC08..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DC07..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.SAUV..HHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.SPNC..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120726/raw/YH.SPNC..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.SPNC..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;]
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC06..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC06..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC06..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC07..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.SAUV..HHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC08..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC08..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.SPNC..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DE07..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DE08..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DE07..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DD06..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DD06..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;]
 </pre></div></div>
 </div>
 </section>
@@ -305,7 +306,7 @@
 <h2>Cleanup the Downloaded Data<a class="headerlink" href="#Cleanup-the-Downloaded-Data" title="Link to this heading"></a></h2>
 <p>Even though <code class="docutils literal notranslate"><span class="pre">mass_downloader.Restrictions</span></code> handles channel priorities, some components might end up being downloaded at multiple channels because of failed data requests (see the output of the previous cell). To avoid data duplicate and in the interest of keeping the memory footprint low, we now remove these duplicated data.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fnmatch</span> <span class="kn">import</span> <span class="nb">filter</span> <span class="k">as</span> <span class="n">fnfilter</span>
@@ -313,7 +314,7 @@
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># keep only HH channels when HH and BH channels were downloaded</span>
@@ -338,18 +339,18 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-YH.DC07
-YH.DC08
-YH.DC06
-YH.DD06
-YH.SPNC
-YH.DE08
-YH.SAUV
 YH.DE07
+YH.SAUV
+YH.DE08
+YH.SPNC
+YH.DD06
+YH.DC06
+YH.DC08
+YH.DC07
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_list</span>
@@ -357,42 +358,42 @@ YH.DE07
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;../BPMF_data/2012/20120726/raw/YH.DC08..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DC07..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.SAUV..HHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DC08..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.SPNC..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DE08..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DE07..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DE07..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DD06..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DD06..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DC06..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DC06..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DC06..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DE08..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DE08..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
+[&#39;../BPMF_data/2012/20120726/raw/YH.DE08..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120726/raw/YH.DE07..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DE08..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120726/raw/YH.DD06..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC07..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.SAUV..HHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120726/raw/YH.DC07..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120726/raw/YH.SAUV..HHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120726/raw/YH.DC08..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.DC07..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.SAUV..HHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.SPNC..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
  &#39;../BPMF_data/2012/20120726/raw/YH.SPNC..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
- &#39;../BPMF_data/2012/20120726/raw/YH.SPNC..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;]
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC06..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC06..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC06..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC07..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.SAUV..HHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC08..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DC08..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.SPNC..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DE07..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DE08..BHN__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DE07..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DD06..BHE__20120725T235140Z__20120727T000820Z.mseed&#39;,
+ &#39;../BPMF_data/2012/20120726/raw/YH.DD06..BHZ__20120725T235140Z__20120727T000820Z.mseed&#39;]
 </pre></div></div>
 </div>
 </section>
 <section id="Plot-the-Raw-Data">
 <h2>Plot the Raw Data<a class="headerlink" href="#Plot-the-Raw-Data" title="Link to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">traces</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
@@ -403,24 +404,24 @@ YH.DE07
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 24 Trace(s) in Stream:
 
-YH.DC08..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DE08..BHE | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
 ...
 (22 other traces)
 ...
-YH.SPNC..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
+YH.DD06..BHZ | 2012-07-25T23:51:40.000000Z - 2012-07-27T00:08:20.000000Z | 50.0 Hz, 4370001 samples
 
 [Use &#34;print(Stream.__str__(extended=True))&#34; to print all Traces]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&quot;svg&quot;]

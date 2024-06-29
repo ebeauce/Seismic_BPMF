@@ -75,7 +75,8 @@
 <li class="toctree-l2"><a class="reference internal" href="7_build_template_database.html">Build Template Database</a></li>
 <li class="toctree-l2"><a class="reference internal" href="8_template_matching.html">Template Matching</a></li>
 <li class="toctree-l2"><a class="reference internal" href="9_build_earthquake_catalog.html">Build Earthquake Catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html">Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html">Reminders on Earthquake Magnitudes:Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html#Magnitude-Computation">Magnitude Computation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
@@ -144,7 +145,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&quot;svg&quot;]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># %config InlineBackend.figure_formats = [&quot;svg&quot;]</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;svg.fonttype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
 </pre></div>
 </div>
@@ -155,7 +156,7 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PROGRAM PARAMETERS</span>
 <span class="c1"># DEVICE: is &quot;cpu&quot; or &quot;gpu&quot; depending on whether you want to use Nvidia GPUs or not</span>
-<span class="n">DEVICE</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span>
+<span class="n">DEVICE</span> <span class="o">=</span> <span class="s2">&quot;gpu&quot;</span>
 <span class="c1"># PHASES: list of seismic phases to use for backprojection</span>
 <span class="n">PHASES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">]</span>
 <span class="c1"># N_MAX_STATIONS: the maximum number of stations used for stacking (e.g. the closest to a given grid point)</span>
@@ -233,14 +234,24 @@
   </thead>
   <tbody>
     <tr>
-      <th>DD06</th>
-      <td>YH.DD06</td>
+      <th>DE07</th>
+      <td>YH.DE07</td>
       <td>YH</td>
-      <td>DD06</td>
-      <td>30.317770</td>
-      <td>40.623539</td>
-      <td>182.0</td>
-      <td>-0.182</td>
+      <td>DE07</td>
+      <td>30.411539</td>
+      <td>40.679661</td>
+      <td>40.0</td>
+      <td>-0.040</td>
+    </tr>
+    <tr>
+      <th>DC07</th>
+      <td>YH.DC07</td>
+      <td>YH</td>
+      <td>DC07</td>
+      <td>30.242170</td>
+      <td>40.667080</td>
+      <td>164.0</td>
+      <td>-0.164</td>
     </tr>
     <tr>
       <th>DC08</th>
@@ -293,24 +304,14 @@
       <td>-0.170</td>
     </tr>
     <tr>
-      <th>DC07</th>
-      <td>YH.DC07</td>
+      <th>DD06</th>
+      <td>YH.DD06</td>
       <td>YH</td>
-      <td>DC07</td>
-      <td>30.242170</td>
-      <td>40.667080</td>
-      <td>164.0</td>
-      <td>-0.164</td>
-    </tr>
-    <tr>
-      <th>DE07</th>
-      <td>YH.DE07</td>
-      <td>YH</td>
-      <td>DE07</td>
-      <td>30.411539</td>
-      <td>40.679661</td>
-      <td>40.0</td>
-      <td>-0.040</td>
+      <td>DD06</td>
+      <td>30.317770</td>
+      <td>40.623539</td>
+      <td>182.0</td>
+      <td>-0.182</td>
     </tr>
   </tbody>
 </table>
@@ -558,44 +559,37 @@ Days to process:  DatetimeIndex([&#39;2012-07-26 00:00:00+00:00&#39;], dtype=&#3
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Reading data for 2012-07-26
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+Reading data for 2012-07-26
 24 Trace(s) in Stream:
-YH.DD06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC08..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DE08..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.SPNC..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC06..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.SAUV..HHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DE08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.SPNC..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.SAUV..HHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC07..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DE07..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DD06..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DE07..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC07..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DD06..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.SAUV..HHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DE07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC08..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DE08..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.SPNC..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC08..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DC06..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DE07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.SAUV..HHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC07..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DE07..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DD06..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DE07..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC07..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DD06..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DE08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.SPNC..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.SAUV..HHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DE08..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.SPNC..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC08..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC06..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.SAUV..HHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DD06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -659,7 +653,8 @@ PhaseNet(
     (4): ModuleList(
       (0): Conv1d(64, 128, kernel_size=(7,), stride=(1,), padding=same, bias=False)
       (1): BatchNorm1d(128, eps=0.001, momentum=0.1, affine=True, track_running_stats=True)
-      (2-3): 2 x None
+      (2): None
+      (3): None
     )
   )
   (up_branch): ModuleList(
@@ -774,7 +769,7 @@ The shape of waveform_features is:  (8, 2, 2160000)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Selected station is DC06
+Selected station is SPNC
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -790,7 +785,8 @@ Text(0.5, 0, &#39;Time (samples)&#39;)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_5_backprojection_19_2.svg" src="../../_images/tutorial_notebooks_5_backprojection_19_2.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_5_backprojection_19_2.png" src="../../_images/tutorial_notebooks_5_backprojection_19_2.png" />
+</div>
 </div>
 <p>See that the number of channels in <code class="docutils literal notranslate"><span class="pre">waveform_features</span></code> is only 2. This is because <code class="docutils literal notranslate"><span class="pre">phasenet</span></code> returned a time series of P-arrival probability <code class="docutils literal notranslate"><span class="pre">waveform_features[:,</span> <span class="pre">0,</span> <span class="pre">:]</span></code> and a time series of S-arrival probability <code class="docutils literal notranslate"><span class="pre">waveform_features[:,</span> <span class="pre">1,</span> <span class="pre">:]</span></code>.</p>
 </section>
@@ -927,6 +923,13 @@ The shape of weights_phases is:  (8, 2, 2)
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
 No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
 No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
 </pre></div></div>
 </div>
@@ -934,7 +937,8 @@ No artists with labels found to put in legend.  Note that artists whose label st
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_5_backprojection_33_1.svg" src="../../_images/tutorial_notebooks_5_backprojection_33_1.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_5_backprojection_33_2.png" src="../../_images/tutorial_notebooks_5_backprojection_33_2.png" />
+</div>
 </div>
 </section>
 <section id="Define-the-earthquake-detections">
@@ -978,7 +982,8 @@ Extracted 17 events.
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_5_backprojection_37_0.svg" src="../../_images/tutorial_notebooks_5_backprojection_37_0.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_5_backprojection_37_0.png" src="../../_images/tutorial_notebooks_5_backprojection_37_0.png" />
+</div>
 </div>
 <p>At this stage, we could save the metadata of each detected event and go to the next notebook, but we will first look at the waveforms of the detected events.</p>
 </section>
@@ -1021,7 +1026,7 @@ Extracted 17 events.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-3.18sec to read the waveforms for all 17 detections.
+2.49sec to read the waveforms for all 17 detections.
 </pre></div></div>
 </div>
 <p>In the following, we use the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> method to plot the detected earthquakes (only works after calling <code class="docutils literal notranslate"><span class="pre">read_waveform</span></code> with each detection, see above cell). Because we declared in <code class="docutils literal notranslate"><span class="pre">PHASE_ON_COMP</span></code> using the S wave on the horizontal components and the P wave on the vertical components, the red vertical lines on the following plots show the predicted S-wave arrival on the horizontal components and the P-wave arrival on the vertical components.</p>
@@ -1038,7 +1043,8 @@ Extracted 17 events.
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_5_backprojection_42_0.svg" src="../../_images/tutorial_notebooks_5_backprojection_42_0.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_5_backprojection_42_0.png" src="../../_images/tutorial_notebooks_5_backprojection_42_0.png" />
+</div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
@@ -1053,7 +1059,8 @@ Extracted 17 events.
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_5_backprojection_43_0.svg" src="../../_images/tutorial_notebooks_5_backprojection_43_0.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_5_backprojection_43_0.png" src="../../_images/tutorial_notebooks_5_backprojection_43_0.png" />
+</div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
@@ -1068,7 +1075,8 @@ Extracted 17 events.
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_5_backprojection_44_0.svg" src="../../_images/tutorial_notebooks_5_backprojection_44_0.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_5_backprojection_44_0.png" src="../../_images/tutorial_notebooks_5_backprojection_44_0.png" />
+</div>
 </div>
 </section>
 <section id="Store-the-metadata-of-the-detected-earthquakes-in-a-database">

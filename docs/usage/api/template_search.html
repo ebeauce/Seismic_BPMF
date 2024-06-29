@@ -58,6 +58,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">BPMF.template_search</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.template_search.Beamformer"><code class="docutils literal notranslate"><span class="pre">Beamformer</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.template_search.TravelTimes"><code class="docutils literal notranslate"><span class="pre">TravelTimes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.template_search.WaveformTransform"><code class="docutils literal notranslate"><span class="pre">WaveformTransform</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.template_search.baseline"><code class="docutils literal notranslate"><span class="pre">baseline()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.template_search.envelope"><code class="docutils literal notranslate"><span class="pre">envelope()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.template_search.envelope_parallel"><code class="docutils literal notranslate"><span class="pre">envelope_parallel()</span></code></a></li>
@@ -474,6 +475,79 @@ stations are read.</p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.TravelTimes.tts">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tts</span></span><a class="headerlink" href="#BPMF.template_search.TravelTimes.tts" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BPMF.template_search.WaveformTransform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BPMF.template_search.</span></span><span class="sig-name descname"><span class="pre">WaveformTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transform_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate_hz</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#WaveformTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.WaveformTransform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for waveform transform.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.template_search.WaveformTransform.data_frame_view">
+<span class="sig-name descname"><span class="pre">data_frame_view</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#WaveformTransform.data_frame_view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.WaveformTransform.data_frame_view" title="Link to this definition"></a></dt>
+<dd><p>Returns <cite>self.transform_arr</cite> as a <cite>pandas.DataFrame</cite>.</p>
+<p>The data frame’s columns are the component names and the
+rows are the station names.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.template_search.WaveformTransform.delta">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">delta</span></span><a class="headerlink" href="#BPMF.template_search.WaveformTransform.delta" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.template_search.WaveformTransform.duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#BPMF.template_search.WaveformTransform.duration" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.template_search.WaveformTransform.get_np_array">
+<span class="sig-name descname"><span class="pre">get_np_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#WaveformTransform.get_np_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.WaveformTransform.get_np_array" title="Link to this definition"></a></dt>
+<dd><p>Arguments go to <cite>BPMF.utils.get_np_array</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.template_search.WaveformTransform.slice">
+<span class="sig-name descname"><span class="pre">slice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">starttime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#WaveformTransform.slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.WaveformTransform.slice" title="Link to this definition"></a></dt>
+<dd><p>Returns a new <cite>WaveformTransform</cite> instance at the requested time.</p>
+<p>Note that either <cite>duration</cite> or <cite>num_samples</cite> must be different
+from None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>starttime</strong> (<cite>obspy.UTCDateTime</cite>) – Time at which slicing starts.</p></li>
+<li><p><strong>duration</strong> (<em>float</em><em>, </em><em>optional</em>) – If not None, this is the duration, in seconds, of the slice.
+Defaults to None, in which case <cite>duration</cite> is calculated from
+<cite>num_samples</cite> and <cite>self.sampling_rate</cite>.</p></li>
+<li><p><strong>num_samples</strong> (<em>int</em><em>, </em><em>optional</em>) – If not None, this is the duration, in samples, of the slice.
+Defaults to None, in which case <cite>num_samples</cite> is calculated
+from <cite>duration</cite> and <cite>self.sampling_rate</cite>.</p></li>
+<li><p><strong>stations</strong> (<em>array-like</em><em>, </em><em>optional</em>) – Names of the stations to use in the slice. Defaults to None,
+in which case <cite>stations</cite> is taken to be the same as <cite>self.stations</cite>.</p></li>
+<li><p><strong>components</strong> (<em>array-like</em><em>, </em><em>optional</em>) – Names of the components to use in the slice. Defaults to None,
+in which case <cite>components</cite> is taken to be the same as
+<cite>self.components</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>new_instance</strong> – The new <cite>WaveformTransform</cite> instance sliced from <cite>self</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>BPMF.template_search.WaveformTransform</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.template_search.WaveformTransform.sr">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sr</span></span><a class="headerlink" href="#BPMF.template_search.WaveformTransform.sr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.template_search.WaveformTransform.time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#BPMF.template_search.WaveformTransform.time" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

@@ -22,7 +22,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude" href="10_magnitudes.html" />
+    <link rel="next" title="Reminders on Earthquake Magnitudes:Seismic Moment, Moment Magnitude and Local Magnitude" href="10_magnitudes.html" />
     <link rel="prev" title="Template Matching" href="8_template_matching.html" /> 
 </head>
 
@@ -70,7 +70,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#Save-final-catalog">Save final catalog</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html">Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html">Reminders on Earthquake Magnitudes:Seismic Moment, Moment Magnitude and Local Magnitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10_magnitudes.html#Magnitude-Computation">Magnitude Computation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../updates.html">Updates</a></li>
@@ -105,7 +106,7 @@
 <h1>Build Earthquake Catalog<a class="headerlink" href="#Build-Earthquake-Catalog" title="Link to this heading"></a></h1>
 <p>In this final notebook, we read the matched-filter database, remove the multiple detections and write a clean earthquake catalog in a csv file.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[115]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
@@ -130,7 +131,7 @@
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[116]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PROGRAM PARAMETERS</span>
@@ -147,7 +148,7 @@
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[117]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read network metadata</span>
@@ -159,7 +160,7 @@
 <section id="Read-the-detected-events'-metadata-for-each-template">
 <h2>Read the detected events’ metadata for each template<a class="headerlink" href="#Read-the-detected-events'-metadata-for-each-template" title="Link to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[118]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># template filenames</span>
@@ -174,202 +175,26 @@
     <span class="n">db_path</span><span class="o">=</span><span class="n">PATH_MF</span><span class="p">,</span>
     <span class="n">check_summary_file</span><span class="o">=</span><span class="n">CHECK_SUMMARY_FILE</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="c1"># sometimes, tid is not cast to the correct dtype</span>
+<span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;tid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;tid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-Reading catalog:   0%|          | 0/12 [00:00&lt;?, ?it/s]
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Reading catalog: 100%|██████████| 12/12 [00:00&lt;00:00, 17.53it/s]
+Reading catalog: 100%|██████████| 13/13 [00:00&lt;00:00, 14.36it/s]
 </pre></div></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.TemplateGroup</span></code> now has a <code class="docutils literal notranslate"><span class="pre">catalog</span></code> attribute, which is a <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Catalog</span></code> instance.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[119]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[119]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;BPMF.dataset.Catalog at 0x7fad01ebfca0&gt;
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[120]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[120]:
-</pre></div>
-</div>
-<div class="output_area rendered_html docutils container">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>longitude</th>
-      <th>latitude</th>
-      <th>depth</th>
-      <th>origin_time</th>
-      <th>cc</th>
-      <th>tid</th>
-    </tr>
-    <tr>
-      <th>event_id</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>5.0</th>
-      <td>30.260000</td>
-      <td>40.630000</td>
-      <td>-0.500000</td>
-      <td>2012-07-26 00:20:46.200</td>
-      <td>0.333776</td>
-      <td>5</td>
-    </tr>
-    <tr>
-      <th>0.0</th>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 00:58:10.840</td>
-      <td>0.252654</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>9.0</th>
-      <td>30.303516</td>
-      <td>40.723750</td>
-      <td>10.390625</td>
-      <td>2012-07-26 00:58:10.920</td>
-      <td>0.210979</td>
-      <td>9</td>
-    </tr>
-    <tr>
-      <th>6.0</th>
-      <td>30.334766</td>
-      <td>40.718750</td>
-      <td>8.765625</td>
-      <td>2012-07-26 00:58:11.080</td>
-      <td>0.297173</td>
-      <td>6</td>
-    </tr>
-    <tr>
-      <th>2.0</th>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 00:58:11.080</td>
-      <td>0.385646</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>7.12</th>
-      <td>30.319141</td>
-      <td>40.716250</td>
-      <td>9.578125</td>
-      <td>2012-07-26 14:38:50.760</td>
-      <td>0.250089</td>
-      <td>7</td>
-    </tr>
-    <tr>
-      <th>8.8</th>
-      <td>30.350391</td>
-      <td>40.713750</td>
-      <td>10.390625</td>
-      <td>2012-07-26 14:49:28.320</td>
-      <td>0.245483</td>
-      <td>8</td>
-    </tr>
-    <tr>
-      <th>3.0</th>
-      <td>30.327441</td>
-      <td>40.600313</td>
-      <td>-1.949219</td>
-      <td>2012-07-26 15:06:20.080</td>
-      <td>1.000000</td>
-      <td>3</td>
-    </tr>
-    <tr>
-      <th>10.3</th>
-      <td>30.333789</td>
-      <td>40.713125</td>
-      <td>7.445312</td>
-      <td>2012-07-26 16:26:52.800</td>
-      <td>0.239526</td>
-      <td>10</td>
-    </tr>
-    <tr>
-      <th>4.0</th>
-      <td>30.430000</td>
-      <td>40.720000</td>
-      <td>9.500000</td>
-      <td>2012-07-26 17:28:21.040</td>
-      <td>1.000000</td>
-      <td>4</td>
-    </tr>
-  </tbody>
-</table>
-<p>165 rows × 6 columns</p>
-</div></div>
-</div>
 </section>
 <section id="Remove-the-multiple-detections">
 <h2>Remove the multiple detections<a class="headerlink" href="#Remove-the-multiple-detections" title="Link to this heading"></a></h2>
 <p>Remove multiple detections with the <code class="docutils literal notranslate"><span class="pre">TemplateGroup.remove_multiples</span></code> method.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[121]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># DISTANCE_CRITERION_KM: Distance, in km, between two detected events (within uncertainties) below which</span>
@@ -387,7 +212,7 @@ Reading catalog: 100%|██████████| 12/12 [00:00&lt;00:00, 17.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[122]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># we need to read the waveforms first</span>
@@ -397,7 +222,7 @@ Reading catalog: 100%|██████████| 12/12 [00:00&lt;00:00, 17.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[123]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">template_group</span><span class="o">.</span><span class="n">remove_multiples</span><span class="p">(</span>
@@ -415,7 +240,7 @@ Reading catalog: 100%|██████████| 12/12 [00:00&lt;00:00, 17.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ebeauce/miniconda3/envs/hy7_py310/lib/python3.10/site-packages/BPMF/dataset.py:4212: RuntimeWarning: invalid value encountered in divide
+/home/ebeauce/software/Seismic_BPMF/BPMF/dataset.py:4493: RuntimeWarning: invalid value encountered in true_divide
   unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[
 </pre></div></div>
 </div>
@@ -435,7 +260,15 @@ All events occurring within 4.0 sec, with uncertainty ellipsoids closer than 15.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Removing multiples: 100%|██████████| 165/165 [00:00&lt;00:00, 2887.90it/s]
+Removing multiples:   0%|          | 0/196 [00:00&lt;?, ?it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Removing multiples: 100%|██████████| 196/196 [00:00&lt;00:00, 3229.92it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -456,7 +289,7 @@ Removing multiples: 100%|██████████| 165/165 [00:00&lt;00:00
 </div>
 <p>The catalog now has three new columns: <code class="docutils literal notranslate"><span class="pre">origin_time_sec</span></code> (a timestamp of <code class="docutils literal notranslate"><span class="pre">origin_time</span></code> in seconds), <code class="docutils literal notranslate"><span class="pre">interevent_time_sec</span></code> (template-wise computation), <code class="docutils literal notranslate"><span class="pre">unique_event</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[124]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
@@ -464,7 +297,7 @@ Removing multiples: 100%|██████████| 165/165 [00:00&lt;00:00
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[124]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -492,6 +325,7 @@ Removing multiples: 100%|██████████| 165/165 [00:00&lt;00:00
       <th>origin_time</th>
       <th>cc</th>
       <th>tid</th>
+      <th>return_time</th>
       <th>origin_time_sec</th>
       <th>interevent_time_sec</th>
       <th>unique_event</th>
@@ -507,128 +341,139 @@ Removing multiples: 100%|██████████| 165/165 [00:00&lt;00:00
       <th></th>
       <th></th>
       <th></th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>5.0</th>
-      <td>30.260000</td>
-      <td>40.630000</td>
-      <td>-0.500000</td>
-      <td>2012-07-26 00:20:46.200</td>
-      <td>0.333776</td>
-      <td>5</td>
+      <th>2.0</th>
+      <td>30.210000</td>
+      <td>40.600000</td>
+      <td>-1.500000</td>
+      <td>2012-07-26 00:20:46.080</td>
+      <td>0.355306</td>
+      <td>2</td>
+      <td>NaN</td>
       <td>1.343262e+09</td>
       <td>0.00</td>
       <td>True</td>
     </tr>
     <tr>
       <th>0.0</th>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 00:58:10.840</td>
-      <td>0.252654</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 00:58:10.640</td>
+      <td>0.271688</td>
       <td>0</td>
+      <td>NaN</td>
       <td>1.343264e+09</td>
-      <td>2244.64</td>
+      <td>2244.56</td>
       <td>False</td>
     </tr>
     <tr>
-      <th>9.0</th>
-      <td>30.303516</td>
-      <td>40.723750</td>
-      <td>10.390625</td>
-      <td>2012-07-26 00:58:10.920</td>
-      <td>0.210979</td>
-      <td>9</td>
+      <th>1.0</th>
+      <td>30.343555</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 00:58:11.000</td>
+      <td>0.321159</td>
+      <td>1</td>
+      <td>NaN</td>
+      <td>1.343264e+09</td>
+      <td>0.36</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>3.0</th>
+      <td>30.330000</td>
+      <td>40.700000</td>
+      <td>-1.500000</td>
+      <td>2012-07-26 00:58:11.080</td>
+      <td>0.309295</td>
+      <td>3</td>
+      <td>NaN</td>
       <td>1.343264e+09</td>
       <td>0.08</td>
       <td>False</td>
     </tr>
     <tr>
       <th>6.0</th>
-      <td>30.334766</td>
-      <td>40.718750</td>
-      <td>8.765625</td>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
       <td>2012-07-26 00:58:11.080</td>
-      <td>0.297173</td>
+      <td>0.226411</td>
       <td>6</td>
+      <td>NaN</td>
       <td>1.343264e+09</td>
-      <td>0.16</td>
+      <td>0.00</td>
       <td>False</td>
     </tr>
     <tr>
-      <th>2.0</th>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 00:58:11.080</td>
-      <td>0.385646</td>
-      <td>2</td>
+      <th>10.0</th>
+      <td>30.337695</td>
+      <td>40.716875</td>
+      <td>8.867188</td>
+      <td>2012-07-26 00:58:11.120</td>
+      <td>0.342251</td>
+      <td>10</td>
+      <td>NaN</td>
       <td>1.343264e+09</td>
-      <td>0.00</td>
+      <td>0.04</td>
       <td>True</td>
     </tr>
     <tr>
       <th>0.1</th>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 00:58:16.360</td>
-      <td>0.306255</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 00:58:16.160</td>
+      <td>0.307403</td>
       <td>0</td>
+      <td>5.52</td>
       <td>1.343264e+09</td>
-      <td>5.28</td>
+      <td>5.04</td>
       <td>True</td>
     </tr>
     <tr>
-      <th>9.1</th>
-      <td>30.303516</td>
-      <td>40.723750</td>
-      <td>10.390625</td>
-      <td>2012-07-26 00:58:16.480</td>
-      <td>0.196892</td>
-      <td>9</td>
+      <th>1.1</th>
+      <td>30.343555</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 00:58:16.520</td>
+      <td>0.262917</td>
+      <td>1</td>
+      <td>5.52</td>
+      <td>1.343264e+09</td>
+      <td>0.36</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>6.1</th>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26 00:58:16.640</td>
+      <td>0.195023</td>
+      <td>6</td>
+      <td>5.56</td>
       <td>1.343264e+09</td>
       <td>0.12</td>
       <td>False</td>
     </tr>
     <tr>
-      <th>2.1</th>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 00:58:16.640</td>
-      <td>0.208208</td>
-      <td>2</td>
+      <th>10.1</th>
+      <td>30.337695</td>
+      <td>40.716875</td>
+      <td>8.867188</td>
+      <td>2012-07-26 00:58:16.680</td>
+      <td>0.268669</td>
+      <td>10</td>
+      <td>5.56</td>
       <td>1.343264e+09</td>
-      <td>0.16</td>
+      <td>0.04</td>
       <td>False</td>
-    </tr>
-    <tr>
-      <th>2.2</th>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 00:59:12.800</td>
-      <td>0.236728</td>
-      <td>2</td>
-      <td>1.343264e+09</td>
-      <td>56.16</td>
-      <td>True</td>
-    </tr>
-    <tr>
-      <th>0.2</th>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 01:02:53.120</td>
-      <td>0.286318</td>
-      <td>0</td>
-      <td>1.343265e+09</td>
-      <td>220.32</td>
-      <td>True</td>
     </tr>
   </tbody>
 </table>
@@ -636,7 +481,7 @@ Removing multiples: 100%|██████████| 165/165 [00:00&lt;00:00
 </div>
 <p>The final catalog is made of the unique events only.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[125]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span> <span class="o">=</span> <span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;unique_event&quot;</span><span class="p">]]</span>
@@ -646,7 +491,7 @@ Removing multiples: 100%|██████████| 165/165 [00:00&lt;00:00
 </div>
 <p>Let’s add the location uncertainties from the template events.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[126]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="n">template_group</span><span class="o">.</span><span class="n">templates</span><span class="p">:</span>
@@ -662,36 +507,13 @@ Removing multiples: 100%|██████████| 165/165 [00:00&lt;00:00
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_33812/1634894027.py:4: SettingWithCopyWarning:
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  template_group.catalog.catalog.loc[selection, &#34;hmax_unc&#34;] = tp.hmax_unc
-/tmp/ipykernel_33812/1634894027.py:5: SettingWithCopyWarning:
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  template_group.catalog.catalog.loc[selection, &#34;hmin_unc&#34;] = tp.hmin_unc
-/tmp/ipykernel_33812/1634894027.py:6: SettingWithCopyWarning:
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  template_group.catalog.catalog.loc[selection, &#34;az_hmax_unc&#34;] = tp.az_hmax_unc
-/tmp/ipykernel_33812/1634894027.py:7: SettingWithCopyWarning:
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  template_group.catalog.catalog.loc[selection, &#34;vmax_unc&#34;] = tp.vmax_unc
+Class instance does not have a `cov_mat` attribute.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[127]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;There are </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">)</span><span class="si">}</span><span class="s2"> events in our template matching catalog!&quot;</span><span class="p">)</span>
@@ -704,11 +526,11 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-There are 67 events in our template matching catalog!
+There are 63 events in our template matching catalog!
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[127]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -736,6 +558,7 @@ There are 67 events in our template matching catalog!
       <th>origin_time</th>
       <th>cc</th>
       <th>tid</th>
+      <th>return_time</th>
       <th>origin_time_sec</th>
       <th>interevent_time_sec</th>
       <th>unique_event</th>
@@ -759,88 +582,94 @@ There are 67 events in our template matching catalog!
       <th></th>
       <th></th>
       <th></th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>5.0</th>
-      <td>30.260000</td>
-      <td>40.630000</td>
-      <td>-0.500000</td>
-      <td>2012-07-26 00:20:46.200</td>
-      <td>0.333776</td>
-      <td>5</td>
+      <th>2.0</th>
+      <td>30.210000</td>
+      <td>40.600000</td>
+      <td>-1.500000</td>
+      <td>2012-07-26 00:20:46.080</td>
+      <td>0.355306</td>
+      <td>2</td>
+      <td>NaN</td>
       <td>1.343262e+09</td>
       <td>0.00</td>
       <td>True</td>
-      <td>4.138734</td>
-      <td>2.266640</td>
-      <td>145.441242</td>
-      <td>1.879851</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
-      <th>2.0</th>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 00:58:11.080</td>
-      <td>0.385646</td>
-      <td>2</td>
+      <th>10.0</th>
+      <td>30.337695</td>
+      <td>40.716875</td>
+      <td>8.867188</td>
+      <td>2012-07-26 00:58:11.120</td>
+      <td>0.342251</td>
+      <td>10</td>
+      <td>NaN</td>
       <td>1.343264e+09</td>
-      <td>0.00</td>
+      <td>0.04</td>
       <td>True</td>
-      <td>2.232884</td>
-      <td>2.065874</td>
-      <td>-173.163204</td>
-      <td>5.369457</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>0.1</th>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 00:58:16.360</td>
-      <td>0.306255</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 00:58:16.160</td>
+      <td>0.307403</td>
       <td>0</td>
+      <td>5.52</td>
       <td>1.343264e+09</td>
-      <td>5.28</td>
+      <td>5.04</td>
       <td>True</td>
-      <td>2.154916</td>
-      <td>1.692434</td>
-      <td>155.518831</td>
-      <td>2.975361</td>
-    </tr>
-    <tr>
-      <th>2.2</th>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 00:59:12.800</td>
-      <td>0.236728</td>
-      <td>2</td>
-      <td>1.343264e+09</td>
-      <td>56.16</td>
-      <td>True</td>
-      <td>2.232884</td>
-      <td>2.065874</td>
-      <td>-173.163204</td>
-      <td>5.369457</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>0.2</th>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 01:02:53.120</td>
-      <td>0.286318</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 01:02:52.920</td>
+      <td>0.283410</td>
       <td>0</td>
+      <td>276.76</td>
       <td>1.343265e+09</td>
-      <td>220.32</td>
+      <td>276.24</td>
       <td>True</td>
-      <td>2.154916</td>
-      <td>1.692434</td>
-      <td>155.518831</td>
-      <td>2.975361</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1.3</th>
+      <td>30.343555</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 01:03:46.920</td>
+      <td>0.403296</td>
+      <td>1</td>
+      <td>53.64</td>
+      <td>1.343265e+09</td>
+      <td>0.36</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>...</th>
@@ -857,95 +686,101 @@ There are 67 events in our template matching catalog!
       <td>...</td>
       <td>...</td>
       <td>...</td>
+      <td>...</td>
     </tr>
     <tr>
-      <th>7.12</th>
-      <td>30.319141</td>
-      <td>40.716250</td>
-      <td>9.578125</td>
-      <td>2012-07-26 14:38:50.760</td>
-      <td>0.250089</td>
-      <td>7</td>
+      <th>5.13</th>
+      <td>30.339648</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 14:49:28.560</td>
+      <td>0.231381</td>
+      <td>5</td>
+      <td>638.00</td>
       <td>1.343314e+09</td>
-      <td>0.16</td>
+      <td>636.20</td>
       <td>True</td>
-      <td>7.482605</td>
-      <td>2.519412</td>
-      <td>121.069720</td>
-      <td>6.019241</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
-      <th>8.8</th>
-      <td>30.350391</td>
-      <td>40.713750</td>
-      <td>10.390625</td>
-      <td>2012-07-26 14:49:28.320</td>
-      <td>0.245483</td>
-      <td>8</td>
-      <td>1.343314e+09</td>
-      <td>637.56</td>
-      <td>True</td>
-      <td>5.444797</td>
-      <td>2.801365</td>
-      <td>90.878884</td>
-      <td>5.589809</td>
-    </tr>
-    <tr>
-      <th>3.0</th>
-      <td>30.327441</td>
-      <td>40.600313</td>
-      <td>-1.949219</td>
-      <td>2012-07-26 15:06:20.080</td>
+      <th>11.0</th>
+      <td>30.326099</td>
+      <td>40.600078</td>
+      <td>-1.987305</td>
+      <td>2012-07-26 15:06:20.160</td>
       <td>1.000000</td>
-      <td>3</td>
+      <td>11</td>
+      <td>NaN</td>
       <td>1.343315e+09</td>
-      <td>1011.76</td>
+      <td>1011.60</td>
       <td>True</td>
-      <td>1.397271</td>
-      <td>1.183020</td>
-      <td>128.315144</td>
-      <td>2.780649</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
-      <th>10.3</th>
-      <td>30.333789</td>
-      <td>40.713125</td>
-      <td>7.445312</td>
-      <td>2012-07-26 16:26:52.800</td>
-      <td>0.239526</td>
-      <td>10</td>
+      <th>7.3</th>
+      <td>30.338672</td>
+      <td>40.716250</td>
+      <td>8.765625</td>
+      <td>2012-07-26 16:26:52.560</td>
+      <td>0.250604</td>
+      <td>7</td>
+      <td>22768.84</td>
       <td>1.343320e+09</td>
-      <td>4832.72</td>
+      <td>4832.40</td>
       <td>True</td>
-      <td>2.652178</td>
-      <td>1.579905</td>
-      <td>93.702470</td>
-      <td>3.878422</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
-      <th>4.0</th>
+      <th>7.4</th>
+      <td>30.338672</td>
+      <td>40.716250</td>
+      <td>8.765625</td>
+      <td>2012-07-26 16:33:57.680</td>
+      <td>0.171082</td>
+      <td>7</td>
+      <td>425.12</td>
+      <td>1.343320e+09</td>
+      <td>425.12</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>12.0</th>
       <td>30.430000</td>
       <td>40.720000</td>
-      <td>9.500000</td>
-      <td>2012-07-26 17:28:21.040</td>
+      <td>10.000000</td>
+      <td>2012-07-26 17:28:20.400</td>
       <td>1.000000</td>
-      <td>4</td>
+      <td>12</td>
+      <td>NaN</td>
       <td>1.343324e+09</td>
-      <td>3688.24</td>
+      <td>3262.72</td>
       <td>True</td>
-      <td>3.942112</td>
-      <td>1.625908</td>
-      <td>72.443923</td>
-      <td>4.694059</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
   </tbody>
 </table>
-<p>67 rows × 13 columns</p>
+<p>63 rows × 14 columns</p>
 </div></div>
 </div>
 <p>Let’s plot these events on a map. You will see that there are far fewer dots on the map than the total number of earthquakes in our catalog… This is because all newly detected events are attributed their template locations. Therefore, most events are plotted at the exact same location.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[128]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span>
@@ -961,7 +796,7 @@ There are 67 events in our template matching catalog!
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_9_build_earthquake_catalog_21_0.png" src="../../_images/tutorial_notebooks_9_build_earthquake_catalog_21_0.png" />
+<img alt="../../_images/tutorial_notebooks_9_build_earthquake_catalog_19_0.png" src="../../_images/tutorial_notebooks_9_build_earthquake_catalog_19_0.png" />
 </div>
 </div>
 </section>
@@ -970,7 +805,7 @@ There are 67 events in our template matching catalog!
 <p>In your workflow, you might be ok with the approximate locations of the template matching catalog. However, if you decide to keep refining the catalog, here are some suggestions to get started.</p>
 <p>One possibility to start refining the locations of all events is to re-run the same process as in notebook 6, namely <code class="docutils literal notranslate"><span class="pre">PhaseNet</span></code> and <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[129]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">seisbench.models</span> <span class="k">as</span> <span class="nn">sbm</span>
@@ -981,7 +816,7 @@ There are 67 events in our template matching catalog!
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[129]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1053,7 +888,7 @@ PhaseNet(
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[130]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PhaseNet picking parameters</span>
@@ -1115,7 +950,7 @@ PhaseNet(
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[131]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1178,24 +1013,16 @@ PhaseNet(
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-Relocating each individual event:   0%|          | 0/67 [00:00&lt;?, ?it/s]
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Relocating each individual event: 100%|██████████| 67/67 [00:37&lt;00:00,  1.78it/s]
+Relocating each individual event: 100%|██████████| 63/63 [00:33&lt;00:00,  1.88it/s]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[132]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span>
@@ -1211,7 +1038,7 @@ Relocating each individual event: 100%|██████████| 67/67 [00
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_9_build_earthquake_catalog_26_0.png" src="../../_images/tutorial_notebooks_9_build_earthquake_catalog_26_0.png" />
+<img alt="../../_images/tutorial_notebooks_9_build_earthquake_catalog_24_0.png" src="../../_images/tutorial_notebooks_9_build_earthquake_catalog_24_0.png" />
 </div>
 </div>
 </section>
@@ -1219,7 +1046,7 @@ Relocating each individual event: 100%|██████████| 67/67 [00
 <h2>Assemble the backprojection and template matching catalog<a class="headerlink" href="#Assemble-the-backprojection-and-template-matching-catalog" title="Link to this heading"></a></h2>
 <p>When selecting the template events from the backprojection catalog, we imposed some quality criteria that might have thrown out some events that we still want in our final catalog. Here, we make a simple comparison of the backprojection and template matching catalogs to find these missing events and add them to the final catalog.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[133]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">BACKPROJECTION_CATALOG_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;backprojection_catalog.csv&quot;</span>
@@ -1227,7 +1054,7 @@ Relocating each individual event: 100%|██████████| 67/67 [00
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[134]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tm_catalog</span> <span class="o">=</span> <span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -1239,7 +1066,7 @@ Relocating each individual event: 100%|██████████| 67/67 [00
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[134]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1268,6 +1095,7 @@ Relocating each individual event: 100%|██████████| 67/67 [00
       <th>origin_time</th>
       <th>cc</th>
       <th>tid</th>
+      <th>return_time</th>
       <th>origin_time_sec</th>
       <th>interevent_time_sec</th>
       <th>unique_event</th>
@@ -1280,88 +1108,93 @@ Relocating each individual event: 100%|██████████| 67/67 [00
   <tbody>
     <tr>
       <th>0</th>
-      <td>tm_5.0</td>
-      <td>30.260000</td>
-      <td>40.630000</td>
-      <td>-0.500000</td>
-      <td>2012-07-26 00:20:46.200000</td>
-      <td>0.333776</td>
-      <td>5</td>
+      <td>tm_2.0</td>
+      <td>30.210000</td>
+      <td>40.600000</td>
+      <td>-1.500000</td>
+      <td>2012-07-26 00:20:46.080000</td>
+      <td>0.355306</td>
+      <td>2</td>
+      <td>NaN</td>
       <td>1.343262e+09</td>
       <td>0.00</td>
       <td>True</td>
-      <td>4.138734</td>
-      <td>2.266640</td>
-      <td>145.441242</td>
-      <td>1.879851</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>tm_2.0</td>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 00:58:11.080000</td>
-      <td>0.385646</td>
-      <td>2</td>
+      <td>tm_10.0</td>
+      <td>30.337695</td>
+      <td>40.716875</td>
+      <td>8.867188</td>
+      <td>2012-07-26 00:58:11.120000</td>
+      <td>0.342251</td>
+      <td>10</td>
+      <td>NaN</td>
       <td>1.343264e+09</td>
-      <td>0.00</td>
+      <td>0.04</td>
       <td>True</td>
-      <td>2.232884</td>
-      <td>2.065874</td>
-      <td>-173.163204</td>
-      <td>5.369457</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>2</th>
       <td>tm_0.1</td>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 00:58:16.360000</td>
-      <td>0.306255</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 00:58:16.160000</td>
+      <td>0.307403</td>
       <td>0</td>
+      <td>5.52</td>
       <td>1.343264e+09</td>
-      <td>5.28</td>
+      <td>5.04</td>
       <td>True</td>
-      <td>2.154916</td>
-      <td>1.692434</td>
-      <td>155.518831</td>
-      <td>2.975361</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>tm_2.2</td>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 00:59:12.800000</td>
-      <td>0.236728</td>
-      <td>2</td>
-      <td>1.343264e+09</td>
-      <td>56.16</td>
+      <td>tm_0.2</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 01:02:52.920000</td>
+      <td>0.283410</td>
+      <td>0</td>
+      <td>276.76</td>
+      <td>1.343265e+09</td>
+      <td>276.24</td>
       <td>True</td>
-      <td>2.232884</td>
-      <td>2.065874</td>
-      <td>-173.163204</td>
-      <td>5.369457</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>tm_0.2</td>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 01:02:53.120000</td>
-      <td>0.286318</td>
-      <td>0</td>
+      <td>tm_1.3</td>
+      <td>30.343555</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 01:03:46.920000</td>
+      <td>0.403296</td>
+      <td>1</td>
+      <td>53.64</td>
       <td>1.343265e+09</td>
-      <td>220.32</td>
+      <td>0.36</td>
       <td>True</td>
-      <td>2.154916</td>
-      <td>1.692434</td>
-      <td>155.518831</td>
-      <td>2.975361</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>...</th>
@@ -1379,99 +1212,105 @@ Relocating each individual event: 100%|██████████| 67/67 [00
       <td>...</td>
       <td>...</td>
       <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>58</th>
+      <td>tm_5.13</td>
+      <td>30.339648</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 14:49:28.560000</td>
+      <td>0.231381</td>
+      <td>5</td>
+      <td>638.00</td>
+      <td>1.343314e+09</td>
+      <td>636.20</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>59</th>
+      <td>tm_11.0</td>
+      <td>30.327686</td>
+      <td>40.600156</td>
+      <td>-1.974609</td>
+      <td>2012-07-26T15:06:20.160000Z</td>
+      <td>1.000000</td>
+      <td>11</td>
+      <td>NaN</td>
+      <td>1.343315e+09</td>
+      <td>1011.60</td>
+      <td>True</td>
+      <td>1.188194</td>
+      <td>0.549611</td>
+      <td>91.233016</td>
+      <td>1.402678</td>
+    </tr>
+    <tr>
+      <th>60</th>
+      <td>tm_7.3</td>
+      <td>30.338672</td>
+      <td>40.716250</td>
+      <td>8.765625</td>
+      <td>2012-07-26 16:26:52.560000</td>
+      <td>0.250604</td>
+      <td>7</td>
+      <td>22768.84</td>
+      <td>1.343320e+09</td>
+      <td>4832.40</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>61</th>
+      <td>tm_7.4</td>
+      <td>30.338672</td>
+      <td>40.716250</td>
+      <td>8.765625</td>
+      <td>2012-07-26 16:33:57.680000</td>
+      <td>0.171082</td>
+      <td>7</td>
+      <td>425.12</td>
+      <td>1.343320e+09</td>
+      <td>425.12</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>62</th>
-      <td>tm_7.12</td>
-      <td>30.319141</td>
-      <td>40.716250</td>
-      <td>9.578125</td>
-      <td>2012-07-26 14:38:50.760000</td>
-      <td>0.250089</td>
-      <td>7</td>
-      <td>1.343314e+09</td>
-      <td>0.16</td>
-      <td>True</td>
-      <td>7.482605</td>
-      <td>2.519412</td>
-      <td>121.069720</td>
-      <td>6.019241</td>
-    </tr>
-    <tr>
-      <th>63</th>
-      <td>tm_8.8</td>
-      <td>30.350391</td>
-      <td>40.713750</td>
-      <td>10.390625</td>
-      <td>2012-07-26 14:49:28.320000</td>
-      <td>0.245483</td>
-      <td>8</td>
-      <td>1.343314e+09</td>
-      <td>637.56</td>
-      <td>True</td>
-      <td>5.444797</td>
-      <td>2.801365</td>
-      <td>90.878884</td>
-      <td>5.589809</td>
-    </tr>
-    <tr>
-      <th>64</th>
-      <td>tm_3.0</td>
-      <td>30.325488</td>
-      <td>40.600313</td>
-      <td>-1.949219</td>
-      <td>2012-07-26T15:06:20.040000Z</td>
-      <td>1.000000</td>
-      <td>3</td>
-      <td>1.343315e+09</td>
-      <td>1011.76</td>
-      <td>True</td>
-      <td>1.312401</td>
-      <td>1.086642</td>
-      <td>132.946490</td>
-      <td>2.321178</td>
-    </tr>
-    <tr>
-      <th>65</th>
-      <td>tm_10.3</td>
-      <td>30.333789</td>
-      <td>40.713125</td>
-      <td>7.445312</td>
-      <td>2012-07-26 16:26:52.800000</td>
-      <td>0.239526</td>
-      <td>10</td>
-      <td>1.343320e+09</td>
-      <td>4832.72</td>
-      <td>True</td>
-      <td>2.652178</td>
-      <td>1.579905</td>
-      <td>93.702470</td>
-      <td>3.878422</td>
-    </tr>
-    <tr>
-      <th>66</th>
-      <td>tm_4.0</td>
+      <td>tm_12.0</td>
       <td>30.430000</td>
       <td>40.720000</td>
-      <td>9.500000</td>
-      <td>2012-07-26 17:28:21.040000</td>
+      <td>10.000000</td>
+      <td>2012-07-26 17:28:20.400000</td>
       <td>1.000000</td>
-      <td>4</td>
+      <td>12</td>
+      <td>NaN</td>
       <td>1.343324e+09</td>
-      <td>3688.24</td>
+      <td>3262.72</td>
       <td>True</td>
-      <td>3.942112</td>
-      <td>1.625908</td>
-      <td>72.443923</td>
-      <td>4.694059</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
   </tbody>
 </table>
-<p>67 rows × 14 columns</p>
+<p>63 rows × 15 columns</p>
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[135]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bp_catalog</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
@@ -1485,7 +1324,7 @@ Relocating each individual event: 100%|██████████| 67/67 [00
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[135]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1515,212 +1354,224 @@ Relocating each individual event: 100%|██████████| 67/67 [00
       <th>hmin_unc</th>
       <th>az_hmax_unc</th>
       <th>vmax_unc</th>
+      <th>event_id.1</th>
+    </tr>
+    <tr>
       <th>event_id</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 01:10:22.000</td>
-      <td>2.154916</td>
-      <td>1.692434</td>
-      <td>155.518831</td>
-      <td>2.975361</td>
+      <th>2012-07-26T01:10:21.800000Z</th>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 01:10:21.800</td>
+      <td>1.736381</td>
+      <td>1.185190</td>
+      <td>156.991406</td>
+      <td>2.658909</td>
       <td>bp_0</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>30.331836</td>
-      <td>40.718125</td>
-      <td>9.070312</td>
-      <td>2012-07-26 01:15:54.320</td>
-      <td>3.778648</td>
-      <td>2.197736</td>
-      <td>90.308290</td>
-      <td>3.466360</td>
+      <th>2012-07-26T01:15:54.160000Z</th>
+      <td>30.343555</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 01:15:54.160</td>
+      <td>2.069702</td>
+      <td>1.101945</td>
+      <td>89.976650</td>
+      <td>2.302121</td>
       <td>bp_1</td>
     </tr>
     <tr>
-      <th>2</th>
-      <td>30.260000</td>
-      <td>40.630000</td>
-      <td>-0.500000</td>
-      <td>2012-07-26 01:58:19.840</td>
-      <td>4.138734</td>
-      <td>2.266640</td>
-      <td>145.441242</td>
-      <td>1.879851</td>
+      <th>2012-07-26T01:58:19.720000Z</th>
+      <td>30.210000</td>
+      <td>40.600000</td>
+      <td>-1.500000</td>
+      <td>2012-07-26 01:58:19.720</td>
+      <td>0.969304</td>
+      <td>0.828467</td>
+      <td>1.958087</td>
+      <td>2.184634</td>
       <td>bp_2</td>
     </tr>
     <tr>
-      <th>3</th>
-      <td>30.334766</td>
-      <td>40.718750</td>
-      <td>8.765625</td>
+      <th>2012-07-26T02:35:01.160000Z</th>
+      <td>30.330000</td>
+      <td>40.700000</td>
+      <td>-1.500000</td>
       <td>2012-07-26 02:35:01.160</td>
-      <td>6.868111</td>
-      <td>2.659949</td>
-      <td>113.998302</td>
-      <td>6.660057</td>
+      <td>4.120233</td>
+      <td>2.617063</td>
+      <td>74.828267</td>
+      <td>4.698645</td>
       <td>bp_3</td>
     </tr>
     <tr>
-      <th>4</th>
-      <td>30.320117</td>
-      <td>40.720625</td>
-      <td>9.679688</td>
-      <td>2012-07-26 03:00:39.000</td>
-      <td>2.108578</td>
-      <td>1.945735</td>
-      <td>36.913097</td>
-      <td>3.823750</td>
+      <th>2012-07-26T03:00:39.160000Z</th>
+      <td>30.324023</td>
+      <td>40.715625</td>
+      <td>9.070312</td>
+      <td>2012-07-26 03:00:39.160</td>
+      <td>1.791514</td>
+      <td>1.152377</td>
+      <td>98.957242</td>
+      <td>3.450490</td>
       <td>bp_4</td>
     </tr>
     <tr>
-      <th>5</th>
-      <td>30.319141</td>
-      <td>40.716250</td>
-      <td>9.578125</td>
-      <td>2012-07-26 04:43:38.560</td>
-      <td>7.482605</td>
-      <td>2.519412</td>
-      <td>121.069720</td>
-      <td>6.019241</td>
+      <th>2012-07-26T04:43:40.160000Z</th>
+      <td>30.350000</td>
+      <td>40.720000</td>
+      <td>8.500000</td>
+      <td>2012-07-26 04:43:40.160</td>
+      <td>15.000000</td>
+      <td>15.000000</td>
+      <td>0.000000</td>
+      <td>15.000000</td>
       <td>bp_5</td>
     </tr>
     <tr>
-      <th>6</th>
-      <td>30.350391</td>
-      <td>40.713750</td>
-      <td>10.390625</td>
-      <td>2012-07-26 04:48:38.400</td>
-      <td>5.444797</td>
-      <td>2.801365</td>
-      <td>90.878884</td>
-      <td>5.589809</td>
+      <th>2012-07-26T04:48:38.640000Z</th>
+      <td>30.339648</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 04:48:38.640</td>
+      <td>2.723289</td>
+      <td>1.353023</td>
+      <td>77.879040</td>
+      <td>3.955719</td>
       <td>bp_6</td>
     </tr>
     <tr>
-      <th>7</th>
-      <td>30.303516</td>
-      <td>40.723750</td>
-      <td>10.390625</td>
-      <td>2012-07-26 08:08:25.520</td>
-      <td>3.553459</td>
-      <td>2.339270</td>
-      <td>97.545388</td>
-      <td>6.632963</td>
+      <th>2012-07-26T08:08:25.680000Z</th>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26 08:08:25.680</td>
+      <td>2.498276</td>
+      <td>1.368690</td>
+      <td>78.911129</td>
+      <td>3.864549</td>
       <td>bp_7</td>
     </tr>
     <tr>
-      <th>8</th>
-      <td>30.333789</td>
-      <td>40.713125</td>
-      <td>7.445312</td>
-      <td>2012-07-26 10:07:23.960</td>
-      <td>2.652178</td>
-      <td>1.579905</td>
-      <td>93.702470</td>
-      <td>3.878423</td>
+      <th>2012-07-26T10:07:23.720000Z</th>
+      <td>30.338672</td>
+      <td>40.716250</td>
+      <td>8.765625</td>
+      <td>2012-07-26 10:07:23.720</td>
+      <td>1.648093</td>
+      <td>0.947081</td>
+      <td>92.574287</td>
+      <td>2.542094</td>
       <td>bp_8</td>
     </tr>
     <tr>
-      <th>9</th>
-      <td>30.290000</td>
-      <td>40.620000</td>
-      <td>0.000000</td>
-      <td>2012-07-26 11:55:36.200</td>
-      <td>5.354502</td>
-      <td>0.617736</td>
-      <td>122.424652</td>
-      <td>1.831314</td>
+      <th>2012-07-26T11:55:35.520000Z</th>
+      <td>30.270000</td>
+      <td>40.600000</td>
+      <td>3.000000</td>
+      <td>2012-07-26 11:55:35.520</td>
+      <td>2.728958</td>
+      <td>1.461620</td>
+      <td>152.650097</td>
+      <td>3.774164</td>
       <td>bp_9</td>
     </tr>
     <tr>
-      <th>10</th>
-      <td>30.304492</td>
-      <td>40.799375</td>
-      <td>-1.898438</td>
-      <td>2012-07-26 13:35:26.320</td>
-      <td>3.834992</td>
-      <td>1.344920</td>
-      <td>89.061111</td>
-      <td>6.283254</td>
+      <th>2012-07-26T13:35:26.480000Z</th>
+      <td>30.295215</td>
+      <td>40.797812</td>
+      <td>-1.949219</td>
+      <td>2012-07-26 13:35:26.480</td>
+      <td>3.689917</td>
+      <td>0.996875</td>
+      <td>88.219249</td>
+      <td>5.571478</td>
       <td>bp_10</td>
     </tr>
     <tr>
-      <th>11</th>
-      <td>30.320117</td>
-      <td>40.719375</td>
-      <td>9.476562</td>
-      <td>2012-07-26 13:48:32.840</td>
-      <td>1.981176</td>
-      <td>1.782798</td>
-      <td>7.829659</td>
-      <td>3.604760</td>
+      <th>2012-07-26T13:48:32.480000Z</th>
+      <td>30.315234</td>
+      <td>40.723750</td>
+      <td>11.609375</td>
+      <td>2012-07-26 13:48:32.480</td>
+      <td>1.456039</td>
+      <td>1.326382</td>
+      <td>38.952550</td>
+      <td>2.881104</td>
       <td>bp_11</td>
     </tr>
     <tr>
-      <th>12</th>
-      <td>30.316211</td>
-      <td>40.718125</td>
-      <td>9.882812</td>
-      <td>2012-07-26 13:51:58.680</td>
-      <td>2.361664</td>
-      <td>2.032220</td>
-      <td>22.657235</td>
-      <td>5.617083</td>
+      <th>2012-07-26T13:51:58.200000Z</th>
+      <td>30.314258</td>
+      <td>40.713125</td>
+      <td>13.335938</td>
+      <td>2012-07-26 13:51:58.200</td>
+      <td>1.774422</td>
+      <td>1.626758</td>
+      <td>134.647549</td>
+      <td>3.745274</td>
       <td>bp_12</td>
     </tr>
     <tr>
-      <th>13</th>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 13:53:31.640</td>
-      <td>2.232884</td>
-      <td>2.065874</td>
-      <td>6.836796</td>
-      <td>5.369457</td>
+      <th>2012-07-26T13:53:31.400000Z</th>
+      <td>30.311328</td>
+      <td>40.718750</td>
+      <td>12.015625</td>
+      <td>2012-07-26 13:53:31.400</td>
+      <td>1.563932</td>
+      <td>1.491863</td>
+      <td>32.859366</td>
+      <td>3.106936</td>
       <td>bp_13</td>
     </tr>
     <tr>
-      <th>14</th>
-      <td>30.333789</td>
-      <td>40.713125</td>
-      <td>7.851562</td>
-      <td>2012-07-26 13:56:54.520</td>
-      <td>4.292925</td>
-      <td>1.990915</td>
-      <td>82.517667</td>
-      <td>6.385122</td>
+      <th>2012-07-26T13:56:54.320000Z</th>
+      <td>30.337695</td>
+      <td>40.716875</td>
+      <td>8.867188</td>
+      <td>2012-07-26 13:56:54.320</td>
+      <td>2.864502</td>
+      <td>1.240042</td>
+      <td>83.687111</td>
+      <td>2.879827</td>
       <td>bp_14</td>
     </tr>
     <tr>
-      <th>15</th>
-      <td>30.327441</td>
-      <td>40.600313</td>
-      <td>-1.949219</td>
-      <td>2012-07-26 15:06:20.080</td>
-      <td>1.397271</td>
-      <td>1.183020</td>
-      <td>128.315144</td>
-      <td>2.780649</td>
+      <th>2012-07-26T15:06:20.160000Z</th>
+      <td>30.326099</td>
+      <td>40.600078</td>
+      <td>-1.987305</td>
+      <td>2012-07-26 15:06:20.160</td>
+      <td>1.464562</td>
+      <td>0.501280</td>
+      <td>92.486000</td>
+      <td>1.075268</td>
       <td>bp_15</td>
     </tr>
     <tr>
-      <th>16</th>
+      <th>2012-07-26T17:28:20.400000Z</th>
       <td>30.430000</td>
       <td>40.720000</td>
-      <td>9.500000</td>
-      <td>2012-07-26 17:28:21.040</td>
-      <td>3.942112</td>
-      <td>1.625908</td>
-      <td>72.443923</td>
-      <td>4.694059</td>
+      <td>10.000000</td>
+      <td>2012-07-26 17:28:20.400</td>
+      <td>3.513222</td>
+      <td>1.443351</td>
+      <td>71.766505</td>
+      <td>6.046675</td>
       <td>bp_16</td>
     </tr>
   </tbody>
@@ -1728,7 +1579,7 @@ Relocating each individual event: 100%|██████████| 67/67 [00
 </div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[136]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># catalog merging parameters</span>
@@ -1738,7 +1589,7 @@ Relocating each individual event: 100%|██████████| 67/67 [00
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[145]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">combined_catalog</span> <span class="o">=</span> <span class="n">tm_catalog</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -1768,12 +1619,12 @@ Relocating each individual event: 100%|██████████| 67/67 [00
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00, 530.93it/s]
+Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00, 984.69it/s]
 </pre></div></div>
 </div>
 <p>And here is the combined catalog! In this simple example, it appears that all events in the backprojection catalog were re-detected in the template matching catalog so that the final catalog has no extra events with respect to the template matching catalog. However, it may not be always like that. Some events in the backprojection catalog may not have been well enough located for you to use them as templates, and they may not have been subsequently re-detected in the template matching catalog.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[146]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">combined_catalog</span>
@@ -1781,7 +1632,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[146]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1810,6 +1661,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
       <th>origin_time</th>
       <th>cc</th>
       <th>tid</th>
+      <th>return_time</th>
       <th>origin_time_sec</th>
       <th>interevent_time_sec</th>
       <th>unique_event</th>
@@ -1817,93 +1669,104 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
       <th>hmin_unc</th>
       <th>az_hmax_unc</th>
       <th>vmax_unc</th>
+      <th>event_id.1</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>tm_5.0</td>
-      <td>30.260000</td>
-      <td>40.630000</td>
-      <td>-0.500000</td>
-      <td>2012-07-26 00:20:46.200000</td>
-      <td>0.333776</td>
-      <td>5.0</td>
+      <td>tm_2.0</td>
+      <td>30.210000</td>
+      <td>40.600000</td>
+      <td>-1.500000</td>
+      <td>2012-07-26 00:20:46.080000</td>
+      <td>0.355306</td>
+      <td>2.0</td>
+      <td>NaN</td>
       <td>1.343262e+09</td>
       <td>0.00</td>
       <td>True</td>
-      <td>4.138734</td>
-      <td>2.266640</td>
-      <td>145.441242</td>
-      <td>1.879851</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>tm_2.0</td>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 00:58:11.080000</td>
-      <td>0.385646</td>
-      <td>2.0</td>
+      <td>tm_10.0</td>
+      <td>30.337695</td>
+      <td>40.716875</td>
+      <td>8.867188</td>
+      <td>2012-07-26 00:58:11.120000</td>
+      <td>0.342251</td>
+      <td>10.0</td>
+      <td>NaN</td>
       <td>1.343264e+09</td>
-      <td>0.00</td>
+      <td>0.04</td>
       <td>True</td>
-      <td>2.232884</td>
-      <td>2.065874</td>
-      <td>-173.163204</td>
-      <td>5.369457</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>2</th>
       <td>tm_0.1</td>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 00:58:16.360000</td>
-      <td>0.306255</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 00:58:16.160000</td>
+      <td>0.307403</td>
       <td>0.0</td>
+      <td>5.52</td>
       <td>1.343264e+09</td>
-      <td>5.28</td>
+      <td>5.04</td>
       <td>True</td>
-      <td>2.154916</td>
-      <td>1.692434</td>
-      <td>155.518831</td>
-      <td>2.975361</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>tm_2.2</td>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 00:59:12.800000</td>
-      <td>0.236728</td>
-      <td>2.0</td>
-      <td>1.343264e+09</td>
-      <td>56.16</td>
+      <td>tm_0.2</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 01:02:52.920000</td>
+      <td>0.283410</td>
+      <td>0.0</td>
+      <td>276.76</td>
+      <td>1.343265e+09</td>
+      <td>276.24</td>
       <td>True</td>
-      <td>2.232884</td>
-      <td>2.065874</td>
-      <td>-173.163204</td>
-      <td>5.369457</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>tm_0.2</td>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 01:02:53.120000</td>
-      <td>0.286318</td>
-      <td>0.0</td>
+      <td>tm_1.3</td>
+      <td>30.343555</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 01:03:46.920000</td>
+      <td>0.403296</td>
+      <td>1.0</td>
+      <td>53.64</td>
       <td>1.343265e+09</td>
-      <td>220.32</td>
+      <td>0.36</td>
       <td>True</td>
-      <td>2.154916</td>
-      <td>1.692434</td>
-      <td>155.518831</td>
-      <td>2.975361</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>...</th>
@@ -1921,100 +1784,112 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
       <td>...</td>
       <td>...</td>
       <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>58</th>
+      <td>tm_5.13</td>
+      <td>30.339648</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 14:49:28.560000</td>
+      <td>0.231381</td>
+      <td>5.0</td>
+      <td>638.00</td>
+      <td>1.343314e+09</td>
+      <td>636.20</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>59</th>
+      <td>tm_11.0</td>
+      <td>30.327686</td>
+      <td>40.600156</td>
+      <td>-1.974609</td>
+      <td>2012-07-26T15:06:20.160000Z</td>
+      <td>1.000000</td>
+      <td>11.0</td>
+      <td>NaN</td>
+      <td>1.343315e+09</td>
+      <td>1011.60</td>
+      <td>True</td>
+      <td>1.188194</td>
+      <td>0.549611</td>
+      <td>91.233016</td>
+      <td>1.402678</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>60</th>
+      <td>tm_7.3</td>
+      <td>30.338672</td>
+      <td>40.716250</td>
+      <td>8.765625</td>
+      <td>2012-07-26 16:26:52.560000</td>
+      <td>0.250604</td>
+      <td>7.0</td>
+      <td>22768.84</td>
+      <td>1.343320e+09</td>
+      <td>4832.40</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>61</th>
+      <td>tm_7.4</td>
+      <td>30.338672</td>
+      <td>40.716250</td>
+      <td>8.765625</td>
+      <td>2012-07-26 16:33:57.680000</td>
+      <td>0.171082</td>
+      <td>7.0</td>
+      <td>425.12</td>
+      <td>1.343320e+09</td>
+      <td>425.12</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>62</th>
-      <td>tm_7.12</td>
-      <td>30.319141</td>
-      <td>40.716250</td>
-      <td>9.578125</td>
-      <td>2012-07-26 14:38:50.760000</td>
-      <td>0.250089</td>
-      <td>7.0</td>
-      <td>1.343314e+09</td>
-      <td>0.16</td>
-      <td>True</td>
-      <td>7.482605</td>
-      <td>2.519412</td>
-      <td>121.069720</td>
-      <td>6.019241</td>
-    </tr>
-    <tr>
-      <th>63</th>
-      <td>tm_8.8</td>
-      <td>30.350391</td>
-      <td>40.713750</td>
-      <td>10.390625</td>
-      <td>2012-07-26 14:49:28.320000</td>
-      <td>0.245483</td>
-      <td>8.0</td>
-      <td>1.343314e+09</td>
-      <td>637.56</td>
-      <td>True</td>
-      <td>5.444797</td>
-      <td>2.801365</td>
-      <td>90.878884</td>
-      <td>5.589809</td>
-    </tr>
-    <tr>
-      <th>64</th>
-      <td>tm_3.0</td>
-      <td>30.325488</td>
-      <td>40.600313</td>
-      <td>-1.949219</td>
-      <td>2012-07-26T15:06:20.040000Z</td>
-      <td>1.000000</td>
-      <td>3.0</td>
-      <td>1.343315e+09</td>
-      <td>1011.76</td>
-      <td>True</td>
-      <td>1.312401</td>
-      <td>1.086642</td>
-      <td>132.946490</td>
-      <td>2.321178</td>
-    </tr>
-    <tr>
-      <th>65</th>
-      <td>tm_10.3</td>
-      <td>30.333789</td>
-      <td>40.713125</td>
-      <td>7.445312</td>
-      <td>2012-07-26 16:26:52.800000</td>
-      <td>0.239526</td>
-      <td>10.0</td>
-      <td>1.343320e+09</td>
-      <td>4832.72</td>
-      <td>True</td>
-      <td>2.652178</td>
-      <td>1.579905</td>
-      <td>93.702470</td>
-      <td>3.878422</td>
-    </tr>
-    <tr>
-      <th>66</th>
-      <td>tm_4.0</td>
+      <td>tm_12.0</td>
       <td>30.430000</td>
       <td>40.720000</td>
-      <td>9.500000</td>
-      <td>2012-07-26 17:28:21.040000</td>
+      <td>10.000000</td>
+      <td>2012-07-26 17:28:20.400000</td>
       <td>1.000000</td>
-      <td>4.0</td>
+      <td>12.0</td>
+      <td>NaN</td>
       <td>1.343324e+09</td>
-      <td>3688.24</td>
+      <td>3262.72</td>
       <td>True</td>
-      <td>3.942112</td>
-      <td>1.625908</td>
-      <td>72.443923</td>
-      <td>4.694059</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
   </tbody>
 </table>
-<p>67 rows × 14 columns</p>
+<p>63 rows × 16 columns</p>
 </div></div>
 </div>
 <p>In this example, we see that two entries of the catalog end up pointing to the same event (see below):</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[147]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">combined_catalog</span><span class="p">[</span>
@@ -2026,7 +1901,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[147]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2055,6 +1930,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
       <th>origin_time</th>
       <th>cc</th>
       <th>tid</th>
+      <th>return_time</th>
       <th>origin_time_sec</th>
       <th>interevent_time_sec</th>
       <th>unique_event</th>
@@ -2062,42 +1938,47 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
       <th>hmin_unc</th>
       <th>az_hmax_unc</th>
       <th>vmax_unc</th>
+      <th>event_id.1</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>55</th>
-      <td>tm_2.34</td>
-      <td>30.318164</td>
+      <th>51</th>
+      <td>tm_0.32</td>
+      <td>30.312305</td>
       <td>40.719375</td>
-      <td>9.679688</td>
-      <td>2012-07-26T13:48:32.800000Z</td>
-      <td>0.790949</td>
-      <td>2.0</td>
+      <td>12.523438</td>
+      <td>2012-07-26T13:48:32.400000Z</td>
+      <td>0.193654</td>
+      <td>0.0</td>
+      <td>18.88</td>
       <td>1.343311e+09</td>
-      <td>0.16</td>
+      <td>16.68</td>
       <td>True</td>
-      <td>2.066821</td>
-      <td>1.825771</td>
-      <td>-155.971604</td>
-      <td>3.545014</td>
+      <td>1.698073</td>
+      <td>1.416915</td>
+      <td>-157.812149</td>
+      <td>3.070552</td>
+      <td>NaN</td>
     </tr>
     <tr>
-      <th>56</th>
-      <td>tm_0.33</td>
-      <td>30.318164</td>
+      <th>50</th>
+      <td>tm_0.31</td>
+      <td>30.314258</td>
       <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26T13:48:32.800000Z</td>
-      <td>0.190980</td>
+      <td>11.914062</td>
+      <td>2012-07-26T13:48:32.440000Z</td>
+      <td>0.733365</td>
       <td>0.0</td>
+      <td>20407.12</td>
       <td>1.343311e+09</td>
-      <td>18.48</td>
+      <td>785.84</td>
       <td>True</td>
-      <td>2.113576</td>
-      <td>1.811872</td>
-      <td>-161.635648</td>
-      <td>3.550606</td>
+      <td>1.516158</td>
+      <td>1.360425</td>
+      <td>-140.439618</td>
+      <td>2.908200</td>
+      <td>NaN</td>
     </tr>
   </tbody>
 </table>
@@ -2105,7 +1986,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
 </div>
 <p><strong>versus</strong> (before relocating each event individually)</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[148]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">initial_catalog</span><span class="p">[</span>
@@ -2117,7 +1998,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[148]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2145,6 +2026,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
       <th>origin_time</th>
       <th>cc</th>
       <th>tid</th>
+      <th>return_time</th>
       <th>origin_time_sec</th>
       <th>interevent_time_sec</th>
       <th>unique_event</th>
@@ -2160,31 +2042,34 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
       <th></th>
       <th></th>
       <th></th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>2.34</th>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 13:48:32.760</td>
-      <td>0.790949</td>
-      <td>2</td>
+      <th>0.31</th>
+      <td>30.323047</td>
+      <td>40.73125</td>
+      <td>12.015625</td>
+      <td>2012-07-26 13:48:32.320</td>
+      <td>0.733365</td>
+      <td>0</td>
+      <td>20407.12</td>
       <td>1.343311e+09</td>
-      <td>0.16</td>
+      <td>785.84</td>
       <td>True</td>
     </tr>
     <tr>
-      <th>0.33</th>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 13:48:51.400</td>
-      <td>0.190980</td>
+      <th>0.32</th>
+      <td>30.323047</td>
+      <td>40.73125</td>
+      <td>12.015625</td>
+      <td>2012-07-26 13:48:51.200</td>
+      <td>0.193654</td>
       <td>0</td>
+      <td>18.88</td>
       <td>1.343311e+09</td>
-      <td>18.48</td>
+      <td>16.68</td>
       <td>True</td>
     </tr>
   </tbody>
@@ -2196,7 +2081,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
 <section id="Last-clean-up">
 <h2>Last clean up<a class="headerlink" href="#Last-clean-up" title="Link to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[149]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">final_cat</span> <span class="o">=</span> <span class="n">combined_catalog</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -2248,13 +2133,23 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 ------ Iteration 0 --------
-Removed 1 events. Examples:
+Removed 3 events. Examples:
+origin_time    2012-07-26T01:15:14.320000Z
+event_id                            tm_0.9
+longitude                        30.381641
+latitude                          40.72125
+Name: 10, dtype: object
+origin_time    2012-07-26T01:15:15.000000Z
+event_id                            tm_1.9
+longitude                        30.329883
+latitude                         40.714375
+Name: 11, dtype: object
 ------ Iteration 1 --------
 Removed 0 events. Examples:
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[150]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">final_cat</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;event_id&quot;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2265,7 +2160,7 @@ Removed 0 events. Examples:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[150]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2294,13 +2189,17 @@ Removed 0 events. Examples:
       <th>origin_time</th>
       <th>cc</th>
       <th>tid</th>
+      <th>return_time</th>
       <th>hmax_unc</th>
       <th>hmin_unc</th>
       <th>az_hmax_unc</th>
       <th>vmax_unc</th>
+      <th>event_id.1</th>
     </tr>
     <tr>
       <th>event_id</th>
+      <th></th>
+      <th></th>
       <th></th>
       <th></th>
       <th></th>
@@ -2316,169 +2215,974 @@ Removed 0 events. Examples:
   </thead>
   <tbody>
     <tr>
-      <th>tm_5.0</th>
-      <td>tm_5.0</td>
-      <td>30.260000</td>
-      <td>40.630000</td>
-      <td>-0.500000</td>
-      <td>2012-07-26 00:20:46.200000</td>
-      <td>0.333776</td>
-      <td>5.0</td>
-      <td>4.138734</td>
-      <td>2.266640</td>
-      <td>145.441242</td>
-      <td>1.879851</td>
-    </tr>
-    <tr>
       <th>tm_2.0</th>
       <td>tm_2.0</td>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 00:58:11.080000</td>
-      <td>0.385646</td>
+      <td>30.210000</td>
+      <td>40.600000</td>
+      <td>-1.500000</td>
+      <td>2012-07-26 00:20:46.080000</td>
+      <td>0.355306</td>
       <td>2.0</td>
-      <td>2.232884</td>
-      <td>2.065874</td>
-      <td>-173.163204</td>
-      <td>5.369457</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_10.0</th>
+      <td>tm_10.0</td>
+      <td>30.337695</td>
+      <td>40.716875</td>
+      <td>8.867188</td>
+      <td>2012-07-26 00:58:11.120000</td>
+      <td>0.342251</td>
+      <td>10.0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>tm_0.1</th>
       <td>tm_0.1</td>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 00:58:16.360000</td>
-      <td>0.306255</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 00:58:16.160000</td>
+      <td>0.307403</td>
       <td>0.0</td>
-      <td>2.154916</td>
-      <td>1.692434</td>
-      <td>155.518831</td>
-      <td>2.975361</td>
-    </tr>
-    <tr>
-      <th>tm_2.2</th>
-      <td>tm_2.2</td>
-      <td>30.320117</td>
-      <td>40.721875</td>
-      <td>9.476562</td>
-      <td>2012-07-26 00:59:12.800000</td>
-      <td>0.236728</td>
-      <td>2.0</td>
-      <td>2.232884</td>
-      <td>2.065874</td>
-      <td>-173.163204</td>
-      <td>5.369457</td>
+      <td>5.52</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>tm_0.2</th>
       <td>tm_0.2</td>
-      <td>30.322070</td>
-      <td>40.726875</td>
-      <td>10.695312</td>
-      <td>2012-07-26 01:02:53.120000</td>
-      <td>0.286318</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 01:02:52.920000</td>
+      <td>0.283410</td>
       <td>0.0</td>
-      <td>2.154916</td>
-      <td>1.692434</td>
-      <td>155.518831</td>
-      <td>2.975361</td>
+      <td>276.76</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
+      <th>tm_1.3</th>
+      <td>tm_1.3</td>
+      <td>30.343555</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 01:03:46.920000</td>
+      <td>0.403296</td>
+      <td>1.0</td>
+      <td>53.64</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
-      <th>tm_7.12</th>
-      <td>tm_7.12</td>
-      <td>30.319141</td>
-      <td>40.716250</td>
-      <td>9.578125</td>
-      <td>2012-07-26 14:38:50.760000</td>
-      <td>0.250089</td>
-      <td>7.0</td>
-      <td>7.482605</td>
-      <td>2.519412</td>
-      <td>121.069720</td>
-      <td>6.019241</td>
-    </tr>
-    <tr>
-      <th>tm_8.8</th>
-      <td>tm_8.8</td>
-      <td>30.350391</td>
-      <td>40.713750</td>
-      <td>10.390625</td>
-      <td>2012-07-26 14:49:28.320000</td>
-      <td>0.245483</td>
-      <td>8.0</td>
-      <td>5.444797</td>
-      <td>2.801365</td>
-      <td>90.878884</td>
-      <td>5.589809</td>
-    </tr>
-    <tr>
-      <th>tm_3.0</th>
-      <td>tm_3.0</td>
-      <td>30.325488</td>
-      <td>40.600313</td>
-      <td>-1.949219</td>
-      <td>2012-07-26T15:06:20.040000Z</td>
-      <td>1.000000</td>
-      <td>3.0</td>
-      <td>1.312401</td>
-      <td>1.086642</td>
-      <td>132.946490</td>
-      <td>2.321178</td>
+      <th>tm_0.4</th>
+      <td>tm_0.4</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 01:09:15.880000</td>
+      <td>0.210914</td>
+      <td>0.0</td>
+      <td>329.32</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>tm_10.3</th>
       <td>tm_10.3</td>
-      <td>30.333789</td>
-      <td>40.713125</td>
-      <td>7.445312</td>
-      <td>2012-07-26 16:26:52.800000</td>
-      <td>0.239526</td>
+      <td>30.337695</td>
+      <td>40.716875</td>
+      <td>8.867188</td>
+      <td>2012-07-26 01:09:26</td>
+      <td>0.290443</td>
       <td>10.0</td>
-      <td>2.652178</td>
-      <td>1.579905</td>
-      <td>93.702470</td>
-      <td>3.878422</td>
+      <td>338.96</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
-      <th>tm_4.0</th>
-      <td>tm_4.0</td>
-      <td>30.430000</td>
+      <th>tm_0.6</th>
+      <td>tm_0.6</td>
+      <td>30.320117</td>
+      <td>40.729375</td>
+      <td>12.117188</td>
+      <td>2012-07-26T01:10:21.840000Z</td>
+      <td>1.000000</td>
+      <td>0.0</td>
+      <td>56.28</td>
+      <td>1.776457</td>
+      <td>1.293067</td>
+      <td>153.641704</td>
+      <td>2.649126</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_10.5</th>
+      <td>tm_10.5</td>
+      <td>30.337695</td>
+      <td>40.716875</td>
+      <td>8.867188</td>
+      <td>2012-07-26 01:10:44.080000</td>
+      <td>0.590581</td>
+      <td>10.0</td>
+      <td>21.76</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_1.7</th>
+      <td>tm_1.7</td>
+      <td>30.343555</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 01:12:32.880000</td>
+      <td>0.315028</td>
+      <td>1.0</td>
+      <td>108.92</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_1.9</th>
+      <td>tm_1.9</td>
+      <td>30.329883</td>
+      <td>40.714375</td>
+      <td>8.664062</td>
+      <td>2012-07-26T01:15:15.000000Z</td>
+      <td>0.332720</td>
+      <td>1.0</td>
+      <td>7.56</td>
+      <td>5.721093</td>
+      <td>1.856309</td>
+      <td>109.504639</td>
+      <td>4.681934</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_1.11</th>
+      <td>tm_1.11</td>
+      <td>30.339648</td>
+      <td>40.718125</td>
+      <td>9.070312</td>
+      <td>2012-07-26T01:15:54.240000Z</td>
+      <td>1.000000</td>
+      <td>1.0</td>
+      <td>19.08</td>
+      <td>1.949209</td>
+      <td>1.118634</td>
+      <td>93.451420</td>
+      <td>2.413492</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_0.13</th>
+      <td>tm_0.13</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 01:16:29.640000</td>
+      <td>0.378459</td>
+      <td>0.0</td>
+      <td>35.84</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_0.14</th>
+      <td>tm_0.14</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 01:18:32.520000</td>
+      <td>0.279227</td>
+      <td>0.0</td>
+      <td>122.88</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_3.8</th>
+      <td>tm_3.8</td>
+      <td>30.330000</td>
+      <td>40.700000</td>
+      <td>-1.500000</td>
+      <td>2012-07-26 01:35:14.720000</td>
+      <td>0.257078</td>
+      <td>3.0</td>
+      <td>1124.60</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_1.14</th>
+      <td>tm_1.14</td>
+      <td>30.343555</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 01:39:53.680000</td>
+      <td>0.230187</td>
+      <td>1.0</td>
+      <td>1280.80</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_0.16</th>
+      <td>tm_0.16</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 01:47:30.080000</td>
+      <td>0.201523</td>
+      <td>0.0</td>
+      <td>456.76</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_6.12</th>
+      <td>tm_6.12</td>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26 01:52:27.960000</td>
+      <td>0.204428</td>
+      <td>6.0</td>
+      <td>2034.96</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_1.15</th>
+      <td>tm_1.15</td>
+      <td>30.358203</td>
+      <td>40.693750</td>
+      <td>11.609375</td>
+      <td>2012-07-26T01:52:36.480000Z</td>
+      <td>0.395754</td>
+      <td>1.0</td>
+      <td>762.76</td>
+      <td>6.427452</td>
+      <td>2.654027</td>
+      <td>110.981749</td>
+      <td>5.236795</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_2.1</th>
+      <td>tm_2.1</td>
+      <td>30.210000</td>
+      <td>40.600000</td>
+      <td>-1.500000</td>
+      <td>2012-07-26 01:58:19.720000</td>
+      <td>1.000000</td>
+      <td>2.0</td>
+      <td>5853.64</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_0.18</th>
+      <td>tm_0.18</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 02:22:49.440000</td>
+      <td>0.301763</td>
+      <td>0.0</td>
+      <td>1813.36</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_1.17</th>
+      <td>tm_1.17</td>
+      <td>30.343555</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 02:24:34.920000</td>
+      <td>0.467743</td>
+      <td>1.0</td>
+      <td>105.12</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_3.11</th>
+      <td>tm_3.11</td>
+      <td>30.330000</td>
+      <td>40.700000</td>
+      <td>-1.500000</td>
+      <td>2012-07-26 02:35:01.160000</td>
+      <td>1.000000</td>
+      <td>3.0</td>
+      <td>626.12</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_4.2</th>
+      <td>tm_4.2</td>
+      <td>30.350000</td>
       <td>40.720000</td>
-      <td>9.500000</td>
-      <td>2012-07-26 17:28:21.040000</td>
+      <td>8.500000</td>
+      <td>2012-07-26 02:43:23.080000</td>
+      <td>0.231139</td>
+      <td>4.0</td>
+      <td>5557.32</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_0.21</th>
+      <td>tm_0.21</td>
+      <td>30.315234</td>
+      <td>40.713750</td>
+      <td>12.015625</td>
+      <td>2012-07-26T03:00:38.720000Z</td>
+      <td>0.697115</td>
+      <td>0.0</td>
+      <td>1537.84</td>
+      <td>1.676146</td>
+      <td>1.188218</td>
+      <td>93.072440</td>
+      <td>3.278191</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_6.18</th>
+      <td>tm_6.18</td>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26 03:08:33.560000</td>
+      <td>0.411435</td>
+      <td>6.0</td>
+      <td>474.56</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_6.19</th>
+      <td>tm_6.19</td>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26 03:10:55.080000</td>
+      <td>0.321954</td>
+      <td>6.0</td>
+      <td>141.52</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_0.24</th>
+      <td>tm_0.24</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 03:32:50.800000</td>
+      <td>0.172344</td>
+      <td>0.0</td>
+      <td>1316.20</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_0.25</th>
+      <td>tm_0.25</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 03:38:13.200000</td>
+      <td>0.196873</td>
+      <td>0.0</td>
+      <td>322.40</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_6.20</th>
+      <td>tm_6.20</td>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26 04:30:33.560000</td>
+      <td>0.191620</td>
+      <td>6.0</td>
+      <td>4778.48</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_4.5</th>
+      <td>tm_4.5</td>
+      <td>30.350000</td>
+      <td>40.720000</td>
+      <td>8.500000</td>
+      <td>2012-07-26 04:43:40.160000</td>
       <td>1.000000</td>
       <td>4.0</td>
-      <td>3.942112</td>
-      <td>1.625908</td>
-      <td>72.443923</td>
-      <td>4.694059</td>
+      <td>5704.84</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_10.19</th>
+      <td>tm_10.19</td>
+      <td>30.337695</td>
+      <td>40.716875</td>
+      <td>8.867188</td>
+      <td>2012-07-26 04:45:04</td>
+      <td>0.277363</td>
+      <td>10.0</td>
+      <td>5648.88</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_4.6</th>
+      <td>tm_4.6</td>
+      <td>30.350000</td>
+      <td>40.720000</td>
+      <td>8.500000</td>
+      <td>2012-07-26 04:46:51.080000</td>
+      <td>0.335807</td>
+      <td>4.0</td>
+      <td>190.92</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_5.5</th>
+      <td>tm_5.5</td>
+      <td>30.339648</td>
+      <td>40.718125</td>
+      <td>9.273438</td>
+      <td>2012-07-26T04:48:38.640000Z</td>
+      <td>1.000000</td>
+      <td>5.0</td>
+      <td>109.32</td>
+      <td>2.760022</td>
+      <td>1.433242</td>
+      <td>80.900073</td>
+      <td>4.036697</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_4.8</th>
+      <td>tm_4.8</td>
+      <td>30.350000</td>
+      <td>40.720000</td>
+      <td>8.500000</td>
+      <td>2012-07-26 04:51:08.440000</td>
+      <td>0.354223</td>
+      <td>4.0</td>
+      <td>148.04</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_6.24</th>
+      <td>tm_6.24</td>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26 05:22:04.480000</td>
+      <td>0.286994</td>
+      <td>6.0</td>
+      <td>1857.76</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_6.25</th>
+      <td>tm_6.25</td>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26 05:45:46.040000</td>
+      <td>0.182386</td>
+      <td>6.0</td>
+      <td>1421.56</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_6.26</th>
+      <td>tm_6.26</td>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26 05:46:59.280000</td>
+      <td>0.267265</td>
+      <td>6.0</td>
+      <td>73.24</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_6.27</th>
+      <td>tm_6.27</td>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26 05:57:16.480000</td>
+      <td>0.211332</td>
+      <td>6.0</td>
+      <td>617.20</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_6.28</th>
+      <td>tm_6.28</td>
+      <td>30.322070</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26T08:08:25.760000Z</td>
+      <td>1.000000</td>
+      <td>6.0</td>
+      <td>7869.20</td>
+      <td>1.687249</td>
+      <td>1.420870</td>
+      <td>119.057751</td>
+      <td>4.167423</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_7.0</th>
+      <td>tm_7.0</td>
+      <td>30.338672</td>
+      <td>40.716250</td>
+      <td>8.765625</td>
+      <td>2012-07-26 09:21:39.400000</td>
+      <td>0.205630</td>
+      <td>7.0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_7.1</th>
+      <td>tm_7.1</td>
+      <td>30.338672</td>
+      <td>40.716250</td>
+      <td>8.765625</td>
+      <td>2012-07-26 09:28:48.360000</td>
+      <td>0.174923</td>
+      <td>7.0</td>
+      <td>428.96</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_7.2</th>
+      <td>tm_7.2</td>
+      <td>30.339160</td>
+      <td>40.716563</td>
+      <td>8.816406</td>
+      <td>2012-07-26T10:07:23.720000Z</td>
+      <td>1.000000</td>
+      <td>7.0</td>
+      <td>2315.36</td>
+      <td>1.549251</td>
+      <td>0.960434</td>
+      <td>88.241652</td>
+      <td>2.583515</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_6.29</th>
+      <td>tm_6.29</td>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26 10:16:45.800000</td>
+      <td>0.359092</td>
+      <td>6.0</td>
+      <td>7700.12</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_6.30</th>
+      <td>tm_6.30</td>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26 10:53:46.600000</td>
+      <td>0.235509</td>
+      <td>6.0</td>
+      <td>2220.80</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_6.31</th>
+      <td>tm_6.31</td>
+      <td>30.335742</td>
+      <td>40.720625</td>
+      <td>8.867188</td>
+      <td>2012-07-26 11:02:23.600000</td>
+      <td>0.350748</td>
+      <td>6.0</td>
+      <td>517.00</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_8.0</th>
+      <td>tm_8.0</td>
+      <td>30.270000</td>
+      <td>40.600000</td>
+      <td>3.000000</td>
+      <td>2012-07-26 11:55:35.520000</td>
+      <td>1.000000</td>
+      <td>8.0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_9.0</th>
+      <td>tm_9.0</td>
+      <td>30.294238</td>
+      <td>40.798437</td>
+      <td>-1.949219</td>
+      <td>2012-07-26T13:35:26.440000Z</td>
+      <td>1.000000</td>
+      <td>9.0</td>
+      <td>NaN</td>
+      <td>3.715397</td>
+      <td>0.989535</td>
+      <td>89.098493</td>
+      <td>5.636553</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_0.31</th>
+      <td>tm_0.31</td>
+      <td>30.314258</td>
+      <td>40.721875</td>
+      <td>11.914062</td>
+      <td>2012-07-26T13:48:32.440000Z</td>
+      <td>0.733365</td>
+      <td>0.0</td>
+      <td>20407.12</td>
+      <td>1.516158</td>
+      <td>1.360425</td>
+      <td>-140.439618</td>
+      <td>2.908200</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_0.33</th>
+      <td>tm_0.33</td>
+      <td>30.323047</td>
+      <td>40.731250</td>
+      <td>12.015625</td>
+      <td>2012-07-26 13:50:18.120000</td>
+      <td>0.342391</td>
+      <td>0.0</td>
+      <td>86.92</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_10.24</th>
+      <td>tm_10.24</td>
+      <td>30.312305</td>
+      <td>40.710625</td>
+      <td>13.539062</td>
+      <td>2012-07-26T13:51:58.160000Z</td>
+      <td>0.536160</td>
+      <td>10.0</td>
+      <td>100.08</td>
+      <td>1.930258</td>
+      <td>1.772629</td>
+      <td>154.039822</td>
+      <td>3.537436</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_0.35</th>
+      <td>tm_0.35</td>
+      <td>30.308398</td>
+      <td>40.718125</td>
+      <td>12.320312</td>
+      <td>2012-07-26T13:53:31.360000Z</td>
+      <td>0.757365</td>
+      <td>0.0</td>
+      <td>93.04</td>
+      <td>1.609972</td>
+      <td>1.401390</td>
+      <td>-153.469187</td>
+      <td>2.941569</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_10.26</th>
+      <td>tm_10.26</td>
+      <td>30.351367</td>
+      <td>40.721875</td>
+      <td>7.648438</td>
+      <td>2012-07-26T13:54:54.240000Z</td>
+      <td>0.408196</td>
+      <td>10.0</td>
+      <td>82.60</td>
+      <td>4.956472</td>
+      <td>2.006614</td>
+      <td>89.078378</td>
+      <td>6.387298</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_10.27</th>
+      <td>tm_10.27</td>
+      <td>30.337695</td>
+      <td>40.716875</td>
+      <td>8.867188</td>
+      <td>2012-07-26T13:56:54.320000Z</td>
+      <td>1.000000</td>
+      <td>10.0</td>
+      <td>120.04</td>
+      <td>2.815204</td>
+      <td>1.244460</td>
+      <td>83.432871</td>
+      <td>2.466413</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_4.14</th>
+      <td>tm_4.14</td>
+      <td>30.350000</td>
+      <td>40.720000</td>
+      <td>8.500000</td>
+      <td>2012-07-26 14:38:52.360000</td>
+      <td>0.257913</td>
+      <td>4.0</td>
+      <td>2718.96</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_5.13</th>
+      <td>tm_5.13</td>
+      <td>30.339648</td>
+      <td>40.716875</td>
+      <td>9.273438</td>
+      <td>2012-07-26 14:49:28.560000</td>
+      <td>0.231381</td>
+      <td>5.0</td>
+      <td>638.00</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_11.0</th>
+      <td>tm_11.0</td>
+      <td>30.327686</td>
+      <td>40.600156</td>
+      <td>-1.974609</td>
+      <td>2012-07-26T15:06:20.160000Z</td>
+      <td>1.000000</td>
+      <td>11.0</td>
+      <td>NaN</td>
+      <td>1.188194</td>
+      <td>0.549611</td>
+      <td>91.233016</td>
+      <td>1.402678</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_7.3</th>
+      <td>tm_7.3</td>
+      <td>30.338672</td>
+      <td>40.716250</td>
+      <td>8.765625</td>
+      <td>2012-07-26 16:26:52.560000</td>
+      <td>0.250604</td>
+      <td>7.0</td>
+      <td>22768.84</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_7.4</th>
+      <td>tm_7.4</td>
+      <td>30.338672</td>
+      <td>40.716250</td>
+      <td>8.765625</td>
+      <td>2012-07-26 16:33:57.680000</td>
+      <td>0.171082</td>
+      <td>7.0</td>
+      <td>425.12</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>tm_12.0</th>
+      <td>tm_12.0</td>
+      <td>30.430000</td>
+      <td>40.720000</td>
+      <td>10.000000</td>
+      <td>2012-07-26 17:28:20.400000</td>
+      <td>1.000000</td>
+      <td>12.0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
   </tbody>
 </table>
-<p>66 rows × 11 columns</p>
 </div></div>
 </div>
 </section>
 <section id="Save-final-catalog">
 <h2>Save final catalog<a class="headerlink" href="#Save-final-catalog" title="Link to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[143]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># csv format</span>
@@ -2489,7 +3193,7 @@ Removed 0 events. Examples:
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[144]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># hdf5 / BPMF format</span>
@@ -2510,7 +3214,7 @@ Removed 0 events. Examples:
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[151]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The final cat!</span>
@@ -2532,7 +3236,7 @@ Removed 0 events. Examples:
     ⢠⣤⣶⣾⣧⣤⣤⣀⡀⠀⠀⠀⠀⠈⠀⠀⠀⢀⡤⠴⠶⠤⢤⡀⣧⣀⣀⠀
     ⠻⠶⣾⠁⠀⠀⠀⠀⠙⣆⠀⠀⠀⠀⠀⠀⣰⠋⠀⠀⠀⠀⠀⢹⣿⣭⣽⠇
     ⠀⠀⠙⠤⠴⢤⡤⠤⠤⠋⠉⠉⠉⠉⠉⠉⠉⠳⠖⠦⠤⠶⠦⠞⠁⠀⠀⠀
-                ALL DONE!⠀⠀⠀⠀
+                ⠀ALL DONE!⠀⠀⠀
 
 </pre></div></div>
 </div>
@@ -2544,7 +3248,7 @@ Removed 0 events. Examples:
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="8_template_matching.html" class="btn btn-neutral float-left" title="Template Matching" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="10_magnitudes.html" class="btn btn-neutral float-right" title="Earthquake Magnitudes: Seismic Moment, Moment Magnitude and Local Magnitude" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="10_magnitudes.html" class="btn btn-neutral float-right" title="Reminders on Earthquake Magnitudes:Seismic Moment, Moment Magnitude and Local Magnitude" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
