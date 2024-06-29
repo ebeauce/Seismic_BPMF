@@ -50,6 +50,9 @@ def bandpass_filter(
         Defines the sharpness of the edges of the taper
         function. We use the tukey window function. The
         default value of 0.01 produces sharp windows.
+    zerophase : bool, optional
+        If True, the filter is applied in the forward and
+        reverse direction to cancel out phase shifting.
 
     Returns
     --------
@@ -72,19 +75,6 @@ def bandpass_filter(
     taper = taper.reshape(X.shape[0], X.shape[1], order="F")
 
     # design the filter
-    # filter_num, filter_den = iirfilter(filter_order,
-    #                                   [freqmin/f_Nyq, freqmax/f_Nyq],
-    #                                   btype='bandpass',
-    #                                   ftype='butter',
-    #                                   output='ba')
-    # filtered_X = lfilter(filter_num,
-    #                     filter_den,
-    #                     X*taper)
-    ## apply the filter a second time to have a
-    ## zero phase filter
-    # filtered_X = lfilter(filter_num,
-    #                     filter_den,
-    #                     X[::-1])[::-1]
     z, p, k = iirfilter(
         filter_order,
         [freqmin / f_Nyq, freqmax / f_Nyq],
@@ -93,6 +83,7 @@ def bandpass_filter(
         output="zpk",
     )
     sos = zpk2sos(z, p, k)
+    # apply the filter
     filtered_X = sosfilt(sos, X * taper)
     if zerophase:
         filtered_X = sosfilt(sos, filtered_X[:, ::-1])[:, ::-1]
@@ -102,6 +93,30 @@ def bandpass_filter(
 def lowpass_chebyshev_I(
     X, freqmax, sampling_rate, order=8, max_ripple=5, zerophase=False
 ):
+    """Apply low-pass type I Chebyshev filter.
+
+    Parameters
+    ----------
+    X : array-like
+        1D array-like with data to filter.
+    freqmax : float
+        High cut-off frequency, in Hz.
+    sampling_rate : float
+        Sampling rate, in Hz, of `X`.
+    order : int, optional
+        Order of the filter. Defaults to 8.
+    max_ripple : int, optional
+        Defaults to 5.
+    zerophase : bool, optional
+       If True, the filter is applied in the forward and
+       reverse direction to cancel out phase shifting.
+     
+    Returns
+    -------
+    X : array-like
+        1D array-like with filtered data.
+    """
+
     from scipy.signal import cheby1, sosfilt
 
     nyquist = sampling_rate / 2.0
@@ -124,6 +139,30 @@ def lowpass_chebyshev_I(
 def lowpass_chebyshev_II(
     X, freqmax, sampling_rate, order=3, min_attenuation_dB=40.0, zerophase=False
 ):
+    """Apply low-pass type II Chebyshev filter.
+
+    Parameters
+    ----------
+    X : array-like
+        1D array-like with data to filter.
+    freqmax : float
+        High cut-off frequency, in Hz.
+    sampling_rate : float
+        Sampling rate, in Hz, of `X`.
+    order : int, optional
+        Order of the filter. Defaults to 3.
+    min_attenuation_dB : float, optional 
+        The minimum attenuation required in the stop band, in decibels.
+        Defaults to 40.
+    zerophase : bool, optional
+       If True, the filter is applied in the forward and
+       reverse direction to cancel out phase shifting.
+     
+    Returns
+    -------
+    X : array-like
+        1D array-like with filtered data.
+    """
     from scipy.signal import cheby2, sosfilt
 
     nyquist = sampling_rate / 2.0
@@ -200,7 +239,7 @@ def preprocess_stream(
     SR_decimals : int, optional
         The number of decimals to round sampling rate values to.
     decimation_method : str, optional
-        The method used for decimation.
+        The method used for decimation. Either 'simple' or 'fourier'.
     allow_oversampling : bool, optional
         If True, raw traces that have a sampling rate lower than the target
         sampling rate will be oversampled instead of being discarded.Defaults
@@ -242,10 +281,6 @@ def preprocess_stream(
     if n_threads != 1:
         from concurrent.futures import ProcessPoolExecutor
 
-        #for tr in stream:
-        #    tr.stats.sampling_rate = np.round(
-        #            tr.stats.sampling_rate, decimals=SR_decimals
-        #            )
         stream, _ = _premerge(stream, verbose=verbose)
 
         with ProcessPoolExecutor(max_workers=n_threads) as executor:
@@ -1991,31 +2026,6 @@ def normalize_batch(seismogram, normalization_window_sample=3000, overlap=0.50):
 
     return seismogram
 
-#def trigger_picks(
-#        probability,
-#        threshold,
-#        minimum_peak_distance_samp=int(1. * cfg.SAMPLING_RATE_HZ)
-#        ):
-#    """
-#    Parameters
-#    ----------
-#    probability : 1D array_like
-#    threshold : float
-#    minimum_peak_distance_samp : integer
-#
-#    Returns
-#    -------
-#    probability_at_peak : 1D array_like
-#    peak_indexes : 1D array_like
-#    """
-#    peak_indexes = _detect_peaks(
-#            probability, mph=threshold, mpd=minimum_peak_distance_samp
-#            )
-#    return (
-#            np.atleast_1d(probability[peak_indexes]),
-#            np.atleast_1d(peak_indexes)
-#            )
-
 def find_picks(
         phase_probability, threshold, **kwargs
         ):
@@ -2089,6 +2099,11 @@ def get_picks(
         modified pick probability is selected.
     search_win_samp: scalar int, optional
         Standard deviation, in samples, used in the gaussian weights.
+
+    Returns
+    -------
+    picks : `pandas.DataFrame`
+        `pandas.DataFrame` with a single P- and S-wave pick per channel.
     """
     columns = ["_picks", "_probas", "_unc"]
     phases = ["P", "S"]

@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.signal as scisig
 from scipy.interpolate import interp1d
+from obspy import Stream
 
 
 class Spectrum:
@@ -381,11 +382,15 @@ class Spectrum:
         ), "Attribute `frequency_bands` is required for this method."
         num_freqs = len(self.frequency_bands)
         spectrum = {}
+        dev_mode = kwargs.get("dev_mode", False)
         for tr in traces:
+            nyq = tr.stats.sampling_rate / 2.
             buffer_samples = int(buffer_seconds * tr.stats.sampling_rate)
             spectrum[tr.id] = {}
             spectrum[tr.id]["spectrum"] = np.zeros(num_freqs, dtype=np.float32)
             spectrum[tr.id]["freq"] = np.zeros(num_freqs, dtype=np.float32)
+            if dev_mode:
+                spectrum[tr.id]["filtered_traces"] = {}
             for i, band in enumerate(self.frequency_bands):
                 bandwidth = (
                     self.frequency_bands[band][1] - self.frequency_bands[band][0]
@@ -393,7 +398,16 @@ class Spectrum:
                 center_freq = 0.5 * (
                     self.frequency_bands[band][0] + self.frequency_bands[band][1]
                 )
+                spectrum[tr.id]["freq"][i] = center_freq
+                if self.frequency_bands[band][1] >= nyq:
+                    # cannot use this frequency band on this channel
+                    continue
                 tr_band = tr.copy()
+                # preprocess before filtering
+                tr_band.detrend("constant")
+                tr_band.detrend("linear")
+                tr_band.taper(0.25, max_length=buffer_seconds, type="cosine")
+                # filter
                 tr_band.filter(
                     "bandpass",
                     freqmin=self.frequency_bands[band][0],
@@ -402,12 +416,18 @@ class Spectrum:
                     zerophase=True,
                 )
                 trimmed_tr = tr_band.data[buffer_samples:-buffer_samples]
+                if dev_mode:
+                    tr_band.trim(
+                            starttime=tr_band.stats.starttime + buffer_seconds,
+                            endtime=tr_band.stats.endtime - buffer_seconds
+                            )
+                    spectrum[tr.id]["filtered_traces"][str(band)] = tr_band
                 if len(trimmed_tr) == 0:
                     # gap in data?
                     continue
                 max_amp = np.max(np.abs(trimmed_tr)) / bandwidth
                 spectrum[tr.id]["spectrum"][i] = max_amp
-                spectrum[tr.id]["freq"][i] = center_freq
+            #print(spectrum[tr.id]["spectrum"])
             max_err = np.sqrt(self.event.hmax_unc**2 + self.event.vmax_unc**2)
             spectrum[tr.id]["relative_distance_err_pct"] = 100.0 * (
                 max_err / self.event.source_receiver_dist.loc[tr.stats.station]
@@ -508,15 +528,17 @@ class Spectrum:
         snr = {}
         for trid in signal_spectrum:
             snr[trid] = {}
+            snr_ = np.zeros(
+                len(signal_spectrum[trid]["spectrum"]), dtype=np.float32
+            )
             if trid in noise_spectrum:
-                snr_ = np.abs(signal_spectrum[trid]["spectrum"]) / np.abs(
-                    noise_spectrum[trid]["spectrum"]
-                )
+                signal = np.abs(signal_spectrum[trid]["spectrum"])
+                noise = np.abs(noise_spectrum[trid]["spectrum"])
+                zero_by_zero = (signal == 0.) & (noise == 0.)
+                snr_[~zero_by_zero] = signal[~zero_by_zero] / noise[~zero_by_zero]
             else:
                 # no noise spectrum, probably because of gap
-                snr_ = np.zeros(
-                    len(signal_spectrum[trid]["spectrum"]), dtype=np.float32
-                )
+                pass
             snr[trid]["snr"] = snr_
             snr[trid]["freq"] = signal_spectrum[trid]["freq"]
         setattr(self, f"snr_{phase}_spectrum", snr)
