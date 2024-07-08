@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def data_reader_template(
     where,
     network="*",
@@ -6,7 +9,7 @@ def data_reader_template(
     location="*",
     starttime="*",
     endtime="*",
-    **kwargs
+    **kwargs,
 ):
     """Data reader for BPMF.
 
@@ -40,6 +43,7 @@ def data_reader_template(
     # read your data into traces
     return traces
 
+
 def data_reader_pyasdf(
     where,
     network="*",
@@ -49,7 +53,7 @@ def data_reader_pyasdf(
     starttime="*",
     endtime="*",
     tag="raw",
-    **kwargs
+    **kwargs,
 ):
     """Data reader for BPMF based on the ASDF format.
 
@@ -90,7 +94,7 @@ def data_reader_pyasdf(
             ds.q.location == location,
         ):
             for tr in getattr(station_, tag):
-                #traces += tr.slice(starttime=starttime,
+                # traces += tr.slice(starttime=starttime,
                 #        endtime=endtime, nearest_sample=True)
                 net = tr.stats.network
                 sta = tr.stats.station
@@ -107,18 +111,20 @@ def data_reader_pyasdf(
                 )
     return traces
 
+
 def data_reader_mseed(
     where,
     network="*",
-    station="*",
-    channel="*",
+    stations=["*"],
+    channels=["*"],
     location="*",
     starttime=None,
     endtime=None,
     attach_response=False,
     data_folder="",
     data_files=None,
-    **kwargs
+    channel_template_str="[A-Z][A-Z]",
+    **kwargs,
 ):
     """Data reader for BPMF.
 
@@ -130,29 +136,34 @@ def data_reader_mseed(
 
     Parameters
     -----------
-    where: string
+    where : str
         Path to data file or root data folder.
-    network: string or list, optional
+    network : str or list, optional
         Code(s) of the target network(s).
-    station: string or list, optional
+    stations : str or list, optional
         Code(s) of the target station(s).
-    channel: string or list, optional
+    channels : str or list, optional
         Code(s) of the target channel(s).
-    location: string or list, optional
+    location : str or list, optional
         Code(s) of the target location(s).
-    starttime: string or obspy.UTCDateTime, optional
+    starttime : str or obspy.UTCDateTime, optional
         Target start time.
-    endtime: string or obspy.UTCDateTime, optional
+    endtime : str or obspy.UTCDateTime, optional
         Target end time.
-    attach_response: boolean, optional
+    attach_response : bool, optional
         If True, find the instrument response from the xml files
         and attach it to the obspy.Stream output instance.
-    data_folder: string, optional
+    data_folder : str, optional
         If given, is the child folder in `where` containing
         the mseed files to read.
-    data_files: list of strings, optional
-        If not None, is the list of full paths to the data files
+    data_files : list, optional
+        If not None, is the list of full paths (str) to the data files
         to read.
+    channel_template_str : str, optional
+        Data files are searched assuming the following naming convention:
+        `full_channel_name = channel_template_str + channels[i]`
+        By default, `channel_template_str='[A-Z][A-Z]'`, meaning that
+        it is assumed that channel names start with two letters.
 
     Returns
     -------
@@ -164,20 +175,40 @@ def data_reader_mseed(
 
     from obspy import Stream, read, read_inventory
 
+    if not isinstance(stations, list) and not isinstance(stations, np.ndarray):
+        stations = [stations]
+    if not isinstance(channels, list) and not isinstance(channels, np.ndarray):
+        channels = [channels]
+
     traces = Stream()
     # read your data into traces
+    # data_files = []
     if data_files is None:
-        data_files = glob.glob(
-            os.path.join(where, data_folder,
-                f"{network}.{station}.{location}.*[!0,1,2,3,4,5,6,7,8,9]{channel}[_.]*")
-        )
+        data_files = []
+        for sta in stations:
+            for cha in channels:
+                cha = channel_template_str + cha 
+                data_files.extend(
+                    glob.glob(
+                        os.path.join(
+                            where, data_folder, f"{network}.{sta}.{location}.{cha}[_.]*"
+                        )
+                    )
+                )
+    resp_files = set()
     for fname in data_files:
-        traces += read(fname, starttime=starttime, endtime=endtime, **kwargs)
+        #print(f"Reading from {fname}...")
+        tr = read(fname, starttime=starttime, endtime=endtime, **kwargs)
+        if len(tr) == 0:
+            # typically because starttime-endtime falls into a gap
+            continue
+        traces += tr
+        network, sta = tr[0].stats.network, tr[0].stats.station
+        if attach_response:
+            resp_files.update(
+                set(glob.glob(os.path.join(where, "resp", f"{network}.{sta}.xml")))
+            )
     if attach_response:
-        resp_files = glob.glob(
-            os.path.join(where, "resp", f"{network}.{station}.xml")
-        )
         invs = list(map(read_inventory, resp_files))
         traces.attach_response(invs)
     return traces
-
