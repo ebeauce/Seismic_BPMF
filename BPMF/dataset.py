@@ -10,6 +10,7 @@ import obspy as obs
 import pandas as pd
 import pathlib
 import copy
+import glob
 import datetime
 import warnings
 
@@ -456,6 +457,7 @@ class Catalog(object):
         extra_attributes=[],
         fill_value=np.nan,
         return_events=False,
+        verbose=False
     ):
         """Read all detected events and build catalog.
 
@@ -491,13 +493,22 @@ class Catalog(object):
             List of `Event` instances of `return_events=True`.
         """
         events = []
+        # fetch list of files in case db_path or filename is given with
+        # Unix wildcards
+        path_to_files = glob.glob(
+                os.path.join(db_path, filename)
+                )
+        if verbose:
+            print("Reading from:")
+            print(path_to_files)
         try:
-            with h5.File(os.path.join(db_path, filename), mode="r") as f:
-                if gid is not None:
-                    f = f[gid]
-                keys = list(f.keys())
-                for key in f.keys():
-                    events.append(Event.read_from_file(hdf5_file=f[key]))
+            for path in path_to_files:
+                with h5.File(path, mode="r") as f:
+                    if gid is not None:
+                        f = f[gid]
+                    keys = list(f.keys())
+                    for key in f.keys():
+                        events.append(Event.read_from_file(hdf5_file=f[key]))
         except Exception as e:
             print(e)
             print(
@@ -3388,6 +3399,7 @@ class Template(Event):
         num_peaks_criterion=5,
         taper_pct=5.0,
         max_lag_samp=None,
+        zeropad=False,
         verbose=True,
     ):
         """
@@ -3427,6 +3439,11 @@ class Template(Event):
             warnings.warn("This is a highly experimental method!")
 
         taper_window = tukey(self.waveforms_arr.shape[-1], alpha=taper_pct / 100.0)
+        if zeropad:
+            next_pow2 = int(np.log2(self.waveforms_arr.shape[-1])) + 1
+            n = 2**next_pow2
+        else:
+            n = None
 
         num_peaks_above_threshold = pd.DataFrame(
             index=self.stations, columns=self.components
@@ -3439,7 +3456,7 @@ class Template(Event):
                 x = self.waveforms_arr[s, c, :]
                 if x.sum() == 0.0:
                     continue
-                x_fft = np.fft.rfft(x * taper_window)
+                x_fft = np.fft.rfft(x * taper_window, n=n)
                 autocorr = np.fft.irfft(x_fft * np.conj(x_fft))
                 # re-order cross-corr (autocorr[len(autocorr)//2] is x-corr at lag 0, by construction)
                 # autocorr = np.hstack( (autocorr[len(autocorr)//2:], autocorr[:len(autocorr)//2]) )
@@ -4601,6 +4618,7 @@ class TemplateGroup(Family):
         # try reading the inter-template CC from db
         db_path, db_filename = os.path.split(self.templates[0].where)
         cc_fn = os.path.join(db_path, output_filename)
+        print(compute_from_scratch, cc_fn, os.path.isfile(cc_fn))
         if not compute_from_scratch and os.path.isfile(cc_fn):
             _intertemplate_cc = self._read_intertp_cc(cc_fn)
             if (
