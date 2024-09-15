@@ -3777,7 +3777,7 @@ class Template(Event):
     # plotting methods
     def plot_detection(
         self,
-        idx,
+        idx_or_gid,
         filename=None,
         db_path=None,
         duration=60.0,
@@ -3828,8 +3828,15 @@ class Template(Event):
                 "template"[::-1], "matched_filter"[::-1], 1
             )[::-1]
         with h5.File(os.path.join(db_path, filename), mode="r") as f:
-            keys = list(f.keys())
-            event = Event.read_from_file(hdf5_file=f[keys[idx]])
+            if type(idx_or_gid) == int:
+                keys = list(f.keys())
+                gid = keys[idx_or_gid]
+            elif type(idx_or_gid) == str:
+                gid = idx_or_gid
+            else:
+                print("Argument `idx_or_gid` must be int or str")
+                return
+            event = Event.read_from_file(hdf5_file=f[gid])
         event.stations = self.stations.copy()
         event.read_waveforms(
             duration,
