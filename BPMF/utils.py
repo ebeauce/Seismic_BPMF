@@ -110,7 +110,7 @@ def lowpass_chebyshev_I(
     zerophase : bool, optional
        If True, the filter is applied in the forward and
        reverse direction to cancel out phase shifting.
-     
+
     Returns
     -------
     X : array-like
@@ -151,13 +151,13 @@ def lowpass_chebyshev_II(
         Sampling rate, in Hz, of `X`.
     order : int, optional
         Order of the filter. Defaults to 3.
-    min_attenuation_dB : float, optional 
+    min_attenuation_dB : float, optional
         The minimum attenuation required in the stop band, in decibels.
         Defaults to 40.
     zerophase : bool, optional
        If True, the filter is applied in the forward and
        reverse direction to cancel out phase shifting.
-     
+
     Returns
     -------
     X : array-like
@@ -182,6 +182,242 @@ def lowpass_chebyshev_II(
     if zerophase:
         X = sosfilt(sos, X[::-1])[::-1]
     return X
+
+#################################
+# Following code block adapted from obspy.core.trace.py v1.4.1
+# Original code:
+#    Copyright The ObsPy Development Team (devs@obspy.org)
+#
+#    GNU Lesser General Public License, Version 3
+#    (https://www.gnu.org/copyleft/lesser.html)
+# Modified by Nate Groebner, 2024
+
+# Remove instrument response from obspy trace objects
+# instantiate the repsonse for each channel once to get away from overhead of importing libraries for every trace
+
+import math
+import warnings
+
+import numpy as np
+
+from obspy.core.inventory import PolynomialResponseStage, Response
+from obspy.signal.invsim import (cosine_taper, cosine_sac_taper,
+                                    invert_spectrum)
+from obspy.signal.util import _npts2nfft
+
+
+def get_response(trace, inventories=None):
+    """
+    Search for and return channel response for the trace.
+
+    :type trace: :clas:`~obspy.core.trace.Trace`
+    :param trace: Trace for which to get the response. The trace provides station,
+        channel, and time info.
+    :type inventories: :class:`~obspy.core.inventory.inventory.Inventory`
+        or :class:`~obspy.core.inventory.network.Network` or a list
+        containing objects of these types or a string with a filename of
+        a StationXML file.
+    :param inventories: Station metadata to use in search for response for
+        each trace in the stream.
+    :returns: :class:`obspy.core.inventory.response.Response` object
+    """
+    if inventories is None and 'response' in trace.stats:
+        if not isinstance(trace.stats.response, Response):
+            msg = ("Response attached to Trace.stats must be of type "
+                    "obspy.core.inventory.response.Response "
+                    "(but is of type %s).") % type(trace.stats.response)
+            raise TypeError(msg)
+        return trace.stats.response
+    elif inventories is None:
+        msg = ('No response information found. Use `inventory` '
+                'parameter to specify an inventory with response '
+                'information.')
+        raise ValueError(msg)
+    from obspy.core.inventory import Inventory, Network, read_inventory
+    if isinstance(inventories, Inventory) or \
+        isinstance(inventories, Network):
+        inventories = [inventories]
+    elif isinstance(inventories, str):
+        inventories = [read_inventory(inventories)]
+    responses = []
+    for inv in inventories:
+        try:
+            responses.append(inv.get_response(trace.id,
+                                                trace.stats.starttime))
+        except Exception:
+            pass
+    if len(responses) > 1:
+        msg = "Found more than one matching response. Using first."
+        warnings.warn(msg)
+    elif len(responses) < 1:
+        msg = "No matching response information found."
+        raise ValueError(msg)
+
+    # Add processing info. In obspy this is accomplished through the
+    # decorator `_add_processing_info`. We do it manually here.
+
+    return responses[0]
+
+def attach_response(trace, inventories):
+    """
+    Search for and attach channel response to the trace as
+    :class:`obspy.core.trace.Trace`.stats.response. Raises an exception
+    if no matching response can be found.
+    To subsequently deconvolve the instrument response use
+    `remove_response`.
+
+    >>> from obspy import read, read_inventory
+    >>> st = read()
+    >>> tr = st[0]
+    >>> inv = read_inventory()
+    >>> attach_response(tr, inv)
+    >>> print(tr.stats.response)  \
+            # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+    Channel Response
+        From M/S (Velocity in Meters per Second) to COUNTS (Digital Counts)
+        Overall Sensitivity: 2.5168e+09 defined at 0.020 Hz
+        4 stages:
+            Stage 1: PolesZerosResponseStage from M/S to V, gain: 1500
+            Stage 2: CoefficientsTypeResponseStage from V to COUNTS, ...
+            Stage 3: FIRResponseStage from COUNTS to COUNTS, gain: 1
+            Stage 4: FIRResponseStage from COUNTS to COUNTS, gain: 1
+
+    :type inventories: :class:`~obspy.core.inventory.inventory.Inventory`
+        or :class:`~obspy.core.inventory.network.Network` or a list
+        containing objects of these types or a string with a filename of
+        a StationXML file.
+    :param inventories: Station metadata to use in search for response for
+        each trace in the stream.
+    """
+    trace.stats.response = get_response(trace, inventories)
+
+def remove_response(trace, inventory=None, output="VEL", water_level=60,
+                    pre_filt=None, zero_mean=True, taper=True,
+                    taper_fraction=0.05, **kwargs):
+
+    """Removes instrument response from an obspy Trace object.
+
+    Performs the transformation in place on the Trace.
+    Modified from obspy code. Original obspy code included this as a method
+    of the Trace class. To prevent circular imports, it imported multiple libraries
+    every time the method was called. This created alot of overhead. The current
+    implementation the uses functions instead of class methods was tested and
+    provides about a 10x speedup.
+
+    Basic usage:
+
+    remove_response(trace, inventory)
+
+    Usage for an obspy Stream:
+
+    where `trace` is an obspy Trace object and `inventory` is an obspy Inventory object
+    that has the instrument response info for the trace. This is usually from a StationXML
+    file. If `trace` has a response attached, no inventory is necessary.
+
+    for trace in stream:
+        remove_response(trace, inventory)
+
+    """
+    if inventory:
+        response = get_response(trace, inventory)
+    else:
+        # assume the trace already has a response attached
+        if not hasattr(trace.stats, "response"):
+            raise ValueError("Must pass an Inventory object if the trace does not have an attached instrument response")
+        response = trace.stats.response
+
+    # polynomial response using blockette 62 stage 0
+    if not response.response_stages and response.instrument_polynomial:
+        coefficients = response.instrument_polynomial.coefficients
+        trace.data = np.poly1d(coefficients[::-1])(trace.data)
+        return trace
+
+    # polynomial response using blockette 62 stage 1 and no other stages
+    if len(response.response_stages) == 1 and \
+        isinstance(response.response_stages[0], PolynomialResponseStage):
+        # check for gain
+        if response.response_stages[0].stage_gain is None:
+            msg = 'Stage gain not defined for %s - setting it to 1.0'
+            warnings.warn(msg % trace.id)
+            gain = 1
+        else:
+            gain = response.response_stages[0].stage_gain
+        coefficients = response.response_stages[0].coefficients[:]
+        for i in range(len(coefficients)):
+            coefficients[i] /= math.pow(gain, i)
+        trace.data = np.poly1d(coefficients[::-1])(trace.data)
+        return trace
+
+    # use evalresp
+    data = trace.data.astype(np.float64)
+    npts = len(data)
+    # time domain pre-processing
+    if zero_mean:
+        data -= data.mean()
+    if taper:
+        data *= cosine_taper(npts, taper_fraction,
+                                sactaper=True, halfcosine=False)
+
+    # smart calculation of nfft dodging large primes
+
+    nfft = _npts2nfft(npts)
+    # Transform data to Frequency domain
+    data = np.fft.rfft(data, n=nfft)
+    # calculate and apply frequency response,
+    # optionally prefilter in frequency domain and/or apply water level
+    freq_response, freqs = \
+        response.get_evalresp_response(trace.stats.delta, nfft,
+                                        output=output, **kwargs)
+
+    # frequency domain pre-filtering of data spectrum
+    # (apply cosine taper in frequency domain)
+    if pre_filt:
+        freq_domain_taper = cosine_sac_taper(freqs, flimit=pre_filt)
+        data *= freq_domain_taper
+
+    if water_level is None:
+        # No water level used, so just directly invert the response.
+        # First entry is at zero frequency and value is zero, too.
+        # Just do not invert the first value (and set to 0 to make sure).
+        freq_response[0] = 0.0
+        freq_response[1:] = 1.0 / freq_response[1:]
+    else:
+        # Invert spectrum with specified water level.
+        invert_spectrum(freq_response, water_level)
+
+    data *= freq_response
+    data[-1] = abs(data[-1]) + 0.0j
+
+
+    # transform data back into the time domain
+    data = np.fft.irfft(data)[0:npts]
+
+    # assign processed data and store processing information
+    trace.data = data
+
+    # add in processing data to trace,stats.processing. This is
+    # accomplished by the decorator _add_processing_info in obspy
+
+    arguments = []
+    arguments += [f"inventory={inventory}"] \
+            + [f"output={output}"] \
+            + [f"water+level={water_level}"] \
+            + [f"pre_filt={pre_filt}"] \
+            + [f"zero_mean={zero_mean}"] \
+            + [f"taper={taper}"] \
+            + [f"taper_fraction={taper_fraction}"]
+    for kwarg in kwargs:
+        arguments += f"{kwarg}={kwargs[kwarg]}"
+
+    info = f"Seismic_BPMF: remove_response({'::'.join(arguments)})"
+
+    trace.stats.setdefault('processing', [])
+    trace.stats.processing.append(info)
+
+    # only necessary for chaining functions
+    return trace
+
+###########################
 
 
 def preprocess_stream(
@@ -2031,7 +2267,7 @@ def find_picks(
         ):
     """Find phase picks from time series of phase probability.
 
-    Phase picks are given by the peaks exceeding `threshold` in 
+    Phase picks are given by the peaks exceeding `threshold` in
     the time series `phase_probability`. The probability neighborhood
     around each peak is used as the pdf of a given pick measurement.
 
@@ -2041,7 +2277,7 @@ def find_picks(
     Parameters
     ----------
     phase_probability : array-like
-        Probability time series of observing the arrival of a 
+        Probability time series of observing the arrival of a
         given seismic phase.
     threshold : float
         Value above which peaks are taken to be candidate phase picks.
@@ -2067,14 +2303,14 @@ def find_picks(
         idx2 = int(peak_properties["right_ips"][i])
         samples = np.arange(idx1, idx2+1)
         prob = phase_probability[samples]
-        
+
         mean = np.sum(samples * prob) / prob.sum()
         std = np.sqrt(np.sum((samples - mean)**2) / prob.sum())
-        
+
         peaks_mean.append(mean)
         peaks_std.append(std)
         peaks_value.append(phase_probability[peak_indexes[i]])
-        
+
     return np.asarray(peaks_value), np.asarray(peaks_mean), np.asarray(peaks_std)
 
 def get_picks(
@@ -2084,10 +2320,10 @@ def get_picks(
         search_win_samp=int(4. * cfg.SAMPLING_RATE_HZ)
         ):
     """Select a single P- and S-pick on each 3-comp seismogram.
-    
+
     Parameters
     ----------
-    picks : `pandas.DataFrame` 
+    picks : `pandas.DataFrame`
         `pandas.DataFrame` as formatted in `BPMF.dataset.pick_PS_phases`.
     buffer_length: scalar int, optional
         Picks that are before this buffer length, in samples, are discarded.
