@@ -193,7 +193,8 @@ def lowpass_chebyshev_II(
 # Modified by Nate Groebner, 2024
 
 # Remove instrument response from obspy trace objects
-# instantiate the repsonse for each channel once to get away from overhead of importing libraries for every trace
+# Speeds up the function considerably by not importing multiple libraries each time
+# the function is called.
 
 import math
 import warnings
@@ -210,16 +211,20 @@ def get_response(trace, inventories=None):
     """
     Search for and return channel response for the trace.
 
-    :type trace: :clas:`~obspy.core.trace.Trace`
-    :param trace: Trace for which to get the response. The trace provides station,
+    Parameters
+    ----------
+    trace : class `~obspy.core.trace.Trace`
+        Trace for which to get the response. The trace provides station,
         channel, and time info.
-    :type inventories: :class:`~obspy.core.inventory.inventory.Inventory`
-        or :class:`~obspy.core.inventory.network.Network` or a list
+    inventories : `~obspy.core.inventory.inventory.Inventory`,
+        or `~obspy.core.inventory.network.Network`, or a list
         containing objects of these types or a string with a filename of
         a StationXML file.
-    :param inventories: Station metadata to use in search for response for
+        Station metadata to use in search for response for
         each trace in the stream.
-    :returns: :class:`obspy.core.inventory.response.Response` object
+    Returns
+    -------
+        `obspy.core.inventory.response.Response` object
     """
     if inventories is None and 'response' in trace.stats:
         if not isinstance(trace.stats.response, Response):
@@ -261,33 +266,17 @@ def get_response(trace, inventories=None):
 def attach_response(trace, inventories):
     """
     Search for and attach channel response to the trace as
-    :class:`obspy.core.trace.Trace`.stats.response. Raises an exception
-    if no matching response can be found.
-    To subsequently deconvolve the instrument response use
-    `remove_response`.
+    :class:`obspy.core.trace.Trace`.stats.response. This attaches the response
+    to the trace in place, with no return value.
+    Raises an exception if no matching response can be found.
 
-    >>> from obspy import read, read_inventory
-    >>> st = read()
-    >>> tr = st[0]
-    >>> inv = read_inventory()
-    >>> attach_response(tr, inv)
-    >>> print(tr.stats.response)  \
-            # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-    Channel Response
-        From M/S (Velocity in Meters per Second) to COUNTS (Digital Counts)
-        Overall Sensitivity: 2.5168e+09 defined at 0.020 Hz
-        4 stages:
-            Stage 1: PolesZerosResponseStage from M/S to V, gain: 1500
-            Stage 2: CoefficientsTypeResponseStage from V to COUNTS, ...
-            Stage 3: FIRResponseStage from COUNTS to COUNTS, gain: 1
-            Stage 4: FIRResponseStage from COUNTS to COUNTS, gain: 1
-
-    :type inventories: :class:`~obspy.core.inventory.inventory.Inventory`
-        or :class:`~obspy.core.inventory.network.Network` or a list
+    inventories : `~obspy.core.inventory.inventory.Inventory`
+        or `~obspy.core.inventory.network.Network` or a list
         containing objects of these types or a string with a filename of
         a StationXML file.
-    :param inventories: Station metadata to use in search for response for
+        Station metadata to use in search for response for
         each trace in the stream.
+
     """
     trace.stats.response = get_response(trace, inventories)
 
@@ -297,25 +286,52 @@ def remove_response(trace, inventory=None, output="VEL", water_level=60,
 
     """Removes instrument response from an obspy Trace object.
 
-    Performs the transformation in place on the Trace.
+    Performs the transformation in place on the Trace. Also returns the
+    Trace object so functions can be chained.
+
     Modified from obspy code. Original obspy code included this as a method
     of the Trace class. To prevent circular imports, it imported multiple libraries
-    every time the method was called. This created alot of overhead. The current
-    implementation the uses functions instead of class methods was tested and
-    provides about a 10x speedup.
+    every time the method was called. This created a lot of overhead. The current
+    implementation uses functions instead of class methods. It provides up to a 10x speedup.
+
+    Parameters
+    ----------
+    trace :
+
+    inventory : None,
+
+    output : default "VEL"
+
+    water_level : default 60
+
+    pre_filt :
+    zero_mean :
+    taper :
+    taper_fraction :
+    **kwargs
+
+    Returns
+    -------
+    `~obspy.core.trace.Trace` object
 
     Basic usage:
 
+    ```python
     remove_response(trace, inventory)
+    ```
 
     Usage for an obspy Stream:
 
     where `trace` is an obspy Trace object and `inventory` is an obspy Inventory object
-    that has the instrument response info for the trace. This is usually from a StationXML
+    that has the instrument response info for the trace. This is often from a StationXML
     file. If `trace` has a response attached, no inventory is necessary.
 
+    To remove responses from a stream, loop over the traces in the stream:
+
+    ```python
     for trace in stream:
         remove_response(trace, inventory)
+    ```
 
     """
     if inventory:
@@ -736,7 +752,7 @@ def _preprocess_stream(
                 f_min = 1.0 / T_max
                 f_max = 1.0 / (2.0 * T_min)
                 pre_filt = [f_min, 3.0 * f_min, 0.90 * f_max, 0.97 * f_max]
-            tr.remove_response(pre_filt=pre_filt, output=unit, plot=plot_resp)
+            remove_response(tr, pre_filt=pre_filt, output=unit)
     elif remove_sensitivity:
         for tr in preprocessed_stream:
             if not hasattr(tr.stats, "response"):
