@@ -280,9 +280,17 @@ def attach_response(trace, inventories):
     """
     trace.stats.response = get_response(trace, inventories)
 
-def remove_response(trace, inventory=None, output="VEL", water_level=60,
-                    pre_filt=None, zero_mean=True, taper=True,
-                    taper_fraction=0.05, **kwargs):
+def remove_response(
+    trace,
+    inventory=None,
+    output="VEL",
+    water_level=60,
+    pre_filt=None,
+    zero_mean=True,
+    taper=True,
+    taper_fraction=0.05,
+    **kwargs
+):
 
     """Removes instrument response from an obspy Trace object.
 
@@ -293,21 +301,57 @@ def remove_response(trace, inventory=None, output="VEL", water_level=60,
     of the Trace class. To prevent circular imports, it imported multiple libraries
     every time the method was called. This created a lot of overhead. The current
     implementation uses functions instead of class methods. It provides up to a 10x speedup.
+    Please note that the obspy implementation proveds functionality for plotting
+    the response. This is NOT included in this function as it is intended for high
+    volume processing. If you wish to use the plotting feature, use the built in
+    obspy method instead.
 
     Parameters
     ----------
-    trace :
+    trace : class `~obspy.core.trace.Trace`
+        Trace for which to get the response. The trace provides station,
+        channel, and time info.
+    inventories : `~obspy.core.inventory.inventory.Inventory`,
+        or `~obspy.core.inventory.network.Network`, or a list
+        containing objects of these types or a string with a filename of
+        a StationXML file, default None
+        Station metadata to use in search for response for
+        each trace in the stream.
 
-    inventory : None,
+    output : str, default "VEL"
+        Output units. One of:
 
-    output : default "VEL"
+            ``"DISP"``
+                displacement, output unit is meters
+            ``"VEL"``
+                velocity, output unit is meters/second
+            ``"ACC"``
+                acceleration, output unit is meters/second**2
+            ``"DEF"``
+                default units, the response is calculated in
+                output units/input units (last stage/first stage).
+                Useful if the units for a particular type of sensor (e.g., a
+                pressure sensor) cannot be converted to displacement, velocity
+                or acceleration.
 
-    water_level : default 60
+    water_level : float, default 60
+        Water level for deconvolution.
 
-    pre_filt :
-    zero_mean :
-    taper :
-    taper_fraction :
+    pre_filt : list or tuple(float, float, float, float)
+        Apply a bandpass filter in frequency domain to the
+            data before deconvolution. The list or tuple defines
+            the four corner frequencies `(f1, f2, f3, f4)` of a cosine taper
+            which is one between `f2` and `f3` and tapers to zero for
+            `f1 < f < f2` and `f3 < f < f4`.
+
+    zero_mean : bool, default True
+        If `True`, the mean of the waveform data is
+            subtracted in time domain prior to deconvolution.
+    taper : bool, default True
+        If `True`, a cosine taper is applied to the waveform data
+            in time domain prior to deconvolution.
+    taper_fraction : float, default 0.05
+        Taper fraction of cosine taper to use.
     **kwargs
 
     Returns
