@@ -10,6 +10,7 @@ import obspy as obs
 import pandas as pd
 import pathlib
 import copy
+import glob
 import datetime
 import warnings
 
@@ -456,6 +457,8 @@ class Catalog(object):
         extra_attributes=[],
         fill_value=np.nan,
         return_events=False,
+        n_threads=1,
+        verbose=False,
     ):
         """Read all detected events and build catalog.
 
@@ -479,6 +482,11 @@ class Catalog(object):
         fill_value : any, optional
             Value that is returned in the catalog if an attribute
             from `extra_attributes` is not found. Default is `numpy.nan`.
+        n_threads : int, optional
+            The number of threads to use for parallel execution. If set to 1
+            (default), the detection files will be read sequentially. If set to
+            a value greater than 1, the detection files will be read in
+            parallel using `n_threads` threads.
         return_events : boolean, optional
             If True, returns the list of `Event` instances in addition to
             the `Catalog` instance. Default is False.
@@ -491,20 +499,48 @@ class Catalog(object):
             List of `Event` instances of `return_events=True`.
         """
         events = []
-        try:
-            with h5.File(os.path.join(db_path, filename), mode="r") as f:
+        # fetch list of files in case db_path or filename is given with
+        # Unix wildcards
+        path_to_files = glob.glob(os.path.join(db_path, filename))
+        path_to_files.sort()
+        if verbose:
+            print("Reading from:")
+            print(path_to_files)
+
+        def _read_events(path):
+            events = []
+            with h5.File(path, mode="r") as f:
                 if gid is not None:
                     f = f[gid]
                 keys = list(f.keys())
                 for key in f.keys():
                     events.append(Event.read_from_file(hdf5_file=f[key]))
-        except Exception as e:
-            print(e)
-            print(
-                "Error while trying to read the detected events "
-                "(perhaps there are none)."
-            )
-            pass
+            return events
+
+        if n_threads != 1:
+            from concurrent.futures import ThreadPoolExecutor
+
+            with ThreadPoolExecutor(max_workers=n_threads) as executor:
+                output = list(executor.map(_read_events, path_to_files))
+                events = [el for sublist in output for el in sublist]
+        else:
+            for path in path_to_files:
+                events.extend(_read_events(path))
+        # try:
+        #    for path in path_to_files:
+        #        with h5.File(path, mode="r") as f:
+        #            if gid is not None:
+        #                f = f[gid]
+        #            keys = list(f.keys())
+        #            for key in f.keys():
+        #                events.append(Event.read_from_file(hdf5_file=f[key]))
+        # except Exception as e:
+        #    print(e)
+        #    print(
+        #        "Error while trying to read the detected events "
+        #        "(perhaps there are none)."
+        #    )
+        #    pass
         if return_events:
             return (
                 cls.read_from_events(
@@ -3388,6 +3424,7 @@ class Template(Event):
         num_peaks_criterion=5,
         taper_pct=5.0,
         max_lag_samp=None,
+        zeropad=False,
         verbose=True,
     ):
         """
@@ -3427,6 +3464,11 @@ class Template(Event):
             warnings.warn("This is a highly experimental method!")
 
         taper_window = tukey(self.waveforms_arr.shape[-1], alpha=taper_pct / 100.0)
+        if zeropad:
+            next_pow2 = int(np.log2(self.waveforms_arr.shape[-1])) + 1
+            n = 2**next_pow2
+        else:
+            n = None
 
         num_peaks_above_threshold = pd.DataFrame(
             index=self.stations, columns=self.components
@@ -3439,7 +3481,7 @@ class Template(Event):
                 x = self.waveforms_arr[s, c, :]
                 if x.sum() == 0.0:
                     continue
-                x_fft = np.fft.rfft(x * taper_window)
+                x_fft = np.fft.rfft(x * taper_window, n=n)
                 autocorr = np.fft.irfft(x_fft * np.conj(x_fft))
                 # re-order cross-corr (autocorr[len(autocorr)//2] is x-corr at lag 0, by construction)
                 # autocorr = np.hstack( (autocorr[len(autocorr)//2:], autocorr[:len(autocorr)//2]) )
@@ -3583,6 +3625,7 @@ class Template(Event):
         return_events=False,
         check_summary_file=True,
         compute_return_times=True,
+        n_threads=1,
     ):
         """
         Build a Catalog instance from detection data.
@@ -3621,6 +3664,12 @@ class Template(Event):
             If True, it computes inter-event times. Because events detected with the
             same template are co-located, these inter-event times can be called
             return times.
+        n_threads : int, optional
+            The number of threads to use for parallel execution. If set to 1
+            (default), the detection files will be read sequentially. If set to
+            a value greater than 1, the detection files will be read in
+            parallel using `n_threads` threads.
+
 
         Notes
         -----
@@ -3672,6 +3721,7 @@ class Template(Event):
                 extra_attributes=extra_attributes,
                 fill_value=fill_value,
                 return_events=return_events,
+                n_threads=n_threads,
             )
             if not return_events:
                 self.catalog = output
@@ -3760,7 +3810,7 @@ class Template(Event):
     # plotting methods
     def plot_detection(
         self,
-        idx,
+        idx_or_gid,
         filename=None,
         db_path=None,
         duration=60.0,
@@ -3811,8 +3861,15 @@ class Template(Event):
                 "template"[::-1], "matched_filter"[::-1], 1
             )[::-1]
         with h5.File(os.path.join(db_path, filename), mode="r") as f:
-            keys = list(f.keys())
-            event = Event.read_from_file(hdf5_file=f[keys[idx]])
+            if type(idx_or_gid) == int:
+                keys = list(f.keys())
+                gid = keys[idx_or_gid]
+            elif type(idx_or_gid) == str:
+                gid = idx_or_gid
+            else:
+                print("Argument `idx_or_gid` must be int or str")
+                return
+            event = Event.read_from_file(hdf5_file=f[gid])
         event.stations = self.stations.copy()
         event.read_waveforms(
             duration,
@@ -4597,12 +4654,18 @@ class TemplateGroup(Family):
         import fast_matched_filter as fmf  # clearly need some optimization
 
         disable = np.bitwise_not(progress)
+        intertemplate_cc_params = {
+            "n_stations": n_stations,
+            "distance_threshold": distance_threshold,
+            "max_lag": max_lag,
+        }
 
         # try reading the inter-template CC from db
         db_path, db_filename = os.path.split(self.templates[0].where)
         cc_fn = os.path.join(db_path, output_filename)
+        print(compute_from_scratch, cc_fn, os.path.isfile(cc_fn))
         if not compute_from_scratch and os.path.isfile(cc_fn):
-            _intertemplate_cc = self._read_intertp_cc(cc_fn)
+            _intertemplate_cc = self._read_intertp_cc(cc_fn, intertemplate_cc_params)
             if (
                 len(np.intersect1d(self.tids, np.int32(_intertemplate_cc.index)))
                 == self.n_templates
@@ -4682,10 +4745,31 @@ class TemplateGroup(Family):
             )
         if compute_from_scratch and save_cc:
             print(f"Saving inter-tp CC to {cc_fn}")
-            self._save_intertp_cc(self._intertemplate_cc, cc_fn)
+            self._save_intertp_cc(
+                self._intertemplate_cc, cc_fn, intertemplate_cc_params
+            )
 
     @staticmethod
-    def _save_intertp_cc(intertp_cc, fullpath):
+    def _params_str(params, sep="::"):
+        # sort keys to be sure to produce consistent strings all the time
+        keys = list(params.keys())
+        keys.sort()
+        params_str = ""
+        for p in keys:
+            if type(params[p]) in (int, str):
+                params_str += f"{p}_{params[p]}{sep}"
+            elif type(params[p]) == float:
+                params_str += f"{p}_{params[p]:.2e}{sep}"
+            else:
+                print("Unexpected parameter type.")
+        # trim end
+        params_str = params_str[: -len(sep)]
+        return params_str
+
+    @staticmethod
+    def _save_intertp_cc(
+        intertp_cc, fullpath, intertemplate_cc_params, overwrite=False
+    ):
         """
         Save the inter-template correlation coefficients to a file.
 
@@ -4700,32 +4784,60 @@ class TemplateGroup(Family):
         fullpath : str
             The full path to the output file where the correlation coefficients
             will be saved.
+        intertemplate_cc_params : dict
+            Dictionary with parameters used to compute the inter-template cc.
+            The parameter values are used to create an id string that defines
+            where the inter-template cc matrix is stored within the hdf5 file
+            located at `fullpath`.
 
         Returns
         -------
         None
         """
-        with h5.File(fullpath, mode="w") as f:
-            f.create_dataset("tids", data=np.int32(intertp_cc.columns))
-            f.create_dataset("intertp_cc", data=np.float32(intertp_cc.values))
+        params_str = TemplateGroup._params_str(intertemplate_cc_params)
+        with h5.File(fullpath, mode="a") as fout:
+            if overwrite and params_str in fout:
+                del fout[params_str]
+            elif params_str in fout:
+                print(f"{params_str} already exists in {fullpath}, ")
+                print("use `overwrite=True` if you want to proceed.")
+            fout.create_group(params_str)
+            fout = fout[params_str]
+            fout.create_group("parameters")
+            for key, value in intertemplate_cc_params.items():
+                fout["parameters"].create_dataset(key, data=value)
+            fout.create_dataset("tids", data=np.int32(intertp_cc.columns))
+            fout.create_dataset("intertp_cc", data=np.float32(intertp_cc.values))
 
     @staticmethod
-    def _read_intertp_cc(fullpath):
+    def _read_intertp_cc(fullpath, intertemplate_cc_params):
         """Read inter-template correlation coefficients from file.
 
         Parameters
         -----------
         fullpath : string
             Full path to output file.
+        intertemplate_cc_params : dict
+            Dictionary with parameters used to compute the inter-template cc.
+            The parameter values are used to create an id string that defines
+            where the inter-template cc matrix is stored within the hdf5 file
+            located at `fullpath`.
 
         Returns
         --------
         intertp_cc : pd.DataFrame
             The inter-template CC in a pd.DataFrame.
         """
-        with h5.File(fullpath, mode="r") as f:
-            tids = f["tids"][()]
-            intertp_cc = f["intertp_cc"][()]
+        params_str = TemplateGroup._params_str(intertemplate_cc_params)
+        with h5.File(fullpath, mode="r") as fin:
+            if params_str not in fin:
+                print(
+                    "Could not find inter-template cc "
+                    f"with the requested parameters: {params_str}"
+                )
+                return
+            tids = fin[params_str]["tids"][()]
+            intertp_cc = fin[params_str]["intertp_cc"][()]
         return pd.DataFrame(index=tids, columns=tids, data=intertp_cc)
 
     def read_waveforms(self, n_threads=1, progress=False):
@@ -4860,7 +4972,12 @@ class TemplateGroup(Family):
             del self._network_to_template_map
 
     def read_catalog(
-        self, extra_attributes=[], fill_value=np.nan, progress=False, **kwargs
+        self,
+        extra_attributes=[],
+        fill_value=np.nan,
+        progress=False,
+        n_threads=1,
+        **kwargs,
     ):
         """
         Build a catalog from all templates' detections.
@@ -4875,6 +4992,12 @@ class TemplateGroup(Family):
             detections.
         progress : bool, optional
             If True, display a progress bar during the operation.
+        n_threads : int, optional
+            The number of threads to use for parallel execution. If set to 1
+            (default), the detection files will be read sequentially. If set to
+            a value greater than 1, the detection files will be read in
+            parallel using `n_threads` threads.
+
         **kwargs
             Additional keyword arguments to be passed to the `read_catalog`
             method of each template.
@@ -4902,7 +5025,10 @@ class TemplateGroup(Family):
         for template in tqdm(self.templates, desc="Reading catalog", disable=disable):
             if not hasattr(template, "catalog"):
                 template.read_catalog(
-                    extra_attributes=extra_attributes, fill_value=fill_value, **kwargs
+                    extra_attributes=extra_attributes,
+                    fill_value=fill_value,
+                    n_threads=n_threads,
+                    **kwargs,
                 )
         # concatenate all catalogs
         self.catalog = Catalog.concatenate(
@@ -4917,6 +5043,7 @@ class TemplateGroup(Family):
         distance_criterion=1.0,
         speed_criterion=5.0,
         similarity_criterion=-1.0,
+        max_lag_for_sim=10,
         progress=False,
         **kwargs,
     ):
@@ -4979,8 +5106,9 @@ class TemplateGroup(Family):
                 self.compute_intertemplate_cc(
                     distance_threshold=distance_criterion,
                     n_stations=n_closest_stations,
-                    max_lag=kwargs.get("max_lag", 10),
+                    max_lag=max_lag_for_sim,
                     device=kwargs.get("device", "cpu"),
+                    save_cc=kwargs.get("save_cc", True),
                 )
         # -----------------------------------
         t1 = give_time()
@@ -5076,28 +5204,30 @@ class TemplateGroup(Family):
             ] = catalog.loc[cat_indexes, "unique_event"].values
 
     # plotting routines
-    def plot_detection(self, idx, **kwargs):
+    def plot_detection(self, row_idx, **kwargs):
         """
-        Plot the idx-th event in `self.catalog.catalog`.
+        Plot the `row_idx` event in `self.catalog.catalog`.
 
-        This method identifies which template detected the idx-th event
+        This method identifies which template detected the `row_idx` event
         and calls `template.plot_detection` with the appropriate arguments.
 
         Parameters
         -----------
-        idx : int
-            Event index in `self.catalog.catalog`.
+        row_idx : self.catalog.catalog.index.dtype
+            Row index of event in `self.catalog.catalog`.
 
         Returns
         ---------
         fig : matplotlib.pyplot.Figure
             The figure showing the detected event.
         """
-        tid, evidx = self.catalog.catalog.index[idx].split(".")
-        tt = self.tindexes.loc[int(tid)]
+        row = self.catalog.catalog.loc[row_idx]
+        tid = int(row.tid)
+        tt = self.tindexes.loc[tid]
         print("Plotting:")
-        print(self.catalog.catalog.iloc[idx])
-        fig = self.templates[tt].plot_detection(int(evidx), **kwargs)
+        print(row)
+        gid = row.origin_time.strftime("%Y-%m-%dT%H:%M:%S")
+        fig = self.templates[tt].plot_detection(gid, **kwargs)
         return fig
 
     def plot_recurrence_times(self, figsize=(15, 7), progress=False, **kwargs):
