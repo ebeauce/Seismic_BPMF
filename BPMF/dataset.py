@@ -3093,7 +3093,8 @@ class Event(object):
                     if plot_probabilities:
                         axb = axes[s, c].twinx()
                         ylim = axes[s, c].get_ylim()
-                        axb.set_ylim(-1.05 * abs(ylim[0]) / abs(ylim[1]), 1.05)
+                        ymean = sum(ylim) / 2.
+                        axb.set_ylim(-1.05 * abs(ylim[0] - ymean) / abs(ylim[1] - ymean), 1.05)
                     if (
                         plot_probabilities
                         and hasattr(self, "probability_time_series")
