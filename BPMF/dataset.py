@@ -3088,13 +3088,17 @@ class Event(object):
                 axes[s, c].plot(
                     time[:num_samples], tr.data[:num_samples] * gain, color="k"
                 )
+                if s != len(stations) - 1:
+                    plt.setp(axes[s, c].get_xticklabels(), visible=False)
                 for ph in ["P", "S"]:
                     # plot the P-/S-wave ML probabilities
                     if plot_probabilities:
                         axb = axes[s, c].twinx()
                         ylim = axes[s, c].get_ylim()
-                        ymean = sum(ylim) / 2.
-                        axb.set_ylim(-1.05 * abs(ylim[0] - ymean) / abs(ylim[1] - ymean), 1.05)
+                        ymean = sum(ylim) / 2.0
+                        axb.set_ylim(
+                            -1.05 * abs(ylim[0] - ymean) / abs(ylim[1] - ymean), 1.05
+                        )
                     if (
                         plot_probabilities
                         and hasattr(self, "probability_time_series")
@@ -3155,8 +3159,18 @@ class Event(object):
             ax.xaxis.set_major_formatter(
                 mdates.ConciseDateFormatter(ax.xaxis.get_major_locator())
             )
-        plt.subplots_adjust(top=0.95, bottom=0.06, right=0.98, left=0.06)
-        fig.text(0.03, 0.40, ylabel, rotation="vertical")
+        fig.text(0.03, 0.40, ylabel, ha="right", rotation="vertical")
+        if plot_probabilities and hasattr(self, "probability_time_series"):
+            fig.text(
+                0.98,
+                0.40,
+                "P- or S-wave arrival probability",
+                ha="left",
+                rotation="vertical",
+            )
+            plt.subplots_adjust(top=0.95, bottom=0.06, right=0.96, left=0.06)
+        else:
+            plt.subplots_adjust(top=0.95, bottom=0.06, right=0.98, left=0.06)
         return fig
 
 
