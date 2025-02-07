@@ -774,6 +774,12 @@ class Spectrum:
                     spectrum[trid]["freq"],
                     np.abs(spectrum[trid]["spectrum"]),
                 )
+                # set to zero any frequency bins that were extrapolated
+                # need the 0.99 in case new_frequencies have some rounding errors
+                outside_bandwidth = (
+                        new_frequencies >= 0.99 * np.max(spectrum[trid]["freq"])
+                        )
+                spectrum[trid]["spectrum"][outside_bandwidth] = 0.
                 spectrum[trid]["freq"] = new_frequencies
 
     def set_frequency_bands(self, frequency_bands):

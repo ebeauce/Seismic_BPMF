@@ -1312,6 +1312,10 @@ class Event(object):
             return self._az_hmin_unc
 
     @property
+    def n_samples(self):
+        return utils.sec_to_samp(self.duration, sr=self.sr)
+
+    @property
     def pl_vmax_unc(self):
         if hasattr(self, "_pl_vmax_unc"):
             return self._pl_vmax_unc
@@ -1979,7 +1983,6 @@ class Event(object):
 
         self.traces = Stream()
         self.duration = duration
-        self.n_samples = utils.sec_to_samp(self.duration, sr=self.sr)
         reading_task_list = []
         for sta in self.stations:
             for comp in self.components:
@@ -2029,6 +2032,9 @@ class Event(object):
             self.set_aux_data({f"offset_{ph.upper()}": offset_phase[ph]})
         for comp in phase_on_comp.keys():
             self.set_aux_data({f"phase_on_comp{comp}": phase_on_comp[comp]})
+        # update self.sampling_rate according to traces
+        if len(self.traces) > 0:
+            self.sampling_rate = self.traces[0].stats.sampling_rate
         if not time_shifted:
             self.trim_waveforms(
                 starttime=self.origin_time - offset_ot,
@@ -3088,12 +3094,17 @@ class Event(object):
                 axes[s, c].plot(
                     time[:num_samples], tr.data[:num_samples] * gain, color="k"
                 )
+                if s != len(stations) - 1:
+                    plt.setp(axes[s, c].get_xticklabels(), visible=False)
                 for ph in ["P", "S"]:
                     # plot the P-/S-wave ML probabilities
                     if plot_probabilities:
                         axb = axes[s, c].twinx()
                         ylim = axes[s, c].get_ylim()
-                        axb.set_ylim(-1.05 * abs(ylim[0]) / abs(ylim[1]), 1.05)
+                        ymean = sum(ylim) / 2.0
+                        axb.set_ylim(
+                            -1.05 * abs(ylim[0] - ymean) / abs(ylim[1] - ymean), 1.05
+                        )
                     if (
                         plot_probabilities
                         and hasattr(self, "probability_time_series")
@@ -3154,8 +3165,18 @@ class Event(object):
             ax.xaxis.set_major_formatter(
                 mdates.ConciseDateFormatter(ax.xaxis.get_major_locator())
             )
-        plt.subplots_adjust(top=0.95, bottom=0.06, right=0.98, left=0.06)
-        fig.text(0.03, 0.40, ylabel, rotation="vertical")
+        fig.text(0.03, 0.40, ylabel, ha="right", rotation="vertical")
+        if plot_probabilities and hasattr(self, "probability_time_series"):
+            fig.text(
+                0.98,
+                0.40,
+                "P- or S-wave arrival probability",
+                ha="left",
+                rotation="vertical",
+            )
+            plt.subplots_adjust(top=0.95, bottom=0.06, right=0.96, left=0.06)
+        else:
+            plt.subplots_adjust(top=0.95, bottom=0.06, right=0.98, left=0.06)
         return fig
 
 
@@ -3308,11 +3329,15 @@ class Template(Event):
                 )
                 return
             template.traces = event.traces
-            template.n_samples = event.n_samples
             template.set_availability()
         else:
-            template.n_samples = event.aux_data["n_samples"]
+            #template.n_samples = event.aux_data["n_samples"]
+            pass
         # ----------------------------------
+        if hasattr(event, "duration"):
+            template.duration = event.duration
+        else:
+            template.duration = (float(event.aux_data["n_samples"]) / event.sr)
         aux_data["n_samples"] = template.n_samples
         if "cov_mat" in aux_data:
             template.cov_mat = aux_data["cov_mat"]
@@ -3347,7 +3372,7 @@ class Template(Event):
             Event.read_from_file(filename, db_path=db_path, gid=gid),
             attach_waveforms=False,
         )
-        template.n_samples = template.aux_data["n_samples"]
+        #template.n_samples = template.aux_data["n_samples"]
         template.id = str(template.aux_data["tid"])
         # overwrite any path that was stored in aux_data, because what matters
         # for the template is only the file it was associated with
