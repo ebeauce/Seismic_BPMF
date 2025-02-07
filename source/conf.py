@@ -5,11 +5,15 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import sys
+import os
+sys.path.insert(0, os.path.abspath(".."))
+print("PYTHONPATH:", sys.path)
 
 project = 'BPMF'
-copyright = '2022, Eric Beauce, William B. Frank'
+copyright = '2025, Eric Beauce, William B. Frank'
 author = 'Eric Beauce, William B. Frank'
-release = '2.0.0'
+release = '2.0.0beta2'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -25,6 +29,8 @@ extensions = [
     "nbsphinx",
     "sphinx_rtd_theme"
         ]
+
+#autodoc_mock_imports = ["BPMF"]
 
 autosummary_generate = True
 
