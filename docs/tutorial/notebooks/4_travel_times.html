@@ -1,24 +1,25 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Compute P-/S-wave travel Times &mdash; BPMF 2.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Compute P-/S-wave travel Times &mdash; BPMF 2.0.0beta2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script src="../../_static/documentation_options.js?v=51b770b3"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=96e89336"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -372,7 +373,12 @@
 </pre></div>
 </div>
 </div>
-<p>The spherical coordinate system used by <code class="docutils literal notranslate"><span class="pre">pykonal</span></code> specifies a point position with <span class="math notranslate nohighlight">\((r, \theta, \varphi)\)</span>: - <span class="math notranslate nohighlight">\(r\)</span>: Distance from center or Earth in km (= decreasing depth). - <span class="math notranslate nohighlight">\(\theta\)</span>: Polar angle in radians (= co-latitude or, equivalently, decreasing latitude). - <span class="math notranslate nohighlight">\(\varphi\)</span>: Azimuthal angle in radians (= longitude).</p>
+<p>The spherical coordinate system used by <code class="docutils literal notranslate"><span class="pre">pykonal</span></code> specifies a point position with <span class="math notranslate nohighlight">\((r, \theta, \varphi)\)</span>:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(r\)</span>: Distance from center or Earth in km (= decreasing depth).</p></li>
+<li><p><span class="math notranslate nohighlight">\(\theta\)</span>: Polar angle in radians (= co-latitude or, equivalently, decreasing latitude).</p></li>
+<li><p><span class="math notranslate nohighlight">\(\varphi\)</span>: Azimuthal angle in radians (= longitude).</p></li>
+</ul>
 <p>Thus, the 3D grid must be built such that <span class="math notranslate nohighlight">\(r\)</span>, <span class="math notranslate nohighlight">\(\theta\)</span> and <span class="math notranslate nohighlight">\(\varphi\)</span> increase with increasing index. Axis 0 is decreasing depth, axis 1 is decreasing latitude and axis 2 is increasing longitude.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -513,20 +519,12 @@ Min radius: 6341 km, min co-latitude: 0.86 rad, min azimuthal angle: 0.53 rad
 <br/></pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-Computing travel times: 0it [00:00, ?it/s]
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Computing travel times: 8it [00:06,  1.23it/s]
+Computing travel times: 0it [00:00, ?it/s]Computing travel times: 8it [00:06,  1.23it/s]
 </pre></div></div>
 </div>
 </section>
@@ -1053,7 +1051,7 @@ There are 14124 sources in the downsampled grid vs 35490 in the original grid.
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Eric Beauce, William B. Frank.</p>
+    <p>&#169; Copyright 2025, Eric Beauce, William B. Frank.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

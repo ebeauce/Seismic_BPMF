@@ -1,24 +1,25 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reminders on Earthquake Magnitudes:Seismic Moment, Moment Magnitude and Local Magnitude &mdash; BPMF 2.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Reminders on Earthquake Magnitudes:Seismic Moment, Moment Magnitude and Local Magnitude &mdash; BPMF 2.0.0beta2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script src="../../_static/documentation_options.js?v=51b770b3"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=96e89336"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -65,11 +66,8 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Reminders on Earthquake Magnitudes:Seismic Moment, Moment Magnitude and Local Magnitude</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#I.-Introduction">I. Introduction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#II.Moment-Magnitude-M_w">II.Moment Magnitude <span class="math notranslate nohighlight">\(M_w\)</span></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#III.-Local-Magnitude-M_\ell">III. Local Magnitude <span class="math notranslate nohighlight">\(M_\ell\)</span></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#1)-Traditional-definition">1) Traditional definition</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#2)-Modified-definition">2) Modified definition</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#III.-Local-Magnitude-M_L">III. Local Magnitude <span class="math notranslate nohighlight">\(M_L\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#IV.-Approximate-Moment-Magnitude-M_{w^*}">IV. Approximate Moment Magnitude <span class="math notranslate nohighlight">\(M_{w^*}\)</span></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#References">References</a></li>
 </ul>
 </li>
@@ -82,7 +80,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#Estimate-a-moment-magnitude-for-every-event:-Traditional-method-(un-comment-if-you-want-to-run-it)">Estimate a moment magnitude for every event: Traditional method (un-comment if you want to run it)</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#Local-magnitude-estimation">Local magnitude estimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Approximate-moment-magnitude-estimation">Approximate moment magnitude estimation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Magnitude-distribution">Magnitude distribution</a></li>
 </ul>
 </li>
@@ -134,14 +132,17 @@ waves, which is often challenging for small events for which low frequencies are
 <div class="math notranslate nohighlight">
 \[S(f) = \dfrac{\Omega_0}{\left( 1 + (f/f_c)^{\gamma n} \right)^{1/\gamma}} \exp \left( - \dfrac{\pi \tau^{P/S}(x, \xi) f}{Q^{P/S}} \right)\quad (2).\]</div>
 <p>Equation (2) is a general expression where <span class="math notranslate nohighlight">\(f_c\)</span> is the corner frequency and <span class="math notranslate nohighlight">\(n\)</span> controls the high-frequency fall-off rate of the spectrum (typically <span class="math notranslate nohighlight">\(n \approx 2\)</span>) and <span class="math notranslate nohighlight">\(\gamma\)</span> controls the sharpness of the spectrum’s corner. The pre-exponential term is the source term and the exponential term is attenuation. <span class="math notranslate nohighlight">\(\tau^{P/S}(x, \xi)\)</span> is the P/S travel time from source location <span class="math notranslate nohighlight">\(\xi\)</span> to receiver location <span class="math notranslate nohighlight">\(x\)</span>, and <span class="math notranslate nohighlight">\(Q^{P/S}\)</span> is the P/S attenuation
-factor. Two special cases of (2) are: - The Brune spectrum (<span class="math notranslate nohighlight">\(n=2\)</span>, <span class="math notranslate nohighlight">\(\gamma = 1\)</span>):</p>
+factor. Two special cases of (2) are:</p>
+<ul>
+<li><p>The Brune spectrum (<span class="math notranslate nohighlight">\(n=2\)</span>, <span class="math notranslate nohighlight">\(\gamma = 1\)</span>):</p>
 <div class="math notranslate nohighlight">
 \[S_{\mathrm{Brune}}(f) = \dfrac{\Omega_0}{1 + (f/f_c)^{2}} \exp \left( - \dfrac{\pi \tau^{P/S}(x, \xi) f}{Q^{P/S}} \right)\quad (3)\]</div>
-<ul class="simple">
-<li><p>Boatwright’s spectrum (<span class="math notranslate nohighlight">\(n=2\)</span>, <span class="math notranslate nohighlight">\(\gamma=2\)</span>):</p></li>
-</ul>
+</li>
+<li><p>Boatwright’s spectrum (<span class="math notranslate nohighlight">\(n=2\)</span>, <span class="math notranslate nohighlight">\(\gamma=2\)</span>):</p>
 <div class="math notranslate nohighlight">
 \[S_{\mathrm{Boatwright}}(f) = \dfrac{\Omega_0}{\left( 1 + (f/f_c)^{2 n} \right)^{1/2}} \exp \left( - \dfrac{\pi \tau^{P/S}(x, \xi) f}{Q^{P/S}} \right)\quad (4)\]</div>
+</li>
+</ul>
 <p>The low-frequency plateau <span class="math notranslate nohighlight">\(\Omega_0\)</span> is proportional to the seismic moment <span class="math notranslate nohighlight">\(M_0\)</span>.</p>
 <div class="math notranslate nohighlight">
 \[\Omega^{P/S}_0 = \dfrac{M_0 R^{P/S}}{4 \pi \sqrt{\rho(\xi) \rho(x) v_{P/S}(\xi) v_{P/S}(x) } v_{P/S}^2(\xi) \mathcal{R}_{P/S}(x, \xi)}\quad (5).\]</div>
@@ -152,37 +153,38 @@ distance). More details in Aki and Richards, 2002 and Boatwright, 1978.</p>
 \[\tilde{u}(f) = u(f) \dfrac{4 \pi \sqrt{\rho(\xi) \rho(x) v_{P/S}(\xi) v_{P/S}(x) } v_{P/S}^2(\xi) \mathcal{R}_{P/S}(x, \xi)}{R^{P/S}} \exp \left( \dfrac{\pi \tau^{P/S}(x, \xi) f}{Q^{P/S}} \right)\quad (6),\]</div>
 <p>and the low-frequency values of <span class="math notranslate nohighlight">\(\tilde{u}(f)\)</span> directly reads as the seismic moment, <span class="math notranslate nohighlight">\(M_0\)</span>.</p>
 </section>
-<section id="III.-Local-Magnitude-M_\ell">
-<h2>III. Local Magnitude <span class="math notranslate nohighlight">\(M_\ell\)</span><a class="headerlink" href="#III.-Local-Magnitude-M_\ell" title="Link to this heading"></a></h2>
-<section id="1)-Traditional-definition">
-<h3>1) Traditional definition<a class="headerlink" href="#1)-Traditional-definition" title="Link to this heading"></a></h3>
-<p>The local magnitude was initially introduced by Richter as the log ratio of peak displacement amplitudes between two earthquakes:</p>
+<section id="III.-Local-Magnitude-M_L">
+<h2>III. Local Magnitude <span class="math notranslate nohighlight">\(M_L\)</span><a class="headerlink" href="#III.-Local-Magnitude-M_L" title="Link to this heading"></a></h2>
+<p>The local magnitude was initially introduced by Richter (1935) as the log ratio of peak displacement amplitudes between two earthquakes:</p>
 <div class="math notranslate nohighlight">
-\[M_\ell = \log \left( \dfrac{A(X)}{A_0(X)} \right),\quad (6)\]</div>
+\[M_L = \log \left( \dfrac{A(X)}{A_0(X)} \right),\quad (6)\]</div>
 <p>which results in an empirical formula correcting for the source-receiver epicentral distance <span class="math notranslate nohighlight">\(X\)</span>:</p>
 <div class="math notranslate nohighlight">
-\[M_\ell = \log A(X) + \alpha \log X + \beta,\quad (7)\]</div>
+\[M_L = \log A(X) + \alpha \log X + \beta,\quad (7)\]</div>
 <p>where <span class="math notranslate nohighlight">\(\alpha\)</span> and <span class="math notranslate nohighlight">\(\beta\)</span> and region-specific parameters (see Peter Shearer’s Introduction to Seismology book, Equations 9.68 and 9.69). <span class="math notranslate nohighlight">\(\alpha \log X\)</span> is an empirical correction for attenuation and geometrical spreading. The issue with the traditional definition of local magnitude is that it applies to a fixed frequency band whereas 1) attenuation is frequency-dependent and 2) as detectable magnitude thresholds keep decreasing, one must choose the frequency band where
-signal-to-noise ratio (SNR) is above 1, otherwise the magnitude estimate is meaningless.</p>
+signal-to-noise ratio (SNR) is above 1, otherwise the magnitude estimate is meaningless. Richter himself was concerned about choosing a consistent seismic phase with consistent dominant frequency across earthquakes. It must also be said that Richter’s pioneering work was done in the Western US with sparse seismic networks. Therefore, epicentral distances were usually much greater than depths and it made sense to consider epicentral rather than hypocentral distances, especially given the large
+uncertainties in depth estimates.</p>
+<p>These issues make it difficult to relate local magnitudes to seismic moments, which is <strong>crucial if one wants to interpret the exponential distribution of magnitudes (Gutenberg-Richter law) in terms of a power-law distribution of seismic moments</strong>. It appears that the local magnitude scale may not be the most appropriate scale for small earthquakes.</p>
 </section>
-<section id="2)-Modified-definition">
-<h3>2) Modified definition<a class="headerlink" href="#2)-Modified-definition" title="Link to this heading"></a></h3>
-<p>Here, we generalize the concept of local magnitude to a frequency dependent formula. Noting that the displacement spectrum <span class="math notranslate nohighlight">\(u(f)\)</span> is nothing but the value of peak displacement per unit bandwidth at a given frequency <span class="math notranslate nohighlight">\(f\)</span>, <span class="math notranslate nohighlight">\(u(f)\)</span> can be used to estimate a local magnitude. Furthermore, we see that any value of the propagation-corrected spectrum <span class="math notranslate nohighlight">\(\tilde{u}(f)\)</span> taken below the corner frequency (<span class="math notranslate nohighlight">\(f &lt; f_c\)</span>) estimates the seismic moment <span class="math notranslate nohighlight">\(M_0\)</span>. With small magnitude
-earthquakes, the signal-to-noise ratio of <span class="math notranslate nohighlight">\(u(f)\)</span> is typically too low to observe the displacement spectrum over a wide enough bandwidth to be able to fit the Brune or Boatwright model. However, a few frequency bins may be above the noise level, and we propose to focus on those to estimate an event magnitude.</p>
-<p>Among these above-noise frequency bins, <span class="math notranslate nohighlight">\(f_{\mathrm{valid}}\)</span>, we use the logarithm of the lowest frequency bin, <span class="math notranslate nohighlight">\(f_{\mathrm{valid}}^{-}\)</span>, of the propagation-corrected displacement spectrum (Eq. (6)), <span class="math notranslate nohighlight">\(\log \tilde{u}(f_{\mathrm{valid}}^{-})\)</span>, as the basis for our local magnitude <span class="math notranslate nohighlight">\(M_\ell\)</span>:</p>
+<section id="IV.-Approximate-Moment-Magnitude-M_{w^*}">
+<h2>IV. Approximate Moment Magnitude <span class="math notranslate nohighlight">\(M_{w^*}\)</span><a class="headerlink" href="#IV.-Approximate-Moment-Magnitude-M_{w^*}" title="Link to this heading"></a></h2>
+<p>To address the above‐mentioned issues, we need to know at which frequency peak displacement is measured and apply the appropriate attenuation correction for this frequency. In fact, the displacement spectrum <span class="math notranslate nohighlight">\(u(f)\)</span> is nothing but the value of peak displacement per unit bandwidth at a given frequency <span class="math notranslate nohighlight">\(f\)</span>. We can therefore use the propagation-corrected spectrum <span class="math notranslate nohighlight">\(\tilde{u}(f)\)</span> as a measure of peak displacement corrected for geometrical spreading and attenuation. Any value taken
+below the corner frequency (<span class="math notranslate nohighlight">\(f &lt; f_c\)</span>) estimates the seismic moment <span class="math notranslate nohighlight">\(M_0\)</span>. With small magnitude earthquakes, the signal-to-noise ratio of <span class="math notranslate nohighlight">\(u(f)\)</span> is typically too low to observe the displacement spectrum over a wide enough bandwidth to be able to fit the Brune or Boatwright model. However, a few frequency bins may be above the noise level, and we propose to focus on those to estimate the seismic moment. We therefore introduce an approximate moment magnitude <span class="math notranslate nohighlight">\(M_{w^*}\)</span>.</p>
+<p>Among these above-noise frequency bins, <span class="math notranslate nohighlight">\(f_{\mathrm{valid}}\)</span>, we use the logarithm of the lowest frequency bin, <span class="math notranslate nohighlight">\(f_{\mathrm{valid}}^{-}\)</span>, of the propagation-corrected displacement spectrum (Eq. (6)), <span class="math notranslate nohighlight">\(\log \tilde{u}(f_{\mathrm{valid}}^{-})\)</span>, as the basis for our local magnitude <span class="math notranslate nohighlight">\(M_{w^*}\)</span>:</p>
 <div class="math notranslate nohighlight">
-\[M_\ell = A \log \tilde{u}(f_{\mathrm{valid}}^{-}) + B.\]</div>
+\[M_{w^*} = A \log \tilde{u}(f_{\mathrm{valid}}^{-}) + B.\]</div>
 <ul class="simple">
 <li><p>Why the lowest frequency bin? Because it has more chances to verify <span class="math notranslate nohighlight">\(f_{\mathrm{valid}}^{-} &lt; f_c\)</span> and, thus, to yield a correct estimate of the seismic moment.</p></li>
+<li><p><span class="math notranslate nohighlight">\(f_{\mathrm{valid}}^{-}\)</span> may still be above <span class="math notranslate nohighlight">\(f_c\)</span>, leading to moment saturation. However, SNR issues are likely with small events, which are those events that have a large corner frequency <span class="math notranslate nohighlight">\(f_c\)</span>.</p></li>
 <li><p>The value of <span class="math notranslate nohighlight">\(A\)</span> determines the magnitude-moment scaling.</p></li>
 <li><p>To match the moment magnitude-seismic moment scaling (see Eq. (1)), we choose <span class="math notranslate nohighlight">\(A = 2/3\)</span> and <span class="math notranslate nohighlight">\(B = -\frac{2}{3} \times 9.1 = -6.0666\)</span>.</p></li>
 </ul>
-</section>
 </section>
 <section id="References">
 <h2>References<a class="headerlink" href="#References" title="Link to this heading"></a></h2>
 <p>Aki, K., &amp; Richards, P. G. (2002). Quantitative seismology.</p>
 <p>Boatwright, J. (1978). Detailed spectral analysis of two small New York State earthquakes. Bulletin of the Seismological Society of America, 68(4), 1117-1131.</p>
+<p>Richter, Charles F (1935). An instrumental earthquake magnitude scale. Bulletin of the seismological society of America.</p>
 <p>Shearer, Peter M. Introduction to seismology. Cambridge university press, 2019.</p>
 </section>
 </section>
@@ -192,7 +194,11 @@ earthquakes, the signal-to-noise ratio of <span class="math notranslate nohighli
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">reload_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+
+
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="c1"># choose the number of threads you want to limit the computation to</span>
 <span class="n">n_CPUs</span> <span class="o">=</span> <span class="mi">24</span>
 <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_CPUs</span><span class="p">)</span>
@@ -345,8 +351,15 @@ Loaded 60 events.
 </section>
 <section id="Moment-magnitude-estimation">
 <h2>Moment magnitude estimation<a class="headerlink" href="#Moment-magnitude-estimation" title="Link to this heading"></a></h2>
-<p>In this section, we will demonstrate the workflow we adopt to compute the moment magnitude of each event. It consists in: - Extracting short windows around the P and S waves, as well as a noise window taken before the P wave. - Correcting for instrument response and integrating velocity to obtain the displacement seismograms. - Computing the displacement noise/P/S spectra on each channel using the traditional vs advanced technique. - Correcting for the path effects (geometrical spreading and
-attenuation). - Averaging the displacement spectrum over the network. - Fitting the displacement spectrum with a model of our choice (here, the Boatwright model).</p>
+<p>In this section, we will demonstrate the workflow we adopt to compute the moment magnitude of each event. It consists in:</p>
+<ul class="simple">
+<li><p>Extracting short windows around the P and S waves, as well as a noise window taken before the P wave.</p></li>
+<li><p>Correcting for instrument response and integrating velocity to obtain the displacement seismograms.</p></li>
+<li><p>Computing the displacement noise/P/S spectra on each channel using the traditional vs advanced technique.</p></li>
+<li><p>Correcting for the path effects (geometrical spreading and attenuation).</p></li>
+<li><p>Averaging the displacement spectrum over the network.</p></li>
+<li><p>Fitting the displacement spectrum with a model of our choice (here, the Boatwright model).</p></li>
+</ul>
 <section id="Conventional-method:-Example-with-a-single-event">
 <h3>Conventional method: Example with a single event<a class="headerlink" href="#Conventional-method:-Example-with-a-single-event" title="Link to this heading"></a></h3>
 <div class="nbinput nblast docutils container">
@@ -410,8 +423,8 @@ attenuation). - Averaging the displacement spectrum over the network. - Fitting 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The maximum horizontal location uncertainty of event 13 is 1.78km.
-The minimum horizontal location uncertainty of event 13 is 1.29km.
+The maximum horizontal location uncertainty of event 13 is 1.77km.
+The minimum horizontal location uncertainty of event 13 is 1.30km.
 The maximum vertical location uncertainty is 2.65km.
 </pre></div></div>
 </div>
@@ -763,8 +776,8 @@ Relative error on fc: 3.04%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The maximum horizontal location uncertainty of event 13 is 1.78km.
-The minimum horizontal location uncertainty of event 13 is 1.29km.
+The maximum horizontal location uncertainty of event 13 is 1.77km.
+The minimum horizontal location uncertainty of event 13 is 1.30km.
 The maximum vertical location uncertainty is 2.65km.
 </pre></div></div>
 </div>
@@ -1177,13 +1190,6 @@ The maximum vertical location uncertainty is 2.65km.
 <div class="highlight"><pre>
 ========================
 Processing event 0
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
 Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
@@ -1411,6 +1417,13 @@ The P-S averaged moment magnitude is nan +/- nan
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_10_magnitudes_35_1.png" src="../../_images/tutorial_notebooks_10_magnitudes_35_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
 <img alt="../../_images/tutorial_notebooks_10_magnitudes_35_2.png" src="../../_images/tutorial_notebooks_10_magnitudes_35_2.png" />
 </div>
 </div>
@@ -1435,18 +1448,11 @@ The P-S averaged moment magnitude is nan +/- nan
 <img alt="../../_images/tutorial_notebooks_10_magnitudes_35_5.png" src="../../_images/tutorial_notebooks_10_magnitudes_35_5.png" />
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_10_magnitudes_35_6.png" src="../../_images/tutorial_notebooks_10_magnitudes_35_6.png" />
-</div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_10_magnitudes_35_7.png" src="../../_images/tutorial_notebooks_10_magnitudes_35_7.png" />
+<img alt="../../_images/tutorial_notebooks_10_magnitudes_35_6.png" src="../../_images/tutorial_notebooks_10_magnitudes_35_6.png" />
 </div>
 </div>
 </section>
@@ -1863,9 +1869,9 @@ The P-S averaged moment magnitude is nan +/- nan
 </div>
 </section>
 </section>
-<section id="Local-magnitude-estimation">
-<h2>Local magnitude estimation<a class="headerlink" href="#Local-magnitude-estimation" title="Link to this heading"></a></h2>
-<p>To estimate an event’s local magnitude as we defined at the beginning of this notebook, we actually just need to add a block of code in the same processing that we used to estimate moment magnitudes. Thus, it usually makes sense to compute both at the same time. While most events do not produce a valid moment magnitude estimate, we get a local magnitude estimate for each event.</p>
+<section id="Approximate-moment-magnitude-estimation">
+<h2>Approximate moment magnitude estimation<a class="headerlink" href="#Approximate-moment-magnitude-estimation" title="Link to this heading"></a></h2>
+<p>To compute the approximate moment magnitude <span class="math notranslate nohighlight">\(M_{w^*}\)</span> of an event, as we defined at the beginning of this notebook, we actually just need to add a block of code in the same processing that we used to estimate moment magnitudes. Thus, it usually makes sense to compute both at the same time. While most events do not produce a valid moment magnitude estimate, we get an approximate moment magnitude for each event.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
@@ -2137,11 +2143,11 @@ The P-S averaged moment magnitude is nan +/- nan
             <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">geo_corrected_peaks</span><span class="p">[</span><span class="n">weights</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">])</span> <span class="o">*</span> <span class="n">weights</span><span class="p">[</span><span class="n">weights</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">]</span>
             <span class="p">)</span>
     <span class="n">estimated_log10_M0</span> <span class="o">=</span> <span class="n">weighted_log_peaks</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="n">Ml</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">Mw_approx</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">A_MOMENT_MAGNITUDE_SCALING</span> <span class="o">*</span> <span class="n">estimated_log10_M0</span>
         <span class="o">+</span> <span class="n">B_MOMENT_MAGNITUDE_SCALING</span>
     <span class="p">)</span>
-    <span class="n">source_parameters</span><span class="p">[</span><span class="s2">&quot;Ml&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ml</span>
+    <span class="n">source_parameters</span><span class="p">[</span><span class="s2">&quot;Mw*&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Mw_approx</span>
 
     <span class="n">spectrum</span><span class="o">.</span><span class="n">set_target_frequencies</span><span class="p">(</span>
         <span class="n">CENTER_FREQUENCIES</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
@@ -2210,7 +2216,7 @@ The P-S averaged moment magnitude is nan +/- nan
 
     <span class="nb">print</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;The P-S averaged moment magnitude is </span><span class="si">{</span><span class="n">Mw</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> +/- </span><span class="si">{</span><span class="n">Mw_err</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;and the local magnitude is </span><span class="si">{</span><span class="n">Ml</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;and the local magnitude is </span><span class="si">{</span><span class="n">Mw_approx</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
     <span class="c1"># save all this new information in BPMF.dataset.Event.aux_data</span>
     <span class="n">event</span><span class="o">.</span><span class="n">set_aux_data</span><span class="p">(</span><span class="n">source_parameters</span><span class="p">)</span>
@@ -2224,13 +2230,6 @@ The P-S averaged moment magnitude is nan +/- nan
 <div class="highlight"><pre>
 ========================
 Processing event 0
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
 The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.21
 ========================
 Processing event 1
@@ -2424,6 +2423,13 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_1.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
 <img alt="../../_images/tutorial_notebooks_10_magnitudes_43_2.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_2.png" />
 </div>
 </div>
@@ -2448,18 +2454,11 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
 <img alt="../../_images/tutorial_notebooks_10_magnitudes_43_5.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_5.png" />
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_6.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_6.png" />
-</div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_7.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_7.png" />
+<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_6.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_6.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -2468,7 +2467,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">magnitudes</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;Mw&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">ev</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;Mw&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">events</span><span class="p">],</span>
-    <span class="s2">&quot;Ml&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">ev</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;Ml&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">events</span><span class="p">],</span>
+    <span class="s2">&quot;Mw*&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">ev</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;Mw*&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">events</span><span class="p">],</span>
     <span class="s2">&quot;event_id&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">ev</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">events</span><span class="p">]</span>
 <span class="p">}</span>
 <span class="n">magnitudes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">magnitudes</span><span class="p">)</span>
@@ -2501,7 +2500,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr style="text-align: right;">
       <th></th>
       <th>Mw</th>
-      <th>Ml</th>
+      <th>Mw*</th>
     </tr>
     <tr>
       <th>event_id</th>
@@ -2513,12 +2512,12 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_005816.160000</th>
       <td>NaN</td>
-      <td>1.207163</td>
+      <td>1.207162</td>
     </tr>
     <tr>
       <th>20120726_011629.640000</th>
       <td>NaN</td>
-      <td>1.350514</td>
+      <td>1.350513</td>
     </tr>
     <tr>
       <th>20120726_011832.520000</th>
@@ -2533,7 +2532,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_022249.440000</th>
       <td>NaN</td>
-      <td>1.245947</td>
+      <td>1.245946</td>
     </tr>
     <tr>
       <th>20120726_010252.920000</th>
@@ -2542,8 +2541,8 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     </tr>
     <tr>
       <th>20120726_030038.720000</th>
-      <td>1.880762</td>
-      <td>1.659529</td>
+      <td>1.880766</td>
+      <td>1.659528</td>
     </tr>
     <tr>
       <th>20120726_033250.800000</th>
@@ -2557,7 +2556,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     </tr>
     <tr>
       <th>20120726_134832.440000</th>
-      <td>2.283612</td>
+      <td>2.283598</td>
       <td>2.180985</td>
     </tr>
     <tr>
@@ -2567,7 +2566,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     </tr>
     <tr>
       <th>20120726_135331.360000</th>
-      <td>2.248920</td>
+      <td>2.248894</td>
       <td>2.153043</td>
     </tr>
     <tr>
@@ -2577,8 +2576,8 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     </tr>
     <tr>
       <th>20120726_011021.840000</th>
-      <td>2.290891</td>
-      <td>2.164842</td>
+      <td>2.290897</td>
+      <td>2.164841</td>
     </tr>
     <tr>
       <th>20120726_011554.240000</th>
@@ -2588,7 +2587,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_013955.440000</th>
       <td>NaN</td>
-      <td>1.361322</td>
+      <td>1.361321</td>
     </tr>
     <tr>
       <th>20120726_015236.480000</th>
@@ -2598,7 +2597,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_022436.480000</th>
       <td>NaN</td>
-      <td>1.019931</td>
+      <td>1.019930</td>
     </tr>
     <tr>
       <th>20120726_010346.920000</th>
@@ -2608,7 +2607,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_011232.880000</th>
       <td>NaN</td>
-      <td>1.140013</td>
+      <td>1.140012</td>
     </tr>
     <tr>
       <th>20120726_011515.000000</th>
@@ -2627,7 +2626,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     </tr>
     <tr>
       <th>20120726_135158.160000</th>
-      <td>2.026131</td>
+      <td>2.026122</td>
       <td>1.859235</td>
     </tr>
     <tr>
@@ -2643,12 +2642,12 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_010926.000000</th>
       <td>NaN</td>
-      <td>1.319061</td>
+      <td>1.319060</td>
     </tr>
     <tr>
       <th>20120726_011022.120000</th>
       <td>NaN</td>
-      <td>2.131044</td>
+      <td>2.131043</td>
     </tr>
     <tr>
       <th>20120726_150620.160000</th>
@@ -2663,7 +2662,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_002043.400000</th>
       <td>NaN</td>
-      <td>1.676261</td>
+      <td>1.676260</td>
     </tr>
     <tr>
       <th>20120726_015819.720000</th>
@@ -2688,12 +2687,12 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_024323.080000</th>
       <td>NaN</td>
-      <td>1.013563</td>
+      <td>1.013562</td>
     </tr>
     <tr>
       <th>20120726_044340.160000</th>
       <td>NaN</td>
-      <td>1.219353</td>
+      <td>1.219352</td>
     </tr>
     <tr>
       <th>20120726_044651.080000</th>
@@ -2703,7 +2702,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_045108.440000</th>
       <td>NaN</td>
-      <td>1.109736</td>
+      <td>1.109735</td>
     </tr>
     <tr>
       <th>20120726_144928.560000</th>
@@ -2743,7 +2742,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_054546.040000</th>
       <td>NaN</td>
-      <td>1.401360</td>
+      <td>1.401359</td>
     </tr>
     <tr>
       <th>20120726_054659.280000</th>
@@ -2753,7 +2752,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_055716.480000</th>
       <td>NaN</td>
-      <td>1.325752</td>
+      <td>1.325751</td>
     </tr>
     <tr>
       <th>20120726_080825.760000</th>
@@ -2763,7 +2762,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_101645.800000</th>
       <td>NaN</td>
-      <td>1.384389</td>
+      <td>1.384388</td>
     </tr>
     <tr>
       <th>20120726_105346.600000</th>
@@ -2783,12 +2782,12 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_092848.360000</th>
       <td>NaN</td>
-      <td>1.283043</td>
+      <td>1.283042</td>
     </tr>
     <tr>
       <th>20120726_100723.720000</th>
-      <td>2.079056</td>
-      <td>1.948038</td>
+      <td>2.078875</td>
+      <td>1.948037</td>
     </tr>
     <tr>
       <th>20120726_162711.920000</th>
@@ -2808,7 +2807,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
     <tr>
       <th>20120726_133526.440000</th>
       <td>NaN</td>
-      <td>1.705371</td>
+      <td>1.705370</td>
     </tr>
   </tbody>
 </table>
@@ -3116,7 +3115,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">GR</span> <span class="o">=</span> <span class="n">MLE_bvalue</span><span class="p">(</span><span class="n">magnitudes</span><span class="p">[</span><span class="s2">&quot;Ml&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">GR</span> <span class="o">=</span> <span class="n">MLE_bvalue</span><span class="p">(</span><span class="n">magnitudes</span><span class="p">[</span><span class="s2">&quot;Mw*&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -3176,7 +3175,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Eric Beauce, William B. Frank.</p>
+    <p>&#169; Copyright 2025, Eric Beauce, William B. Frank.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

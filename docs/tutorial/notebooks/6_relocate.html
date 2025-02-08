@@ -1,24 +1,25 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Relocation &mdash; BPMF 2.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Relocation &mdash; BPMF 2.0.0beta2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script src="../../_static/documentation_options.js?v=51b770b3"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=96e89336"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -127,7 +128,7 @@
 <span class="kn">from</span> <span class="nn">BPMF.data_reader_examples</span> <span class="kn">import</span> <span class="n">data_reader_mseed</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span> <span class="k">as</span> <span class="n">give_time</span>
 
-<span class="o">%</span><span class="k">config</span> InlineBackend.figure_formats = [&quot;svg&quot;]
+<span class="c1"># %config InlineBackend.figure_formats = [&quot;svg&quot;]</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;svg.fonttype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
 </pre></div>
 </div>
@@ -543,10 +544,20 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_6_relocate_11_0.svg" src="../../_images/tutorial_notebooks_6_relocate_11_0.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_6_relocate_11_0.png" src="../../_images/tutorial_notebooks_6_relocate_11_0.png" />
 </div>
-<p>The backprojection method offers several advantages for locating earthquakes: - Locations come for free in addition to detecting events. - The “picking” of P and S waves does not involve any single-channel threshold. - Backprojection effectively solves the detection and phase association problems at the same time.</p>
-<p>However, there is a number of cons: - The backprojection locations are just as good as the grid is. If a downsampled grid was used for computation efficiency, then the locations definitely need to be refined. - It is hard and computationally expensive to estimate uncertainties (as we will see later in this notebook).</p>
+</div>
+<p>The backprojection method offers several advantages for locating earthquakes:</p>
+<ul class="simple">
+<li><p>Locations come for free in addition to detecting events.</p></li>
+<li><p>The “picking” of P and S waves does not involve any single-channel threshold.</p></li>
+<li><p>Backprojection effectively solves the detection and phase association problems at the same time.</p></li>
+</ul>
+<p>However, there is a number of cons:</p>
+<ul class="simple">
+<li><p>The backprojection locations are just as good as the grid is. If a downsampled grid was used for computation efficiency, then the locations definitely need to be refined.</p></li>
+<li><p>It is hard and computationally expensive to estimate uncertainties (as we will see later in this notebook).</p></li>
+</ul>
 <p>Thus, in the following, we will explore two ways to refine the initial locations.</p>
 </section>
 <section id="Relocation-1:-PhaseNet-picks-and-NonLinLoc">
@@ -599,7 +610,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2.65sec to read the waveforms for all 17 detections.
+3.40sec to read the waveforms for all 17 detections.
 </pre></div></div>
 </div>
 <p>Let’s plot these short windows with <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.plot</span></code>.</p>
@@ -617,7 +628,8 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_6_relocate_17_0.svg" src="../../_images/tutorial_notebooks_6_relocate_17_0.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_6_relocate_17_0.png" src="../../_images/tutorial_notebooks_6_relocate_17_0.png" />
+</div>
 </div>
 <p>Now, we will use <code class="docutils literal notranslate"><span class="pre">PhaseNet</span></code> to pick the P- and S-wave arrivals. This is done with the <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.pick_PS_phases</span></code> method.</p>
 <div class="nbinput nblast docutils container">
@@ -773,21 +785,21 @@ Picking P and S wave arrivals on detection 16
       <td>20.300467</td>
       <td>0.155635</td>
       <td>0.860289</td>
-      <td>22.553028</td>
+      <td>22.553024</td>
       <td>0.101877</td>
       <td>2012-07-26T01:10:24.580467Z</td>
-      <td>2012-07-26T01:10:26.833028Z</td>
+      <td>2012-07-26T01:10:26.833024Z</td>
     </tr>
     <tr>
       <th>DC07</th>
       <td>0.602067</td>
       <td>20.334587</td>
-      <td>0.185502</td>
+      <td>0.185503</td>
       <td>0.678574</td>
-      <td>22.202778</td>
+      <td>22.202774</td>
       <td>0.129679</td>
       <td>2012-07-26T01:10:24.614587Z</td>
-      <td>2012-07-26T01:10:26.482778Z</td>
+      <td>2012-07-26T01:10:26.482774Z</td>
     </tr>
     <tr>
       <th>DC08</th>
@@ -795,20 +807,20 @@ Picking P and S wave arrivals on detection 16
       <td>20.053699</td>
       <td>0.115350</td>
       <td>0.690027</td>
-      <td>21.970955</td>
+      <td>21.970953</td>
       <td>0.112607</td>
       <td>2012-07-26T01:10:24.333699Z</td>
-      <td>2012-07-26T01:10:26.250955Z</td>
+      <td>2012-07-26T01:10:26.250953Z</td>
     </tr>
     <tr>
       <th>DE08</th>
       <td>0.241382</td>
-      <td>19.796841</td>
+      <td>19.796843</td>
       <td>0.295909</td>
       <td>0.366147</td>
       <td>21.934898</td>
       <td>0.229555</td>
-      <td>2012-07-26T01:10:24.076841Z</td>
+      <td>2012-07-26T01:10:24.076843Z</td>
       <td>2012-07-26T01:10:26.214898Z</td>
     </tr>
     <tr>
@@ -817,42 +829,42 @@ Picking P and S wave arrivals on detection 16
       <td>20.136955</td>
       <td>0.094823</td>
       <td>0.884857</td>
-      <td>21.986250</td>
+      <td>21.986248</td>
       <td>0.096080</td>
       <td>2012-07-26T01:10:24.416955Z</td>
-      <td>2012-07-26T01:10:26.266250Z</td>
+      <td>2012-07-26T01:10:26.266248Z</td>
     </tr>
     <tr>
       <th>DC06</th>
-      <td>0.826056</td>
-      <td>20.938959</td>
+      <td>0.826057</td>
+      <td>20.938963</td>
       <td>0.085419</td>
       <td>0.886496</td>
-      <td>23.207861</td>
+      <td>23.207859</td>
       <td>0.097003</td>
-      <td>2012-07-26T01:10:25.218959Z</td>
-      <td>2012-07-26T01:10:27.487861Z</td>
+      <td>2012-07-26T01:10:25.218963Z</td>
+      <td>2012-07-26T01:10:27.487859Z</td>
     </tr>
     <tr>
       <th>SAUV</th>
       <td>0.793898</td>
-      <td>19.595509</td>
-      <td>0.104621</td>
+      <td>19.595510</td>
+      <td>0.104622</td>
       <td>0.818875</td>
       <td>21.098804</td>
       <td>0.107155</td>
-      <td>2012-07-26T01:10:23.875509Z</td>
+      <td>2012-07-26T01:10:23.875510Z</td>
       <td>2012-07-26T01:10:25.378804Z</td>
     </tr>
     <tr>
       <th>DD06</th>
       <td>0.456268</td>
-      <td>20.447828</td>
+      <td>20.447830</td>
       <td>0.156354</td>
       <td>0.805816</td>
       <td>22.341667</td>
       <td>0.112516</td>
-      <td>2012-07-26T01:10:24.727828Z</td>
+      <td>2012-07-26T01:10:24.727830Z</td>
       <td>2012-07-26T01:10:26.621667Z</td>
     </tr>
   </tbody>
@@ -885,10 +897,15 @@ Picking P and S wave arrivals on detection 16
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-3.00sec to read the waveforms for all 17 detections.
+3.42sec to read the waveforms for all 17 detections.
 </pre></div></div>
 </div>
-<p>The following plot shows: - the P-/S-wave arrival continuous probabilities (blue=P-wave, red=S-wave) computed by PhaseNet, - the PhaseNet picks with dashed vertical lines (blue=P-wave, red=S-wave), - the arrival times predicted by the backprojection location with solid vertical lines (purple=P-wave, orange=S-wave).</p>
+<p>The following plot shows:</p>
+<ul class="simple">
+<li><p>the P-/S-wave arrival continuous probabilities (blue=P-wave, red=S-wave) computed by PhaseNet,</p></li>
+<li><p>the PhaseNet picks with dashed vertical lines (blue=P-wave, red=S-wave),</p></li>
+<li><p>the arrival times predicted by the backprojection location with solid vertical lines (purple=P-wave, orange=S-wave).</p></li>
+</ul>
 <p>See how, in this tutorial, the backprojection locations already do a good job at predicting the P- and S-wave times… given the limitations of the 1D velocity model.</p>
 <p>Note: Try to run the phase picking again with <code class="docutils literal notranslate"><span class="pre">USE_APRIORI_PICKS=False</span></code> and see how the plot changes.</p>
 <div class="nbinput docutils container">
@@ -907,7 +924,8 @@ Picking P and S wave arrivals on detection 16
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_6_relocate_26_0.svg" src="../../_images/tutorial_notebooks_6_relocate_26_0.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_6_relocate_26_0.png" src="../../_images/tutorial_notebooks_6_relocate_26_0.png" />
+</div>
 </div>
 <p>We now are all set for using our favorite location software using PhaseNet’s picks. We can use <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code> with one of <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event</span></code> methods. See <a class="reference external" href="http://alomax.free.fr/nlloc/">http://alomax.free.fr/nlloc/</a> for more info.</p>
 <div class="nbinput nblast docutils container">
@@ -985,11 +1003,12 @@ Relocating event 16
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_6_relocate_31_0.svg" src="../../_images/tutorial_notebooks_6_relocate_31_0.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_6_relocate_31_0.png" src="../../_images/tutorial_notebooks_6_relocate_31_0.png" />
+</div>
 </div>
 <p>It doesn’t look like much has changed… But we now have the location uncertainties. The uncertainty information is encoded in the covariance matrix, which is stored at <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.aux_data[&quot;cov_mat&quot;]</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1007,11 +1026,11 @@ Relocating event 16
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The maximum horizontal location uncertainty of event 0 is 1.74km.
-The azimuth of the maximum horizontal uncertainty is 156.99degrees.
-The mainimumhorizontal location uncertainty of event 0 is 1.19km.
-The azimuth of the minimum horizontal uncertainty is 66.99degrees.
-The maximum vertical location uncertainty is 2.66km.
+The maximum horizontal location uncertainty of event 0 is 1.73km.
+The azimuth of the maximum horizontal uncertainty is 157.27degrees.
+The mainimumhorizontal location uncertainty of event 0 is 1.18km.
+The azimuth of the minimum horizontal uncertainty is 67.27degrees.
+The maximum vertical location uncertainty is 2.64km.
 </pre></div></div>
 </div>
 <p>Before plotting the map with the new locations, let’s make sure our locations are not unnecessarily biased by aberrant pick outliers. Even though we used <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>’s EDT method, which is robust to outliers, we can easily identify outliers and remove them.</p>
@@ -1042,19 +1061,12 @@ The maximum vertical location uncertainty is 2.66km.
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Relocating event 0
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+Relocating event 0
 Relocating event 1
 Relocating event 4
 Relocating event 6
@@ -1084,7 +1096,8 @@ Relocating event 15
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_6_relocate_36_0.svg" src="../../_images/tutorial_notebooks_6_relocate_36_0.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_6_relocate_36_0.png" src="../../_images/tutorial_notebooks_6_relocate_36_0.png" />
+</div>
 </div>
 </section>
 <section id="Gather-the-new-catalog,-clean-up-possible-multiples-and-plot-the-new-locations">
@@ -1167,10 +1180,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.731250</td>
       <td>12.015625</td>
       <td>2012-07-26 01:10:21.800</td>
-      <td>1.736381</td>
-      <td>1.185190</td>
-      <td>156.991406</td>
-      <td>2.658909</td>
+      <td>1.733366</td>
+      <td>1.182667</td>
+      <td>157.271635</td>
+      <td>2.640251</td>
     </tr>
     <tr>
       <th>2012-07-26T01:15:54.160000Z</th>
@@ -1178,10 +1191,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.716875</td>
       <td>9.273438</td>
       <td>2012-07-26 01:15:54.160</td>
-      <td>2.069702</td>
-      <td>1.101945</td>
-      <td>89.976650</td>
-      <td>2.302121</td>
+      <td>2.070620</td>
+      <td>1.108417</td>
+      <td>90.435851</td>
+      <td>2.250307</td>
     </tr>
     <tr>
       <th>2012-07-26T01:58:19.720000Z</th>
@@ -1189,10 +1202,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.600000</td>
       <td>-1.500000</td>
       <td>2012-07-26 01:58:19.720</td>
-      <td>0.969304</td>
-      <td>0.828467</td>
-      <td>1.958087</td>
-      <td>2.184634</td>
+      <td>0.968885</td>
+      <td>0.833068</td>
+      <td>11.277525</td>
+      <td>2.155680</td>
     </tr>
     <tr>
       <th>2012-07-26T02:35:01.160000Z</th>
@@ -1200,10 +1213,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.700000</td>
       <td>-1.500000</td>
       <td>2012-07-26 02:35:01.160</td>
-      <td>4.120233</td>
-      <td>2.617063</td>
-      <td>74.828267</td>
-      <td>4.698645</td>
+      <td>4.140636</td>
+      <td>2.593994</td>
+      <td>72.951755</td>
+      <td>4.445532</td>
     </tr>
     <tr>
       <th>2012-07-26T03:00:39.160000Z</th>
@@ -1211,10 +1224,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.715625</td>
       <td>9.070312</td>
       <td>2012-07-26 03:00:39.160</td>
-      <td>1.791514</td>
-      <td>1.152377</td>
-      <td>98.957242</td>
-      <td>3.450490</td>
+      <td>1.812523</td>
+      <td>1.146382</td>
+      <td>96.893951</td>
+      <td>3.431834</td>
     </tr>
     <tr>
       <th>2012-07-26T04:43:40.160000Z</th>
@@ -1233,10 +1246,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.716875</td>
       <td>9.273438</td>
       <td>2012-07-26 04:48:38.640</td>
-      <td>2.723289</td>
-      <td>1.353023</td>
-      <td>77.879040</td>
-      <td>3.955719</td>
+      <td>2.689873</td>
+      <td>1.357818</td>
+      <td>77.828681</td>
+      <td>3.859434</td>
     </tr>
     <tr>
       <th>2012-07-26T08:08:25.680000Z</th>
@@ -1244,10 +1257,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.720625</td>
       <td>8.867188</td>
       <td>2012-07-26 08:08:25.680</td>
-      <td>2.498276</td>
-      <td>1.368690</td>
-      <td>78.911129</td>
-      <td>3.864549</td>
+      <td>2.457855</td>
+      <td>1.324990</td>
+      <td>80.384442</td>
+      <td>3.851911</td>
     </tr>
     <tr>
       <th>2012-07-26T10:07:23.720000Z</th>
@@ -1255,10 +1268,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.716250</td>
       <td>8.765625</td>
       <td>2012-07-26 10:07:23.720</td>
-      <td>1.648093</td>
-      <td>0.947081</td>
-      <td>92.574287</td>
-      <td>2.542094</td>
+      <td>1.642315</td>
+      <td>0.946182</td>
+      <td>93.504006</td>
+      <td>2.522272</td>
     </tr>
     <tr>
       <th>2012-07-26T11:55:35.520000Z</th>
@@ -1266,10 +1279,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.600000</td>
       <td>3.000000</td>
       <td>2012-07-26 11:55:35.520</td>
-      <td>2.728958</td>
-      <td>1.461620</td>
-      <td>152.650097</td>
-      <td>3.774164</td>
+      <td>2.731442</td>
+      <td>1.437874</td>
+      <td>152.628773</td>
+      <td>3.716407</td>
     </tr>
     <tr>
       <th>2012-07-26T13:35:26.480000Z</th>
@@ -1277,10 +1290,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.797812</td>
       <td>-1.949219</td>
       <td>2012-07-26 13:35:26.480</td>
-      <td>3.689917</td>
-      <td>0.996875</td>
-      <td>88.219249</td>
-      <td>5.571478</td>
+      <td>3.697239</td>
+      <td>0.998076</td>
+      <td>88.219160</td>
+      <td>5.458099</td>
     </tr>
     <tr>
       <th>2012-07-26T13:48:32.480000Z</th>
@@ -1288,10 +1301,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.723750</td>
       <td>11.609375</td>
       <td>2012-07-26 13:48:32.480</td>
-      <td>1.456039</td>
-      <td>1.326382</td>
-      <td>38.952550</td>
-      <td>2.881104</td>
+      <td>1.429097</td>
+      <td>1.324683</td>
+      <td>34.905759</td>
+      <td>2.865370</td>
     </tr>
     <tr>
       <th>2012-07-26T13:51:58.200000Z</th>
@@ -1299,10 +1312,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.713125</td>
       <td>13.335938</td>
       <td>2012-07-26 13:51:58.200</td>
-      <td>1.774422</td>
-      <td>1.626758</td>
-      <td>134.647549</td>
-      <td>3.745274</td>
+      <td>1.782372</td>
+      <td>1.640373</td>
+      <td>133.233003</td>
+      <td>3.765628</td>
     </tr>
     <tr>
       <th>2012-07-26T13:53:31.400000Z</th>
@@ -1310,10 +1323,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.718750</td>
       <td>12.015625</td>
       <td>2012-07-26 13:53:31.400</td>
-      <td>1.563932</td>
-      <td>1.491863</td>
-      <td>32.859366</td>
-      <td>3.106936</td>
+      <td>1.557949</td>
+      <td>1.486866</td>
+      <td>36.010911</td>
+      <td>3.102796</td>
     </tr>
     <tr>
       <th>2012-07-26T13:56:54.320000Z</th>
@@ -1321,21 +1334,21 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.716875</td>
       <td>8.867188</td>
       <td>2012-07-26 13:56:54.320</td>
-      <td>2.864502</td>
-      <td>1.240042</td>
-      <td>83.687111</td>
-      <td>2.879827</td>
+      <td>2.875005</td>
+      <td>1.242650</td>
+      <td>84.046297</td>
+      <td>2.869467</td>
     </tr>
     <tr>
       <th>2012-07-26T15:06:20.160000Z</th>
-      <td>30.326099</td>
-      <td>40.600078</td>
-      <td>-1.987305</td>
+      <td>30.326221</td>
+      <td>40.600156</td>
+      <td>-1.974609</td>
       <td>2012-07-26 15:06:20.160</td>
-      <td>1.464562</td>
-      <td>0.501280</td>
-      <td>92.486000</td>
-      <td>1.075268</td>
+      <td>1.502012</td>
+      <td>0.491035</td>
+      <td>92.386020</td>
+      <td>0.880841</td>
     </tr>
     <tr>
       <th>2012-07-26T17:28:20.400000Z</th>
@@ -1343,10 +1356,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.720000</td>
       <td>10.000000</td>
       <td>2012-07-26 17:28:20.400</td>
-      <td>3.513222</td>
-      <td>1.443351</td>
-      <td>71.766505</td>
-      <td>6.046675</td>
+      <td>3.553327</td>
+      <td>1.468112</td>
+      <td>71.712055</td>
+      <td>5.997913</td>
     </tr>
   </tbody>
 </table>
@@ -1404,10 +1417,10 @@ Class instance does not have a `cov_mat` attribute.
     <span class="k">if</span> <span class="n">dt_sec</span> <span class="o">&lt;</span> <span class="n">MINIMUM_INTEREVENT_TIME_SEC</span><span class="p">:</span>
         <span class="c1"># test their epicentral distance</span>
         <span class="n">epi_distance</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">two_point_epicentral_distance</span><span class="p">(</span>
-                <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;latitude&quot;</span><span class="p">],</span>
                 <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;longitude&quot;</span><span class="p">],</span>
+                <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;latitude&quot;</span><span class="p">],</span>
+                <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">][</span><span class="s2">&quot;longitude&quot;</span><span class="p">],</span>
                 <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">][</span><span class="s2">&quot;latitude&quot;</span><span class="p">],</span>
-                <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">previous_ev</span><span class="p">][</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
                 <span class="p">)</span>
         <span class="k">if</span> <span class="n">epi_distance</span> <span class="o">&gt;</span> <span class="n">MINIMUM_EPICENTRAL_DISTANCE_KM</span><span class="p">:</span>
             <span class="c1"># these two events are close in time but distant in space</span>
@@ -1490,10 +1503,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.731250</td>
       <td>12.015625</td>
       <td>2012-07-26 01:10:21.800</td>
-      <td>1.736381</td>
-      <td>1.185190</td>
-      <td>156.991406</td>
-      <td>2.658909</td>
+      <td>1.733366</td>
+      <td>1.182667</td>
+      <td>157.271635</td>
+      <td>2.640251</td>
       <td>bp_0</td>
     </tr>
     <tr>
@@ -1502,10 +1515,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.716875</td>
       <td>9.273438</td>
       <td>2012-07-26 01:15:54.160</td>
-      <td>2.069702</td>
-      <td>1.101945</td>
-      <td>89.976650</td>
-      <td>2.302121</td>
+      <td>2.070620</td>
+      <td>1.108417</td>
+      <td>90.435851</td>
+      <td>2.250307</td>
       <td>bp_1</td>
     </tr>
     <tr>
@@ -1514,10 +1527,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.600000</td>
       <td>-1.500000</td>
       <td>2012-07-26 01:58:19.720</td>
-      <td>0.969304</td>
-      <td>0.828467</td>
-      <td>1.958087</td>
-      <td>2.184634</td>
+      <td>0.968885</td>
+      <td>0.833068</td>
+      <td>11.277525</td>
+      <td>2.155680</td>
       <td>bp_2</td>
     </tr>
     <tr>
@@ -1526,10 +1539,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.700000</td>
       <td>-1.500000</td>
       <td>2012-07-26 02:35:01.160</td>
-      <td>4.120233</td>
-      <td>2.617063</td>
-      <td>74.828267</td>
-      <td>4.698645</td>
+      <td>4.140636</td>
+      <td>2.593994</td>
+      <td>72.951755</td>
+      <td>4.445532</td>
       <td>bp_3</td>
     </tr>
     <tr>
@@ -1538,10 +1551,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.715625</td>
       <td>9.070312</td>
       <td>2012-07-26 03:00:39.160</td>
-      <td>1.791514</td>
-      <td>1.152377</td>
-      <td>98.957242</td>
-      <td>3.450490</td>
+      <td>1.812523</td>
+      <td>1.146382</td>
+      <td>96.893951</td>
+      <td>3.431834</td>
       <td>bp_4</td>
     </tr>
     <tr>
@@ -1562,10 +1575,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.716875</td>
       <td>9.273438</td>
       <td>2012-07-26 04:48:38.640</td>
-      <td>2.723289</td>
-      <td>1.353023</td>
-      <td>77.879040</td>
-      <td>3.955719</td>
+      <td>2.689873</td>
+      <td>1.357818</td>
+      <td>77.828681</td>
+      <td>3.859434</td>
       <td>bp_6</td>
     </tr>
     <tr>
@@ -1574,10 +1587,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.720625</td>
       <td>8.867188</td>
       <td>2012-07-26 08:08:25.680</td>
-      <td>2.498276</td>
-      <td>1.368690</td>
-      <td>78.911129</td>
-      <td>3.864549</td>
+      <td>2.457855</td>
+      <td>1.324990</td>
+      <td>80.384442</td>
+      <td>3.851911</td>
       <td>bp_7</td>
     </tr>
     <tr>
@@ -1586,10 +1599,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.716250</td>
       <td>8.765625</td>
       <td>2012-07-26 10:07:23.720</td>
-      <td>1.648093</td>
-      <td>0.947081</td>
-      <td>92.574287</td>
-      <td>2.542094</td>
+      <td>1.642315</td>
+      <td>0.946182</td>
+      <td>93.504006</td>
+      <td>2.522272</td>
       <td>bp_8</td>
     </tr>
     <tr>
@@ -1598,10 +1611,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.600000</td>
       <td>3.000000</td>
       <td>2012-07-26 11:55:35.520</td>
-      <td>2.728958</td>
-      <td>1.461620</td>
-      <td>152.650097</td>
-      <td>3.774164</td>
+      <td>2.731442</td>
+      <td>1.437874</td>
+      <td>152.628773</td>
+      <td>3.716407</td>
       <td>bp_9</td>
     </tr>
     <tr>
@@ -1610,10 +1623,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.797812</td>
       <td>-1.949219</td>
       <td>2012-07-26 13:35:26.480</td>
-      <td>3.689917</td>
-      <td>0.996875</td>
-      <td>88.219249</td>
-      <td>5.571478</td>
+      <td>3.697239</td>
+      <td>0.998076</td>
+      <td>88.219160</td>
+      <td>5.458099</td>
       <td>bp_10</td>
     </tr>
     <tr>
@@ -1622,10 +1635,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.723750</td>
       <td>11.609375</td>
       <td>2012-07-26 13:48:32.480</td>
-      <td>1.456039</td>
-      <td>1.326382</td>
-      <td>38.952550</td>
-      <td>2.881104</td>
+      <td>1.429097</td>
+      <td>1.324683</td>
+      <td>34.905759</td>
+      <td>2.865370</td>
       <td>bp_11</td>
     </tr>
     <tr>
@@ -1634,10 +1647,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.713125</td>
       <td>13.335938</td>
       <td>2012-07-26 13:51:58.200</td>
-      <td>1.774422</td>
-      <td>1.626758</td>
-      <td>134.647549</td>
-      <td>3.745274</td>
+      <td>1.782372</td>
+      <td>1.640373</td>
+      <td>133.233003</td>
+      <td>3.765628</td>
       <td>bp_12</td>
     </tr>
     <tr>
@@ -1646,10 +1659,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.718750</td>
       <td>12.015625</td>
       <td>2012-07-26 13:53:31.400</td>
-      <td>1.563932</td>
-      <td>1.491863</td>
-      <td>32.859366</td>
-      <td>3.106936</td>
+      <td>1.557949</td>
+      <td>1.486866</td>
+      <td>36.010911</td>
+      <td>3.102796</td>
       <td>bp_13</td>
     </tr>
     <tr>
@@ -1658,22 +1671,22 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.716875</td>
       <td>8.867188</td>
       <td>2012-07-26 13:56:54.320</td>
-      <td>2.864502</td>
-      <td>1.240042</td>
-      <td>83.687111</td>
-      <td>2.879827</td>
+      <td>2.875005</td>
+      <td>1.242650</td>
+      <td>84.046297</td>
+      <td>2.869467</td>
       <td>bp_14</td>
     </tr>
     <tr>
       <th>2012-07-26T15:06:20.160000Z</th>
-      <td>30.326099</td>
-      <td>40.600078</td>
-      <td>-1.987305</td>
+      <td>30.326221</td>
+      <td>40.600156</td>
+      <td>-1.974609</td>
       <td>2012-07-26 15:06:20.160</td>
-      <td>1.464562</td>
-      <td>0.501280</td>
-      <td>92.486000</td>
-      <td>1.075268</td>
+      <td>1.502012</td>
+      <td>0.491035</td>
+      <td>92.386020</td>
+      <td>0.880841</td>
       <td>bp_15</td>
     </tr>
     <tr>
@@ -1682,17 +1695,22 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.720000</td>
       <td>10.000000</td>
       <td>2012-07-26 17:28:20.400</td>
-      <td>3.513222</td>
-      <td>1.443351</td>
-      <td>71.766505</td>
-      <td>6.046675</td>
+      <td>3.553327</td>
+      <td>1.468112</td>
+      <td>71.712055</td>
+      <td>5.997913</td>
       <td>bp_16</td>
     </tr>
   </tbody>
 </table>
 </div></div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code> locations are able to resolve the location differences between events much better than the backprojection locations. However, limits remain due to: - Errors in picks. - Approximations in velocity model (1D model whereas the area is hghly heterogeneous!). - Earthquakes are located outside the network, so large uncertainties cannot be avoided.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code> locations are able to resolve the location differences between events much better than the backprojection locations. However, limits remain due to:</p>
+<ul class="simple">
+<li><p>Errors in picks.</p></li>
+<li><p>Approximations in velocity model (1D model whereas the area is hghly heterogeneous!).</p></li>
+<li><p>Earthquakes are located outside the network, so large uncertainties cannot be avoided.</p></li>
+</ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
@@ -1710,7 +1728,8 @@ Class instance does not have a `cov_mat` attribute.
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_6_relocate_43_0.svg" src="../../_images/tutorial_notebooks_6_relocate_43_0.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_6_relocate_43_0.png" src="../../_images/tutorial_notebooks_6_relocate_43_0.png" />
+</div>
 </div>
 </section>
 </section>
@@ -1957,10 +1976,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.73125</td>
       <td>12.015625</td>
       <td>2012-07-26 01:10:21.800</td>
-      <td>1.736381</td>
-      <td>1.18519</td>
-      <td>156.991406</td>
-      <td>2.658909</td>
+      <td>1.733366</td>
+      <td>1.182667</td>
+      <td>157.271635</td>
+      <td>2.640251</td>
     </tr>
   </tbody>
 </table>
@@ -2079,7 +2098,8 @@ Class instance does not have a `cov_mat` attribute.
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_6_relocate_57_0.svg" src="../../_images/tutorial_notebooks_6_relocate_57_0.svg" /></div>
+<img alt="../../_images/tutorial_notebooks_6_relocate_57_0.png" src="../../_images/tutorial_notebooks_6_relocate_57_0.png" />
+</div>
 </div>
 <p>The current way of estimating location uncertainties with the backprojection method is to compute a weighted average distance between the maximum beam grid point (indexed by <span class="math notranslate nohighlight">\(k^*\)</span>) and all other grid points. To avoid the result to be grid-size dependent, we limit the weighted average to a restricted rectangular domain taken around the maximum beam grid point.</p>
 <div class="math notranslate nohighlight">
@@ -2089,7 +2109,7 @@ Class instance does not have a `cov_mat` attribute.
 <p>where <span class="math notranslate nohighlight">\(e_{i,k^*}\)</span> is the epicentral distance between grid points <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(k^*\)</span> and <span class="math notranslate nohighlight">\(\Delta d_{i,k^*}\)</span> is the depth difference between grid points <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(k^*\)</span>.</p>
 <p>In this case, we assume the uncertainty ellipse to be isotropic, that is, <span class="math notranslate nohighlight">\(h_{max,unc} = h_{min,unc}\)</span>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
@@ -2107,11 +2127,11 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The maximum horizontal location uncertainty of event 0 is 1.74km.
-The azimuth of the maximum horizontal uncertainty is 156.99degrees.
-The mainimum horizontal location uncertainty of event 0 is 1.19km.
-The azimuth of the minimum horizontal uncertainty is 66.99degrees.
-The maximum vertical location uncertainty is 2.66km with 29.50degrees plunge.
+The maximum horizontal location uncertainty of event 0 is 1.73km.
+The azimuth of the maximum horizontal uncertainty is 157.27degrees.
+The mainimum horizontal location uncertainty of event 0 is 1.18km.
+The azimuth of the minimum horizontal uncertainty is 67.27degrees.
+The maximum vertical location uncertainty is 2.64km with 29.70degrees plunge.
 </pre></div></div>
 </div>
 </section>
@@ -2128,7 +2148,7 @@ The maximum vertical location uncertainty is 2.66km with 29.50degrees plunge.
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Eric Beauce, William B. Frank.</p>
+    <p>&#169; Copyright 2025, Eric Beauce, William B. Frank.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

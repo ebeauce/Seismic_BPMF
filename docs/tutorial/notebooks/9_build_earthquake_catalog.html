@@ -1,24 +1,25 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Build Earthquake Catalog &mdash; BPMF 2.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Build Earthquake Catalog &mdash; BPMF 2.0.0beta2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script src="../../_static/documentation_options.js?v=51b770b3"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=96e89336"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -106,7 +107,7 @@
 <h1>Build Earthquake Catalog<a class="headerlink" href="#Build-Earthquake-Catalog" title="Link to this heading"></a></h1>
 <p>In this final notebook, we read the matched-filter database, remove the multiple detections and write a clean earthquake catalog in a csv file.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
@@ -131,7 +132,7 @@
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PROGRAM PARAMETERS</span>
@@ -148,7 +149,7 @@
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read network metadata</span>
@@ -160,7 +161,7 @@
 <section id="Read-the-detected-events'-metadata-for-each-template">
 <h2>Read the detected events’ metadata for each template<a class="headerlink" href="#Read-the-detected-events'-metadata-for-each-template" title="Link to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># template filenames</span>
@@ -185,7 +186,7 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Reading catalog: 100%|██████████| 13/13 [00:00&lt;00:00, 14.36it/s]
+Reading catalog: 100%|██████████| 13/13 [00:01&lt;00:00, 11.14it/s]
 </pre></div></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.TemplateGroup</span></code> now has a <code class="docutils literal notranslate"><span class="pre">catalog</span></code> attribute, which is a <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Catalog</span></code> instance.</p>
@@ -194,7 +195,7 @@ Reading catalog: 100%|██████████| 13/13 [00:00&lt;00:00, 14.
 <h2>Remove the multiple detections<a class="headerlink" href="#Remove-the-multiple-detections" title="Link to this heading"></a></h2>
 <p>Remove multiple detections with the <code class="docutils literal notranslate"><span class="pre">TemplateGroup.remove_multiples</span></code> method.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># DISTANCE_CRITERION_KM: Distance, in km, between two detected events (within uncertainties) below which</span>
@@ -212,7 +213,7 @@ Reading catalog: 100%|██████████| 13/13 [00:00&lt;00:00, 14.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># we need to read the waveforms first</span>
@@ -222,7 +223,7 @@ Reading catalog: 100%|██████████| 13/13 [00:00&lt;00:00, 14.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">template_group</span><span class="o">.</span><span class="n">remove_multiples</span><span class="p">(</span>
@@ -240,7 +241,7 @@ Reading catalog: 100%|██████████| 13/13 [00:00&lt;00:00, 14.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ebeauce/software/Seismic_BPMF/BPMF/dataset.py:4493: RuntimeWarning: invalid value encountered in true_divide
+/home/ebeauce/software/Seismic_BPMF/BPMF/dataset.py:4575: RuntimeWarning: invalid value encountered in divide
   unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[
 </pre></div></div>
 </div>
@@ -249,8 +250,10 @@ Reading catalog: 100%|██████████| 13/13 [00:00&lt;00:00, 14.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+False ../BPMF_outputs/template_db/intertp_cc.h5 False
 Computing the similarity matrix...
 Computing the inter-template directional errors...
+Saving inter-tp CC to ../BPMF_outputs/template_db/intertp_cc.h5
 Searching for events detected by multiple templates
 All events occurring within 4.0 sec, with uncertainty ellipsoids closer than 15.0 km will and inter-template CC larger than 0.10 be considered the same
 </pre></div></div>
@@ -260,15 +263,7 @@ All events occurring within 4.0 sec, with uncertainty ellipsoids closer than 15.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Removing multiples:   0%|          | 0/196 [00:00&lt;?, ?it/s]
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-Removing multiples: 100%|██████████| 196/196 [00:00&lt;00:00, 3229.92it/s]
+Removing multiples: 100%|██████████| 196/196 [00:00&lt;00:00, 3453.44it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -289,7 +284,7 @@ Removing multiples: 100%|██████████| 196/196 [00:00&lt;00:00
 </div>
 <p>The catalog now has three new columns: <code class="docutils literal notranslate"><span class="pre">origin_time_sec</span></code> (a timestamp of <code class="docutils literal notranslate"><span class="pre">origin_time</span></code> in seconds), <code class="docutils literal notranslate"><span class="pre">interevent_time_sec</span></code> (template-wise computation), <code class="docutils literal notranslate"><span class="pre">unique_event</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
@@ -297,7 +292,7 @@ Removing multiples: 100%|██████████| 196/196 [00:00&lt;00:00
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -481,7 +476,7 @@ Removing multiples: 100%|██████████| 196/196 [00:00&lt;00:00
 </div>
 <p>The final catalog is made of the unique events only.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span> <span class="o">=</span> <span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;unique_event&quot;</span><span class="p">]]</span>
@@ -491,7 +486,7 @@ Removing multiples: 100%|██████████| 196/196 [00:00&lt;00:00
 </div>
 <p>Let’s add the location uncertainties from the template events.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="n">template_group</span><span class="o">.</span><span class="n">templates</span><span class="p">:</span>
@@ -513,7 +508,7 @@ Class instance does not have a `cov_mat` attribute.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;There are </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">)</span><span class="si">}</span><span class="s2"> events in our template matching catalog!&quot;</span><span class="p">)</span>
@@ -530,7 +525,7 @@ There are 63 events in our template matching catalog!
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -707,9 +702,9 @@ There are 63 events in our template matching catalog!
     </tr>
     <tr>
       <th>11.0</th>
-      <td>30.326099</td>
-      <td>40.600078</td>
-      <td>-1.987305</td>
+      <td>30.326221</td>
+      <td>40.600156</td>
+      <td>-1.974609</td>
       <td>2012-07-26 15:06:20.160</td>
       <td>1.000000</td>
       <td>11</td>
@@ -780,7 +775,7 @@ There are 63 events in our template matching catalog!
 </div>
 <p>Let’s plot these events on a map. You will see that there are far fewer dots on the map than the total number of earthquakes in our catalog… This is because all newly detected events are attributed their template locations. Therefore, most events are plotted at the exact same location.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span>
@@ -805,7 +800,7 @@ There are 63 events in our template matching catalog!
 <p>In your workflow, you might be ok with the approximate locations of the template matching catalog. However, if you decide to keep refining the catalog, here are some suggestions to get started.</p>
 <p>One possibility to start refining the locations of all events is to re-run the same process as in notebook 6, namely <code class="docutils literal notranslate"><span class="pre">PhaseNet</span></code> and <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">seisbench.models</span> <span class="k">as</span> <span class="nn">sbm</span>
@@ -816,7 +811,7 @@ There are 63 events in our template matching catalog!
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -852,8 +847,7 @@ PhaseNet(
     (4): ModuleList(
       (0): Conv1d(64, 128, kernel_size=(7,), stride=(1,), padding=same, bias=False)
       (1): BatchNorm1d(128, eps=0.001, momentum=0.1, affine=True, track_running_stats=True)
-      (2): None
-      (3): None
+      (2-3): 2 x None
     )
   )
   (up_branch): ModuleList(
@@ -888,7 +882,7 @@ PhaseNet(
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PhaseNet picking parameters</span>
@@ -950,7 +944,7 @@ PhaseNet(
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1018,11 +1012,11 @@ PhaseNet(
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Relocating each individual event: 100%|██████████| 63/63 [00:33&lt;00:00,  1.88it/s]
+Relocating each individual event:   0%|          | 0/63 [00:00&lt;?, ?it/s]Relocating each individual event: 100%|██████████| 63/63 [00:43&lt;00:00,  1.46it/s]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span>
@@ -1046,7 +1040,7 @@ Relocating each individual event: 100%|██████████| 63/63 [00
 <h2>Assemble the backprojection and template matching catalog<a class="headerlink" href="#Assemble-the-backprojection-and-template-matching-catalog" title="Link to this heading"></a></h2>
 <p>When selecting the template events from the backprojection catalog, we imposed some quality criteria that might have thrown out some events that we still want in our final catalog. Here, we make a simple comparison of the backprojection and template matching catalogs to find these missing events and add them to the final catalog.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">BACKPROJECTION_CATALOG_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;backprojection_catalog.csv&quot;</span>
@@ -1054,7 +1048,7 @@ Relocating each individual event: 100%|██████████| 63/63 [00
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tm_catalog</span> <span class="o">=</span> <span class="n">template_group</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -1066,7 +1060,7 @@ Relocating each individual event: 100%|██████████| 63/63 [00
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1245,10 +1239,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>1.343315e+09</td>
       <td>1011.60</td>
       <td>True</td>
-      <td>1.188194</td>
-      <td>0.549611</td>
-      <td>91.233016</td>
-      <td>1.402678</td>
+      <td>1.204434</td>
+      <td>0.549646</td>
+      <td>90.198577</td>
+      <td>1.38049</td>
     </tr>
     <tr>
       <th>60</th>
@@ -1310,7 +1304,7 @@ Relocating each individual event: 100%|██████████| 63/63 [00
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bp_catalog</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
@@ -1324,7 +1318,7 @@ Relocating each individual event: 100%|██████████| 63/63 [00
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1376,10 +1370,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.731250</td>
       <td>12.015625</td>
       <td>2012-07-26 01:10:21.800</td>
-      <td>1.736381</td>
-      <td>1.185190</td>
-      <td>156.991406</td>
-      <td>2.658909</td>
+      <td>1.733366</td>
+      <td>1.182667</td>
+      <td>157.271635</td>
+      <td>2.640251</td>
       <td>bp_0</td>
     </tr>
     <tr>
@@ -1388,10 +1382,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.716875</td>
       <td>9.273438</td>
       <td>2012-07-26 01:15:54.160</td>
-      <td>2.069702</td>
-      <td>1.101945</td>
-      <td>89.976650</td>
-      <td>2.302121</td>
+      <td>2.070620</td>
+      <td>1.108417</td>
+      <td>90.435851</td>
+      <td>2.250307</td>
       <td>bp_1</td>
     </tr>
     <tr>
@@ -1400,10 +1394,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.600000</td>
       <td>-1.500000</td>
       <td>2012-07-26 01:58:19.720</td>
-      <td>0.969304</td>
-      <td>0.828467</td>
-      <td>1.958087</td>
-      <td>2.184634</td>
+      <td>0.968885</td>
+      <td>0.833068</td>
+      <td>11.277525</td>
+      <td>2.155680</td>
       <td>bp_2</td>
     </tr>
     <tr>
@@ -1412,10 +1406,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.700000</td>
       <td>-1.500000</td>
       <td>2012-07-26 02:35:01.160</td>
-      <td>4.120233</td>
-      <td>2.617063</td>
-      <td>74.828267</td>
-      <td>4.698645</td>
+      <td>4.140636</td>
+      <td>2.593994</td>
+      <td>72.951755</td>
+      <td>4.445532</td>
       <td>bp_3</td>
     </tr>
     <tr>
@@ -1424,10 +1418,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.715625</td>
       <td>9.070312</td>
       <td>2012-07-26 03:00:39.160</td>
-      <td>1.791514</td>
-      <td>1.152377</td>
-      <td>98.957242</td>
-      <td>3.450490</td>
+      <td>1.812523</td>
+      <td>1.146382</td>
+      <td>96.893951</td>
+      <td>3.431834</td>
       <td>bp_4</td>
     </tr>
     <tr>
@@ -1448,10 +1442,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.716875</td>
       <td>9.273438</td>
       <td>2012-07-26 04:48:38.640</td>
-      <td>2.723289</td>
-      <td>1.353023</td>
-      <td>77.879040</td>
-      <td>3.955719</td>
+      <td>2.689873</td>
+      <td>1.357818</td>
+      <td>77.828681</td>
+      <td>3.859434</td>
       <td>bp_6</td>
     </tr>
     <tr>
@@ -1460,10 +1454,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.720625</td>
       <td>8.867188</td>
       <td>2012-07-26 08:08:25.680</td>
-      <td>2.498276</td>
-      <td>1.368690</td>
-      <td>78.911129</td>
-      <td>3.864549</td>
+      <td>2.457855</td>
+      <td>1.324990</td>
+      <td>80.384442</td>
+      <td>3.851911</td>
       <td>bp_7</td>
     </tr>
     <tr>
@@ -1472,10 +1466,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.716250</td>
       <td>8.765625</td>
       <td>2012-07-26 10:07:23.720</td>
-      <td>1.648093</td>
-      <td>0.947081</td>
-      <td>92.574287</td>
-      <td>2.542094</td>
+      <td>1.642315</td>
+      <td>0.946182</td>
+      <td>93.504006</td>
+      <td>2.522272</td>
       <td>bp_8</td>
     </tr>
     <tr>
@@ -1484,10 +1478,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.600000</td>
       <td>3.000000</td>
       <td>2012-07-26 11:55:35.520</td>
-      <td>2.728958</td>
-      <td>1.461620</td>
-      <td>152.650097</td>
-      <td>3.774164</td>
+      <td>2.731442</td>
+      <td>1.437874</td>
+      <td>152.628773</td>
+      <td>3.716407</td>
       <td>bp_9</td>
     </tr>
     <tr>
@@ -1496,10 +1490,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.797812</td>
       <td>-1.949219</td>
       <td>2012-07-26 13:35:26.480</td>
-      <td>3.689917</td>
-      <td>0.996875</td>
-      <td>88.219249</td>
-      <td>5.571478</td>
+      <td>3.697239</td>
+      <td>0.998076</td>
+      <td>88.219160</td>
+      <td>5.458099</td>
       <td>bp_10</td>
     </tr>
     <tr>
@@ -1508,10 +1502,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.723750</td>
       <td>11.609375</td>
       <td>2012-07-26 13:48:32.480</td>
-      <td>1.456039</td>
-      <td>1.326382</td>
-      <td>38.952550</td>
-      <td>2.881104</td>
+      <td>1.429097</td>
+      <td>1.324683</td>
+      <td>34.905759</td>
+      <td>2.865370</td>
       <td>bp_11</td>
     </tr>
     <tr>
@@ -1520,10 +1514,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.713125</td>
       <td>13.335938</td>
       <td>2012-07-26 13:51:58.200</td>
-      <td>1.774422</td>
-      <td>1.626758</td>
-      <td>134.647549</td>
-      <td>3.745274</td>
+      <td>1.782372</td>
+      <td>1.640373</td>
+      <td>133.233003</td>
+      <td>3.765628</td>
       <td>bp_12</td>
     </tr>
     <tr>
@@ -1532,10 +1526,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.718750</td>
       <td>12.015625</td>
       <td>2012-07-26 13:53:31.400</td>
-      <td>1.563932</td>
-      <td>1.491863</td>
-      <td>32.859366</td>
-      <td>3.106936</td>
+      <td>1.557949</td>
+      <td>1.486866</td>
+      <td>36.010911</td>
+      <td>3.102796</td>
       <td>bp_13</td>
     </tr>
     <tr>
@@ -1544,22 +1538,22 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.716875</td>
       <td>8.867188</td>
       <td>2012-07-26 13:56:54.320</td>
-      <td>2.864502</td>
-      <td>1.240042</td>
-      <td>83.687111</td>
-      <td>2.879827</td>
+      <td>2.875005</td>
+      <td>1.242650</td>
+      <td>84.046297</td>
+      <td>2.869467</td>
       <td>bp_14</td>
     </tr>
     <tr>
       <th>2012-07-26T15:06:20.160000Z</th>
-      <td>30.326099</td>
-      <td>40.600078</td>
-      <td>-1.987305</td>
+      <td>30.326221</td>
+      <td>40.600156</td>
+      <td>-1.974609</td>
       <td>2012-07-26 15:06:20.160</td>
-      <td>1.464562</td>
-      <td>0.501280</td>
-      <td>92.486000</td>
-      <td>1.075268</td>
+      <td>1.502012</td>
+      <td>0.491035</td>
+      <td>92.386020</td>
+      <td>0.880841</td>
       <td>bp_15</td>
     </tr>
     <tr>
@@ -1568,10 +1562,10 @@ Relocating each individual event: 100%|██████████| 63/63 [00
       <td>40.720000</td>
       <td>10.000000</td>
       <td>2012-07-26 17:28:20.400</td>
-      <td>3.513222</td>
-      <td>1.443351</td>
-      <td>71.766505</td>
-      <td>6.046675</td>
+      <td>3.553327</td>
+      <td>1.468112</td>
+      <td>71.712055</td>
+      <td>5.997913</td>
       <td>bp_16</td>
     </tr>
   </tbody>
@@ -1579,7 +1573,7 @@ Relocating each individual event: 100%|██████████| 63/63 [00
 </div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># catalog merging parameters</span>
@@ -1589,7 +1583,7 @@ Relocating each individual event: 100%|██████████| 63/63 [00
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">combined_catalog</span> <span class="o">=</span> <span class="n">tm_catalog</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -1619,12 +1613,12 @@ Relocating each individual event: 100%|██████████| 63/63 [00
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00, 984.69it/s]
+Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00, 1134.01it/s]
 </pre></div></div>
 </div>
 <p>And here is the combined catalog! In this simple example, it appears that all events in the backprojection catalog were re-detected in the template matching catalog so that the final catalog has no extra events with respect to the template matching catalog. However, it may not be always like that. Some events in the backprojection catalog may not have been well enough located for you to use them as templates, and they may not have been subsequently re-detected in the template matching catalog.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">combined_catalog</span>
@@ -1632,7 +1626,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1819,10 +1813,10 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
       <td>1.343315e+09</td>
       <td>1011.60</td>
       <td>True</td>
-      <td>1.188194</td>
-      <td>0.549611</td>
-      <td>91.233016</td>
-      <td>1.402678</td>
+      <td>1.204434</td>
+      <td>0.549646</td>
+      <td>90.198577</td>
+      <td>1.38049</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -1889,7 +1883,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
 </div>
 <p>In this example, we see that two entries of the catalog end up pointing to the same event (see below):</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">combined_catalog</span><span class="p">[</span>
@@ -1901,7 +1895,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1955,10 +1949,10 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
       <td>1.343311e+09</td>
       <td>16.68</td>
       <td>True</td>
-      <td>1.698073</td>
-      <td>1.416915</td>
-      <td>-157.812149</td>
-      <td>3.070552</td>
+      <td>1.694781</td>
+      <td>1.424041</td>
+      <td>-159.166753</td>
+      <td>3.097528</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -1974,10 +1968,10 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
       <td>1.343311e+09</td>
       <td>785.84</td>
       <td>True</td>
-      <td>1.516158</td>
-      <td>1.360425</td>
-      <td>-140.439618</td>
-      <td>2.908200</td>
+      <td>1.507701</td>
+      <td>1.363615</td>
+      <td>-142.318562</td>
+      <td>2.908710</td>
       <td>NaN</td>
     </tr>
   </tbody>
@@ -1986,7 +1980,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
 </div>
 <p><strong>versus</strong> (before relocating each event individually)</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">initial_catalog</span><span class="p">[</span>
@@ -1998,7 +1992,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2081,7 +2075,7 @@ Loop through BP cat: 100%|██████████| 17/17 [00:00&lt;00:00,
 <section id="Last-clean-up">
 <h2>Last clean up<a class="headerlink" href="#Last-clean-up" title="Link to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">final_cat</span> <span class="o">=</span> <span class="n">combined_catalog</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -2149,7 +2143,7 @@ Removed 0 events. Examples:
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">final_cat</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;event_id&quot;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2160,7 +2154,7 @@ Removed 0 events. Examples:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2336,10 +2330,10 @@ Removed 0 events. Examples:
       <td>1.000000</td>
       <td>0.0</td>
       <td>56.28</td>
-      <td>1.776457</td>
-      <td>1.293067</td>
-      <td>153.641704</td>
-      <td>2.649126</td>
+      <td>1.773194</td>
+      <td>1.296419</td>
+      <td>154.710273</td>
+      <td>2.652053</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -2384,10 +2378,10 @@ Removed 0 events. Examples:
       <td>0.332720</td>
       <td>1.0</td>
       <td>7.56</td>
-      <td>5.721093</td>
-      <td>1.856309</td>
-      <td>109.504639</td>
-      <td>4.681934</td>
+      <td>5.705995</td>
+      <td>1.811602</td>
+      <td>109.473063</td>
+      <td>4.795679</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -2400,10 +2394,10 @@ Removed 0 events. Examples:
       <td>1.000000</td>
       <td>1.0</td>
       <td>19.08</td>
-      <td>1.949209</td>
-      <td>1.118634</td>
-      <td>93.451420</td>
-      <td>2.413492</td>
+      <td>1.945561</td>
+      <td>1.118281</td>
+      <td>94.036371</td>
+      <td>2.438769</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -2512,10 +2506,10 @@ Removed 0 events. Examples:
       <td>0.395754</td>
       <td>1.0</td>
       <td>762.76</td>
-      <td>6.427452</td>
-      <td>2.654027</td>
-      <td>110.981749</td>
-      <td>5.236795</td>
+      <td>6.534589</td>
+      <td>2.600683</td>
+      <td>111.351147</td>
+      <td>5.330862</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -2608,10 +2602,10 @@ Removed 0 events. Examples:
       <td>0.697115</td>
       <td>0.0</td>
       <td>1537.84</td>
-      <td>1.676146</td>
-      <td>1.188218</td>
-      <td>93.072440</td>
-      <td>3.278191</td>
+      <td>1.639696</td>
+      <td>1.184815</td>
+      <td>93.276813</td>
+      <td>3.267438</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -2752,10 +2746,10 @@ Removed 0 events. Examples:
       <td>1.000000</td>
       <td>5.0</td>
       <td>109.32</td>
-      <td>2.760022</td>
-      <td>1.433242</td>
-      <td>80.900073</td>
-      <td>4.036697</td>
+      <td>2.810966</td>
+      <td>1.445601</td>
+      <td>81.508179</td>
+      <td>4.001420</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -2848,10 +2842,10 @@ Removed 0 events. Examples:
       <td>1.000000</td>
       <td>6.0</td>
       <td>7869.20</td>
-      <td>1.687249</td>
-      <td>1.420870</td>
-      <td>119.057751</td>
-      <td>4.167423</td>
+      <td>1.686887</td>
+      <td>1.440093</td>
+      <td>115.918392</td>
+      <td>4.267344</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -2896,10 +2890,10 @@ Removed 0 events. Examples:
       <td>1.000000</td>
       <td>7.0</td>
       <td>2315.36</td>
-      <td>1.549251</td>
-      <td>0.960434</td>
-      <td>88.241652</td>
-      <td>2.583515</td>
+      <td>1.562172</td>
+      <td>0.962052</td>
+      <td>88.607279</td>
+      <td>2.582100</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -2976,10 +2970,10 @@ Removed 0 events. Examples:
       <td>1.000000</td>
       <td>9.0</td>
       <td>NaN</td>
-      <td>3.715397</td>
-      <td>0.989535</td>
-      <td>89.098493</td>
-      <td>5.636553</td>
+      <td>3.745895</td>
+      <td>0.968482</td>
+      <td>89.284110</td>
+      <td>5.686243</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -2992,10 +2986,10 @@ Removed 0 events. Examples:
       <td>0.733365</td>
       <td>0.0</td>
       <td>20407.12</td>
-      <td>1.516158</td>
-      <td>1.360425</td>
-      <td>-140.439618</td>
-      <td>2.908200</td>
+      <td>1.507701</td>
+      <td>1.363615</td>
+      <td>-142.318562</td>
+      <td>2.908710</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -3024,10 +3018,10 @@ Removed 0 events. Examples:
       <td>0.536160</td>
       <td>10.0</td>
       <td>100.08</td>
-      <td>1.930258</td>
-      <td>1.772629</td>
-      <td>154.039822</td>
-      <td>3.537436</td>
+      <td>1.931911</td>
+      <td>1.742724</td>
+      <td>148.924871</td>
+      <td>3.534384</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -3040,10 +3034,10 @@ Removed 0 events. Examples:
       <td>0.757365</td>
       <td>0.0</td>
       <td>93.04</td>
-      <td>1.609972</td>
-      <td>1.401390</td>
-      <td>-153.469187</td>
-      <td>2.941569</td>
+      <td>1.599465</td>
+      <td>1.394841</td>
+      <td>-155.245910</td>
+      <td>2.957749</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -3056,10 +3050,10 @@ Removed 0 events. Examples:
       <td>0.408196</td>
       <td>10.0</td>
       <td>82.60</td>
-      <td>4.956472</td>
-      <td>2.006614</td>
-      <td>89.078378</td>
-      <td>6.387298</td>
+      <td>5.043594</td>
+      <td>1.996250</td>
+      <td>88.523582</td>
+      <td>6.411122</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -3072,10 +3066,10 @@ Removed 0 events. Examples:
       <td>1.000000</td>
       <td>10.0</td>
       <td>120.04</td>
-      <td>2.815204</td>
-      <td>1.244460</td>
-      <td>83.432871</td>
-      <td>2.466413</td>
+      <td>2.772472</td>
+      <td>1.282198</td>
+      <td>83.034589</td>
+      <td>2.490108</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -3120,10 +3114,10 @@ Removed 0 events. Examples:
       <td>1.000000</td>
       <td>11.0</td>
       <td>NaN</td>
-      <td>1.188194</td>
-      <td>0.549611</td>
-      <td>91.233016</td>
-      <td>1.402678</td>
+      <td>1.204434</td>
+      <td>0.549646</td>
+      <td>90.198577</td>
+      <td>1.380490</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -3182,7 +3176,7 @@ Removed 0 events. Examples:
 <section id="Save-final-catalog">
 <h2>Save final catalog<a class="headerlink" href="#Save-final-catalog" title="Link to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># csv format</span>
@@ -3193,7 +3187,7 @@ Removed 0 events. Examples:
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># hdf5 / BPMF format</span>
@@ -3214,7 +3208,7 @@ Removed 0 events. Examples:
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The final cat!</span>
@@ -3254,7 +3248,7 @@ Removed 0 events. Examples:
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Eric Beauce, William B. Frank.</p>
+    <p>&#169; Copyright 2025, Eric Beauce, William B. Frank.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

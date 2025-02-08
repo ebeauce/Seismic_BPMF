@@ -1,24 +1,25 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Template Matching &mdash; BPMF 2.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Template Matching &mdash; BPMF 2.0.0beta2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script src="../../_static/documentation_options.js?v=51b770b3"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=96e89336"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -244,7 +245,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.72sec to read the 13 templates.
+0.73sec to read the 13 templates.
 </pre></div></div>
 </div>
 </section>
@@ -275,7 +276,7 @@
 <section id="Load-the-data">
 <h2>Load the data<a class="headerlink" href="#Load-the-data" title="Link to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">date_list</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">datelist</span><span class="p">()</span>
@@ -321,19 +322,12 @@ Days to process:  DatetimeIndex([&#39;2012-07-26 00:00:00+00:00&#39;], dtype=&#3
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Processing 2012-07-26
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+Processing 2012-07-26
 24 Trace(s) in Stream:
 YH.DE07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DC07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
@@ -420,8 +414,8 @@ Template 6 detected 38 events.
 Template 7 detected 5 events.
 Template 8 detected 1 events.
 Template 9 detected 1 events.
-Total time spent on computing CCs: 7.80sec
-Total time spent on finding detections: 1.22sec
+Total time spent on computing CCs: 5.29sec
+Total time spent on finding detections: 0.48sec
 </pre></div></div>
 </div>
 </section>
@@ -490,7 +484,7 @@ Total time spent on finding detections: 1.22sec
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-8.60sec to read the waveforms for all 13 detections.
+8.11sec to read the waveforms for all 13 detections.
 </pre></div></div>
 </div>
 <p>Using <code class="docutils literal notranslate"><span class="pre">BPMF.similarity.MatchedFilter.plot_detection</span></code> method, we plot the waveforms of a detected event (black) on top of which we plot the template waveforms (red). The location in time of the detected event is also shown by an arrow on the CC time series (top plot).</p>
@@ -569,7 +563,7 @@ Total time spent on finding detections: 1.22sec
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Writing took 28.21sec.
+Writing took 25.43sec.
 </pre></div></div>
 </div>
 <p>We are almost done! Note that neighboring templates are very likely to detect some events in common. Thus, to build a meaningful earthquake catalog with no (or, more realistically, few) multiple detections of the same events, we still need to clean up the database (see next notebook).</p>
@@ -587,7 +581,7 @@ Writing took 28.21sec.
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Eric Beauce, William B. Frank.</p>
+    <p>&#169; Copyright 2025, Eric Beauce, William B. Frank.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
