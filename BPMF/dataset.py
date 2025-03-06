@@ -3331,13 +3331,13 @@ class Template(Event):
             template.traces = event.traces
             template.set_availability()
         else:
-            #template.n_samples = event.aux_data["n_samples"]
+            # template.n_samples = event.aux_data["n_samples"]
             pass
         # ----------------------------------
         if hasattr(event, "duration"):
             template.duration = event.duration
         else:
-            template.duration = (float(event.aux_data["n_samples"]) / event.sr)
+            template.duration = float(event.aux_data["n_samples"]) / event.sr
         aux_data["n_samples"] = template.n_samples
         if "cov_mat" in aux_data:
             template.cov_mat = aux_data["cov_mat"]
@@ -3372,7 +3372,7 @@ class Template(Event):
             Event.read_from_file(filename, db_path=db_path, gid=gid),
             attach_waveforms=False,
         )
-        #template.n_samples = template.aux_data["n_samples"]
+        # template.n_samples = template.aux_data["n_samples"]
         template.id = str(template.aux_data["tid"])
         # overwrite any path that was stored in aux_data, because what matters
         # for the template is only the file it was associated with
@@ -4691,7 +4691,7 @@ class TemplateGroup(Family):
         print(compute_from_scratch, cc_fn, os.path.isfile(cc_fn))
         if not compute_from_scratch and os.path.isfile(cc_fn):
             _intertemplate_cc = self._read_intertp_cc(cc_fn, intertemplate_cc_params)
-            if (
+            if (_intertemplate_cc is not None) and (
                 len(np.intersect1d(self.tids, np.int32(_intertemplate_cc.index)))
                 == self.n_templates
             ):
