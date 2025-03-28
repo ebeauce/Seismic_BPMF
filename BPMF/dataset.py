@@ -4699,6 +4699,8 @@ class TemplateGroup(Family):
                 self._intertemplate_cc = _intertemplate_cc.loc[self.tids, self.tids]
                 print(f"Read inter-template CCs from {cc_fn}.")
             else:
+                print("WHY??????")
+                breakpoint()
                 compute_from_scratch = True
         else:
             compute_from_scratch = True
@@ -5417,7 +5419,8 @@ class Stack(Event):
         obspy.Stream instances that populate the `self.traces` attribute.
         """
         self.traces = obs.Stream()
-        self.n_samples = utils.sec_to_samp(duration, sr=self.sr)
+        self.duration = duration
+        #self.n_samples = utils.sec_to_samp(duration, sr=self.sr)
         for s, sta in enumerate(self.stations):
             for c, cp in enumerate(self.components):
                 ph = phase_on_comp[cp].upper()
