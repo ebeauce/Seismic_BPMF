@@ -498,7 +498,6 @@ class Catalog(object):
         events : list, optional
             List of `Event` instances of `return_events=True`.
         """
-        events = []
         # fetch list of files in case db_path or filename is given with
         # Unix wildcards
         path_to_files = glob.glob(os.path.join(db_path, filename))
@@ -507,41 +506,57 @@ class Catalog(object):
             print("Reading from:")
             print(path_to_files)
 
-        def _read_events(path):
-            events = []
-            with h5.File(path, mode="r") as f:
-                if gid is not None:
-                    f = f[gid]
-                keys = list(f.keys())
-                for key in f.keys():
-                    events.append(Event.read_from_file(hdf5_file=f[key]))
-            return events
+        if return_events:
+            def _read(path):
+                events = []
+                with h5.File(path, mode="r") as f:
+                    if gid is not None:
+                        f = f[gid]
+                    keys = list(f.keys())
+                    for key in f.keys():
+                        events.append(Event.read_from_file(hdf5_file=f[key]))
+                return events
+        else:
+            def _read(path):
+                base_attributes = [
+                        "longitude", "latitude", "depth", "origin_time"
+                        ]
+                catalog = {}
+                for attr in base_attributes + extra_attributes:
+                    catalog[attr] = []
+                with h5.File(path, mode="r") as fin:
+                    if gid is not None:
+                        fin = fin[gid]
+                    keys = list(fin.keys())
+                    for key in fin:
+                        for attr in base_attributes:
+                            catalog[attr].append(fin[key][attr][()])
+                        for attr in extra_attributes:
+                            if attr in fin:
+                                catalog[attr].append(fin[key][attr][()])
+                            elif "aux_data" in fin[key] and attr in fin[key]["aux_data"]:
+                                catalog[attr].append(
+                                        fin[key]["aux_data"][attr][()]
+                                        )
+                            else:
+                                catalog[attr].append(fill_value)
+                return pd.DataFrame(catalog)
+
 
         if n_threads != 1:
             from concurrent.futures import ThreadPoolExecutor
 
             with ThreadPoolExecutor(max_workers=n_threads) as executor:
-                output = list(executor.map(_read_events, path_to_files))
-                events = [el for sublist in output for el in sublist]
+                output = list(executor.map(_read, path_to_files))
         else:
+            output = []
             for path in path_to_files:
-                events.extend(_read_events(path))
-        # try:
-        #    for path in path_to_files:
-        #        with h5.File(path, mode="r") as f:
-        #            if gid is not None:
-        #                f = f[gid]
-        #            keys = list(f.keys())
-        #            for key in f.keys():
-        #                events.append(Event.read_from_file(hdf5_file=f[key]))
-        # except Exception as e:
-        #    print(e)
-        #    print(
-        #        "Error while trying to read the detected events "
-        #        "(perhaps there are none)."
-        #    )
-        #    pass
+                output.append(_read(path))
         if return_events:
+            if n_threads != 1:
+                events = [el for sublist in output for el in sublist]
+            else:
+                events = output
             return (
                 cls.read_from_events(
                     events, extra_attributes=extra_attributes, fill_value=fill_value
@@ -549,9 +564,16 @@ class Catalog(object):
                 events,
             )
         else:
-            return cls.read_from_events(
-                events, extra_attributes=extra_attributes, fill_value=fill_value
-            )
+            if len(output) == 0:
+                base_attributes = [
+                        "longitude", "latitude", "depth", "origin_time"
+                        ]
+                empty_catalog = {}
+                for attr in base_attributes + extra_attributes:
+                    empty_catalog[attr] = []
+                return cls.read_from_dataframe(pd.DataFrame(empty_catalog))
+            else:
+                return cls.concatenate(output)
 
     # ---------------------------------------------------------
     #                  Plotting methods
@@ -3331,13 +3353,13 @@ class Template(Event):
             template.traces = event.traces
             template.set_availability()
         else:
-            #template.n_samples = event.aux_data["n_samples"]
+            # template.n_samples = event.aux_data["n_samples"]
             pass
         # ----------------------------------
         if hasattr(event, "duration"):
             template.duration = event.duration
         else:
-            template.duration = (float(event.aux_data["n_samples"]) / event.sr)
+            template.duration = float(event.aux_data["n_samples"]) / event.sr
         aux_data["n_samples"] = template.n_samples
         if "cov_mat" in aux_data:
             template.cov_mat = aux_data["cov_mat"]
@@ -3372,7 +3394,7 @@ class Template(Event):
             Event.read_from_file(filename, db_path=db_path, gid=gid),
             attach_waveforms=False,
         )
-        #template.n_samples = template.aux_data["n_samples"]
+        # template.n_samples = template.aux_data["n_samples"]
         template.id = str(template.aux_data["tid"])
         # overwrite any path that was stored in aux_data, because what matters
         # for the template is only the file it was associated with
@@ -4691,7 +4713,7 @@ class TemplateGroup(Family):
         print(compute_from_scratch, cc_fn, os.path.isfile(cc_fn))
         if not compute_from_scratch and os.path.isfile(cc_fn):
             _intertemplate_cc = self._read_intertp_cc(cc_fn, intertemplate_cc_params)
-            if (
+            if (_intertemplate_cc is not None) and (
                 len(np.intersect1d(self.tids, np.int32(_intertemplate_cc.index)))
                 == self.n_templates
             ):
@@ -5133,7 +5155,7 @@ class TemplateGroup(Family):
                     n_stations=n_closest_stations,
                     max_lag=max_lag_for_sim,
                     device=kwargs.get("device", "cpu"),
-                    save_cc=kwargs.get("save_cc", True),
+                    save_cc=kwargs.get("save_cc", False),
                 )
         # -----------------------------------
         t1 = give_time()
@@ -5417,7 +5439,8 @@ class Stack(Event):
         obspy.Stream instances that populate the `self.traces` attribute.
         """
         self.traces = obs.Stream()
-        self.n_samples = utils.sec_to_samp(duration, sr=self.sr)
+        self.duration = duration
+        #self.n_samples = utils.sec_to_samp(duration, sr=self.sr)
         for s, sta in enumerate(self.stations):
             for c, cp in enumerate(self.components):
                 ph = phase_on_comp[cp].upper()
