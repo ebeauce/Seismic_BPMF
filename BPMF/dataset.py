@@ -1883,6 +1883,7 @@ class Event(object):
         # only used if use_apriori_picks is True
         search_win_samp = utils.sec_to_samp(search_win_sec, sr=self.sampling_rate)
         # keep best P- and S-wave pick on each 3-comp seismogram
+        #print(picks["S_picks"])
         picks = utils.get_picks(
             picks,
             prior_knowledge=prior_knowledge,
@@ -1903,6 +1904,8 @@ class Event(object):
             },
             inplace=True,
         )
+        picks["P_abs_picks"] = np.empty(len(picks), dtype=object)
+        picks["S_abs_picks"] = np.empty(len(picks), dtype=object)
         for sta in picks.index:
             for ph in ["P", "S"]:
                 if pd.isna(picks.loc[sta, f"{ph}_picks_sec"]):
