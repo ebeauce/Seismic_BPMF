@@ -3070,7 +3070,7 @@ class Event(object):
             The list of station names for which to plot the waveforms. If None, all
             stations associated with the Event are plotted. Defaults to None.
         ylabel : str, optional
-            The label for the y-axis. Defaults to r"Velocity ($\mu$m/s).
+            The label for the y-axis. Defaults to r'Velocity ($\mu$m/s)'.
         **kwargs
             Additional keyword arguments that are passed to the matplotlib plot
             function.
