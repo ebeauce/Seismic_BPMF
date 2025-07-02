@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BPMF.clib &mdash; BPMF 2.0.0beta2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -74,14 +74,14 @@
            <div itemprop="articleBody">
              
   <h1>Source code for BPMF.clib</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">import</span> <span class="nn">ctypes</span> <span class="k">as</span> <span class="nn">C</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">C</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">cfg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">cfg</span>
 
 <span class="n">cpu_loaded</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -147,7 +147,7 @@
 
 <div class="viewcode-block" id="kurtosis">
 <a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.kurtosis">[docs]</a>
-<span class="k">def</span> <span class="nf">kurtosis</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">W</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">kurtosis</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">W</span><span class="p">):</span>
     <span class="n">n_stations</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">n_components</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -167,7 +167,7 @@
 
 <div class="viewcode-block" id="find_similar_sources">
 <a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.find_similar_sources">[docs]</a>
-<span class="k">def</span> <span class="nf">find_similar_sources</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_similar_sources</span><span class="p">(</span>
         <span class="n">moveouts</span><span class="p">,</span>
         <span class="n">source_longitude</span><span class="p">,</span>
         <span class="n">source_latitude</span><span class="p">,</span>
@@ -246,7 +246,7 @@
 
 <div class="viewcode-block" id="select_cc_indexes">
 <a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.select_cc_indexes">[docs]</a>
-<span class="k">def</span> <span class="nf">select_cc_indexes</span><span class="p">(</span><span class="n">ccs</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">search_win</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_cc_indexes</span><span class="p">(</span><span class="n">ccs</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">search_win</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Select new event detection&#39;s correlation indexes.</span>
 
 <span class="sd">    Parameters</span>
@@ -282,7 +282,7 @@
 
 <div class="viewcode-block" id="time_dependent_threshold">
 <a class="viewcode-back" href="../../usage/api/clib.html#BPMF.clib.time_dependent_threshold">[docs]</a>
-<span class="k">def</span> <span class="nf">time_dependent_threshold</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">time_dependent_threshold</span><span class="p">(</span>
         <span class="n">time_series</span><span class="p">,</span> <span class="n">sliding_window_samp</span><span class="p">,</span> <span class="n">num_dev</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.66</span><span class="p">,</span> <span class="n">threshold_type</span><span class="o">=</span><span class="s2">&quot;rms&quot;</span><span class="p">,</span>
         <span class="n">white_noise</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="kc">None</span>
         <span class="p">):</span>

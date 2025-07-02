@@ -24,7 +24,7 @@ Please, refer one of the following articles if you use BPMF for your research:
 Installation
 -------------
 
-You may need to edit the Makefile according to your OS (instructions in the Makefile's comments).
+You may need to edit the Makefile according to your OS (instructions in the Makefile's comments), in particular if you are using a recent Mac!
 
 From source
 ^^^^^^^^^^^

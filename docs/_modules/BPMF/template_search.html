@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BPMF.template_search &mdash; BPMF 2.0.0beta2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -74,41 +74,41 @@
            <div itemprop="articleBody">
              
   <h1>Source code for BPMF.template_search</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
-<span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">cfg</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">clib</span><span class="p">,</span> <span class="n">utils</span><span class="p">,</span> <span class="n">dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">cfg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">clib</span><span class="p">,</span> <span class="n">utils</span><span class="p">,</span> <span class="n">dataset</span>
 
-<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">obspy</span> <span class="k">as</span> <span class="nn">obs</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pylab</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">obspy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">obs</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-<span class="kn">import</span> <span class="nn">beampower</span> <span class="k">as</span> <span class="nn">bp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">beampower</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bp</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">median_abs_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">median_abs_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">median_absolute_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">median_absolute_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
 <span class="c1"># from scipy.stats import median_abs_deviation as scimad</span>
-<span class="kn">from</span> <span class="nn">scipy.ndimage.filters</span> <span class="kn">import</span> <span class="n">gaussian_filter1d</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
-<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">hilbert</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.ndimage.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussian_filter1d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">hilbert</span>
 
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span> <span class="k">as</span> <span class="n">give_time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span> <span class="k">as</span> <span class="n">give_time</span>
 
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">isnan</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="n">isnan</span>
 
-<span class="kn">from</span> <span class="nn">obspy.core</span> <span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">udt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">obspy.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">udt</span>
 
 
 <div class="viewcode-block" id="TravelTimes">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.TravelTimes">[docs]</a>
-<span class="k">class</span> <span class="nc">TravelTimes</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TravelTimes</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for handling travel time tables. </span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">tt_filename</span><span class="p">,</span>
             <span class="n">tt_folder_path</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">MOVEOUTS_PATH</span><span class="p">,</span>
@@ -125,21 +125,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">where</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tt_folder_path</span><span class="p">,</span> <span class="n">tt_filename</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">n_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;source_indexes&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_indexes</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call self.read first.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;source_indexes&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_indexes</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call self.read first.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">phases</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">phases</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times_samp&quot;</span><span class="p">):</span>
@@ -149,14 +149,14 @@
 
     <span class="c1"># aliases</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">tts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call self.read first.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">source_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">source_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;source_coordinates&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_coordinates</span>
         <span class="k">else</span><span class="p">:</span>
@@ -164,7 +164,7 @@
 
 <div class="viewcode-block" id="TravelTimes.read">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.TravelTimes.read">[docs]</a>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phases</span><span class="p">,</span> <span class="n">source_indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">read_coords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phases</span><span class="p">,</span> <span class="n">source_indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">read_coords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -180,7 +180,7 @@
 <span class="sd">            travel times from `self.where`. Default is None, that is, all</span>
 <span class="sd">            stations are read.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">h5py</span> <span class="k">as</span> <span class="nn">h5</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">h5</span>
 
         <span class="n">tts</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">with</span> <span class="n">h5</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">where</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fin</span><span class="p">:</span>
@@ -230,7 +230,7 @@
 
 <div class="viewcode-block" id="TravelTimes.convert_to_samples">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.TravelTimes.convert_to_samples">[docs]</a>
-    <span class="k">def</span> <span class="nf">convert_to_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">remove_tt_seconds</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_to_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">remove_tt_seconds</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a new `self.travel_times_samp` attribute.</span>
 
@@ -257,7 +257,7 @@
 
 <div class="viewcode-block" id="TravelTimes.get_travel_times_array">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.TravelTimes.get_travel_times_array">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_travel_times_array</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_travel_times_array</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;seconds&quot;</span><span class="p">,</span> <span class="n">stations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">phases</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">relative_to_first</span><span class="o">=</span><span class="kc">False</span>
             <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -310,11 +310,11 @@
 
 <div class="viewcode-block" id="WaveformTransform">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.WaveformTransform">[docs]</a>
-<span class="k">class</span> <span class="nc">WaveformTransform</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">WaveformTransform</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for waveform transform.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">transform_arr</span><span class="p">,</span> <span class="n">stations</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">starttime</span><span class="p">,</span> <span class="n">sampling_rate_hz</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes an instance that represents the transformed wavefield.</span>
@@ -354,19 +354,19 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">+=</span> <span class="n">tr</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">sr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">delta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sampling_rate&quot;</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to define the instance&#39;s sampling rate first.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
@@ -378,7 +378,7 @@
 
 <div class="viewcode-block" id="WaveformTransform.data_frame_view">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.WaveformTransform.data_frame_view">[docs]</a>
-    <span class="k">def</span> <span class="nf">data_frame_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_frame_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns `self.transform_arr` as a `pandas.DataFrame`.</span>
 
 <span class="sd">        The data frame&#39;s columns are the component names and the</span>
@@ -393,7 +393,7 @@
 
 <div class="viewcode-block" id="WaveformTransform.get_np_array">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.WaveformTransform.get_np_array">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_np_array</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_np_array</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">stations</span><span class="p">,</span>
         <span class="n">components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -415,7 +415,7 @@
 
 <div class="viewcode-block" id="WaveformTransform.slice">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.WaveformTransform.slice">[docs]</a>
-    <span class="k">def</span> <span class="nf">slice</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">slice</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">starttime</span><span class="p">,</span>
         <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -490,10 +490,10 @@
 
 <div class="viewcode-block" id="Beamformer">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer">[docs]</a>
-<span class="k">class</span> <span class="nc">Beamformer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Beamformer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for backprojecting waveform features with beamforming.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">network</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -537,7 +537,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">moveouts_relative_to_first</span> <span class="o">=</span> <span class="n">moveouts_relative_to_first</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">moveouts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">moveouts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">get_travel_times_array</span><span class="p">(</span>
                     <span class="n">units</span><span class="o">=</span><span class="s2">&quot;samples&quot;</span><span class="p">,</span>
@@ -549,42 +549,42 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call `set_travel_times` first.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">n_stations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_stations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;network&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to call set_network first.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">n_stations</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">n_phases</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_phases</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;phases&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to call set_phases first.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">n_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">n_sources</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call `set_travel_times` first.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">num_sources</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Call `set_travel_times` first.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">stations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;network&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to call set_network first.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">stations</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">source_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">source_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;travel_times&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">travel_times</span><span class="o">.</span><span class="n">source_coordinates</span>
         <span class="k">else</span><span class="p">:</span>
@@ -593,7 +593,7 @@
 
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_likelihood</span><span class="p">(</span><span class="n">beam_volume</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_likelihood</span><span class="p">(</span><span class="n">beam_volume</span><span class="p">):</span>
         <span class="n">likelihood</span> <span class="o">=</span> <span class="p">(</span><span class="n">beam_volume</span> <span class="o">-</span> <span class="n">beam_volume</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span>
             <span class="n">beam_volume</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">beam_volume</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
         <span class="p">)</span>
@@ -604,7 +604,7 @@
 
 <div class="viewcode-block" id="Beamformer.backproject">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.backproject">[docs]</a>
-    <span class="k">def</span> <span class="nf">backproject</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backproject</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">waveform_features</span><span class="p">,</span>
             <span class="n">reduce</span><span class="o">=</span><span class="s2">&quot;max&quot;</span><span class="p">,</span>
@@ -673,7 +673,7 @@
 
 <div class="viewcode-block" id="Beamformer.find_detections">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.find_detections">[docs]</a>
-    <span class="k">def</span> <span class="nf">find_detections</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_detections</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">detection_threshold</span><span class="p">,</span> <span class="n">minimum_interevent_time</span><span class="p">,</span> <span class="n">n_max_stations</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Analyze the composite network response to find detections.</span>
@@ -696,7 +696,7 @@
 <span class="sd">        detections: dictionary,</span>
 <span class="sd">            Dictionary with data and metadata of the detected earthquakes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">Stream</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">obspy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stream</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">detection_threshold</span> <span class="o">=</span> <span class="n">detection_threshold</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">minimum_interevent_time</span> <span class="o">=</span> <span class="n">minimum_interevent_time</span>
@@ -774,7 +774,7 @@
 
 <div class="viewcode-block" id="Beamformer.remove_baseline">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.remove_baseline">[docs]</a>
-    <span class="k">def</span> <span class="nf">remove_baseline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;composite&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_baseline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;composite&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove baseline from network response</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># convert window from seconds to samples</span>
@@ -785,10 +785,10 @@
 
 <div class="viewcode-block" id="Beamformer.return_pd_series">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.return_pd_series">[docs]</a>
-    <span class="k">def</span> <span class="nf">return_pd_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;maxbeam&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">return_pd_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;maxbeam&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the network response as a Pandas.Series.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
         <span class="n">time_series</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
         <span class="n">indexes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span>
@@ -802,9 +802,9 @@
 
 <div class="viewcode-block" id="Beamformer.smooth_maxbeam">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.smooth_maxbeam">[docs]</a>
-    <span class="k">def</span> <span class="nf">smooth_maxbeam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">smooth_maxbeam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Smooth the network response with a gaussian kernel.&quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">scipy.ndimage.filters</span> <span class="kn">import</span> <span class="n">gaussian_filter1d</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.ndimage.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussian_filter1d</span>
 
         <span class="c1"># convert window from seconds to samples</span>
         <span class="n">window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">window</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
@@ -813,7 +813,7 @@
 
 <div class="viewcode-block" id="Beamformer.set_data">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attribute `data` to the class instance.</span>
 
 <span class="sd">        Parameters</span>
@@ -827,7 +827,7 @@
 
 <div class="viewcode-block" id="Beamformer.set_network">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_network">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attribute `network` to the class instance.</span>
 
 <span class="sd">        `network` determines which stations are included in the computation</span>
@@ -847,7 +847,7 @@
 
 <div class="viewcode-block" id="Beamformer.set_phases">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_phases">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_phases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phases</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_phases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phases</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attach `phases` to the class instance.</span>
 
 <span class="sd">        Parameters</span>
@@ -862,7 +862,7 @@
 
 <div class="viewcode-block" id="Beamformer.set_travel_times">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_travel_times">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_travel_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">travel_times</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_travel_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">travel_times</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attaches `travel_times` to the class instance.</span>
 
 <span class="sd">        Parameters</span>
@@ -875,7 +875,7 @@
 
 <div class="viewcode-block" id="Beamformer.set_source_coordinates">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_source_coordinates">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_source_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_coords</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_source_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_coords</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attribute `_source_coordinates` to the class instance.</span>
 
 <span class="sd">        Parameters</span>
@@ -888,7 +888,7 @@
 
 <div class="viewcode-block" id="Beamformer.set_weights">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_weights">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights_phases</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights_sources</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights_phases</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights_sources</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the weights required by `beampower`.</span>
 
 <span class="sd">        weights_phases: (n_stations, n_channels, n_phases) np.ndarray, optional</span>
@@ -907,7 +907,7 @@
 
 <div class="viewcode-block" id="Beamformer.set_weights_sources">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.set_weights_sources">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_weights_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_max_stations</span><span class="p">,</span> <span class="n">n_min_stations</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_weights_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_max_stations</span><span class="p">,</span> <span class="n">n_min_stations</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set network-geometry-based weights of each source-receiver pair.</span>
 
 <span class="sd">        Parameters</span>
@@ -937,7 +937,7 @@
 
 <div class="viewcode-block" id="Beamformer.weights_station_density">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.weights_station_density">[docs]</a>
-    <span class="k">def</span> <span class="nf">weights_station_density</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">weights_station_density</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">cutoff_dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lower_percentile</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upper_percentile</span><span class="o">=</span><span class="mf">100.0</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute station weights to balance station density.</span>
@@ -992,7 +992,7 @@
         <span class="k">return</span> <span class="n">weights_sta_density</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_baseline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_baseline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute a baseline.</span>
 
 <span class="sd">        The baseline is a curve connecting the local minima. Removing the</span>
@@ -1017,7 +1017,7 @@
     <span class="c1"># -------------------------------------------</span>
 <div class="viewcode-block" id="Beamformer.plot_maxbeam">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.plot_maxbeam">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_maxbeam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_maxbeam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the composite network response.</span>
 
 <span class="sd">        Parameters</span>
@@ -1034,8 +1034,8 @@
 <span class="sd">        fig: plt.Figure</span>
 <span class="sd">            The Figure instance produced by this method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-        <span class="kn">import</span> <span class="nn">matplotlib.dates</span> <span class="k">as</span> <span class="nn">mdates</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.dates</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mdates</span>
 
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># plot the maximum beam</span>
@@ -1090,7 +1090,7 @@
 
 <div class="viewcode-block" id="Beamformer.plot_detection">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.plot_detection">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_detection</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_detection</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">detection</span><span class="p">,</span>
         <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
@@ -1120,8 +1120,8 @@
 <span class="sd">        fig: plt.Figure</span>
 <span class="sd">            The Figure instance produced by this method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-        <span class="kn">import</span> <span class="nn">matplotlib.dates</span> <span class="k">as</span> <span class="nn">mdates</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.dates</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mdates</span>
 
         <span class="k">if</span> <span class="n">n_stations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">stations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">stations</span>
@@ -1186,14 +1186,14 @@
 
 <div class="viewcode-block" id="Beamformer.plot_likelihood">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.Beamformer.plot_likelihood">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">likelihood</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">likelihood</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot likelihood (beam) slices at a given time.&quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">cartopy.crs</span> <span class="kn">import</span> <span class="n">PlateCarree</span>
-        <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">Normalize</span>
-        <span class="kn">from</span> <span class="nn">matplotlib.cm</span> <span class="kn">import</span> <span class="n">ScalarMappable</span>
-        <span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">cartopy.crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">PlateCarree</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="kn">import</span> <span class="n">Normalize</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.cm</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScalarMappable</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">mpl_toolkits.axes_grid1</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_axes_locatable</span>
 
-        <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">plotting_utils</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">plotting_utils</span>
 
         <span class="k">if</span> <span class="n">time_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">src_idx</span><span class="p">,</span> <span class="n">time_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">argmax</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -1284,7 +1284,7 @@
         <span class="k">return</span> <span class="n">fig</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_rectangular_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lon0</span><span class="p">,</span> <span class="n">lat0</span><span class="p">,</span> <span class="n">side_km</span><span class="o">=</span><span class="mf">100.0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_rectangular_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lon0</span><span class="p">,</span> <span class="n">lat0</span><span class="p">,</span> <span class="n">side_km</span><span class="o">=</span><span class="mf">100.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a boolean array indicating which points in a given grid are inside</span>
 <span class="sd">        a rectangular domain centered at the given longitude and latitude.</span>
 
@@ -1321,7 +1321,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">selection</span>
 
-    <span class="k">def</span> <span class="nf">_compute_location_uncertainty</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_location_uncertainty</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">event_longitude</span><span class="p">,</span> <span class="n">event_latitude</span><span class="p">,</span> <span class="n">event_depth</span><span class="p">,</span> <span class="n">likelihood</span><span class="p">,</span> <span class="n">domain</span>
             <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1361,7 +1361,7 @@
 <span class="sd">        library from the Cartopy package.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">cartopy.geodesic</span> <span class="kn">import</span> <span class="n">Geodesic</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">cartopy.geodesic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geodesic</span>
         <span class="c1"># initialize the Geodesic instance</span>
         <span class="n">G</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="p">()</span>
         <span class="n">epi_distances</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span>
@@ -1385,7 +1385,7 @@
         <span class="k">return</span> <span class="n">hunc</span><span class="p">,</span> <span class="n">vunc</span></div>
 
 
-<span class="k">def</span> <span class="nf">_detect_peaks</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_detect_peaks</span><span class="p">(</span>
     <span class="n">x</span><span class="p">,</span>
     <span class="n">mph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">mpd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
@@ -1405,10 +1405,10 @@
             <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_plot_peaks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mph</span><span class="p">,</span> <span class="n">mpd</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">valley</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_plot_peaks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mph</span><span class="p">,</span> <span class="n">mpd</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">valley</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot results of the detect_peaks function, see its help.&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;matplotlib is not available.&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1448,7 +1448,7 @@
 
 <div class="viewcode-block" id="baseline">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.baseline">[docs]</a>
-<span class="k">def</span> <span class="nf">baseline</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">baseline</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
     <span class="n">n_windows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="n">w</span><span class="p">))</span>
     <span class="n">minima</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_windows</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
     <span class="n">minima_args</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_windows</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
@@ -1467,7 +1467,7 @@
 
 <div class="viewcode-block" id="time_dependent_threshold">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.time_dependent_threshold">[docs]</a>
-<span class="k">def</span> <span class="nf">time_dependent_threshold</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">time_dependent_threshold</span><span class="p">(</span>
     <span class="n">network_response</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">CNR_threshold</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">N_DEV_BP_THRESHOLD</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute a time-dependent detection threshold.</span>
@@ -1493,10 +1493,10 @@
 <span class="sd">        Detection threshold on the network response.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">median_abs_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">median_abs_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">median_absolute_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
-    <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">median_absolute_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
 
     <span class="c1"># calculate n_windows given window</span>
     <span class="c1"># and overlap</span>
@@ -1542,7 +1542,7 @@
 
 <div class="viewcode-block" id="time_dependent_threshold_pd">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.time_dependent_threshold_pd">[docs]</a>
-<span class="k">def</span> <span class="nf">time_dependent_threshold_pd</span><span class="p">(</span><span class="n">network_response</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">time_dependent_threshold_pd</span><span class="p">(</span><span class="n">network_response</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate a time dependent detection threshold</span>
 <span class="sd">    using the rolling function from pandas.</span>
@@ -1580,7 +1580,7 @@
 
 <div class="viewcode-block" id="saturated_envelopes">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.saturated_envelopes">[docs]</a>
-<span class="k">def</span> <span class="nf">saturated_envelopes</span><span class="p">(</span><span class="n">traces</span><span class="p">,</span> <span class="n">anomaly_threshold</span><span class="o">=</span><span class="mf">1.0e-11</span><span class="p">,</span> <span class="n">max_dynamic_range</span><span class="o">=</span><span class="mf">1.0e5</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">saturated_envelopes</span><span class="p">(</span><span class="n">traces</span><span class="p">,</span> <span class="n">anomaly_threshold</span><span class="o">=</span><span class="mf">1.0e-11</span><span class="p">,</span> <span class="n">max_dynamic_range</span><span class="o">=</span><span class="mf">1.0e5</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the saturated envelopes.</span>
 
 <span class="sd">    Parameters</span>
@@ -1631,7 +1631,7 @@
 
 <div class="viewcode-block" id="envelope_parallel">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.envelope_parallel">[docs]</a>
-<span class="k">def</span> <span class="nf">envelope_parallel</span><span class="p">(</span><span class="n">traces</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">envelope_parallel</span><span class="p">(</span><span class="n">traces</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the envelope of traces.</span>
 
 <span class="sd">    The envelope is defined as the modulus of the complex</span>
@@ -1648,7 +1648,7 @@
 <span class="sd">    envelopes: (n_stations, n_channels, n_samples) numpy.ndarray, float</span>
 <span class="sd">        The moduli of the analytical signal of the input traces.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">concurrent.futures</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">concurrent.futures</span>
 
     <span class="n">traces_reshaped</span> <span class="o">=</span> <span class="n">traces</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">traces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">with</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ProcessPoolExecutor</span><span class="p">()</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
@@ -1659,7 +1659,7 @@
 
 <div class="viewcode-block" id="envelope">
 <a class="viewcode-back" href="../../usage/api/template_search.html#BPMF.template_search.envelope">[docs]</a>
-<span class="k">def</span> <span class="nf">envelope</span><span class="p">(</span><span class="n">trace</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">envelope</span><span class="p">(</span><span class="n">trace</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the envelope of trace.</span>
 
 <span class="sd">    The envelope is defined as the modulus of the complex</span>
@@ -1676,7 +1676,7 @@
 <span class="sd">    envelope: (n_samples) numpy.ndarray, float</span>
 <span class="sd">        The modulus of the analytical signal of the input traces.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">hilbert</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">hilbert</span>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">hilbert</span><span class="p">(</span><span class="n">trace</span><span class="p">)))</span></div>
 

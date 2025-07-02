@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BPMF.utils &mdash; BPMF 2.0.0beta2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -74,22 +74,22 @@
            <div itemprop="articleBody">
              
   <h1>Source code for BPMF.utils</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">h5py</span> <span class="k">as</span> <span class="nn">h5</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">pathlib</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">h5</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">import</span> <span class="nn">obspy</span> <span class="k">as</span> <span class="nn">obs</span>
-<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">find_peaks</span><span class="p">,</span> <span class="n">peak_widths</span>
-<span class="kn">from</span> <span class="nn">obspy.core</span> <span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">udt</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span> <span class="k">as</span> <span class="n">give_time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">obspy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">obs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_peaks</span><span class="p">,</span> <span class="n">peak_widths</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">obspy.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">udt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span> <span class="k">as</span> <span class="n">give_time</span>
 
-<span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">cfg</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">cfg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataset</span>
 
 
 <span class="c1"># -------------------------------------------------</span>
@@ -99,7 +99,7 @@
 
 <div class="viewcode-block" id="bandpass_filter">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.bandpass_filter">[docs]</a>
-<span class="k">def</span> <span class="nf">bandpass_filter</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bandpass_filter</span><span class="p">(</span>
     <span class="n">X</span><span class="p">,</span>
     <span class="n">filter_order</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
     <span class="n">freqmin</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">MIN_FREQ_HZ</span><span class="p">,</span>
@@ -138,11 +138,11 @@
 <span class="sd">        The input array X after filtering.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">iirfilter</span><span class="p">,</span> <span class="n">tukey</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">iirfilter</span><span class="p">,</span> <span class="n">tukey</span>
 
     <span class="c1"># from scipy.signal import lfilter</span>
-    <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">zpk2sos</span><span class="p">,</span> <span class="n">sosfilt</span>
-    <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">detrend</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">zpk2sos</span><span class="p">,</span> <span class="n">sosfilt</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">detrend</span>
 
     <span class="c1"># detrend the data</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">detrend</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
@@ -171,7 +171,7 @@
 
 <div class="viewcode-block" id="lowpass_chebyshev_I">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.lowpass_chebyshev_I">[docs]</a>
-<span class="k">def</span> <span class="nf">lowpass_chebyshev_I</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">lowpass_chebyshev_I</span><span class="p">(</span>
     <span class="n">X</span><span class="p">,</span> <span class="n">freqmax</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">max_ripple</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply low-pass type I Chebyshev filter.</span>
@@ -191,14 +191,14 @@
 <span class="sd">    zerophase : bool, optional</span>
 <span class="sd">       If True, the filter is applied in the forward and</span>
 <span class="sd">       reverse direction to cancel out phase shifting.</span>
-<span class="sd">     </span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    X : array-like</span>
 <span class="sd">        1D array-like with filtered data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">cheby1</span><span class="p">,</span> <span class="n">sosfilt</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">cheby1</span><span class="p">,</span> <span class="n">sosfilt</span>
 
     <span class="n">nyquist</span> <span class="o">=</span> <span class="n">sampling_rate</span> <span class="o">/</span> <span class="mf">2.0</span>
 
@@ -220,7 +220,7 @@
 
 <div class="viewcode-block" id="lowpass_chebyshev_II">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.lowpass_chebyshev_II">[docs]</a>
-<span class="k">def</span> <span class="nf">lowpass_chebyshev_II</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">lowpass_chebyshev_II</span><span class="p">(</span>
     <span class="n">X</span><span class="p">,</span> <span class="n">freqmax</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">min_attenuation_dB</span><span class="o">=</span><span class="mf">40.0</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply low-pass type II Chebyshev filter.</span>
@@ -235,19 +235,19 @@
 <span class="sd">        Sampling rate, in Hz, of `X`.</span>
 <span class="sd">    order : int, optional</span>
 <span class="sd">        Order of the filter. Defaults to 3.</span>
-<span class="sd">    min_attenuation_dB : float, optional </span>
+<span class="sd">    min_attenuation_dB : float, optional</span>
 <span class="sd">        The minimum attenuation required in the stop band, in decibels.</span>
 <span class="sd">        Defaults to 40.</span>
 <span class="sd">    zerophase : bool, optional</span>
 <span class="sd">       If True, the filter is applied in the forward and</span>
 <span class="sd">       reverse direction to cancel out phase shifting.</span>
-<span class="sd">     </span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    X : array-like</span>
 <span class="sd">        1D array-like with filtered data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">cheby2</span><span class="p">,</span> <span class="n">sosfilt</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">cheby2</span><span class="p">,</span> <span class="n">sosfilt</span>
 
     <span class="n">nyquist</span> <span class="o">=</span> <span class="n">sampling_rate</span> <span class="o">/</span> <span class="mf">2.0</span>
 
@@ -271,7 +271,7 @@
 
 <div class="viewcode-block" id="preprocess_stream">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.preprocess_stream">[docs]</a>
-<span class="k">def</span> <span class="nf">preprocess_stream</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">preprocess_stream</span><span class="p">(</span>
     <span class="n">stream</span><span class="p">,</span>
     <span class="n">freqmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">freqmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -343,7 +343,7 @@
 <span class="sd">    obspy.Stream</span>
 <span class="sd">        A preprocessed stream of seismic data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 
     <span class="n">data_preprocessor</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
         <span class="n">_preprocess_stream</span><span class="p">,</span>
@@ -366,7 +366,7 @@
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">n_threads</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
 
         <span class="n">stream</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_premerge</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
@@ -390,9 +390,9 @@
         <span class="k">return</span> <span class="n">data_preprocessor</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_premerge</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clean-up stream before calling merge.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_premerge</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clean-up stream before calling merge.&quot;&quot;&quot;</span>
     <span class="c1"># first, make a list of all stations in stream</span>
     <span class="n">stations</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
@@ -422,17 +422,21 @@
             <span class="k">if</span> <span class="n">sampling_rates_counts</span><span class="p">[</span><span class="n">unique_sampling_rates</span><span class="o">.</span><span class="n">argmax</span><span class="p">()]</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="n">ref_sampling_rate</span> <span class="o">=</span> <span class="n">unique_sampling_rates</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">ref_sampling_rate</span> <span class="o">=</span> <span class="n">unique_sampling_rates</span><span class="p">[</span><span class="n">sampling_rates_counts</span><span class="o">.</span><span class="n">argmax</span><span class="p">()]</span>
+                <span class="n">ref_sampling_rate</span> <span class="o">=</span> <span class="n">unique_sampling_rates</span><span class="p">[</span>
+                    <span class="n">sampling_rates_counts</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+                <span class="p">]</span>
             <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">!=</span> <span class="n">ref_sampling_rate</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removing </span><span class="si">{</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> because not desired sampling rate &quot;</span>
-                              <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">ref_sampling_rate</span><span class="si">}</span><span class="s2">)&quot;</span>  <span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Removing </span><span class="si">{</span><span class="n">tr</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> because not desired sampling rate &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">ref_sampling_rate</span><span class="si">}</span><span class="s2">)&quot;</span>
+                        <span class="p">)</span>
                     <span class="n">stream</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">stream</span><span class="p">,</span> <span class="n">stations</span>
 
 
-<span class="k">def</span> <span class="nf">_preprocess_stream</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_preprocess_stream</span><span class="p">(</span>
     <span class="n">stream</span><span class="p">,</span>
     <span class="n">freqmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">freqmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -501,7 +505,9 @@
             <span class="c1"># don&#39;t include this trace</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Too much gap duration on </span><span class="si">{</span><span class="n">trace_id</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Duration is: </span><span class="si">{</span><span class="n">trace_duration</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s (min is </span><span class="si">{</span><span class="n">minimum_length</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">target_duration</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s)&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Duration is: </span><span class="si">{</span><span class="n">trace_duration</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s (min is </span><span class="si">{</span><span class="n">minimum_length</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">target_duration</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s)&quot;</span>
+                <span class="p">)</span>
             <span class="k">continue</span>
         <span class="c1"># split will lose information about start and end times</span>
         <span class="c1"># if the start or the end is masked</span>
@@ -522,11 +528,13 @@
         <span class="k">for</span> <span class="n">gap</span> <span class="ow">in</span> <span class="n">tr</span><span class="o">.</span><span class="n">get_gaps</span><span class="p">():</span>
             <span class="n">gap_duration</span> <span class="o">+=</span> <span class="n">gap</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">target_duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-            <span class="n">gap_duration</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">minimum_length</span><span class="p">)</span> <span class="o">*</span> <span class="n">target_duration</span>
+            <span class="n">gap_duration</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">minimum_length</span><span class="p">)</span> <span class="o">*</span> <span class="n">target_duration</span>
         <span class="p">):</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Too much gap duration on </span><span class="si">{</span><span class="n">trace_id</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Gap duration is: </span><span class="si">{</span><span class="n">trace_duration</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s (max is </span><span class="si">{</span><span class="p">(</span><span class="mf">1.</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">minimum_length</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">target_duration</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s)&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Gap duration is: </span><span class="si">{</span><span class="n">trace_duration</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s (max is </span><span class="si">{</span><span class="p">(</span><span class="mf">1.</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">minimum_length</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">target_duration</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s)&quot;</span>
+                <span class="p">)</span>
             <span class="k">continue</span>
         <span class="n">tr</span><span class="o">.</span><span class="n">detrend</span><span class="p">(</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span>
         <span class="n">tr</span><span class="o">.</span><span class="n">detrend</span><span class="p">(</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
@@ -634,7 +642,7 @@
 
 <div class="viewcode-block" id="get_moveout_array">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.get_moveout_array">[docs]</a>
-<span class="k">def</span> <span class="nf">get_moveout_array</span><span class="p">(</span><span class="n">tts</span><span class="p">,</span> <span class="n">stations</span><span class="p">,</span> <span class="n">phases</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_moveout_array</span><span class="p">(</span><span class="n">tts</span><span class="p">,</span> <span class="n">stations</span><span class="p">,</span> <span class="n">phases</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Format the travel times into a numpy.ndarray.</span>
 
 <span class="sd">    Parameters</span>
@@ -664,7 +672,7 @@
 
 <div class="viewcode-block" id="load_travel_times">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.load_travel_times">[docs]</a>
-<span class="k">def</span> <span class="nf">load_travel_times</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_travel_times</span><span class="p">(</span>
     <span class="n">path</span><span class="p">,</span> <span class="n">phases</span><span class="p">,</span> <span class="n">source_indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_coords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stations</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the travel times from `path`.</span>
@@ -744,7 +752,7 @@
 
 <div class="viewcode-block" id="SVDWF">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.SVDWF">[docs]</a>
-<span class="k">def</span> <span class="nf">SVDWF</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SVDWF</span><span class="p">(</span>
     <span class="n">matrix</span><span class="p">,</span>
     <span class="n">expl_var</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
     <span class="n">max_singular_values</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
@@ -786,9 +794,9 @@
 <span class="sd">    filtered_data: (n x m) numpy array</span>
 <span class="sd">        The matrix filtered through the SVD procedure.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="kn">import</span> <span class="n">svd</span>
-    <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">wiener</span>
-    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">svd</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">wiener</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">U</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">Vt</span> <span class="o">=</span> <span class="n">svd</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -853,7 +861,7 @@
 
 <div class="viewcode-block" id="fetch_detection_waveforms">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.fetch_detection_waveforms">[docs]</a>
-<span class="k">def</span> <span class="nf">fetch_detection_waveforms</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_detection_waveforms</span><span class="p">(</span>
     <span class="n">tid</span><span class="p">,</span>
     <span class="n">db_path_T</span><span class="p">,</span>
     <span class="n">db_path_M</span><span class="p">,</span>
@@ -868,12 +876,10 @@
     <span class="n">unique_events</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">catalog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
-    <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">groupby</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">operator</span><span class="w"> </span><span class="kn">import</span> <span class="n">itemgetter</span>
 
-    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;Deprecated function! (Old, under construction or experimental)&quot;</span>
-            <span class="p">)</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Deprecated function! (Old, under construction or experimental)&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">catalog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cat</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">Catalog</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;multiplets</span><span class="si">{</span><span class="n">tid</span><span class="si">}</span><span class="s2">catalog.h5&quot;</span><span class="p">,</span> <span class="n">db_path_M</span><span class="p">)</span>
@@ -950,7 +956,7 @@
 
 <div class="viewcode-block" id="fetch_detection_waveforms_refilter">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.fetch_detection_waveforms_refilter">[docs]</a>
-<span class="k">def</span> <span class="nf">fetch_detection_waveforms_refilter</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_detection_waveforms_refilter</span><span class="p">(</span>
     <span class="n">tid</span><span class="p">,</span>
     <span class="n">db_path_T</span><span class="p">,</span>
     <span class="n">db_path_M</span><span class="p">,</span>
@@ -970,11 +976,9 @@
 <span class="p">):</span>
     <span class="c1"># sys.path.append(os.path.join(cfg.base, &#39;earthquake_location_eb&#39;))</span>
     <span class="c1"># import relocation_utils</span>
-    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">event_extraction</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">event_extraction</span>
 
-    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;Deprecated function! (Old, under construction or experimental)&quot;</span>
-            <span class="p">)</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Deprecated function! (Old, under construction or experimental)&quot;</span><span class="p">)</span>
 
     <span class="n">cat</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">Catalog</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;multiplets</span><span class="si">{</span><span class="n">tid</span><span class="si">}</span><span class="s2">catalog.h5&quot;</span><span class="p">,</span> <span class="n">db_path_M</span><span class="p">)</span>
     <span class="n">cat</span><span class="o">.</span><span class="n">read_data</span><span class="p">()</span>
@@ -1074,7 +1078,7 @@
 
 <div class="viewcode-block" id="SVDWF_multiplets">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.SVDWF_multiplets">[docs]</a>
-<span class="k">def</span> <span class="nf">SVDWF_multiplets</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SVDWF_multiplets</span><span class="p">(</span>
     <span class="n">tid</span><span class="p">,</span>
     <span class="n">db_path</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">INPUT_PATH</span><span class="p">,</span>
     <span class="n">db_path_M</span><span class="o">=</span><span class="s2">&quot;matched_filter_1&quot;</span><span class="p">,</span>
@@ -1135,9 +1139,7 @@
 <span class="sd">        an attribute. See also all the useful metadata in</span>
 <span class="sd">        the attributes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;Deprecated function! (Old, under construction or experimental)&quot;</span>
-            <span class="p">)</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Deprecated function! (Old, under construction or experimental)&quot;</span><span class="p">)</span>
 
     <span class="c1"># -----------------------------------------------------------------------------------------------</span>
     <span class="n">T</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">Template</span><span class="p">(</span><span class="s2">&quot;template</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tid</span><span class="p">),</span> <span class="n">db_path_T</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="n">db_path</span><span class="p">)</span>
@@ -1204,7 +1206,7 @@
 
 <div class="viewcode-block" id="extract_colors_from_tree">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.extract_colors_from_tree">[docs]</a>
-<span class="k">def</span> <span class="nf">extract_colors_from_tree</span><span class="p">(</span><span class="n">dendogram</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">color_singleton</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_colors_from_tree</span><span class="p">(</span><span class="n">dendogram</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">color_singleton</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Routine to build the map from cluster ids to dendogram colors.</span>
 
@@ -1228,7 +1230,7 @@
 <span class="sd">        cluster_colors[k] = &#39;C0&#39; means that cluster k</span>
 <span class="sd">        is colored in &#39;C0&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">groupby</span>
 
     <span class="c1"># --------------------</span>
     <span class="n">list_summary</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1271,7 +1273,7 @@
 
 <div class="viewcode-block" id="find_template_clusters">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.find_template_clusters">[docs]</a>
-<span class="k">def</span> <span class="nf">find_template_clusters</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_template_clusters</span><span class="p">(</span>
     <span class="n">TpGroup</span><span class="p">,</span>
     <span class="n">method</span><span class="o">=</span><span class="s2">&quot;single&quot;</span><span class="p">,</span>
     <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;correlation&quot;</span><span class="p">,</span>
@@ -1284,12 +1286,10 @@
 <span class="sd">    Find non-overlapping groups of similar templates</span>
 <span class="sd">    with the hierarchical clustering package from scipy.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">squareform</span>
-    <span class="kn">from</span> <span class="nn">scipy.cluster</span> <span class="kn">import</span> <span class="n">hierarchy</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial.distance</span><span class="w"> </span><span class="kn">import</span> <span class="n">squareform</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">hierarchy</span>
 
-    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;Deprecated function! (Old, under construction or experimental)&quot;</span>
-            <span class="p">)</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Deprecated function! (Old, under construction or experimental)&quot;</span><span class="p">)</span>
 
     <span class="c1"># first, transform the CC matrix into a condensed matrix</span>
     <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">TpGroup</span><span class="o">.</span><span class="n">intertp_cc</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
@@ -1335,7 +1335,7 @@
 
 <div class="viewcode-block" id="round_time">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.round_time">[docs]</a>
-<span class="k">def</span> <span class="nf">round_time</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">round_time</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
@@ -1362,7 +1362,7 @@
 
 <div class="viewcode-block" id="sec_to_samp">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.sec_to_samp">[docs]</a>
-<span class="k">def</span> <span class="nf">sec_to_samp</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sec_to_samp</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert seconds to samples taking into account rounding errors.</span>
 
 <span class="sd">    Parameters</span>
@@ -1381,7 +1381,7 @@
 
 <div class="viewcode-block" id="time_range">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.time_range">[docs]</a>
-<span class="k">def</span> <span class="nf">time_range</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">time_range</span><span class="p">(</span>
     <span class="n">start_time</span><span class="p">,</span>
     <span class="n">end_time</span><span class="p">,</span>
     <span class="n">dt_sec</span><span class="p">,</span>
@@ -1422,7 +1422,7 @@
 
 <div class="viewcode-block" id="linear_regression">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.linear_regression">[docs]</a>
-<span class="k">def</span> <span class="nf">linear_regression</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">linear_regression</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    cf. https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html</span>
 
@@ -1438,7 +1438,7 @@
 <span class="sd">           hypothesis is that the slope is zero</span>
 <span class="sd">    std_err: standard error of the estimated slope</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">linregress</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">linregress</span>
 
     <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">r_val</span><span class="p">,</span> <span class="n">p_val</span><span class="p">,</span> <span class="n">std_err</span> <span class="o">=</span> <span class="n">linregress</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">r_val</span><span class="p">,</span> <span class="n">p_val</span><span class="p">,</span> <span class="n">std_err</span></div>
@@ -1447,7 +1447,7 @@
 
 <div class="viewcode-block" id="weighted_linear_regression">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.weighted_linear_regression">[docs]</a>
-<span class="k">def</span> <span class="nf">weighted_linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">weighted_linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
@@ -1487,9 +1487,10 @@
 <span class="c1">#             Others</span>
 <span class="c1"># -------------------------------------------------</span>
 
+
 <div class="viewcode-block" id="cov_mat_intersection">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.cov_mat_intersection">[docs]</a>
-<span class="k">def</span> <span class="nf">cov_mat_intersection</span><span class="p">(</span><span class="n">cov_mat</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis2</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cov_mat_intersection</span><span class="p">(</span><span class="n">cov_mat</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis2</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute intersection between covariance matrix and plane.</span>
 
 <span class="sd">    Note that we assume the following coordinate system:</span>
@@ -1530,14 +1531,14 @@
     <span class="n">min_dir</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:,</span> <span class="n">w</span><span class="o">.</span><span class="n">argmin</span><span class="p">()]</span>
     <span class="c1"># &quot;azimuth&quot; is angle between `axis2` (`max_dir[1]`) and ellipse&#39;s semi-axis</span>
     <span class="n">az_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">max_dir</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">max_dir</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mf">180.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
-    <span class="n">az_min</span> <span class="o">=</span> <span class="p">(</span><span class="n">az_max</span> <span class="o">+</span> <span class="mf">90.</span><span class="p">)</span> <span class="o">%</span> <span class="mf">360.</span>
+    <span class="n">az_min</span> <span class="o">=</span> <span class="p">(</span><span class="n">az_max</span> <span class="o">+</span> <span class="mf">90.0</span><span class="p">)</span> <span class="o">%</span> <span class="mf">360.0</span>
     <span class="k">return</span> <span class="n">max_unc</span><span class="p">,</span> <span class="n">min_unc</span><span class="p">,</span> <span class="n">az_max</span><span class="p">,</span> <span class="n">az_min</span></div>
 
 
 
 <div class="viewcode-block" id="compute_distances">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.compute_distances">[docs]</a>
-<span class="k">def</span> <span class="nf">compute_distances</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_distances</span><span class="p">(</span>
     <span class="n">source_longitudes</span><span class="p">,</span>
     <span class="n">source_latitudes</span><span class="p">,</span>
     <span class="n">source_depths</span><span class="p">,</span>
@@ -1582,7 +1583,7 @@
 <span class="sd">        This array is returned only if `return_epicentral_distances` is True.</span>
 <span class="sd">        The shape of the array is (n_sources, n_receivers).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">cartopy.geodesic</span> <span class="kn">import</span> <span class="n">Geodesic</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">cartopy.geodesic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geodesic</span>
 
     <span class="c1"># convert types if necessary</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_longitudes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -1621,7 +1622,7 @@
 
 <div class="viewcode-block" id="event_count">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.event_count">[docs]</a>
-<span class="k">def</span> <span class="nf">event_count</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">event_count</span><span class="p">(</span>
     <span class="n">event_timings_str</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">,</span>
@@ -1662,7 +1663,7 @@
 <span class="sd">        To get a numpy array from this Pandas Series,</span>
 <span class="sd">        use: event_count.values</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
     <span class="n">start_date</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_date</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">))</span>
     <span class="n">end_date</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">end_date</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">))</span>
@@ -1712,7 +1713,7 @@
 
 <div class="viewcode-block" id="get_np_array">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.get_np_array">[docs]</a>
-<span class="k">def</span> <span class="nf">get_np_array</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_np_array</span><span class="p">(</span>
     <span class="n">stream</span><span class="p">,</span>
     <span class="n">stations</span><span class="p">,</span>
     <span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">],</span>
@@ -1789,7 +1790,7 @@
 
 <div class="viewcode-block" id="max_norm">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.max_norm">[docs]</a>
-<span class="k">def</span> <span class="nf">max_norm</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">max_norm</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
     <span class="n">max_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">max_</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">X</span> <span class="o">/</span> <span class="n">max_</span>
@@ -1800,8 +1801,8 @@
 
 <div class="viewcode-block" id="running_mad">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.running_mad">[docs]</a>
-<span class="k">def</span> <span class="nf">running_mad</span><span class="p">(</span><span class="n">time_series</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">n_mad</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.75</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">median_abs_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">running_mad</span><span class="p">(</span><span class="n">time_series</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">n_mad</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.75</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">median_abs_deviation</span> <span class="k">as</span> <span class="n">scimad</span>
 
     <span class="c1"># calculate n_windows given window</span>
     <span class="c1"># and overlap</span>
@@ -1844,20 +1845,21 @@
     <span class="k">return</span> <span class="n">running_stat</span></div>
 
 
+
 <div class="viewcode-block" id="spectrogram">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.spectrogram">[docs]</a>
-<span class="k">def</span> <span class="nf">spectrogram</span><span class="p">(</span>
-        <span class="n">x</span><span class="p">,</span>
-        <span class="n">window_duration_sec</span><span class="p">,</span>
-        <span class="n">overlap</span><span class="p">,</span>
-        <span class="n">sampling_rate</span><span class="p">,</span>
-        <span class="n">detrend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">window</span><span class="o">=</span><span class="s2">&quot;hann&quot;</span><span class="p">,</span>
-        <span class="n">nfft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">boundary</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">padded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">scaling</span><span class="o">=</span><span class="s2">&quot;spectrum&quot;</span>
-        <span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">spectrogram</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="n">window_duration_sec</span><span class="p">,</span>
+    <span class="n">overlap</span><span class="p">,</span>
+    <span class="n">sampling_rate</span><span class="p">,</span>
+    <span class="n">detrend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">window</span><span class="o">=</span><span class="s2">&quot;hann&quot;</span><span class="p">,</span>
+    <span class="n">nfft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">boundary</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">padded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">scaling</span><span class="o">=</span><span class="s2">&quot;spectrum&quot;</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1893,7 +1895,7 @@
 <span class="sd">        Times, in seconds, of the sliding windows.</span>
 <span class="sd">    spectrogram : numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">stft</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">stft</span>
 
     <span class="n">stft_params</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">stft_params</span><span class="p">[</span><span class="s2">&quot;nperseg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">window_duration_sec</span> <span class="o">*</span> <span class="n">sampling_rate</span><span class="p">)</span>
@@ -1905,15 +1907,14 @@
     <span class="n">stft_params</span><span class="p">[</span><span class="s2">&quot;padded&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">padded</span>
     <span class="n">stft_params</span><span class="p">[</span><span class="s2">&quot;scaling&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaling</span>
 
-    <span class="n">frequency</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">spec</span> <span class="o">=</span> <span class="n">stft</span><span class="p">(</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">stft_params</span>
-            <span class="p">)</span>
+    <span class="n">frequency</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">spec</span> <span class="o">=</span> <span class="n">stft</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">stft_params</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="two_point_epicentral_distance">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.two_point_epicentral_distance">[docs]</a>
-<span class="k">def</span> <span class="nf">two_point_epicentral_distance</span><span class="p">(</span><span class="n">lon_1</span><span class="p">,</span> <span class="n">lat_1</span><span class="p">,</span> <span class="n">lon_2</span><span class="p">,</span> <span class="n">lat_2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">two_point_epicentral_distance</span><span class="p">(</span><span class="n">lon_1</span><span class="p">,</span> <span class="n">lat_1</span><span class="p">,</span> <span class="n">lon_2</span><span class="p">,</span> <span class="n">lat_2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the distance between two points.</span>
 
 
@@ -1933,16 +1934,17 @@
 <span class="sd">    dist: scalar, float</span>
 <span class="sd">        Distance between Point 1 and Point 2 in kilometers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">obspy.geodetics.base</span> <span class="kn">import</span> <span class="n">calc_vincenty_inverse</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">obspy.geodetics.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">calc_vincenty_inverse</span>
 
     <span class="n">dist</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">baz</span> <span class="o">=</span> <span class="n">calc_vincenty_inverse</span><span class="p">(</span><span class="n">lat_1</span><span class="p">,</span> <span class="n">lon_1</span><span class="p">,</span> <span class="n">lat_2</span><span class="p">,</span> <span class="n">lon_2</span><span class="p">)</span>
     <span class="n">dist</span> <span class="o">/=</span> <span class="mf">1000.0</span>  <span class="c1"># from m to km</span>
     <span class="k">return</span> <span class="n">dist</span></div>
 
 
+
 <div class="viewcode-block" id="two_point_distance">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.two_point_distance">[docs]</a>
-<span class="k">def</span> <span class="nf">two_point_distance</span><span class="p">(</span><span class="n">lon_1</span><span class="p">,</span> <span class="n">lat_1</span><span class="p">,</span> <span class="n">depth_1</span><span class="p">,</span> <span class="n">lon_2</span><span class="p">,</span> <span class="n">lat_2</span><span class="p">,</span> <span class="n">depth_2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">two_point_distance</span><span class="p">(</span><span class="n">lon_1</span><span class="p">,</span> <span class="n">lat_1</span><span class="p">,</span> <span class="n">depth_1</span><span class="p">,</span> <span class="n">lon_2</span><span class="p">,</span> <span class="n">lat_2</span><span class="p">,</span> <span class="n">depth_2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the distance between two points.</span>
 
 
@@ -1967,7 +1969,7 @@
 <span class="sd">        Distance between Point 1 and Point 2 in kilometers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">from</span> <span class="nn">obspy.geodetics.base</span> <span class="kn">import</span> <span class="n">calc_vincenty_inverse</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">obspy.geodetics.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">calc_vincenty_inverse</span>
 
     <span class="n">dist</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">baz</span> <span class="o">=</span> <span class="n">calc_vincenty_inverse</span><span class="p">(</span><span class="n">lat_1</span><span class="p">,</span> <span class="n">lon_1</span><span class="p">,</span> <span class="n">lat_2</span><span class="p">,</span> <span class="n">lon_2</span><span class="p">)</span>
     <span class="n">dist</span> <span class="o">/=</span> <span class="mf">1000.0</span>  <span class="c1"># from m to km</span>
@@ -1978,14 +1980,15 @@
 
 <div class="viewcode-block" id="donefun">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.donefun">[docs]</a>
-<span class="k">def</span> <span class="nf">donefun</span><span class="p">(</span><span class="n">french</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">donefun</span><span class="p">(</span><span class="n">french</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Super useful function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">french</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;ALL DONE!&quot;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">random</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">random</span><span class="w"> </span><span class="kn">import</span> <span class="n">random</span>
+
         <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="mf">0.25</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;HOP LÀ!&quot;</span>
@@ -2013,7 +2016,7 @@
 
 <div class="viewcode-block" id="write_lock_file">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.write_lock_file">[docs]</a>
-<span class="k">def</span> <span class="nf">write_lock_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_lock_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">check</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Lock file </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> already exists!&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">flush</span><span class="p">:</span>
@@ -2028,9 +2031,9 @@
 
 <div class="viewcode-block" id="read_write_waiting_list">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.read_write_waiting_list">[docs]</a>
-<span class="k">def</span> <span class="nf">read_write_waiting_list</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">unit_wait_time</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_write_waiting_list</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">unit_wait_time</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read/write queue to avoid conflicts between jobs.&quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
 
     <span class="n">path_no_ext</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
@@ -2106,6 +2109,7 @@
             <span class="k">continue</span></div>
 
 
+
 <span class="c1"># =======================================================</span>
 <span class="c1">#         routines for automatic picking</span>
 <span class="c1"># =======================================================</span>
@@ -2113,7 +2117,7 @@
 
 <div class="viewcode-block" id="normalize_batch">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.normalize_batch">[docs]</a>
-<span class="k">def</span> <span class="nf">normalize_batch</span><span class="p">(</span><span class="n">seismogram</span><span class="p">,</span> <span class="n">normalization_window_sample</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.50</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_batch</span><span class="p">(</span><span class="n">seismogram</span><span class="p">,</span> <span class="n">normalization_window_sample</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.50</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply Z-score normalization in running windows.</span>
 
 <span class="sd">    Following Zhu et al. 2019, this function applied Z-score</span>
@@ -2133,10 +2137,10 @@
 <span class="sd">    normalized_seismogram : numpy.ndarray</span>
 <span class="sd">        Normalized seismogram with same shape as `seismogram`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
 
-    <span class="c1">#shift = normalization_window_sample // 2</span>
-    <span class="n">shift</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">*</span> <span class="n">normalization_window_sample</span><span class="p">)</span>
+    <span class="c1"># shift = normalization_window_sample // 2</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span> <span class="o">*</span> <span class="n">normalization_window_sample</span><span class="p">)</span>
     <span class="n">num_stations</span><span class="p">,</span> <span class="n">num_channels</span><span class="p">,</span> <span class="n">num_time_samples</span> <span class="o">=</span> <span class="n">seismogram</span><span class="o">.</span><span class="n">shape</span>
 
     <span class="c1"># std in sliding windows</span>
@@ -2167,39 +2171,32 @@
     <span class="c1"># normalize data with sliding std and mean</span>
     <span class="n">t_interp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_time_samples</span><span class="p">)</span>
     <span class="n">std_interp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
-            <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
-                <span class="n">t_interp</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">sld_std</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">sld_std</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="n">sld_std</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="p">)</span>
-                <span class="k">for</span> <span class="n">sld_std</span> <span class="ow">in</span> <span class="n">sliding_std</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sliding_std</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-                <span class="p">),</span>
-            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
-                    <span class="n">sliding_std</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_interp</span><span class="p">),)</span>
-                    <span class="p">)</span>
+        <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">t_interp</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">sld_std</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">sld_std</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="n">sld_std</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">sld_std</span> <span class="ow">in</span> <span class="n">sliding_std</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sliding_std</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">),</span>
+        <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sliding_std</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_interp</span><span class="p">),))</span>
     <span class="n">mean_interp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
-            <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
-                <span class="n">t_interp</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">m_std</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">m_std</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="n">m_std</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="p">)</span>
-                <span class="k">for</span> <span class="n">m_std</span> <span class="ow">in</span> <span class="n">sliding_mean</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sliding_mean</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-                <span class="p">),</span>
-            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
-                    <span class="n">sliding_mean</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_interp</span><span class="p">),)</span>
-                    <span class="p">)</span>
+        <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">t_interp</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">m_std</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">m_std</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="n">m_std</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">m_std</span> <span class="ow">in</span> <span class="n">sliding_mean</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sliding_mean</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">),</span>
+        <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sliding_mean</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_interp</span><span class="p">),))</span>
 
     <span class="n">seismogram</span> <span class="o">=</span> <span class="p">(</span><span class="n">seismogram</span> <span class="o">-</span> <span class="n">mean_interp</span><span class="p">)</span> <span class="o">/</span> <span class="n">std_interp</span>
 
     <span class="k">return</span> <span class="n">seismogram</span></div>
 
 
+
 <div class="viewcode-block" id="find_picks">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.find_picks">[docs]</a>
-<span class="k">def</span> <span class="nf">find_picks</span><span class="p">(</span>
-        <span class="n">phase_probability</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-        <span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_picks</span><span class="p">(</span><span class="n">phase_probability</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Find phase picks from time series of phase probability.</span>
 
-<span class="sd">    Phase picks are given by the peaks exceeding `threshold` in </span>
+<span class="sd">    Phase picks are given by the peaks exceeding `threshold` in</span>
 <span class="sd">    the time series `phase_probability`. The probability neighborhood</span>
 <span class="sd">    around each peak is used as the pdf of a given pick measurement.</span>
 
@@ -2209,7 +2206,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    phase_probability : array-like</span>
-<span class="sd">        Probability time series of observing the arrival of a </span>
+<span class="sd">        Probability time series of observing the arrival of a</span>
 <span class="sd">        given seismic phase.</span>
 <span class="sd">    threshold : float</span>
 <span class="sd">        Value above which peaks are taken to be candidate phase picks.</span>
@@ -2227,38 +2224,43 @@
     <span class="c1"># so that `properties` has peak width info</span>
     <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">peak_indexes</span><span class="p">,</span> <span class="n">peak_properties</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span>
-            <span class="n">phase_probability</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">)</span>
+        <span class="n">phase_probability</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
     <span class="n">peaks_value</span><span class="p">,</span> <span class="n">peaks_mean</span><span class="p">,</span> <span class="n">peaks_std</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_indexes</span><span class="p">)):</span>
         <span class="n">idx1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">peak_properties</span><span class="p">[</span><span class="s2">&quot;left_ips&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
         <span class="n">idx2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">peak_properties</span><span class="p">[</span><span class="s2">&quot;right_ips&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
-        <span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">prob</span> <span class="o">=</span> <span class="n">phase_probability</span><span class="p">[</span><span class="n">samples</span><span class="p">]</span>
-        
+
         <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">samples</span> <span class="o">*</span> <span class="n">prob</span><span class="p">)</span> <span class="o">/</span> <span class="n">prob</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">samples</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">prob</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-        
+        <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">samples</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">prob</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
         <span class="n">peaks_mean</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span>
         <span class="n">peaks_std</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">std</span><span class="p">)</span>
         <span class="n">peaks_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">phase_probability</span><span class="p">[</span><span class="n">peak_indexes</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
-        
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">peaks_value</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">peaks_mean</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">peaks_std</span><span class="p">)</span></div>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">peaks_value</span><span class="p">)),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">peaks_mean</span><span class="p">)),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">peaks_std</span><span class="p">)),</span>
+    <span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="get_picks">
 <a class="viewcode-back" href="../../usage/api/utils.html#BPMF.utils.get_picks">[docs]</a>
-<span class="k">def</span> <span class="nf">get_picks</span><span class="p">(</span>
-        <span class="n">picks</span><span class="p">,</span>
-        <span class="n">buffer_length</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">),</span>
-        <span class="n">prior_knowledge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">search_win_samp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">4.</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">)</span>
-        <span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_picks</span><span class="p">(</span>
+    <span class="n">picks</span><span class="p">,</span>
+    <span class="n">buffer_length</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">),</span>
+    <span class="n">prior_knowledge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">search_win_samp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">),</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Select a single P- and S-pick on each 3-comp seismogram.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    picks : `pandas.DataFrame` </span>
+<span class="sd">    picks : `pandas.DataFrame`</span>
 <span class="sd">        `pandas.DataFrame` as formatted in `BPMF.dataset.pick_PS_phases`.</span>
 <span class="sd">    buffer_length: scalar int, optional</span>
 <span class="sd">        Picks that are before this buffer length, in samples, are discarded.</span>
@@ -2286,7 +2288,7 @@
             <span class="n">prior_S</span> <span class="o">=</span> <span class="n">prior_knowledge</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">prior_P</span><span class="p">,</span> <span class="n">prior_S</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
-        <span class="c1">#for n in range(len(picks[&quot;P_picks&quot;][st])):</span>
+        <span class="c1"># for n in range(len(picks[&quot;P_picks&quot;][st])):</span>
         <span class="c1"># ----------------</span>
         <span class="c1"># remove picks from the buffer length</span>
         <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">phases</span><span class="p">:</span>
@@ -2295,73 +2297,67 @@
                 <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}{</span><span class="n">col</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ph</span><span class="si">}{</span><span class="n">col</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="n">valid_picks</span><span class="p">]</span>
         <span class="n">search_S_pick</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">search_P_pick</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;S_picks&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># if len(picks.loc[sta, &quot;S_picks&quot;]) == 0:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;S_picks&quot;</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># if no valid S pick: fill in with nan</span>
             <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">s_columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
             <span class="n">search_S_pick</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_picks&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_picks&quot;</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># if no valid P pick: fill in with nan</span>
             <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">p_columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
             <span class="n">search_P_pick</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">search_S_pick</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">prior_S</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># take only the highest probability trigger</span>
-                <span class="n">best_S_trigger</span> <span class="o">=</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;S_probas&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+                <span class="n">best_S_trigger</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;S_probas&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># use a priori picks</span>
-                <span class="n">tapered_S_probas</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;S_probas&quot;</span><span class="p">]</span>
-                        <span class="o">*</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
-                            <span class="o">-</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;S_picks&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">prior_S</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">search_win_samp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-                            <span class="p">)</span>
-                        <span class="p">)</span>
-                <span class="n">best_S_trigger</span> <span class="o">=</span> <span class="n">tapered_S_probas</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
-                <span class="c1">## don&#39;t keep if too far from a priori</span>
-                <span class="c1">#if abs(picks[&quot;S_picks&quot;][st][best_S_trigger] - prior_S) &gt; 4 * search_win_samp:</span>
-                <span class="c1">#    best_S_trigger = np.nan</span>
+                <span class="n">tapered_S_probas</span> <span class="o">=</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;S_probas&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                    <span class="o">-</span><span class="p">((</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;S_picks&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">prior_S</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">search_win_samp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">best_S_trigger</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">tapered_S_probas</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">best_S_trigger</span><span class="p">):</span>
                 <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">s_columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">s_columns</span><span class="p">:</span>
-                    <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">col</span><span class="p">][</span><span class="n">best_S_trigger</span><span class="p">]</span>
+                    <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">col</span><span class="p">])[</span>
+                        <span class="n">best_S_trigger</span>
+                    <span class="p">]</span>
             <span class="c1"># update P picks: keep only those that are before the best S pick</span>
             <span class="k">if</span> <span class="n">search_P_pick</span><span class="p">:</span>
                 <span class="n">valid_P_picks</span> <span class="o">=</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_picks&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;S_picks&quot;</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">p_columns</span><span class="p">:</span>
                     <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">col</span><span class="p">][</span><span class="n">valid_P_picks</span><span class="p">]</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_picks&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_picks&quot;</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="c1"># if no valid P pick: fill in with nan</span>
                     <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">p_columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
                     <span class="n">search_P_pick</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">search_P_pick</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">prior_P</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># take only the highest probability trigger</span>
-                <span class="n">best_P_trigger</span> <span class="o">=</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_probas&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+                <span class="n">best_P_trigger</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_probas&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># use a priori picks</span>
-                <span class="n">tapered_P_probas</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_probas&quot;</span><span class="p">]</span>
-                        <span class="o">*</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
-                            <span class="o">-</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_picks&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">prior_P</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">search_win_samp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-                            <span class="p">)</span>
-                        <span class="p">)</span>
-                <span class="n">best_P_trigger</span> <span class="o">=</span> <span class="n">tapered_P_probas</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
-                <span class="c1">## don&#39;t keep if too far from a priori</span>
-                <span class="c1">#if abs(picks[&quot;P_picks&quot;][st][best_P_trigger] - prior_P) &gt; 4 * search_win_samp:</span>
-                <span class="c1">#    best_P_trigger = np.nan</span>
+                <span class="n">tapered_P_probas</span> <span class="o">=</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_probas&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                    <span class="o">-</span><span class="p">((</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="s2">&quot;P_picks&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">prior_P</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">search_win_samp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">best_P_trigger</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">tapered_P_probas</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">best_P_trigger</span><span class="p">):</span>
                 <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">p_columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">p_columns</span><span class="p">:</span>
-                    <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">col</span><span class="p">][</span><span class="n">best_P_trigger</span><span class="p">]</span>
+                    <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">,</span> <span class="n">col</span><span class="p">])[</span>
+                        <span class="n">best_P_trigger</span>
+                    <span class="p">]</span>
     <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">picks</span><span class="p">:</span>
         <span class="n">picks</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">picks</span></div>
 
 
-<span class="k">def</span> <span class="nf">_detect_peaks</span><span class="p">(</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_detect_peaks</span><span class="p">(</span>
     <span class="n">x</span><span class="p">,</span>
     <span class="n">mph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">mpd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
@@ -2372,7 +2368,6 @@
     <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect peaks in data based on their amplitude and other features.</span>
 
 <span class="sd">    Note: Will be removed in future versions because all these features are</span>
@@ -2514,7 +2509,6 @@
         <span class="n">_plot_peaks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mph</span><span class="p">,</span> <span class="n">mpd</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">valley</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ind</span>
-
 </pre></div>
 
            </div>

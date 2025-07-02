@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pre-requisites &mdash; BPMF 2.0.0beta2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
@@ -130,6 +130,11 @@
 <span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>nvidia<span class="w"> </span>cuda-nvcc<span class="w"> </span>cuda-toolkit
 </pre></div>
 </div>
+<p>OR, you may need <cite>clang</cite> if your machine uses one of the Apple Silicon chips. In which case, run:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>clang<span class="w"> </span>lld
+<span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>nvidia<span class="w"> </span>cuda-nvcc<span class="w"> </span>cuda-toolkit
+</pre></div>
+</div>
 <p>Run the following command to install (almost) all the packages need for this tutorial:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>obspy<span class="w"> </span>numpy<span class="w"> </span>scipy<span class="w"> </span>pandas<span class="w"> </span>matplotlib<span class="w"> </span>h5py<span class="w"> </span>ipython<span class="w"> </span>jupyter<span class="w"> </span>cartopy<span class="w"> </span>colorcet
 </pre></div>
@@ -171,7 +176,7 @@ for more information.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>seisbench
 </pre></div>
 </div>
-<p>This should download the package <code class="xref py py-data docutils literal notranslate"><span class="pre">torch</span></code>.</p>
+<p>This should download the package <code class="xref py py-data docutils literal notranslate"><span class="pre">torch</span></code>. Note that if you want to use GPU-accelerated <code class="xref py py-data docutils literal notranslate"><span class="pre">seisbench</span></code> you will need to install <code class="xref py py-data docutils literal notranslate"><span class="pre">torch</span></code> with GPU support. In this case, the pip install may make a mess with your cuda libraries if you installed cuda locally with <cite>conda</cite>.</p>
 </section>
 <section id="nonlinloc">
 <h3>NonLinLoc<a class="headerlink" href="#nonlinloc" title="Link to this heading"></a></h3>

@@ -38,6 +38,13 @@ In general, you can use :py:data:`conda` to locally install a C and a CUDA-C com
     $ conda install gcc
     $ conda install -c nvidia cuda-nvcc cuda-toolkit
 
+OR, you may need `clang` if your machine uses one of the Apple Silicon chips. In which case, run:
+
+.. code-block:: console
+
+    $ conda install clang lld
+    $ conda install -c nvidia cuda-nvcc cuda-toolkit
+
 
 Run the following command to install (almost) all the packages need for this tutorial:
 
@@ -96,7 +103,7 @@ Several important features of :py:data:`BPMF` relies on the deep neural network 
 
     $ pip install seisbench
 
-This should download the package :py:data:`torch`.
+This should download the package :py:data:`torch`. Note that if you want to use GPU-accelerated :py:data:`seisbench` you will need to install :py:data:`torch` with GPU support. In this case, the pip install may make a mess with your cuda libraries if you installed cuda locally with `conda`. 
 
 NonLinLoc
 ^^^^^^^^^

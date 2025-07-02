@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BPMF.data_reader_examples &mdash; BPMF 2.0.0beta2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -51,12 +51,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="clib.html">BPMF.clib</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dataset.html">BPMF.dataset</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">BPMF.data_reader_examples</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#BPMF.data_reader_examples.data_reader_mseed"><code class="docutils literal notranslate"><span class="pre">data_reader_mseed()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#BPMF.data_reader_examples.data_reader_pyasdf"><code class="docutils literal notranslate"><span class="pre">data_reader_pyasdf()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#BPMF.data_reader_examples.data_reader_template"><code class="docutils literal notranslate"><span class="pre">data_reader_template()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">BPMF.data_reader_examples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="NLLoc_utils.html">BPMF.NLLoc_utils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plotting_utils.html">BPMF.ploting_utils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="similarity_search.html">BPMF.similarity_search</a></li>
@@ -97,99 +92,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-BPMF.data_reader_examples">
-<span id="bpmf-data-reader-examples"></span><h1>BPMF.data_reader_examples<a class="headerlink" href="#module-BPMF.data_reader_examples" title="Link to this heading"></a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="BPMF.data_reader_examples.data_reader_mseed">
-<span class="sig-prename descclassname"><span class="pre">BPMF.data_reader_examples.</span></span><span class="sig-name descname"><span class="pre">data_reader_mseed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">where</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['*']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['*']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attach_response</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_template_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'[A-Z][A-Z]'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/data_reader_examples.html#data_reader_mseed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.data_reader_examples.data_reader_mseed" title="Link to this definition"></a></dt>
-<dd><p>Data reader for BPMF.</p>
-<p>This data reader is specifically designed for the folder tree convention
-that we use in the tutorial. We will use the same data reader at later
-stages of the workflow.</p>
-<p>Note: This is the data reader introduced in BPMF’s tutorial.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>where</strong> (<em>str</em>) – Path to data file or root data folder.</p></li>
-<li><p><strong>network</strong> (<em>str</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Code(s) of the target network(s).</p></li>
-<li><p><strong>stations</strong> (<em>str</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Code(s) of the target station(s).</p></li>
-<li><p><strong>channels</strong> (<em>str</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Code(s) of the target channel(s).</p></li>
-<li><p><strong>location</strong> (<em>str</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Code(s) of the target location(s).</p></li>
-<li><p><strong>starttime</strong> (<em>str</em><em> or </em><em>obspy.UTCDateTime</em><em>, </em><em>optional</em>) – Target start time.</p></li>
-<li><p><strong>endtime</strong> (<em>str</em><em> or </em><em>obspy.UTCDateTime</em><em>, </em><em>optional</em>) – Target end time.</p></li>
-<li><p><strong>attach_response</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, find the instrument response from the xml files
-and attach it to the obspy.Stream output instance.</p></li>
-<li><p><strong>data_folder</strong> (<em>str</em><em>, </em><em>optional</em>) – If given, is the child folder in <cite>where</cite> containing
-the mseed files to read.</p></li>
-<li><p><strong>data_files</strong> (<em>list</em><em>, </em><em>optional</em>) – If not None, is the list of full paths (str) to the data files
-to read.</p></li>
-<li><p><strong>channel_template_str</strong> (<em>str</em><em>, </em><em>optional</em>) – Data files are searched assuming the following naming convention:
-<cite>full_channel_name = channel_template_str + channels[i]</cite>
-By default, <cite>channel_template_str=’[A-Z][A-Z]’</cite>, meaning that
-it is assumed that channel names start with two letters.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>traces</strong> – The seismic data.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>obspy.Stream</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="BPMF.data_reader_examples.data_reader_pyasdf">
-<span class="sig-prename descclassname"><span class="pre">BPMF.data_reader_examples.</span></span><span class="sig-name descname"><span class="pre">data_reader_pyasdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">where</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'raw'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/data_reader_examples.html#data_reader_pyasdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.data_reader_examples.data_reader_pyasdf" title="Link to this definition"></a></dt>
-<dd><p>Data reader for BPMF based on the ASDF format.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>where</strong> (<em>string</em>) – Path to data file or root data folder.</p></li>
-<li><p><strong>network</strong> (<em>string</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Code(s) of the target network(s).</p></li>
-<li><p><strong>station</strong> (<em>string</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Code(s) of the target station(s).</p></li>
-<li><p><strong>channel</strong> (<em>string</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Code(s) of the target channel(s).</p></li>
-<li><p><strong>location</strong> (<em>string</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Code(s) of the target location(s).</p></li>
-<li><p><strong>starttime</strong> (<em>string</em><em> or </em><em>obspy.UTCDateTime</em><em>, </em><em>optional</em>) – Target start time.</p></li>
-<li><p><strong>endtime</strong> (<em>string</em><em> or </em><em>obspy.UTCDateTime</em><em>, </em><em>optional</em>) – Target end time.</p></li>
-<li><p><strong>tag</strong> (<em>string</em><em>, </em><em>default to 'raw'</em>) – Tag name in the ASDF file.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>traces</strong> – The seismic data.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>obspy.Stream</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="BPMF.data_reader_examples.data_reader_template">
-<span class="sig-prename descclassname"><span class="pre">BPMF.data_reader_examples.</span></span><span class="sig-name descname"><span class="pre">data_reader_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">where</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/data_reader_examples.html#data_reader_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.data_reader_examples.data_reader_template" title="Link to this definition"></a></dt>
-<dd><p>Data reader for BPMF.</p>
-<p>Any data reader must have the present signature.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>where</strong> (<em>string</em>) – Path to data file or root data folder.</p></li>
-<li><p><strong>network</strong> (<em>string</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Code(s) of the target network(s).</p></li>
-<li><p><strong>station</strong> (<em>string</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Code(s) of the target station(s).</p></li>
-<li><p><strong>channel</strong> (<em>string</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Code(s) of the target channel(s).</p></li>
-<li><p><strong>location</strong> (<em>string</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Code(s) of the target location(s).</p></li>
-<li><p><strong>starttime</strong> (<em>string</em><em> or </em><em>obspy.UTCDateTime</em><em>, </em><em>optional</em>) – Target start time.</p></li>
-<li><p><strong>endtime</strong> (<em>string</em><em> or </em><em>obspy.UTCDateTime</em><em>, </em><em>optional</em>) – Target end time.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>traces</strong> – The seismic data.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>obspy.Stream</p>
-</dd>
-</dl>
-</dd></dl>
-
+  <section id="bpmf-data-reader-examples">
+<h1>BPMF.data_reader_examples<a class="headerlink" href="#bpmf-data-reader-examples" title="Link to this heading"></a></h1>
 </section>
 
 
