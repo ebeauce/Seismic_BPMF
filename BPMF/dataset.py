@@ -2388,6 +2388,7 @@ class Event(object):
                 # external change
                 pathlib.Path(output_dir).rmdir()
             return
+
         hypocenter, predicted_times = NLLoc_utils.read_NLLoc_outputs(
             out_fn, os.path.join(cfg.NLLOC_OUTPUT_PATH, self.id)
         )
@@ -2405,8 +2406,8 @@ class Event(object):
                 # add this protection against unexpected
                 # external change
                 pathlib.Path(output_dir).rmdir()
-            self.set_aux_data({"NLLoc_success": False})
             return
+
         if hypocenter["success"] == False and default_to_gaussian:
             for attr in ["latitude", "longitude", "depth"]:
                 hypocenter[attr] = hypocenter[f"exp_{attr}"]
