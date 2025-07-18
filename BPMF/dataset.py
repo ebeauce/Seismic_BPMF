@@ -2271,6 +2271,7 @@ class Event(object):
         stations=None,
         method="EDT",
         max_epicentral_dist_km_S=None,
+        default_to_gaussian=False,
         verbose=0,
         cleanup_out_dir=True,
         **kwargs,
@@ -2287,6 +2288,12 @@ class Event(object):
             Optimization algorithm used by NonLinLoc. Available options are:
             'GAU_ANALYTIC', 'EDT', 'EDT_OT', 'EDT_OT_WT_ML'. Refer to NonLinLoc's
             documentation for more details. Default is 'EDT'.
+        max_epicentral_dist_km_S : float, optional
+            If not None, only stations closer than `max_epicentral_dist_km_S` from the
+            prior location contribute to S picks. Defaults to None.
+        default_to_gaussian : bool, optional
+            If True, the gaussian approximation of the location pdf is used when the
+            search for the maximum likelihood fails. Defaults to False.
         verbose : int, optional
             Verbosity level of NonLinLoc. If greater than 0, NonLinLoc's outputs
             are printed to the standard output. Default is 0.
@@ -2398,7 +2405,13 @@ class Event(object):
                 # add this protection against unexpected
                 # external change
                 pathlib.Path(output_dir).rmdir()
+            self.set_aux_data({"NLLoc_success": False})
             return
+        if hypocenter["success"] == False and default_to_gaussian:
+            for attr in ["latitude", "longitude", "depth"]:
+                hypocenter[attr] = hypocenter[f"exp_{attr}"]
+                del hypocenter[f"exp_{attr}"]
+
         hypocenter["origin_time"] = udt(hypocenter["origin_time"])
         # round seconds to reasonable precision to avoid producing
         # origin times that are in between samples
@@ -2418,7 +2431,7 @@ class Event(object):
         predicted_times["S_abs_arrival_times"] = S_abs_arrivals
         # attach the theoretical arrival times
         self.arrival_times = predicted_times
-        self.set_aux_data({"NLLoc_reloc": True})
+        self.set_aux_data({"NLLoc_success": hypocenter["success"]})
         self.set_aux_data({"cov_mat": self.cov_mat, "tt_rms": self.tt_rms})
         # clean the temporary control and pick files
         for fn in glob.glob(os.path.join(input_dir, "*")):
@@ -3070,7 +3083,7 @@ class Event(object):
             The list of station names for which to plot the waveforms. If None, all
             stations associated with the Event are plotted. Defaults to None.
         ylabel : str, optional
-            The label for the y-axis. Defaults to r'Velocity ($\mu$m/s)'.
+            The label for the y-axis. Defaults to r'Velocity (microm/s)'.
         **kwargs
             Additional keyword arguments that are passed to the matplotlib plot
             function.
