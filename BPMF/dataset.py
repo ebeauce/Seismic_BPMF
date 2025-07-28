@@ -507,6 +507,7 @@ class Catalog(object):
             print(path_to_files)
 
         if return_events:
+
             def _read(path):
                 events = []
                 with h5.File(path, mode="r") as f:
@@ -516,11 +517,11 @@ class Catalog(object):
                     for key in f.keys():
                         events.append(Event.read_from_file(hdf5_file=f[key]))
                 return events
+
         else:
+
             def _read(path):
-                base_attributes = [
-                        "longitude", "latitude", "depth", "origin_time"
-                        ]
+                base_attributes = ["longitude", "latitude", "depth", "origin_time"]
                 catalog = {}
                 for attr in base_attributes + extra_attributes:
                     catalog[attr] = []
@@ -534,14 +535,13 @@ class Catalog(object):
                         for attr in extra_attributes:
                             if attr in fin:
                                 catalog[attr].append(fin[key][attr][()])
-                            elif "aux_data" in fin[key] and attr in fin[key]["aux_data"]:
-                                catalog[attr].append(
-                                        fin[key]["aux_data"][attr][()]
-                                        )
+                            elif (
+                                "aux_data" in fin[key] and attr in fin[key]["aux_data"]
+                            ):
+                                catalog[attr].append(fin[key]["aux_data"][attr][()])
                             else:
                                 catalog[attr].append(fill_value)
                 return pd.DataFrame(catalog)
-
 
         if n_threads != 1:
             from concurrent.futures import ThreadPoolExecutor
@@ -565,9 +565,7 @@ class Catalog(object):
             )
         else:
             if len(output) == 0:
-                base_attributes = [
-                        "longitude", "latitude", "depth", "origin_time"
-                        ]
+                base_attributes = ["longitude", "latitude", "depth", "origin_time"]
                 empty_catalog = {}
                 for attr in base_attributes + extra_attributes:
                     empty_catalog[attr] = []
@@ -1673,42 +1671,47 @@ class Event(object):
 
     def pick_PS_phases(
         self,
+        picker,
         duration,
         threshold_P=0.60,
         threshold_S=0.60,
         offset_ot=cfg.BUFFER_EXTRACTED_EVENTS_SEC,
-        mini_batch_size=126,
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
         component_aliases={"N": ["N", "1"], "E": ["E", "2"], "Z": ["Z"]},
         upsampling=1,
         downsampling=1,
         use_apriori_picks=False,
         search_win_sec=2.0,
-        ml_model=None,
-        ml_model_name="original",
         keep_probability_time_series=False,
         phase_probability_time_series=None,
         **kwargs,
     ):
         """
-        Use PhaseNet (Zhu et al., 2019) to pick P and S waves (Event class).
+        Use `picker` to pick the P- and S-wave arrivals (Event class).
 
         Parameters
         ----------
+        picker : func
+            Function that returns the time series of P- and S-wave probabilities:
+            `ps_proba_time_series=f(seismograms)`,
+            with shape of `seismograms`=(n_stations, n_channels=3, n_times) and shape
+            of `ps_proba_time_series`=(n_stations, n_phases=2, n_times). The first channel,
+            `ps_proba_time_series[:, 0, :]` is the P-wave probability, and the second,
+            `ps_proba_time_series[:, 1, :]`, is the S-wave probability.
+            Note: This function must include all preprocessing steps that may be required,
+            like chunking and normalization.
         duration : float
             Duration of the time window, in seconds, to process and search
             for P and S wave arrivals.
         threshold_P : float, optional
-            Threshold on PhaseNet's probabilities to trigger the
+            Threshold on P-wave probabilities to trigger the
             identification of a P-wave arrival. (default 0.60)
         threshold_S : float, optional
-            Threshold on PhaseNet's probabilities to trigger the
+            Threshold on S-wave probabilities to trigger the
             identification of an S-wave arrival. (default 0.60)
         offset_ot : float, optional
             Offset in seconds to apply to the origin time.
             (default cfg.BUFFER_EXTRACTED_EVENTS_SEC)
-        mini_batch_size : int, optional
-            Number of traces processed in a single batch by PhaseNet. (default 126)
         phase_on_comp : dict, optional
             Dictionary defining the seismic phase extracted on each component.
             For example, `phase_on_comp['N']` specifies the phase extracted on
@@ -1730,12 +1733,6 @@ class Event(object):
         search_win_sec : float, optional
             Search window size, in seconds, used for refining
             the P and S wave picks. (default 2.0)
-        ml_model : object, optional
-            Pre-trained PhaseNet model object. If not provided,
-            the default model will be loaded. (default None)
-        ml_model_name : str, optional
-            Name of the pre-trained PhaseNet model to load if `ml_model`
-            is not provided. (default "original")
         keep_probability_time_series : bool, optional
             If True, the phase probability time series are stored in a
             new class attribute, `self.probability_time_series`. (default True)
@@ -1755,16 +1752,6 @@ class Event(object):
         - PhaseNet must be used with 3-component data.
         - Results are stored in the object's attribute `self.picks`.
         """
-        from torch import no_grad, from_numpy
-
-        if ml_model is None:
-            import seisbench.models as sbm
-
-            ml_model = sbm.PhaseNet.from_pretrained(ml_model_name)
-            ml_model.eval()
-
-        ml_p_index = kwargs.get("ml_P_index", 1)
-        ml_s_index = kwargs.get("ml_S_index", 2)
 
         if phase_probability_time_series is None:
             if kwargs.get("read_waveforms", True):
@@ -1785,24 +1772,9 @@ class Event(object):
                 # momentarily update samping_rate
                 sampling_rate0 = float(self.sampling_rate)
                 self.sampling_rate = self.sr * upsampling / downsampling
-            data_arr_n = utils.normalize_batch(
-                data_arr,
-                normalization_window_sample=kwargs.get(
-                    "normalization_window_sample", data_arr.shape[-1]
-                ),
-            )
-            closest_pow2 = int(np.log2(data_arr_n.shape[-1])) + 1
-            diff = 2**closest_pow2 - data_arr_n.shape[-1]
-            left = diff // 2
-            right = diff // 2 + diff % 2
-            data_arr_n = np.pad(
-                data_arr_n, ((0, 0), (0, 0), (left, right)), mode="reflect"
-            )
-            with no_grad():
-                phase_proba = ml_model(from_numpy(data_arr_n).float())
-                phase_proba = phase_proba.detach().numpy()
-            # trim edges
-            phase_proba = phase_proba[:, :, left:-right]
+
+            # call the phase picker
+            phase_proba = picker(data_arr)
 
             # define traces variable for later
             traces = self.traces
@@ -1822,12 +1794,8 @@ class Event(object):
                     np.datetime64(self.traces[0].stats.starttime) + times
                 )
                 for s, sta in enumerate(self.stations):
-                    self.probability_time_series.loc[sta, "P"] = phase_proba[
-                        s, ml_p_index, :
-                    ]
-                    self.probability_time_series.loc[sta, "S"] = phase_proba[
-                        s, ml_s_index, :
-                    ]
+                    self.probability_time_series.loc[sta, "P"] = phase_proba[s, 0, :]
+                    self.probability_time_series.loc[sta, "S"] = phase_proba[s, 1, :]
 
         else:
             # use the WaveformTransform instance in `phase_probability_time_series` to
@@ -1857,10 +1825,10 @@ class Event(object):
         )
         for s, sta in enumerate(self.stations):
             picks.loc[sta, ["P_probas", "P_picks", "P_unc"]] = utils.find_picks(
-                phase_proba[s, ml_p_index, :], threshold_P
+                phase_proba[s, 0, :], threshold_P
             )
             picks.loc[sta, ["S_probas", "S_picks", "S_unc"]] = utils.find_picks(
-                phase_proba[s, ml_s_index, :], threshold_S
+                phase_proba[s, 1, :], threshold_S
             )
         # now, only keep the best P and S picks
         if use_apriori_picks and hasattr(self, "arrival_times"):
@@ -1883,7 +1851,7 @@ class Event(object):
         # only used if use_apriori_picks is True
         search_win_samp = utils.sec_to_samp(search_win_sec, sr=self.sampling_rate)
         # keep best P- and S-wave pick on each 3-comp seismogram
-        #print(picks["S_picks"])
+        # print(picks["S_picks"])
         picks = utils.get_picks(
             picks,
             prior_knowledge=prior_knowledge,
@@ -2645,10 +2613,11 @@ class Event(object):
         for station in self.picks.index:
             for ph in self.phases:
                 if not pd.isnull(self.picks.loc[station, f"{ph.upper()}_picks_sec"]):
-                    self.moveouts.loc[
-                        station, f"moveouts_{ph.upper()}"
-                    ] = utils.round_time(
-                        self.picks.loc[station, f"{ph.upper()}_picks_sec"], sr=self.sr
+                    self.moveouts.loc[station, f"moveouts_{ph.upper()}"] = (
+                        utils.round_time(
+                            self.picks.loc[station, f"{ph.upper()}_picks_sec"],
+                            sr=self.sr,
+                        )
                     )
 
     def set_moveouts_to_theoretical_times(self):
@@ -2664,11 +2633,11 @@ class Event(object):
                 if not pd.isnull(
                     self.arrival_times.loc[station, f"{ph.upper()}_tt_sec"]
                 ):
-                    self.moveouts.loc[
-                        station, f"moveouts_{ph.upper()}"
-                    ] = utils.round_time(
-                        self.arrival_times.loc[station, f"{ph.upper()}_tt_sec"],
-                        sr=self.sr,
+                    self.moveouts.loc[station, f"moveouts_{ph.upper()}"] = (
+                        utils.round_time(
+                            self.arrival_times.loc[station, f"{ph.upper()}_tt_sec"],
+                            sr=self.sr,
+                        )
                     )
 
     def set_source_receiver_dist(self, network):
@@ -4611,9 +4580,7 @@ class TemplateGroup(Family):
         _dir_errors = np.zeros((self.n_templates, self.n_templates), dtype=np.float32)
         for t in range(self.n_templates):
             unit_direction = cartesian_coords - cartesian_coords[t, :]
-            unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[
-                :, np.newaxis
-            ]
+            unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[:, np.newaxis]
             # this operation produced NaNs for i=t
             unit_direction[np.isnan(unit_direction)] = 0.0
             if hasattr(self.templates[t], "cov_mat"):
@@ -5263,9 +5230,9 @@ class TemplateGroup(Family):
             self.templates[tt].catalog.catalog["unique_event"] = np.zeros(
                 len(self.templates[tt].catalog.catalog), dtype=bool
             )
-            self.templates[tt].catalog.catalog.loc[
-                cat_indexes, "unique_event"
-            ] = catalog.loc[cat_indexes, "unique_event"].values
+            self.templates[tt].catalog.catalog.loc[cat_indexes, "unique_event"] = (
+                catalog.loc[cat_indexes, "unique_event"].values
+            )
 
     # plotting routines
     def plot_detection(self, row_idx, **kwargs):
@@ -5457,7 +5424,7 @@ class Stack(Event):
         """
         self.traces = obs.Stream()
         self.duration = duration
-        #self.n_samples = utils.sec_to_samp(duration, sr=self.sr)
+        # self.n_samples = utils.sec_to_samp(duration, sr=self.sr)
         for s, sta in enumerate(self.stations):
             for c, cp in enumerate(self.components):
                 ph = phase_on_comp[cp].upper()
@@ -5492,19 +5459,17 @@ class Stack(Event):
 
     def pick_PS_phases_family_mode(
         self,
+        picker,
         duration,
         threshold_P=0.60,
         threshold_S=0.60,
-        mini_batch_size=126,
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
         upsampling=1,
         downsampling=1,
-        ml_model_name="original",
-        ml_model=None,
         **kwargs,
     ):
         """
-        Use PhaseNet (Zhu et al., 2019) to pick P and S waves.
+        Use `picker` to pick the P- and S-wave arrivals (Stack class).
 
         This method picks P- and S-wave arrivals on every 3-component seismogram
         in `self.filtered_data`. Thus, potentially many picks can be found on every
@@ -5512,18 +5477,24 @@ class Stack(Event):
 
         Parameters
         ----------
+        picker : func
+            Function that returns the time series of P- and S-wave probabilities:
+            `ps_proba_time_series=f(seismograms)`,
+            with shape of `seismograms`=(n_stations, n_channels=3, n_times) and shape
+            of `ps_proba_time_series`=(n_stations, n_phases=2, n_times). The first channel,
+            `ps_proba_time_series[:, 0, :]` is the P-wave probability, and the second,
+            `ps_proba_time_series[:, 1, :]`, is the S-wave probability.
+            Note: This function must include all preprocessing steps that may be required,
+            like chunking and normalization.
         duration : float
             Duration, in seconds, of the time window to process to search
             for P and S wave arrivals.
         threshold_P : float, optional
-            Threshold on PhaseNet's probabilities to trigger the identification
+            Threshold on P-wave probabilities to trigger the identification
             of a P-wave arrival. Default: 0.60
         threshold_S : float, optional
-            Threshold on PhaseNet's probabilities to trigger the identification
+            Threshold on S-wave probabilities to trigger the identification
             of an S-wave arrival. Default: 0.60
-        mini_batch_size : int, optional
-            Number of traces processed in a single batch by PhaseNet.
-            This shouldn't have to be tuned. Default: 126
         phase_on_comp : dict, optional
             Dictionary defining which seismic phase is extracted on each component.
             For example, `phase_on_comp['N']` gives the phase that is extracted on
@@ -5543,17 +5514,6 @@ class Stack(Event):
         - If `self.filtered_data` does not exist, `self.pick_PS_phases` is used
         on the stacked traces.
         """
-
-        from torch import no_grad, from_numpy
-
-        if ml_model is None:
-            import seisbench.models as sbm
-
-            ml_model = sbm.PhaseNet.from_pretrained(ml_model_name)
-            ml_model.eval()
-
-        ml_p_index = kwargs.get("ml_P_index", 1)
-        ml_s_index = kwargs.get("ml_S_index", 2)
 
         if kwargs.get("read_waveforms", True):
             # read waveforms in "picking" mode
@@ -5578,19 +5538,10 @@ class Stack(Event):
                 self.sampling_rate = self.sr * upsampling / downsampling
             num_events, num_stations = data_arr.shape[:2]
             num_traces = num_events * num_stations
-            data_arr_n = utils.normalize_batch(
-                data_arr.reshape(num_traces, data_arr.shape[2], data_arr.shape[3])
-            )
-            closest_pow2 = int(np.log2(data_arr_n.shape[-1])) + 1
-            diff = 2**closest_pow2 - data_arr_n.shape[-1]
-            left = diff // 2
-            right = diff // 2 + diff % 2
-            data_arr_n = np.pad(
-                data_arr_n, ((0, 0), (0, 0), (left, right)), mode="reflect"
-            )
-            with no_grad():
-                ml_probas = ml_model(from_numpy(data_arr_n).float())
-                ml_probas = ml_probas.detach().numpy()
+
+            # call the phase picker
+            ml_probas = picker(data_arr)
+
             # find picks and sotre in dictionaries
             picks = {}
             picks["P_picks"] = {}
@@ -5603,13 +5554,13 @@ class Stack(Event):
                 for n in range(num_events):
                     tr_idx = s * num_events + n
                     P_proba, P_pick = utils.trigger_picks(
-                        ml_probas[tr_idx, ml_p_index, left:-right],
+                        ml_probas[tr_idx, 0, :],
                         threshold_P,
                     )
                     picks["P_proba"][sta].append(P_proba)
                     picks["P_picks"][sta].append(P_pick)
                     S_proba, S_pick = utils.trigger_picks(
-                        ml_probas[tr_idx, ml_s_index, left:-right],
+                        ml_probas[tr_idx, 1, :],
                         threshold_S,
                     )
                     picks["S_proba"][sta].append(S_proba)
@@ -5653,6 +5604,7 @@ class Stack(Event):
                 self.sampling_rate = sampling_rate0
         else:
             super(Stack, self).pick_PS_phases(
+                picker,
                 duration,
                 "",
                 threshold_P=threshold_P,
