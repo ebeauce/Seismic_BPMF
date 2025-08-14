@@ -59,12 +59,12 @@ def bandpass_filter(
     filtered_X: (n x m) numpy array,
         The input array X after filtering.
     """
+    try:
+        from scipy.signal import tukey
+    except ImportError:
+        from scipy.signal.windows import tukey
 
-    from scipy.signal import iirfilter, tukey
-
-    # from scipy.signal import lfilter
-    from scipy.signal import zpk2sos, sosfilt
-    from scipy.signal import detrend
+    from scipy.signal import iirfilter, zpk2sos, sosfilt, detrend
 
     # detrend the data
     X = detrend(X, type="constant", axis=-1)
@@ -660,10 +660,10 @@ def SVDWF(
     matrix,
     expl_var=0.4,
     max_singular_values=5,
+    wiener_filter_colsize=None,
     freqmin=cfg.MIN_FREQ_HZ,
     freqmax=cfg.MAX_FREQ_HZ,
-    sampling_rate=cfg.SAMPLING_RATE_HZ,
-    wiener_filter_colsize=None,
+    sampling_rate=None,
 ):
     """
     Implementation of the Singular Value Decomposition Wiener Filter (SVDWF)
@@ -687,8 +687,9 @@ def SVDWF(
         Minimum target frequency, in Hz. Defaults to `BPMF.cfg.MIN_FREQ_HZ`.
     freqmax : float, optional
         Maximum target frequency, in Hz. Defaults to `BPMF.cfg.MAX_FREQ_HZ`.
-    sampling_rate : float, optional
-        Sampling rate of `matrix`. Defaults to `BPMF.cfg.SAMPLING_RATE_HZ`.
+    sampling_rate : float or None, optional
+        Sampling rate of `matrix`. Defaults to None, in which case no filtering
+        is applied..
     wiener_filter_colsize : int, optional
         Size of the wiener filter in the outermost dimension, that is, the
         event axis. Defaults to None, in which case the filter has length `n`.
@@ -750,15 +751,16 @@ def SVDWF(
     # remove nans or infs
     filtered_data[np.isnan(filtered_data)] = 0.0
     filtered_data[np.isinf(filtered_data)] = 0.0
-    # SVD adds noise in the low and the high frequencies
-    # refiltering the SVD-filtered data seems necessary
-    filtered_data = bandpass_filter(
-        filtered_data,
-        filter_order=4,
-        freqmin=freqmin,
-        freqmax=freqmax,
-        f_Nyq=sampling_rate / 2.0,
-    )
+    if sampling_rate is not None:
+        # SVD adds noise in the low and the high frequencies
+        # refiltering the SVD-filtered data seems necessary
+        filtered_data = bandpass_filter(
+            filtered_data,
+            filter_order=4,
+            freqmin=freqmin,
+            freqmax=freqmax,
+            f_Nyq=sampling_rate / 2.0,
+        )
     return filtered_data
 
 
