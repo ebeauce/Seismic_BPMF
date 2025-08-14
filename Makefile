@@ -3,14 +3,12 @@ maindir=BPMF
 libdir=$(maindir)/lib
 
 # define compilers
-NVCC=nvcc
-
 # -------------------------------------------------
 # Unix system
-#CC=gcc
+CC=gcc
 # -------------------------------------------------
 # Apple Silicon chip:
-CC=clang
+#CC=clang
 # -------------------------------------------------
 
 # define commands
@@ -23,15 +21,15 @@ COPTIMFLAGS_CPU=-O3
 
 # -------------------------------------------------
 # Unix system
-#CFLAGS_CPU=-fopenmp -fPIC -ftree-vectorize -march=native -std=c99
-#LDFLAGS_CPU=-shared
+CFLAGS_CPU=-fopenmp -fPIC -ftree-vectorize -march=native -std=c99
+LDFLAGS_CPU=-shared
 # -------------------------------------------------
 
 
 # -------------------------------------------------
 # Apple Silicon chip
-CFLAGS_CPU=-fopenmp=libomp -L$(CONDA_PREFIX)/lib -I$(CONDA_PREFIX)/include -fPIC -ftree-vectorize -march=native -std=c99
-LDFLAGS_CPU=-shared -fuse-ld=lld
+#CFLAGS_CPU=-fopenmp=libomp -L$(CONDA_PREFIX)/lib -I$(CONDA_PREFIX)/include -fPIC -ftree-vectorize -march=native -std=c99
+#LDFLAGS_CPU=-shared -fuse-ld=lld
 # -------------------------------------------------
 
 # build for python
