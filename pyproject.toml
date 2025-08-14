@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "BPMF"
+dynamic = ["version"]
+description = "Package for earthquake detection and location."
+readme = "README.md"
+license = { text = "GPL" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Eric Beaucé", email = "ebeauce@ldeo.columbia.edu" },
+    { name = "William Frank" },
+]
+maintainers = [
+    { name = "Eric Beaucé", email = "ebeauce@ldeo.columbia.edu" },
+    { name = "William Frank" },
+]
+keywords = ["earthquake detection", "backprojection", "matched-filtering"]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+]
+dependencies = [
+    "beampower",
+    "FastMatchedFilter",
+    "h5py",
+    "matplotlib",
+    "numpy",
+    "obspy",
+    "pandas",
+    "scipy",
+    "tqdm"
+]
+
+[tool.setuptools.packages.find]
+include = ["BPMF*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "BPMF.__version__" }
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[project.urls]
+GitHub = "https://github.com/Seismic_BPMF"
+Documentation = "https://https://ebeauce.github.io/Seismic_BPMF"
+Issues = "https://github.com/Seismic_BPMF/issues"
