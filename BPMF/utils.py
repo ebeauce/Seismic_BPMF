@@ -59,12 +59,12 @@ def bandpass_filter(
     filtered_X: (n x m) numpy array,
         The input array X after filtering.
     """
+    try:
+        from scipy.signal import tukey
+    except ImportError:
+        from scipy.signal.windows import tukey
 
-    from scipy.signal import iirfilter, tukey
-
-    # from scipy.signal import lfilter
-    from scipy.signal import zpk2sos, sosfilt
-    from scipy.signal import detrend
+    from scipy.signal import iirfilter, zpk2sos, sosfilt, detrend
 
     # detrend the data
     X = detrend(X, type="constant", axis=-1)
@@ -110,7 +110,7 @@ def lowpass_chebyshev_I(
     zerophase : bool, optional
        If True, the filter is applied in the forward and
        reverse direction to cancel out phase shifting.
-     
+
     Returns
     -------
     X : array-like
@@ -151,13 +151,13 @@ def lowpass_chebyshev_II(
         Sampling rate, in Hz, of `X`.
     order : int, optional
         Order of the filter. Defaults to 3.
-    min_attenuation_dB : float, optional 
+    min_attenuation_dB : float, optional
         The minimum attenuation required in the stop band, in decibels.
         Defaults to 40.
     zerophase : bool, optional
        If True, the filter is applied in the forward and
        reverse direction to cancel out phase shifting.
-     
+
     Returns
     -------
     X : array-like
@@ -302,9 +302,9 @@ def preprocess_stream(
     else:
         return data_preprocessor(stream)
 
+
 def _premerge(stream, verbose=False):
-    """Clean-up stream before calling merge.
-    """
+    """Clean-up stream before calling merge."""
     # first, make a list of all stations in stream
     stations = []
     for tr in stream:
@@ -334,12 +334,16 @@ def _premerge(stream, verbose=False):
             if sampling_rates_counts[unique_sampling_rates.argmax()] >= 3:
                 ref_sampling_rate = unique_sampling_rates.max()
             else:
-                ref_sampling_rate = unique_sampling_rates[sampling_rates_counts.argmax()]
+                ref_sampling_rate = unique_sampling_rates[
+                    sampling_rates_counts.argmax()
+                ]
             for tr in st:
                 if tr.stats.sampling_rate != ref_sampling_rate:
                     if verbose:
-                        print(f"Removing {tr.id} because not desired sampling rate "
-                              f"({tr.stats.sampling_rate} vs {ref_sampling_rate})"  )
+                        print(
+                            f"Removing {tr.id} because not desired sampling rate "
+                            f"({tr.stats.sampling_rate} vs {ref_sampling_rate})"
+                        )
                     stream.remove(tr)
     return stream, stations
 
@@ -413,7 +417,9 @@ def _preprocess_stream(
             # don't include this trace
             if verbose:
                 print(f"Too much gap duration on {trace_id}.")
-                print(f"Duration is: {trace_duration:.2f}s (min is {minimum_length * target_duration:.2f}s)")
+                print(
+                    f"Duration is: {trace_duration:.2f}s (min is {minimum_length * target_duration:.2f}s)"
+                )
             continue
         # split will lose information about start and end times
         # if the start or the end is masked
@@ -434,11 +440,13 @@ def _preprocess_stream(
         for gap in tr.get_gaps():
             gap_duration += gap[6]
         if (target_duration is not None) and (
-            gap_duration > (1. - minimum_length) * target_duration
+            gap_duration > (1.0 - minimum_length) * target_duration
         ):
             if verbose:
                 print(f"Too much gap duration on {trace_id}.")
-                print(f"Gap duration is: {trace_duration:.2f}s (max is {(1. - minimum_length) * target_duration:.2f}s)")
+                print(
+                    f"Gap duration is: {trace_duration:.2f}s (max is {(1. - minimum_length) * target_duration:.2f}s)"
+                )
             continue
         tr.detrend("constant")
         tr.detrend("linear")
@@ -652,10 +660,10 @@ def SVDWF(
     matrix,
     expl_var=0.4,
     max_singular_values=5,
+    wiener_filter_colsize=None,
     freqmin=cfg.MIN_FREQ_HZ,
     freqmax=cfg.MAX_FREQ_HZ,
-    sampling_rate=cfg.SAMPLING_RATE_HZ,
-    wiener_filter_colsize=None,
+    sampling_rate=None,
 ):
     """
     Implementation of the Singular Value Decomposition Wiener Filter (SVDWF)
@@ -679,8 +687,9 @@ def SVDWF(
         Minimum target frequency, in Hz. Defaults to `BPMF.cfg.MIN_FREQ_HZ`.
     freqmax : float, optional
         Maximum target frequency, in Hz. Defaults to `BPMF.cfg.MAX_FREQ_HZ`.
-    sampling_rate : float, optional
-        Sampling rate of `matrix`. Defaults to `BPMF.cfg.SAMPLING_RATE_HZ`.
+    sampling_rate : float or None, optional
+        Sampling rate of `matrix`. Defaults to None, in which case no filtering
+        is applied..
     wiener_filter_colsize : int, optional
         Size of the wiener filter in the outermost dimension, that is, the
         event axis. Defaults to None, in which case the filter has length `n`.
@@ -742,15 +751,16 @@ def SVDWF(
     # remove nans or infs
     filtered_data[np.isnan(filtered_data)] = 0.0
     filtered_data[np.isinf(filtered_data)] = 0.0
-    # SVD adds noise in the low and the high frequencies
-    # refiltering the SVD-filtered data seems necessary
-    filtered_data = bandpass_filter(
-        filtered_data,
-        filter_order=4,
-        freqmin=freqmin,
-        freqmax=freqmax,
-        f_Nyq=sampling_rate / 2.0,
-    )
+    if sampling_rate is not None:
+        # SVD adds noise in the low and the high frequencies
+        # refiltering the SVD-filtered data seems necessary
+        filtered_data = bandpass_filter(
+            filtered_data,
+            filter_order=4,
+            freqmin=freqmin,
+            freqmax=freqmax,
+            f_Nyq=sampling_rate / 2.0,
+        )
     return filtered_data
 
 
@@ -772,9 +782,7 @@ def fetch_detection_waveforms(
     from itertools import groupby
     from operator import itemgetter
 
-    warnings.warn(
-            "Deprecated function! (Old, under construction or experimental)"
-            )
+    warnings.warn("Deprecated function! (Old, under construction or experimental)")
 
     if catalog is None:
         cat = dataset.Catalog(f"multiplets{tid}catalog.h5", db_path_M)
@@ -870,9 +878,7 @@ def fetch_detection_waveforms_refilter(
     # import relocation_utils
     from . import event_extraction
 
-    warnings.warn(
-            "Deprecated function! (Old, under construction or experimental)"
-            )
+    warnings.warn("Deprecated function! (Old, under construction or experimental)")
 
     cat = dataset.Catalog(f"multiplets{tid}catalog.h5", db_path_M)
     cat.read_data()
@@ -1030,9 +1036,7 @@ def SVDWF_multiplets(
         an attribute. See also all the useful metadata in
         the attributes.
     """
-    warnings.warn(
-            "Deprecated function! (Old, under construction or experimental)"
-            )
+    warnings.warn("Deprecated function! (Old, under construction or experimental)")
 
     # -----------------------------------------------------------------------------------------------
     T = dataset.Template("template{:d}".format(tid), db_path_T, db_path=db_path)
@@ -1176,9 +1180,7 @@ def find_template_clusters(
     from scipy.spatial.distance import squareform
     from scipy.cluster import hierarchy
 
-    warnings.warn(
-            "Deprecated function! (Old, under construction or experimental)"
-            )
+    warnings.warn("Deprecated function! (Old, under construction or experimental)")
 
     # first, transform the CC matrix into a condensed matrix
     np.fill_diagonal(TpGroup.intertp_cc.values, 1.0)
@@ -1360,6 +1362,7 @@ def weighted_linear_regression(X, Y, W=None):
 #             Others
 # -------------------------------------------------
 
+
 def cov_mat_intersection(cov_mat, axis1=0, axis2=1):
     """Compute intersection between covariance matrix and plane.
 
@@ -1401,7 +1404,7 @@ def cov_mat_intersection(cov_mat, axis1=0, axis2=1):
     min_dir = v[:, w.argmin()]
     # "azimuth" is angle between `axis2` (`max_dir[1]`) and ellipse's semi-axis
     az_max = np.arctan2(max_dir[0], max_dir[1]) * 180.0 / np.pi
-    az_min = (az_max + 90.) % 360.
+    az_min = (az_max + 90.0) % 360.0
     return max_unc, min_unc, az_max, az_min
 
 
@@ -1699,18 +1702,19 @@ def running_mad(time_series, window, n_mad=10.0, overlap=0.75):
     running_stat = interpolator(full_time)
     return running_stat
 
+
 def spectrogram(
-        x,
-        window_duration_sec,
-        overlap,
-        sampling_rate,
-        detrend=False,
-        window="hann",
-        nfft=None,
-        boundary=None,
-        padded=False,
-        scaling="spectrum"
-        ):
+    x,
+    window_duration_sec,
+    overlap,
+    sampling_rate,
+    detrend=False,
+    window="hann",
+    nfft=None,
+    boundary=None,
+    padded=False,
+    scaling="spectrum",
+):
     """
     Parameters
     ----------
@@ -1758,10 +1762,9 @@ def spectrogram(
     stft_params["padded"] = padded
     stft_params["scaling"] = scaling
 
-    frequency, time, spec = stft(
-            x, sampling_rate, **stft_params
-            )
+    frequency, time, spec = stft(x, sampling_rate, **stft_params)
     return frequency, time, np.abs(spec)
+
 
 def two_point_epicentral_distance(lon_1, lat_1, lon_2, lat_2):
     """Compute the distance between two points.
@@ -1788,6 +1791,7 @@ def two_point_epicentral_distance(lon_1, lat_1, lon_2, lat_2):
     dist, az, baz = calc_vincenty_inverse(lat_1, lon_1, lat_2, lon_2)
     dist /= 1000.0  # from m to km
     return dist
+
 
 def two_point_distance(lon_1, lat_1, depth_1, lon_2, lat_2, depth_2):
     """Compute the distance between two points.
@@ -1830,6 +1834,7 @@ def donefun(french=False):
         msg = "ALL DONE!"
     else:
         from random import random
+
         r = random()
         if r < 0.25:
             msg = "HOP LÀ!"
@@ -1943,6 +1948,7 @@ def read_write_waiting_list(func, path, unit_wait_time=0.2):
                 pathlib.Path(path_lock).unlink()
             continue
 
+
 # =======================================================
 #         routines for automatic picking
 # =======================================================
@@ -1970,8 +1976,8 @@ def normalize_batch(seismogram, normalization_window_sample=3000, overlap=0.50):
     """
     from scipy.interpolate import interp1d
 
-    #shift = normalization_window_sample // 2
-    shift = int((1. - overlap) * normalization_window_sample)
+    # shift = normalization_window_sample // 2
+    shift = int((1.0 - overlap) * normalization_window_sample)
     num_stations, num_channels, num_time_samples = seismogram.shape
 
     # std in sliding windows
@@ -2002,36 +2008,29 @@ def normalize_batch(seismogram, normalization_window_sample=3000, overlap=0.50):
     # normalize data with sliding std and mean
     t_interp = np.arange(num_time_samples)
     std_interp = np.stack(
-            tuple(np.interp(
-                t_interp, time, sld_std, left=sld_std[0], right=sld_std[-1]
-                )
-                for sld_std in sliding_std.reshape(-1, sliding_std.shape[-1])
-                ),
-            axis=0
-            ).reshape(
-                    sliding_std.shape[:-1] + (len(t_interp),)
-                    )
+        tuple(
+            np.interp(t_interp, time, sld_std, left=sld_std[0], right=sld_std[-1])
+            for sld_std in sliding_std.reshape(-1, sliding_std.shape[-1])
+        ),
+        axis=0,
+    ).reshape(sliding_std.shape[:-1] + (len(t_interp),))
     mean_interp = np.stack(
-            tuple(np.interp(
-                t_interp, time, m_std, left=m_std[0], right=m_std[-1]
-                )
-                for m_std in sliding_mean.reshape(-1, sliding_mean.shape[-1])
-                ),
-            axis=0
-            ).reshape(
-                    sliding_mean.shape[:-1] + (len(t_interp),)
-                    )
+        tuple(
+            np.interp(t_interp, time, m_std, left=m_std[0], right=m_std[-1])
+            for m_std in sliding_mean.reshape(-1, sliding_mean.shape[-1])
+        ),
+        axis=0,
+    ).reshape(sliding_mean.shape[:-1] + (len(t_interp),))
 
     seismogram = (seismogram - mean_interp) / std_interp
 
     return seismogram
 
-def find_picks(
-        phase_probability, threshold, **kwargs
-        ):
+
+def find_picks(phase_probability, threshold, **kwargs):
     """Find phase picks from time series of phase probability.
 
-    Phase picks are given by the peaks exceeding `threshold` in 
+    Phase picks are given by the peaks exceeding `threshold` in
     the time series `phase_probability`. The probability neighborhood
     around each peak is used as the pdf of a given pick measurement.
 
@@ -2041,7 +2040,7 @@ def find_picks(
     Parameters
     ----------
     phase_probability : array-like
-        Probability time series of observing the arrival of a 
+        Probability time series of observing the arrival of a
         given seismic phase.
     threshold : float
         Value above which peaks are taken to be candidate phase picks.
@@ -2059,35 +2058,40 @@ def find_picks(
     # so that `properties` has peak width info
     kwargs.setdefault("width", 1)
     peak_indexes, peak_properties = find_peaks(
-            phase_probability, height=threshold, **kwargs
-            )
+        phase_probability, height=threshold, **kwargs
+    )
     peaks_value, peaks_mean, peaks_std = [], [], []
     for i in range(len(peak_indexes)):
         idx1 = int(peak_properties["left_ips"][i])
         idx2 = int(peak_properties["right_ips"][i])
-        samples = np.arange(idx1, idx2+1)
+        samples = np.arange(idx1, idx2 + 1)
         prob = phase_probability[samples]
-        
+
         mean = np.sum(samples * prob) / prob.sum()
-        std = np.sqrt(np.sum((samples - mean)**2) / prob.sum())
-        
+        std = np.sqrt(np.sum((samples - mean) ** 2) / prob.sum())
+
         peaks_mean.append(mean)
         peaks_std.append(std)
         peaks_value.append(phase_probability[peak_indexes[i]])
-        
-    return np.asarray(peaks_value), np.asarray(peaks_mean), np.asarray(peaks_std)
+
+    return (
+        np.atleast_1d(np.asarray(peaks_value)),
+        np.atleast_1d(np.asarray(peaks_mean)),
+        np.atleast_1d(np.asarray(peaks_std)),
+    )
+
 
 def get_picks(
-        picks,
-        buffer_length=int(2. * cfg.SAMPLING_RATE_HZ),
-        prior_knowledge=None,
-        search_win_samp=int(4. * cfg.SAMPLING_RATE_HZ)
-        ):
+    picks,
+    buffer_length=int(2.0 * cfg.SAMPLING_RATE_HZ),
+    prior_knowledge=None,
+    search_win_samp=int(4.0 * cfg.SAMPLING_RATE_HZ),
+):
     """Select a single P- and S-pick on each 3-comp seismogram.
-    
+
     Parameters
     ----------
-    picks : `pandas.DataFrame` 
+    picks : `pandas.DataFrame`
         `pandas.DataFrame` as formatted in `BPMF.dataset.pick_PS_phases`.
     buffer_length: scalar int, optional
         Picks that are before this buffer length, in samples, are discarded.
@@ -2115,7 +2119,7 @@ def get_picks(
             prior_S = prior_knowledge.loc[sta, "S"]
         else:
             prior_P, prior_S = None, None
-        #for n in range(len(picks["P_picks"][st])):
+        # for n in range(len(picks["P_picks"][st])):
         # ----------------
         # remove picks from the buffer length
         for ph in phases:
@@ -2124,70 +2128,64 @@ def get_picks(
                 picks.loc[sta, f"{ph}{col}"] = picks.loc[sta, f"{ph}{col}"][valid_picks]
         search_S_pick = True
         search_P_pick = True
-        if len(picks.loc[sta, "S_picks"]) == 0:
+        # if len(picks.loc[sta, "S_picks"]) == 0:
+        if len(np.atleast_1d(picks.loc[sta, "S_picks"])) == 0:
             # if no valid S pick: fill in with nan
             picks.loc[sta, s_columns] = np.nan
             search_S_pick = False
-        if len(picks.loc[sta, "P_picks"]) == 0:
+        if len(np.atleast_1d(picks.loc[sta, "P_picks"])) == 0:
             # if no valid P pick: fill in with nan
             picks.loc[sta, p_columns] = np.nan
             search_P_pick = False
         if search_S_pick:
             if prior_S is None:
                 # take only the highest probability trigger
-                best_S_trigger = picks.loc[sta, "S_probas"].argmax()
+                best_S_trigger = np.atleast_1d(picks.loc[sta, "S_probas"]).argmax()
             else:
                 # use a priori picks
-                tapered_S_probas = (
-                        picks.loc[sta, "S_probas"]
-                        *
-                        np.exp(
-                            -(picks.loc[sta, "S_picks"] - prior_S)**2/(2.*search_win_samp**2)
-                            )
-                        )
-                best_S_trigger = tapered_S_probas.argmax()
-                ## don't keep if too far from a priori
-                #if abs(picks["S_picks"][st][best_S_trigger] - prior_S) > 4 * search_win_samp:
-                #    best_S_trigger = np.nan
+                tapered_S_probas = picks.loc[sta, "S_probas"] * np.exp(
+                    -((picks.loc[sta, "S_picks"] - prior_S) ** 2)
+                    / (2.0 * search_win_samp**2)
+                )
+                best_S_trigger = np.atleast_1d(tapered_S_probas).argmax()
             if np.isnan(best_S_trigger):
                 picks.loc[sta, s_columns] = np.nan
             else:
                 for col in s_columns:
-                    picks.loc[sta, col] = picks.loc[sta, col][best_S_trigger]
+                    picks.loc[sta, col] = np.atleast_1d(picks.loc[sta, col])[
+                        best_S_trigger
+                    ]
             # update P picks: keep only those that are before the best S pick
             if search_P_pick:
                 valid_P_picks = picks.loc[sta, "P_picks"] < picks.loc[sta, "S_picks"]
                 for col in p_columns:
                     picks.loc[sta, col] = picks.loc[sta, col][valid_P_picks]
-                if len(picks.loc[sta, "P_picks"]) == 0:
+                if len(np.atleast_1d(picks.loc[sta, "P_picks"])) == 0:
                     # if no valid P pick: fill in with nan
                     picks.loc[sta, p_columns] = np.nan
                     search_P_pick = False
         if search_P_pick:
             if prior_P is None:
                 # take only the highest probability trigger
-                best_P_trigger = picks.loc[sta, "P_probas"].argmax()
+                best_P_trigger = np.atleast_1d(picks.loc[sta, "P_probas"]).argmax()
             else:
                 # use a priori picks
-                tapered_P_probas = (
-                        picks.loc[sta, "P_probas"]
-                        *
-                        np.exp(
-                            -(picks.loc[sta, "P_picks"] - prior_P)**2/(2.*search_win_samp**2)
-                            )
-                        )
-                best_P_trigger = tapered_P_probas.argmax()
-                ## don't keep if too far from a priori
-                #if abs(picks["P_picks"][st][best_P_trigger] - prior_P) > 4 * search_win_samp:
-                #    best_P_trigger = np.nan
+                tapered_P_probas = picks.loc[sta, "P_probas"] * np.exp(
+                    -((picks.loc[sta, "P_picks"] - prior_P) ** 2)
+                    / (2.0 * search_win_samp**2)
+                )
+                best_P_trigger = np.atleast_1d(tapered_P_probas).argmax()
             if np.isnan(best_P_trigger):
                 picks.loc[sta, p_columns] = np.nan
             else:
                 for col in p_columns:
-                    picks.loc[sta, col] = picks.loc[sta, col][best_P_trigger]
+                    picks.loc[sta, col] = np.atleast_1d(picks.loc[sta, col])[
+                        best_P_trigger
+                    ]
     for col in picks:
         picks[col] = np.float32(picks[col])
     return picks
+
 
 def _detect_peaks(
     x,
@@ -2200,7 +2198,6 @@ def _detect_peaks(
     show=False,
     ax=None,
 ):
-
     """Detect peaks in data based on their amplitude and other features.
 
     Note: Will be removed in future versions because all these features are
@@ -2342,4 +2339,3 @@ def _detect_peaks(
         _plot_peaks(x, mph, mpd, threshold, edge, valley, ax, ind)
 
     return ind
-

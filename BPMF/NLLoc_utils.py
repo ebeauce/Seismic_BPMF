@@ -99,10 +99,26 @@ def read_NLLoc_outputs(filename, path):
     f = open(os.path.join(path, filename), mode="r")
     # read until relevant line
     for line in f:
-        if line.split()[0] == "GEOGRAPHIC":
+        line_s = line.split()
+        if line_s[0] == "NLLOC":
+            success = line_s[2].strip('"')
+            if success == "LOCATED":
+                success = True
+            else:
+                success = False
+        elif line_s[0] == "GEOGRAPHIC":
             hypocenter_info = line[:-1].split()
+        elif line_s[0] == "QUALITY":
+            tt_rms = float(line_s[8])
+        elif line_s[0] == "STATISTICS":
+            uncertainty_info = line[:-1].split()
+        elif line_s[0] == "STAT_GEOG":
+            hypocenter["exp_latitude"] = float(line_s[2])
+            hypocenter["exp_longitude"] = float(line_s[4])
+            hypocenter["exp_depth"] = float(line_s[6])
             break
 
+    hypocenter["success"] = success
     hypocenter["origin_time"] = "{}-{}-{}T{}:{}:{}".format(
         hypocenter_info[2],
         hypocenter_info[3],
@@ -123,17 +139,7 @@ def read_NLLoc_outputs(filename, path):
     hypocenter["latitude"] = float(hypocenter_info[9])
     hypocenter["longitude"] = float(hypocenter_info[11])
     hypocenter["depth"] = float(hypocenter_info[13])
-    # read until relevant line
-    for line in f:
-        if line.split()[0] == "QUALITY":
-            tt_rms = float(line.split()[8])
-            break
     hypocenter["tt_rms"] = tt_rms
-    # read until relevant line
-    for line in f:
-        if line.split()[0] == "STATISTICS":
-            uncertainty_info = line[:-1].split()
-            break
     # warning! The covariance matrix is expressed
     # in a LEFT HANDED system
     # for a RIGHT HANDED system, we reverse Z-axis
@@ -151,7 +157,7 @@ def read_NLLoc_outputs(filename, path):
     hypocenter["cov_mat"] = cov_mat + cov_mat.T - np.diag(cov_mat.diagonal())
     # read until relevant line
     for line in f:
-        if line.split()[0] == "PHASE":
+        if line[:5] == "PHASE":
             break
     predicted_times = {}
     predicted_times["P_residuals_sec"] = []
