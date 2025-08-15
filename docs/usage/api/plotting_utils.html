@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BPMF.ploting_utils &mdash; BPMF 2.0.0beta2 documentation</title>
+  <title>BPMF.plotting_utils &mdash; BPMF 2.0.0beta2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
@@ -53,7 +53,16 @@
 <li class="toctree-l3"><a class="reference internal" href="dataset.html">BPMF.dataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="data_reader_examples.html">BPMF.data_reader_examples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="NLLoc_utils.html">BPMF.NLLoc_utils</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">BPMF.ploting_utils</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">BPMF.plotting_utils</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.plotting_utils.add_scale_bar"><code class="docutils literal notranslate"><span class="pre">add_scale_bar()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.plotting_utils.initialize_map"><code class="docutils literal notranslate"><span class="pre">initialize_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.plotting_utils.plot_catalog"><code class="docutils literal notranslate"><span class="pre">plot_catalog()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.plotting_utils.plot_detection_matrix"><code class="docutils literal notranslate"><span class="pre">plot_detection_matrix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.plotting_utils.plot_template"><code class="docutils literal notranslate"><span class="pre">plot_template()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.plotting_utils.uncertainty_ellipse"><code class="docutils literal notranslate"><span class="pre">uncertainty_ellipse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.plotting_utils.vertical_uncertainty_ellipse"><code class="docutils literal notranslate"><span class="pre">vertical_uncertainty_ellipse()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="similarity_search.html">BPMF.similarity_search</a></li>
 <li class="toctree-l3"><a class="reference internal" href="spectrum.html">BPMF.spectrum</a></li>
 <li class="toctree-l3"><a class="reference internal" href="template_search.html">BPMF.template_search</a></li>
@@ -82,7 +91,7 @@
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../usage.html">Usage</a></li>
           <li class="breadcrumb-item"><a href="../api.html">API</a></li>
-      <li class="breadcrumb-item active">BPMF.ploting_utils</li>
+      <li class="breadcrumb-item active">BPMF.plotting_utils</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/usage/api/plotting_utils.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -92,8 +101,102 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="bpmf-ploting-utils">
-<h1>BPMF.ploting_utils<a class="headerlink" href="#bpmf-ploting-utils" title="Link to this heading"></a></h1>
+  <section id="bpmf-plotting-utils">
+<h1>BPMF.plotting_utils<a class="headerlink" href="#bpmf-plotting-utils" title="Link to this heading"></a></h1>
+<dl class="py function" id="module-BPMF.plotting_utils">
+<dt class="sig sig-object py" id="BPMF.plotting_utils.add_scale_bar">
+<span class="sig-prename descclassname"><span class="pre">BPMF.plotting_utils.</span></span><span class="sig-name descname"><span class="pre">add_scale_bar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_crs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'longitudinal'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/plotting_utils.html#add_scale_bar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.plotting_utils.add_scale_bar" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>GeoAxes instance</em>) – The axis on which we want to add a scale bar.</p></li>
+<li><p><strong>x_start</strong> (<em>float</em>) – The x coordinate of the left end of the scale bar,
+given in the axis coordinate system, i.e. from 0 to 1.</p></li>
+<li><p><strong>y_start</strong> (<em>float</em>) – The y coordinate of the left end of the scale bar,
+given in the axis coordinate system, i.e. from 0 to 1.</p></li>
+<li><p><strong>distance</strong> (<em>float</em>) – The distance covered by the scale bar, in km.</p></li>
+<li><p><strong>source_crs</strong> (<em>cartopy.crs</em>) – The coordinate system in which the data are written.</p></li>
+<li><p><strong>orientation</strong> (<em>string</em><em>, </em><em>default to 'longitudinal'</em>) – Either ‘longitudinal’ or ‘latitudinal’. Determine the orientation
+of the scale bar.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.plotting_utils.initialize_map">
+<span class="sig-prename descclassname"><span class="pre">BPMF.plotting_utils.</span></span><span class="sig-name descname"><span class="pre">initialize_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_longitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_latitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seismic_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markersize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topography_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_topo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bottom_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/plotting_utils.html#initialize_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.plotting_utils.initialize_map" title="Link to this definition"></a></dt>
+<dd><p>Initialize map instance with Cartopy.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.plotting_utils.plot_catalog">
+<span class="sig-prename descclassname"><span class="pre">BPMF.plotting_utils.</span></span><span class="sig-name descname"><span class="pre">plot_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_M</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catalog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_multiples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scat_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/plotting_utils.html#plot_catalog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.plotting_utils.plot_catalog" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.plotting_utils.plot_detection_matrix">
+<span class="sig-prename descclassname"><span class="pre">BPMF.plotting_utils.</span></span><span class="sig-name descname"><span class="pre">plot_detection_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetimes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/plotting_utils.html#plot_detection_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.plotting_utils.plot_detection_matrix" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.plotting_utils.plot_template">
+<span class="sig-prename descclassname"><span class="pre">BPMF.plotting_utils.</span></span><span class="sig-name descname"><span class="pre">plot_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'template_db_2/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mv_view</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/plotting_utils.html#plot_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.plotting_utils.plot_template" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.plotting_utils.uncertainty_ellipse">
+<span class="sig-prename descclassname"><span class="pre">BPMF.plotting_utils.</span></span><span class="sig-name descname"><span class="pre">uncertainty_ellipse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hmax_uncertainty_km</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmin_uncertainty_km</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmax_azimuth_deg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/plotting_utils.html#uncertainty_ellipse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.plotting_utils.uncertainty_ellipse" title="Link to this definition"></a></dt>
+<dd><p>Compute a set of longitude and latitude points that describe the uncertainty
+ellipse in the horizontal plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hmax_uncertainty_km</strong> (<em>float</em>) – The length of the major axis of the uncertainty ellipse in kilometers.</p></li>
+<li><p><strong>hmin_uncertainty_km</strong> (<em>float</em>) – The length of the minor axis of the uncertainty ellipse in kilometers.</p></li>
+<li><p><strong>hmax_azimuth_deg</strong> (<em>float</em>) – The azimuth angle of the major axis of the uncertainty ellipse in degrees.</p></li>
+<li><p><strong>longitude_center</strong> (<em>float</em>) – The longitude coordinate of the center point of the ellipse.</p></li>
+<li><p><strong>latitude_center</strong> (<em>float</em>) – The latitude coordinate of the center point of the ellipse.</p></li>
+<li><p><strong>num_points</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of points used to describe the ellipse, default is 100.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>longitude_ellipse</strong> (<em>numpy.ndarray</em>) – The longitude coordinates of the points that make up the uncertainty ellipse.</p></li>
+<li><p><strong>latitude_ellipse</strong> (<em>numpy.ndarray</em>) – The latitude coordinates of the points that make up the uncertainty ellipse.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.plotting_utils.vertical_uncertainty_ellipse">
+<span class="sig-prename descclassname"><span class="pre">BPMF.plotting_utils.</span></span><span class="sig-name descname"><span class="pre">vertical_uncertainty_ellipse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cov_mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizontal_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'longitude'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/plotting_utils.html#vertical_uncertainty_ellipse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.plotting_utils.vertical_uncertainty_ellipse" title="Link to this definition"></a></dt>
+<dd><p>Compute a set of longitude and latitude points that describe the uncertainty
+ellipse in the vertical plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cov_mat</strong> (<em>numpy.ndarray</em>) – The (3x3) covariance matrix returned by Event.relocate(method=’NLLoc’).</p></li>
+<li><p><strong>longitude_center</strong> (<em>float</em>) – The longitude coordinate of the center point of the ellipse.</p></li>
+<li><p><strong>latitude_center</strong> (<em>float</em>) – The latitude coordinate of the center point of the ellipse.</p></li>
+<li><p><strong>depth_center</strong> (<em>float</em>) – The depth, in km, of the center point of the ellipse.</p></li>
+<li><p><strong>horizontal_direction</strong> (<em>str</em><em>, </em><em>optional</em>) – Either ‘longitude’ or ‘latitude’. Define the x-coordinate of the plane.</p></li>
+<li><p><strong>num_points</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of points used to describe the ellipse, default is 100.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>longitude_ellipse</strong> (<em>numpy.ndarray</em>) – The longitude coordinates of the points that make up the uncertainty ellipse.</p></li>
+<li><p><strong>latitude_ellipse</strong> (<em>numpy.ndarray</em>) – The latitude coordinates of the points that make up the uncertainty ellipse.</p></li>
+<li><p><strong>depth_ellipse</strong> (<em>numpy.ndarray</em>) – The depth, in km, of the points that make up the uncertainty ellipse.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 

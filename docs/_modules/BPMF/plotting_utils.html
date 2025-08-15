@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BPMF.plotting_utils &mdash; BPMF 2.0.0beta2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -74,21 +74,21 @@
            <div itemprop="articleBody">
              
   <h1>Source code for BPMF.plotting_utils</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">cfg</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">dataset</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">cfg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">Normalize</span>
-<span class="kn">from</span> <span class="nn">matplotlib.cm</span> <span class="kn">import</span> <span class="n">ScalarMappable</span>
-<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">mcolors</span>
-<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="kn">import</span> <span class="n">Normalize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.cm</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScalarMappable</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mcolors</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mpl_toolkits.axes_grid1</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_axes_locatable</span>
 
-<span class="kn">from</span> <span class="nn">obspy.core</span> <span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">udt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">obspy.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">udt</span>
 
 <span class="c1"># -------------------------------------------------------</span>
 <span class="c1">#       Many functions will disappear soon, replaced</span>
@@ -98,7 +98,7 @@
 
 <div class="viewcode-block" id="plot_template">
 <a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.plot_template">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_template</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_template</span><span class="p">(</span>
     <span class="n">idx</span><span class="p">,</span>
     <span class="n">db_path_T</span><span class="o">=</span><span class="s2">&quot;template_db_2/&quot;</span><span class="p">,</span>
     <span class="n">db_path</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">INPUT_PATH</span><span class="p">,</span>
@@ -204,7 +204,7 @@
 
 <div class="viewcode-block" id="plot_detection_matrix">
 <a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.plot_detection_matrix">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_detection_matrix</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_detection_matrix</span><span class="p">(</span>
     <span class="n">X</span><span class="p">,</span> <span class="n">datetimes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stack</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
 
@@ -260,7 +260,7 @@
 
 <div class="viewcode-block" id="plot_catalog">
 <a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.plot_catalog">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_catalog</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_catalog</span><span class="p">(</span>
     <span class="n">tids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">db_path_T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">db_path_M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -274,7 +274,7 @@
 
     <span class="k">if</span> <span class="n">cmap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">colorcet</span> <span class="k">as</span> <span class="nn">cc</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">colorcet</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cc</span>
 
             <span class="n">cmap</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">bjy</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -344,7 +344,7 @@
 
 <div class="viewcode-block" id="initialize_map">
 <a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.initialize_map">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_map</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_map</span><span class="p">(</span>
     <span class="n">map_longitudes</span><span class="p">,</span>
     <span class="n">map_latitudes</span><span class="p">,</span>
     <span class="n">map_axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -361,7 +361,7 @@
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize map instance with Cartopy.&quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">cartopy</span> <span class="k">as</span> <span class="nn">ctp</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">cartopy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ctp</span>
 
     <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;topo_alpha&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;topo_alpha&quot;</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">)</span>
     <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;downsample_faults&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;downsample_faults&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
@@ -399,7 +399,7 @@
     <span class="k">if</span> <span class="n">topography_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># -----------------------</span>
         <span class="c1"># get topography</span>
-        <span class="kn">import</span> <span class="nn">netCDF4</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">netCDF4</span>
 
         <span class="k">with</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_topo</span><span class="p">,</span> <span class="n">topography_file</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">if</span> <span class="s2">&quot;z&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
@@ -551,7 +551,7 @@
 
 <div class="viewcode-block" id="add_scale_bar">
 <a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.add_scale_bar">[docs]</a>
-<span class="k">def</span> <span class="nf">add_scale_bar</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_scale_bar</span><span class="p">(</span>
     <span class="n">ax</span><span class="p">,</span> <span class="n">x_start</span><span class="p">,</span> <span class="n">y_start</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">source_crs</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;longitudinal&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -573,8 +573,8 @@
 <span class="sd">        Either &#39;longitudinal&#39; or &#39;latitudinal&#39;. Determine the orientation</span>
 <span class="sd">        of the scale bar.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">cartopy.geodesic</span> <span class="kn">import</span> <span class="n">Geodesic</span>
-    <span class="kn">from</span> <span class="nn">cartopy.crs</span> <span class="kn">import</span> <span class="n">PlateCarree</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">cartopy.geodesic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geodesic</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">cartopy.crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">PlateCarree</span>
 
     <span class="n">G</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="p">()</span>
 
@@ -627,7 +627,7 @@
 
 <div class="viewcode-block" id="uncertainty_ellipse">
 <a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.uncertainty_ellipse">[docs]</a>
-<span class="k">def</span> <span class="nf">uncertainty_ellipse</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">uncertainty_ellipse</span><span class="p">(</span>
         <span class="n">hmax_uncertainty_km</span><span class="p">,</span>
         <span class="n">hmin_uncertainty_km</span><span class="p">,</span>
         <span class="n">hmax_azimuth_deg</span><span class="p">,</span>
@@ -661,7 +661,7 @@
 <span class="sd">    latitude_ellipse : numpy.ndarray</span>
 <span class="sd">        The latitude coordinates of the points that make up the uncertainty ellipse.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">cartopy.geodesic</span> <span class="kn">import</span> <span class="n">Geodesic</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">cartopy.geodesic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geodesic</span>
 
     <span class="n">azimuths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">360.</span><span class="p">,</span> <span class="n">num_points</span><span class="p">)</span>
     <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">azimuths</span> <span class="o">-</span> <span class="n">hmax_azimuth_deg</span><span class="p">))</span>
@@ -678,7 +678,7 @@
 
 <div class="viewcode-block" id="vertical_uncertainty_ellipse">
 <a class="viewcode-back" href="../../usage/api/plotting_utils.html#BPMF.plotting_utils.vertical_uncertainty_ellipse">[docs]</a>
-<span class="k">def</span> <span class="nf">vertical_uncertainty_ellipse</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">vertical_uncertainty_ellipse</span><span class="p">(</span>
         <span class="n">cov_mat</span><span class="p">,</span> <span class="n">longitude_center</span><span class="p">,</span> <span class="n">latitude_center</span><span class="p">,</span> <span class="n">depth_center</span><span class="p">,</span>
         <span class="n">horizontal_direction</span><span class="o">=</span><span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="n">num_points</span><span class="o">=</span><span class="mi">100</span>
         <span class="p">):</span>
@@ -711,7 +711,7 @@
 <span class="sd">        The depth, in km, of the points that make up the uncertainty ellipse.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">from</span> <span class="nn">cartopy.geodesic</span> <span class="kn">import</span> <span class="n">Geodesic</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">cartopy.geodesic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geodesic</span>
 
     <span class="c1"># ray shooting with Geodesic</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="p">()</span>

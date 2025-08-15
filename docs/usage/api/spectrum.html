@@ -53,9 +53,19 @@
 <li class="toctree-l3"><a class="reference internal" href="dataset.html">BPMF.dataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="data_reader_examples.html">BPMF.data_reader_examples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="NLLoc_utils.html">BPMF.NLLoc_utils</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plotting_utils.html">BPMF.ploting_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plotting_utils.html">BPMF.plotting_utils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="similarity_search.html">BPMF.similarity_search</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">BPMF.spectrum</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">BPMF.spectrum</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.spectrum.Spectrum"><code class="docutils literal notranslate"><span class="pre">Spectrum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.spectrum.boatwright"><code class="docutils literal notranslate"><span class="pre">boatwright()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.spectrum.brune"><code class="docutils literal notranslate"><span class="pre">brune()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.spectrum.compute_moment_magnitude"><code class="docutils literal notranslate"><span class="pre">compute_moment_magnitude()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.spectrum.fc_circular_crack"><code class="docutils literal notranslate"><span class="pre">fc_circular_crack()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.spectrum.magnitude_to_moment"><code class="docutils literal notranslate"><span class="pre">magnitude_to_moment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.spectrum.moment_to_magnitude"><code class="docutils literal notranslate"><span class="pre">moment_to_magnitude()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.spectrum.stress_drop_circular_crack"><code class="docutils literal notranslate"><span class="pre">stress_drop_circular_crack()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="template_search.html">BPMF.template_search</a></li>
 <li class="toctree-l3"><a class="reference internal" href="utils.html">BPMF.utils</a></li>
 </ul>
@@ -92,8 +102,488 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="bpmf-spectrum">
-<h1>BPMF.spectrum<a class="headerlink" href="#bpmf-spectrum" title="Link to this heading"></a></h1>
+  <section id="module-BPMF.spectrum">
+<span id="bpmf-spectrum"></span><h1>BPMF.spectrum<a class="headerlink" href="#module-BPMF.spectrum" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BPMF.spectrum.</span></span><span class="sig-name descname"><span class="pre">Spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency_bands</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for handling spectral data and calculations.$a</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.compute_correction_factor">
+<span class="sig-name descname"><span class="pre">compute_correction_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_receiver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp_receiver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vs_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vs_receiver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radiation_S</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.float64(0.6324555320336759)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radiation_P</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.float64(0.5163977794943222)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.compute_correction_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.compute_correction_factor" title="Link to this definition"></a></dt>
+<dd><p>Compute the correction factor and attenuation factor for a seismic event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rho_source</strong> (<em>float</em>) – Density of the source medium, in kg/m3.</p></li>
+<li><p><strong>rho_receiver</strong> (<em>float</em>) – Density of the receiver medium, in kg/m3.</p></li>
+<li><p><strong>vp_source</strong> (<em>float</em>) – P-wave velocity of the source medium, in m/s.</p></li>
+<li><p><strong>vp_receiver</strong> (<em>float</em>) – P-wave velocity of the receiver medium, in m/s.</p></li>
+<li><p><strong>vs_source</strong> (<em>float</em>) – S-wave velocity of the source medium, in m/s.</p></li>
+<li><p><strong>vs_receiver</strong> (<em>float</em>) – S-wave velocity of the receiver medium, in m/s.</p></li>
+<li><p><strong>radiation_S</strong> (<em>float</em><em>, </em><em>optional</em>) – Radiation coefficient for S-wave. Default is sqrt(2/5).</p></li>
+<li><p><strong>radiation_P</strong> (<em>float</em><em>, </em><em>optional</em>) – Radiation coefficient for P-wave. Default is sqrt(4/15).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The correction factor and attenuation factor are stored in the
+object’s attributes <cite>correction_factor</cite> and <cite>attenuation_factor</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method requires the object to have an attached <cite>BPMF.dataset.Event</cite>
+instance and for the instance to have called the <cite>set_source_receiver_dist(network)</cite> method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.compute_multi_band_spectrum">
+<span class="sig-name descname"><span class="pre">compute_multi_band_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traces</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_seconds</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.compute_multi_band_spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.compute_multi_band_spectrum" title="Link to this definition"></a></dt>
+<dd><p>Compute spectrum from the maximum amplitude in multiple 1-octave frequency bands.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>traces</strong> (<em>list</em>) – List of seismic traces.</p></li>
+<li><p><strong>phase</strong> (<em>str</em>) – Phase of the seismic event. Should be ‘noise’, ‘p’, or ‘s’.</p></li>
+<li><p><strong>buffer_seconds</strong> (<em>float</em>) – Buffer duration in seconds to remove from the beginning and end of the trace.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments for filtering.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The computed spectrum is stored in the object’s attribute <cite>{phase}_spectrum</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The attribute <cite>frequency_bands</cite> is required for this method.</p></li>
+<li><p>The spectrum is computed by finding the maximum amplitude in each 1-octave frequency band.</p></li>
+<li><p>The resulting spectrum and frequency values are stored in the <cite>spectrum</cite> dictionary.</p></li>
+<li><p>The relative distance error percentage is calculated and stored for each trace.</p></li>
+<li><p>The attribute <cite>{phase.lower()}_spectrum</cite> is updated with the computed spectrum.</p></li>
+<li><p>If the attribute <cite>phases</cite> exists, the phase is appended to the list. Otherwise, a new list is created.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.compute_network_average_spectrum">
+<span class="sig-name descname"><span class="pre">compute_network_average_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snr_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_propagation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average_log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_num_valid_channels_per_freq_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_relative_distance_err_pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.compute_network_average_spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.compute_network_average_spectrum" title="Link to this definition"></a></dt>
+<dd><p>Compute the network average spectrum for a given phase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phase</strong> (<em>str</em>) – Phase of the seismic event. Should be either ‘p’ or ‘s’.</p></li>
+<li><p><strong>snr_threshold</strong> (<em>float</em>) – Signal-to-noise ratio threshold for valid channels.</p></li>
+<li><p><strong>correct_propagation</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating whether to correct for propagation effects. Default is True.</p></li>
+<li><p><strong>average_log</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating whether to average the logarithm of the spectra. Default is True.</p></li>
+<li><p><strong>min_num_valid_channels_per_freq_bin</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum number of valid channels required per frequency bin. Default is 0.</p></li>
+<li><p><strong>max_relative_distance_err_pct</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum relative distance error percentage for a valid channel. Default is 25.0.</p></li>
+<li><p><strong>verbose</strong> (<em>int</em><em>, </em><em>optional</em>) – Verbosity level. Set to 0 for no output. Default is 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The average spectrum and related information are stored in the object’s attributes.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method requires the object to have already computed the spectrum for the specified phase
+and to have set the target frequencies using the <cite>set_target_frequencies</cite> method.
+If <cite>correct_propagation</cite> is set to True, the method also requires the object to have computed
+the correction factor using the <cite>compute_correction_factor</cite> method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.compute_signal_to_noise_ratio">
+<span class="sig-name descname"><span class="pre">compute_signal_to_noise_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.compute_signal_to_noise_ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.compute_signal_to_noise_ratio" title="Link to this definition"></a></dt>
+<dd><p>Compute the signal-to-noise ratio (SNR) for the specified phase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>phase</strong> (<em>str</em>) – Phase of the seismic event. Should be ‘p’ or ‘s’.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The computed SNR values are stored in the object’s attribute <cite>snr_{phase}_spectrum</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – <ul class="simple">
+<li><p>If <cite>phase</cite> is not ‘p’ or ‘s’.
+    - If the {phase} spectrum has not been computed.
+    - If the noise spectrum has not been computed.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The SNR is calculated as the modulus of the signal spectrum divided by the modulus of the noise spectrum.</p></li>
+<li><p>The SNR values and corresponding frequencies are stored in the <cite>snr</cite> dictionary.</p></li>
+<li><p>The attribute <cite>snr_{phase}_spectrum</cite> is updated with the computed SNR values.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.compute_spectrum">
+<span class="sig-name descname"><span class="pre">compute_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traces</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">taper_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.compute_spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.compute_spectrum" title="Link to this definition"></a></dt>
+<dd><p>Compute spectrum using the Fast Fourier Transform (FFT) on the input traces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>traces</strong> (<em>list</em>) – List of seismic traces.</p></li>
+<li><p><strong>phase</strong> (<em>str</em>) – Phase of the seismic event. Should be ‘noise’, ‘p’, or ‘s’.</p></li>
+<li><p><strong>taper</strong> (<em>callable</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Tapering function to apply to the traces before computing the spectrum. Default is None.</p></li>
+<li><p><strong>**taper_kwargs</strong> – Additional keyword arguments for the tapering function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The computed spectrum is stored in the object’s attribute <cite>{phase}_spectrum</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The spectrum is computed using the FFT on the input traces.</p></li>
+<li><p>The computed spectrum and frequency values are stored in the <cite>spectrum</cite> dictionary.</p></li>
+<li><p>The relative distance error percentage is calculated and stored for each trace.</p></li>
+<li><p>The attribute <cite>{phase.lower()}_spectrum</cite> is updated with the computed spectrum.</p></li>
+<li><p>If the attribute <cite>phases</cite> exists, the phase is appended to the list. Otherwise, a new list is created.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.differentiate">
+<span class="sig-name descname"><span class="pre">differentiate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.differentiate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.differentiate" title="Link to this definition"></a></dt>
+<dd><p>Apply differentiation to the spectrum of the specified phase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phase</strong> (<em>str</em>) – Phase of the seismic event. Should be ‘p’ or ‘s’.</p></li>
+<li><p><strong>average</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating whether to differentiate the average spectrum (True) or individual spectra (False).
+Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The spectrum is modified in-place by multiplying it with the corresponding frequency values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – <ul class="simple">
+<li><p>If <cite>average</cite> is True and the average {phase} spectrum has not been computed.
+    - If <cite>average</cite> is False and the {phase} spectrum has not been computed.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.fit_average_spectrum">
+<span class="sig-name descname"><span class="pre">fit_average_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'brune'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_fraction_valid_points_below_fc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_fraction_valid_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weighted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.fit_average_spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.fit_average_spectrum" title="Link to this definition"></a></dt>
+<dd><p>Fit the average displacement spectrum with a specified model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phase</strong> (<em>str</em>) – Phase of the seismic event. Should be ‘p’ or ‘s’.</p></li>
+<li><p><strong>model</strong> (<em>str</em><em>, </em><em>optional</em>) – Model to use for fitting the spectrum. Default is ‘brune’.</p></li>
+<li><p><strong>log</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating whether to fit the logarithm of the spectrum. Default is True.</p></li>
+<li><p><strong>min_fraction_valid_points_below_fc</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum fraction of valid points required below the corner frequency. Default is 0.10.</p></li>
+<li><p><strong>min_fraction_valid_points</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum fraction of valid points required overall. Default is 0.50.</p></li>
+<li><p><strong>weighted</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating whether to apply weighted fitting using sigmoid weights. Default is False.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments to be passed to the curve fitting function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The fitting results are stored as attributes of the object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – If the average {phase} spectrum has not been computed.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>If the spectrum is below the SNR threshold everywhere, the fitting cannot be performed.</p></li>
+<li><p>If there are not enough valid points or valid points below the corner frequency,
+the fitting is considered unsuccessful.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.integrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.integrate" title="Link to this definition"></a></dt>
+<dd><p>Integrate the spectrum for a specific phase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phase</strong> (<em>str</em>) – Phase name. Should be ‘p’ or ‘s’.</p></li>
+<li><p><strong>average</strong> (<em>bool</em><em>, </em><em>optional</em>) – Specifies whether to integrate the average spectrum (if True) or individual spectra (if False).
+Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The spectrum is integrated in-place.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – If the specified phase spectrum has not been computed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.plot_average_spectrum">
+<span class="sig-name descname"><span class="pre">plot_average_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spectrum'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figtitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'noise':</span> <span class="pre">'dimgrey',</span> <span class="pre">'p':</span> <span class="pre">'C3',</span> <span class="pre">'s':</span> <span class="pre">'black'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linestyle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'noise':</span> <span class="pre">'--',</span> <span class="pre">'p':</span> <span class="pre">'-',</span> <span class="pre">'s':</span> <span class="pre">'-'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_num_valid_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.plot_average_spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.plot_average_spectrum" title="Link to this definition"></a></dt>
+<dd><p>Plot the average spectrum for a given phase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phase</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The phase(s) for which to plot the average spectrum.</p></li>
+<li><p><strong>figname</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the figure. Default is “spectrum”.</p></li>
+<li><p><strong>figtitle</strong> (<em>str</em><em>, </em><em>optional</em>) – The title of the figure. Default is an empty string.</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>, </em><em>optional</em>) – The size of the figure in inches. Default is (10, 10).</p></li>
+<li><p><strong>colors</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary specifying the colors for different phases.
+Default is {“noise”: “dimgrey”, “s”: “black”, “p”: “C3”}.</p></li>
+<li><p><strong>linestyle</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary specifying the line styles for different phases.
+Default is {“noise”: “–”, “s”: “-”, “p”: “-“}.</p></li>
+<li><p><strong>plot_fit</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to plot the fitted model spectrum. Default is False.</p></li>
+<li><p><strong>plot_std</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to plot the standard deviation range of the average spectrum. Default is False.</p></li>
+<li><p><strong>plot_num_valid_channels</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to plot the number of channels above the signal-to-noise ratio (SNR) threshold. Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated figure.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.figure.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.plot_spectrum">
+<span class="sig-name descname"><span class="pre">plot_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spectrum'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_propagation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_snr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'noise':</span> <span class="pre">'dimgrey',</span> <span class="pre">'p':</span> <span class="pre">'C3',</span> <span class="pre">'s':</span> <span class="pre">'black'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linestyle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'noise':</span> <span class="pre">'--',</span> <span class="pre">'p':</span> <span class="pre">'-',</span> <span class="pre">'s':</span> <span class="pre">'-'}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.plot_spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.plot_spectrum" title="Link to this definition"></a></dt>
+<dd><p>Plot the spectrum for the specified phase(s) and trace(s).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phase</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The phase(s) for which to plot the spectrum.</p></li>
+<li><p><strong>station</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The station code. If None, all stations will be plotted. Default is None.</p></li>
+<li><p><strong>component</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The component code. If None, all components will be plotted. Default is None.</p></li>
+<li><p><strong>figname</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the figure. Default is “spectrum”.</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>, </em><em>optional</em>) – The size of the figure in inches. Default is (10, 10).</p></li>
+<li><p><strong>correct_propagation</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to correct the spectrum for propagation effects. Default is False.</p></li>
+<li><p><strong>plot_snr</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to plot the signal-to-noise ratio (SNR) spectrum if available. Default is False.</p></li>
+<li><p><strong>colors</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary specifying the colors for different phases. Default is {“noise”: “dimgrey”, “s”: “black”, “p”: “C3”}.</p></li>
+<li><p><strong>linestyle</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary specifying the line styles for different phases. Default is {“noise”: “–”, “s”: “-”, “p”: “-“}.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated figure.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.figure.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.resample">
+<span class="sig-name descname"><span class="pre">resample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.resample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.resample" title="Link to this definition"></a></dt>
+<dd><p>Resample the spectrum to new frequencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_frequencies</strong> (<em>array-like</em>) – New frequency values to resample the spectrum to.</p></li>
+<li><p><strong>phase</strong> (<em>str</em><em> or </em><em>list</em>) – Phase(s) of the seismic event to resample. Can be a single phase or a list of phases.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The spectrum is resampled and updated in-place.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.set_Q_model">
+<span class="sig-name descname"><span class="pre">set_Q_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.set_Q_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.set_Q_model" title="Link to this definition"></a></dt>
+<dd><p>Set the attenuation Q model for P and S phases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Q</strong> (<em>array-like</em>) – Array of attenuation Q values.</p></li>
+<li><p><strong>frequencies</strong> (<em>array-like</em>) – Array of corresponding frequencies. These are used to later keep
+track of which frequencies were used for the Q model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Q model is stored in the <cite>Q0</cite> attribute. The frequencies are
+stored in the <cite>Q0_frequencies</cite> attribute. These are later used to
+computed the Q-model and attenuation factor at arbitrary frequencies.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.set_frequency_bands">
+<span class="sig-name descname"><span class="pre">set_frequency_bands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency_bands</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.set_frequency_bands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.set_frequency_bands" title="Link to this definition"></a></dt>
+<dd><p>Set the frequency bands for spectrum analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>frequency_bands</strong> (<em>dict</em>) – Dictionary specifying the frequency bands.
+The keys are the names of the bands, and the values are tuples of the form (freqmin, freqmax).
+freqmin and freqmax represent the minimum and maximum frequencies of each band, respectively.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The frequency bands are set and stored as an attribute in the object.
+The center frequencies of each band are also calculated and stored in the <cite>frequencies</cite> attribute.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.set_target_frequencies">
+<span class="sig-name descname"><span class="pre">set_target_frequencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.set_target_frequencies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.set_target_frequencies" title="Link to this definition"></a></dt>
+<dd><p>Set the target frequencies for spectrum analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>freq_min</strong> (<em>float</em>) – Minimum frequency.</p></li>
+<li><p><strong>freq_max</strong> (<em>float</em>) – Maximum frequency.</p></li>
+<li><p><strong>num_points</strong> (<em>int</em>) – Number of target frequencies to generate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The target frequencies are set and stored as an attribute in the object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.update_Q_model">
+<span class="sig-name descname"><span class="pre">update_Q_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.update_Q_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.update_Q_model" title="Link to this definition"></a></dt>
+<dd><p>Interpolate the Q-model at the current <cite>self.frequencies</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.spectrum.Spectrum.update_attenuation_factor">
+<span class="sig-name descname"><span class="pre">update_attenuation_factor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#Spectrum.update_attenuation_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.Spectrum.update_attenuation_factor" title="Link to this definition"></a></dt>
+<dd><p>Compute attenuation factor at the current <cite>self.frequencies</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.spectrum.boatwright">
+<span class="sig-prename descclassname"><span class="pre">BPMF.spectrum.</span></span><span class="sig-name descname"><span class="pre">boatwright</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#boatwright"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.boatwright" title="Link to this definition"></a></dt>
+<dd><p>Boatwright model.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.spectrum.brune">
+<span class="sig-prename descclassname"><span class="pre">BPMF.spectrum.</span></span><span class="sig-name descname"><span class="pre">brune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#brune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.brune" title="Link to this definition"></a></dt>
+<dd><p>Brune model.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.spectrum.compute_moment_magnitude">
+<span class="sig-prename descclassname"><span class="pre">BPMF.spectrum.</span></span><span class="sig-name descname"><span class="pre">compute_moment_magnitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mag_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_above_Mw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_above_random</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_figures</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['p',</span> <span class="pre">'s']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(8,</span> <span class="pre">8)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#compute_moment_magnitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.compute_moment_magnitude" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.spectrum.fc_circular_crack">
+<span class="sig-prename descclassname"><span class="pre">BPMF.spectrum.</span></span><span class="sig-name descname"><span class="pre">fc_circular_crack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stress_drop_Pa</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'p'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vs_m_per_s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3500.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vr_vs_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#fc_circular_crack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.fc_circular_crack" title="Link to this definition"></a></dt>
+<dd><p>Compute the corner frequency assuming a circular crack model (Eshelby).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Mw</strong> (<em>float</em>) – Moment magnitude of the earthquake.</p></li>
+<li><p><strong>stress_drop_Pa</strong> (<em>float</em><em>, </em><em>optional</em>) – Stress drop in Pascals. Default is 1.0e6.</p></li>
+<li><p><strong>phase</strong> (<em>str</em><em>, </em><em>optional</em>) – Seismic phase. Valid values are ‘p’ for P-wave and ‘s’ for S-wave.
+Default is ‘p’.</p></li>
+<li><p><strong>vs_m_per_s</strong> (<em>float</em><em>, </em><em>optional</em>) – Shear wave velocity in meters per second. Default is 3500.0.</p></li>
+<li><p><strong>vr_vs_ratio</strong> (<em>float</em><em>, </em><em>optional</em>) – Ratio of rupture velocity to shear wave velocity. Default is 0.9.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>corner_frequency</strong> – Corner frequency in Hertz.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – If phase is not ‘p’ or ‘s’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.spectrum.magnitude_to_moment">
+<span class="sig-prename descclassname"><span class="pre">BPMF.spectrum.</span></span><span class="sig-name descname"><span class="pre">magnitude_to_moment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#magnitude_to_moment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.magnitude_to_moment" title="Link to this definition"></a></dt>
+<dd><p>Convert moment magnitude to seismic moment [N.m].</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.spectrum.moment_to_magnitude">
+<span class="sig-prename descclassname"><span class="pre">BPMF.spectrum.</span></span><span class="sig-name descname"><span class="pre">moment_to_magnitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#moment_to_magnitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.moment_to_magnitude" title="Link to this definition"></a></dt>
+<dd><p>Convert seismic moment [N.m] to moment magnitude.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.spectrum.stress_drop_circular_crack">
+<span class="sig-prename descclassname"><span class="pre">BPMF.spectrum.</span></span><span class="sig-name descname"><span class="pre">stress_drop_circular_crack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'p'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vs_m_per_s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3500.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vr_vs_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/spectrum.html#stress_drop_circular_crack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.spectrum.stress_drop_circular_crack" title="Link to this definition"></a></dt>
+<dd><p>Compute the stress drop assuming a circular crack model (Eshelby).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Mw</strong> (<em>float</em>) – Moment magnitude of the earthquake.</p></li>
+<li><p><strong>fc</strong> (<em>float</em>) – Corner frequency in Hertz.</p></li>
+<li><p><strong>phase</strong> (<em>str</em><em>, </em><em>optional</em>) – Seismic phase. Valid values are ‘p’ for P-wave and ‘s’ for S-wave.
+Default is ‘p’.</p></li>
+<li><p><strong>vs_m_per_s</strong> (<em>float</em><em>, </em><em>optional</em>) – Shear wave velocity in meters per second. Default is 3500.0.</p></li>
+<li><p><strong>vr_vs_ratio</strong> (<em>float</em><em>, </em><em>optional</em>) – Ratio of rupture velocity to shear wave velocity. Default is 0.9.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>stress_drop</strong> – Stress drop in Pascals.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – If phase is not ‘p’ or ‘s’.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 

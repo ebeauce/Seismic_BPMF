@@ -108,13 +108,13 @@
   <section id="Relocation">
 <h1>Relocation<a class="headerlink" href="#Relocation" title="Link to this heading"></a></h1>
 <p>In the previous notebook, <code class="docutils literal notranslate"><span class="pre">5_backprojection</span></code>, we built a database of events detected with the backprojection technique. Here, we will improve the location of each of these events by using a more elaborated location technique.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="c1"># choose the number of threads you want to limit the computation to</span>
-<span class="n">n_CPUs</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="n">n_CPUs</span> <span class="o">=</span> <span class="mi">12</span>
 <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_CPUs</span><span class="p">)</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
@@ -124,6 +124,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seisbench.models</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sbm</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">BPMF.data_reader_examples</span><span class="w"> </span><span class="kn">import</span> <span class="n">data_reader_mseed</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span> <span class="k">as</span> <span class="n">give_time</span>
@@ -132,6 +133,14 @@
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;svg.fonttype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Matched-filter GPU is not compiled! Should be here: /Users/eric/miniconda3/envs/py312/lib/python3.12/site-packages/fast_matched_filter/lib/matched_filter_GPU.so
+</pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -610,7 +619,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-3.40sec to read the waveforms for all 17 detections.
+1.47sec to read the waveforms for all 17 detections.
 </pre></div></div>
 </div>
 <p>Let’s plot these short windows with <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.plot</span></code>.</p>
@@ -631,9 +640,54 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 <img alt="../../_images/tutorial_notebooks_6_relocate_17_0.png" src="../../_images/tutorial_notebooks_6_relocate_17_0.png" />
 </div>
 </div>
-<p>Now, we will use <code class="docutils literal notranslate"><span class="pre">PhaseNet</span></code> to pick the P- and S-wave arrivals. This is done with the <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.pick_PS_phases</span></code> method.</p>
+<p>Now, we will use <code class="docutils literal notranslate"><span class="pre">PhaseNet</span></code> to pick the P- and S-wave arrivals. This is done by defining a wrapper function to plug <code class="docutils literal notranslate"><span class="pre">PhaseNet</span></code> into the BPMF workflow with the <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.pick_PS_phases</span></code> method.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">ml_picker</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ML-based seismic phase picker using PhaseNet.</span>
+
+<span class="sd">    For maximum flexibility, all interfacing with phase pickers is done through</span>
+<span class="sd">    wrapper functions like this one. This function must behave like:</span>
+<span class="sd">    `y = f(x)`,</span>
+<span class="sd">    where `y` are the time series of P- and S-wave probabilities. This function must</span>
+<span class="sd">    include all preprocessing steps that may be required, like chunking and normalization.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : np.ndarray</span>
+<span class="sd">        Seismograms, shape (n_stations, n_channels=3, n_times).</span>
+<span class="sd">    chunk_size : int, optional</span>
+<span class="sd">        Size of the seismograms, in samples, used in the training of the ML model.</span>
+<span class="sd">        Default is 3000 (30 seconds at 100 Hz).</span>
+<span class="sd">    device : str, optional</span>
+<span class="sd">        Device to use to run the ML model, either &quot;cpu&quot; or &quot;gpu&quot;. Default is</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ps_proba_time_series : np.ndarray</span>
+<span class="sd">        Time series of P- and S-wave probabilities, shape (n_stations, n_phases, n_times).</span>
+<span class="sd">        The first channel, `ps_proba_time_series[:, 0, :]` is the P-wave probability,</span>
+<span class="sd">        and the second, `ps_proba_time_series[:, 1, :]`, is the S-wave probability.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">no_grad</span><span class="p">,</span> <span class="n">from_numpy</span>
+
+    <span class="n">_ml_detector</span> <span class="o">=</span> <span class="n">sbm</span><span class="o">.</span><span class="n">PhaseNet</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;original&quot;</span><span class="p">)</span>
+    <span class="n">_ml_detector</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">device</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span>
+        <span class="n">_ml_detector</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">normalize_batch</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">normalization_window_sample</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">from_numpy</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">device</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+        <span class="n">ps_proba_time_series</span> <span class="o">=</span> <span class="n">_ml_detector</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="c1"># remove channel 0, which is probability of noise</span>
+    <span class="k">return</span> <span class="n">ps_proba_time_series</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PhaseNet picking parameters</span>
@@ -674,7 +728,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">)):</span>
@@ -687,6 +741,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
     <span class="c1"># P/S arrival times that we use a &quot;prior information&quot;</span>
     <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_arrival_times_from_moveouts</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">backprojection_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">pick_PS_phases</span><span class="p">(</span>
+        <span class="n">ml_picker</span><span class="p">,</span>
         <span class="n">DURATION_SEC</span><span class="p">,</span>
         <span class="n">threshold_P</span><span class="o">=</span><span class="n">THRESHOLD_P</span><span class="p">,</span>
         <span class="n">threshold_S</span><span class="o">=</span><span class="n">THRESHOLD_S</span><span class="p">,</span>
@@ -726,7 +781,7 @@ Picking P and S wave arrivals on detection 16
 </div>
 <p>We are done with the automatic picking! Every instance of <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event</span></code> should now have a new attribute <code class="docutils literal notranslate"><span class="pre">picks</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
@@ -735,7 +790,7 @@ Picking P and S wave arrivals on detection 16
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -781,91 +836,91 @@ Picking P and S wave arrivals on detection 16
   <tbody>
     <tr>
       <th>DE07</th>
-      <td>0.665437</td>
-      <td>20.300467</td>
-      <td>0.155635</td>
-      <td>0.860289</td>
-      <td>22.553024</td>
-      <td>0.101877</td>
-      <td>2012-07-26T01:10:24.580467Z</td>
-      <td>2012-07-26T01:10:26.833024Z</td>
+      <td>0.750512</td>
+      <td>20.343639</td>
+      <td>0.121599</td>
+      <td>0.842435</td>
+      <td>22.558382</td>
+      <td>0.106735</td>
+      <td>2012-07-26T01:10:24.623639Z</td>
+      <td>2012-07-26T01:10:26.838382Z</td>
     </tr>
     <tr>
       <th>DC07</th>
-      <td>0.602067</td>
-      <td>20.334587</td>
-      <td>0.185503</td>
-      <td>0.678574</td>
-      <td>22.202774</td>
-      <td>0.129679</td>
-      <td>2012-07-26T01:10:24.614587Z</td>
-      <td>2012-07-26T01:10:26.482774Z</td>
+      <td>0.641994</td>
+      <td>20.245672</td>
+      <td>0.156870</td>
+      <td>0.613393</td>
+      <td>22.223631</td>
+      <td>0.136231</td>
+      <td>2012-07-26T01:10:24.525672Z</td>
+      <td>2012-07-26T01:10:26.503631Z</td>
     </tr>
     <tr>
       <th>DC08</th>
-      <td>0.754658</td>
-      <td>20.053699</td>
-      <td>0.115350</td>
-      <td>0.690027</td>
-      <td>21.970953</td>
-      <td>0.112607</td>
-      <td>2012-07-26T01:10:24.333699Z</td>
-      <td>2012-07-26T01:10:26.250953Z</td>
+      <td>0.676526</td>
+      <td>20.038637</td>
+      <td>0.141339</td>
+      <td>0.617997</td>
+      <td>21.945810</td>
+      <td>0.137248</td>
+      <td>2012-07-26T01:10:24.318637Z</td>
+      <td>2012-07-26T01:10:26.225810Z</td>
     </tr>
     <tr>
       <th>DE08</th>
-      <td>0.241382</td>
-      <td>19.796843</td>
-      <td>0.295909</td>
-      <td>0.366147</td>
-      <td>21.934898</td>
-      <td>0.229555</td>
-      <td>2012-07-26T01:10:24.076843Z</td>
-      <td>2012-07-26T01:10:26.214898Z</td>
+      <td>0.142299</td>
+      <td>19.640823</td>
+      <td>0.275763</td>
+      <td>0.294153</td>
+      <td>21.971857</td>
+      <td>0.254681</td>
+      <td>2012-07-26T01:10:23.920823Z</td>
+      <td>2012-07-26T01:10:26.251857Z</td>
     </tr>
     <tr>
       <th>SPNC</th>
-      <td>0.918361</td>
-      <td>20.136955</td>
-      <td>0.094823</td>
-      <td>0.884857</td>
-      <td>21.986248</td>
-      <td>0.096080</td>
-      <td>2012-07-26T01:10:24.416955Z</td>
-      <td>2012-07-26T01:10:26.266248Z</td>
+      <td>0.918656</td>
+      <td>20.107605</td>
+      <td>0.094761</td>
+      <td>0.852687</td>
+      <td>21.982594</td>
+      <td>0.101620</td>
+      <td>2012-07-26T01:10:24.387605Z</td>
+      <td>2012-07-26T01:10:26.262594Z</td>
     </tr>
     <tr>
       <th>DC06</th>
-      <td>0.826057</td>
-      <td>20.938963</td>
-      <td>0.085419</td>
-      <td>0.886496</td>
-      <td>23.207859</td>
-      <td>0.097003</td>
-      <td>2012-07-26T01:10:25.218963Z</td>
-      <td>2012-07-26T01:10:27.487859Z</td>
+      <td>0.575692</td>
+      <td>20.782578</td>
+      <td>0.250013</td>
+      <td>0.845824</td>
+      <td>23.215721</td>
+      <td>0.106698</td>
+      <td>2012-07-26T01:10:25.062578Z</td>
+      <td>2012-07-26T01:10:27.495721Z</td>
     </tr>
     <tr>
       <th>SAUV</th>
-      <td>0.793898</td>
-      <td>19.595510</td>
-      <td>0.104622</td>
-      <td>0.818875</td>
-      <td>21.098804</td>
-      <td>0.107155</td>
-      <td>2012-07-26T01:10:23.875510Z</td>
-      <td>2012-07-26T01:10:25.378804Z</td>
+      <td>0.770925</td>
+      <td>19.604372</td>
+      <td>0.106772</td>
+      <td>0.845173</td>
+      <td>21.107704</td>
+      <td>0.105764</td>
+      <td>2012-07-26T01:10:23.884372Z</td>
+      <td>2012-07-26T01:10:25.387704Z</td>
     </tr>
     <tr>
       <th>DD06</th>
-      <td>0.456268</td>
-      <td>20.447830</td>
-      <td>0.156354</td>
-      <td>0.805816</td>
-      <td>22.341667</td>
-      <td>0.112516</td>
-      <td>2012-07-26T01:10:24.727830Z</td>
-      <td>2012-07-26T01:10:26.621667Z</td>
+      <td>0.521397</td>
+      <td>20.373207</td>
+      <td>0.209006</td>
+      <td>0.779116</td>
+      <td>22.342867</td>
+      <td>0.113789</td>
+      <td>2012-07-26T01:10:24.653207Z</td>
+      <td>2012-07-26T01:10:26.622867Z</td>
     </tr>
   </tbody>
 </table>
@@ -873,7 +928,7 @@ Picking P and S wave arrivals on detection 16
 </div>
 <p>These picks are automatically read when calling <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.plot</span></code>. Before plotting the waveforms with the newly obtained picks, let’s re-read the waveforms in the same format as before for the sake of easier visualization.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t1</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
@@ -897,7 +952,7 @@ Picking P and S wave arrivals on detection 16
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-3.42sec to read the waveforms for all 17 detections.
+1.31sec to read the waveforms for all 17 detections.
 </pre></div></div>
 </div>
 <p>The following plot shows:</p>
@@ -909,7 +964,7 @@ Picking P and S wave arrivals on detection 16
 <p>See how, in this tutorial, the backprojection locations already do a good job at predicting the P- and S-wave times… given the limitations of the 1D velocity model.</p>
 <p>Note: Try to run the phase picking again with <code class="docutils literal notranslate"><span class="pre">USE_APRIORI_PICKS=False</span></code> and see how the plot changes.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># play with EVENT_IDX to plot different events</span>
@@ -924,12 +979,12 @@ Picking P and S wave arrivals on detection 16
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_6_relocate_26_0.png" src="../../_images/tutorial_notebooks_6_relocate_26_0.png" />
+<img alt="../../_images/tutorial_notebooks_6_relocate_27_0.png" src="../../_images/tutorial_notebooks_6_relocate_27_0.png" />
 </div>
 </div>
 <p>We now are all set for using our favorite location software using PhaseNet’s picks. We can use <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code> with one of <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event</span></code> methods. See <a class="reference external" href="http://alomax.free.fr/nlloc/">http://alomax.free.fr/nlloc/</a> for more info.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># location parameters</span>
@@ -944,7 +999,7 @@ Picking P and S wave arrivals on detection 16
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ev</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">):</span>
@@ -970,9 +1025,9 @@ Picking P and S wave arrivals on detection 16
 <div class="highlight"><pre>
 Relocating event 0
 Relocating event 1
-Relocating event 2
 Relocating event 3
 Relocating event 4
+Relocating event 5
 Relocating event 6
 Relocating event 7
 Relocating event 8
@@ -988,7 +1043,7 @@ Relocating event 16
 </div>
 <p>Let’s plot the arrival times predicted by NLLoc’s location! As you can see, a 1D velocity model cannot fit the picks very well. The stations are right in the heterogeneous fault zone.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># play with EVENT_IDX to plot different events</span>
@@ -1003,12 +1058,12 @@ Relocating event 16
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_6_relocate_31_0.png" src="../../_images/tutorial_notebooks_6_relocate_31_0.png" />
+<img alt="../../_images/tutorial_notebooks_6_relocate_32_0.png" src="../../_images/tutorial_notebooks_6_relocate_32_0.png" />
 </div>
 </div>
 <p>It doesn’t look like much has changed… But we now have the location uncertainties. The uncertainty information is encoded in the covariance matrix, which is stored at <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.aux_data[&quot;cov_mat&quot;]</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1026,16 +1081,16 @@ Relocating event 16
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The maximum horizontal location uncertainty of event 0 is 1.73km.
-The azimuth of the maximum horizontal uncertainty is 157.27degrees.
-The mainimumhorizontal location uncertainty of event 0 is 1.18km.
-The azimuth of the minimum horizontal uncertainty is 67.27degrees.
-The maximum vertical location uncertainty is 2.64km.
+The maximum horizontal location uncertainty of event 0 is 1.70km.
+The azimuth of the maximum horizontal uncertainty is 153.69degrees.
+The mainimumhorizontal location uncertainty of event 0 is 1.41km.
+The azimuth of the minimum horizontal uncertainty is 63.69degrees.
+The maximum vertical location uncertainty is 2.41km.
 </pre></div></div>
 </div>
 <p>Before plotting the map with the new locations, let’s make sure our locations are not unnecessarily biased by aberrant pick outliers. Even though we used <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>’s EDT method, which is robust to outliers, we can easily identify outliers and remove them.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># we set a maximum tolerable difference, in percentage, between the picked time and the predicted travel time</span>
@@ -1061,27 +1116,8 @@ The maximum vertical location uncertainty is 2.64km.
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Relocating event 0
-Relocating event 1
-Relocating event 4
-Relocating event 6
-Relocating event 7
-Relocating event 8
-Relocating event 10
-Relocating event 11
-Relocating event 12
-Relocating event 13
-Relocating event 14
-Relocating event 15
-</pre></div></div>
-</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># play with EVENT_IDX to plot different events</span>
@@ -1096,7 +1132,7 @@ Relocating event 15
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_6_relocate_36_0.png" src="../../_images/tutorial_notebooks_6_relocate_36_0.png" />
+<img alt="../../_images/tutorial_notebooks_6_relocate_37_0.png" src="../../_images/tutorial_notebooks_6_relocate_37_0.png" />
 </div>
 </div>
 </section>
@@ -1104,7 +1140,7 @@ Relocating event 15
 <h3>Gather the new catalog, clean up possible multiples and plot the new locations<a class="headerlink" href="#Gather-the-new-catalog,-clean-up-possible-multiples-and-plot-the-new-locations" title="Link to this heading"></a></h3>
 <p>Just like before, we make a new instance of <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Catalog</span></code> to use the built-in plotting methods.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># --- update event ids now that we have our final locations</span>
@@ -1129,8 +1165,17 @@ Relocating event 15
 Class instance does not have a `cov_mat` attribute.
 </pre></div></div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/eric/Documents/WORK/software/Seismic_BPMF/BPMF/dataset.py:324: UserWarning: no explicit representation of timezones available for np.datetime64
+  np.asarray(origin_times, dtype=&#34;datetime64[ms]&#34;)
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1175,191 +1220,191 @@ Class instance does not have a `cov_mat` attribute.
   </thead>
   <tbody>
     <tr>
-      <th>2012-07-26T01:10:21.800000Z</th>
-      <td>30.323047</td>
-      <td>40.731250</td>
-      <td>12.015625</td>
-      <td>2012-07-26 01:10:21.800</td>
-      <td>1.733366</td>
-      <td>1.182667</td>
-      <td>157.271635</td>
-      <td>2.640251</td>
+      <th>2012-07-26T01:10:21.720000Z</th>
+      <td>30.319141</td>
+      <td>40.728750</td>
+      <td>12.6000</td>
+      <td>2012-07-26 01:10:21.720</td>
+      <td>1.698487</td>
+      <td>1.414764</td>
+      <td>153.686127</td>
+      <td>2.414335</td>
     </tr>
     <tr>
-      <th>2012-07-26T01:15:54.160000Z</th>
-      <td>30.343555</td>
-      <td>40.716875</td>
-      <td>9.273438</td>
-      <td>2012-07-26 01:15:54.160</td>
-      <td>2.070620</td>
-      <td>1.108417</td>
-      <td>90.435851</td>
-      <td>2.250307</td>
+      <th>2012-07-26T01:15:54.200000Z</th>
+      <td>30.340137</td>
+      <td>40.717813</td>
+      <td>9.1500</td>
+      <td>2012-07-26 01:15:54.200</td>
+      <td>1.815575</td>
+      <td>1.080586</td>
+      <td>94.892570</td>
+      <td>1.836544</td>
     </tr>
     <tr>
-      <th>2012-07-26T01:58:19.720000Z</th>
+      <th>2012-07-26T01:57:57.600000Z</th>
       <td>30.210000</td>
       <td>40.600000</td>
-      <td>-1.500000</td>
-      <td>2012-07-26 01:58:19.720</td>
-      <td>0.968885</td>
-      <td>0.833068</td>
-      <td>11.277525</td>
-      <td>2.155680</td>
-    </tr>
-    <tr>
-      <th>2012-07-26T02:35:01.160000Z</th>
-      <td>30.330000</td>
-      <td>40.700000</td>
-      <td>-1.500000</td>
-      <td>2012-07-26 02:35:01.160</td>
-      <td>4.140636</td>
-      <td>2.593994</td>
-      <td>72.951755</td>
-      <td>4.445532</td>
-    </tr>
-    <tr>
-      <th>2012-07-26T03:00:39.160000Z</th>
-      <td>30.324023</td>
-      <td>40.715625</td>
-      <td>9.070312</td>
-      <td>2012-07-26 03:00:39.160</td>
-      <td>1.812523</td>
-      <td>1.146382</td>
-      <td>96.893951</td>
-      <td>3.431834</td>
-    </tr>
-    <tr>
-      <th>2012-07-26T04:43:40.160000Z</th>
-      <td>30.350000</td>
-      <td>40.720000</td>
-      <td>8.500000</td>
-      <td>2012-07-26 04:43:40.160</td>
+      <td>-1.5000</td>
+      <td>2012-07-26 01:57:57.600</td>
       <td>15.000000</td>
       <td>15.000000</td>
       <td>0.000000</td>
       <td>15.000000</td>
     </tr>
     <tr>
-      <th>2012-07-26T04:48:38.640000Z</th>
-      <td>30.339648</td>
-      <td>40.716875</td>
-      <td>9.273438</td>
-      <td>2012-07-26 04:48:38.640</td>
-      <td>2.689873</td>
-      <td>1.357818</td>
-      <td>77.828681</td>
-      <td>3.859434</td>
+      <th>2012-07-26T02:35:01.640000Z</th>
+      <td>30.283008</td>
+      <td>40.669375</td>
+      <td>10.7000</td>
+      <td>2012-07-26 02:35:01.640</td>
+      <td>5.230615</td>
+      <td>2.131634</td>
+      <td>46.391747</td>
+      <td>2.980151</td>
+    </tr>
+    <tr>
+      <th>2012-07-26T03:00:38.760000Z</th>
+      <td>30.314258</td>
+      <td>40.711875</td>
+      <td>11.9000</td>
+      <td>2012-07-26 03:00:38.760</td>
+      <td>1.715005</td>
+      <td>1.174521</td>
+      <td>87.935600</td>
+      <td>2.962931</td>
+    </tr>
+    <tr>
+      <th>2012-07-26T04:43:38.320000Z</th>
+      <td>30.323047</td>
+      <td>40.723750</td>
+      <td>10.2000</td>
+      <td>2012-07-26 04:43:38.320</td>
+      <td>5.511346</td>
+      <td>2.587443</td>
+      <td>130.822739</td>
+      <td>4.229696</td>
+    </tr>
+    <tr>
+      <th>2012-07-26T04:48:38.520000Z</th>
+      <td>30.345996</td>
+      <td>40.720312</td>
+      <td>9.3500</td>
+      <td>2012-07-26 04:48:38.520</td>
+      <td>1.822953</td>
+      <td>0.915660</td>
+      <td>94.854744</td>
+      <td>2.632025</td>
     </tr>
     <tr>
       <th>2012-07-26T08:08:25.680000Z</th>
-      <td>30.335742</td>
-      <td>40.720625</td>
-      <td>8.867188</td>
+      <td>30.328418</td>
+      <td>40.720312</td>
+      <td>9.3500</td>
       <td>2012-07-26 08:08:25.680</td>
-      <td>2.457855</td>
-      <td>1.324990</td>
-      <td>80.384442</td>
-      <td>3.851911</td>
+      <td>1.291449</td>
+      <td>0.997296</td>
+      <td>118.889877</td>
+      <td>2.928737</td>
     </tr>
     <tr>
-      <th>2012-07-26T10:07:23.720000Z</th>
-      <td>30.338672</td>
-      <td>40.716250</td>
-      <td>8.765625</td>
-      <td>2012-07-26 10:07:23.720</td>
-      <td>1.642315</td>
-      <td>0.946182</td>
-      <td>93.504006</td>
-      <td>2.522272</td>
+      <th>2012-07-26T10:07:23.680000Z</th>
+      <td>30.340137</td>
+      <td>40.717188</td>
+      <td>8.9500</td>
+      <td>2012-07-26 10:07:23.680</td>
+      <td>1.506835</td>
+      <td>0.934440</td>
+      <td>92.518990</td>
+      <td>2.340574</td>
     </tr>
     <tr>
-      <th>2012-07-26T11:55:35.520000Z</th>
-      <td>30.270000</td>
-      <td>40.600000</td>
-      <td>3.000000</td>
-      <td>2012-07-26 11:55:35.520</td>
-      <td>2.731442</td>
-      <td>1.437874</td>
-      <td>152.628773</td>
-      <td>3.716407</td>
+      <th>2012-07-26T11:55:35.920000Z</th>
+      <td>30.290576</td>
+      <td>40.610156</td>
+      <td>-0.6250</td>
+      <td>2012-07-26 11:55:35.920</td>
+      <td>4.056647</td>
+      <td>1.009115</td>
+      <td>143.165070</td>
+      <td>4.583938</td>
     </tr>
     <tr>
-      <th>2012-07-26T13:35:26.480000Z</th>
-      <td>30.295215</td>
-      <td>40.797812</td>
-      <td>-1.949219</td>
-      <td>2012-07-26 13:35:26.480</td>
-      <td>3.697239</td>
-      <td>0.998076</td>
-      <td>88.219160</td>
-      <td>5.458099</td>
+      <th>2012-07-26T13:35:26.520000Z</th>
+      <td>30.294238</td>
+      <td>40.793438</td>
+      <td>-1.9500</td>
+      <td>2012-07-26 13:35:26.520</td>
+      <td>2.833779</td>
+      <td>0.946032</td>
+      <td>87.217918</td>
+      <td>4.114086</td>
     </tr>
     <tr>
-      <th>2012-07-26T13:48:32.480000Z</th>
-      <td>30.315234</td>
-      <td>40.723750</td>
-      <td>11.609375</td>
-      <td>2012-07-26 13:48:32.480</td>
-      <td>1.429097</td>
-      <td>1.324683</td>
-      <td>34.905759</td>
-      <td>2.865370</td>
+      <th>2012-07-26T13:48:32.400000Z</th>
+      <td>30.312305</td>
+      <td>40.720625</td>
+      <td>12.3000</td>
+      <td>2012-07-26 13:48:32.400</td>
+      <td>1.549857</td>
+      <td>1.404627</td>
+      <td>18.447174</td>
+      <td>2.727262</td>
     </tr>
     <tr>
       <th>2012-07-26T13:51:58.200000Z</th>
       <td>30.314258</td>
-      <td>40.713125</td>
-      <td>13.335938</td>
+      <td>40.711875</td>
+      <td>13.5000</td>
       <td>2012-07-26 13:51:58.200</td>
-      <td>1.782372</td>
-      <td>1.640373</td>
-      <td>133.233003</td>
-      <td>3.765628</td>
+      <td>1.613285</td>
+      <td>1.436867</td>
+      <td>171.564072</td>
+      <td>3.265158</td>
     </tr>
     <tr>
-      <th>2012-07-26T13:53:31.400000Z</th>
-      <td>30.311328</td>
-      <td>40.718750</td>
-      <td>12.015625</td>
-      <td>2012-07-26 13:53:31.400</td>
-      <td>1.557949</td>
-      <td>1.486866</td>
-      <td>36.010911</td>
-      <td>3.102796</td>
+      <th>2012-07-26T13:53:31.360000Z</th>
+      <td>30.312305</td>
+      <td>40.720625</td>
+      <td>12.1000</td>
+      <td>2012-07-26 13:53:31.360</td>
+      <td>1.580810</td>
+      <td>1.416355</td>
+      <td>41.573853</td>
+      <td>2.860213</td>
     </tr>
     <tr>
-      <th>2012-07-26T13:56:54.320000Z</th>
-      <td>30.337695</td>
+      <th>2012-07-26T13:56:54.200000Z</th>
+      <td>30.345508</td>
       <td>40.716875</td>
-      <td>8.867188</td>
-      <td>2012-07-26 13:56:54.320</td>
-      <td>2.875005</td>
-      <td>1.242650</td>
-      <td>84.046297</td>
-      <td>2.869467</td>
+      <td>9.1000</td>
+      <td>2012-07-26 13:56:54.200</td>
+      <td>2.321362</td>
+      <td>0.939128</td>
+      <td>84.500626</td>
+      <td>3.821277</td>
     </tr>
     <tr>
-      <th>2012-07-26T15:06:20.160000Z</th>
-      <td>30.326221</td>
-      <td>40.600156</td>
-      <td>-1.974609</td>
-      <td>2012-07-26 15:06:20.160</td>
-      <td>1.502012</td>
-      <td>0.491035</td>
-      <td>92.386020</td>
-      <td>0.880841</td>
+      <th>2012-07-26T15:06:20.120000Z</th>
+      <td>30.328052</td>
+      <td>40.600078</td>
+      <td>-1.9875</td>
+      <td>2012-07-26 15:06:20.120</td>
+      <td>0.865955</td>
+      <td>0.523434</td>
+      <td>94.870903</td>
+      <td>0.354512</td>
     </tr>
     <tr>
-      <th>2012-07-26T17:28:20.400000Z</th>
-      <td>30.430000</td>
-      <td>40.720000</td>
-      <td>10.000000</td>
-      <td>2012-07-26 17:28:20.400</td>
-      <td>3.553327</td>
-      <td>1.468112</td>
-      <td>71.712055</td>
-      <td>5.997913</td>
+      <th>2012-07-26T17:28:20.360000Z</th>
+      <td>30.398242</td>
+      <td>40.709375</td>
+      <td>5.7000</td>
+      <td>2012-07-26 17:28:20.360</td>
+      <td>3.772975</td>
+      <td>1.206461</td>
+      <td>73.783661</td>
+      <td>5.774685</td>
     </tr>
   </tbody>
 </table>
@@ -1368,7 +1413,7 @@ Class instance does not have a `cov_mat` attribute.
 <p>Remove possible multiple detections:</p>
 <p>The backprojection method does not have good inter-event time resolution because of the large uncertainties on the event origin times. There always exists a relatively large trade-off between the origin time and the location so it happens to detect the same event several times in a row if <code class="docutils literal notranslate"><span class="pre">MINIMUM_INTEREVENT_TIME_SEC</span></code> was not set large enough in <code class="docutils literal notranslate"><span class="pre">5_backprojection.ipynb</span></code>. After relocation with <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>, it is easier to identify such multiple detections.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># the criteria that determine whether two events are the same or not are of course somewhat arbitrary</span>
@@ -1379,7 +1424,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ---------------------------------------------------------</span>
@@ -1450,8 +1495,19 @@ Class instance does not have a `cov_mat` attribute.
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/var/folders/dv/ly3mdyfn2rg8_nbsghjxvhjh0000gn/T/ipykernel_1244/3001744156.py:30: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  nlloc_catalog.catalog.origin_time[i]
+/var/folders/dv/ly3mdyfn2rg8_nbsghjxvhjh0000gn/T/ipykernel_1244/3001744156.py:31: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  - nlloc_catalog.catalog.origin_time[previous_ev]
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1498,207 +1554,207 @@ Class instance does not have a `cov_mat` attribute.
   </thead>
   <tbody>
     <tr>
-      <th>2012-07-26T01:10:21.800000Z</th>
-      <td>30.323047</td>
-      <td>40.731250</td>
-      <td>12.015625</td>
-      <td>2012-07-26 01:10:21.800</td>
-      <td>1.733366</td>
-      <td>1.182667</td>
-      <td>157.271635</td>
-      <td>2.640251</td>
+      <th>2012-07-26T01:10:21.720000Z</th>
+      <td>30.319141</td>
+      <td>40.728750</td>
+      <td>12.6000</td>
+      <td>2012-07-26 01:10:21.720</td>
+      <td>1.698487</td>
+      <td>1.414764</td>
+      <td>153.686127</td>
+      <td>2.414335</td>
       <td>bp_0</td>
     </tr>
     <tr>
-      <th>2012-07-26T01:15:54.160000Z</th>
-      <td>30.343555</td>
-      <td>40.716875</td>
-      <td>9.273438</td>
-      <td>2012-07-26 01:15:54.160</td>
-      <td>2.070620</td>
-      <td>1.108417</td>
-      <td>90.435851</td>
-      <td>2.250307</td>
+      <th>2012-07-26T01:15:54.200000Z</th>
+      <td>30.340137</td>
+      <td>40.717813</td>
+      <td>9.1500</td>
+      <td>2012-07-26 01:15:54.200</td>
+      <td>1.815575</td>
+      <td>1.080586</td>
+      <td>94.892570</td>
+      <td>1.836544</td>
       <td>bp_1</td>
     </tr>
     <tr>
-      <th>2012-07-26T01:58:19.720000Z</th>
+      <th>2012-07-26T01:57:57.600000Z</th>
       <td>30.210000</td>
       <td>40.600000</td>
-      <td>-1.500000</td>
-      <td>2012-07-26 01:58:19.720</td>
-      <td>0.968885</td>
-      <td>0.833068</td>
-      <td>11.277525</td>
-      <td>2.155680</td>
-      <td>bp_2</td>
-    </tr>
-    <tr>
-      <th>2012-07-26T02:35:01.160000Z</th>
-      <td>30.330000</td>
-      <td>40.700000</td>
-      <td>-1.500000</td>
-      <td>2012-07-26 02:35:01.160</td>
-      <td>4.140636</td>
-      <td>2.593994</td>
-      <td>72.951755</td>
-      <td>4.445532</td>
-      <td>bp_3</td>
-    </tr>
-    <tr>
-      <th>2012-07-26T03:00:39.160000Z</th>
-      <td>30.324023</td>
-      <td>40.715625</td>
-      <td>9.070312</td>
-      <td>2012-07-26 03:00:39.160</td>
-      <td>1.812523</td>
-      <td>1.146382</td>
-      <td>96.893951</td>
-      <td>3.431834</td>
-      <td>bp_4</td>
-    </tr>
-    <tr>
-      <th>2012-07-26T04:43:40.160000Z</th>
-      <td>30.350000</td>
-      <td>40.720000</td>
-      <td>8.500000</td>
-      <td>2012-07-26 04:43:40.160</td>
+      <td>-1.5000</td>
+      <td>2012-07-26 01:57:57.600</td>
       <td>15.000000</td>
       <td>15.000000</td>
       <td>0.000000</td>
       <td>15.000000</td>
+      <td>bp_2</td>
+    </tr>
+    <tr>
+      <th>2012-07-26T02:35:01.640000Z</th>
+      <td>30.283008</td>
+      <td>40.669375</td>
+      <td>10.7000</td>
+      <td>2012-07-26 02:35:01.640</td>
+      <td>5.230615</td>
+      <td>2.131634</td>
+      <td>46.391747</td>
+      <td>2.980151</td>
+      <td>bp_3</td>
+    </tr>
+    <tr>
+      <th>2012-07-26T03:00:38.760000Z</th>
+      <td>30.314258</td>
+      <td>40.711875</td>
+      <td>11.9000</td>
+      <td>2012-07-26 03:00:38.760</td>
+      <td>1.715005</td>
+      <td>1.174521</td>
+      <td>87.935600</td>
+      <td>2.962931</td>
+      <td>bp_4</td>
+    </tr>
+    <tr>
+      <th>2012-07-26T04:43:38.320000Z</th>
+      <td>30.323047</td>
+      <td>40.723750</td>
+      <td>10.2000</td>
+      <td>2012-07-26 04:43:38.320</td>
+      <td>5.511346</td>
+      <td>2.587443</td>
+      <td>130.822739</td>
+      <td>4.229696</td>
       <td>bp_5</td>
     </tr>
     <tr>
-      <th>2012-07-26T04:48:38.640000Z</th>
-      <td>30.339648</td>
-      <td>40.716875</td>
-      <td>9.273438</td>
-      <td>2012-07-26 04:48:38.640</td>
-      <td>2.689873</td>
-      <td>1.357818</td>
-      <td>77.828681</td>
-      <td>3.859434</td>
+      <th>2012-07-26T04:48:38.520000Z</th>
+      <td>30.345996</td>
+      <td>40.720312</td>
+      <td>9.3500</td>
+      <td>2012-07-26 04:48:38.520</td>
+      <td>1.822953</td>
+      <td>0.915660</td>
+      <td>94.854744</td>
+      <td>2.632025</td>
       <td>bp_6</td>
     </tr>
     <tr>
       <th>2012-07-26T08:08:25.680000Z</th>
-      <td>30.335742</td>
-      <td>40.720625</td>
-      <td>8.867188</td>
+      <td>30.328418</td>
+      <td>40.720312</td>
+      <td>9.3500</td>
       <td>2012-07-26 08:08:25.680</td>
-      <td>2.457855</td>
-      <td>1.324990</td>
-      <td>80.384442</td>
-      <td>3.851911</td>
+      <td>1.291449</td>
+      <td>0.997296</td>
+      <td>118.889877</td>
+      <td>2.928737</td>
       <td>bp_7</td>
     </tr>
     <tr>
-      <th>2012-07-26T10:07:23.720000Z</th>
-      <td>30.338672</td>
-      <td>40.716250</td>
-      <td>8.765625</td>
-      <td>2012-07-26 10:07:23.720</td>
-      <td>1.642315</td>
-      <td>0.946182</td>
-      <td>93.504006</td>
-      <td>2.522272</td>
+      <th>2012-07-26T10:07:23.680000Z</th>
+      <td>30.340137</td>
+      <td>40.717188</td>
+      <td>8.9500</td>
+      <td>2012-07-26 10:07:23.680</td>
+      <td>1.506835</td>
+      <td>0.934440</td>
+      <td>92.518990</td>
+      <td>2.340574</td>
       <td>bp_8</td>
     </tr>
     <tr>
-      <th>2012-07-26T11:55:35.520000Z</th>
-      <td>30.270000</td>
-      <td>40.600000</td>
-      <td>3.000000</td>
-      <td>2012-07-26 11:55:35.520</td>
-      <td>2.731442</td>
-      <td>1.437874</td>
-      <td>152.628773</td>
-      <td>3.716407</td>
+      <th>2012-07-26T11:55:35.920000Z</th>
+      <td>30.290576</td>
+      <td>40.610156</td>
+      <td>-0.6250</td>
+      <td>2012-07-26 11:55:35.920</td>
+      <td>4.056647</td>
+      <td>1.009115</td>
+      <td>143.165070</td>
+      <td>4.583938</td>
       <td>bp_9</td>
     </tr>
     <tr>
-      <th>2012-07-26T13:35:26.480000Z</th>
-      <td>30.295215</td>
-      <td>40.797812</td>
-      <td>-1.949219</td>
-      <td>2012-07-26 13:35:26.480</td>
-      <td>3.697239</td>
-      <td>0.998076</td>
-      <td>88.219160</td>
-      <td>5.458099</td>
+      <th>2012-07-26T13:35:26.520000Z</th>
+      <td>30.294238</td>
+      <td>40.793438</td>
+      <td>-1.9500</td>
+      <td>2012-07-26 13:35:26.520</td>
+      <td>2.833779</td>
+      <td>0.946032</td>
+      <td>87.217918</td>
+      <td>4.114086</td>
       <td>bp_10</td>
     </tr>
     <tr>
-      <th>2012-07-26T13:48:32.480000Z</th>
-      <td>30.315234</td>
-      <td>40.723750</td>
-      <td>11.609375</td>
-      <td>2012-07-26 13:48:32.480</td>
-      <td>1.429097</td>
-      <td>1.324683</td>
-      <td>34.905759</td>
-      <td>2.865370</td>
+      <th>2012-07-26T13:48:32.400000Z</th>
+      <td>30.312305</td>
+      <td>40.720625</td>
+      <td>12.3000</td>
+      <td>2012-07-26 13:48:32.400</td>
+      <td>1.549857</td>
+      <td>1.404627</td>
+      <td>18.447174</td>
+      <td>2.727262</td>
       <td>bp_11</td>
     </tr>
     <tr>
       <th>2012-07-26T13:51:58.200000Z</th>
       <td>30.314258</td>
-      <td>40.713125</td>
-      <td>13.335938</td>
+      <td>40.711875</td>
+      <td>13.5000</td>
       <td>2012-07-26 13:51:58.200</td>
-      <td>1.782372</td>
-      <td>1.640373</td>
-      <td>133.233003</td>
-      <td>3.765628</td>
+      <td>1.613285</td>
+      <td>1.436867</td>
+      <td>171.564072</td>
+      <td>3.265158</td>
       <td>bp_12</td>
     </tr>
     <tr>
-      <th>2012-07-26T13:53:31.400000Z</th>
-      <td>30.311328</td>
-      <td>40.718750</td>
-      <td>12.015625</td>
-      <td>2012-07-26 13:53:31.400</td>
-      <td>1.557949</td>
-      <td>1.486866</td>
-      <td>36.010911</td>
-      <td>3.102796</td>
+      <th>2012-07-26T13:53:31.360000Z</th>
+      <td>30.312305</td>
+      <td>40.720625</td>
+      <td>12.1000</td>
+      <td>2012-07-26 13:53:31.360</td>
+      <td>1.580810</td>
+      <td>1.416355</td>
+      <td>41.573853</td>
+      <td>2.860213</td>
       <td>bp_13</td>
     </tr>
     <tr>
-      <th>2012-07-26T13:56:54.320000Z</th>
-      <td>30.337695</td>
+      <th>2012-07-26T13:56:54.200000Z</th>
+      <td>30.345508</td>
       <td>40.716875</td>
-      <td>8.867188</td>
-      <td>2012-07-26 13:56:54.320</td>
-      <td>2.875005</td>
-      <td>1.242650</td>
-      <td>84.046297</td>
-      <td>2.869467</td>
+      <td>9.1000</td>
+      <td>2012-07-26 13:56:54.200</td>
+      <td>2.321362</td>
+      <td>0.939128</td>
+      <td>84.500626</td>
+      <td>3.821277</td>
       <td>bp_14</td>
     </tr>
     <tr>
-      <th>2012-07-26T15:06:20.160000Z</th>
-      <td>30.326221</td>
-      <td>40.600156</td>
-      <td>-1.974609</td>
-      <td>2012-07-26 15:06:20.160</td>
-      <td>1.502012</td>
-      <td>0.491035</td>
-      <td>92.386020</td>
-      <td>0.880841</td>
+      <th>2012-07-26T15:06:20.120000Z</th>
+      <td>30.328052</td>
+      <td>40.600078</td>
+      <td>-1.9875</td>
+      <td>2012-07-26 15:06:20.120</td>
+      <td>0.865955</td>
+      <td>0.523434</td>
+      <td>94.870903</td>
+      <td>0.354512</td>
       <td>bp_15</td>
     </tr>
     <tr>
-      <th>2012-07-26T17:28:20.400000Z</th>
-      <td>30.430000</td>
-      <td>40.720000</td>
-      <td>10.000000</td>
-      <td>2012-07-26 17:28:20.400</td>
-      <td>3.553327</td>
-      <td>1.468112</td>
-      <td>71.712055</td>
-      <td>5.997913</td>
+      <th>2012-07-26T17:28:20.360000Z</th>
+      <td>30.398242</td>
+      <td>40.709375</td>
+      <td>5.7000</td>
+      <td>2012-07-26 17:28:20.360</td>
+      <td>3.772975</td>
+      <td>1.206461</td>
+      <td>73.783661</td>
+      <td>5.774685</td>
       <td>bp_16</td>
     </tr>
   </tbody>
@@ -1712,7 +1768,7 @@ Class instance does not have a `cov_mat` attribute.
 <li><p>Earthquakes are located outside the network, so large uncertainties cannot be avoided.</p></li>
 </ul>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span>
@@ -1728,7 +1784,7 @@ Class instance does not have a `cov_mat` attribute.
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_6_relocate_43_0.png" src="../../_images/tutorial_notebooks_6_relocate_43_0.png" />
+<img alt="../../_images/tutorial_notebooks_6_relocate_44_0.png" src="../../_images/tutorial_notebooks_6_relocate_44_0.png" />
 </div>
 </div>
 </section>
@@ -1737,7 +1793,7 @@ Class instance does not have a `cov_mat` attribute.
 <h2>Save the relocated events<a class="headerlink" href="#Save-the-relocated-events" title="Link to this heading"></a></h2>
 <p>Save all the events that were not identified as multiples to a hdf5 database.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
@@ -1747,10 +1803,10 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">)):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">)):</span>
     <span class="n">evid</span> <span class="o">=</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
     <span class="n">backprojection_events_dict</span><span class="p">[</span><span class="n">evid</span><span class="p">]</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
             <span class="n">OUTPUT_DB_FILENAME</span><span class="p">,</span>
@@ -2098,7 +2154,7 @@ Class instance does not have a `cov_mat` attribute.
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_6_relocate_57_0.png" src="../../_images/tutorial_notebooks_6_relocate_57_0.png" />
+<img alt="../../_images/tutorial_notebooks_6_relocate_58_0.png" src="../../_images/tutorial_notebooks_6_relocate_58_0.png" />
 </div>
 </div>
 <p>The current way of estimating location uncertainties with the backprojection method is to compute a weighted average distance between the maximum beam grid point (indexed by <span class="math notranslate nohighlight">\(k^*\)</span>) and all other grid points. To avoid the result to be grid-size dependent, we limit the weighted average to a restricted rectangular domain taken around the maximum beam grid point.</p>

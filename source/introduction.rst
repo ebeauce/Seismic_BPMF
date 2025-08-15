@@ -26,27 +26,13 @@ Installation
 
 You may need to edit the Makefile according to your OS (instructions in the Makefile's comments), in particular if you are using a recent Mac!
 
-From source
-^^^^^^^^^^^
-A simple make + whichever implementation does the trick. Possible make commands are:
+BPMF must be installed from source, which involves compiling C libraries. From the root directory, run:
 
 .. code-block:: console
 
-    $ make python_cpu
-    $ make python_gpu
     $ pip install .
 
-Using pip (recommended)
-^^^^^^^^^^^^^^^^^^^^^^^
-
-Installation as a Python module is possible via pip (which supports clean uninstalling):
-
-.. code-block:: console
-
-    $ python setup.py build_ext
-    $ pip install .
-
-or simply:
+Or simply, from anywhere:
 
 .. code-block:: console
 

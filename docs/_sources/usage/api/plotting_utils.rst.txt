@@ -1,4 +1,4 @@
-BPMF.ploting_utils
+BPMF.plotting_utils
 ==================
 
 .. automodule:: BPMF.plotting_utils

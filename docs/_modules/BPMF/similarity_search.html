@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BPMF.similarity_search &mdash; BPMF 2.0.0beta2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -74,33 +74,33 @@
            <div itemprop="articleBody">
              
   <h1>Source code for BPMF.similarity_search</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">cfg</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">dataset</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">clib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">cfg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">clib</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">fast_matched_filter</span> <span class="k">as</span> <span class="nn">fmf</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">fast_matched_filter</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fmf</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="kn">from</span> <span class="nn">obspy.core</span> <span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">udt</span>
-<span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">Stream</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">obspy.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">udt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">obspy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stream</span>
 
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">kurtosis</span>
-<span class="kn">import</span> <span class="nn">concurrent.futures</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">kurtosis</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">concurrent.futures</span>
 
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span> <span class="k">as</span> <span class="n">give_time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span> <span class="k">as</span> <span class="n">give_time</span>
 
 
 <div class="viewcode-block" id="MatchedFilter">
 <a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter">[docs]</a>
-<span class="k">class</span> <span class="nc">MatchedFilter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MatchedFilter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for running a matched filter search and detecting earthquakes.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">template_group</span><span class="p">,</span>
         <span class="n">min_channels</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
@@ -217,15 +217,15 @@
 
     <span class="c1"># properties</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">components</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">stations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">stations</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">memory_cc_time_series</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">memory_cc_time_series</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="mf">0.0</span>
         <span class="k">else</span><span class="p">:</span>
@@ -236,7 +236,7 @@
 
 <div class="viewcode-block" id="MatchedFilter.set_data">
 <a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.set_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attribute `dataset.Data` instance to `self`.</span>
 
 <span class="sd">        Parameters</span>
@@ -263,7 +263,7 @@
 
 <div class="viewcode-block" id="MatchedFilter.select_cc_indexes">
 <a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.select_cc_indexes">[docs]</a>
-    <span class="k">def</span> <span class="nf">select_cc_indexes</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_cc_indexes</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">cc_t</span><span class="p">,</span>
         <span class="n">threshold</span><span class="p">,</span>
@@ -367,7 +367,7 @@
 
 <div class="viewcode-block" id="MatchedFilter.compute_cc_time_series">
 <a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.compute_cc_time_series">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_cc_time_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight_type</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">tids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_cc_time_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight_type</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">tids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the CC time series (step 1 of matched-filter search).</span>
 
 <span class="sd">        Parameters</span>
@@ -459,7 +459,7 @@
 
 <div class="viewcode-block" id="MatchedFilter.find_detections">
 <a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.find_detections">[docs]</a>
-    <span class="k">def</span> <span class="nf">find_detections</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_detections</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">minimum_interevent_time</span><span class="p">,</span>
         <span class="n">threshold_window_dur</span><span class="o">=</span><span class="mf">1800.0</span><span class="p">,</span>
@@ -512,7 +512,7 @@
         <span class="k">return</span> <span class="n">detections</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_find_detections_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tid</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_find_detections_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tid</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
         <span class="c1"># t: index in this run&#39;s loop</span>
         <span class="c1"># tt: index in the self.template_group.templates list</span>
@@ -644,7 +644,7 @@
 
 <div class="viewcode-block" id="MatchedFilter.run_matched_filter_search">
 <a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.run_matched_filter_search">[docs]</a>
-    <span class="k">def</span> <span class="nf">run_matched_filter_search</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_matched_filter_search</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">minimum_interevent_time</span><span class="p">,</span>
         <span class="n">weight_type</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span>
@@ -736,7 +736,7 @@
     <span class="c1"># -------------------------------------------</span>
 <div class="viewcode-block" id="MatchedFilter.plot_cc">
 <a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.plot_cc">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_cc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_cc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the time series of correlation coefficients.</span>
 
 <span class="sd">        Parameters</span>
@@ -755,8 +755,8 @@
 <span class="sd">        fig: plt.Figure</span>
 <span class="sd">            The Figure instance produced by this method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-        <span class="kn">import</span> <span class="nn">matplotlib.dates</span> <span class="k">as</span> <span class="nn">mdates</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.dates</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mdates</span>
 
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># plot the correlation coefficients</span>
@@ -849,7 +849,7 @@
 
 <div class="viewcode-block" id="MatchedFilter.plot_detection">
 <a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.plot_detection">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_detection</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_detection</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">detection</span><span class="p">,</span>
         <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
@@ -876,12 +876,12 @@
 <span class="sd">        fig: plt.Figure</span>
 <span class="sd">            The Figure instance produced by this method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-        <span class="kn">import</span> <span class="nn">matplotlib.dates</span> <span class="k">as</span> <span class="nn">mdates</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.dates</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mdates</span>
 
         <span class="n">tid</span> <span class="o">=</span> <span class="n">detection</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;tid&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">n_max_stations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 
             <span class="n">detection</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">detection</span><span class="p">)</span>
             <span class="n">detection</span><span class="o">.</span><span class="n">n_closest_stations</span><span class="p">(</span><span class="n">n_max_stations</span><span class="p">)</span>
@@ -1046,7 +1046,7 @@
 
 <div class="viewcode-block" id="time_dependent_threshold">
 <a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.time_dependent_threshold">[docs]</a>
-<span class="k">def</span> <span class="nf">time_dependent_threshold</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">time_dependent_threshold</span><span class="p">(</span>
     <span class="n">time_series</span><span class="p">,</span> <span class="n">sliding_window</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.66</span><span class="p">,</span> <span class="n">threshold_type</span><span class="o">=</span><span class="s2">&quot;rms&quot;</span><span class="p">,</span> <span class="n">white_noise</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">num_threads</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>

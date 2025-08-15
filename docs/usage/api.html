@@ -53,7 +53,7 @@
 <li class="toctree-l3"><a class="reference internal" href="api/dataset.html">BPMF.dataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/data_reader_examples.html">BPMF.data_reader_examples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/NLLoc_utils.html">BPMF.NLLoc_utils</a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/plotting_utils.html">BPMF.ploting_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/plotting_utils.html">BPMF.plotting_utils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html">BPMF.similarity_search</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/spectrum.html">BPMF.spectrum</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/template_search.html">BPMF.template_search</a></li>
@@ -263,11 +263,76 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/data_reader_examples.html">BPMF.data_reader_examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/NLLoc_utils.html">BPMF.NLLoc_utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/plotting_utils.html">BPMF.ploting_utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/similarity_search.html">BPMF.similarity_search</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/spectrum.html">BPMF.spectrum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/data_reader_examples.html">BPMF.data_reader_examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/data_reader_examples.html#BPMF.data_reader_examples.data_reader_mseed"><code class="docutils literal notranslate"><span class="pre">data_reader_mseed()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/data_reader_examples.html#BPMF.data_reader_examples.data_reader_pyasdf"><code class="docutils literal notranslate"><span class="pre">data_reader_pyasdf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/data_reader_examples.html#BPMF.data_reader_examples.data_reader_template"><code class="docutils literal notranslate"><span class="pre">data_reader_template()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/NLLoc_utils.html">BPMF.NLLoc_utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/NLLoc_utils.html#BPMF.NLLoc_utils.load_pykonal_tts"><code class="docutils literal notranslate"><span class="pre">load_pykonal_tts()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/NLLoc_utils.html#BPMF.NLLoc_utils.read_NLLoc_outputs"><code class="docutils literal notranslate"><span class="pre">read_NLLoc_outputs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/NLLoc_utils.html#BPMF.NLLoc_utils.write_NLLoc_control"><code class="docutils literal notranslate"><span class="pre">write_NLLoc_control()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/NLLoc_utils.html#BPMF.NLLoc_utils.write_NLLoc_inputs"><code class="docutils literal notranslate"><span class="pre">write_NLLoc_inputs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/NLLoc_utils.html#BPMF.NLLoc_utils.write_NLLoc_obs"><code class="docutils literal notranslate"><span class="pre">write_NLLoc_obs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/plotting_utils.html">BPMF.plotting_utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.add_scale_bar"><code class="docutils literal notranslate"><span class="pre">add_scale_bar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.initialize_map"><code class="docutils literal notranslate"><span class="pre">initialize_map()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.plot_catalog"><code class="docutils literal notranslate"><span class="pre">plot_catalog()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.plot_detection_matrix"><code class="docutils literal notranslate"><span class="pre">plot_detection_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.plot_template"><code class="docutils literal notranslate"><span class="pre">plot_template()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.uncertainty_ellipse"><code class="docutils literal notranslate"><span class="pre">uncertainty_ellipse()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/plotting_utils.html#BPMF.plotting_utils.vertical_uncertainty_ellipse"><code class="docutils literal notranslate"><span class="pre">vertical_uncertainty_ellipse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/similarity_search.html">BPMF.similarity_search</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter"><code class="docutils literal notranslate"><span class="pre">MatchedFilter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.components"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.components</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.compute_cc_time_series"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.compute_cc_time_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.find_detections"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.find_detections()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.memory_cc_time_series"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.memory_cc_time_series</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.plot_cc"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.plot_cc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.plot_detection"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.plot_detection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.run_matched_filter_search"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.run_matched_filter_search()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.select_cc_indexes"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.select_cc_indexes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.set_data"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.set_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.MatchedFilter.stations"><code class="docutils literal notranslate"><span class="pre">MatchedFilter.stations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/similarity_search.html#BPMF.similarity_search.time_dependent_threshold"><code class="docutils literal notranslate"><span class="pre">time_dependent_threshold()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/spectrum.html">BPMF.spectrum</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum"><code class="docutils literal notranslate"><span class="pre">Spectrum</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.compute_correction_factor"><code class="docutils literal notranslate"><span class="pre">Spectrum.compute_correction_factor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.compute_multi_band_spectrum"><code class="docutils literal notranslate"><span class="pre">Spectrum.compute_multi_band_spectrum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.compute_network_average_spectrum"><code class="docutils literal notranslate"><span class="pre">Spectrum.compute_network_average_spectrum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.compute_signal_to_noise_ratio"><code class="docutils literal notranslate"><span class="pre">Spectrum.compute_signal_to_noise_ratio()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.compute_spectrum"><code class="docutils literal notranslate"><span class="pre">Spectrum.compute_spectrum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.differentiate"><code class="docutils literal notranslate"><span class="pre">Spectrum.differentiate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.fit_average_spectrum"><code class="docutils literal notranslate"><span class="pre">Spectrum.fit_average_spectrum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.integrate"><code class="docutils literal notranslate"><span class="pre">Spectrum.integrate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.plot_average_spectrum"><code class="docutils literal notranslate"><span class="pre">Spectrum.plot_average_spectrum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.plot_spectrum"><code class="docutils literal notranslate"><span class="pre">Spectrum.plot_spectrum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.resample"><code class="docutils literal notranslate"><span class="pre">Spectrum.resample()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.set_Q_model"><code class="docutils literal notranslate"><span class="pre">Spectrum.set_Q_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.set_frequency_bands"><code class="docutils literal notranslate"><span class="pre">Spectrum.set_frequency_bands()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.set_target_frequencies"><code class="docutils literal notranslate"><span class="pre">Spectrum.set_target_frequencies()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.update_Q_model"><code class="docutils literal notranslate"><span class="pre">Spectrum.update_Q_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.Spectrum.update_attenuation_factor"><code class="docutils literal notranslate"><span class="pre">Spectrum.update_attenuation_factor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.boatwright"><code class="docutils literal notranslate"><span class="pre">boatwright()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.brune"><code class="docutils literal notranslate"><span class="pre">brune()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.compute_moment_magnitude"><code class="docutils literal notranslate"><span class="pre">compute_moment_magnitude()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.fc_circular_crack"><code class="docutils literal notranslate"><span class="pre">fc_circular_crack()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.magnitude_to_moment"><code class="docutils literal notranslate"><span class="pre">magnitude_to_moment()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.moment_to_magnitude"><code class="docutils literal notranslate"><span class="pre">moment_to_magnitude()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/spectrum.html#BPMF.spectrum.stress_drop_circular_crack"><code class="docutils literal notranslate"><span class="pre">stress_drop_circular_crack()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api/template_search.html">BPMF.template_search</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer"><code class="docutils literal notranslate"><span class="pre">Beamformer</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/template_search.html#BPMF.template_search.Beamformer.backproject"><code class="docutils literal notranslate"><span class="pre">Beamformer.backproject()</span></code></a></li>

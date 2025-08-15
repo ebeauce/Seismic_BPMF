@@ -137,12 +137,12 @@
 <span class="sd">    filtered_X: (n x m) numpy array,</span>
 <span class="sd">        The input array X after filtering.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">tukey</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal.windows</span><span class="w"> </span><span class="kn">import</span> <span class="n">tukey</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">iirfilter</span><span class="p">,</span> <span class="n">tukey</span>
-
-    <span class="c1"># from scipy.signal import lfilter</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">zpk2sos</span><span class="p">,</span> <span class="n">sosfilt</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">detrend</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">iirfilter</span><span class="p">,</span> <span class="n">zpk2sos</span><span class="p">,</span> <span class="n">sosfilt</span><span class="p">,</span> <span class="n">detrend</span>
 
     <span class="c1"># detrend the data</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">detrend</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
@@ -756,10 +756,10 @@
     <span class="n">matrix</span><span class="p">,</span>
     <span class="n">expl_var</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
     <span class="n">max_singular_values</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">wiener_filter_colsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">freqmin</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">MIN_FREQ_HZ</span><span class="p">,</span>
     <span class="n">freqmax</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">MAX_FREQ_HZ</span><span class="p">,</span>
-    <span class="n">sampling_rate</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">,</span>
-    <span class="n">wiener_filter_colsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">sampling_rate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implementation of the Singular Value Decomposition Wiener Filter (SVDWF)</span>
@@ -783,8 +783,9 @@
 <span class="sd">        Minimum target frequency, in Hz. Defaults to `BPMF.cfg.MIN_FREQ_HZ`.</span>
 <span class="sd">    freqmax : float, optional</span>
 <span class="sd">        Maximum target frequency, in Hz. Defaults to `BPMF.cfg.MAX_FREQ_HZ`.</span>
-<span class="sd">    sampling_rate : float, optional</span>
-<span class="sd">        Sampling rate of `matrix`. Defaults to `BPMF.cfg.SAMPLING_RATE_HZ`.</span>
+<span class="sd">    sampling_rate : float or None, optional</span>
+<span class="sd">        Sampling rate of `matrix`. Defaults to None, in which case no filtering</span>
+<span class="sd">        is applied..</span>
 <span class="sd">    wiener_filter_colsize : int, optional</span>
 <span class="sd">        Size of the wiener filter in the outermost dimension, that is, the</span>
 <span class="sd">        event axis. Defaults to None, in which case the filter has length `n`.</span>
@@ -846,15 +847,16 @@
     <span class="c1"># remove nans or infs</span>
     <span class="n">filtered_data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">filtered_data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="c1"># SVD adds noise in the low and the high frequencies</span>
-    <span class="c1"># refiltering the SVD-filtered data seems necessary</span>
-    <span class="n">filtered_data</span> <span class="o">=</span> <span class="n">bandpass_filter</span><span class="p">(</span>
-        <span class="n">filtered_data</span><span class="p">,</span>
-        <span class="n">filter_order</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-        <span class="n">freqmin</span><span class="o">=</span><span class="n">freqmin</span><span class="p">,</span>
-        <span class="n">freqmax</span><span class="o">=</span><span class="n">freqmax</span><span class="p">,</span>
-        <span class="n">f_Nyq</span><span class="o">=</span><span class="n">sampling_rate</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">sampling_rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># SVD adds noise in the low and the high frequencies</span>
+        <span class="c1"># refiltering the SVD-filtered data seems necessary</span>
+        <span class="n">filtered_data</span> <span class="o">=</span> <span class="n">bandpass_filter</span><span class="p">(</span>
+            <span class="n">filtered_data</span><span class="p">,</span>
+            <span class="n">filter_order</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">freqmin</span><span class="o">=</span><span class="n">freqmin</span><span class="p">,</span>
+            <span class="n">freqmax</span><span class="o">=</span><span class="n">freqmax</span><span class="p">,</span>
+            <span class="n">f_Nyq</span><span class="o">=</span><span class="n">sampling_rate</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">return</span> <span class="n">filtered_data</span></div>
 
 

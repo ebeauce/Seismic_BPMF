@@ -49,11 +49,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#description">Description</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reference">Reference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#from-source">From source</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#using-pip-recommended">Using pip (recommended)</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
@@ -109,27 +105,14 @@
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
 <p>You may need to edit the Makefile according to your OS (instructions in the Makefile’s comments), in particular if you are using a recent Mac!</p>
-<section id="from-source">
-<h3>From source<a class="headerlink" href="#from-source" title="Link to this heading"></a></h3>
-<p>A simple make + whichever implementation does the trick. Possible make commands are:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make<span class="w"> </span>python_cpu
-<span class="gp">$ </span>make<span class="w"> </span>python_gpu
-<span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>.
+<p>BPMF must be installed from source, which involves compiling C libraries. From the root directory, run:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>.
 </pre></div>
 </div>
-</section>
-<section id="using-pip-recommended">
-<h3>Using pip (recommended)<a class="headerlink" href="#using-pip-recommended" title="Link to this heading"></a></h3>
-<p>Installation as a Python module is possible via pip (which supports clean uninstalling):</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>setup.py<span class="w"> </span>build_ext
-<span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>.
-</pre></div>
-</div>
-<p>or simply:</p>
+<p>Or simply, from anywhere:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/ebeauce/Seismic_BPMF
 </pre></div>
 </div>
-</section>
 </section>
 </section>
 

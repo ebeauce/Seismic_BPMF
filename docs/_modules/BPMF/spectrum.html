@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BPMF.spectrum &mdash; BPMF 2.0.0beta2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -74,23 +74,23 @@
            <div itemprop="articleBody">
              
   <h1>Source code for BPMF.spectrum</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">scisig</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
-<span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">Stream</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scisig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">obspy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stream</span>
 
 
 <div class="viewcode-block" id="Spectrum">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum">[docs]</a>
-<span class="k">class</span> <span class="nc">Spectrum</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Spectrum</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for handling spectral data and calculations.$a</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frequency_bands</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frequency_bands</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -112,7 +112,7 @@
 
 <div class="viewcode-block" id="Spectrum.set_Q_model">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.set_Q_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_Q_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_Q_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the attenuation Q model for P and S phases.</span>
 
@@ -142,7 +142,7 @@
 
 <div class="viewcode-block" id="Spectrum.update_Q_model">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.update_Q_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_Q_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_Q_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Interpolate the Q-model at the current `self.frequencies`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -158,7 +158,7 @@
 
 <div class="viewcode-block" id="Spectrum.update_attenuation_factor">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.update_attenuation_factor">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_attenuation_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_attenuation_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute attenuation factor at the current `self.frequencies`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -178,7 +178,7 @@
 
 <div class="viewcode-block" id="Spectrum.compute_correction_factor">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_correction_factor">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_correction_factor</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_correction_factor</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">rho_source</span><span class="p">,</span>
         <span class="n">rho_receiver</span><span class="p">,</span>
@@ -222,7 +222,7 @@
 <span class="sd">        This method requires the object to have an attached `BPMF.dataset.Event`</span>
 <span class="sd">        instance and for the instance to have called the `set_source_receiver_dist(network)` method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;event&quot;</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Attach the BPMF.dataset.Event instance first.&quot;</span><span class="p">)</span>
@@ -281,7 +281,7 @@
 
 <div class="viewcode-block" id="Spectrum.compute_network_average_spectrum">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_network_average_spectrum">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_network_average_spectrum</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_network_average_spectrum</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">phase</span><span class="p">,</span>
         <span class="n">snr_threshold</span><span class="p">,</span>
@@ -438,7 +438,7 @@
 
 <div class="viewcode-block" id="Spectrum.compute_multi_band_spectrum">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_multi_band_spectrum">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_multi_band_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">buffer_seconds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_multi_band_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">buffer_seconds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute spectrum from the maximum amplitude in multiple 1-octave frequency bands.</span>
 
@@ -536,7 +536,7 @@
 
 <div class="viewcode-block" id="Spectrum.compute_spectrum">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_spectrum">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">taper</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">taper_kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">taper</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">taper_kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute spectrum using the Fast Fourier Transform (FFT) on the input traces.</span>
 
@@ -593,7 +593,7 @@
 
 <div class="viewcode-block" id="Spectrum.compute_signal_to_noise_ratio">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_signal_to_noise_ratio">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_signal_to_noise_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_signal_to_noise_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the signal-to-noise ratio (SNR) for the specified phase.</span>
 
@@ -647,7 +647,7 @@
 
 <div class="viewcode-block" id="Spectrum.integrate">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.integrate">[docs]</a>
-    <span class="k">def</span> <span class="nf">integrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">integrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Integrate the spectrum for a specific phase.</span>
 
@@ -689,7 +689,7 @@
 
 <div class="viewcode-block" id="Spectrum.differentiate">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.differentiate">[docs]</a>
-    <span class="k">def</span> <span class="nf">differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">differentiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply differentiation to the spectrum of the specified phase.</span>
 
@@ -732,7 +732,7 @@
 
 <div class="viewcode-block" id="Spectrum.fit_average_spectrum">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.fit_average_spectrum">[docs]</a>
-    <span class="k">def</span> <span class="nf">fit_average_spectrum</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_average_spectrum</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">phase</span><span class="p">,</span>
         <span class="n">model</span><span class="o">=</span><span class="s2">&quot;brune&quot;</span><span class="p">,</span>
@@ -778,8 +778,8 @@
 <span class="sd">        - If there are not enough valid points or valid points below the corner frequency,</span>
 <span class="sd">          the fitting is considered unsuccessful.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">curve_fit</span>
-        <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">curve_fit</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 
         <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">assert</span> <span class="p">(</span>
@@ -857,7 +857,7 @@
 
 <div class="viewcode-block" id="Spectrum.resample">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.resample">[docs]</a>
-    <span class="k">def</span> <span class="nf">resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_frequencies</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_frequencies</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Resample the spectrum to new frequencies.</span>
 
@@ -898,7 +898,7 @@
 
 <div class="viewcode-block" id="Spectrum.set_frequency_bands">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.set_frequency_bands">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_frequency_bands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequency_bands</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_frequency_bands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequency_bands</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the frequency bands for spectrum analysis.</span>
 
@@ -925,7 +925,7 @@
 
 <div class="viewcode-block" id="Spectrum.set_target_frequencies">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.set_target_frequencies">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_target_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq_min</span><span class="p">,</span> <span class="n">freq_max</span><span class="p">,</span> <span class="n">num_points</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_target_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq_min</span><span class="p">,</span> <span class="n">freq_max</span><span class="p">,</span> <span class="n">num_points</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the target frequencies for spectrum analysis.</span>
 
@@ -950,7 +950,7 @@
 
 <div class="viewcode-block" id="Spectrum.plot_average_spectrum">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.plot_average_spectrum">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_average_spectrum</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_average_spectrum</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">phase</span><span class="p">,</span>
         <span class="n">figname</span><span class="o">=</span><span class="s2">&quot;spectrum&quot;</span><span class="p">,</span>
@@ -993,8 +993,8 @@
 <span class="sd">        matplotlib.figure.Figure</span>
 <span class="sd">            The generated figure.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">fnmatch</span>
-        <span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">MaxNLocator</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">fnmatch</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.ticker</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxNLocator</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">phase</span> <span class="o">=</span> <span class="p">[</span><span class="n">phase</span><span class="p">]</span>
@@ -1062,7 +1062,7 @@
 
 <div class="viewcode-block" id="Spectrum.plot_spectrum">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.Spectrum.plot_spectrum">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_spectrum</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_spectrum</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">phase</span><span class="p">,</span>
         <span class="n">station</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1103,7 +1103,7 @@
 <span class="sd">        matplotlib.figure.Figure</span>
 <span class="sd">            The generated figure.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">fnmatch</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">fnmatch</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">phase</span> <span class="o">=</span> <span class="p">[</span><span class="n">phase</span><span class="p">]</span>
@@ -1164,7 +1164,7 @@
 
 <div class="viewcode-block" id="brune">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.brune">[docs]</a>
-<span class="k">def</span> <span class="nf">brune</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">omega0</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">brune</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">omega0</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Brune model.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">omega0</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">freqs</span> <span class="o">/</span> <span class="n">fc</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
@@ -1175,7 +1175,7 @@
 
 <div class="viewcode-block" id="boatwright">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.boatwright">[docs]</a>
-<span class="k">def</span> <span class="nf">boatwright</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">omega0</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">boatwright</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">omega0</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Boatwright model.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">omega0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">freqs</span> <span class="o">/</span> <span class="n">fc</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span><span class="p">)</span>
@@ -1186,7 +1186,7 @@
 
 <div class="viewcode-block" id="magnitude_to_moment">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.magnitude_to_moment">[docs]</a>
-<span class="k">def</span> <span class="nf">magnitude_to_moment</span><span class="p">(</span><span class="n">Mw</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">magnitude_to_moment</span><span class="p">(</span><span class="n">Mw</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert moment magnitude to seismic moment [N.m].&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">Mw</span> <span class="o">+</span> <span class="mf">9.1</span><span class="p">)</span></div>
 
@@ -1194,7 +1194,7 @@
 
 <div class="viewcode-block" id="moment_to_magnitude">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.moment_to_magnitude">[docs]</a>
-<span class="k">def</span> <span class="nf">moment_to_magnitude</span><span class="p">(</span><span class="n">M0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">moment_to_magnitude</span><span class="p">(</span><span class="n">M0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert seismic moment [N.m] to moment magnitude.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">M0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">9.1</span><span class="p">)</span></div>
 
@@ -1202,7 +1202,7 @@
 
 <div class="viewcode-block" id="fc_circular_crack">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.fc_circular_crack">[docs]</a>
-<span class="k">def</span> <span class="nf">fc_circular_crack</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fc_circular_crack</span><span class="p">(</span>
     <span class="n">Mw</span><span class="p">,</span> <span class="n">stress_drop_Pa</span><span class="o">=</span><span class="mf">1.0e6</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="n">vs_m_per_s</span><span class="o">=</span><span class="mf">3500.0</span><span class="p">,</span> <span class="n">vr_vs_ratio</span><span class="o">=</span><span class="mf">0.9</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1248,7 +1248,7 @@
 
 <div class="viewcode-block" id="stress_drop_circular_crack">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.stress_drop_circular_crack">[docs]</a>
-<span class="k">def</span> <span class="nf">stress_drop_circular_crack</span><span class="p">(</span><span class="n">Mw</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="n">vs_m_per_s</span><span class="o">=</span><span class="mf">3500.0</span><span class="p">,</span> <span class="n">vr_vs_ratio</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">stress_drop_circular_crack</span><span class="p">(</span><span class="n">Mw</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="n">vs_m_per_s</span><span class="o">=</span><span class="mf">3500.0</span><span class="p">,</span> <span class="n">vr_vs_ratio</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the stress drop assuming a circular crack model (Eshelby).</span>
 
@@ -1293,7 +1293,7 @@
 <span class="c1"># workflow function</span>
 <div class="viewcode-block" id="compute_moment_magnitude">
 <a class="viewcode-back" href="../../usage/api/spectrum.html#BPMF.spectrum.compute_moment_magnitude">[docs]</a>
-<span class="k">def</span> <span class="nf">compute_moment_magnitude</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_moment_magnitude</span><span class="p">(</span>
     <span class="n">event</span><span class="p">,</span>
     <span class="n">mag_params</span><span class="p">,</span>
     <span class="n">plot_above_Mw</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
