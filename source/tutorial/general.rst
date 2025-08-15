@@ -18,18 +18,22 @@ Once `Anaconda` or `Miniconda` is installed, you can use the :py:data:`conda` co
 
     $ conda config --add channels conda-forge
 
-We will then create a Python 3.10 environment named `BPMF_tuto`:
+We will then create a Python 3.12 environment named `BPMF_tuto`:
 
 
 .. code-block:: console
 
-    $ conda create -n BPMF_tuto python=3.10
+    $ conda create -n BPMF_tuto python=3.12
 
 We now need to activate this environment:
 
 .. code-block:: console
 
     $ conda activate BPMF_tuto
+
+
+C and CUDA-C Compilers
+^^^^^^^^^^^^^^^^^^^^^^
 
 In general, you can use :py:data:`conda` to locally install a C and a CUDA-C compiler.
 
@@ -46,12 +50,15 @@ OR, you may need `clang` if your machine uses one of the Apple Silicon chips. In
     $ conda install -c nvidia cuda-nvcc cuda-toolkit
 
 
+Standard Python packages
+^^^^^^^^^^^^^^^^^^^^^^^^
+
 Run the following command to install (almost) all the packages need for this tutorial:
 
 
 .. code-block:: console
 
-    $ conda install obspy numpy scipy pandas matplotlib h5py ipython jupyter cartopy colorcet
+    $ conda install obspy numpy scipy pandas matplotlib h5py ipython jupyter cartopy colorcet tqdm
 
 Beampower
 ^^^^^^^^^
@@ -88,49 +95,47 @@ for more information.
 PyKonal
 ^^^^^^^
 
-Then, download Pykonal from `https://github.com/malcolmw/pykonal <https://github.com/malcolmw/pykonal>`_. Pykonal is the package we will use for computing the P- and S-wave travel times. Once downloaded and unpacked, go to Pykonal's root folder and run:
+:py:data:`pykonal` is the package we will use for computing the P- and S-wave travel times (`https://github.com/malcolmw/pykonal <https://github.com/malcolmw/pykonal>`_). Install it with pip:
 
 .. code-block:: console
 
-    $ pip install .
+    $ pip install pykonal
 
-PhaseNet
-^^^^^^^^
+SeisBench
+^^^^^^^^^
 
-Several important features of :py:data:`BPMF` relies on the deep neural network phase picker PhaseNet. In order to use PhaseNet, you have to install :py:data:`seisbench` (`https://github.com/seisbench/seisbench <https://github.com/seisbench/seisbench>`_), a convenient python package to run the most popular machine learning earthquake pickers/detectors. Simply run: 
+The best results with :py:data:`BPMF` are achieved when using deep-learning-based phase pickers. :py:data:`seisbench` (`https://github.com/seisbench/seisbench <https://github.com/seisbench/seisbench>`_) provides a convenient and comprehensive API to effortlessly use a number of well known models, such as PhaseNet. Install :py:data:`seisbench` with: 
 
 .. code-block:: console
 
     $ pip install seisbench
 
-This should download the package :py:data:`torch`. Note that if you want to use GPU-accelerated :py:data:`seisbench` you will need to install :py:data:`torch` with GPU support. In this case, the pip install may make a mess with your cuda libraries if you installed cuda locally with `conda`. 
+This will also install the package :py:data:`torch`, including GPU support if your machine fits the requirements.
 
 NonLinLoc
 ^^^^^^^^^
 
-To benefit from the best location routines, you need to install the :py:data:`NLLoc` software (`http://alomax.free.fr/nlloc/ <http://alomax.free.fr/nlloc/>`_). You can download :py:data:`NLLoc` at `http://alomax.free.fr/nlloc/soft7.00/tar/NLL7.00_src.tgz <http://alomax.free.fr/nlloc/soft7.00/tar/NLL7.00_src.tgz>`_. For Unix and Mac users, I recommend doing something along the lines (modify as necessary):
+:py:data:`BPMF` provides an interface with the :py:data:`NLLoc` software (`http://alomax.free.fr/nlloc/ <http://alomax.free.fr/nlloc/>`_) for earthquake location. Get :py:data:`NLLoc` at `https://github.com/ut-beg-texnet/NonLinLoc <https://github.com/ut-beg-texnet/NonLinLoc>` and follow the installation instructions in the README.
 
 .. code-block:: console
 
-    $ mkdir ${HOME}/NLLoc
-    $ cd ${HOME}/NLLoc
-    $ wget http://alomax.free.fr/nlloc/soft7.00/tar/NLL7.00_src.tgz
-    $ tar -xvf archive_name
+    $ git clone https://github.com/ut-beg-texnet/NonLinLoc.git
+    $ cd NonLinLoc
+    $ cd src
+    $ rm CMakeCache.txt
+    $ cmake .
+    $ make
 
-And then, create a `bin` folder where `NLLoc`'s binary executable files will be stored after compilation.
+This will create a series of executable in the `bin` folder. Make this folder is added to your shell `PATH` variable. For example, add the following
 
 .. code-block:: console
     
-    $ mkdir ${HOME}/bin
-    $ export MYBIN=${HOME}/bin/
-    $ export PATH=${MYBIN}:$PATH
+    $ export PATH={/pathtononlinloc/}NonLinLoc/bin/:$PATH
 
-and add the last two lines to your `.bashrc` file (Mac users might need to do the equivalent for zsh or csh instead of bash). After that, you can run the `Makefile` from `${HOME}/NLLoc`.
+to your `.bashrc` file (Mac users might need to do the equivalent for zsh or csh instead of bash).
 
-.. code-block:: console
-
-    $ make
-
+BPMF
+^^^^
 
 Finally, we need to install :py:data:`BPMF` to our new environment. We refer you to the :ref:`Installation` Section of the documentation.
 
@@ -141,7 +146,13 @@ Running the Tutorial
 The tutorial is made of a series of Ipython notebooks that are meant to be run from 0 to 10.
 
 
-Reference
----------
+References
+----------
 
-Zhu, Weiqiang, and Gregory C. Beroza. "PhaseNet: a deep-neural-network-based seismic arrival-time picking method." Geophysical Journal International 216, no. 1 (2019): 261-273.
+Lomax, Anthony, Alberto Michelini, and Andrew Curtis. "Earthquake location, direct, global-search methods." In Encyclopedia of complexity and systems science, pp. 1-33. Springer, New York, NY, 2014.
+
+White, Malcolm CA, Hongjian Fang, Nori Nakata, and Yehuda Ben‐Zion. "PyKonal: a Python package for solving the eikonal equation in spherical and Cartesian coordinates using the fast marching method." Seismological Research Letters 91, no. 4 (2020): 2378-2389.
+
+Woollam, Jack, Jannes Münchmeyer, Frederik Tilmann, Andreas Rietbrock, Dietrich Lange, Thomas Bornstein, Tobias Diehl et al. "SeisBench—A toolbox for machine learning in seismology." Seismological Society of America 93, no. 3 (2022): 1695-1709.
+
+Zhu, Weiqiang, and Gregory C. Beroza. "PhaseNet: a deep-neural-network-based seismic arrival-time picking method." Geophysical Journal International 216, no. 1 (2019): 261-273

@@ -52,15 +52,18 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Pre-requisites</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#environment">Environment</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#base">Base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#c-and-cuda-c-compilers">C and CUDA-C Compilers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#standard-python-packages">Standard Python packages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#beampower">Beampower</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#fast-matched-filter">Fast Matched Filter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pykonal">PyKonal</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#phasenet">PhaseNet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#seisbench">SeisBench</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#nonlinloc">NonLinLoc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bpmf">BPMF</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#running-the-tutorial">Running the Tutorial</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reference">Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="notebooks/0_initialize_project.html">Project Initialization</a></li>
@@ -117,14 +120,17 @@
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>config<span class="w"> </span>--add<span class="w"> </span>channels<span class="w"> </span>conda-forge
 </pre></div>
 </div>
-<p>We will then create a Python 3.10 environment named <cite>BPMF_tuto</cite>:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>BPMF_tuto<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10
+<p>We will then create a Python 3.12 environment named <cite>BPMF_tuto</cite>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>BPMF_tuto<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.12
 </pre></div>
 </div>
 <p>We now need to activate this environment:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>activate<span class="w"> </span>BPMF_tuto
 </pre></div>
 </div>
+</section>
+<section id="c-and-cuda-c-compilers">
+<h3>C and CUDA-C Compilers<a class="headerlink" href="#c-and-cuda-c-compilers" title="Link to this heading"></a></h3>
 <p>In general, you can use <code class="xref py py-data docutils literal notranslate"><span class="pre">conda</span></code> to locally install a C and a CUDA-C compiler.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>gcc
 <span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>nvidia<span class="w"> </span>cuda-nvcc<span class="w"> </span>cuda-toolkit
@@ -135,8 +141,11 @@
 <span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>nvidia<span class="w"> </span>cuda-nvcc<span class="w"> </span>cuda-toolkit
 </pre></div>
 </div>
+</section>
+<section id="standard-python-packages">
+<h3>Standard Python packages<a class="headerlink" href="#standard-python-packages" title="Link to this heading"></a></h3>
 <p>Run the following command to install (almost) all the packages need for this tutorial:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>obspy<span class="w"> </span>numpy<span class="w"> </span>scipy<span class="w"> </span>pandas<span class="w"> </span>matplotlib<span class="w"> </span>h5py<span class="w"> </span>ipython<span class="w"> </span>jupyter<span class="w"> </span>cartopy<span class="w"> </span>colorcet
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>obspy<span class="w"> </span>numpy<span class="w"> </span>scipy<span class="w"> </span>pandas<span class="w"> </span>matplotlib<span class="w"> </span>h5py<span class="w"> </span>ipython<span class="w"> </span>jupyter<span class="w"> </span>cartopy<span class="w"> </span>colorcet<span class="w"> </span>tqdm
 </pre></div>
 </div>
 </section>
@@ -165,38 +174,38 @@ for more information.</p>
 </section>
 <section id="pykonal">
 <h3>PyKonal<a class="headerlink" href="#pykonal" title="Link to this heading"></a></h3>
-<p>Then, download Pykonal from <a class="reference external" href="https://github.com/malcolmw/pykonal">https://github.com/malcolmw/pykonal</a>. Pykonal is the package we will use for computing the P- and S-wave travel times. Once downloaded and unpacked, go to Pykonal’s root folder and run:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>.
+<p><code class="xref py py-data docutils literal notranslate"><span class="pre">pykonal</span></code> is the package we will use for computing the P- and S-wave travel times (<a class="reference external" href="https://github.com/malcolmw/pykonal">https://github.com/malcolmw/pykonal</a>). Install it with pip:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>pykonal
 </pre></div>
 </div>
 </section>
-<section id="phasenet">
-<h3>PhaseNet<a class="headerlink" href="#phasenet" title="Link to this heading"></a></h3>
-<p>Several important features of <code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code> relies on the deep neural network phase picker PhaseNet. In order to use PhaseNet, you have to install <code class="xref py py-data docutils literal notranslate"><span class="pre">seisbench</span></code> (<a class="reference external" href="https://github.com/seisbench/seisbench">https://github.com/seisbench/seisbench</a>), a convenient python package to run the most popular machine learning earthquake pickers/detectors. Simply run:</p>
+<section id="seisbench">
+<h3>SeisBench<a class="headerlink" href="#seisbench" title="Link to this heading"></a></h3>
+<p>The best results with <code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code> are achieved when using deep-learning-based phase pickers. <code class="xref py py-data docutils literal notranslate"><span class="pre">seisbench</span></code> (<a class="reference external" href="https://github.com/seisbench/seisbench">https://github.com/seisbench/seisbench</a>) provides a convenient and comprehensive API to effortlessly use a number of well known models, such as PhaseNet. Install <code class="xref py py-data docutils literal notranslate"><span class="pre">seisbench</span></code> with:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>seisbench
 </pre></div>
 </div>
-<p>This should download the package <code class="xref py py-data docutils literal notranslate"><span class="pre">torch</span></code>. Note that if you want to use GPU-accelerated <code class="xref py py-data docutils literal notranslate"><span class="pre">seisbench</span></code> you will need to install <code class="xref py py-data docutils literal notranslate"><span class="pre">torch</span></code> with GPU support. In this case, the pip install may make a mess with your cuda libraries if you installed cuda locally with <cite>conda</cite>.</p>
+<p>This will also install the package <code class="xref py py-data docutils literal notranslate"><span class="pre">torch</span></code>, including GPU support if your machine fits the requirements.</p>
 </section>
 <section id="nonlinloc">
 <h3>NonLinLoc<a class="headerlink" href="#nonlinloc" title="Link to this heading"></a></h3>
-<p>To benefit from the best location routines, you need to install the <code class="xref py py-data docutils literal notranslate"><span class="pre">NLLoc</span></code> software (<a class="reference external" href="http://alomax.free.fr/nlloc/">http://alomax.free.fr/nlloc/</a>). You can download <code class="xref py py-data docutils literal notranslate"><span class="pre">NLLoc</span></code> at <a class="reference external" href="http://alomax.free.fr/nlloc/soft7.00/tar/NLL7.00_src.tgz">http://alomax.free.fr/nlloc/soft7.00/tar/NLL7.00_src.tgz</a>. For Unix and Mac users, I recommend doing something along the lines (modify as necessary):</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mkdir<span class="w"> </span><span class="si">${</span><span class="nv">HOME</span><span class="si">}</span>/NLLoc
-<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span><span class="si">${</span><span class="nv">HOME</span><span class="si">}</span>/NLLoc
-<span class="gp">$ </span>wget<span class="w"> </span>http://alomax.free.fr/nlloc/soft7.00/tar/NLL7.00_src.tgz
-<span class="gp">$ </span>tar<span class="w"> </span>-xvf<span class="w"> </span>archive_name
+<p><code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code> provides an interface with the <code class="xref py py-data docutils literal notranslate"><span class="pre">NLLoc</span></code> software (<a class="reference external" href="http://alomax.free.fr/nlloc/">http://alomax.free.fr/nlloc/</a>) for earthquake location. Get <code class="xref py py-data docutils literal notranslate"><span class="pre">NLLoc</span></code> at <cite>https://github.com/ut-beg-texnet/NonLinLoc &lt;https://github.com/ut-beg-texnet/NonLinLoc&gt;</cite> and follow the installation instructions in the README.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ut-beg-texnet/NonLinLoc.git
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>NonLinLoc
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>src
+<span class="gp">$ </span>rm<span class="w"> </span>CMakeCache.txt
+<span class="gp">$ </span>cmake<span class="w"> </span>.
+<span class="gp">$ </span>make
 </pre></div>
 </div>
-<p>And then, create a <cite>bin</cite> folder where <cite>NLLoc</cite>’s binary executable files will be stored after compilation.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mkdir<span class="w"> </span><span class="si">${</span><span class="nv">HOME</span><span class="si">}</span>/bin
-<span class="gp">$ </span><span class="nb">export</span><span class="w"> </span><span class="nv">MYBIN</span><span class="o">=</span><span class="si">${</span><span class="nv">HOME</span><span class="si">}</span>/bin/
-<span class="gp">$ </span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="si">${</span><span class="nv">MYBIN</span><span class="si">}</span>:<span class="nv">$PATH</span>
+<p>This will create a series of executable in the <cite>bin</cite> folder. Make this folder is added to your shell <cite>PATH</cite> variable. For example, add the following</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">={</span>/pathtononlinloc/<span class="o">}</span>NonLinLoc/bin/:<span class="nv">$PATH</span>
 </pre></div>
 </div>
-<p>and add the last two lines to your <cite>.bashrc</cite> file (Mac users might need to do the equivalent for zsh or csh instead of bash). After that, you can run the <cite>Makefile</cite> from <cite>${HOME}/NLLoc</cite>.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make
-</pre></div>
-</div>
+<p>to your <cite>.bashrc</cite> file (Mac users might need to do the equivalent for zsh or csh instead of bash).</p>
+</section>
+<section id="bpmf">
+<h3>BPMF<a class="headerlink" href="#bpmf" title="Link to this heading"></a></h3>
 <p>Finally, we need to install <code class="xref py py-data docutils literal notranslate"><span class="pre">BPMF</span></code> to our new environment. We refer you to the <a class="reference internal" href="../introduction.html#installation"><span class="std std-ref">Installation</span></a> Section of the documentation.</p>
 </section>
 </section>
@@ -204,9 +213,12 @@ for more information.</p>
 <h2>Running the Tutorial<a class="headerlink" href="#running-the-tutorial" title="Link to this heading"></a></h2>
 <p>The tutorial is made of a series of Ipython notebooks that are meant to be run from 0 to 10.</p>
 </section>
-<section id="reference">
-<h2>Reference<a class="headerlink" href="#reference" title="Link to this heading"></a></h2>
-<p>Zhu, Weiqiang, and Gregory C. Beroza. “PhaseNet: a deep-neural-network-based seismic arrival-time picking method.” Geophysical Journal International 216, no. 1 (2019): 261-273.</p>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
+<p>Lomax, Anthony, Alberto Michelini, and Andrew Curtis. “Earthquake location, direct, global-search methods.” In Encyclopedia of complexity and systems science, pp. 1-33. Springer, New York, NY, 2014.</p>
+<p>White, Malcolm CA, Hongjian Fang, Nori Nakata, and Yehuda Ben‐Zion. “PyKonal: a Python package for solving the eikonal equation in spherical and Cartesian coordinates using the fast marching method.” Seismological Research Letters 91, no. 4 (2020): 2378-2389.</p>
+<p>Woollam, Jack, Jannes Münchmeyer, Frederik Tilmann, Andreas Rietbrock, Dietrich Lange, Thomas Bornstein, Tobias Diehl et al. “SeisBench—A toolbox for machine learning in seismology.” Seismological Society of America 93, no. 3 (2022): 1695-1709.</p>
+<p>Zhu, Weiqiang, and Gregory C. Beroza. “PhaseNet: a deep-neural-network-based seismic arrival-time picking method.” Geophysical Journal International 216, no. 1 (2019): 261-273</p>
 </section>
 </section>
 
