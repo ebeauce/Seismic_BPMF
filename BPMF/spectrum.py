@@ -243,7 +243,7 @@ class Spectrum:
             print("You requested correcting for propagation effects. ")
             print("You need to use compute_correction_factor first.")
             return
-        average_spectrum = np.ma.zeros(len(self.frequencies), dtype=np.float32)
+        average_spectrum = np.ma.zeros(len(self.frequencies), dtype=np.float64)
         masked_spectra = []
         signal_spectrum = getattr(self, f"{phase}_spectrum")
         snr_spectrum = getattr(self, f"snr_{phase}_spectrum")
@@ -387,7 +387,7 @@ class Spectrum:
             nyq = tr.stats.sampling_rate / 2.
             buffer_samples = int(buffer_seconds * tr.stats.sampling_rate)
             spectrum[tr.id] = {}
-            spectrum[tr.id]["spectrum"] = np.zeros(num_freqs, dtype=np.float32)
+            spectrum[tr.id]["spectrum"] = np.zeros(num_freqs, dtype=np.float64)
             spectrum[tr.id]["freq"] = np.zeros(num_freqs, dtype=np.float32)
             if dev_mode:
                 spectrum[tr.id]["filtered_traces"] = {}
@@ -529,7 +529,7 @@ class Spectrum:
         for trid in signal_spectrum:
             snr[trid] = {}
             snr_ = np.zeros(
-                len(signal_spectrum[trid]["spectrum"]), dtype=np.float32
+                len(signal_spectrum[trid]["spectrum"]), dtype=np.float64
             )
             if trid in noise_spectrum:
                 signal = np.abs(signal_spectrum[trid]["spectrum"])
