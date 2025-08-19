@@ -2057,6 +2057,10 @@ def find_picks(phase_probability, threshold, **kwargs):
     # set the width kwarg to 1 if not defined
     # so that `properties` has peak width info
     kwargs.setdefault("width", 1)
+    # adding condition on prominence helps discard
+    # the very small 'peaks' that are merely noise
+    # around actual peaks
+    kwargs.setdefault("prominence", 0.9*threshold)
     peak_indexes, peak_properties = find_peaks(
         phase_probability, height=threshold, **kwargs
     )
