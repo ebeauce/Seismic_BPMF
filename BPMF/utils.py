@@ -1456,12 +1456,13 @@ def compute_distances(
     from cartopy.geodesic import Geodesic
 
     # convert types if necessary
-    if isinstance(source_longitudes, list):
-        source_longitudes = np.asarray(source_longitudes)
-    if isinstance(source_latitudes, list):
-        source_latitudes = np.asarray(source_latitudes)
-    if isinstance(source_depths, list):
-        source_depths = np.asarray(source_depths)
+    source_longitudes = np.atleast_1d(source_longitudes)
+    source_latitudes = np.atleast_1d(source_latitudes)
+    source_depths = np.atleast_1d(source_depths)
+    receiver_longitudes = np.atleast_1d(receiver_longitudes)
+    receiver_latitudes = np.atleast_1d(receiver_latitudes)
+    receiver_depths = np.atleast_1d(receiver_depths)
+
 
     # initialize distance array
     hypocentral_distances = np.zeros(
