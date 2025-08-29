@@ -553,10 +553,7 @@ class Catalog(object):
             for path in path_to_files:
                 output.append(_read(path))
         if return_events:
-            if n_threads != 1:
-                events = [el for sublist in output for el in sublist]
-            else:
-                events = output
+            events = [el for sublist in output for el in sublist]
             return (
                 cls.read_from_events(
                     events, extra_attributes=extra_attributes, fill_value=fill_value
