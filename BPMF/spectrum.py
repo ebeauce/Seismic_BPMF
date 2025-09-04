@@ -713,7 +713,7 @@ class Spectrum:
         else:
             inverse_weights = None
         p0 = np.array([omega0_first_guess, fc_first_guess])
-        bounds = (np.array([0.0, 0.0]), np.array([np.inf, np.inf]))
+        bounds = (np.array([0.0, 0.0]), np.array([np.inf, 1.e3 * fc_first_guess]))
         try:
             popt, pcov = curve_fit(
                 mod, x, y, p0=p0, bounds=bounds, sigma=inverse_weights, **kwargs
