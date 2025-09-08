@@ -1456,12 +1456,13 @@ def compute_distances(
     from cartopy.geodesic import Geodesic
 
     # convert types if necessary
-    if isinstance(source_longitudes, list):
-        source_longitudes = np.asarray(source_longitudes)
-    if isinstance(source_latitudes, list):
-        source_latitudes = np.asarray(source_latitudes)
-    if isinstance(source_depths, list):
-        source_depths = np.asarray(source_depths)
+    source_longitudes = np.atleast_1d(source_longitudes)
+    source_latitudes = np.atleast_1d(source_latitudes)
+    source_depths = np.atleast_1d(source_depths)
+    receiver_longitudes = np.atleast_1d(receiver_longitudes)
+    receiver_latitudes = np.atleast_1d(receiver_latitudes)
+    receiver_depths = np.atleast_1d(receiver_depths)
+
 
     # initialize distance array
     hypocentral_distances = np.zeros(
@@ -2057,6 +2058,10 @@ def find_picks(phase_probability, threshold, **kwargs):
     # set the width kwarg to 1 if not defined
     # so that `properties` has peak width info
     kwargs.setdefault("width", 1)
+    # adding condition on prominence helps discard
+    # the very small 'peaks' that are merely noise
+    # around actual peaks
+    kwargs.setdefault("prominence", 0.9*threshold)
     peak_indexes, peak_properties = find_peaks(
         phase_probability, height=threshold, **kwargs
     )

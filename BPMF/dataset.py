@@ -553,10 +553,7 @@ class Catalog(object):
             for path in path_to_files:
                 output.append(_read(path))
         if return_events:
-            if n_threads != 1:
-                events = [el for sublist in output for el in sublist]
-            else:
-                events = output
+            events = [el for sublist in output for el in sublist]
             return (
                 cls.read_from_events(
                     events, extra_attributes=extra_attributes, fill_value=fill_value
@@ -1403,6 +1400,24 @@ class Event(object):
             n_samples=self.n_samples,
             verbose=True,
         )
+
+    def inherit_location(self, template_event):
+        """Copy location attributes from `template_event`.
+
+        Parameters
+        ----------
+        template_event : Event
+            An instance of `BPMF.dataset.Event` with location, and 
+            possibly location uncertainties, to inherit.
+        """
+        for attr in ["longitude", "latitude", "depth"]:
+            setattr(self, attr, getattr(template_event, attr))
+        if hasattr(template_event, "cov_mat"):
+            self.cov_mat = template_event.cov_mat
+            self.set_aux_data({"cov_mat": self.cov_mat})
+        elif hasattr(template_event, "aux_data") and ("cov_mat" in template_event.aux_data):
+            self.set_aux_data({"cov_mat": template_event.aux_data["cov_mat"]})
+            self.cov_mat = template_event.aux_data["cov_mat"]
 
     def compute_snr(self, noise_window_sec=5.0, **data_reader_kwargs):
         """
