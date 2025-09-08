@@ -108,8 +108,8 @@
   <section id="Relocation">
 <h1>Relocation<a class="headerlink" href="#Relocation" title="Link to this heading"></a></h1>
 <p>In the previous notebook, <code class="docutils literal notranslate"><span class="pre">5_backprojection</span></code>, we built a database of events detected with the backprojection technique. Here, we will improve the location of each of these events by using a more elaborated location technique.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -134,16 +134,8 @@
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Matched-filter GPU is not compiled! Should be here: /Users/eric/miniconda3/envs/py312/lib/python3.12/site-packages/fast_matched_filter/lib/matched_filter_GPU.so
-</pre></div></div>
-</div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">INPUT_DB_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;raw_bp.h5&quot;</span>
@@ -154,7 +146,7 @@ Matched-filter GPU is not compiled! Should be here: /Users/eric/miniconda3/envs/
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">net</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Network</span><span class="p">(</span><span class="n">NETWORK_FILENAME</span><span class="p">)</span>
@@ -166,7 +158,7 @@ Matched-filter GPU is not compiled! Should be here: /Users/eric/miniconda3/envs/
 <h2>Load the metadata of the events previously detected with backprojection<a class="headerlink" href="#Load-the-metadata-of-the-events-previously-detected-with-backprojection" title="Link to this heading"></a></h2>
 <p>In the previous notebook, we used <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.write</span></code> to save the metadata of each detected event to a hdf5 database. Here, we will use <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.read_from_file</span></code> to read the metadata and build a list of <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event</span></code> instances.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">backprojection_events</span> <span class="o">=</span> <span class="p">[]</span>
@@ -195,7 +187,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">initial_catalog</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;origin_time&quot;</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;depth&quot;</span><span class="p">])</span>
@@ -213,7 +205,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -367,7 +359,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 <p>Build a <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Catalog</span></code> instance from <code class="docutils literal notranslate"><span class="pre">initial_catalog</span></code> in order to benefit from the <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Catalog</span></code> plotting methods.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">initial_catalog</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Catalog</span><span class="o">.</span><span class="n">read_from_dataframe</span><span class="p">(</span>
@@ -377,7 +369,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">initial_catalog</span><span class="o">.</span><span class="n">catalog</span>
@@ -385,7 +377,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -539,7 +531,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 <p>Let’s plot the locations that the backprojection method produced.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">initial_catalog</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">network</span><span class="o">=</span><span class="n">net</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">markersize_station</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">lat_margin</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
@@ -576,7 +568,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 <section id="Automated-picking-and-relocation">
 <h3>Automated picking and relocation<a class="headerlink" href="#Automated-picking-and-relocation" title="Link to this heading"></a></h3>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># event extraction parameters</span>
@@ -595,7 +587,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t1</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
@@ -619,12 +611,12 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-1.47sec to read the waveforms for all 17 detections.
+2.54sec to read the waveforms for all 17 detections.
 </pre></div></div>
 </div>
 <p>Let’s plot these short windows with <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.plot</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># play with EVENT_IDX to plot different events</span>
@@ -642,7 +634,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 <p>Now, we will use <code class="docutils literal notranslate"><span class="pre">PhaseNet</span></code> to pick the P- and S-wave arrivals. This is done by defining a wrapper function to plug <code class="docutils literal notranslate"><span class="pre">PhaseNet</span></code> into the BPMF workflow with the <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.pick_PS_phases</span></code> method.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">ml_picker</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
@@ -687,7 +679,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PhaseNet picking parameters</span>
@@ -728,7 +720,7 @@ In hdf5, &#39;subfolders&#39; are called &#39;groups&#39;.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">)):</span>
@@ -781,7 +773,7 @@ Picking P and S wave arrivals on detection 16
 </div>
 <p>We are done with the automatic picking! Every instance of <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event</span></code> should now have a new attribute <code class="docutils literal notranslate"><span class="pre">picks</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
@@ -790,7 +782,7 @@ Picking P and S wave arrivals on detection 16
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -836,80 +828,80 @@ Picking P and S wave arrivals on detection 16
   <tbody>
     <tr>
       <th>DE07</th>
-      <td>0.750512</td>
-      <td>20.343639</td>
+      <td>0.750513</td>
+      <td>20.343641</td>
       <td>0.121599</td>
       <td>0.842435</td>
-      <td>22.558382</td>
+      <td>22.558384</td>
       <td>0.106735</td>
-      <td>2012-07-26T01:10:24.623639Z</td>
-      <td>2012-07-26T01:10:26.838382Z</td>
+      <td>2012-07-26T01:10:24.623641Z</td>
+      <td>2012-07-26T01:10:26.838384Z</td>
     </tr>
     <tr>
       <th>DC07</th>
       <td>0.641994</td>
-      <td>20.245672</td>
+      <td>20.245676</td>
       <td>0.156870</td>
       <td>0.613393</td>
-      <td>22.223631</td>
+      <td>22.223633</td>
       <td>0.136231</td>
-      <td>2012-07-26T01:10:24.525672Z</td>
-      <td>2012-07-26T01:10:26.503631Z</td>
+      <td>2012-07-26T01:10:24.525676Z</td>
+      <td>2012-07-26T01:10:26.503633Z</td>
     </tr>
     <tr>
       <th>DC08</th>
       <td>0.676526</td>
-      <td>20.038637</td>
+      <td>20.038641</td>
       <td>0.141339</td>
       <td>0.617997</td>
-      <td>21.945810</td>
+      <td>21.945808</td>
       <td>0.137248</td>
-      <td>2012-07-26T01:10:24.318637Z</td>
-      <td>2012-07-26T01:10:26.225810Z</td>
+      <td>2012-07-26T01:10:24.318641Z</td>
+      <td>2012-07-26T01:10:26.225808Z</td>
     </tr>
     <tr>
       <th>DE08</th>
-      <td>0.142299</td>
-      <td>19.640823</td>
-      <td>0.275763</td>
+      <td>0.142298</td>
+      <td>19.640827</td>
+      <td>0.275764</td>
       <td>0.294153</td>
       <td>21.971857</td>
       <td>0.254681</td>
-      <td>2012-07-26T01:10:23.920823Z</td>
+      <td>2012-07-26T01:10:23.920827Z</td>
       <td>2012-07-26T01:10:26.251857Z</td>
     </tr>
     <tr>
       <th>SPNC</th>
       <td>0.918656</td>
-      <td>20.107605</td>
+      <td>20.107607</td>
       <td>0.094761</td>
       <td>0.852687</td>
-      <td>21.982594</td>
+      <td>21.982595</td>
       <td>0.101620</td>
-      <td>2012-07-26T01:10:24.387605Z</td>
-      <td>2012-07-26T01:10:26.262594Z</td>
+      <td>2012-07-26T01:10:24.387607Z</td>
+      <td>2012-07-26T01:10:26.262595Z</td>
     </tr>
     <tr>
       <th>DC06</th>
-      <td>0.575692</td>
-      <td>20.782578</td>
-      <td>0.250013</td>
+      <td>0.575691</td>
+      <td>20.782576</td>
+      <td>0.250012</td>
       <td>0.845824</td>
       <td>23.215721</td>
       <td>0.106698</td>
-      <td>2012-07-26T01:10:25.062578Z</td>
+      <td>2012-07-26T01:10:25.062576Z</td>
       <td>2012-07-26T01:10:27.495721Z</td>
     </tr>
     <tr>
       <th>SAUV</th>
       <td>0.770925</td>
-      <td>19.604372</td>
-      <td>0.106772</td>
+      <td>19.604368</td>
+      <td>0.106771</td>
       <td>0.845173</td>
-      <td>21.107704</td>
+      <td>21.107708</td>
       <td>0.105764</td>
-      <td>2012-07-26T01:10:23.884372Z</td>
-      <td>2012-07-26T01:10:25.387704Z</td>
+      <td>2012-07-26T01:10:23.884368Z</td>
+      <td>2012-07-26T01:10:25.387708Z</td>
     </tr>
     <tr>
       <th>DD06</th>
@@ -917,10 +909,10 @@ Picking P and S wave arrivals on detection 16
       <td>20.373207</td>
       <td>0.209006</td>
       <td>0.779116</td>
-      <td>22.342867</td>
+      <td>22.342863</td>
       <td>0.113789</td>
       <td>2012-07-26T01:10:24.653207Z</td>
-      <td>2012-07-26T01:10:26.622867Z</td>
+      <td>2012-07-26T01:10:26.622863Z</td>
     </tr>
   </tbody>
 </table>
@@ -928,7 +920,7 @@ Picking P and S wave arrivals on detection 16
 </div>
 <p>These picks are automatically read when calling <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.plot</span></code>. Before plotting the waveforms with the newly obtained picks, let’s re-read the waveforms in the same format as before for the sake of easier visualization.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t1</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
@@ -952,7 +944,7 @@ Picking P and S wave arrivals on detection 16
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-1.31sec to read the waveforms for all 17 detections.
+2.70sec to read the waveforms for all 17 detections.
 </pre></div></div>
 </div>
 <p>The following plot shows:</p>
@@ -964,7 +956,7 @@ Picking P and S wave arrivals on detection 16
 <p>See how, in this tutorial, the backprojection locations already do a good job at predicting the P- and S-wave times… given the limitations of the 1D velocity model.</p>
 <p>Note: Try to run the phase picking again with <code class="docutils literal notranslate"><span class="pre">USE_APRIORI_PICKS=False</span></code> and see how the plot changes.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># play with EVENT_IDX to plot different events</span>
@@ -984,7 +976,7 @@ Picking P and S wave arrivals on detection 16
 </div>
 <p>We now are all set for using our favorite location software using PhaseNet’s picks. We can use <code class="docutils literal notranslate"><span class="pre">NLLoc</span></code> with one of <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event</span></code> methods. See <a class="reference external" href="http://alomax.free.fr/nlloc/">http://alomax.free.fr/nlloc/</a> for more info.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># location parameters</span>
@@ -999,7 +991,7 @@ Picking P and S wave arrivals on detection 16
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ev</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">):</span>
@@ -1043,7 +1035,7 @@ Relocating event 16
 </div>
 <p>Let’s plot the arrival times predicted by NLLoc’s location! As you can see, a 1D velocity model cannot fit the picks very well. The stations are right in the heterogeneous fault zone.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># play with EVENT_IDX to plot different events</span>
@@ -1063,7 +1055,7 @@ Relocating event 16
 </div>
 <p>It doesn’t look like much has changed… But we now have the location uncertainties. The uncertainty information is encoded in the covariance matrix, which is stored at <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event.aux_data[&quot;cov_mat&quot;]</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1081,16 +1073,16 @@ Relocating event 16
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The maximum horizontal location uncertainty of event 0 is 1.70km.
-The azimuth of the maximum horizontal uncertainty is 153.69degrees.
-The mainimumhorizontal location uncertainty of event 0 is 1.41km.
-The azimuth of the minimum horizontal uncertainty is 63.69degrees.
-The maximum vertical location uncertainty is 2.41km.
+The maximum horizontal location uncertainty of event 0 is 1.71km.
+The azimuth of the maximum horizontal uncertainty is 150.39degrees.
+The mainimumhorizontal location uncertainty of event 0 is 1.44km.
+The azimuth of the minimum horizontal uncertainty is 60.39degrees.
+The maximum vertical location uncertainty is 2.44km.
 </pre></div></div>
 </div>
 <p>Before plotting the map with the new locations, let’s make sure our locations are not unnecessarily biased by aberrant pick outliers. Even though we used <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>’s EDT method, which is robust to outliers, we can easily identify outliers and remove them.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># we set a maximum tolerable difference, in percentage, between the picked time and the predicted travel time</span>
@@ -1117,7 +1109,7 @@ The maximum vertical location uncertainty is 2.41km.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># play with EVENT_IDX to plot different events</span>
@@ -1140,7 +1132,7 @@ The maximum vertical location uncertainty is 2.41km.
 <h3>Gather the new catalog, clean up possible multiples and plot the new locations<a class="headerlink" href="#Gather-the-new-catalog,-clean-up-possible-multiples-and-plot-the-new-locations" title="Link to this heading"></a></h3>
 <p>Just like before, we make a new instance of <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Catalog</span></code> to use the built-in plotting methods.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># --- update event ids now that we have our final locations</span>
@@ -1170,12 +1162,12 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/eric/Documents/WORK/software/Seismic_BPMF/BPMF/dataset.py:324: UserWarning: no explicit representation of timezones available for np.datetime64
+/home/ebeauce/software/Seismic_BPMF/BPMF/dataset.py:324: UserWarning: no explicit representation of timezones available for np.datetime64
   np.asarray(origin_times, dtype=&#34;datetime64[ms]&#34;)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1225,10 +1217,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.728750</td>
       <td>12.6000</td>
       <td>2012-07-26 01:10:21.720</td>
-      <td>1.698487</td>
-      <td>1.414764</td>
-      <td>153.686127</td>
-      <td>2.414335</td>
+      <td>1.713889</td>
+      <td>1.438382</td>
+      <td>150.388474</td>
+      <td>2.443677</td>
     </tr>
     <tr>
       <th>2012-07-26T01:15:54.200000Z</th>
@@ -1236,10 +1228,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.717813</td>
       <td>9.1500</td>
       <td>2012-07-26 01:15:54.200</td>
-      <td>1.815575</td>
-      <td>1.080586</td>
-      <td>94.892570</td>
-      <td>1.836544</td>
+      <td>1.766185</td>
+      <td>0.957067</td>
+      <td>93.146858</td>
+      <td>2.177404</td>
     </tr>
     <tr>
       <th>2012-07-26T01:57:57.600000Z</th>
@@ -1258,10 +1250,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.669375</td>
       <td>10.7000</td>
       <td>2012-07-26 02:35:01.640</td>
-      <td>5.230615</td>
-      <td>2.131634</td>
-      <td>46.391747</td>
-      <td>2.980151</td>
+      <td>5.237969</td>
+      <td>2.169321</td>
+      <td>46.649498</td>
+      <td>3.042312</td>
     </tr>
     <tr>
       <th>2012-07-26T03:00:38.760000Z</th>
@@ -1269,10 +1261,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.711875</td>
       <td>11.9000</td>
       <td>2012-07-26 03:00:38.760</td>
-      <td>1.715005</td>
-      <td>1.174521</td>
-      <td>87.935600</td>
-      <td>2.962931</td>
+      <td>1.722674</td>
+      <td>1.167362</td>
+      <td>88.518181</td>
+      <td>3.007942</td>
     </tr>
     <tr>
       <th>2012-07-26T04:43:38.320000Z</th>
@@ -1280,10 +1272,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.723750</td>
       <td>10.2000</td>
       <td>2012-07-26 04:43:38.320</td>
-      <td>5.511346</td>
-      <td>2.587443</td>
-      <td>130.822739</td>
-      <td>4.229696</td>
+      <td>5.539433</td>
+      <td>2.653419</td>
+      <td>131.163864</td>
+      <td>4.183529</td>
     </tr>
     <tr>
       <th>2012-07-26T04:48:38.520000Z</th>
@@ -1291,21 +1283,21 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.720312</td>
       <td>9.3500</td>
       <td>2012-07-26 04:48:38.520</td>
-      <td>1.822953</td>
-      <td>0.915660</td>
-      <td>94.854744</td>
-      <td>2.632025</td>
+      <td>1.817742</td>
+      <td>0.925883</td>
+      <td>94.536827</td>
+      <td>2.592613</td>
     </tr>
     <tr>
-      <th>2012-07-26T08:08:25.680000Z</th>
-      <td>30.328418</td>
-      <td>40.720312</td>
-      <td>9.3500</td>
-      <td>2012-07-26 08:08:25.680</td>
-      <td>1.291449</td>
-      <td>0.997296</td>
-      <td>118.889877</td>
-      <td>2.928737</td>
+      <th>2012-07-26T08:08:25.760000Z</th>
+      <td>30.322559</td>
+      <td>40.720937</td>
+      <td>8.8500</td>
+      <td>2012-07-26 08:08:25.760</td>
+      <td>1.209022</td>
+      <td>0.942840</td>
+      <td>127.960640</td>
+      <td>2.648956</td>
     </tr>
     <tr>
       <th>2012-07-26T10:07:23.680000Z</th>
@@ -1313,32 +1305,32 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.717188</td>
       <td>8.9500</td>
       <td>2012-07-26 10:07:23.680</td>
-      <td>1.506835</td>
-      <td>0.934440</td>
-      <td>92.518990</td>
-      <td>2.340574</td>
+      <td>1.501076</td>
+      <td>0.950018</td>
+      <td>91.866226</td>
+      <td>2.387271</td>
     </tr>
     <tr>
-      <th>2012-07-26T11:55:35.920000Z</th>
-      <td>30.290576</td>
-      <td>40.610156</td>
-      <td>-0.6250</td>
-      <td>2012-07-26 11:55:35.920</td>
-      <td>4.056647</td>
-      <td>1.009115</td>
-      <td>143.165070</td>
-      <td>4.583938</td>
+      <th>2012-07-26T11:55:36.000000Z</th>
+      <td>30.287402</td>
+      <td>40.619687</td>
+      <td>-0.7500</td>
+      <td>2012-07-26 11:55:36.000</td>
+      <td>4.696620</td>
+      <td>1.133235</td>
+      <td>144.824448</td>
+      <td>4.342819</td>
     </tr>
     <tr>
       <th>2012-07-26T13:35:26.520000Z</th>
       <td>30.294238</td>
-      <td>40.793438</td>
+      <td>40.794063</td>
       <td>-1.9500</td>
       <td>2012-07-26 13:35:26.520</td>
-      <td>2.833779</td>
-      <td>0.946032</td>
-      <td>87.217918</td>
-      <td>4.114086</td>
+      <td>2.955352</td>
+      <td>0.966323</td>
+      <td>87.058800</td>
+      <td>3.966837</td>
     </tr>
     <tr>
       <th>2012-07-26T13:48:32.400000Z</th>
@@ -1346,10 +1338,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.720625</td>
       <td>12.3000</td>
       <td>2012-07-26 13:48:32.400</td>
-      <td>1.549857</td>
-      <td>1.404627</td>
-      <td>18.447174</td>
-      <td>2.727262</td>
+      <td>1.546550</td>
+      <td>1.414732</td>
+      <td>21.012421</td>
+      <td>2.729270</td>
     </tr>
     <tr>
       <th>2012-07-26T13:51:58.200000Z</th>
@@ -1357,10 +1349,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.711875</td>
       <td>13.5000</td>
       <td>2012-07-26 13:51:58.200</td>
-      <td>1.613285</td>
-      <td>1.436867</td>
-      <td>171.564072</td>
-      <td>3.265158</td>
+      <td>1.741413</td>
+      <td>1.491587</td>
+      <td>166.295975</td>
+      <td>3.198883</td>
     </tr>
     <tr>
       <th>2012-07-26T13:53:31.360000Z</th>
@@ -1368,21 +1360,21 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.720625</td>
       <td>12.1000</td>
       <td>2012-07-26 13:53:31.360</td>
-      <td>1.580810</td>
-      <td>1.416355</td>
-      <td>41.573853</td>
-      <td>2.860213</td>
+      <td>1.578368</td>
+      <td>1.425255</td>
+      <td>31.847794</td>
+      <td>2.887139</td>
     </tr>
     <tr>
       <th>2012-07-26T13:56:54.200000Z</th>
-      <td>30.345508</td>
-      <td>40.716875</td>
-      <td>9.1000</td>
+      <td>30.345996</td>
+      <td>40.717188</td>
+      <td>9.1500</td>
       <td>2012-07-26 13:56:54.200</td>
-      <td>2.321362</td>
-      <td>0.939128</td>
-      <td>84.500626</td>
-      <td>3.821277</td>
+      <td>2.007848</td>
+      <td>0.880852</td>
+      <td>86.483894</td>
+      <td>3.057234</td>
     </tr>
     <tr>
       <th>2012-07-26T15:06:20.120000Z</th>
@@ -1390,21 +1382,21 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.600078</td>
       <td>-1.9875</td>
       <td>2012-07-26 15:06:20.120</td>
-      <td>0.865955</td>
-      <td>0.523434</td>
-      <td>94.870903</td>
-      <td>0.354512</td>
+      <td>0.870097</td>
+      <td>0.518110</td>
+      <td>94.459953</td>
+      <td>0.358991</td>
     </tr>
     <tr>
-      <th>2012-07-26T17:28:20.360000Z</th>
-      <td>30.398242</td>
-      <td>40.709375</td>
-      <td>5.7000</td>
-      <td>2012-07-26 17:28:20.360</td>
-      <td>3.772975</td>
-      <td>1.206461</td>
-      <td>73.783661</td>
-      <td>5.774685</td>
+      <th>2012-07-26T17:28:21.640000Z</th>
+      <td>30.310352</td>
+      <td>40.654375</td>
+      <td>-0.5000</td>
+      <td>2012-07-26 17:28:21.640</td>
+      <td>4.602456</td>
+      <td>1.586548</td>
+      <td>63.806900</td>
+      <td>5.752606</td>
     </tr>
   </tbody>
 </table>
@@ -1413,7 +1405,7 @@ Class instance does not have a `cov_mat` attribute.
 <p>Remove possible multiple detections:</p>
 <p>The backprojection method does not have good inter-event time resolution because of the large uncertainties on the event origin times. There always exists a relatively large trade-off between the origin time and the location so it happens to detect the same event several times in a row if <code class="docutils literal notranslate"><span class="pre">MINIMUM_INTEREVENT_TIME_SEC</span></code> was not set large enough in <code class="docutils literal notranslate"><span class="pre">5_backprojection.ipynb</span></code>. After relocation with <code class="docutils literal notranslate"><span class="pre">NonLinLoc</span></code>, it is easier to identify such multiple detections.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># the criteria that determine whether two events are the same or not are of course somewhat arbitrary</span>
@@ -1424,7 +1416,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ---------------------------------------------------------</span>
@@ -1500,14 +1492,14 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/var/folders/dv/ly3mdyfn2rg8_nbsghjxvhjh0000gn/T/ipykernel_1244/3001744156.py:30: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+/tmp/ipykernel_2935334/3001744156.py:30: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
   nlloc_catalog.catalog.origin_time[i]
-/var/folders/dv/ly3mdyfn2rg8_nbsghjxvhjh0000gn/T/ipykernel_1244/3001744156.py:31: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+/tmp/ipykernel_2935334/3001744156.py:31: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
   - nlloc_catalog.catalog.origin_time[previous_ev]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1559,10 +1551,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.728750</td>
       <td>12.6000</td>
       <td>2012-07-26 01:10:21.720</td>
-      <td>1.698487</td>
-      <td>1.414764</td>
-      <td>153.686127</td>
-      <td>2.414335</td>
+      <td>1.713889</td>
+      <td>1.438382</td>
+      <td>150.388474</td>
+      <td>2.443677</td>
       <td>bp_0</td>
     </tr>
     <tr>
@@ -1571,10 +1563,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.717813</td>
       <td>9.1500</td>
       <td>2012-07-26 01:15:54.200</td>
-      <td>1.815575</td>
-      <td>1.080586</td>
-      <td>94.892570</td>
-      <td>1.836544</td>
+      <td>1.766185</td>
+      <td>0.957067</td>
+      <td>93.146858</td>
+      <td>2.177404</td>
       <td>bp_1</td>
     </tr>
     <tr>
@@ -1595,10 +1587,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.669375</td>
       <td>10.7000</td>
       <td>2012-07-26 02:35:01.640</td>
-      <td>5.230615</td>
-      <td>2.131634</td>
-      <td>46.391747</td>
-      <td>2.980151</td>
+      <td>5.237969</td>
+      <td>2.169321</td>
+      <td>46.649498</td>
+      <td>3.042312</td>
       <td>bp_3</td>
     </tr>
     <tr>
@@ -1607,10 +1599,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.711875</td>
       <td>11.9000</td>
       <td>2012-07-26 03:00:38.760</td>
-      <td>1.715005</td>
-      <td>1.174521</td>
-      <td>87.935600</td>
-      <td>2.962931</td>
+      <td>1.722674</td>
+      <td>1.167362</td>
+      <td>88.518181</td>
+      <td>3.007942</td>
       <td>bp_4</td>
     </tr>
     <tr>
@@ -1619,10 +1611,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.723750</td>
       <td>10.2000</td>
       <td>2012-07-26 04:43:38.320</td>
-      <td>5.511346</td>
-      <td>2.587443</td>
-      <td>130.822739</td>
-      <td>4.229696</td>
+      <td>5.539433</td>
+      <td>2.653419</td>
+      <td>131.163864</td>
+      <td>4.183529</td>
       <td>bp_5</td>
     </tr>
     <tr>
@@ -1631,22 +1623,22 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.720312</td>
       <td>9.3500</td>
       <td>2012-07-26 04:48:38.520</td>
-      <td>1.822953</td>
-      <td>0.915660</td>
-      <td>94.854744</td>
-      <td>2.632025</td>
+      <td>1.817742</td>
+      <td>0.925883</td>
+      <td>94.536827</td>
+      <td>2.592613</td>
       <td>bp_6</td>
     </tr>
     <tr>
-      <th>2012-07-26T08:08:25.680000Z</th>
-      <td>30.328418</td>
-      <td>40.720312</td>
-      <td>9.3500</td>
-      <td>2012-07-26 08:08:25.680</td>
-      <td>1.291449</td>
-      <td>0.997296</td>
-      <td>118.889877</td>
-      <td>2.928737</td>
+      <th>2012-07-26T08:08:25.760000Z</th>
+      <td>30.322559</td>
+      <td>40.720937</td>
+      <td>8.8500</td>
+      <td>2012-07-26 08:08:25.760</td>
+      <td>1.209022</td>
+      <td>0.942840</td>
+      <td>127.960640</td>
+      <td>2.648956</td>
       <td>bp_7</td>
     </tr>
     <tr>
@@ -1655,34 +1647,34 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.717188</td>
       <td>8.9500</td>
       <td>2012-07-26 10:07:23.680</td>
-      <td>1.506835</td>
-      <td>0.934440</td>
-      <td>92.518990</td>
-      <td>2.340574</td>
+      <td>1.501076</td>
+      <td>0.950018</td>
+      <td>91.866226</td>
+      <td>2.387271</td>
       <td>bp_8</td>
     </tr>
     <tr>
-      <th>2012-07-26T11:55:35.920000Z</th>
-      <td>30.290576</td>
-      <td>40.610156</td>
-      <td>-0.6250</td>
-      <td>2012-07-26 11:55:35.920</td>
-      <td>4.056647</td>
-      <td>1.009115</td>
-      <td>143.165070</td>
-      <td>4.583938</td>
+      <th>2012-07-26T11:55:36.000000Z</th>
+      <td>30.287402</td>
+      <td>40.619687</td>
+      <td>-0.7500</td>
+      <td>2012-07-26 11:55:36.000</td>
+      <td>4.696620</td>
+      <td>1.133235</td>
+      <td>144.824448</td>
+      <td>4.342819</td>
       <td>bp_9</td>
     </tr>
     <tr>
       <th>2012-07-26T13:35:26.520000Z</th>
       <td>30.294238</td>
-      <td>40.793438</td>
+      <td>40.794063</td>
       <td>-1.9500</td>
       <td>2012-07-26 13:35:26.520</td>
-      <td>2.833779</td>
-      <td>0.946032</td>
-      <td>87.217918</td>
-      <td>4.114086</td>
+      <td>2.955352</td>
+      <td>0.966323</td>
+      <td>87.058800</td>
+      <td>3.966837</td>
       <td>bp_10</td>
     </tr>
     <tr>
@@ -1691,10 +1683,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.720625</td>
       <td>12.3000</td>
       <td>2012-07-26 13:48:32.400</td>
-      <td>1.549857</td>
-      <td>1.404627</td>
-      <td>18.447174</td>
-      <td>2.727262</td>
+      <td>1.546550</td>
+      <td>1.414732</td>
+      <td>21.012421</td>
+      <td>2.729270</td>
       <td>bp_11</td>
     </tr>
     <tr>
@@ -1703,10 +1695,10 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.711875</td>
       <td>13.5000</td>
       <td>2012-07-26 13:51:58.200</td>
-      <td>1.613285</td>
-      <td>1.436867</td>
-      <td>171.564072</td>
-      <td>3.265158</td>
+      <td>1.741413</td>
+      <td>1.491587</td>
+      <td>166.295975</td>
+      <td>3.198883</td>
       <td>bp_12</td>
     </tr>
     <tr>
@@ -1715,22 +1707,22 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.720625</td>
       <td>12.1000</td>
       <td>2012-07-26 13:53:31.360</td>
-      <td>1.580810</td>
-      <td>1.416355</td>
-      <td>41.573853</td>
-      <td>2.860213</td>
+      <td>1.578368</td>
+      <td>1.425255</td>
+      <td>31.847794</td>
+      <td>2.887139</td>
       <td>bp_13</td>
     </tr>
     <tr>
       <th>2012-07-26T13:56:54.200000Z</th>
-      <td>30.345508</td>
-      <td>40.716875</td>
-      <td>9.1000</td>
+      <td>30.345996</td>
+      <td>40.717188</td>
+      <td>9.1500</td>
       <td>2012-07-26 13:56:54.200</td>
-      <td>2.321362</td>
-      <td>0.939128</td>
-      <td>84.500626</td>
-      <td>3.821277</td>
+      <td>2.007848</td>
+      <td>0.880852</td>
+      <td>86.483894</td>
+      <td>3.057234</td>
       <td>bp_14</td>
     </tr>
     <tr>
@@ -1739,22 +1731,22 @@ Class instance does not have a `cov_mat` attribute.
       <td>40.600078</td>
       <td>-1.9875</td>
       <td>2012-07-26 15:06:20.120</td>
-      <td>0.865955</td>
-      <td>0.523434</td>
-      <td>94.870903</td>
-      <td>0.354512</td>
+      <td>0.870097</td>
+      <td>0.518110</td>
+      <td>94.459953</td>
+      <td>0.358991</td>
       <td>bp_15</td>
     </tr>
     <tr>
-      <th>2012-07-26T17:28:20.360000Z</th>
-      <td>30.398242</td>
-      <td>40.709375</td>
-      <td>5.7000</td>
-      <td>2012-07-26 17:28:20.360</td>
-      <td>3.772975</td>
-      <td>1.206461</td>
-      <td>73.783661</td>
-      <td>5.774685</td>
+      <th>2012-07-26T17:28:21.640000Z</th>
+      <td>30.310352</td>
+      <td>40.654375</td>
+      <td>-0.5000</td>
+      <td>2012-07-26 17:28:21.640</td>
+      <td>4.602456</td>
+      <td>1.586548</td>
+      <td>63.806900</td>
+      <td>5.752606</td>
       <td>bp_16</td>
     </tr>
   </tbody>
@@ -1768,7 +1760,7 @@ Class instance does not have a `cov_mat` attribute.
 <li><p>Earthquakes are located outside the network, so large uncertainties cannot be avoided.</p></li>
 </ul>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span>
@@ -1793,7 +1785,7 @@ Class instance does not have a `cov_mat` attribute.
 <h2>Save the relocated events<a class="headerlink" href="#Save-the-relocated-events" title="Link to this heading"></a></h2>
 <p>Save all the events that were not identified as multiples to a hdf5 database.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
@@ -1803,7 +1795,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[59]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nlloc_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">)):</span>
@@ -1822,7 +1814,7 @@ Class instance does not have a `cov_mat` attribute.
 <p>The goal of this section is to explore an alternative to the PhaseNet + NonLinLoc workflow solely based on the use backprojection. If a “sparse” grid was used for the purpose of earthquake detection, then a fine grid can be used here.</p>
 <p>In the following, we run a “vanilla” backprojection that backprojects the waveforms’ envelopes (as defined by the Hilbert transform).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[60]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PHASES: list of seismic phases to use for backprojection</span>
@@ -1838,7 +1830,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 <p>For backprojection, we need to load the travel time grid and set up the <code class="docutils literal notranslate"><span class="pre">BPMF.template_search.Beamformer</span></code> instance.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[61]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tts</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">template_search</span><span class="o">.</span><span class="n">TravelTimes</span><span class="p">(</span>
@@ -1853,7 +1845,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1887,7 +1879,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[63]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># relocation parameters</span>
@@ -1898,7 +1890,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># uncomment this section to perform the backprojection-based relocation</span>
@@ -1940,7 +1932,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">beam_relocated_event</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">backprojection_events</span><span class="p">[</span><span class="n">EVENT_IDX</span><span class="p">])</span>
@@ -1969,7 +1961,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dummy_catalog</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Catalog</span><span class="o">.</span><span class="n">read_from_events</span><span class="p">(</span>
@@ -1981,8 +1973,17 @@ Class instance does not have a `cov_mat` attribute.
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/ebeauce/software/Seismic_BPMF/BPMF/dataset.py:324: UserWarning: no explicit representation of timezones available for np.datetime64
+  np.asarray(origin_times, dtype=&#34;datetime64[ms]&#34;)
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2027,15 +2028,15 @@ Class instance does not have a `cov_mat` attribute.
   </thead>
   <tbody>
     <tr>
-      <th>2012-07-26T01:10:21.800000Z</th>
-      <td>30.323047</td>
-      <td>40.73125</td>
-      <td>12.015625</td>
-      <td>2012-07-26 01:10:21.800</td>
-      <td>1.733366</td>
-      <td>1.182667</td>
-      <td>157.271635</td>
-      <td>2.640251</td>
+      <th>2012-07-26T01:10:21.720000Z</th>
+      <td>30.319141</td>
+      <td>40.72875</td>
+      <td>12.6</td>
+      <td>2012-07-26 01:10:21.720</td>
+      <td>1.713889</td>
+      <td>1.438382</td>
+      <td>150.388474</td>
+      <td>2.443677</td>
     </tr>
   </tbody>
 </table>
@@ -2043,7 +2044,7 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 <p>The difference between this backprojection and the “detection backprojection” of 5_backprojection is that, here, we stored the value of each beam of the 4D (x, y, z, time) grid! Below, we plot 3 slices of the (x, y, z, time=time of max beam) volume.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">cartopy.crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">PlateCarree</span>
@@ -2165,7 +2166,7 @@ Class instance does not have a `cov_mat` attribute.
 <p>where <span class="math notranslate nohighlight">\(e_{i,k^*}\)</span> is the epicentral distance between grid points <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(k^*\)</span> and <span class="math notranslate nohighlight">\(\Delta d_{i,k^*}\)</span> is the depth difference between grid points <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(k^*\)</span>.</p>
 <p>In this case, we assume the uncertainty ellipse to be isotropic, that is, <span class="math notranslate nohighlight">\(h_{max,unc} = h_{min,unc}\)</span>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[68]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">0</span>
@@ -2183,11 +2184,11 @@ Class instance does not have a `cov_mat` attribute.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The maximum horizontal location uncertainty of event 0 is 1.73km.
-The azimuth of the maximum horizontal uncertainty is 157.27degrees.
-The mainimum horizontal location uncertainty of event 0 is 1.18km.
-The azimuth of the minimum horizontal uncertainty is 67.27degrees.
-The maximum vertical location uncertainty is 2.64km with 29.70degrees plunge.
+The maximum horizontal location uncertainty of event 0 is 1.71km.
+The azimuth of the maximum horizontal uncertainty is 150.39degrees.
+The mainimum horizontal location uncertainty of event 0 is 1.44km.
+The azimuth of the minimum horizontal uncertainty is 60.39degrees.
+The maximum vertical location uncertainty is 2.44km with 29.33degrees plunge.
 </pre></div></div>
 </div>
 </section>

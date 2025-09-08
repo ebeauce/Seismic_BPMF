@@ -191,7 +191,7 @@ below the corner frequency (<span class="math notranslate nohighlight">\(f &lt; 
 <section id="Magnitude-Computation">
 <h1>Magnitude Computation<a class="headerlink" href="#Magnitude-Computation" title="Link to this heading"></a></h1>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">reload_ext</span> autoreload
@@ -215,7 +215,7 @@ below the corner frequency (<span class="math notranslate nohighlight">\(f &lt; 
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">INPUT_DB_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;final_catalog.h5&quot;</span>
@@ -224,7 +224,7 @@ below the corner frequency (<span class="math notranslate nohighlight">\(f &lt; 
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">net</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Network</span><span class="p">(</span><span class="n">NETWORK_FILENAME</span><span class="p">)</span>
@@ -236,7 +236,7 @@ below the corner frequency (<span class="math notranslate nohighlight">\(f &lt; 
 <h2>Load the metadata of the previously detected events<a class="headerlink" href="#Load-the-metadata-of-the-previously-detected-events" title="Link to this heading"></a></h2>
 <p>This is similar to what we did in 6_relocate.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span> <span class="o">=</span> <span class="p">[]</span>
@@ -269,11 +269,11 @@ below the corner frequency (<span class="math notranslate nohighlight">\(f &lt; 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Loaded 60 events.
+Loaded 53 events.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ev</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
@@ -286,66 +286,59 @@ Loaded 60 events.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0 2012-07-26T00:58:16.160000Z
-1 2012-07-26T01:16:29.640000Z
-2 2012-07-26T01:18:32.520000Z
-3 2012-07-26T01:47:30.080000Z
-4 2012-07-26T02:22:49.440000Z
-5 2012-07-26T01:02:52.920000Z
+0 2012-07-26T01:15:54.200000Z
+1 2012-07-26T01:16:30.040000Z
+2 2012-07-26T01:18:32.920000Z
+3 2012-07-26T01:39:55.520000Z
+4 2012-07-26T01:52:36.480000Z
+5 2012-07-26T02:24:36.560000Z
 6 2012-07-26T03:00:38.720000Z
-7 2012-07-26T03:32:50.800000Z
-8 2012-07-26T03:38:13.200000Z
-9 2012-07-26T13:48:32.440000Z
-10 2012-07-26T13:50:18.080000Z
-11 2012-07-26T13:53:31.320000Z
-12 2012-07-26T01:09:15.880000Z
-13 2012-07-26T01:10:21.800000Z
-14 2012-07-26T01:15:54.240000Z
-15 2012-07-26T01:39:55.440000Z
-16 2012-07-26T01:52:36.480000Z
-17 2012-07-26T02:24:36.480000Z
-18 2012-07-26T01:03:46.920000Z
-19 2012-07-26T01:12:32.880000Z
-20 2012-07-26T01:15:15.000000Z
-21 2012-07-26T00:58:11.080000Z
-22 2012-07-26T04:45:03.800000Z
-23 2012-07-26T13:51:58.160000Z
-24 2012-07-26T13:54:54.240000Z
-25 2012-07-26T13:56:54.320000Z
-26 2012-07-26T01:09:26.000000Z
-27 2012-07-26T01:10:22.080000Z
-28 2012-07-26T15:06:20.160000Z
-29 2012-07-26T17:28:20.320000Z
-30 2012-07-26T00:20:43.400000Z
-31 2012-07-26T01:58:19.720000Z
-32 2012-07-26T02:35:01.080000Z
-33 2012-07-26T01:35:14.720000Z
-34 2012-07-26T14:38:52.320000Z
-35 2012-07-26T02:43:23.080000Z
-36 2012-07-26T04:43:40.160000Z
-37 2012-07-26T04:46:51.080000Z
-38 2012-07-26T04:51:08.440000Z
-39 2012-07-26T14:49:28.560000Z
-40 2012-07-26T04:48:38.640000Z
-41 2012-07-26T01:52:27.960000Z
-42 2012-07-26T03:08:33.640000Z
-43 2012-07-26T03:10:55.080000Z
-44 2012-07-26T04:30:33.560000Z
-45 2012-07-26T05:22:04.480000Z
-46 2012-07-26T05:45:46.040000Z
-47 2012-07-26T05:46:59.280000Z
-48 2012-07-26T05:57:16.480000Z
-49 2012-07-26T08:08:25.760000Z
-50 2012-07-26T10:16:45.800000Z
-51 2012-07-26T10:53:46.560000Z
-52 2012-07-26T11:02:25.280000Z
-53 2012-07-26T09:21:39.400000Z
-54 2012-07-26T09:28:48.320000Z
-55 2012-07-26T10:07:23.720000Z
-56 2012-07-26T16:27:11.920000Z
-57 2012-07-26T16:33:57.680000Z
-58 2012-07-26T11:55:35.280000Z
-59 2012-07-26T13:35:26.440000Z
+7 2012-07-26T01:02:53.320000Z
+8 2012-07-26T13:48:32.440000Z
+9 2012-07-26T13:50:18.520000Z
+10 2012-07-26T13:53:31.320000Z
+11 2012-07-26T01:03:46.960000Z
+12 2012-07-26T01:10:21.760000Z
+13 2012-07-26T01:12:32.920000Z
+14 2012-07-26T01:15:14.040000Z
+15 2012-07-26T02:35:01.200000Z
+16 2012-07-26T01:35:15.200000Z
+17 2012-07-26T17:28:20.200000Z
+18 2012-07-26T14:38:50.520000Z
+19 2012-07-26T04:43:38.320000Z
+20 2012-07-26T04:46:49.240000Z
+21 2012-07-26T04:51:06.560000Z
+22 2012-07-26T14:49:28.440000Z
+23 2012-07-26T04:48:38.480000Z
+24 2012-07-26T01:52:28.040000Z
+25 2012-07-26T03:08:33.640000Z
+26 2012-07-26T03:10:55.160000Z
+27 2012-07-26T04:30:33.640000Z
+28 2012-07-26T05:22:04.560000Z
+29 2012-07-26T05:45:46.080000Z
+30 2012-07-26T05:46:59.320000Z
+31 2012-07-26T05:57:16.560000Z
+32 2012-07-26T08:08:25.560000Z
+33 2012-07-26T10:16:45.880000Z
+34 2012-07-26T10:53:46.680000Z
+35 2012-07-26T11:02:23.680000Z
+36 2012-07-26T09:21:39.320000Z
+37 2012-07-26T09:28:48.320000Z
+38 2012-07-26T10:07:23.680000Z
+39 2012-07-26T16:26:52.520000Z
+40 2012-07-26T16:33:57.640000Z
+41 2012-07-26T11:55:35.560000Z
+42 2012-07-26T13:35:24.400000Z
+43 2012-07-26T00:58:11.000000Z
+44 2012-07-26T00:58:16.560000Z
+45 2012-07-26T02:22:49.800000Z
+46 2012-07-26T04:45:03.880000Z
+47 2012-07-26T13:51:58.200000Z
+48 2012-07-26T13:54:54.160000Z
+49 2012-07-26T13:56:54.280000Z
+50 2012-07-26T01:09:25.880000Z
+51 2012-07-26T01:10:43.920000Z
+52 2012-07-26T15:06:20.080000Z
 </pre></div></div>
 </div>
 </section>
@@ -363,7 +356,7 @@ Loaded 60 events.
 <section id="Conventional-method:-Example-with-a-single-event">
 <h3>Conventional method: Example with a single event<a class="headerlink" href="#Conventional-method:-Example-with-a-single-event" title="Link to this heading"></a></h3>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#         waveform extraction parameters</span>
@@ -407,10 +400,10 @@ Loaded 60 events.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">13</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">12</span>
 <span class="n">event</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">EVENT_IDX</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The maximum horizontal location uncertainty of event </span><span class="si">{</span><span class="n">EVENT_IDX</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">hmax_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">km.&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The minimum horizontal location uncertainty of event </span><span class="si">{</span><span class="n">EVENT_IDX</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">hmin_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">km.&quot;</span><span class="p">)</span>
@@ -423,14 +416,14 @@ Loaded 60 events.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The maximum horizontal location uncertainty of event 13 is 1.77km.
-The minimum horizontal location uncertainty of event 13 is 1.30km.
-The maximum vertical location uncertainty is 2.65km.
+The maximum horizontal location uncertainty of event 12 is 1.72km.
+The minimum horizontal location uncertainty of event 12 is 1.49km.
+The maximum vertical location uncertainty is 2.48km.
 </pre></div></div>
 </div>
 <p>In the following, we define 3 <code class="docutils literal notranslate"><span class="pre">obspy.Stream</span></code> instances with the noise, P-wave and S-wave traces. Here, it is important to identify the clipped waveforms and set them to zero so that we don’t use them in the future. The identification of clipped waveforms is based on a simple kurtosis test (kurtosis is low for clipped waveforms because the extremum values are often reached).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#                 extract waveforms</span>
@@ -497,7 +490,7 @@ The maximum vertical location uncertainty is 2.65km.
 </div>
 <p>We can now compute the velocity spectra on each channel.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spectrum</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">)</span>
@@ -514,7 +507,7 @@ The maximum vertical location uncertainty is 2.65km.
 </div>
 <p>Let’s plot the velocity spectra and the signal-to-noise ratio (SNR) spectra.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">phase_to_plot</span> <span class="o">=</span> <span class="s2">&quot;s&quot;</span>
@@ -532,12 +525,12 @@ The maximum vertical location uncertainty is 2.65km.
 <p>Before correcting for geometrical spreading, we need to build an attenuation model. In general, body-wave attenuation in the lithosphere is described by he quality factor <span class="math notranslate nohighlight">\(Q\)</span>, which is related to frequency by (Aki, 1980):</p>
 <div class="math notranslate nohighlight">
 \[Q \propto f^{n},\ 0.5 \leq n \leq 0.8\quad (6)\]</div>
-<p>To build a simple model of attenuation, we assume that <span class="math notranslate nohighlight">\(Q^P = Q^S = Q_0 f^n\)</span>. We search for an adequate value of <span class="math notranslate nohighlight">\(Q_0\)</span> and <span class="math notranslate nohighlight">\(n\)</span> in the literature. <span class="math notranslate nohighlight">\(Q_0 = 33\)</span> and <span class="math notranslate nohighlight">\(n = 0.75\)</span> reproduce reasonably well the curves shown in Izgi et al., 2020.</p>
+<p>To build a simple model of attenuation, we assume that <span class="math notranslate nohighlight">\(Q^P = Q^S = Q_0 f^n\)</span> (this is a very crude approximation!!). We search for an adequate value of <span class="math notranslate nohighlight">\(Q_0\)</span> and <span class="math notranslate nohighlight">\(n\)</span> in the literature. <span class="math notranslate nohighlight">\(Q_0 = 33\)</span> and <span class="math notranslate nohighlight">\(n = 0.75\)</span> reproduce reasonably well the curves shown in Izgi et al., 2020.</p>
 <p>References:</p>
 <p>Aki, K. (1980). Attenuation of shear-waves in the lithosphere for frequencies from 0.05 to 25 Hz. Physics of the Earth and Planetary Interiors, 21(1), 50-60.</p>
 <p>Izgi, G., Eken, T., Gaebler, P., Eulenfeld, T., &amp; Taymaz, T. (2020). Crustal seismic attenuation parameters in the western region of the North Anatolian Fault Zone. Journal of Geodynamics, 134, 101694.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Q_1Hz</span> <span class="o">=</span> <span class="mf">33.</span>
@@ -547,7 +540,7 @@ The maximum vertical location uncertainty is 2.65km.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spectrum</span><span class="o">.</span><span class="n">set_Q_model</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
@@ -560,7 +553,7 @@ The maximum vertical location uncertainty is 2.65km.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[59]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">source_parameters</span> <span class="o">=</span> <span class="p">{}</span>
@@ -616,24 +609,16 @@ The maximum vertical location uncertainty is 2.65km.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Relative error on M0: 3.65%
-Relative error on fc: 3.20%
-Relative error on M0: 4.00%
-Relative error on fc: 3.04%
+Not enough valid points! (Only 49.00%)
+Relative error on M0: 3.95%
+Relative error on fc: 2.99%
 </pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_10_magnitudes_21_1.png" src="../../_images/tutorial_notebooks_10_magnitudes_21_1.png" />
-</div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_10_magnitudes_21_2.png" src="../../_images/tutorial_notebooks_10_magnitudes_21_2.png" />
+<img alt="../../_images/tutorial_notebooks_10_magnitudes_21_1.png" src="../../_images/tutorial_notebooks_10_magnitudes_21_1.png" />
 </div>
 </div>
 <p>The significant discrepancy between the P- and S-wave estimates probably comes from the difficulty of separating P and S waves at short distances. Thus, it’s better to simply use the S-wave estimate.</p>
@@ -650,7 +635,7 @@ Relative error on fc: 3.04%
 <p>Reference:</p>
 <p>Al‐Ismail, Fatimah, William L. Ellsworth, and Gregory C. Beroza. (2022) “A Time‐Domain Approach for Accurate Spectral Source Estimation with Application to Ridgecrest, California, Earthquakes.” Bulletin of the Seismological Society of America.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#         waveform extraction parameters</span>
@@ -714,7 +699,7 @@ Relative error on fc: 3.04%
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_filtered_traces</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">station_name</span><span class="p">,</span> <span class="n">noise_spectrum</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -760,10 +745,10 @@ Relative error on fc: 3.04%
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">13</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">EVENT_IDX</span> <span class="o">=</span> <span class="mi">12</span>
 <span class="n">event</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">EVENT_IDX</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The maximum horizontal location uncertainty of event </span><span class="si">{</span><span class="n">EVENT_IDX</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">hmax_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">km.&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The minimum horizontal location uncertainty of event </span><span class="si">{</span><span class="n">EVENT_IDX</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">hmin_unc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">km.&quot;</span><span class="p">)</span>
@@ -776,13 +761,13 @@ Relative error on fc: 3.04%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The maximum horizontal location uncertainty of event 13 is 1.77km.
-The minimum horizontal location uncertainty of event 13 is 1.30km.
-The maximum vertical location uncertainty is 2.65km.
+The maximum horizontal location uncertainty of event 12 is 1.72km.
+The minimum horizontal location uncertainty of event 12 is 1.49km.
+The maximum vertical location uncertainty is 2.48km.
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[68]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="c1">#                 extract waveforms</span>
@@ -845,7 +830,7 @@ The maximum vertical location uncertainty is 2.65km.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[69]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># -----------------------------------------</span>
@@ -929,7 +914,7 @@ The maximum vertical location uncertainty is 2.65km.
 </div>
 <p>Have a look at the bandpass filtered displacement seismograms from which the spectrum was built:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[70]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plot_filtered_traces</span><span class="p">(</span>
@@ -950,7 +935,7 @@ The maximum vertical location uncertainty is 2.65km.
 <section id="Estimate-a-moment-magnitude-for-every-event:-Al-Ismail-method-(preferred)">
 <h3>Estimate a moment magnitude for every event: Al-Ismail method (preferred)<a class="headerlink" href="#Estimate-a-moment-magnitude-for-every-event:-Al-Ismail-method-(preferred)" title="Link to this heading"></a></h3>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[71]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#         waveform extraction parameters</span>
@@ -1014,7 +999,7 @@ The maximum vertical location uncertainty is 2.65km.
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[72]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
@@ -1190,59 +1175,58 @@ The maximum vertical location uncertainty is 2.65km.
 <div class="highlight"><pre>
 ========================
 Processing event 0
-Class instance does not have a `cov_mat` attribute.
+Not enough valid points! (Only 35.00%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 1
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 2
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 3
-Class instance does not have a `cov_mat` attribute.
+Not enough valid points! (Only 30.00%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 4
-Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 5
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 6
 The P-S averaged moment magnitude is 1.88 +/- 0.03
 ========================
 Processing event 7
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 8
-Class instance does not have a `cov_mat` attribute.
-The P-S averaged moment magnitude is nan +/- nan
+The P-S averaged moment magnitude is 2.29 +/- 0.03
 ========================
 Processing event 9
-The P-S averaged moment magnitude is 2.28 +/- 0.03
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 10
-Class instance does not have a `cov_mat` attribute.
-The P-S averaged moment magnitude is nan +/- nan
+The P-S averaged moment magnitude is 2.27 +/- 0.02
 ========================
 Processing event 11
-The P-S averaged moment magnitude is 2.25 +/- 0.03
-========================
-Processing event 12
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
+Processing event 12
+The P-S averaged moment magnitude is 2.30 +/- 0.02
+========================
 Processing event 13
-The P-S averaged moment magnitude is 2.29 +/- 0.02
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 14
-Not enough valid points! (Only 35.00%)
+Not enough valid points! (Only 5.00%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 15
@@ -1255,27 +1239,27 @@ Processing event 17
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 18
-Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 19
-Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 20
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 21
-Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 22
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 23
-The P-S averaged moment magnitude is 2.03 +/- 0.03
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 24
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 25
@@ -1283,17 +1267,19 @@ Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 26
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 27
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 28
-Not enough valid points! (Only 35.00%)
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 29
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 30
@@ -1301,38 +1287,37 @@ Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 31
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 32
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 33
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 34
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 35
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 36
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 37
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 38
-Class instance does not have a `cov_mat` attribute.
-The P-S averaged moment magnitude is nan +/- nan
+The P-S averaged moment magnitude is 2.08 +/- 0.05
 ========================
 Processing event 39
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 40
@@ -1340,76 +1325,48 @@ Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 41
-Class instance does not have a `cov_mat` attribute.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 42
-Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 43
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 44
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 45
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 46
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 47
-Class instance does not have a `cov_mat` attribute.
-The P-S averaged moment magnitude is nan +/- nan
+The P-S averaged moment magnitude is 2.03 +/- 0.03
 ========================
 Processing event 48
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 49
-Not enough valid points! (Only 40.00%)
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 50
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 51
-Class instance does not have a `cov_mat` attribute.
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 52
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 53
-Class instance does not have a `cov_mat` attribute.
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 54
-Class instance does not have a `cov_mat` attribute.
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 55
-The P-S averaged moment magnitude is 2.08 +/- 0.05
-========================
-Processing event 56
 Spectrum is below SNR threshold everywhere, cannot fit it.
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 57
-Class instance does not have a `cov_mat` attribute.
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 58
-Spectrum is below SNR threshold everywhere, cannot fit it.
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 59
 The P-S averaged moment magnitude is nan +/- nan
 </pre></div></div>
 </div>
@@ -1459,7 +1416,7 @@ The P-S averaged moment magnitude is nan +/- nan
 <section id="Estimate-a-moment-magnitude-for-every-event:-Traditional-method-(un-comment-if-you-want-to-run-it)">
 <h3>Estimate a moment magnitude for every event: Traditional method (un-comment if you want to run it)<a class="headerlink" href="#Estimate-a-moment-magnitude-for-every-event:-Traditional-method-(un-comment-if-you-want-to-run-it)" title="Link to this heading"></a></h3>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[73]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#         waveform extraction parameters</span>
@@ -1508,7 +1465,7 @@ The P-S averaged moment magnitude is nan +/- nan
 </div>
 <p>Let’s run the magnitude computation code for every event. If fitting the network-averaged displacement spectrum is not possible because of poor SNR or location, or if the inverted parameters’ errors are too large then the moment magnitude cannot be estimated and the returned value is <code class="docutils literal notranslate"><span class="pre">nan</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[74]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
@@ -1672,21 +1629,26 @@ The P-S averaged moment magnitude is nan +/- nan
 <div class="highlight"><pre>
 ========================
 Processing event 0
+Not enough valid points! (Only 3.00%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 1
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 2
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 3
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 4
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 5
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 6
@@ -1694,31 +1656,35 @@ Not enough valid points! (Only 9.00%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 7
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 8
+Not enough valid points below corner frequency (only 6.0%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 9
-Not enough valid points below corner frequency (only 7.0%)
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 10
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 11
 Not enough valid points below corner frequency (only 0.0%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
+Processing event 11
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan
+========================
 Processing event 12
+Not enough valid points below corner frequency (only 7.0%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 13
-Not enough valid points below corner frequency (only 4.0%)
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 14
-Not enough valid points! (Only 3.00%)
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 15
@@ -1743,13 +1709,15 @@ Processing event 21
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 22
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 23
-Not enough valid points! (Only 12.00%)
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 24
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 25
@@ -1757,16 +1725,19 @@ Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 26
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 27
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 28
-Not enough valid points! (Only 7.00%)
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 29
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 30
@@ -1774,30 +1745,38 @@ Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 31
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 32
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 33
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 34
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 35
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 36
+Not enough valid points! (Only 1.00%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 37
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 38
+Not enough valid points! (Only 39.00%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 39
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 40
@@ -1808,25 +1787,30 @@ Processing event 41
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 42
-Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 43
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 44
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 45
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 46
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 47
+Not enough valid points! (Only 15.00%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 48
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 49
@@ -1834,36 +1818,15 @@ Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 50
+Spectrum is below SNR threshold everywhere, cannot fit it.
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 51
+Not enough valid points! (Only 2.00%)
 The P-S averaged moment magnitude is nan +/- nan
 ========================
 Processing event 52
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 53
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 54
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 55
-Not enough valid points! (Only 39.00%)
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 56
 Spectrum is below SNR threshold everywhere, cannot fit it.
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 57
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 58
-Spectrum is below SNR threshold everywhere, cannot fit it.
-The P-S averaged moment magnitude is nan +/- nan
-========================
-Processing event 59
 The P-S averaged moment magnitude is nan +/- nan
 </pre></div></div>
 </div>
@@ -1873,7 +1836,7 @@ The P-S averaged moment magnitude is nan +/- nan
 <h2>Approximate moment magnitude estimation<a class="headerlink" href="#Approximate-moment-magnitude-estimation" title="Link to this heading"></a></h2>
 <p>To compute the approximate moment magnitude <span class="math notranslate nohighlight">\(M_{w^*}\)</span> of an event, as we defined at the beginning of this notebook, we actually just need to add a block of code in the same processing that we used to estimate moment magnitudes. Thus, it usually makes sense to compute both at the same time. While most events do not produce a valid moment magnitude estimate, we get an approximate moment magnitude for each event.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[75]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="c1">#         waveform extraction parameters</span>
@@ -1944,7 +1907,7 @@ The P-S averaged moment magnitude is nan +/- nan
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[76]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">snr_based_weights</span><span class="p">(</span><span class="n">snr</span><span class="p">,</span> <span class="n">snr_threshold</span><span class="p">,</span> <span class="n">weight_max</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">max_num_bad_measurements</span><span class="o">=</span><span class="mi">9</span><span class="p">):</span>
@@ -1966,7 +1929,7 @@ The P-S averaged moment magnitude is nan +/- nan
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[78]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
@@ -2216,7 +2179,7 @@ The P-S averaged moment magnitude is nan +/- nan
 
     <span class="nb">print</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;The P-S averaged moment magnitude is </span><span class="si">{</span><span class="n">Mw</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> +/- </span><span class="si">{</span><span class="n">Mw_err</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;and the local magnitude is </span><span class="si">{</span><span class="n">Mw_approx</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;and the approximate moment magnitude is </span><span class="si">{</span><span class="n">Mw_approx</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
     <span class="c1"># save all this new information in BPMF.dataset.Event.aux_data</span>
     <span class="n">event</span><span class="o">.</span><span class="n">set_aux_data</span><span class="p">(</span><span class="n">source_parameters</span><span class="p">)</span>
@@ -2230,239 +2193,1093 @@ The P-S averaged moment magnitude is nan +/- nan
 <div class="highlight"><pre>
 ========================
 Processing event 0
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.21
-========================
-Processing event 1
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.35
-========================
-Processing event 2
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.17
-========================
-Processing event 3
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.34
-========================
-Processing event 4
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.25
-========================
-Processing event 5
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.28
-========================
-Processing event 6
-The P-S averaged moment magnitude is 1.88 +/- 0.03 and the local magnitude is 1.66
-========================
-Processing event 7
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.33
-========================
-Processing event 8
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.36
-========================
-Processing event 9
-The P-S averaged moment magnitude is 2.28 +/- 0.03 and the local magnitude is 2.18
-========================
-Processing event 10
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.47
-========================
-Processing event 11
-The P-S averaged moment magnitude is 2.25 +/- 0.03 and the local magnitude is 2.15
-========================
-Processing event 12
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.54
-========================
-Processing event 13
-The P-S averaged moment magnitude is 2.29 +/- 0.02 and the local magnitude is 2.16
-========================
-Processing event 14
-Not enough valid points! (Only 35.00%)
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.60
-========================
-Processing event 15
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.36
-========================
-Processing event 16
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.42
-========================
-Processing event 17
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.02
-========================
-Processing event 18
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.18
-========================
-Processing event 19
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.14
-========================
-Processing event 20
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.46
-========================
-Processing event 21
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.26
-========================
-Processing event 22
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.26
-========================
-Processing event 23
-The P-S averaged moment magnitude is 2.03 +/- 0.03 and the local magnitude is 1.86
-========================
-Processing event 24
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.50
-========================
-Processing event 25
-Spectrum is below SNR threshold everywhere, cannot fit it.
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.47
-========================
-Processing event 26
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.32
-========================
-Processing event 27
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 2.13
-========================
-Processing event 28
-Not enough valid points! (Only 35.00%)
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 2.00
-========================
-Processing event 29
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.39
-========================
-Processing event 30
-Spectrum is below SNR threshold everywhere, cannot fit it.
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.68
-========================
-Processing event 31
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.47
-========================
-Processing event 32
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.14
-========================
-Processing event 33
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 0.98
-========================
-Processing event 34
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.36
-========================
-Processing event 35
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.01
-========================
-Processing event 36
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.22
-========================
-Processing event 37
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.19
-========================
-Processing event 38
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.11
-========================
-Processing event 39
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.46
-========================
-Processing event 40
-Spectrum is below SNR threshold everywhere, cannot fit it.
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.28
-========================
-Processing event 41
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.35
-========================
-Processing event 42
-Spectrum is below SNR threshold everywhere, cannot fit it.
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.27
-========================
-Processing event 43
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.31
-========================
-Processing event 44
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.34
-========================
-Processing event 45
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.41
-========================
-Processing event 46
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.40
-========================
-Processing event 47
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.62
-========================
-Processing event 48
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.33
-========================
-Processing event 49
-Not enough valid points! (Only 40.00%)
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.89
-========================
-Processing event 50
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.38
-========================
-Processing event 51
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.75
-========================
-Processing event 52
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.11
-========================
-Processing event 53
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.86
-========================
-Processing event 54
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.28
-========================
-Processing event 55
-The P-S averaged moment magnitude is 2.08 +/- 0.05 and the local magnitude is 1.95
-========================
-Processing event 56
-Spectrum is below SNR threshold everywhere, cannot fit it.
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.25
-========================
-Processing event 57
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.24
-========================
-Processing event 58
-Spectrum is below SNR threshold everywhere, cannot fit it.
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.33
-========================
-Processing event 59
-The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;772102363365.0879&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_1.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_1.png" />
+<div class="highlight"><pre>
+Not enough valid points! (Only 35.00%)
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.60
+========================
+Processing event 1
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;532003897767.10736&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.26
+========================
+Processing event 2
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;507970486098.99194&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.27
+========================
+Processing event 3
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;470299061311.84174&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Not enough valid points! (Only 30.00%)
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.63
+========================
+Processing event 4
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;883987226585.5594&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.42
+========================
+Processing event 5
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;734711564057.551&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.11
+========================
+Processing event 6
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;450200394033.2132&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is 1.88 +/- 0.03 and the approximate moment magnitude is 1.66
+========================
+Processing event 7
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;87810684912.02907&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.25
+========================
+Processing event 8
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:145: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;2122986642993.463&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = np.median(
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is 2.29 +/- 0.03 and the approximate moment magnitude is 2.19
+========================
+Processing event 9
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;228627489345.9734&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.39
+========================
+Processing event 10
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;2758345527945.0947&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is 2.27 +/- 0.02 and the approximate moment magnitude is 2.15
+========================
+Processing event 11
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;450602480096.8624&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.18
+========================
+Processing event 12
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:145: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;2628277051024.041&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = np.median(
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is 2.30 +/- 0.02 and the approximate moment magnitude is 2.17
+========================
+Processing event 13
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;444150121311.96844&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.19
+========================
+Processing event 14
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;731186442805.5977&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Not enough valid points! (Only 5.00%)
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.48
+========================
+Processing event 15
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;367793923112.1274&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.39
+========================
+Processing event 16
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;403821227121.0637&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.33
+========================
+Processing event 17
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;591429238905.5813&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.31
+========================
+Processing event 18
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;494071829460.9085&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.33
+========================
+Processing event 19
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;548119407514.3116&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.16
+========================
+Processing event 20
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;501661132355.7745&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.26
+========================
+Processing event 21
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;537569079239.0409&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.13
+========================
+Processing event 22
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;935194755633.666&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.48
+========================
+Processing event 23
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;597385755529.7917&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.30
+========================
+Processing event 24
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;598569696416.3661&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.25
+========================
+Processing event 25
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;433043183429.0329&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.26
+========================
+Processing event 26
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;653155964422.0328&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.34
+========================
+Processing event 27
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;1410456454318.853&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.21
+========================
+Processing event 28
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;609285164361.2958&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.41
+========================
+Processing event 29
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;468116353009.8219&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.39
+========================
+Processing event 30
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;873902697331.8114&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.44
+========================
+Processing event 31
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;1062087531849.3342&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.24
+========================
+Processing event 32
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;973859798915.9071&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.75
+========================
+Processing event 33
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;887325720462.0553&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.34
+========================
+Processing event 34
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;2624415023601.182&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.76
+========================
+Processing event 35
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;1125293429533.5059&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.43
+========================
+Processing event 36
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;930883453483.9702&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.89
+========================
+Processing event 37
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;747236031646.3351&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.50
+========================
+Processing event 38
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;928290588871.247&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is 2.08 +/- 0.05 and the approximate moment magnitude is 1.95
+========================
+Processing event 39
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;1287744047973.0916&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.43
+========================
+Processing event 40
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;727875215848.2048&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.25
+========================
+Processing event 41
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;624062484481.3505&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.24
+========================
+Processing event 42
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;5856088900587.878&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 2.14
+========================
+Processing event 43
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;448526752583.9849&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.28
+========================
+Processing event 44
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;392051248887.1148&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.13
+========================
+Processing event 45
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;319030079163.63336&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.22
+========================
+Processing event 46
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;743031227150.9391&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.28
+========================
+Processing event 47
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;695979130103.2994&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The P-S averaged moment magnitude is 2.03 +/- 0.03 and the approximate moment magnitude is 1.85
+========================
+Processing event 48
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;541840650656.94135&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.67
+========================
+Processing event 49
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;602967437644.9066&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.47
+========================
+Processing event 50
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;293946264742.22546&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.33
+========================
+Processing event 51
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;761956164847.2507&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 1.93
+========================
+Processing event 52
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_2939483/2646755398.py:164: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;2857374502665.1533&#39; has dtype incompatible with float32, please explicitly cast to a compatible dtype first.
+  geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectrum is below SNR threshold everywhere, cannot fit it.
+The P-S averaged moment magnitude is nan +/- nan and the approximate moment magnitude is 2.00
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_107.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_107.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_2.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_2.png" />
+<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_108.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_108.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_3.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_3.png" />
+<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_109.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_109.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_4.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_4.png" />
+<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_110.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_110.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_5.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_5.png" />
+<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_111.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_111.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_6.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_6.png" />
+<img alt="../../_images/tutorial_notebooks_10_magnitudes_43_112.png" src="../../_images/tutorial_notebooks_10_magnitudes_43_112.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[79]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">magnitudes</span> <span class="o">=</span> <span class="p">{</span>
@@ -2477,7 +3294,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[79]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -2510,304 +3327,269 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
   </thead>
   <tbody>
     <tr>
-      <th>20120726_005816.160000</th>
+      <th>20120726_011554.200000</th>
       <td>NaN</td>
-      <td>1.207162</td>
+      <td>1.604723</td>
     </tr>
     <tr>
-      <th>20120726_011629.640000</th>
+      <th>20120726_011630.040000</th>
       <td>NaN</td>
-      <td>1.350513</td>
+      <td>1.263758</td>
     </tr>
     <tr>
-      <th>20120726_011832.520000</th>
+      <th>20120726_011832.920000</th>
       <td>NaN</td>
-      <td>1.165677</td>
+      <td>1.267286</td>
     </tr>
     <tr>
-      <th>20120726_014730.080000</th>
+      <th>20120726_013955.520000</th>
       <td>NaN</td>
-      <td>1.342158</td>
-    </tr>
-    <tr>
-      <th>20120726_022249.440000</th>
-      <td>NaN</td>
-      <td>1.245946</td>
-    </tr>
-    <tr>
-      <th>20120726_010252.920000</th>
-      <td>NaN</td>
-      <td>1.282594</td>
-    </tr>
-    <tr>
-      <th>20120726_030038.720000</th>
-      <td>1.880766</td>
-      <td>1.659528</td>
-    </tr>
-    <tr>
-      <th>20120726_033250.800000</th>
-      <td>NaN</td>
-      <td>1.333005</td>
-    </tr>
-    <tr>
-      <th>20120726_033813.200000</th>
-      <td>NaN</td>
-      <td>1.357563</td>
-    </tr>
-    <tr>
-      <th>20120726_134832.440000</th>
-      <td>2.283598</td>
-      <td>2.180985</td>
-    </tr>
-    <tr>
-      <th>20120726_135018.120000</th>
-      <td>NaN</td>
-      <td>1.468663</td>
-    </tr>
-    <tr>
-      <th>20120726_135331.360000</th>
-      <td>2.248894</td>
-      <td>2.153043</td>
-    </tr>
-    <tr>
-      <th>20120726_010915.880000</th>
-      <td>NaN</td>
-      <td>1.538680</td>
-    </tr>
-    <tr>
-      <th>20120726_011021.840000</th>
-      <td>2.290897</td>
-      <td>2.164841</td>
-    </tr>
-    <tr>
-      <th>20120726_011554.240000</th>
-      <td>NaN</td>
-      <td>1.602305</td>
-    </tr>
-    <tr>
-      <th>20120726_013955.440000</th>
-      <td>NaN</td>
-      <td>1.361321</td>
+      <td>1.628737</td>
     </tr>
     <tr>
       <th>20120726_015236.480000</th>
       <td>NaN</td>
-      <td>1.419641</td>
+      <td>1.424593</td>
     </tr>
     <tr>
-      <th>20120726_022436.480000</th>
+      <th>20120726_022436.560000</th>
       <td>NaN</td>
-      <td>1.019930</td>
+      <td>1.114642</td>
     </tr>
     <tr>
-      <th>20120726_010346.920000</th>
+      <th>20120726_030038.720000</th>
+      <td>1.880841</td>
+      <td>1.660956</td>
+    </tr>
+    <tr>
+      <th>20120726_010253.320000</th>
       <td>NaN</td>
-      <td>1.184990</td>
+      <td>1.251891</td>
     </tr>
     <tr>
-      <th>20120726_011232.880000</th>
+      <th>20120726_134832.440000</th>
+      <td>2.289566</td>
+      <td>2.188922</td>
+    </tr>
+    <tr>
+      <th>20120726_135018.520000</th>
       <td>NaN</td>
-      <td>1.140012</td>
+      <td>1.390803</td>
     </tr>
     <tr>
-      <th>20120726_011515.000000</th>
+      <th>20120726_135331.360000</th>
+      <td>2.269483</td>
+      <td>2.152488</td>
+    </tr>
+    <tr>
+      <th>20120726_010346.960000</th>
       <td>NaN</td>
-      <td>1.455202</td>
+      <td>1.179089</td>
     </tr>
     <tr>
-      <th>20120726_005811.120000</th>
+      <th>20120726_011021.760000</th>
+      <td>2.297319</td>
+      <td>2.174831</td>
+    </tr>
+    <tr>
+      <th>20120726_011232.920000</th>
       <td>NaN</td>
-      <td>1.263591</td>
+      <td>1.185124</td>
     </tr>
     <tr>
-      <th>20120726_044503.800000</th>
+      <th>20120726_011514.040000</th>
       <td>NaN</td>
-      <td>1.263764</td>
+      <td>1.476431</td>
     </tr>
     <tr>
-      <th>20120726_135158.160000</th>
-      <td>2.026122</td>
-      <td>1.859235</td>
-    </tr>
-    <tr>
-      <th>20120726_135454.240000</th>
+      <th>20120726_023501.200000</th>
       <td>NaN</td>
-      <td>1.496184</td>
+      <td>1.394825</td>
     </tr>
     <tr>
-      <th>20120726_135654.320000</th>
+      <th>20120726_013515.200000</th>
       <td>NaN</td>
-      <td>1.469914</td>
+      <td>1.330881</td>
     </tr>
     <tr>
-      <th>20120726_010926.000000</th>
+      <th>20120726_172820.200000</th>
       <td>NaN</td>
-      <td>1.319060</td>
+      <td>1.314680</td>
     </tr>
     <tr>
-      <th>20120726_011022.120000</th>
+      <th>20120726_143850.520000</th>
       <td>NaN</td>
-      <td>2.131043</td>
+      <td>1.334875</td>
     </tr>
     <tr>
-      <th>20120726_150620.160000</th>
+      <th>20120726_044338.320000</th>
       <td>NaN</td>
-      <td>1.997114</td>
+      <td>1.161341</td>
     </tr>
     <tr>
-      <th>20120726_172820.360000</th>
+      <th>20120726_044649.240000</th>
       <td>NaN</td>
-      <td>1.393548</td>
+      <td>1.264410</td>
     </tr>
     <tr>
-      <th>20120726_002043.400000</th>
+      <th>20120726_045106.600000</th>
       <td>NaN</td>
-      <td>1.676260</td>
+      <td>1.134567</td>
     </tr>
     <tr>
-      <th>20120726_015819.720000</th>
+      <th>20120726_144928.440000</th>
       <td>NaN</td>
-      <td>1.470920</td>
+      <td>1.478560</td>
     </tr>
     <tr>
-      <th>20120726_023501.120000</th>
+      <th>20120726_044838.480000</th>
       <td>NaN</td>
-      <td>1.139524</td>
+      <td>1.296359</td>
     </tr>
     <tr>
-      <th>20120726_013514.720000</th>
+      <th>20120726_015228.040000</th>
       <td>NaN</td>
-      <td>0.983534</td>
-    </tr>
-    <tr>
-      <th>20120726_143852.360000</th>
-      <td>NaN</td>
-      <td>1.362541</td>
-    </tr>
-    <tr>
-      <th>20120726_024323.080000</th>
-      <td>NaN</td>
-      <td>1.013562</td>
-    </tr>
-    <tr>
-      <th>20120726_044340.160000</th>
-      <td>NaN</td>
-      <td>1.219352</td>
-    </tr>
-    <tr>
-      <th>20120726_044651.080000</th>
-      <td>NaN</td>
-      <td>1.189360</td>
-    </tr>
-    <tr>
-      <th>20120726_045108.440000</th>
-      <td>NaN</td>
-      <td>1.109735</td>
-    </tr>
-    <tr>
-      <th>20120726_144928.560000</th>
-      <td>NaN</td>
-      <td>1.462207</td>
-    </tr>
-    <tr>
-      <th>20120726_044838.640000</th>
-      <td>NaN</td>
-      <td>1.279655</td>
-    </tr>
-    <tr>
-      <th>20120726_015227.960000</th>
-      <td>NaN</td>
-      <td>1.348423</td>
+      <td>1.245574</td>
     </tr>
     <tr>
       <th>20120726_030833.640000</th>
       <td>NaN</td>
-      <td>1.271191</td>
+      <td>1.261726</td>
     </tr>
     <tr>
-      <th>20120726_031055.080000</th>
+      <th>20120726_031055.160000</th>
       <td>NaN</td>
-      <td>1.313780</td>
+      <td>1.339742</td>
     </tr>
     <tr>
-      <th>20120726_043033.560000</th>
+      <th>20120726_043033.640000</th>
       <td>NaN</td>
-      <td>1.336812</td>
+      <td>1.214663</td>
     </tr>
     <tr>
-      <th>20120726_052204.480000</th>
+      <th>20120726_052204.560000</th>
       <td>NaN</td>
-      <td>1.413154</td>
+      <td>1.410922</td>
     </tr>
     <tr>
-      <th>20120726_054546.040000</th>
+      <th>20120726_054546.120000</th>
       <td>NaN</td>
-      <td>1.401359</td>
+      <td>1.385218</td>
     </tr>
     <tr>
-      <th>20120726_054659.280000</th>
+      <th>20120726_054659.360000</th>
       <td>NaN</td>
-      <td>1.615338</td>
+      <td>1.435205</td>
     </tr>
     <tr>
-      <th>20120726_055716.480000</th>
+      <th>20120726_055716.560000</th>
       <td>NaN</td>
-      <td>1.325751</td>
+      <td>1.244371</td>
     </tr>
     <tr>
-      <th>20120726_080825.760000</th>
+      <th>20120726_080825.600000</th>
       <td>NaN</td>
-      <td>1.891369</td>
+      <td>1.747621</td>
     </tr>
     <tr>
-      <th>20120726_101645.800000</th>
+      <th>20120726_101645.880000</th>
       <td>NaN</td>
-      <td>1.384388</td>
+      <td>1.344526</td>
     </tr>
     <tr>
-      <th>20120726_105346.600000</th>
+      <th>20120726_105346.680000</th>
       <td>NaN</td>
-      <td>1.750327</td>
+      <td>1.764048</td>
     </tr>
     <tr>
-      <th>20120726_110225.280000</th>
+      <th>20120726_110223.680000</th>
       <td>NaN</td>
-      <td>1.111823</td>
+      <td>1.429550</td>
     </tr>
     <tr>
-      <th>20120726_092139.400000</th>
+      <th>20120726_092139.360000</th>
       <td>NaN</td>
-      <td>1.862437</td>
+      <td>1.888350</td>
     </tr>
     <tr>
-      <th>20120726_092848.360000</th>
+      <th>20120726_092848.320000</th>
       <td>NaN</td>
-      <td>1.283042</td>
+      <td>1.500745</td>
     </tr>
     <tr>
-      <th>20120726_100723.720000</th>
-      <td>2.078875</td>
-      <td>1.948037</td>
+      <th>20120726_100723.680000</th>
+      <td>2.083996</td>
+      <td>1.951722</td>
     </tr>
     <tr>
-      <th>20120726_162711.920000</th>
+      <th>20120726_162652.520000</th>
       <td>NaN</td>
-      <td>1.248158</td>
+      <td>1.432201</td>
     </tr>
     <tr>
-      <th>20120726_163357.680000</th>
+      <th>20120726_163357.640000</th>
       <td>NaN</td>
-      <td>1.239655</td>
+      <td>1.252611</td>
     </tr>
     <tr>
-      <th>20120726_115535.280000</th>
+      <th>20120726_115535.560000</th>
       <td>NaN</td>
-      <td>1.330952</td>
+      <td>1.237141</td>
     </tr>
     <tr>
-      <th>20120726_133526.440000</th>
+      <th>20120726_133524.400000</th>
       <td>NaN</td>
-      <td>1.705370</td>
+      <td>2.135856</td>
+    </tr>
+    <tr>
+      <th>20120726_005811.000000</th>
+      <td>NaN</td>
+      <td>1.277841</td>
+    </tr>
+    <tr>
+      <th>20120726_005816.560000</th>
+      <td>NaN</td>
+      <td>1.131540</td>
+    </tr>
+    <tr>
+      <th>20120726_022249.840000</th>
+      <td>NaN</td>
+      <td>1.218735</td>
+    </tr>
+    <tr>
+      <th>20120726_044503.880000</th>
+      <td>NaN</td>
+      <td>1.279976</td>
+    </tr>
+    <tr>
+      <th>20120726_135158.200000</th>
+      <td>2.027339</td>
+      <td>1.853159</td>
+    </tr>
+    <tr>
+      <th>20120726_135454.160000</th>
+      <td>NaN</td>
+      <td>1.669978</td>
+    </tr>
+    <tr>
+      <th>20120726_135654.280000</th>
+      <td>NaN</td>
+      <td>1.471723</td>
+    </tr>
+    <tr>
+      <th>20120726_010925.880000</th>
+      <td>NaN</td>
+      <td>1.334967</td>
+    </tr>
+    <tr>
+      <th>20120726_011043.920000</th>
+      <td>NaN</td>
+      <td>1.934684</td>
+    </tr>
+    <tr>
+      <th>20120726_150620.120000</th>
+      <td>NaN</td>
+      <td>1.998655</td>
     </tr>
   </tbody>
 </table>
@@ -2818,7 +3600,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
 <h2>Magnitude distribution<a class="headerlink" href="#Magnitude-distribution" title="Link to this heading"></a></h2>
 <p>Let’s now have a look at the distribution of earthquake magnitudes. We provide a few functions for building, modeling and plotting the distribution.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[80]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">fM_distribution</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">Mmin</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">Mmax</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=-</span><span class="mi">10</span><span class="p">):</span>
@@ -3112,7 +3894,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[81]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">GR</span> <span class="o">=</span> <span class="n">MLE_bvalue</span><span class="p">(</span><span class="n">magnitudes</span><span class="p">[</span><span class="s2">&quot;Mw*&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
@@ -3120,7 +3902,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[82]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plot_bvalue</span><span class="p">(</span><span class="n">GR</span><span class="p">)</span>
@@ -3136,7 +3918,7 @@ The P-S averaged moment magnitude is nan +/- nan and the local magnitude is 1.71
 </div>
 <p>Of course, computing the Gutenberg-Richter b-value on a such a small catalog may not make sense at all.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[83]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">BPMF</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">donefun</span><span class="p">()</span>

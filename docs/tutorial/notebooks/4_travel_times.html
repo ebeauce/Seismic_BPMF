@@ -524,7 +524,7 @@ Min radius: 6341 km, min co-latitude: 0.86 rad, min azimuthal angle: 0.53 rad
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Computing travel times: 0it [00:00, ?it/s]Computing travel times: 8it [00:06,  1.23it/s]
+Computing travel times: 0it [00:00, ?it/s]Computing travel times: 8it [00:06,  1.24it/s]
 </pre></div></div>
 </div>
 </section>
@@ -861,11 +861,180 @@ Done!
 <br/></pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:435: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  (seismic_stations[&#34;longitude&#34;][s] &gt; map_longitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:436: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;longitude&#34;][s] &lt; map_longitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:437: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &gt; map_latitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:438: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &lt; map_latitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:442: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:443: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:450: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  if seismic_stations[&#34;stations&#34;][s] != &#34;&#34;:
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:452: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s] + 0.02,
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:453: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:454: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;stations&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:435: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  (seismic_stations[&#34;longitude&#34;][s] &gt; map_longitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:436: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;longitude&#34;][s] &lt; map_longitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:437: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &gt; map_latitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:438: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &lt; map_latitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:442: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:443: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:450: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  if seismic_stations[&#34;stations&#34;][s] != &#34;&#34;:
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:452: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s] + 0.02,
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:453: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:454: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;stations&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:435: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  (seismic_stations[&#34;longitude&#34;][s] &gt; map_longitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:436: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;longitude&#34;][s] &lt; map_longitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:437: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &gt; map_latitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:438: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &lt; map_latitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:442: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:443: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:450: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  if seismic_stations[&#34;stations&#34;][s] != &#34;&#34;:
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:452: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s] + 0.02,
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:453: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:454: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;stations&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:435: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  (seismic_stations[&#34;longitude&#34;][s] &gt; map_longitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:436: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;longitude&#34;][s] &lt; map_longitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:437: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &gt; map_latitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:438: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &lt; map_latitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:442: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:443: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:450: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  if seismic_stations[&#34;stations&#34;][s] != &#34;&#34;:
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:452: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s] + 0.02,
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:453: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:454: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;stations&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:435: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  (seismic_stations[&#34;longitude&#34;][s] &gt; map_longitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:436: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;longitude&#34;][s] &lt; map_longitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:437: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &gt; map_latitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:438: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &lt; map_latitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:442: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:443: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:450: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  if seismic_stations[&#34;stations&#34;][s] != &#34;&#34;:
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:452: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s] + 0.02,
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:453: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:454: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;stations&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:435: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  (seismic_stations[&#34;longitude&#34;][s] &gt; map_longitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:436: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;longitude&#34;][s] &lt; map_longitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:437: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &gt; map_latitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:438: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &lt; map_latitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:442: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:443: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:450: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  if seismic_stations[&#34;stations&#34;][s] != &#34;&#34;:
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:452: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s] + 0.02,
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:453: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:454: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;stations&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:435: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  (seismic_stations[&#34;longitude&#34;][s] &gt; map_longitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:436: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;longitude&#34;][s] &lt; map_longitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:437: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &gt; map_latitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:438: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &lt; map_latitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:442: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:443: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:450: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  if seismic_stations[&#34;stations&#34;][s] != &#34;&#34;:
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:452: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s] + 0.02,
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:453: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:454: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;stations&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:435: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  (seismic_stations[&#34;longitude&#34;][s] &gt; map_longitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:436: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;longitude&#34;][s] &lt; map_longitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:437: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &gt; map_latitudes[1])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:438: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  or (seismic_stations[&#34;latitude&#34;][s] &lt; map_latitudes[0])
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:442: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:443: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:450: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  if seismic_stations[&#34;stations&#34;][s] != &#34;&#34;:
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:452: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;longitude&#34;][s] + 0.02,
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:453: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;latitude&#34;][s],
+/home/ebeauce/software/Seismic_BPMF/BPMF/plotting_utils.py:454: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  seismic_stations[&#34;stations&#34;][s],
+/home/ebeauce/miniconda3/envs/hy8_py312/lib/python3.12/site-packages/cartopy/mpl/geoaxes.py:394: UserWarning: The `map_projection` keyword argument is deprecated, use `projection` to instantiate a GeoAxes instead.
+  warnings.warn(&#34;The `map_projection` keyword argument is &#34;
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_4_travel_times_29_0.png" src="../../_images/tutorial_notebooks_4_travel_times_29_0.png" />
+<img alt="../../_images/tutorial_notebooks_4_travel_times_29_1.png" src="../../_images/tutorial_notebooks_4_travel_times_29_1.png" />
 </div>
 </div>
 </section>

@@ -102,7 +102,7 @@
   <section id="Build-Template-Database">
 <h1>Build Template Database<a class="headerlink" href="#Build-Template-Database" title="Link to this heading"></a></h1>
 <p>In this notebook, we use the events detected in notebook 5, and further characterized in notebooks 6 ands 7, to build a database of template events. This step consists mostly in building data and metadata files but also allows the selection of events based on quality and the grouping of similar events. We want to avoid having too many similar templates in the database as it means useless, redundant computation in the template matching process (similar templates detect the same events).</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -121,14 +121,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">BPMF.data_reader_examples</span><span class="w"> </span><span class="kn">import</span> <span class="n">data_reader_mseed</span>
 <br/></pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Matched-filter GPU is not compiled! Should be here: /Users/eric/miniconda3/envs/py312/lib/python3.12/site-packages/fast_matched_filter/lib/matched_filter_GPU.so
-</pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -188,10 +180,14 @@ Matched-filter GPU is not compiled! Should be here: /Users/eric/miniconda3/envs/
         <span class="n">event</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">Event</span><span class="o">.</span><span class="n">read_from_file</span><span class="p">(</span>
             <span class="n">DB_FILENAME</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">OUTPUT_PATH</span><span class="p">,</span> <span class="n">gid</span><span class="o">=</span><span class="n">key</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="s2">&quot;NLLoc_success&quot;</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">aux_data</span><span class="p">:</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span> <span class="c1"># necessary if backprojection and template matching at not done at the same sampling rate</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;NLLoc_success&quot;</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">aux_data</span><span class="p">)</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;NLLoc_success&quot;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">hmax_unc</span> <span class="o">&lt;</span> <span class="n">HMAX_LOCATION_UNCERTAINTY_KM</span><span class="p">:</span>
                 <span class="c1"># if event was well relocated with NLLoc, use its location</span>
                 <span class="n">event</span><span class="o">.</span><span class="n">set_moveouts_to_theoretical_times</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># only use the best located events as templates</span>
+            <span class="k">continue</span>
         <span class="n">event</span><span class="o">.</span><span class="n">where</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">INPUT_PATH</span><span class="p">,</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">origin_time</span><span class="o">.</span><span class="n">year</span><span class="p">),</span>
@@ -234,7 +230,7 @@ Checking reloc_bp.h5...
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|██████████| 17/17 [00:02&lt;00:00,  6.84it/s]
+100%|██████████| 17/17 [00:04&lt;00:00,  4.10it/s]
 </pre></div></div>
 </div>
 </section>
@@ -292,16 +288,23 @@ Checking reloc_bp.h5...
 True ../BPMF_data/2012/intertp_cc.h5 False
 Computing the similarity matrix...
 Computing the inter-template directional errors...
-Computed inter-template CCs in 0.05sec.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/ebeauce/software/Seismic_BPMF/BPMF/dataset.py:4596: RuntimeWarning: invalid value encountered in divide
+  unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[:, np.newaxis]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
-/Users/eric/Documents/WORK/software/Seismic_BPMF/BPMF/dataset.py:4582: RuntimeWarning: invalid value encountered in divide
-  unit_direction /= np.sqrt(np.sum(unit_direction**2, axis=1))[:, np.newaxis]
+Computed inter-template CCs in 2.31sec.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -351,7 +354,6 @@ Computed inter-template CCs in 0.05sec.
       <th>13</th>
       <th>14</th>
       <th>15</th>
-      <th>16</th>
     </tr>
   </thead>
   <tbody>
@@ -359,188 +361,159 @@ Computed inter-template CCs in 0.05sec.
       <th>0</th>
       <td>1.000000</td>
       <td>0.559639</td>
-      <td>0.000000</td>
       <td>0.237905</td>
       <td>0.658476</td>
       <td>0.125906</td>
       <td>0.349816</td>
-      <td>0.434551</td>
+      <td>0.395224</td>
       <td>0.305461</td>
       <td>0.000000</td>
       <td>0.0</td>
       <td>0.754021</td>
       <td>0.508248</td>
       <td>0.770461</td>
-      <td>0.383099</td>
+      <td>0.368720</td>
       <td>0.000000</td>
-      <td>0.174441</td>
+      <td>0.000000</td>
     </tr>
     <tr>
       <th>1</th>
       <td>0.559639</td>
       <td>1.000000</td>
-      <td>0.146489</td>
       <td>0.242573</td>
       <td>0.504128</td>
       <td>0.143789</td>
       <td>0.386010</td>
-      <td>0.454618</td>
+      <td>0.442590</td>
       <td>0.306094</td>
       <td>0.000000</td>
       <td>0.0</td>
       <td>0.482705</td>
       <td>0.359752</td>
       <td>0.509030</td>
-      <td>0.470346</td>
+      <td>0.470342</td>
       <td>0.000000</td>
-      <td>0.174221</td>
+      <td>0.000000</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.000000</td>
-      <td>0.146489</td>
-      <td>1.000000</td>
-      <td>0.203993</td>
-      <td>0.159324</td>
-      <td>0.187586</td>
-      <td>0.182059</td>
-      <td>0.159073</td>
-      <td>0.139724</td>
-      <td>0.185361</td>
-      <td>0.0</td>
-      <td>0.142176</td>
-      <td>0.155862</td>
-      <td>0.125403</td>
-      <td>0.183236</td>
-      <td>0.184122</td>
-      <td>0.207473</td>
-    </tr>
-    <tr>
-      <th>3</th>
       <td>0.237905</td>
       <td>0.242573</td>
-      <td>0.203993</td>
       <td>1.000000</td>
       <td>0.235402</td>
       <td>0.184906</td>
       <td>0.221147</td>
-      <td>0.193829</td>
+      <td>0.201339</td>
       <td>0.180018</td>
-      <td>0.158489</td>
+      <td>0.155212</td>
       <td>0.0</td>
       <td>0.227727</td>
       <td>0.185032</td>
       <td>0.215122</td>
-      <td>0.230660</td>
+      <td>0.222629</td>
       <td>0.000000</td>
-      <td>0.182517</td>
+      <td>0.000000</td>
     </tr>
     <tr>
-      <th>4</th>
+      <th>3</th>
       <td>0.658476</td>
       <td>0.504128</td>
-      <td>0.159324</td>
       <td>0.235402</td>
       <td>1.000000</td>
       <td>0.151123</td>
       <td>0.372494</td>
-      <td>0.430288</td>
+      <td>0.423800</td>
       <td>0.301853</td>
       <td>0.000000</td>
       <td>0.0</td>
       <td>0.623572</td>
       <td>0.578178</td>
       <td>0.602277</td>
-      <td>0.413449</td>
+      <td>0.427195</td>
       <td>0.000000</td>
-      <td>0.208349</td>
+      <td>0.000000</td>
     </tr>
     <tr>
-      <th>5</th>
+      <th>4</th>
       <td>0.125906</td>
       <td>0.143789</td>
-      <td>0.187586</td>
       <td>0.184906</td>
       <td>0.151123</td>
       <td>1.000000</td>
       <td>0.149263</td>
-      <td>0.119723</td>
+      <td>0.114303</td>
       <td>0.135881</td>
       <td>0.000000</td>
       <td>0.0</td>
       <td>0.117979</td>
       <td>0.115291</td>
       <td>0.110907</td>
-      <td>0.153645</td>
+      <td>0.154486</td>
       <td>0.000000</td>
-      <td>0.153511</td>
+      <td>0.179920</td>
     </tr>
     <tr>
-      <th>6</th>
+      <th>5</th>
       <td>0.349816</td>
       <td>0.386010</td>
-      <td>0.182059</td>
       <td>0.221147</td>
       <td>0.372494</td>
       <td>0.149263</td>
       <td>1.000000</td>
-      <td>0.353850</td>
+      <td>0.354931</td>
       <td>0.314605</td>
       <td>0.000000</td>
       <td>0.0</td>
       <td>0.349831</td>
       <td>0.292897</td>
       <td>0.338853</td>
-      <td>0.363107</td>
+      <td>0.363080</td>
       <td>0.000000</td>
-      <td>0.162088</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>0.395224</td>
+      <td>0.442590</td>
+      <td>0.201339</td>
+      <td>0.423800</td>
+      <td>0.114303</td>
+      <td>0.354931</td>
+      <td>1.000000</td>
+      <td>0.302241</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.410315</td>
+      <td>0.357536</td>
+      <td>0.419088</td>
+      <td>0.399775</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
     </tr>
     <tr>
       <th>7</th>
-      <td>0.434551</td>
-      <td>0.454618</td>
-      <td>0.159073</td>
-      <td>0.193829</td>
-      <td>0.430288</td>
-      <td>0.119723</td>
-      <td>0.353850</td>
-      <td>1.000000</td>
-      <td>0.294828</td>
-      <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.435631</td>
-      <td>0.372027</td>
-      <td>0.439064</td>
-      <td>0.399177</td>
-      <td>0.000000</td>
-      <td>0.178389</td>
-    </tr>
-    <tr>
-      <th>8</th>
       <td>0.305461</td>
       <td>0.306094</td>
-      <td>0.139724</td>
       <td>0.180018</td>
       <td>0.301853</td>
       <td>0.135881</td>
       <td>0.314605</td>
-      <td>0.294828</td>
+      <td>0.302241</td>
       <td>1.000000</td>
       <td>0.000000</td>
       <td>0.0</td>
       <td>0.339814</td>
       <td>0.279266</td>
       <td>0.306012</td>
-      <td>0.306131</td>
+      <td>0.306147</td>
       <td>0.000000</td>
-      <td>0.171886</td>
+      <td>0.000000</td>
     </tr>
     <tr>
-      <th>9</th>
+      <th>8</th>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.185361</td>
-      <td>0.158489</td>
+      <td>0.155212</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
@@ -552,12 +525,11 @@ Computed inter-template CCs in 0.05sec.
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.194189</td>
-      <td>0.000000</td>
+      <td>0.191474</td>
+      <td>0.186136</td>
     </tr>
     <tr>
-      <th>10</th>
-      <td>0.000000</td>
+      <th>9</th>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
@@ -576,123 +548,117 @@ Computed inter-template CCs in 0.05sec.
       <td>0.000000</td>
     </tr>
     <tr>
-      <th>11</th>
+      <th>10</th>
       <td>0.754021</td>
       <td>0.482705</td>
-      <td>0.142176</td>
       <td>0.227727</td>
       <td>0.623572</td>
       <td>0.117979</td>
       <td>0.349831</td>
-      <td>0.435631</td>
+      <td>0.410315</td>
       <td>0.339814</td>
       <td>0.000000</td>
       <td>0.0</td>
       <td>1.000000</td>
       <td>0.498979</td>
       <td>0.817058</td>
-      <td>0.411083</td>
+      <td>0.416711</td>
       <td>0.000000</td>
-      <td>0.176085</td>
+      <td>0.000000</td>
     </tr>
     <tr>
-      <th>12</th>
+      <th>11</th>
       <td>0.508248</td>
       <td>0.359752</td>
-      <td>0.155862</td>
       <td>0.185032</td>
       <td>0.578178</td>
       <td>0.115291</td>
       <td>0.292897</td>
-      <td>0.372027</td>
+      <td>0.357536</td>
       <td>0.279266</td>
       <td>0.000000</td>
       <td>0.0</td>
       <td>0.498979</td>
       <td>1.000000</td>
       <td>0.541206</td>
-      <td>0.407999</td>
+      <td>0.407940</td>
       <td>0.000000</td>
-      <td>0.207932</td>
+      <td>0.000000</td>
     </tr>
     <tr>
-      <th>13</th>
+      <th>12</th>
       <td>0.770461</td>
       <td>0.509030</td>
-      <td>0.125403</td>
       <td>0.215122</td>
       <td>0.602277</td>
       <td>0.110907</td>
       <td>0.338853</td>
-      <td>0.439064</td>
+      <td>0.419088</td>
       <td>0.306012</td>
       <td>0.000000</td>
       <td>0.0</td>
       <td>0.817058</td>
       <td>0.541206</td>
       <td>1.000000</td>
-      <td>0.461769</td>
+      <td>0.465988</td>
       <td>0.000000</td>
-      <td>0.186432</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>0.368720</td>
+      <td>0.470342</td>
+      <td>0.222629</td>
+      <td>0.427195</td>
+      <td>0.154486</td>
+      <td>0.363080</td>
+      <td>0.399775</td>
+      <td>0.306147</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.416711</td>
+      <td>0.407940</td>
+      <td>0.465988</td>
+      <td>1.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
     </tr>
     <tr>
       <th>14</th>
-      <td>0.383099</td>
-      <td>0.470346</td>
-      <td>0.183236</td>
-      <td>0.230660</td>
-      <td>0.413449</td>
-      <td>0.153645</td>
-      <td>0.363107</td>
-      <td>0.399177</td>
-      <td>0.306131</td>
       <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.191474</td>
       <td>0.0</td>
-      <td>0.411083</td>
-      <td>0.407999</td>
-      <td>0.461769</td>
-      <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.153544</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>0.188708</td>
     </tr>
     <tr>
       <th>15</th>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.184122</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.179920</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.194189</td>
+      <td>0.186136</td>
       <td>0.0</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>1.000000</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>16</th>
-      <td>0.174441</td>
-      <td>0.174221</td>
-      <td>0.207473</td>
-      <td>0.182517</td>
-      <td>0.208349</td>
-      <td>0.153511</td>
-      <td>0.162088</td>
-      <td>0.178389</td>
-      <td>0.171886</td>
-      <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.176085</td>
-      <td>0.207932</td>
-      <td>0.186432</td>
-      <td>0.153544</td>
-      <td>0.000000</td>
+      <td>0.188708</td>
       <td>1.000000</td>
     </tr>
   </tbody>
@@ -765,7 +731,7 @@ Computed inter-template CCs in 0.05sec.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Template 0 is similar to: {0, 1, 4, 11, 12, 13}
+Template 0 is similar to: {0, 1, 3, 10, 11, 12}
 Keeping only Template 1
 </pre></div></div>
 </div>
@@ -774,7 +740,7 @@ Keeping only Template 1
 <h2>Plot the similar templates<a class="headerlink" href="#Plot-the-similar-templates" title="Link to this heading"></a></h2>
 <p>How good was our criterion to group similar templates together? Let’s check the waveforms of the similar templates. The previous cell told us that template 0 is similar to templates 1, 4, 11, 12 and 13.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tid</span> <span class="o">=</span> <span class="mi">0</span>
@@ -784,7 +750,18 @@ Keeping only Template 1
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/ebeauce/software/Seismic_BPMF/BPMF/dataset.py:3153: UserWarning: no explicit representation of timezones available for np.datetime64
+  np.datetime64(ph_pick),
+/home/ebeauce/software/Seismic_BPMF/BPMF/dataset.py:3175: UserWarning: no explicit representation of timezones available for np.datetime64
+  ph_pick = np.datetime64(
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -796,11 +773,11 @@ Text(0.5, 0.98, &#39;Template 0&#39;)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_7_build_template_database_17_1.png" src="../../_images/tutorial_notebooks_7_build_template_database_17_1.png" />
+<img alt="../../_images/tutorial_notebooks_7_build_template_database_17_2.png" src="../../_images/tutorial_notebooks_7_build_template_database_17_2.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tid</span> <span class="o">=</span> <span class="mi">1</span>
@@ -810,7 +787,7 @@ Text(0.5, 0.98, &#39;Template 0&#39;)
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -827,7 +804,7 @@ Text(0.5, 0.98, &#39;Template 1&#39;)
 </div>
 <p>Let’s plot the waveforms of all the templates similar to template 0 on SAUV.E .</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">hilbert</span>
@@ -853,7 +830,7 @@ Text(0.5, 0.98, &#39;Template 1&#39;)
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -873,7 +850,7 @@ Text(0, 0.5, &#39;Velocity (AU)&#39;)
 <section id="Save-the-non-redundant-templates-in-a-database">
 <h2>Save the non-redundant templates in a database<a class="headerlink" href="#Save-the-non-redundant-templates-in-a-database" title="Link to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">output_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">OUTPUT_PATH</span><span class="p">,</span> <span class="n">DB_PATH_T</span><span class="p">)</span>
