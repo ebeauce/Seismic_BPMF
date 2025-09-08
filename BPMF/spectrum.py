@@ -472,7 +472,10 @@ class Spectrum:
             "s",
         ), "phase should be 'noise', 'p' or 's'."
         if taper is None:
-            taper = scisig.tukey
+            if hasattr(scisig, "windows"):
+                taper = scisig.windows.tukey
+            else:
+                taper = scisig.tukey
             taper_kwargs.setdefault("alpha", 0.05)
         spectrum = {}
         for tr in traces:
