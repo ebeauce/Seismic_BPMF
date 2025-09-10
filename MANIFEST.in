@@ -1,2 +1,8 @@
 include BPMF/*py
 include BPMF/lib/*so
+include BPMF/libc.c
+include BPMF/libc.h
+include LICENSE
+include Makefile
+include README.md
+include setup.py
