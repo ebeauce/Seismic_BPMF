@@ -255,7 +255,10 @@ def plot_catalog(
 # ---------------------------------------------------------------
 #                Utils for maps
 # ---------------------------------------------------------------
-def load_topography(path, decimation_factor=None, format="netcdf4"):
+def _2dgrid_to_flat_indexes(indexes, grid_dim):
+    return (indexes[0][:, None] * grid_dim[1] + indexes[1][None, :]).flatten()
+
+def load_topography(path, decimation_factor=None, format="netcdf4", bounds=None):
     """Load topography from `path`.
 
     Parameters
@@ -285,23 +288,47 @@ def load_topography(path, decimation_factor=None, format="netcdf4"):
         import netCDF4
 
         with netCDF4.Dataset(path, "r") as f:
-            if "z" in f.variables:
-                topo = f.variables["z"][:].data
-            elif "Band1" in f.variables:
-                topo = f.variables["Band1"][:].data
+            # ----------- longitudes -------------
             if "lon" in f.variables:
                 lon_topo = f.variables["lon"][:].data
             elif "x" in f.variables:
                 lon_topo = f.variables["x"][:].data
+            num_lon = len(lon_topo)
+            if bounds is not None:
+                lon_indexes = np.where((lon_topo >= bounds[0]) & (lon_topo <= bounds[1]))[0]
+            else:
+                lon_indexes = np.arange(num_lon)
+            # take indexes in ascending lon and lat
+            lon_indexes = lon_indexes[np.argsort(lon_topo[lon_indexes])]
+            if decimation_factor is not None:
+                lon_indexes = lon_indexes[::decimation_factor]
+            # ----------- latitudes -------------
             if "lat" in f.variables:
                 lat_topo = f.variables["lat"][:].data
             elif "y" in f.variables:
                 lat_topo = f.variables["y"][:].data
-        if decimation_factor is not None:
-            lon_topo = lon_topo[::decimation_factor]
-            lat_topo = lat_topo[::decimation_factor]
-            topo = topo[::decimation_factor, ::decimation_factor]
-    return lon_topo, lat_topo, topo
+            num_lat = len(lat_topo)
+            if bounds is not None:
+                lat_indexes = np.where((lat_topo >= bounds[2]) & (lat_topo <= bounds[3]))[0]
+            else:
+                lat_indexes = np.arange(num_lat)
+            # take indexes in ascending lon and lat
+            lat_indexes = lat_indexes[np.argsort(lat_topo[lat_indexes])]
+            if decimation_factor is not None:
+                lat_indexes = lat_indexes[::decimation_factor]
+            # ----------- topography -------------
+            if bounds is not None:
+                topo_indexes = _2dgrid_to_flat_indexes(
+                        (lat_indexes, lon_indexes), (num_lat, num_lon)
+                        )
+            if "z" in f.variables:
+                topo = f.variables["z"][:].data.reshape(-1)[topo_indexes]
+                topo = topo.reshape(len(lat_indexes), len(lon_indexes))
+            elif "Band1" in f.variables:
+                topo = f.variables["Band1"][:].data.reshape(-1)[topo_indexes]
+                topo = topo.reshape(len(lat_indexes), len(lon_indexes))
+
+    return lon_topo[lon_indexes], lat_topo[lat_indexes], topo
 
 
 def initialize_map(
@@ -360,25 +387,8 @@ def initialize_map(
     if topography_file is not None:
         lon_topo, lat_topo, topo = load_topography(
                 os.path.join(path_topo, topography_file),
+                bounds=map_longitudes+map_latitudes,
                 )
-
-        # select relevant area
-        selected_lon = np.where(
-            (lon_topo >= map_longitudes[0]) & (lon_topo <= map_longitudes[1])
-        )[0]
-        selected_lat = np.where(
-            (lat_topo >= map_latitudes[0]) & (lat_topo <= map_latitudes[1])
-        )[0]
-        lon_topo = lon_topo[selected_lon]
-        lat_topo = lat_topo[selected_lat]
-        topo = topo[selected_lat, :]
-        topo = topo[:, selected_lon]
-        # make sure to take these arrays in ascending lons and lats
-        ascending_lon = np.argsort(lon_topo)
-        ascending_lat = np.argsort(lat_topo)
-        lon_topo, lat_topo = lon_topo[ascending_lon], lat_topo[ascending_lat]
-        topo = topo[ascending_lat, :]
-        topo = topo[:, ascending_lon]
 
         if kwargs["shaded_topo"]:
             sun = LightSource(azdeg=90., altdeg=45.)
