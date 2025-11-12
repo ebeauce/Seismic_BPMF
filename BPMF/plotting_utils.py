@@ -255,6 +255,53 @@ def plot_catalog(
 # ---------------------------------------------------------------
 #                Utils for maps
 # ---------------------------------------------------------------
+def load_topography(path, decimation_factor=None, format="netcdf4"):
+    """Load topography from `path`.
+
+    Parameters
+    ----------
+    path : str
+        Path to topography file.
+    decimation_factor : int, optional
+        If not None, decimate the topography grid by `decimation_factor`.
+        Defaults to None.
+    format : str
+        Should only be 'netcdf4' for now.
+
+    Returns
+    -------
+    lon_topo : numpy.ndarray
+        (num_longitudes, num_latitudes) longitude array.
+    lat_topo : numpy.ndarray
+        (num_longitudes, num_latitudes) latitude array.
+    topo : numpy.ndarray
+        (num_longitudes, num_latitudes) topography array.
+    """
+    if format not in {"netcdf4"}:
+        print("`format` should be 'netcdf4'")
+        return
+
+    if format == "netcdf4":
+        import netCDF4
+
+        with netCDF4.Dataset(path, "r") as f:
+            if "z" in f.variables:
+                topo = f.variables["z"][:].data
+            elif "Band1" in f.variables:
+                topo = f.variables["Band1"][:].data
+            if "lon" in f.variables:
+                lon_topo = f.variables["lon"][:].data
+            elif "x" in f.variables:
+                lon_topo = f.variables["x"][:].data
+            if "lat" in f.variables:
+                lat_topo = f.variables["lat"][:].data
+            elif "y" in f.variables:
+                lat_topo = f.variables["y"][:].data
+        if decimation_factor is not None:
+            lon_topo = lon_topo[::decimation_factor]
+            lat_topo = lat_topo[::decimation_factor]
+            topo = topo[::decimation_factor, ::decimation_factor]
+    return lon_topo, lat_topo, topo
 
 
 def initialize_map(
@@ -275,6 +322,7 @@ def initialize_map(
 ):
     """Initialize map instance with Cartopy."""
     import cartopy as ctp
+    from matplotlib.colors import LightSource
 
     kwargs["topo_alpha"] = kwargs.get("topo_alpha", 0.30)
     kwargs["downsample_faults"] = kwargs.get("downsample_faults", True)
@@ -310,23 +358,10 @@ def initialize_map(
     RES = "10m"
 
     if topography_file is not None:
-        # -----------------------
-        # get topography
-        import netCDF4
+        lon_topo, lat_topo, topo = load_topography(
+                os.path.join(path_topo, topography_file),
+                )
 
-        with netCDF4.Dataset(os.path.join(path_topo, topography_file), "r") as f:
-            if "z" in f.variables:
-                topo = f.variables["z"][:].data
-            elif "Band1" in f.variables:
-                topo = f.variables["Band1"][:].data
-            if "lon" in f.variables:
-                lon_topo = f.variables["lon"][:].data
-            elif "x" in f.variables:
-                lon_topo = f.variables["x"][:].data
-            if "lat" in f.variables:
-                lat_topo = f.variables["lat"][:].data
-            elif "y" in f.variables:
-                lat_topo = f.variables["y"][:].data
         # select relevant area
         selected_lon = np.where(
             (lon_topo >= map_longitudes[0]) & (lon_topo <= map_longitudes[1])
@@ -344,37 +379,36 @@ def initialize_map(
         lon_topo, lat_topo = lon_topo[ascending_lon], lat_topo[ascending_lat]
         topo = topo[ascending_lat, :]
         topo = topo[:, ascending_lon]
+
         if kwargs["shaded_topo"]:
-            # get topography gradient
-            grad_x, grad_y = np.gradient(topo)
-            slope = np.pi / 2.0 - np.arctan(np.sqrt(grad_x**2 + grad_y**2))
-            aspect = np.arctan2(grad_x, grad_y)
-            altitude = np.pi / 4.0  # sun angle
-            azimuth = np.pi / 2.0  # sun direction
-            topo = np.sin(altitude) * np.sin(slope) + np.cos(altitude) * np.cos(
-                slope
-            ) * np.cos((azimuth - np.pi / 2.0) - aspect)
-        # levels_topo = np.linspace(-500., topo.max(), 20)
-        # print('Plot the topography.')
-        # transform data
-        # fast version
-        lon_g, lat_g = np.meshgrid(lon_topo, lat_topo, indexing="xy")
-        trans_data = map_axis.projection.transform_points(
-            data_coords, lon_g, lat_g, topo
+            sun = LightSource(azdeg=90., altdeg=45.)
+            topo = sun.shade(
+                    topo,
+                    cmap=kwargs["topo_cmap"],
+                    norm=kwargs["topo_cnorm"],
+                    vert_exag=0.5,
+                    blend_mode="soft",
+                    )
+
+        source_extent = map_longitudes + map_latitudes
+        target_extent = map_axis.get_xlim() + map_axis.get_ylim()
+        reproj_topo, extent = ctp.img_transform.warp_array(
+            topo,
+            source_proj=data_coords,
+            target_proj=map_axis.projection,
+            source_extent=source_extent,
+            target_extent=target_extent,
+            target_res=topo.shape
         )
-        X = trans_data[..., 0]
-        Y = trans_data[..., 1]
-        Z = trans_data[..., 2]
-        map_axis.imshow(
-            Z,
-            extent=[X.min(), X.max(), Y.min(), Y.max()],
-            cmap=kwargs["topo_cmap"],
-            norm=kwargs["topo_cnorm"],
+        ax.imshow(
+            topo,
+            extent=extent,
             origin="lower",
-            alpha=kwargs["topo_alpha"],
-            interpolation="bilinear",
+            cmap=cmap,
+            alpha=topo_alpha,
+            interpolation="bilinear",    
             zorder=-1,
-        )
+            )
 
     # ------------ DRAW MERIDIANS AND PARALLELS --------------
     LON0 = (int(map_longitudes[0] / 0.5) + 1.0) * 0.5
