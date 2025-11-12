@@ -327,7 +327,6 @@ def load_topography(path, decimation_factor=None, format="netcdf4", bounds=None)
             elif "Band1" in f.variables:
                 topo = f.variables["Band1"][:].data.reshape(-1)[topo_indexes]
                 topo = topo.reshape(len(lat_indexes), len(lon_indexes))
-
     return lon_topo[lon_indexes], lat_topo[lat_indexes], topo
 
 
@@ -349,12 +348,13 @@ def initialize_map(
 ):
     """Initialize map instance with Cartopy."""
     import cartopy as ctp
+    from cartopy.img_transform import warp_array
     from matplotlib.colors import LightSource
 
     kwargs["topo_alpha"] = kwargs.get("topo_alpha", 0.30)
     kwargs["downsample_faults"] = kwargs.get("downsample_faults", True)
     kwargs["shaded_topo"] = kwargs.get("shaded_topo", True)
-    kwargs["topo_cmap"] = kwargs.get("topo_cmap", "gray")
+    kwargs["topo_cmap"] = kwargs.get("topo_cmap", plt.get_cmap("gray"))
     kwargs["topo_cnorm"] = kwargs.get("topo_cnorm", None)
     kwargs["fault_zorder"] = kwargs.get("fault_zorder", 1.01)
     figsize = kwargs.get("figsize", (15, 15))
@@ -390,7 +390,7 @@ def initialize_map(
                 bounds=map_longitudes+map_latitudes,
                 )
 
-        if kwargs["shaded_topo"]:
+        if kwargs.get("shaded_topo", False):
             sun = LightSource(azdeg=90., altdeg=45.)
             topo = sun.shade(
                     topo,
@@ -402,7 +402,7 @@ def initialize_map(
 
         source_extent = map_longitudes + map_latitudes
         target_extent = map_axis.get_xlim() + map_axis.get_ylim()
-        reproj_topo, extent = ctp.img_transform.warp_array(
+        reproj_topo, extent = warp_array(
             topo,
             source_proj=data_coords,
             target_proj=map_axis.projection,
@@ -410,12 +410,12 @@ def initialize_map(
             target_extent=target_extent,
             target_res=topo.shape
         )
-        ax.imshow(
+        map_axis.imshow(
             topo,
             extent=extent,
             origin="lower",
-            cmap=cmap,
-            alpha=topo_alpha,
+            cmap=kwargs["topo_cmap"],
+            alpha=kwargs["topo_alpha"],
             interpolation="bilinear",    
             zorder=-1,
             )
