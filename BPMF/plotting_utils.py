@@ -509,26 +509,36 @@ def initialize_map(
 
 
 def add_scale_bar(
-    ax, x_start, y_start, distance, source_crs, orientation="longitudinal", **kwargs
+    ax,
+    x_start,
+    y_start,
+    distance,
+    source_crs,
+    orientation="longitudinal",
+    vertical_text_offset=0.001,
+    **kwargs
 ):
     """
     Parameters
     -----------
-    ax: GeoAxes instance
+    ax : GeoAxes
         The axis on which we want to add a scale bar.
-    x_start: float
+    x_start : float
         The x coordinate of the left end of the scale bar,
         given in the axis coordinate system, i.e. from 0 to 1.
-    y_start: float
+    y_start : float
         The y coordinate of the left end of the scale bar,
         given in the axis coordinate system, i.e. from 0 to 1.
-    distance: float
+    distance : float
         The distance covered by the scale bar, in km.
-    source_crs: cartopy.crs
+    source_crs : cartopy.crs
         The coordinate system in which the data are written.
-    orientation: string, default to 'longitudinal'
+    vertical_text_offset : float, optional
+        Vertical offset between scale bar text and scale bar,
+        in units of latitudes. Defaults to 0.001.
+    orientation : str, optional
         Either 'longitudinal' or 'latitudinal'. Determine the orientation
-        of the scale bar.
+        of the scale bar. Defaults to 'longitudinal'.
     """
     from cartopy.geodesic import Geodesic
     from cartopy.crs import PlateCarree
@@ -581,7 +591,7 @@ def add_scale_bar(
             )
     ax.text(
         (lon_start + lon_end) / 2.0,
-        (lat_start + lat_end) / 2.0 - 0.001,
+        (lat_start + lat_end) / 2.0 - vertical_text_offset,
         "{:.0f}km".format(distance),
         transform=data_coords,
         ha="center",
