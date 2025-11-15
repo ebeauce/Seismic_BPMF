@@ -320,9 +320,18 @@ class Catalog(object):
         catalog["longitude"] = longitudes
         catalog["latitude"] = latitudes
         catalog["depth"] = depths
-        catalog["origin_time"] = pd.to_datetime(
-            np.asarray(origin_times, dtype="datetime64[ms]")
-        )
+        try:
+            # do this if origin_times have time zone info
+            catalog["origin_time"] = pd.to_datetime(
+                np.asarray(origin_times).astype("U"),
+                #utc=True
+            ).astype("datetime64[ms, UTC]").tz_localize(None)
+        except TypeError:
+            # do this otherwise
+            catalog["origin_time"] = pd.to_datetime(
+                np.asarray(origin_times).astype("U"),
+                #utc=True
+            ).astype("datetime64[ms]")
         catalog.update(kwargs)
         if event_ids is not None:
             catalog["event_id"] = event_ids
