@@ -3873,6 +3873,7 @@ class Template(Event):
         duration=60.0,
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
         offset_ot=10.0,
+        stations=None,
         **kwargs,
     ):
         """
@@ -3927,7 +3928,10 @@ class Template(Event):
                 print("Argument `idx_or_gid` must be int or str")
                 return
             event = Event.read_from_file(hdf5_file=f[gid])
-        event.stations = self.stations.copy()
+        if stations is None:
+            stations = self.stations.copy()
+        event.stations = stations
+
         event.read_waveforms(
             duration,
             offset_ot=offset_ot,
@@ -3936,10 +3940,6 @@ class Template(Event):
             **kwargs,
         )
         fig = event.plot(**kwargs)
-        if kwargs.get("stations", None) is None:
-            stations = event.stations
-        else:
-            stations = kwargs.get("stations", None)
         # stations = event.stations
         axes = fig.get_axes()
         cc, n_channels = 0.0, 0
