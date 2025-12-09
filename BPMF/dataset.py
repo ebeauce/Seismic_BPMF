@@ -4252,7 +4252,7 @@ class EventGroup(Family):
         expl_var=0.4,
         max_singular_values=5,
         wiener_filter_colsize=None,
-        verbose=1,
+        verbose=0,
     ):
         """
         Apply Singular Value Decomposition Waveform Filtering (SVDWF) and stack the waveforms.
