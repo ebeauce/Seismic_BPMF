@@ -5409,6 +5409,10 @@ class Stack(Event):
         else:
             self.id = id
 
+    def set_arrival_times_from_moveouts(self, offset_ot, verbose=0):
+        self.origin_time += offset_ot
+        super().set_arrival_times_from_moveouts(verbose=verbose)
+
     def read_waveforms(
         self,
         duration,
