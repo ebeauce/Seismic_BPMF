@@ -894,7 +894,13 @@ class Data(object):
         # self._read_metadata()
         if sampling_rate is not None:
             self.sampling_rate = sampling_rate
-            self.n_samples = utils.sec_to_samp(duration, sr=self.sampling_rate)
+
+    @property
+    def n_samples(self):
+        if self.sampling_rate is not None:
+            return utils.sec_to_samp(self.duration, sr=self.sampling_rate)
+        else:
+            return
 
     @property
     def sr(self):
@@ -910,6 +916,8 @@ class Data(object):
                 self.date, self.date + self.duration, 1.0 / self.sr, unit="ms"
             )
         return self._time
+
+
 
     def get_np_array(
         self,
