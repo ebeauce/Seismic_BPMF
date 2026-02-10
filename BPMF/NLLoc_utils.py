@@ -9,7 +9,7 @@ import numpy as np
 import glob
 
 
-def load_pykonal_tts(filename, path):
+def load_pykonal_tts(filename, path, stations=None):
     """Load the travel-time grid computed with Pykonal.
 
     Load the travel times previously computed with Pykonal and reformat the axes
@@ -17,10 +17,14 @@ def load_pykonal_tts(filename, path):
 
     Parameters
     -----------
-    filename: string
+    filename : str
         Name of the travel-time file. Example: 'tts.h5'.
-    path: string, default to `BPMF.cfg.MOVEOUTS_PATH`
+    path : str
         Name of the directory where the travel-time file is located.
+    stations : list, optional
+        List of station names to read. If None, reads all stations.
+        Defaults to None.
+
 
     Returns
     ---------
@@ -49,7 +53,8 @@ def load_pykonal_tts(filename, path):
         for phase in ["P", "S"]:
             tts[phase] = {}
             for sta in f[f"tt_{phase}"].keys():
-                tts[phase][sta] = f[f"tt_{phase}"][sta][()]
+                if stations is None or sta in stations:
+                    tts[phase][sta] = f[f"tt_{phase}"][sta][()]
 
     # initial axis order is (depth, latitude, longitude) with decreasing depths
 
