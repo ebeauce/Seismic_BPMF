@@ -911,7 +911,8 @@ class Data(object):
         if not hasattr(self, "sampling_rate"):
             print("You need to define the instance's sampling rate first.")
             return
-        if not hasattr(self, "_time"):
+        expected_length = int(self.duration * self.sr)
+        if not hasattr(self, "_time") or abs(len(self._time) - expected_length) > 1:
             self._time = utils.time_range(
                 self.date, self.date + self.duration, 1.0 / self.sr, unit="ms"
             )
