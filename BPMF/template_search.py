@@ -239,7 +239,7 @@ class WaveformTransform(object):
         """
         self.stations = stations
         self.components = components
-        self.transform_arr = transform_arr
+        #self.transform_arr = transform_arr
         self.starttime = starttime
         self.n_samples = transform_arr.shape[-1]
         self.sampling_rate = sampling_rate_hz
@@ -276,6 +276,10 @@ class WaveformTransform(object):
             )
         return self._time
 
+    @property
+    def transform_arr(self):
+        return self.get_np_array(self.stations, components=self.components, verbose=False)
+
     def data_frame_view(self):
         """Returns `self.transform_arr` as a `pandas.DataFrame`.
 
@@ -286,6 +290,9 @@ class WaveformTransform(object):
         for s, sta in enumerate(df.index):
             for p, ph in enumerate(df.columns):
                 df.loc[sta, ph] = self.transform_arr[s, p, :]
+                df.loc[sta, ph] = self.transform.select(
+                        station=sta, component=ph
+                        )[0].data
         return df
 
     def get_np_array(
@@ -760,34 +767,108 @@ class Beamformer(object):
         if weights_sources is not None:
             self.weights_sources = weights_sources
 
-    def set_weights_sources(self, n_max_stations, n_min_stations=0):
-        """Set network-geometry-based weights of each source-receiver pair.
-
-        Parameters
-        ------------
-        n_max_stations: scalar, int
-            Maximum number of stations used at each theoretical source. Only
-            the `n_max_stations` stations will be set a weight > 0.
+    def _weights_sources_closest(self, num_closest_stations):
+        """
         """
         weights_sources = np.ones((self.n_sources, self.n_stations), dtype=np.float32)
-        self.data.set_availability(self.stations)
         operational_stations = self.data.availability_per_sta.loc[self.stations].values
+        # select moveouts from one phase (doesnt matter which one)
         mv = self.moveouts[:, operational_stations, 0]
-        n_max_stations = min(mv.shape[1], n_max_stations)
-        if (n_max_stations < self.n_stations) and (n_max_stations > 0):
+        num_closest_stations = min(mv.shape[1], num_closest_stations)
+        if (num_closest_stations < self.n_stations) and (num_closest_stations > 0):
             cutoff_mv = np.max(
-                np.partition(mv, n_max_stations - 1)[:, :n_max_stations],
+                np.partition(mv, num_closest_stations - 1)[:, :num_closest_stations],
                 axis=1,
                 keepdims=True,
             )
             weights_sources[self.moveouts[:, :, 0] > cutoff_mv] = 0.0
+        # zero-out offline stations
         weights_sources[:, ~operational_stations] = 0.
+        return weights_sources
+
+    def _weights_sources_max_moveout(self, max_moveout):
+        """
+        """
+        weights_sources = np.zeros((self.n_sources, self.n_stations), dtype=np.float32)
+        operational_stations = self.data.availability_per_sta.loc[self.stations].values
+        # select shortest moveout across all phases
+        mv = np.min(self.moveouts, axis=-1)
+        # detect stations that are within the imposed max moveout
+        valid_stations = mv < max_moveout
+        weights_sources[valid_stations] = 1.
+        # zero-out offline stations
+        weights_sources[:, ~operational_stations] = 0.
+        return weights_sources
+
+
+    def set_weights_sources(self, n_min_stations=0, normalize=False,
+            weight_station_density=False, method="closest_stations", **kwargs):
+        """
+        Set network-geometry-based weights of each source-receiver pair.
+
+        Parameters
+        ----------
+        n_min_stations : int, optional
+            Minimum number of stations required for a source to be considered. 
+            If a source has fewer than `n_min_stations` with weight > 0, 
+            all weights for that source are set to 0. Default is 0.
+        normalize : bool, optional
+            If True, normalizes weights such that the sum of weights for each 
+            source equals 1. Default is False.
+        method : {"closest_stations", "max_moveout"}, optional
+            The strategy used to calculate weights. Default is "closest_stations".
+        **kwargs : dict
+            Additional method-specific arguments:
+            
+            - If method is "closest_stations":
+                num_closest_stations (int): The number of nearest stations 
+                to assign weights to. (Required)
+            
+            - If method is "max_moveout":
+                max_moveout (float): The maximum allowable moveout 
+                threshold. (Required)
+
+        Raises
+        ------
+        ValueError
+            If `method` is not one of the supported strings.
+        TypeError
+            If the required keyword argument for the chosen `method` is missing.
+        """
+        self.data.set_availability(self.stations)
+        possible_methods = {"closest_stations", "max_moveout"}
+        if method not in possible_methods:
+            raise ValueError(f"Invalid method '{method}'. Must be one of {possible_methods}")
+
+        if method == "closest_stations":
+            if kwargs.get("num_closest_stations") is None:
+                raise TypeError(f"When method is '{method}', `num_closest_stations` is required.")
+            weights_sources = self._weights_sources_closest(kwargs.get("num_closest_stations"))
+        elif method == "max_moveout":
+            if kwargs.get("max_moveout") is None:
+                raise TypeError(f"When method '{method}', `max_moveout` is required.")
+            weights_sources = self._weights_sources_max_moveout(kwargs.get("max_moveout"))
+
         if n_min_stations > 0:
             n_stations_per_source = np.sum(weights_sources > 0.0, axis=-1)
             weights_sources[n_stations_per_source < n_min_stations, :] = 0.0
+
+        if weight_station_density:
+            weights = self._station_density_weights(
+                    cutoff_dist=kwargs.get("cutoff_dist", None),
+                    lower_percentile=kwargs.get("lower_percentile", 0.),
+                    upper_percentile=kwargs.get("upper_percentile", 100.)
+                    )
+            weights_sources *= weights[None, :]
+
+        if normalize:
+            norm = np.sum(weights_sources, axis=1, keepdims=True)
+            norm[norm == 0.] = 1.
+            weights_sources /= norm
+
         self.weights_sources = weights_sources
 
-    def weights_station_density(
+    def _station_density_weights(
         self, cutoff_dist=None, lower_percentile=0.0, upper_percentile=100.0
     ):
         """Compute station weights to balance station density.
