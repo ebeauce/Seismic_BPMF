@@ -970,8 +970,10 @@ class Beamformer(object):
         if n_stations is None:
             stations = self.network.stations
         else:
+            detection.set_availability()
+            avail_sta = detection.availability.index[detection.availability]
             stations = (
-                detection.moveouts[detection.moveouts.columns[0]]
+                detection.moveouts.loc[avail_sta, detection.moveouts.columns[0]]
                 .sort_values()[:n_stations]
                 .index
             )
