@@ -290,17 +290,29 @@ class MatchedFilter(object):
         weights_arr = np.float32(
             self.template_group.network_to_template_map
         )
-        if hasattr(self.data, "availability"):
-            # turn weights to zero on unavailable stations
-            weights_arr[:, ~self.data.availability_per_cha.values] = 0.0
-        norm = np.sum(weights_arr, axis=(1, 2), keepdims=True)
-        norm[norm == 0.0] = 1.0
-        weights_arr /= norm
         # insufficient data
         invalid = (
             np.sum((weights_arr != 0.0), axis=(1, 2)) < self.min_channels
         ) | (np.sum(np.sum(weights_arr, axis=2) > 0.0, axis=1) < self.min_stations)
         weights_arr[invalid] = 0.0
+        return weights_arr
+
+    def _weights_stations_max_moveout(self, max_moveout_sec):
+        """ """
+        weights_arr = np.zeros(
+                (
+                    self.template_group.n_templates,
+                    self.network.n_stations,
+                    self.network.n_components
+                    ),
+                dtype=np.float32
+                )
+        max_moveout_samp = int(max_moveout_sec * self.template_group.templates[0].sr)
+        # select shortest moveout across all phases
+        mv = np.min(self.template_group.moveouts_arr, axis=-1)
+        # detect stations that are within the imposed max moveout
+        valid_stations = mv < max_moveout_samp
+        weights_arr[valid_stations, :] = 1.0
         return weights_arr
 
 
@@ -368,7 +380,7 @@ class MatchedFilter(object):
             ):
         """
         """
-        possible_methods = {"simple"}
+        possible_methods = {"simple", "max_moveout"}
         if method not in possible_methods:
             raise ValueError(
                     f"Invalid method '{method}'. Must be one of {possible_methods}"
@@ -376,6 +388,16 @@ class MatchedFilter(object):
 
         if method == "simple":
             weights_stations = self._weights_stations_simple()
+        elif method == "max_moveout":
+            if kwargs.get("max_moveout") is None:
+                raise TypeError(f"When method '{method}', `max_moveout` is required.")
+            weights_stations = self._weights_stations_max_moveout(
+                    kwargs.get("max_moveout")
+                    )
+
+        if hasattr(self.data, "availability"):
+            # turn weights to zero on unavailable stations
+            weights_stations[:, ~self.data.availability_per_cha.values] = 0.0
 
         if n_min_stations > 0:
             n_stations_per_template = np.sum(weights_stations > 0.0, axis=-1)
@@ -422,7 +444,7 @@ class MatchedFilter(object):
         # of templates selected for this run
         self.tids_subset = self.template_group.tids[select_tts].tolist()
 
-        weights_arr = self.weights_stations[select_tts, :]
+        self._weights_arr = self.weights_stations[select_tts, :]
 
         # ----------------------------------------------
         # parameters
@@ -431,7 +453,7 @@ class MatchedFilter(object):
         # ----------------------------------------------
         #  are there templates with zero-weights only?
         #  if yes, skip them to gain time
-        invalid_weights = np.sum(weights_arr, axis=(1, 2)) == 0
+        invalid_weights = np.sum(self._weights_arr, axis=(1, 2)) == 0
         tindexes_to_skip = select_tts[invalid_weights]
         select_tts = select_tts[~invalid_weights]
         # ----------------------------------------------
@@ -450,7 +472,7 @@ class MatchedFilter(object):
                 cc_sums = fmf.matched_filter(
                     self.template_group.waveforms_arr[select_tts, id1:id2, :, :],
                     self.template_group.moveouts_arr[select_tts, id1:id2, :],
-                    weights_arr[~invalid_weights, id1:id2, :],
+                    self._weights_arr[~invalid_weights, id1:id2, :],
                     self.data_arr[id1:id2, ...],
                     self.step,
                     arch=device,
@@ -534,7 +556,7 @@ class MatchedFilter(object):
         )
 
         cc_t = self.cc[tid]
-        weights_t = self.weights_arr[t, ...]
+        weights_t = self._weights_arr[t, ...]
 
         valid = cc_t != 0.0
         if np.sum(valid) == 0:
@@ -780,7 +802,7 @@ class MatchedFilter(object):
 
         sr = self.data.sr
         cc_t = self.cc[tid]
-        weights_t = self.weights_arr[self.tids_subset.index(tid), ...]
+        weights_t = self._weights_arr[self.tids_subset.index(tid), ...]
 
         detection_threshold = time_dependent_threshold(
             cc_t,
