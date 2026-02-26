@@ -147,6 +147,10 @@ class MatchedFilter(object):
         return self.template_group.stations
 
     @property
+    def network(self):
+            return self.template_group.network
+
+    @property
     def memory_cc_time_series(self):
         if not hasattr(self, "data"):
             return 0.0
@@ -281,13 +285,123 @@ class MatchedFilter(object):
             cc_idx = cc_idx[idx]
         return cc_idx
 
-    def compute_cc_time_series(self, weight_type="simple", device="cpu", tids=None):
+    def _weights_stations_simple(self):
+        # equal weights to all channels
+        weights_arr = np.float32(
+            self.template_group.network_to_template_map
+        )
+        if hasattr(self.data, "availability"):
+            # turn weights to zero on unavailable stations
+            weights_arr[:, ~self.data.availability_per_cha.values] = 0.0
+        norm = np.sum(weights_arr, axis=(1, 2), keepdims=True)
+        norm[norm == 0.0] = 1.0
+        weights_arr /= norm
+        # insufficient data
+        invalid = (
+            np.sum((weights_arr != 0.0), axis=(1, 2)) < self.min_channels
+        ) | (np.sum(np.sum(weights_arr, axis=2) > 0.0, axis=1) < self.min_stations)
+        weights_arr[invalid] = 0.0
+        return weights_arr
+
+
+    def _station_density_weights(
+        self, cutoff_dist=None, lower_percentile=0.0, upper_percentile=100.0
+    ):
+        """Compute station weights to balance station density.
+
+        Areas of high station density produce stronger network responses than
+        areas with sparse coverage, and thus might prevent detecting earthquakes
+        where stations are scarcer.
+
+        Parameters
+        -----------
+        cutoff_dist: scalar float, default to None
+            All station pairs (i,j) are attributed a number from a gaussian
+            distribution with standard deviation `cutoff_dist`, in km. The
+            weight of station i is: `w_i = 1/(sum_j(exp(-D_ij**2/cutoff_dist**2)))`.
+            If None, `cutoff_dist` is set to the median interstation distance.
+        lower_percentile: scalar float, default to 0
+            If `lower_percentile > 0`, the weights are clipped above the
+            `lower_percentile`-th percentile.
+        upper_percentile: scalar float, default to 100
+            If `upper_percentile < 100`, the weights are clipped below the
+            `upper_percentile`-th percentile.
+
+        Returns
+        -------
+        weights_sta_density: (n_stations,) `numpy.ndarray`
+            The station density weights.
+        """
+        if cutoff_dist is None:
+            cutoff_dist = np.median(
+                self.network.interstation_distances.values[
+                    self.network.interstation_distances.values != 0.0
+                ]
+            )
+        weights_sta_density = np.zeros(self.network.n_stations, dtype=np.float32)
+        for s, sta in enumerate(self.network.stations):
+            dist_sj = self.network.interstation_distances.loc[sta]
+            weights_sta_density[s] = 1.0 / np.sum(
+                np.exp(-(dist_sj**2) / cutoff_dist**2)
+            )
+        if lower_percentile > 0.0:
+            weights_sta_density = np.clip(
+                weights_sta_density,
+                np.percentile(weights_sta_density, lower_percentile),
+                weights_sta_density.max(),
+            )
+        if upper_percentile < 100.0:
+            weights_sta_density = np.clip(
+                weights_sta_density,
+                weights_sta_density.min(),
+                np.percentile(weights_sta_density, upper_percentile),
+            )
+        return weights_sta_density
+
+    def set_weights_stations(
+            self,
+            n_min_stations=0,
+            normalize=True,
+            weight_station_density=False,
+            method="simple",
+            **kwargs
+            ):
+        """
+        """
+        possible_methods = {"simple"}
+        if method not in possible_methods:
+            raise ValueError(
+                    f"Invalid method '{method}'. Must be one of {possible_methods}"
+            )
+
+        if method == "simple":
+            weights_stations = self._weights_stations_simple()
+
+        if n_min_stations > 0:
+            n_stations_per_template = np.sum(weights_stations > 0.0, axis=-1)
+            weights_stations[n_stations_per_template < n_min_stations, :] = 0.0
+
+        if weight_station_density:
+            weights_density = self._station_density_weights(
+                cutoff_dist=kwargs.get("cutoff_dist", None),
+                lower_percentile=kwargs.get("lower_percentile", 0.0),
+                upper_percentile=kwargs.get("upper_percentile", 100.0),
+            )
+            weights_stations *= weights_density[None, :, None]
+
+        if normalize:
+            norm = np.sum(weights_stations, axis=(1, 2), keepdims=True)
+            norm[norm == 0.0] = 1.0
+            weights_stations /= norm
+
+        self.weights_stations = weights_stations
+
+
+    def compute_cc_time_series(self, device="cpu", tids=None):
         """Compute the CC time series (step 1 of matched-filter search).
 
         Parameters
         ----------
-        weight_type: string, default to 'simple'
-            'simple' is the only option for now.
         device : string, default to 'cpu'
             Either 'cpu' or 'gpu'.
         tids: list of `tid`, default to None
@@ -308,31 +422,16 @@ class MatchedFilter(object):
         # of templates selected for this run
         self.tids_subset = self.template_group.tids[select_tts].tolist()
 
+        weights_arr = self.weights_stations[select_tts, :]
+
         # ----------------------------------------------
         # parameters
         nt, ns, nc, Nsamp = self.template_group.waveforms_arr[select_tts, ...].shape
         n_stations, n_components, n_samples_data = self.data_arr.shape
-        if weight_type == "simple":
-            # equal weights to all channels
-            weights_arr = np.float32(
-                self.template_group.network_to_template_map[select_tts, ...]
-            )
-            if hasattr(self.data, "availability"):
-                # turn weights to zero on unavailable stations
-                weights_arr[:, ~self.data.availability_per_cha.values] = 0.0
-            norm = np.sum(weights_arr, axis=(1, 2), keepdims=True)
-            norm[norm == 0.0] = 1.0
-            weights_arr /= norm
-            # insufficient data
-            invalid = (
-                np.sum((weights_arr != 0.0), axis=(1, 2)) < self.min_channels
-            ) | (np.sum(np.sum(weights_arr, axis=2) > 0.0, axis=1) < self.min_stations)
-            weights_arr[invalid] = 0.0
-        self.weights_arr = weights_arr
         # ----------------------------------------------
         #  are there templates with zero-weights only?
         #  if yes, skip them to gain time
-        invalid_weights = np.sum(self.weights_arr, axis=(1, 2)) == 0
+        invalid_weights = np.sum(weights_arr, axis=(1, 2)) == 0
         tindexes_to_skip = select_tts[invalid_weights]
         select_tts = select_tts[~invalid_weights]
         # ----------------------------------------------
@@ -446,9 +545,9 @@ class MatchedFilter(object):
                 cc_t,
                 utils.sec_to_samp(self.threshold_window_dur, sr=self.data.sr),
                 threshold_type=self.threshold_type,
-                #white_noise=self.white_noise,
+                # white_noise=self.white_noise,
                 overlap=self.overlap,
-                num_threads=self.num_threads_threshold
+                num_threads=self.num_threads_threshold,
             )
             # saturate threshold as requested by the user
             threshold = np.minimum(self.max_CC_threshold * np.sum(weights_t), threshold)
@@ -555,7 +654,6 @@ class MatchedFilter(object):
     def run_matched_filter_search(
         self,
         minimum_interevent_time,
-        weight_type="simple",
         device="cpu",
         threshold_window_dur=1800.0,
         overlap=0.25,
@@ -618,7 +716,7 @@ class MatchedFilter(object):
             tids_chunk = self.template_group.tids[tt1:tt2]
             t1_fmf = give_time()
             self.compute_cc_time_series(
-                weight_type=weight_type, device=device, tids=tids_chunk
+                device=device, tids=tids_chunk
             )
             t2_fmf = give_time()
             duration_fmf += t2_fmf - t1_fmf
@@ -860,93 +958,13 @@ class MatchedFilter(object):
         return fig
 
 
-# def time_dependent_threshold(
-#    time_series, sliding_window, overlap=0.66, threshold_type="rms", white_noise=None
-# ):
-#    """
-#    Time dependent detection threshold.
-#
-#    Parameters
-#    -----------
-#    time_series: (n_correlations) array_like
-#        The array of correlation coefficients calculated by
-#        FMF (float 32).
-#    sliding_window: scalar integer
-#        The size of the sliding window, in samples, used
-#        to calculate the time dependent central tendency
-#        and deviation of the time series.
-#    overlap: scalar float, default to 0.75
-#    threshold_type: string, default to 'rms'
-#        Either rms or mad, depending on which measure
-#        of deviation you want to use.
-#    white_noise: `numpy.ndarray` or None, default to None
-#        If not None, `white_noise` is a vector of random values sampled from the
-#        standard normal distribution. It is used to fill zeros in the CC time
-#        series. If None, a random vector is generated from scratch.
-#
-#    Returns
-#    ----------
-#    threshold: (n_correlations) array_like
-#        Returns the time dependent threshold, with same
-#        size as the input time series.
-#    """
-#
-#    time_series = time_series.copy()
-#    threshold_type = threshold_type.lower()
-#    n_samples = len(time_series)
-#    half_window = sliding_window // 2
-#    shift = int((1.0 - overlap) * sliding_window)
-#    zeros = time_series == 0.0
-#    n_zeros = np.sum(zeros)
-#    if white_noise is None:
-#        white_noise = np.random.normal(size=n_zeros).astype("float32")
-#    if threshold_type == "rms":
-#        default_center = time_series[~zeros].mean()
-#        default_deviation = np.std(time_series[~zeros])
-#        # note: white_noise[n_zeros] is necessary in case white_noise
-#        # was not None
-#        time_series[zeros] = (
-#                white_noise[:n_zeros] * default_deviation + default_center
-#        )
-#        time_series_win = np.lib.stride_tricks.sliding_window_view(
-#            time_series, sliding_window
-#        )[::shift, :]
-#        center = np.mean(time_series_win, axis=-1)
-#        deviation = np.std(time_series_win, axis=-1)
-#    elif threshold_type == "mad":
-#        default_center = np.median(time_series[~zeros])
-#        default_deviation = np.median(np.abs(time_series[~zeros] - default_center))
-#        time_series[zeros] = (
-#                white_noise[:n_zeros] * default_deviation + default_center
-#        )
-#        time_series_win = np.lib.stride_tricks.sliding_window_view(
-#            time_series, sliding_window
-#        )[::shift, :]
-#        center = np.median(time_series_win, axis=-1)
-#        deviation = np.median(
-#            np.abs(time_series_win - center[:, np.newaxis]), axis=-1
-#        )
-#    threshold = center + cfg.N_DEV_MF_THRESHOLD * deviation
-#    threshold[1:] = np.maximum(threshold[:-1], threshold[1:])
-#    threshold[:-1] = np.maximum(threshold[:-1], threshold[1:])
-#    time = np.arange(half_window, n_samples - (sliding_window - half_window))
-#    indexes_l = time // shift
-#    indexes_l[indexes_l >= len(threshold)] = len(threshold) - 1
-#    #breakpoint()
-#    threshold = threshold[indexes_l]
-#    threshold = np.hstack(
-#        (
-#            threshold[0] * np.ones(half_window, dtype=np.float32),
-#            threshold,
-#            threshold[-1] * np.ones(sliding_window - half_window, dtype=np.float32),
-#        )
-#    )
-#    return threshold
-
-
 def time_dependent_threshold(
-    time_series, sliding_window, overlap=0.66, threshold_type="rms", white_noise=None,
-    num_threads=None
+    time_series,
+    sliding_window,
+    overlap=0.66,
+    threshold_type="rms",
+    white_noise=None,
+    num_threads=None,
 ):
     """
     Time dependent detection threshold.
@@ -984,7 +1002,7 @@ def time_dependent_threshold(
             cfg.N_DEV_MF_THRESHOLD,
             overlap=overlap,
             white_noise=white_noise,
-            num_threads=num_threads
+            num_threads=num_threads,
         )
         return threshold
 
