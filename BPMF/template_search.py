@@ -788,7 +788,10 @@ class Beamformer(object):
     def _weights_sources_max_moveout(self, max_moveout):
         """ """
         weights_sources = np.zeros((self.n_sources, self.n_stations), dtype=np.float32)
-        operational_stations = self.data.availability_per_sta.loc[self.stations].values
+        if hasattr(self.data, "availability"):
+            operational_stations = self.data.availability_per_sta.loc[self.stations].values
+        else:
+            operational_stations = np.ones(self.n_stations, dtype=bool)
         # select shortest moveout across all phases
         mv = np.min(self.moveouts, axis=-1)
         # detect stations that are within the imposed max moveout
