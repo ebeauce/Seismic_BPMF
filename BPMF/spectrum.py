@@ -126,7 +126,7 @@ class Spectrum:
         -------
         None
             The correction factor and attenuation factor are stored in the
-            object's attributes `correction_factor` and `attenuation_factor`.
+            object's attributes `geometrical_factor` and `attenuation_factor`.
 
         Notes
         -----
@@ -142,7 +142,7 @@ class Spectrum:
             print("Call event.set_source_receiver_dist(network) first.")
             return
         stations = np.sort(self.event.source_receiver_dist.index)
-        correction_factor = pd.DataFrame(index=stations)
+        geometrical_factor = pd.DataFrame(index=stations)
         attenuation_factor = pd.DataFrame(
             index=stations, columns=["attenuation_P", "attenuation_S"], dtype=object
         )
@@ -161,7 +161,7 @@ class Spectrum:
                 * r_m
                 / radiation_S
             )
-            correction_factor.loc[sta, f"correction_S"] = corr_s
+            geometrical_factor.loc[sta, f"correction_S"] = corr_s
             if hasattr(self, "Q"):
                 attenuation_factor.loc[sta, f"attenuation_S"] = np.exp(
                     np.pi * tt_s * np.asarray(self.frequencies) / self.Q
@@ -179,14 +179,14 @@ class Spectrum:
                    *
                    r_m / radiation_P
                    )
-            correction_factor.loc[sta, f"correction_P"] = corr_p
+            geometrical_factor.loc[sta, f"correction_P"] = corr_p
             if hasattr(self, "Q"):
                 attenuation_factor.loc[sta, f"attenuation_P"] = np.exp(
                     np.pi * tt_p * np.asarray(self.frequencies) / self.Q
                 )
             else:
                 attenuation_factor.loc[sta, f"attenuation_P"] = None
-        self.correction_factor = correction_factor
+        self.geometrical_factor = geometrical_factor
         self.attenuation_factor = attenuation_factor
 
     def compute_network_average_spectrum(
@@ -239,7 +239,7 @@ class Spectrum:
         assert hasattr(
             self, "frequencies"
         ), "You need to use set_target_frequencies first"
-        if correct_propagation and not hasattr(self, "correction_factor"):
+        if correct_propagation and not hasattr(self, "geometrical_factor"):
             print("You requested correcting for propagation effects. ")
             print("You need to use compute_correction_factor first.")
             return
@@ -267,16 +267,13 @@ class Spectrum:
             amplitude_spectrum = signal_spectrum[trid]["spectrum"].copy()
             if correct_propagation:
                 sta = trid.split(".")[1]
-                amplitude_spectrum *= self.correction_factor.loc[
+                amplitude_spectrum *= self.geometrical_factor.loc[
                     sta, f"correction_{phase.upper()}"
                 ]
                 if (
                     self.attenuation_factor.loc[sta, f"attenuation_{phase.upper()}"]
                     is not None
                 ):
-                    # att = self.attenuation_factor.loc[
-                    #    sta, f"attenuation_{phase.upper()}"
-                    # ](signal_spectrum[trid]["freq"])
                     amplitude_spectrum *= self.attenuation_factor.loc[
                         sta, f"attenuation_{phase.upper()}"
                     ]
@@ -1013,7 +1010,7 @@ class Spectrum:
                 amplitude_spec = np.abs(fft)
                 if correct_propagation and ph in ["p", "s"]:
                     # sta = trid.split(".")[1]
-                    amplitude_spec *= self.correction_factor.loc[
+                    amplitude_spec *= self.geometrical_factor.loc[
                         sta, f"correction_{ph.upper()}"
                     ]
                 ax.plot(
