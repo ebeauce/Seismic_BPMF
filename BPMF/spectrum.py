@@ -808,6 +808,14 @@ class Spectrum:
             self.frequencies[i] = 0.5 * (
                 self.frequency_bands[band][0] + self.frequency_bands[band][1]
             )
+        # make sure this is sorted!!
+        freq_bands = list(self.frequency_bands.keys())
+        sorted_idx = np.argsort(self.frequencies)
+        self.frequencies = self.frequencies[sorted_idx]
+        self.frequency_bands = {
+                freq_bands[i]: self.frequency_bands[freq_bands[i]]
+                for i in sorted_idx
+                }
 
     def set_target_frequencies(self, freq_min, freq_max, num_points):
         """
