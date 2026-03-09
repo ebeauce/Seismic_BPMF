@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.signal as scisig
+import warnings
+
 from scipy.interpolate import interp1d
 from obspy import Stream
 
@@ -31,6 +33,7 @@ class Spectrum:
         self.event = event
         if frequency_bands is not None:
             self.set_frequency_bands(frequency_bands)
+        self.correction_flags = {}
 
     def set_Q_model(self, Q, frequencies):
         """
@@ -161,7 +164,7 @@ class Spectrum:
                 * r_m
                 / radiation_S
             )
-            geometrical_factor.loc[sta, f"correction_S"] = corr_s
+            geometrical_factor.loc[sta, f"geometry_S"] = corr_s
             if hasattr(self, "Q"):
                 attenuation_factor.loc[sta, f"attenuation_S"] = np.exp(
                     np.pi * tt_s * np.asarray(self.frequencies) / self.Q
@@ -179,7 +182,7 @@ class Spectrum:
                    *
                    r_m / radiation_P
                    )
-            geometrical_factor.loc[sta, f"correction_P"] = corr_p
+            geometrical_factor.loc[sta, f"geometry_P"] = corr_p
             if hasattr(self, "Q"):
                 attenuation_factor.loc[sta, f"attenuation_P"] = np.exp(
                     np.pi * tt_p * np.asarray(self.frequencies) / self.Q
@@ -189,11 +192,55 @@ class Spectrum:
         self.geometrical_factor = geometrical_factor
         self.attenuation_factor = attenuation_factor
 
+    def correct_geometrical_spreading(self):
+        if not hasattr(self, "geometrical_factor"):
+            warnings.warn("You need to use compute_correction_factor first.")
+            return
+        for phase in self.phases:
+            if phase == "noise":
+                continue
+            if not phase in self.correction_flags:
+                # initialize flag
+                self.correction_flags[phase] = {}
+                self.correction_flags[phase][f"geometry_{phase}"] = False
+            if self.correction_flags[phase].get(f"geometry_{phase}", False):
+                print(f"Geometrical spreading was already corrected for for {phase} spectrum")
+                continue
+            for trid in getattr(self, f"{phase}_spectrum"):
+                sta = trid.split(".")[1]
+                _geom_corr = self.geometrical_factor.loc[sta, f"geometry_{phase.upper()}"]
+                getattr(self, f"{phase}_spectrum")[trid]["spectrum"] *= _geom_corr
+            # update flag
+            self.correction_flags[phase][f"geometry_{phase}"] = True
+
+    def correct_attenuation(self):
+        if not hasattr(self, "attenuation_factor"):
+            warnings.warn("You need to use compute_correction_factor first.")
+            return
+        self.update_Q_model()
+        self.update_attenuation_factor()
+        for phase in self.phases:
+            if phase == "noise":
+                continue
+            if not phase in self.correction_flags:
+                # initialize flag
+                self.correction_flags[phase] = {}
+                self.correction_flags[phase][f"attenuation_{phase}"] = False
+            if self.correction_flags[phase].get(f"attenuation_{phase}", False):
+                print(f"Attenuation was already corrected for for {phase} spectrum")
+                continue
+            for trid in getattr(self, f"{phase}_spectrum"):
+                sta = trid.split(".")[1]
+                _att_corr = self.attenuation_factor.loc[sta, f"attenuation_{phase.upper()}"]
+                getattr(self, f"{phase}_spectrum")[trid]["spectrum"] *= _att_corr
+            # update flag
+            self.correction_flags[phase][f"attenuation_{phase}"] = True
+
+
     def compute_network_average_spectrum(
         self,
         phase,
         snr_threshold,
-        correct_propagation=True,
         average_log=True,
         min_num_valid_channels_per_freq_bin=0,
         max_relative_distance_err_pct=25.0,
@@ -209,8 +256,6 @@ class Spectrum:
             Phase of the seismic event. Should be either 'p' or 's'.
         snr_threshold : float
             Signal-to-noise ratio threshold for valid channels.
-        correct_propagation : bool, optional
-            Flag indicating whether to correct for propagation effects. Default is True.
         average_log : bool, optional
             Flag indicating whether to average the logarithm of the spectra. Default is True.
         min_num_valid_channels_per_freq_bin : int, optional
@@ -239,17 +284,10 @@ class Spectrum:
         assert hasattr(
             self, "frequencies"
         ), "You need to use set_target_frequencies first"
-        if correct_propagation and not hasattr(self, "geometrical_factor"):
-            print("You requested correcting for propagation effects. ")
-            print("You need to use compute_correction_factor first.")
-            return
         average_spectrum = np.ma.zeros(len(self.frequencies), dtype=np.float64)
         masked_spectra = []
         signal_spectrum = getattr(self, f"{phase}_spectrum")
         snr_spectrum = getattr(self, f"snr_{phase}_spectrum")
-        if hasattr(self, "Q"):
-            self.update_Q_model()
-            self.update_attenuation_factor()
         for trid in signal_spectrum:
             if (
                 signal_spectrum[trid]["relative_distance_err_pct"]
@@ -265,18 +303,6 @@ class Spectrum:
                 continue
             mask = snr_spectrum[trid]["snr"] < snr_threshold
             amplitude_spectrum = signal_spectrum[trid]["spectrum"].copy()
-            if correct_propagation:
-                sta = trid.split(".")[1]
-                amplitude_spectrum *= self.geometrical_factor.loc[
-                    sta, f"correction_{phase.upper()}"
-                ]
-                if (
-                    self.attenuation_factor.loc[sta, f"attenuation_{phase.upper()}"]
-                    is not None
-                ):
-                    amplitude_spectrum *= self.attenuation_factor.loc[
-                        sta, f"attenuation_{phase.upper()}"
-                    ]
             masked_spectra.append(
                 np.ma.masked_array(data=amplitude_spectrum, mask=mask)
             )
@@ -1011,7 +1037,7 @@ class Spectrum:
                 if correct_propagation and ph in ["p", "s"]:
                     # sta = trid.split(".")[1]
                     amplitude_spec *= self.geometrical_factor.loc[
-                        sta, f"correction_{ph.upper()}"
+                        sta, f"geometry_{ph.upper()}"
                     ]
                 ax.plot(
                     freq,
