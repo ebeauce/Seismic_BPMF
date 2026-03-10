@@ -14,25 +14,24 @@ class Spectrum:
     Class for handling spectral data and calculations.$a
     """
 
-    def __init__(self, event=None, frequency_bands=None):
+    def __init__(self, event=None):
         """
+        Initialize a new Spectrum instance.
+
         Parameters
         ----------
-        event : str or None, optional
-            The event associated with the spectrum. Default is None.
-        frequency_bands : list or None, optional
-            The frequency bands for the spectrum. Default is None.
+        event : BPMF.dataset.Event, optional
+            The event object associated with this spectrum. Default is None.
 
         Attributes
         ----------
-        event : str or None
-            The event associated with the spectrum.
-        frequency_bands : list or None
-            The frequency bands for the spectrum.
+        event : BPMF.dataset.Event or None
+            The associated event data.
+        correction_flags : dict
+            A dictionary tracking applied corrections (e.g., geometrical 
+            spreading or attenuation). Initialized as empty.
         """
         self.event = event
-        if frequency_bands is not None:
-            self.set_frequency_bands(frequency_bands)
         self.correction_flags = {}
 
     def set_Q_model(self, Q, frequencies):
@@ -1207,13 +1206,46 @@ def stress_drop_circular_crack(Mw, fc, phase="p", vs_m_per_s=3500.0, vr_vs_ratio
 
 
 def _snr_based_weights(snr, snr_threshold, weight_max=3.0, max_num_bad_measurements=6):
+    """
+    Calculate station weights based on Signal-to-Noise Ratio (SNR).
+
+    The weighting logic follows a three-step process:
+    1. Weights are initially set equal to the SNR, clipped at `weight_max`.
+    2. If enough "good" measurements (SNR >= `snr_threshold`) exist, all 
+       "bad" measurements are assigned a weight of 0.
+    3. If most measurements are "bad," the function preserves up to the 
+       `max_num_bad_measurements` best available signals to allow for an 
+       approximate estimation.
+
+    Parameters
+    ----------
+    snr : numpy.ndarray
+        An array of SNR values for different stations or channels.
+    snr_threshold : float
+        The minimum SNR value considered "good" data.
+    weight_max : float, optional
+        The maximum allowable weight for any single measurement. 
+        Default is 3.0.
+    max_num_bad_measurements : int, optional
+        The maximum number of measurements to keep if the number of 
+        valid measurements is low. Default is 6.
+
+    Returns
+    -------
+    weights : numpy.ndarray
+        An array of weights corresponding to the input `snr` array.
+
+    Notes
+    -----
+    This is a protected helper function (denoted by the underscore) 
+    intended for use within the magnitude estimation pipeline of BPMF.
+    """
     # allow some numerical noise (?)
     snr_clipped = np.minimum(snr, 1.001 * snr_threshold)
     # linear function of snr
     weights = snr_clipped
     # clip weights
     weights = np.minimum(weights, weight_max)
-    # print("Before", weights)
     if np.sum(snr >= snr_threshold) >= max_num_bad_measurements:
         # set weights of bad measurements to 0
         weights[snr < snr_threshold] = 0.0
@@ -1221,7 +1253,6 @@ def _snr_based_weights(snr, snr_threshold, weight_max=3.0, max_num_bad_measureme
         ordered_indexes = np.argsort(snr)
         # set to 0 all but the `max_num_bad_measurements` least bad meas.
         weights[ordered_indexes[:-max_num_bad_measurements]] = 0.0
-    # print("After", weights)
     return weights
 
 
@@ -1234,6 +1265,53 @@ def approximate_moment_magnitude(
     phases=None,
     snr_based_weights=_snr_based_weights,
 ):
+    """
+    Estimate the approximate moment magnitude (Mw*) from displacement spectra.
+
+    This function calculates Mw* by identifying valid frequency bands that satisfy 
+    a minimum SNR threshold. For high-quality signals, it prioritizes low-frequency 
+    bands to reflect the physical seismic moment. For low-quality signals, it 
+    applies a weighted average across available frequencies.
+
+    The magnitude is calculated using the relation:
+    $$M_w = \text{scaling} \times (\log_{10}(M_0) - 9.1)$$
+
+    Parameters
+    ----------
+    spectrum : BPMF.spectrum.Spectrum
+        The spectrum object containing multi-band displacement and SNR data.
+    snr_threshold : float, optional
+        The minimum signal-to-noise ratio required to consider a frequency 
+        band "valid". Default is 10.0.
+    num_averaging_bands : int, optional
+        The number of low-frequency valid bands to average when calculating 
+        the plateau. Default is 1.
+    low_snr_freq_min_hz : float, optional
+        The minimum frequency (in Hz) to consider when the SNR is below 
+        the threshold. Default is 2.0.
+    magnitude_log_moment_scaling : float, optional
+        The scaling factor for the moment-to-magnitude conversion. 
+        Default is 2/3 (standard Kanamori scale).
+    phases : list of str or None, optional
+        Seismic phases to process (e.g., ['p', 's']). If None, retrieves 
+        phases from the `spectrum` object. Default is None.
+    snr_based_weights : callable, optional
+        A function used to calculate station weights based on peak SNR. 
+        Default is `_snr_based_weights`.
+
+    Returns
+    -------
+    approx_moment : dict
+        A dictionary where keys are phase names and values are the 
+        calculated approximate moment magnitudes (Mw).
+
+    Notes
+    -----
+    The function performs a station-by-station analysis. If no bands meet 
+    the `snr_threshold`, it falls back to a weighted mean of bands above 
+    `low_snr_freq_min_hz` to provide a best-effort estimate, though this 
+    may introduce significant error.
+    """
     if phases is None:
         phases = spectrum.phases
 
@@ -1319,12 +1397,59 @@ def extract_windows(
     offset_ot_sec_noise,
     data_folder,
     attach_response=True,
-    time_shifted=False,
     phase_on_comp_p={"N": "P", "1": "P", "E": "P", "2": "P", "Z": "P"},
     phase_on_comp_s={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "S"},
     offset_phase={"P": 0.5, "S": 0.5},
     cleanup_stream=None,
 ):
+    """
+    Extract noise, P-wave, and S-wave windows and convert to displacement.
+
+    This function performs a three-stage extraction process from raw seismic data:
+    1. Extracts a noise window relative to the origin time (OT).
+    2. Extracts P-wave and S-wave windows based on phase arrival picks.
+    3. Applies detrending, tapering, and instrument response removal to 
+       output displacement (m) seismograms.
+
+    Parameters
+    ----------
+    event : BPMF.dataset.Event
+        The event object used to read waveforms and access arrival times.
+    duration_sec : float
+        The length of each extracted window in seconds.
+    offset_ot_sec_noise : float
+        The time offset from the origin time to start the noise window.
+    data_folder : str
+        Path to the directory containing the raw waveform files.
+    attach_response : bool, optional
+        If True, attaches instrument response metadata during reading. 
+        Default is True.
+    phase_on_comp_p : dict, optional
+        Mapping of component labels to the P-phase for windowing.
+    phase_on_comp_s : dict, optional
+        Mapping of component labels to the S-phase for windowing.
+    offset_phase : dict, optional
+        Offset in seconds relative to the phase arrival to start the 
+        signal window. Default is {"P": 0.5, "S": 0.5}.
+    cleanup_stream : callable, optional
+        A custom function or object (e.g., a filter) applied to the 
+        `obspy.Stream` after each read. Default is None.
+
+    Returns
+    -------
+    windows : dict
+        A dictionary containing the processed `obspy.Stream` objects:
+        - 'noise': The noise window traces.
+        - 'p': The P-wave window traces.
+        - 's': The S-wave window traces.
+
+    Notes
+    -----
+    Instrument response removal uses a pre-filter defined by the 
+    `duration_sec` and the Nyquist frequency to avoid numerical 
+    instability at very low or high frequencies. All outputs are 
+    returned as displacement (DISP).
+    """
     #                 extract waveforms
     # first, read short extract before signal as an estimate of noise
     event.read_waveforms(
@@ -1343,7 +1468,7 @@ def extract_windows(
         duration_sec,
         phase_on_comp=phase_on_comp_p,
         offset_phase=offset_phase,
-        time_shifted=time_shifted,
+        time_shifted=True,
         data_folder=data_folder,
         attach_response=attach_response,
     )
@@ -1355,7 +1480,7 @@ def extract_windows(
         duration_sec,
         phase_on_comp=phase_on_comp_s,
         offset_phase=offset_phase,
-        time_shifted=time_shifted,
+        time_shifted=True,
         data_folder=data_folder,
         attach_response=attach_response,
     )
@@ -1380,7 +1505,6 @@ def extract_windows(
                 pre_filt=pre_filt,
                 zero_mean=False,
                 taper=False,
-                # taper_fraction=0.25,
                 output="DISP",
                 plot=False,
             )
@@ -1396,7 +1520,7 @@ def compute_moment_magnitude(
     phases=None,
     freq_min_hz=None,
     freq_max_hz=None,
-    num_freqs=None,
+    num_freqs=25,
     frequency_bands=None,
     window_buffer_sec=None,
     snr_threshold=10.0,
@@ -1431,7 +1555,106 @@ def compute_moment_magnitude(
     plot_spectrum=False,
     figsize=(8, 8),
 ):
-    """ """
+    """Apply workflow to estimate moment magnitude and approximate moment magnitude.
+
+    Parameters
+    ----------
+    event : BPMF.dataset.Event
+        The event for which the moment magnitude must be estimated.
+    windows : dict
+        Seismic phase windows extracted using, for example, `spectrum.extract_windows`.
+    method : str, optional
+        Either of 'regular' or 'multiband'.
+        - 'regular': Calculates spectra with FFT.
+          Must provide `freq_min_hz` and `freq_max_hz`.
+        - 'multiband': Calculates spectra following Al-Ismail et al., 2022.
+          Must provide `frequency_bands` and `window_buffer_sec`.
+    phases : list or None, optional
+        List of seismic phase names, including 'noise'. If None, uses `windows` to
+        determine the phases. Defaults to None.
+    freq_min_hz : float or None, optional
+        Minimum frequency, in Hertz, at which spectra are resampled.
+        Used only if method='regular'. Defaults to None.
+    freq_max_hz : float or None, optional
+        Maximum frequency, in Hertz, at which spectra are resampled.
+        Used only if method='regular'. Defaults to None.
+    num_freqs : int, optional
+        Number of frequency bins used in the log-uniformly resampled spectra.
+        Defaults to 25.
+    frequency_bands : dict, optional
+        Dictionary with frequency bands used when `method='multiband'`.
+        Example: frequency_bands = {'band1': [0.4, 0.8], 'band2': [0.8, 1.6]}
+    window_buffer_sec : float, optional
+        The left and right time series buffer, in seconds, to ignore when calculating
+        the spectra with the 'multiband' method.
+    snr_threshold : float, optional
+        Only frequency bins with signal-to-noise ratio (snr) larger than `snr_threshold`
+        are used in the network average. Defaults to 10.
+    min_num_valid_channels_per_freq_bin : int, optional
+        If less than `min_num_valid_channels_per_freq_bin` contributed to the
+        network average at a given frequency, this frequency is masked and does
+        not contribute to evaluating the spectral model. Defaults to 0.20.
+    max_relative_distance_err_pct : float, optional
+        If the relative distance error, `100 x dr / r`, is more than
+        `max_relative_distance_err_pct`, the station does not contribute to the
+        network average. Defaults to 33%.
+    medium_properties : dict, optional
+        Medium properties used to relate the displacement spectrum to seismic
+        moment release.
+    approximate_moment_magnitude_args : dict, optional
+        Arguments passed to `BPMF.spectrum.approximate_moment_magnitude`.
+    qc : bool, optional
+        If True, attempts to calculate the moment magnitude. Defaults to True.
+    full_output : bool, optional
+        If True, returns the propagation-corrected displacement spectra
+        as well as snr spectra. Defaults to True.
+    spectral_model : str, optional
+        Either of 'brune' or 'boatwright'. Defaults to 'brune'.
+    min_fraction_valid_points_below_fc : float, optional
+        Fraction of valid frequency bins of the network-averaged spectrum
+        below the inferred corner frequency required to trust the fit.
+        Defaults to 0.20.
+    num_channel_weighted_fit : bool, optional
+        If True, fitting the spectral models gives more weight to the frequency bins
+        at which the displacement spectra was observed across more stations.
+    max_rel_m0_err_pct : float, optional
+        Trust fit only if the relative error on seismic moment is less than 
+        `max_rel_m0_err_pct`. Defaults to 33%.
+    max_rel_fc_err_pct : float, optional
+        Trust fit only if the relative error on corner frequency is less than 
+        `max_rel_fc_err_pct`. Defaults to 33%.
+    stress_drop_mpa_min : float, optional
+        Trust fit only if the inferred stress drop is higher than `stress_drop_mpa_min`.
+        Defaults to 1e-3.
+    stress_drop_mpa_max : float, optional
+        Trust fit only if the inferred stress drop is lower than `stress_drop_mpa_max`.
+        Defaults to 1e4.
+    plot_above_mw : float, optional
+        Plot observed and modeled displacement spectrum if inferred moment
+        magnitude is above `plot_above_mw`. Defaults to 100.
+    plot_above_random : float, optional
+        Plot observed and modeled displacement spectrum if random number is
+        above `plot_above_random`. Defaults to 1.0.
+    plot_spectrum : bool, optional
+        If False, never plot figures. Defaults to False.
+    figsize : tuple, optional
+        Size of figure, in inches. Defaults to (8, 8).
+
+    Returns
+    -------
+    spectrum : BPMF.spectrum.Spectrum
+        The Spectrum instance built to compute and model the spectra.
+    source_parameters : dict
+        Dictionary with inferred moment magnitude and approximate
+        moment magnitude.
+    prop_corr_disp_spectra : pandas.DataFrame, optional
+        Is returned only if `full_output=True`.
+    snr_spectra : pandas.DataFrame, optional
+        Is returned only if `full_output=True`.
+    figures : list, optional
+        Observed and modeled P- and/or S-wave displacement spectra. Is returned
+        only if `plot_spectrum=True` and `Mw > plot_above_mw` or `R > plot_above_random`.
+    """
     # initialize spectrum instance
     spectrum = Spectrum(event=event)
     if phases is None:
@@ -1504,7 +1727,7 @@ def compute_moment_magnitude(
             success = True
     if not success:
         # failed for all requested phases
-        output = (event, spectrum, source_parameters)
+        output = (spectrum, source_parameters)
         if full_output:
             output = output + (
                 pd.DataFrame(),
@@ -1528,15 +1751,11 @@ def compute_moment_magnitude(
     # -----------------------------------------------------------
     #         Compute approximate moment magnitude
     # -----------------------------------------------------------
+    approximate_moment_magnitude_args["phases"] = phases
+    approximate_moment_magnitude_args["snr_threshold"] = snr_threshold
     approx_moment = approximate_moment_magnitude(
         spectrum,
-        phases=phases,
-        snr_threshold=snr_threshold,
-        num_averaging_bands=approximate_moment_magnitude_args["num_averaging_bands"],
-        low_snr_freq_min_hz=approximate_moment_magnitude_args["low_snr_freq_min_hz"],
-        magnitude_log_moment_scaling=approximate_moment_magnitude_args[
-            "magnitude_log_moment_scaling"
-        ],
+        **approximate_moment_magnitude_args,
     )
     # fetch approximate moment magnitude
     if ph in approx_moment:
@@ -1660,7 +1879,7 @@ def compute_moment_magnitude(
     Mw_app /= norm
     source_parameters["Mw*"] = Mw_app
 
-    output = (event, spectrum, source_parameters)
+    output = (spectrum, source_parameters)
     if full_output:
         output = output + (
             corr_disp_spectra,
