@@ -285,7 +285,7 @@ class MatchedFilter(object):
             cc_idx = cc_idx[idx]
         return cc_idx
 
-    def _weights_stations_simple(self):
+    def _weights_channels_simple(self):
         # equal weights to all channels
         weights_arr = np.float32(self.template_group.network_to_template_map)
         # insufficient data
@@ -295,7 +295,7 @@ class MatchedFilter(object):
         weights_arr[invalid] = 0.0
         return weights_arr
 
-    def _weights_stations_closest(self, num_closest_stations):
+    def _weights_channels_closest(self, num_closest_stations):
         """ """
         weights_arr = np.ones(
             (
@@ -331,7 +331,7 @@ class MatchedFilter(object):
         weights_arr[~operational_channels] = 0.0
         return weights_arr
 
-    def _weights_stations_max_moveout(
+    def _weights_channels_max_moveout(
         self, max_moveout_sec, n_min_stations=0, max_moveout2_sec=None
     ):
         """ """
@@ -420,7 +420,7 @@ class MatchedFilter(object):
             )
         return weights_sta_density
 
-    def set_weights_stations(
+    def set_weights_channels(
         self,
         n_min_stations=0,
         normalize=True,
@@ -436,27 +436,27 @@ class MatchedFilter(object):
             )
 
         if method == "simple":
-            weights_stations = self._weights_stations_simple()
+            weights_channels = self._weights_channels_simple()
         elif method == "closest_stations":
             if kwargs.get("num_closest_stations") is None:
                 raise TypeError(
                     f"When method is '{method}', `num_closest_stations` is required."
                 )
-            weights_stations = self._weights_stations_closest(
+            weights_channels = self._weights_channels_closest(
                 kwargs.get("num_closest_stations")
             )
         elif method == "max_moveout":
             if kwargs.get("max_moveout_sec") is None:
                 raise TypeError(f"When method '{method}', `max_moveout_sec` is required.")
-            weights_stations = self._weights_stations_max_moveout(
+            weights_channels = self._weights_channels_max_moveout(
                 kwargs.get("max_moveout_sec"),
                 n_min_stations=n_min_stations,
                 max_moveout2_sec=kwargs.get("max_moveout2_sec")
             )
 
         if n_min_stations > 0:
-            n_stations_per_template = np.sum(weights_stations > 0.0, axis=-1)
-            weights_stations[n_stations_per_template < n_min_stations, :] = 0.0
+            n_stations_per_template = np.sum(np.any(weights_channels > 0.0, axis=-1), axis=1)
+            weights_channels[n_stations_per_template < n_min_stations, :] = 0.0
 
         if weight_station_density:
             weights_density = self._station_density_weights(
@@ -464,14 +464,14 @@ class MatchedFilter(object):
                 lower_percentile=kwargs.get("lower_percentile", 0.0),
                 upper_percentile=kwargs.get("upper_percentile", 100.0),
             )
-            weights_stations *= weights_density[None, :, None]
+            weights_channels *= weights_density[None, :, None]
 
         if normalize:
-            norm = np.sum(weights_stations, axis=(1, 2), keepdims=True)
+            norm = np.sum(weights_channels, axis=(1, 2), keepdims=True)
             norm[norm == 0.0] = 1.0
-            weights_stations /= norm
+            weights_channels /= norm
 
-        self.weights_stations = weights_stations
+        self.weights_channels = weights_channels
 
     def compute_cc_time_series(self, device="cpu", tids=None):
         """Compute the CC time series (step 1 of matched-filter search).
@@ -498,7 +498,7 @@ class MatchedFilter(object):
         # of templates selected for this run
         self.tids_subset = self.template_group.tids[select_tts].tolist()
 
-        self._weights_arr = self.weights_stations[select_tts, :]
+        self._weights_arr = self.weights_channels[select_tts, :]
 
         # ----------------------------------------------
         # parameters
