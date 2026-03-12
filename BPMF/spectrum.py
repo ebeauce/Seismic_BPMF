@@ -1319,6 +1319,8 @@ def approximate_moment_magnitude(
     """
     if phases is None:
         phases = spectrum.phases
+        if "noise" in phases:
+            phases.remove("noise")
 
     corr_disp_spectra = {}
     snr_spectra = {}
