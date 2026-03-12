@@ -9,7 +9,7 @@ import numpy as np
 import glob
 
 
-def load_pykonal_tts(filename, path):
+def load_pykonal_tts(filename, path, stations=None):
     """Load the travel-time grid computed with Pykonal.
 
     Load the travel times previously computed with Pykonal and reformat the axes
@@ -17,10 +17,14 @@ def load_pykonal_tts(filename, path):
 
     Parameters
     -----------
-    filename: string
+    filename : str
         Name of the travel-time file. Example: 'tts.h5'.
-    path: string, default to `BPMF.cfg.MOVEOUTS_PATH`
+    path : str
         Name of the directory where the travel-time file is located.
+    stations : list, optional
+        List of station names to read. If None, reads all stations.
+        Defaults to None.
+
 
     Returns
     ---------
@@ -49,7 +53,8 @@ def load_pykonal_tts(filename, path):
         for phase in ["P", "S"]:
             tts[phase] = {}
             for sta in f[f"tt_{phase}"].keys():
-                tts[phase][sta] = f[f"tt_{phase}"][sta][()]
+                if stations is None or sta in stations:
+                    tts[phase][sta] = f[f"tt_{phase}"][sta][()]
 
     # initial axis order is (depth, latitude, longitude) with decreasing depths
 
@@ -306,7 +311,7 @@ def write_NLLoc_obs(
         #    continue
         if st in picks["P_abs_picks"].dropna().index:
             if "P_unc_sec" in picks.columns:
-                err = min(err_min, picks.loc[st, "P_unc_sec"])
+                err = max(err_min, picks.loc[st, "P_unc_sec"])
             else:
                 err = err_min
             P_arrival_time = udt(picks.loc[st]["P_abs_picks"])
@@ -354,7 +359,7 @@ def write_NLLoc_obs(
             )
         if st in picks["S_abs_picks"].dropna().index:
             if "S_unc_sec" in picks.columns:
-                err = min(err_min, picks.loc[st, "S_unc_sec"])
+                err = max(err_min, picks.loc[st, "S_unc_sec"])
             else:
                 err = err_min
             S_arrival_time = udt(picks.loc[st]["S_abs_picks"])

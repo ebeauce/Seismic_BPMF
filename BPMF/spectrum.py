@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.signal as scisig
+import warnings
+
 from scipy.interpolate import interp1d
 from obspy import Stream
 
@@ -12,27 +14,27 @@ class Spectrum:
     Class for handling spectral data and calculations.$a
     """
 
-    def __init__(self, event=None, frequency_bands=None):
+    def __init__(self, event=None):
         """
+        Initialize a new Spectrum instance.
+
         Parameters
         ----------
-        event : str or None, optional
-            The event associated with the spectrum. Default is None.
-        frequency_bands : list or None, optional
-            The frequency bands for the spectrum. Default is None.
+        event : BPMF.dataset.Event, optional
+            The event object associated with this spectrum. Default is None.
 
         Attributes
         ----------
-        event : str or None
-            The event associated with the spectrum.
-        frequency_bands : list or None
-            The frequency bands for the spectrum.
+        event : BPMF.dataset.Event or None
+            The associated event data.
+        correction_flags : dict
+            A dictionary tracking applied corrections (e.g., geometrical 
+            spreading or attenuation). Initialized as empty.
         """
         self.event = event
-        if frequency_bands is not None:
-            self.set_frequency_bands(frequency_bands)
+        self.correction_flags = {}
 
-    def set_Q_model(self, Q, frequencies):
+    def set_Q_model(self, Q, frequencies, Q_phase_prefactor={}):
         """
         Set the attenuation Q model for P and S phases.
 
@@ -48,7 +50,7 @@ class Spectrum:
         -------
         None
             The Q model is stored in the `Q0` attribute. The frequencies are
-            stored in the `Q0_frequencies` attribute. These are later used to 
+            stored in the `Q0_frequencies` attribute. These are later used to
             computed the Q-model and attenuation factor at arbitrary frequencies.
 
         """
@@ -58,6 +60,7 @@ class Spectrum:
             frequencies, Q, kind="linear", fill_value=(Q[0], Q[-1]), bounds_error=False
         )
         self.Q = np.asarray(interpolator(self.frequencies))
+        self.Q_phase_prefactor = Q_phase_prefactor
 
     def update_Q_model(self):
         """
@@ -82,11 +85,13 @@ class Spectrum:
             r_m = 1000.0 * self.event.source_receiver_dist.loc[sta]
             tt_s = self.event.arrival_times.loc[sta, "S_tt_sec"]
             tt_p = self.event.arrival_times.loc[sta, "P_tt_sec"]
+            Q_s = self.Q * self.Q_phase_prefactor.get("s", 1.)
+            Q_p = self.Q * self.Q_phase_prefactor.get("p", 1.)
             self.attenuation_factor.loc[sta, f"attenuation_S"] = np.exp(
-                np.pi * tt_s * np.asarray(self.frequencies) / self.Q
+                np.pi * tt_s * np.asarray(self.frequencies) / Q_p
             )
             self.attenuation_factor.loc[sta, f"attenuation_P"] = np.exp(
-                np.pi * tt_s * np.asarray(self.frequencies) / self.Q
+                np.pi * tt_s * np.asarray(self.frequencies) / Q_s
             )
 
     def compute_correction_factor(
@@ -126,7 +131,7 @@ class Spectrum:
         -------
         None
             The correction factor and attenuation factor are stored in the
-            object's attributes `correction_factor` and `attenuation_factor`.
+            object's attributes `geometrical_factor` and `attenuation_factor`.
 
         Notes
         -----
@@ -142,7 +147,7 @@ class Spectrum:
             print("Call event.set_source_receiver_dist(network) first.")
             return
         stations = np.sort(self.event.source_receiver_dist.index)
-        correction_factor = pd.DataFrame(index=stations)
+        geometrical_factor = pd.DataFrame(index=stations)
         attenuation_factor = pd.DataFrame(
             index=stations, columns=["attenuation_P", "attenuation_S"], dtype=object
         )
@@ -161,39 +166,93 @@ class Spectrum:
                 * r_m
                 / radiation_S
             )
-            correction_factor.loc[sta, f"correction_S"] = corr_s
+            geometrical_factor.loc[sta, f"geometry_S"] = corr_s
             if hasattr(self, "Q"):
+                Q_s = self.Q * self.Q_phase_prefactor.get("s", 1.)
                 attenuation_factor.loc[sta, f"attenuation_S"] = np.exp(
-                    np.pi * tt_s * np.asarray(self.frequencies) / self.Q
+                    np.pi * tt_s * np.asarray(self.frequencies) / Q_s
                 )
             else:
                 attenuation_factor.loc[sta, f"attenuation_S"] = None
 
             tt_p = self.event.arrival_times.loc[sta, "P_tt_sec"]
             corr_p = (
-                   4.0 * np.pi
-                   *
-                   np.sqrt(rho_receiver) * np.sqrt(rho_source)
-                   *
-                   np.sqrt(vp_receiver) * vp_source**(5./2.)
-                   *
-                   r_m / radiation_P
-                   )
-            correction_factor.loc[sta, f"correction_P"] = corr_p
+                4.0
+                * np.pi
+                * np.sqrt(rho_receiver)
+                * np.sqrt(rho_source)
+                * np.sqrt(vp_receiver)
+                * vp_source ** (5.0 / 2.0)
+                * r_m
+                / radiation_P
+            )
+            geometrical_factor.loc[sta, f"geometry_P"] = corr_p
             if hasattr(self, "Q"):
+                Q_p = self.Q * self.Q_phase_prefactor.get("p", 1.)
                 attenuation_factor.loc[sta, f"attenuation_P"] = np.exp(
-                    np.pi * tt_p * np.asarray(self.frequencies) / self.Q
+                    np.pi * tt_p * np.asarray(self.frequencies) / Q_p
                 )
             else:
                 attenuation_factor.loc[sta, f"attenuation_P"] = None
-        self.correction_factor = correction_factor
+        self.geometrical_factor = geometrical_factor
         self.attenuation_factor = attenuation_factor
+
+    def correct_geometrical_spreading(self):
+        """Correct all spectra for geometrical spreading."""
+        if not hasattr(self, "geometrical_factor"):
+            warnings.warn("You need to use compute_correction_factor first.")
+            return
+        for phase in self.phases:
+            if phase == "noise":
+                continue
+            if not phase in self.correction_flags:
+                # initialize flag
+                self.correction_flags[phase] = {}
+                self.correction_flags[phase][f"geometry_{phase}"] = False
+            if self.correction_flags[phase].get(f"geometry_{phase}", False):
+                print(
+                    f"Geometrical spreading was already corrected for for {phase} spectrum"
+                )
+                continue
+            for trid in getattr(self, f"{phase}_spectrum"):
+                sta = trid.split(".")[1]
+                _geom_corr = self.geometrical_factor.loc[
+                    sta, f"geometry_{phase.upper()}"
+                ]
+                getattr(self, f"{phase}_spectrum")[trid]["spectrum"] *= _geom_corr
+            # update flag
+            self.correction_flags[phase][f"geometry_{phase}"] = True
+
+    def correct_attenuation(self):
+        """Correct all spectra for attenuation."""
+        if not hasattr(self, "attenuation_factor"):
+            warnings.warn("You need to use compute_correction_factor first.")
+            return
+        self.update_Q_model()
+        self.update_attenuation_factor()
+        for phase in self.phases:
+            if phase == "noise":
+                continue
+            if not phase in self.correction_flags:
+                # initialize flag
+                self.correction_flags[phase] = {}
+                self.correction_flags[phase][f"attenuation_{phase}"] = False
+            if self.correction_flags[phase].get(f"attenuation_{phase}", False):
+                print(f"Attenuation was already corrected for for {phase} spectrum")
+                continue
+            for trid in getattr(self, f"{phase}_spectrum"):
+                sta = trid.split(".")[1]
+                _att_corr = self.attenuation_factor.loc[
+                    sta, f"attenuation_{phase.upper()}"
+                ]
+                getattr(self, f"{phase}_spectrum")[trid]["spectrum"] *= _att_corr
+            # update flag
+            self.correction_flags[phase][f"attenuation_{phase}"] = True
 
     def compute_network_average_spectrum(
         self,
         phase,
         snr_threshold,
-        correct_propagation=True,
         average_log=True,
         min_num_valid_channels_per_freq_bin=0,
         max_relative_distance_err_pct=25.0,
@@ -209,8 +268,6 @@ class Spectrum:
             Phase of the seismic event. Should be either 'p' or 's'.
         snr_threshold : float
             Signal-to-noise ratio threshold for valid channels.
-        correct_propagation : bool, optional
-            Flag indicating whether to correct for propagation effects. Default is True.
         average_log : bool, optional
             Flag indicating whether to average the logarithm of the spectra. Default is True.
         min_num_valid_channels_per_freq_bin : int, optional
@@ -239,17 +296,10 @@ class Spectrum:
         assert hasattr(
             self, "frequencies"
         ), "You need to use set_target_frequencies first"
-        if correct_propagation and not hasattr(self, "correction_factor"):
-            print("You requested correcting for propagation effects. ")
-            print("You need to use compute_correction_factor first.")
-            return
         average_spectrum = np.ma.zeros(len(self.frequencies), dtype=np.float64)
         masked_spectra = []
         signal_spectrum = getattr(self, f"{phase}_spectrum")
         snr_spectrum = getattr(self, f"snr_{phase}_spectrum")
-        if hasattr(self, "Q"):
-            self.update_Q_model()
-            self.update_attenuation_factor()
         for trid in signal_spectrum:
             if (
                 signal_spectrum[trid]["relative_distance_err_pct"]
@@ -265,21 +315,6 @@ class Spectrum:
                 continue
             mask = snr_spectrum[trid]["snr"] < snr_threshold
             amplitude_spectrum = signal_spectrum[trid]["spectrum"].copy()
-            if correct_propagation:
-                sta = trid.split(".")[1]
-                amplitude_spectrum *= self.correction_factor.loc[
-                    sta, f"correction_{phase.upper()}"
-                ]
-                if (
-                    self.attenuation_factor.loc[sta, f"attenuation_{phase.upper()}"]
-                    is not None
-                ):
-                    # att = self.attenuation_factor.loc[
-                    #    sta, f"attenuation_{phase.upper()}"
-                    # ](signal_spectrum[trid]["freq"])
-                    amplitude_spectrum *= self.attenuation_factor.loc[
-                        sta, f"attenuation_{phase.upper()}"
-                    ]
             masked_spectra.append(
                 np.ma.masked_array(data=amplitude_spectrum, mask=mask)
             )
@@ -384,7 +419,7 @@ class Spectrum:
         spectrum = {}
         dev_mode = kwargs.get("dev_mode", False)
         for tr in traces:
-            nyq = tr.stats.sampling_rate / 2.
+            nyq = tr.stats.sampling_rate / 2.0
             buffer_samples = int(buffer_seconds * tr.stats.sampling_rate)
             spectrum[tr.id] = {}
             spectrum[tr.id]["spectrum"] = np.zeros(num_freqs, dtype=np.float64)
@@ -418,16 +453,16 @@ class Spectrum:
                 trimmed_tr = tr_band.data[buffer_samples:-buffer_samples]
                 if dev_mode:
                     tr_band.trim(
-                            starttime=tr_band.stats.starttime + buffer_seconds,
-                            endtime=tr_band.stats.endtime - buffer_seconds
-                            )
+                        starttime=tr_band.stats.starttime + buffer_seconds,
+                        endtime=tr_band.stats.endtime - buffer_seconds,
+                    )
                     spectrum[tr.id]["filtered_traces"][str(band)] = tr_band
                 if len(trimmed_tr) == 0:
                     # gap in data?
                     continue
                 max_amp = np.max(np.abs(trimmed_tr)) / bandwidth
                 spectrum[tr.id]["spectrum"][i] = max_amp
-            #print(spectrum[tr.id]["spectrum"])
+            # print(spectrum[tr.id]["spectrum"])
             max_err = np.sqrt(self.event.hmax_unc**2 + self.event.vmax_unc**2)
             spectrum[tr.id]["relative_distance_err_pct"] = 100.0 * (
                 max_err / self.event.source_receiver_dist.loc[tr.stats.station]
@@ -531,13 +566,11 @@ class Spectrum:
         snr = {}
         for trid in signal_spectrum:
             snr[trid] = {}
-            snr_ = np.zeros(
-                len(signal_spectrum[trid]["spectrum"]), dtype=np.float64
-            )
+            snr_ = np.zeros(len(signal_spectrum[trid]["spectrum"]), dtype=np.float64)
             if trid in noise_spectrum:
                 signal = np.abs(signal_spectrum[trid]["spectrum"])
                 noise = np.abs(noise_spectrum[trid]["spectrum"])
-                zero_by_zero = (signal == 0.) & (noise == 0.)
+                zero_by_zero = (signal == 0.0) & (noise == 0.0)
                 snr_[~zero_by_zero] = signal[~zero_by_zero] / noise[~zero_by_zero]
             else:
                 # no noise spectrum, probably because of gap
@@ -716,7 +749,7 @@ class Spectrum:
         else:
             inverse_weights = None
         p0 = np.array([omega0_first_guess, fc_first_guess])
-        bounds = (np.array([0.0, 0.0]), np.array([np.inf, 1.e3 * fc_first_guess]))
+        bounds = (np.array([0.0, 0.0]), np.array([np.inf, 1.0e3 * fc_first_guess]))
         try:
             popt, pcov = curve_fit(
                 mod, x, y, p0=p0, bounds=bounds, sigma=inverse_weights, **kwargs
@@ -779,10 +812,10 @@ class Spectrum:
                 )
                 # set to zero any frequency bins that were extrapolated
                 # need the 0.99 in case new_frequencies have some rounding errors
-                outside_bandwidth = (
-                        new_frequencies >= 0.99 * np.max(spectrum[trid]["freq"])
-                        )
-                spectrum[trid]["spectrum"][outside_bandwidth] = 0.
+                outside_bandwidth = new_frequencies >= 0.99 * np.max(
+                    spectrum[trid]["freq"]
+                )
+                spectrum[trid]["spectrum"][outside_bandwidth] = 0.0
                 spectrum[trid]["freq"] = new_frequencies
 
     def set_frequency_bands(self, frequency_bands):
@@ -808,6 +841,13 @@ class Spectrum:
             self.frequencies[i] = 0.5 * (
                 self.frequency_bands[band][0] + self.frequency_bands[band][1]
             )
+        # make sure this is sorted!!
+        freq_bands = list(self.frequency_bands.keys())
+        sorted_idx = np.argsort(self.frequencies)
+        self.frequencies = self.frequencies[sorted_idx]
+        self.frequency_bands = {
+            freq_bands[i]: self.frequency_bands[freq_bands[i]] for i in sorted_idx
+        }
 
     def set_target_frequencies(self, freq_min, freq_max, num_points):
         """
@@ -829,6 +869,28 @@ class Spectrum:
         """
         self.frequencies = np.logspace(
             np.log10(freq_min), np.log10(freq_max), num_points
+        )
+
+    def _spectra_pd(self, phase):
+        _spec = getattr(self, f"{phase}_spectrum")
+        return pd.DataFrame(
+            columns=list(_spec.keys()),
+            index=self.frequencies,
+            data=np.stack(
+                [_spec[trid]["spectrum"] for trid in _spec],
+                axis=1,
+            ),
+        )
+
+    def _snr_spectra_pd(self, phase):
+        _spec = getattr(self, f"snr_{phase}_spectrum")
+        return pd.DataFrame(
+            columns=list(_spec.keys()),
+            index=self.frequencies,
+            data=np.stack(
+                [_spec[trid]["snr"] for trid in _spec],
+                axis=1,
+            ),
         )
 
     def plot_average_spectrum(
@@ -1005,8 +1067,8 @@ class Spectrum:
                 amplitude_spec = np.abs(fft)
                 if correct_propagation and ph in ["p", "s"]:
                     # sta = trid.split(".")[1]
-                    amplitude_spec *= self.correction_factor.loc[
-                        sta, f"correction_{ph.upper()}"
+                    amplitude_spec *= self.geometrical_factor.loc[
+                        sta, f"geometry_{ph.upper()}"
                     ]
                 ax.plot(
                     freq,
@@ -1148,185 +1210,691 @@ def stress_drop_circular_crack(Mw, fc, phase="p", vs_m_per_s=3500.0, vr_vs_ratio
     return stress_drop
 
 
-# workflow function
-def compute_moment_magnitude(
-    event,
-    mag_params,
-    plot_above_Mw=100.0,
-    plot_above_random=1.0,
-    path_figures="",
-    phases=["p", "s"],
-    plot=False,
-    figsize=(8, 8),
-):
-    """ """
-    event.set_moveouts_to_theoretical_times()
-    event.set_moveouts_to_empirical_times()
-    spectrum = Spectrum(event=event)
+def _snr_based_weights(snr, snr_threshold, weight_max=3.0, max_num_bad_measurements=6):
+    """
+    Calculate station weights based on Signal-to-Noise Ratio (SNR).
 
-    # ---------------------------------------------------------------
+    The weighting logic follows a three-step process:
+    1. Weights are initially set equal to the SNR, clipped at `weight_max`.
+    2. If enough "good" measurements (SNR >= `snr_threshold`) exist, all 
+       "bad" measurements are assigned a weight of 0.
+    3. If most measurements are "bad," the function preserves up to the 
+       `max_num_bad_measurements` best available signals to allow for an 
+       approximate estimation.
+
+    Parameters
+    ----------
+    snr : numpy.ndarray
+        An array of SNR values for different stations or channels.
+    snr_threshold : float
+        The minimum SNR value considered "good" data.
+    weight_max : float, optional
+        The maximum allowable weight for any single measurement. 
+        Default is 3.0.
+    max_num_bad_measurements : int, optional
+        The maximum number of measurements to keep if the number of 
+        valid measurements is low. Default is 6.
+
+    Returns
+    -------
+    weights : numpy.ndarray
+        An array of weights corresponding to the input `snr` array.
+
+    Notes
+    -----
+    This is a protected helper function (denoted by the underscore) 
+    intended for use within the magnitude estimation pipeline of BPMF.
+    """
+    # allow some numerical noise (?)
+    snr_clipped = np.minimum(snr, 1.001 * snr_threshold)
+    # linear function of snr
+    weights = snr_clipped
+    # clip weights
+    weights = np.minimum(weights, weight_max)
+    if np.sum(snr >= snr_threshold) >= max_num_bad_measurements:
+        # set weights of bad measurements to 0
+        weights[snr < snr_threshold] = 0.0
+    else:
+        ordered_indexes = np.argsort(snr)
+        # set to 0 all but the `max_num_bad_measurements` least bad meas.
+        weights[ordered_indexes[:-max_num_bad_measurements]] = 0.0
+    return weights
+
+
+def approximate_moment_magnitude(
+    spectrum,
+    snr_threshold=10.0,
+    num_averaging_bands=1,
+    low_snr_freq_min_hz=2.0,
+    magnitude_log_moment_scaling=2.0 / 3.0,
+    phases=None,
+    snr_based_weights=_snr_based_weights,
+):
+    """
+    Estimate the approximate moment magnitude (Mw*) from displacement spectra.
+
+    This function calculates Mw* by identifying valid frequency bands that satisfy 
+    a minimum SNR threshold. For high-quality signals, it prioritizes low-frequency 
+    bands to reflect the physical seismic moment. For low-quality signals, it 
+    applies a weighted average across available frequencies.
+
+    The magnitude is calculated using the relation:
+    $$M_w = \text{scaling} \times (\log_{10}(M_0) - 9.1)$$
+
+    Parameters
+    ----------
+    spectrum : BPMF.spectrum.Spectrum
+        The spectrum object containing multi-band displacement and SNR data.
+    snr_threshold : float, optional
+        The minimum signal-to-noise ratio required to consider a frequency 
+        band "valid". Default is 10.0.
+    num_averaging_bands : int, optional
+        The number of low-frequency valid bands to average when calculating 
+        the plateau. Default is 1.
+    low_snr_freq_min_hz : float, optional
+        The minimum frequency (in Hz) to consider when the SNR is below 
+        the threshold. Default is 2.0.
+    magnitude_log_moment_scaling : float, optional
+        The scaling factor for the moment-to-magnitude conversion. 
+        Default is 2/3 (standard Kanamori scale).
+    phases : list of str or None, optional
+        Seismic phases to process (e.g., ['p', 's']). If None, retrieves 
+        phases from the `spectrum` object. Default is None.
+    snr_based_weights : callable, optional
+        A function used to calculate station weights based on peak SNR. 
+        Default is `_snr_based_weights`.
+
+    Returns
+    -------
+    approx_moment : dict
+        A dictionary where keys are phase names and values are the 
+        calculated approximate moment magnitudes (Mw).
+
+    Notes
+    -----
+    The function performs a station-by-station analysis. If no bands meet 
+    the `snr_threshold`, it falls back to a weighted mean of bands above 
+    `low_snr_freq_min_hz` to provide a best-effort estimate, though this 
+    may introduce significant error.
+    """
+    if phases is None:
+        phases = spectrum.phases
+        if "noise" in phases:
+            phases.remove("noise")
+
+    corr_disp_spectra = {}
+    snr_spectra = {}
+    approx_moment = {}
+    for ph in phases:
+        # 1) store multi-band, propagation-corrected displacement
+        # spectra in a pandas.DataFrame
+        corr_disp_spectra[ph] = spectrum._spectra_pd(ph)
+        # 2) store snr in a pandas.DataFrame
+        snr_spectra[ph] = spectrum._snr_spectra_pd(ph)
+        # 3) select peaks from best lowest frequency band
+        #    to calculate the approximate moment magnitude
+        geo_corrected_peaks = pd.Series(
+            index=list(corr_disp_spectra[ph].columns), dtype=np.float64
+        )
+        num_cha = len(corr_disp_spectra[ph].columns)
+        _peak_snr = np.zeros(num_cha, dtype=np.float32)
+
+        for j, idx in enumerate(geo_corrected_peaks.index):
+            # process station by station
+            station = idx.split(".")[1]
+            # fetch relevant disp spectra and snr
+            multi_band_peaks = corr_disp_spectra[ph].loc[:, idx]
+            multi_band_snr = snr_spectra[ph].loc[:, idx]
+            # find frequency bands that satisfy snr criterion
+            valid_bands = multi_band_snr.loc[multi_band_snr > snr_threshold].index
+            if len(valid_bands) > 0:
+                # peak amplitude is taken from the lowest-frequency,
+                # valid frequency band (reflect physical seismic moment)
+                valid_bands = np.sort(valid_bands)
+                selected_bands = valid_bands[
+                    : min(len(valid_bands), num_averaging_bands)
+                ]
+                if len(selected_bands) > 1:
+                    geo_corrected_peaks.loc[idx] = np.median(
+                        multi_band_peaks.loc[selected_bands].values
+                    )
+                else:
+                    geo_corrected_peaks.loc[idx] = multi_band_peaks.loc[
+                        selected_bands
+                    ].values[0]
+                if np.isnan(geo_corrected_peaks.loc[idx]):
+                    breakpoint()
+                _peak_snr[j] = snr_threshold
+            else:
+                # peak amplitude is taken from the highest snr frequency
+                # band (implies error on magnitude estimation)
+                high_freq = multi_band_snr.index > low_snr_freq_min_hz
+                freq_idx = multi_band_snr[high_freq].index[
+                    multi_band_snr[high_freq].argmax()
+                ]
+
+                w_ = multi_band_snr.loc[high_freq]
+                p_ = multi_band_peaks.loc[high_freq]
+                sum_ = w_.sum()
+                sum_ = 1.0 if sum_ == 0.0 else sum_
+                geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
+                _peak_snr[j] = (w_ * multi_band_snr.loc[high_freq]).sum() / sum_
+
+        _peak_snr[geo_corrected_peaks == 0.0] = 0.0
+        weights = snr_based_weights(_peak_snr, snr_threshold)
+
+        weighted_log_peaks = np.zeros(len(weights), dtype=np.float64)
+        weighted_log_peaks[weights > 0.0] = (
+            np.log10(geo_corrected_peaks[weights > 0.0]) * weights[weights > 0.0]
+        )
+        estimated_log10_M0 = weighted_log_peaks.sum() / weights.sum()
+        Mw_approx = magnitude_log_moment_scaling * (estimated_log10_M0 - 9.1)
+        print(
+            f"{ph.upper()}-wave: Approx. Mw: {Mw_approx:.2f} (approx. log10 M0: {estimated_log10_M0:.2f})"
+        )
+        approx_moment[ph] = Mw_approx
+
+    return approx_moment
+
+
+# workflow function
+def extract_windows(
+    event,
+    duration_sec,
+    offset_ot_sec_noise,
+    data_folder,
+    attach_response=True,
+    phase_on_comp_p={"N": "P", "1": "P", "E": "P", "2": "P", "Z": "P"},
+    phase_on_comp_s={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "S"},
+    offset_phase={"P": 0.5, "S": 0.5},
+    cleanup_stream=None,
+):
+    """
+    Extract noise, P-wave, and S-wave windows and convert to displacement.
+
+    This function performs a three-stage extraction process from raw seismic data:
+    1. Extracts a noise window relative to the origin time (OT).
+    2. Extracts P-wave and S-wave windows based on phase arrival picks.
+    3. Applies detrending, tapering, and instrument response removal to 
+       output displacement (m) seismograms.
+
+    Parameters
+    ----------
+    event : BPMF.dataset.Event
+        The event object used to read waveforms and access arrival times.
+    duration_sec : float
+        The length of each extracted window in seconds.
+    offset_ot_sec_noise : float
+        The time offset from the origin time to start the noise window.
+    data_folder : str
+        Path to the directory containing the raw waveform files.
+    attach_response : bool, optional
+        If True, attaches instrument response metadata during reading. 
+        Default is True.
+    phase_on_comp_p : dict, optional
+        Mapping of component labels to the P-phase for windowing.
+    phase_on_comp_s : dict, optional
+        Mapping of component labels to the S-phase for windowing.
+    offset_phase : dict, optional
+        Offset in seconds relative to the phase arrival to start the 
+        signal window. Default is {"P": 0.5, "S": 0.5}.
+    cleanup_stream : callable, optional
+        A custom function or object (e.g., a filter) applied to the 
+        `obspy.Stream` after each read. Default is None.
+
+    Returns
+    -------
+    windows : dict
+        A dictionary containing the processed `obspy.Stream` objects:
+        - 'noise': The noise window traces.
+        - 'p': The P-wave window traces.
+        - 's': The S-wave window traces.
+
+    Notes
+    -----
+    Instrument response removal uses a pre-filter defined by the 
+    `duration_sec` and the Nyquist frequency to avoid numerical 
+    instability at very low or high frequencies. All outputs are 
+    returned as displacement (DISP).
+    """
     #                 extract waveforms
     # first, read short extract before signal as an estimate of noise
     event.read_waveforms(
-        mag_params["DURATION_SEC"],
+        duration_sec,
         time_shifted=False,
-        data_folder=mag_params["DATA_FOLDER"],
-        offset_ot=mag_params["OFFSET_OT_SEC_NOISE"],
-        attach_response=mag_params["ATTACH_RESPONSE"],
+        data_folder=data_folder,
+        offset_ot=offset_ot_sec_noise,
+        attach_response=attach_response,
     )
+    if cleanup_stream is not None:
+        cleanup_stream(event.traces)
     noise = event.traces.copy()
-    noise.remove_sensitivity()
-    spectrum.compute_spectrum(noise, "noise")
+
     # then, read signal
-    if "p" in phases:
-        event.read_waveforms(
-            mag_params["DURATION_SEC"],
-            phase_on_comp=mag_params["PHASE_ON_COMP_P"],
-            offset_phase=mag_params["OFFSET_PHASE"],
-            time_shifted=mag_params["TIME_SHIFTED"],
-            data_folder=mag_params["DATA_FOLDER"],
-            attach_response=mag_params["ATTACH_RESPONSE"],
-        )
-        event.traces.remove_sensitivity()
-        event.zero_out_clipped_waveforms(kurtosis_threshold=-1)
-        p_wave = event.traces.copy()
-        spectrum.compute_spectrum(p_wave, "p")
-    if "s" in phases:
-        event.read_waveforms(
-            mag_params["DURATION_SEC"],
-            phase_on_comp=mag_params["PHASE_ON_COMP_S"],
-            offset_phase=mag_params["OFFSET_PHASE"],
-            time_shifted=mag_params["TIME_SHIFTED"],
-            data_folder=mag_params["DATA_FOLDER"],
-            attach_response=mag_params["ATTACH_RESPONSE"],
-        )
-        event.traces.remove_sensitivity()
-        event.zero_out_clipped_waveforms(kurtosis_threshold=-1)
-        s_wave = event.traces.copy()
-        spectrum.compute_spectrum(s_wave, "s")
+    event.read_waveforms(
+        duration_sec,
+        phase_on_comp=phase_on_comp_p,
+        offset_phase=offset_phase,
+        time_shifted=True,
+        data_folder=data_folder,
+        attach_response=attach_response,
+    )
+    if cleanup_stream is not None:
+        cleanup_stream(event.traces)
+    p_wave = event.traces.copy()
+
+    event.read_waveforms(
+        duration_sec,
+        phase_on_comp=phase_on_comp_s,
+        offset_phase=offset_phase,
+        time_shifted=True,
+        data_folder=data_folder,
+        attach_response=attach_response,
+    )
+    if cleanup_stream is not None:
+        cleanup_stream(event.traces)
+    s_wave = event.traces.copy()
+
+    # correct for instrument response and integrate to get displacement seismograms
+    for st in [noise, p_wave, s_wave]:
+        for tr in st:
+            fnyq = tr.stats.sampling_rate / 2.0
+            pre_filt = [
+                1.0 / duration_sec,
+                1.05 / duration_sec,
+                0.95 * fnyq,
+                0.98 * fnyq,
+            ]
+            tr.detrend("constant")
+            tr.detrend("linear")
+            tr.taper(0.25, type="cosine")
+            tr.remove_response(
+                pre_filt=pre_filt,
+                zero_mean=False,
+                taper=False,
+                output="DISP",
+                plot=False,
+            )
+
+    windows = {"noise": noise, "p": p_wave, "s": s_wave}
+    return windows
+
+
+def compute_moment_magnitude(
+    event,
+    windows,
+    method="regular",
+    phases=None,
+    freq_min_hz=None,
+    freq_max_hz=None,
+    num_freqs=25,
+    frequency_bands=None,
+    window_buffer_sec=None,
+    snr_threshold=10.0,
+    min_num_valid_channels_per_freq_bin=3,
+    max_relative_distance_err_pct=33.0,
+    medium_properties={
+        "Q_1Hz": None,
+        "attenuation_n": None,
+        "rho_source_kgm3": None,
+        "vp_source_ms": None,
+        "vs_source_ms": None,
+        "rho_receiver_kgm3": None,
+        "vp_receiver_ms": None,
+        "vs_receiver_ms": None,
+    },
+    approximate_moment_magnitude_args={
+        "num_averaging_bands": 3,
+        "low_snr_freq_min_hz": 2.0,
+        "magnitude_log_moment_scaling": 2.0 / 3.0,
+    },
+    q_phase_prefactor={"p": 2.25, "s": 1.0},
+    qc=True,
+    full_output=False,
+    spectral_model="brune",
+    min_fraction_valid_points=0.50,
+    min_fraction_valid_points_below_fc=0.20,
+    num_channel_weighted_fit=True,
+    max_rel_m0_err_pct=33.0,
+    max_rel_fc_err_pct=33.0,
+    stress_drop_mpa_min=1.0e-3,
+    stress_drop_mpa_max=1.0e4,
+    plot_above_mw=100.0,
+    plot_above_random=1.0,
+    plot_spectrum=False,
+    figsize=(8, 8),
+):
+    """Apply workflow to estimate moment magnitude and approximate moment magnitude.
+
+    Parameters
+    ----------
+    event : BPMF.dataset.Event
+        The event for which the moment magnitude must be estimated.
+    windows : dict
+        Seismic phase windows extracted using, for example, `spectrum.extract_windows`.
+    method : str, optional
+        Either of 'regular' or 'multiband'.
+        - 'regular': Calculates spectra with FFT.
+          Must provide `freq_min_hz` and `freq_max_hz`.
+        - 'multiband': Calculates spectra following Al-Ismail et al., 2022.
+          Must provide `frequency_bands` and `window_buffer_sec`.
+    phases : list or None, optional
+        List of seismic phase names, including 'noise'. If None, uses `windows` to
+        determine the phases. Defaults to None.
+    freq_min_hz : float or None, optional
+        Minimum frequency, in Hertz, at which spectra are resampled.
+        Used only if method='regular'. Defaults to None.
+    freq_max_hz : float or None, optional
+        Maximum frequency, in Hertz, at which spectra are resampled.
+        Used only if method='regular'. Defaults to None.
+    num_freqs : int, optional
+        Number of frequency bins used in the log-uniformly resampled spectra.
+        Defaults to 25.
+    frequency_bands : dict, optional
+        Dictionary with frequency bands used when `method='multiband'`.
+        Example: frequency_bands = {'band1': [0.4, 0.8], 'band2': [0.8, 1.6]}
+    window_buffer_sec : float, optional
+        The left and right time series buffer, in seconds, to ignore when calculating
+        the spectra with the 'multiband' method.
+    snr_threshold : float, optional
+        Only frequency bins with signal-to-noise ratio (snr) larger than `snr_threshold`
+        are used in the network average. Defaults to 10.
+    min_num_valid_channels_per_freq_bin : int, optional
+        If less than `min_num_valid_channels_per_freq_bin` contributed to the
+        network average at a given frequency, this frequency is masked and does
+        not contribute to evaluating the spectral model. Defaults to 0.20.
+    max_relative_distance_err_pct : float, optional
+        If the relative distance error, `100 x dr / r`, is more than
+        `max_relative_distance_err_pct`, the station does not contribute to the
+        network average. Defaults to 33%.
+    medium_properties : dict, optional
+        Medium properties used to relate the displacement spectrum to seismic
+        moment release.
+    approximate_moment_magnitude_args : dict, optional
+        Arguments passed to `BPMF.spectrum.approximate_moment_magnitude`.
+    qc : bool, optional
+        If True, attempts to calculate the moment magnitude. Defaults to True.
+    full_output : bool, optional
+        If True, returns the propagation-corrected displacement spectra
+        as well as snr spectra. Defaults to True.
+    spectral_model : str, optional
+        Either of 'brune' or 'boatwright'. Defaults to 'brune'.
+    min_fraction_valid_points_below_fc : float, optional
+        Fraction of valid frequency bins of the network-averaged spectrum
+        below the inferred corner frequency required to trust the fit.
+        Defaults to 0.20.
+    num_channel_weighted_fit : bool, optional
+        If True, fitting the spectral models gives more weight to the frequency bins
+        at which the displacement spectra was observed across more stations.
+    max_rel_m0_err_pct : float, optional
+        Trust fit only if the relative error on seismic moment is less than 
+        `max_rel_m0_err_pct`. Defaults to 33%.
+    max_rel_fc_err_pct : float, optional
+        Trust fit only if the relative error on corner frequency is less than 
+        `max_rel_fc_err_pct`. Defaults to 33%.
+    stress_drop_mpa_min : float, optional
+        Trust fit only if the inferred stress drop is higher than `stress_drop_mpa_min`.
+        Defaults to 1e-3.
+    stress_drop_mpa_max : float, optional
+        Trust fit only if the inferred stress drop is lower than `stress_drop_mpa_max`.
+        Defaults to 1e4.
+    plot_above_mw : float, optional
+        Plot observed and modeled displacement spectrum if inferred moment
+        magnitude is above `plot_above_mw`. Defaults to 100.
+    plot_above_random : float, optional
+        Plot observed and modeled displacement spectrum if random number is
+        above `plot_above_random`. Defaults to 1.0.
+    plot_spectrum : bool, optional
+        If False, never plot figures. Defaults to False.
+    figsize : tuple, optional
+        Size of figure, in inches. Defaults to (8, 8).
+
+    Returns
+    -------
+    spectrum : BPMF.spectrum.Spectrum
+        The Spectrum instance built to compute and model the spectra.
+    source_parameters : dict
+        Dictionary with inferred moment magnitude and approximate
+        moment magnitude.
+    prop_corr_disp_spectra : pandas.DataFrame, optional
+        Is returned only if `full_output=True`.
+    snr_spectra : pandas.DataFrame, optional
+        Is returned only if `full_output=True`.
+    figures : list, optional
+        Observed and modeled P- and/or S-wave displacement spectra. Is returned
+        only if `plot_spectrum=True` and `Mw > plot_above_mw` or `R > plot_above_random`.
+    """
+    # initialize spectrum instance
+    spectrum = Spectrum(event=event)
+    if phases is None:
+        phases = list(windows.keys())
 
     # -----------------------------------------------------------
-    spectrum.set_target_frequencies(
-        mag_params["FREQ_MIN_HZ"], mag_params["FREQ_MAX_HZ"], mag_params["NUM_FREQS"]
-    )
-    spectrum.resample(spectrum.frequencies, spectrum.phases)
+    #           Compute displacement spectra
+    # -----------------------------------------------------------
+    if method == "regular":
+        for ph in phases:
+            spectrum.compute_spectrum(windows[ph], ph, alpha=0.15)
+        spectrum.set_target_frequencies(freq_min_hz, freq_max_hz, num_freqs)
+        spectrum.resample(spectrum.frequencies, spectrum.phases)
+    elif method == "multiband":
+        spectrum.set_frequency_bands(frequency_bands)
+        for ph in phases:
+            spectrum.compute_multi_band_spectrum(windows[ph], ph, window_buffer_sec)
+        # does the following resampling even make sense?
+        spectrum.set_target_frequencies(
+                spectrum.frequencies.min(),
+                spectrum.frequencies.max(),
+                num_freqs
+                )
+        spectrum.resample(spectrum.frequencies, spectrum.phases)
+
     for ph in phases:
+        if ph == "noise":
+            continue
         spectrum.compute_signal_to_noise_ratio(ph)
 
-    # from Ford et al 2008, BSSA
-    Q = mag_params["Q_1HZ"] * np.power(
-        spectrum.frequencies, mag_params["ATTENUATION_N"]
+    # -----------------------------------------------------------
+    #        compute propagation effects and corrections
+    # -----------------------------------------------------------
+    Q = medium_properties["Q_1HZ"] * np.power(
+        spectrum.frequencies, medium_properties["attenuation_n"]
     )
-    spectrum.attenuation_Q_model(Q, spectrum.frequencies)
+    spectrum.set_Q_model(Q, spectrum.frequencies, Q_phase_prefactor=q_phase_prefactor)
     spectrum.compute_correction_factor(
-        mag_params["RHO_SOURCE_KGM3"],
-        mag_params["RHO_RECEIVER_KGM3"],
-        mag_params["VP_SOURCE_MS"],
-        mag_params["VP_RECEIVER_MS"],
-        mag_params["VS_SOURCE_MS"],
-        mag_params["VS_RECEIVER_MS"],
+        medium_properties["rho_source_kgm3"],
+        medium_properties["rho_receiver_kgm3"],
+        medium_properties["vp_source_ms"],
+        medium_properties["vp_receiver_ms"],
+        medium_properties["vs_source_ms"],
+        medium_properties["vs_receiver_ms"],
     )
 
+    # -----------------------------------------------------------
+    #              Correct for propagation effects
+    # -----------------------------------------------------------
+    spectrum.correct_geometrical_spreading()
+    spectrum.correct_attenuation()
+
+    # -----------------------------------------------------------
+    #                  Initialize output
+    # -----------------------------------------------------------
+    phases = list(phases)
+    phases.remove("noise")
+    success = False
     source_parameters = {}
-    for phase_for_mag in phases:
-        spectrum.compute_network_average_spectrum(
-            phase_for_mag,
-            mag_params["SNR_THRESHOLD"],
-            min_num_valid_channels_per_freq_bin=mag_params[
-                "MIN_NUM_VALID_CHANNELS_PER_FREQ_BIN"
-            ],
-            max_relative_distance_err_pct=mag_params["MAX_RELATIVE_DISTANCE_ERR_PCT"],
-        )
-        if not phase_for_mag in spectrum.average_spectra:
-            continue
-        spectrum.integrate(phase_for_mag, average=True)
-        spectrum.fit_average_spectrum(
-            phase_for_mag,
-            model=mag_params["SPECTRAL_MODEL"],
-            min_fraction_valid_points_below_fc=mag_params[
-                "MIN_FRACTION_VALID_POINTS_BELOW_FC"
-            ],
-            weighted=mag_params["NUM_CHANNEL_WEIGHTED_FIT"],
-        )
-        if spectrum.inversion_success:
-            rel_M0_err = 100.0 * spectrum.M0_err / spectrum.M0
-            rel_fc_err = 100.0 * spectrum.fc_err / spectrum.fc
-            if (
-                rel_M0_err > mag_params["MAX_REL_M0_ERR_PCT"]
-                or spectrum.fc < 0.0
-                or spectrum.fc > mag_params["MAX_REL_FC_ERR_PCT"]
-            ):
-                continue
-            print(f"Relative error on M0: {rel_M0_err:.2f}%")
-            print(f"Relative error on fc: {rel_fc_err:.2f}%")
-            # event.set_aux_data({f"Mw_{phase_for_mag}": spectrum.Mw})
-            figtitle = (
-                f"{event.origin_time.strftime('%Y-%m-%dT%H:%M:%S')}: "
-                f"{event.latitude:.3f}"
-                "\u00b0"
-                f"N, {event.longitude:.3f}"
-                "\u00b0"
-                f"E, {event.depth:.1f}km, "
-                r"$\Delta M_0 / M_0=$"
-                f"{rel_M0_err:.1f}%, "
-                r"$\Delta f_c / f_c=$"
-                f"{rel_fc_err:.1f}%"
+    if plot_spectrum:
+        figs = []
+    for ph in phases:
+        source_parameters[ph] = {}
+        if len(getattr(spectrum, f"{ph}_spectrum")) == 0:
+            print(f"Could not compute a single {ph}-wave spectrum!")
+            source_parameters[ph]["Mw*"] = np.nan
+            source_parameters[ph]["Mw"] = np.nan
+            source_parameters[ph]["Mw_err"] = np.nan
+        else:
+            success = True
+    if not success:
+        # failed for all requested phases
+        output = (spectrum, source_parameters)
+        if full_output:
+            output = output + (
+                pd.DataFrame(),
+                pd.DataFrame(),
             )
-            source_parameters[f"M0_{phase_for_mag}"] = spectrum.M0
-            source_parameters[f"Mw_{phase_for_mag}"] = spectrum.Mw
-            source_parameters[f"fc_{phase_for_mag}"] = spectrum.fc
-            source_parameters[f"M0_err_{phase_for_mag}"] = spectrum.M0_err
-            source_parameters[f"fc_err_{phase_for_mag}"] = spectrum.fc_err
-            if (
-                plot
-                and (spectrum.Mw > plot_above_Mw)
-                or np.random.random() > plot_above_random
-            ):
-                fig = spectrum.plot_average_spectrum(
-                    phase_for_mag,
-                    plot_fit=True,
-                    figname=f"{phase_for_mag}_spectrum_{event.id}",
-                    figsize=figsize,
-                    figtitle=figtitle,
-                    plot_std=True,
-                    plot_num_valid_channels=True,
-                )
-                fig.savefig(
-                    os.path.join(path_figures, fig._label + ".png"),
-                    format="png",
-                    bbox_inches="tight",
-                )
-                plt.close(fig)
+        if plot_spectrum:
+            output = output + (figs,)
+        return output
+
+    # -----------------------------------------------------------
+    #       Compute network-averaged displacement spectrum
+    # -----------------------------------------------------------
+    for ph in phases:
+        spectrum.compute_network_average_spectrum(
+            ph,
+            snr_threshold,
+            min_num_valid_channels_per_freq_bin=min_num_valid_channels_per_freq_bin,
+            max_relative_distance_err_pct=max_relative_distance_err_pct,
+        )
+
+    # -----------------------------------------------------------
+    #         Compute approximate moment magnitude
+    # -----------------------------------------------------------
+    approximate_moment_magnitude_args["phases"] = phases
+    approximate_moment_magnitude_args["snr_threshold"] = snr_threshold
+    approx_moment = approximate_moment_magnitude(
+        spectrum,
+        **approximate_moment_magnitude_args,
+    )
+    # fetch approximate moment magnitude
+    if ph in approx_moment:
+        source_parameters[ph]["Mw*"] = approx_moment[ph]
+
+    if full_output:
+        corr_disp_spectra = {}
+        snr_spectra = {}
+        for ph in phases:
+            # 1) store propagation-corrected displacement
+            # spectra in a pandas.DataFrame
+            corr_disp_spectra[ph] = spectrum._spectra_pd(ph)
+            # 2) store snr in a pandas.DataFrame
+            snr_spectra[ph] = spectrum._snr_spectra_pd(ph)
+
+    # -----------------------------------------------------
+    #          Compute moment magnitude
+    # -----------------------------------------------------
+    if qc:
+        # event passed location quality criterion
+        for ph in spectrum.average_spectra:
+            spectrum.fit_average_spectrum(
+                ph,
+                model=spectral_model,
+                min_fraction_valid_points_below_fc=min_fraction_valid_points_below_fc,
+                min_fraction_valid_points=min_fraction_valid_points,
+                weighted=num_channel_weighted_fit,
+            )
+            if spectrum.inversion_success:
+                print(f"-------------- {ph.upper()} -------------")
+                rel_M0_err = 100.0 * spectrum.M0_err / spectrum.M0
+                rel_fc_err = 100.0 * spectrum.fc_err / spectrum.fc
+                print(f"Relative error on M0: {rel_M0_err:.2f}%")
+                print(f"Relative error on fc: {rel_fc_err:.2f}%")
+                if (
+                    rel_M0_err > max_rel_m0_err_pct
+                    or spectrum.fc < 0.0
+                    or rel_fc_err > max_rel_fc_err_pct
+                ):
+                    print("Relative error is too large")
+                else:
+                    # calculate stress drop
+                    stress_drop_MPa = (
+                        stress_drop_circular_crack(spectrum.Mw, spectrum.fc, phase=ph)
+                        / 1.0e6
+                    )
+                    figtitle = (
+                        f"{event.origin_time.strftime('%Y-%m-%dT%H:%M:%S')}: "
+                        f"{event.latitude:.3f}"
+                        "\u00b0"
+                        f"N, {event.longitude:.3f}"
+                        "\u00b0"
+                        f"E, {event.depth:.1f}km,\n"
+                        r"$\Delta M_0 / M_0=$"
+                        f"{rel_M0_err:.1f}%, "
+                        r"$\Delta f_c / f_c=$"
+                        f"{rel_fc_err:.1f}%, "
+                        f"$\Delta \sigma=$"
+                        f"{stress_drop_MPa:.2f}"
+                    )
+                    reasonable_stress_drop = (stress_drop_MPa > stress_drop_mpa_min) & (
+                        stress_drop_MPa < stress_drop_mpa_max
+                    )
+                    reasonable_stress_drop = True
+                    if reasonable_stress_drop:
+                        source_parameters[ph]["M0"] = spectrum.M0
+                        source_parameters[ph]["Mw"] = spectrum.Mw
+                        source_parameters[ph]["fc"] = spectrum.fc
+                        source_parameters[ph]["M0_err"] = spectrum.M0_err
+                        source_parameters[ph]["fc_err"] = spectrum.fc_err
+                        if (
+                            plot_spectrum
+                            and (spectrum.Mw > plot_above_mw)
+                            or np.random.random() > plot_above_random
+                        ):
+                            fig = spectrum.plot_average_spectrum(
+                                ph,
+                                plot_fit=True,
+                                figname=f"{ph}_spectrum_{event.id}",
+                                figsize=figsize,
+                                figtitle=figtitle,
+                                plot_std=True,
+                                plot_num_valid_channels=True,
+                            )
+                            figs.append(fig)
+                    else:
+                        print(f"Anomalous stress drop! {stress_drop_MPa:.2f}MPa")
 
     Mw_exists = False
     norm = 0.0
     Mw = 0.0
     Mw_err = 0.0
-    for ph in ["p", "s"]:
-        if f"Mw_{ph}" in source_parameters:
-            Mw += source_parameters[f"Mw_{ph}"]
+    Mw_app = 0.0
+    for ph in phases:
+        if "Mw" in source_parameters[ph]:
+            Mw += source_parameters[ph]["Mw"]
             Mw_err += (
                 2.0
                 / 3.0
-                * source_parameters[f"M0_err_{ph}"]
-                / source_parameters[f"M0_{ph}"]
+                * source_parameters[ph]["M0_err"]
+                / source_parameters[ph]["M0"]
             )
             norm += 1
             Mw_exists = True
     if Mw_exists:
         Mw /= norm
         Mw_err /= norm
-        source_parameters["Mw"] = Mw
-        source_parameters["Mw_err"] = Mw_err
+        print(f"The P-S averaged moment magnitude is {Mw:.2f} +/- {Mw_err:.2f}")
     else:
         Mw = np.nan
         Mw_err = np.nan
+        fig = None
+    source_parameters["Mw"] = Mw
+    source_parameters["Mw_err"] = Mw_err
 
-    if Mw_exists:
-        print(f"The P-S averaged moment magnitude is {Mw:.2f} +/- {Mw_err:.2f}")
-        source_parameters["Mw"] = Mw
-        source_parameters["Mw_err"] = Mw_err
+    Mw_app = 0.0
+    norm = 0.0
+    for ph in phases:
+        if "Mw*" in source_parameters[ph]:
+            Mw_app += source_parameters[ph]["Mw*"]
+            norm += 1.0
+    Mw_app /= norm
+    source_parameters["Mw*"] = Mw_app
 
-    event.set_aux_data(source_parameters)
-
-    return event, spectrum
+    output = (spectrum, source_parameters)
+    if full_output:
+        output = output + (
+            corr_disp_spectra,
+            snr_spectra,
+        )
+    if plot_spectrum:
+        output = output + (figs,)
+    return output

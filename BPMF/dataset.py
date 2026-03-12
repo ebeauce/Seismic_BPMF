@@ -320,9 +320,18 @@ class Catalog(object):
         catalog["longitude"] = longitudes
         catalog["latitude"] = latitudes
         catalog["depth"] = depths
-        catalog["origin_time"] = pd.to_datetime(
-            np.asarray(origin_times, dtype="datetime64[ms]")
-        )
+        try:
+            # do this if origin_times have time zone info
+            catalog["origin_time"] = pd.to_datetime(
+                np.asarray(origin_times).astype("U"),
+                #utc=True
+            ).astype("datetime64[ms, UTC]").tz_localize(None)
+        except TypeError:
+            # do this otherwise
+            catalog["origin_time"] = pd.to_datetime(
+                np.asarray(origin_times).astype("U"),
+                #utc=True
+            ).astype("datetime64[ms]")
         catalog.update(kwargs)
         if event_ids is not None:
             catalog["event_id"] = event_ids
@@ -885,7 +894,13 @@ class Data(object):
         # self._read_metadata()
         if sampling_rate is not None:
             self.sampling_rate = sampling_rate
-            self.n_samples = utils.sec_to_samp(duration, sr=self.sampling_rate)
+
+    @property
+    def n_samples(self):
+        if self.sampling_rate is not None:
+            return utils.sec_to_samp(self.duration, sr=self.sampling_rate)
+        else:
+            return
 
     @property
     def sr(self):
@@ -896,11 +911,14 @@ class Data(object):
         if not hasattr(self, "sampling_rate"):
             print("You need to define the instance's sampling rate first.")
             return
-        if not hasattr(self, "_time"):
+        expected_length = int(self.duration * self.sr)
+        if not hasattr(self, "_time") or abs(len(self._time) - expected_length) > 1:
             self._time = utils.time_range(
                 self.date, self.date + self.duration, 1.0 / self.sr, unit="ms"
             )
         return self._time
+
+
 
     def get_np_array(
         self,
@@ -3864,6 +3882,7 @@ class Template(Event):
         duration=60.0,
         phase_on_comp={"N": "S", "1": "S", "E": "S", "2": "S", "Z": "P"},
         offset_ot=10.0,
+        stations=None,
         **kwargs,
     ):
         """
@@ -3918,7 +3937,10 @@ class Template(Event):
                 print("Argument `idx_or_gid` must be int or str")
                 return
             event = Event.read_from_file(hdf5_file=f[gid])
-        event.stations = self.stations.copy()
+        if stations is None:
+            stations = self.stations.copy()
+        event.stations = stations
+
         event.read_waveforms(
             duration,
             offset_ot=offset_ot,
@@ -3927,10 +3949,6 @@ class Template(Event):
             **kwargs,
         )
         fig = event.plot(**kwargs)
-        if kwargs.get("stations", None) is None:
-            stations = event.stations
-        else:
-            stations = kwargs.get("stations", None)
         # stations = event.stations
         axes = fig.get_axes()
         cc, n_channels = 0.0, 0
@@ -4243,7 +4261,7 @@ class EventGroup(Family):
         expl_var=0.4,
         max_singular_values=5,
         wiener_filter_colsize=None,
-        verbose=1,
+        verbose=0,
     ):
         """
         Apply Singular Value Decomposition Waveform Filtering (SVDWF) and stack the waveforms.
@@ -4415,6 +4433,13 @@ class TemplateGroup(Family):
     @property
     def n_templates(self):
         return len(self.templates)
+
+    @property
+    def availability_arr(self):
+        return np.stack(
+                [tp.availability_per_cha for tp in self.templates],
+                axis=0
+                )
 
     @property
     def dir_errors(self):
@@ -5399,6 +5424,10 @@ class Stack(Event):
             self.id = self.origin_time.strftime("%Y%m%d_%H%M%S")
         else:
             self.id = id
+
+    def set_arrival_times_from_moveouts(self, offset_ot, verbose=0):
+        self.origin_time += offset_ot
+        super().set_arrival_times_from_moveouts(verbose=verbose)
 
     def read_waveforms(
         self,

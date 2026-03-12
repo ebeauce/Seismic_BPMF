@@ -28,13 +28,13 @@ from obspy.core import UTCDateTime as udt
 
 
 class TravelTimes(object):
-    """Class for handling travel time tables. 
-    """
+    """Class for handling travel time tables."""
+
     def __init__(
-            self,
-            tt_filename,
-            tt_folder_path=cfg.MOVEOUTS_PATH,
-            ):
+        self,
+        tt_filename,
+        tt_folder_path=cfg.MOVEOUTS_PATH,
+    ):
         """
         Parameters
         ----------
@@ -114,45 +114,33 @@ class TravelTimes(object):
                 for sta in fin[f"tt_{ph}"].keys():
                     if stations is not None and sta not in stations:
                         continue
-                    # flatten the lon/lat/dep grid as we work with
-                    # flat source indexes
                     if source_indexes is not None:
                         # select a subset of the source grid
-                        #source_indexes = np.unravel_index(source_indexes, grid_shape)
-                        #source_indexes_unravelled = np.unravel_index(
-                        #    source_indexes, grid_shape
-                        #)
-                        #selection = np.zeros(grid_shape, dtype=bool)
-                        #selection[source_indexes_unravelled] = True
-                        #tts[ph][sta] = fin[f"tt_{ph}"][sta][selection].flatten().astype(
-                        #        "float32"
-                        #        )
-                        tts[ph][sta] = fin[f"tt_{ph}"][sta][...].reshape(-1)[self.source_indexes].astype(
-                                "float32"
-                                )
+                        tts[ph][sta] = (
+                            fin[f"tt_{ph}"][sta][...]
+                            .reshape(-1)[self.source_indexes]
+                            .astype("float32")
+                        )
                     else:
-                        tts[ph][sta] = fin[f"tt_{ph}"][sta][()].flatten().astype(
-                                "float32"
-                                )
+                        tts[ph][sta] = (
+                            fin[f"tt_{ph}"][sta][()].flatten().astype("float32")
+                        )
             self.travel_times = pd.DataFrame(tts)
             if read_coords:
                 source_coords = {}
                 if source_indexes is not None:
-                    #source_indexes_unravelled = np.unravel_index(source_indexes, grid_shape)
-                    #selection = np.zeros(grid_shape, dtype=bool)
-                    #selection[source_indexes_unravelled] = True
                     for coord in fin["source_coordinates"].keys():
-                        #source_coords[coord] = fin[
-                        #        "source_coordinates"
-                        #        ][coord][selection].flatten()
-                        source_coords[coord] = fin[
-                                "source_coordinates"
-                                ][coord][...].reshape(-1)[self.source_indexes]
+                        source_coords[coord] = fin["source_coordinates"][coord][
+                            ...
+                        ].reshape(-1)[self.source_indexes]
                 else:
                     for coord in fin["source_coordinates"].keys():
-                        source_coords[coord] = fin["source_coordinates"][coord][()].flatten()
-                self.source_coordinates = pd.DataFrame(source_coords, index=self.source_indexes)
-
+                        source_coords[coord] = fin["source_coordinates"][coord][
+                            ()
+                        ].flatten()
+                self.source_coordinates = pd.DataFrame(
+                    source_coords, index=self.source_indexes
+                )
 
     def convert_to_samples(self, sampling_rate, remove_tt_seconds=False):
         """
@@ -171,16 +159,16 @@ class TravelTimes(object):
             travel_times_samp[ph] = {}
             for sta in self.travel_times.index:
                 travel_times_samp[ph][sta] = utils.sec_to_samp(
-                        self.travel_times.loc[sta, ph],
-                        sr=sampling_rate,
-                        )
+                    self.travel_times.loc[sta, ph],
+                    sr=sampling_rate,
+                )
         self.travel_times_samp = pd.DataFrame(travel_times_samp)
         if remove_tt_seconds:
             del self.travel_times
 
     def get_travel_times_array(
-            self, units="seconds", stations=None, phases=None, relative_to_first=False
-            ):
+        self, units="seconds", stations=None, phases=None, relative_to_first=False
+    ):
         """
         Parameters
         ----------
@@ -199,8 +187,8 @@ class TravelTimes(object):
             earliest phase for each source.
         """
         assert units in ["seconds", "samples"], print(
-                "units shoulds be either of 'seconds' or 'samples'"
-                )
+            "units shoulds be either of 'seconds' or 'samples'"
+        )
         if units == "seconds" and not hasattr(self, "travel_times"):
             print("Call `self.read` first.")
             return
@@ -216,10 +204,7 @@ class TravelTimes(object):
         if phases is None:
             phases = attr.columns
         dtype = attr.loc[stations[0], phases[0]].dtype
-        tts = np.zeros(
-                (self.n_sources, len(stations), len(phases)),
-                dtype=dtype
-                )
+        tts = np.zeros((self.n_sources, len(stations), len(phases)), dtype=dtype)
         for s, sta in enumerate(stations):
             for p, ph in enumerate(phases):
                 tts[:, s, p] = attr.loc[sta, ph]
@@ -227,10 +212,10 @@ class TravelTimes(object):
             tts = tts - np.min(tts, axis=(1, 2), keepdims=True)
         return tts
 
-class WaveformTransform(object):
-    """Class for waveform transform.
 
-    """
+class WaveformTransform(object):
+    """Class for waveform transform."""
+
     def __init__(
         self, transform_arr, stations, components, starttime, sampling_rate_hz
     ):
@@ -256,7 +241,7 @@ class WaveformTransform(object):
         """
         self.stations = stations
         self.components = components
-        self.transform_arr = transform_arr
+        # self.transform_arr = transform_arr
         self.starttime = starttime
         self.n_samples = transform_arr.shape[-1]
         self.sampling_rate = sampling_rate_hz
@@ -293,6 +278,12 @@ class WaveformTransform(object):
             )
         return self._time
 
+    @property
+    def transform_arr(self):
+        return self.get_np_array(
+            self.stations, components=self.components, verbose=False
+        )
+
     def data_frame_view(self):
         """Returns `self.transform_arr` as a `pandas.DataFrame`.
 
@@ -303,6 +294,9 @@ class WaveformTransform(object):
         for s, sta in enumerate(df.index):
             for p, ph in enumerate(df.columns):
                 df.loc[sta, ph] = self.transform_arr[s, p, :]
+                df.loc[sta, ph] = self.transform.select(station=sta, component=ph)[
+                    0
+                ].data
         return df
 
     def get_np_array(
@@ -356,7 +350,7 @@ class WaveformTransform(object):
             Names of the components to use in the slice. Defaults to None,
             in which case `components` is taken to be the same as
             `self.components`.
-        
+
         Returns
         -------
         new_instance : `BPMF.template_search.WaveformTransform`
@@ -411,7 +405,7 @@ class Beamformer(object):
         Once initialized, the `Beamformer` instance can be re-used for
         different settings. For example, when processing multiple days in a row,
         `Beamformer.set_data` and `Beamformer.set_network` can be called at the
-        beginning of each day to adapt to new data and potentially different 
+        beginning of each day to adapt to new data and potentially different
         network configurations.
 
         Parameters
@@ -429,7 +423,7 @@ class Beamformer(object):
             Default is None, in which case `self.set_phases` must be called later.
         travel_times : `TravelTimes`, optional
             `TravelTimes` class instance with the travel time table that will
-            be used for backprojection the waveform features. Default is None, 
+            be used for backprojection the waveform features. Default is None,
             in which case `self.set_travel_times` must be called later.
         moveouts_relative_to_first : boolean, optional
             If True, the moveouts used for backprojection are set relative to the
@@ -445,11 +439,11 @@ class Beamformer(object):
     def moveouts(self):
         if hasattr(self, "travel_times"):
             return self.travel_times.get_travel_times_array(
-                    units="samples",
-                    stations=self.stations,
-                    phases=self.phases,
-                    relative_to_first=self.moveouts_relative_to_first,
-                    )
+                units="samples",
+                stations=self.stations,
+                phases=self.phases,
+                relative_to_first=self.moveouts_relative_to_first,
+            )
         else:
             print("Call `set_travel_times` first.")
 
@@ -495,8 +489,6 @@ class Beamformer(object):
         else:
             print("Call `set_travel_times` first.")
 
-
-
     @staticmethod
     def _likelihood(beam_volume):
         likelihood = (beam_volume - beam_volume.min()) / (
@@ -504,17 +496,17 @@ class Beamformer(object):
         )
         # likelihood is not meant to be outside [0, 1] beside numerical
         # imprecisions
-        likelihood = np.clip(likelihood, a_min=0., a_max=1.)
+        likelihood = np.clip(likelihood, a_min=0.0, a_max=1.0)
         return likelihood
 
     def backproject(
-            self,
-            waveform_features,
-            reduce="max",
-            device="cpu",
-            out_of_bounds="strict",
-            num_threads=None,
-            ):
+        self,
+        waveform_features,
+        reduce="max",
+        device="cpu",
+        out_of_bounds="strict",
+        num_threads=None,
+    ):
         """Backproject the waveform features.
 
         Parameters
@@ -672,16 +664,14 @@ class Beamformer(object):
         return detections, peak_indexes, source_indexes
 
     def remove_baseline(self, window, attribute="composite"):
-        """Remove baseline from network response
-        """
+        """Remove baseline from network response"""
         # convert window from seconds to samples
         window = int(window * self.sampling_rate)
         attr_baseline = self._baseline(getattr(self, attribute), window)
         setattr(self, attribute, getattr(self, attribute) - attr_baseline)
 
     def return_pd_series(self, attribute="maxbeam"):
-        """Return the network response as a Pandas.Series.
-        """
+        """Return the network response as a Pandas.Series."""
         import pandas as pd
 
         time_series = getattr(self, attribute)
@@ -777,34 +767,125 @@ class Beamformer(object):
         if weights_sources is not None:
             self.weights_sources = weights_sources
 
-    def set_weights_sources(self, n_max_stations, n_min_stations=0):
-        """Set network-geometry-based weights of each source-receiver pair.
-
-        Parameters
-        ------------
-        n_max_stations: scalar, int
-            Maximum number of stations used at each theoretical source. Only
-            the `n_max_stations` stations will be set a weight > 0.
-        """
+    def _weights_sources_closest(self, num_closest_stations):
+        """ """
         weights_sources = np.ones((self.n_sources, self.n_stations), dtype=np.float32)
-        self.data.set_availability(self.stations)
-        operational_stations = self.data.availability_per_sta.loc[self.stations].values
+        if hasattr(self.data, "availability"):
+            operational_stations = self.data.availability_per_sta.loc[self.stations].values
+        else:
+            operational_stations = np.ones(self.n_stations, dtype=bool)
+        # select moveouts from one phase (doesnt matter which one)
         mv = self.moveouts[:, operational_stations, 0]
-        n_max_stations = min(mv.shape[1], n_max_stations)
-        if (n_max_stations < self.n_stations) and (n_max_stations > 0):
+        num_closest_stations = min(mv.shape[1], num_closest_stations)
+        if (num_closest_stations < self.n_stations) and (num_closest_stations > 0):
             cutoff_mv = np.max(
-                np.partition(mv, n_max_stations - 1)[:, :n_max_stations],
+                np.partition(mv, num_closest_stations - 1)[:, :num_closest_stations],
                 axis=1,
                 keepdims=True,
             )
             weights_sources[self.moveouts[:, :, 0] > cutoff_mv] = 0.0
-        weights_sources[:, ~operational_stations] = 0.
+        # zero-out offline stations
+        weights_sources[:, ~operational_stations] = 0.0
+        return weights_sources
+
+    def _weights_sources_max_moveout(self, max_moveout):
+        """ """
+        weights_sources = np.zeros((self.n_sources, self.n_stations), dtype=np.float32)
+        if hasattr(self.data, "availability"):
+            operational_stations = self.data.availability_per_sta.loc[self.stations].values
+        else:
+            operational_stations = np.ones(self.n_stations, dtype=bool)
+        # select shortest moveout across all phases
+        mv = np.min(self.moveouts, axis=-1)
+        # detect stations that are within the imposed max moveout
+        valid_stations = mv < max_moveout
+        weights_sources[valid_stations] = 1.0
+        # zero-out offline stations
+        weights_sources[:, ~operational_stations] = 0.0
+        return weights_sources
+
+    def set_weights_sources(
+        self,
+        n_min_stations=0,
+        normalize=False,
+        weight_station_density=False,
+        method="closest_stations",
+        **kwargs,
+    ):
+        """
+        Set network-geometry-based weights of each source-receiver pair.
+
+        Parameters
+        ----------
+        n_min_stations : int, optional
+            Minimum number of stations required for a source to be considered.
+            If a source has fewer than `n_min_stations` with weight > 0,
+            all weights for that source are set to 0. Default is 0.
+        normalize : bool, optional
+            If True, normalizes weights such that the sum of weights for each
+            source equals 1. Default is False.
+        method : {"closest_stations", "max_moveout"}, optional
+            The strategy used to calculate weights. Default is "closest_stations".
+        **kwargs : dict
+            Additional method-specific arguments:
+
+            - If method is "closest_stations":
+                num_closest_stations (int): The number of nearest stations
+                to assign weights to. (Required)
+
+            - If method is "max_moveout":
+                max_moveout (float): The maximum allowable moveout
+                threshold. (Required)
+
+        Raises
+        ------
+        ValueError
+            If `method` is not one of the supported strings.
+        TypeError
+            If the required keyword argument for the chosen `method` is missing.
+        """
+        self.data.set_availability(self.stations)
+        possible_methods = {"closest_stations", "max_moveout"}
+        if method not in possible_methods:
+            raise ValueError(
+                f"Invalid method '{method}'. Must be one of {possible_methods}"
+            )
+
+        if method == "closest_stations":
+            if kwargs.get("num_closest_stations") is None:
+                raise TypeError(
+                    f"When method is '{method}', `num_closest_stations` is required."
+                )
+            weights_sources = self._weights_sources_closest(
+                kwargs.get("num_closest_stations")
+            )
+        elif method == "max_moveout":
+            if kwargs.get("max_moveout") is None:
+                raise TypeError(f"When method '{method}', `max_moveout` is required.")
+            weights_sources = self._weights_sources_max_moveout(
+                kwargs.get("max_moveout")
+            )
+
         if n_min_stations > 0:
             n_stations_per_source = np.sum(weights_sources > 0.0, axis=-1)
             weights_sources[n_stations_per_source < n_min_stations, :] = 0.0
+
+        if weight_station_density:
+            weights = self._station_density_weights(
+                cutoff_dist=kwargs.get("cutoff_dist", None),
+                lower_percentile=kwargs.get("lower_percentile", 0.0),
+                upper_percentile=kwargs.get("upper_percentile", 100.0),
+            )
+            weights_sources *= weights[None, :]
+
+        if normalize:
+            norm = np.sum(weights_sources, axis=1, keepdims=True)
+            norm[norm == 0.0] = 1.0
+            weights_sources /= norm
+
         self.weights_sources = weights_sources
 
-    def weights_station_density(
+    def _station_density_weights(
         self, cutoff_dist=None, lower_percentile=0.0, upper_percentile=100.0
     ):
         """Compute station weights to balance station density.
@@ -903,16 +984,12 @@ class Beamformer(object):
 
         if ax is None:
             # plot the maximum beam
-            fig = plt.figure(
-                    "maximum_beam", figsize=kwargs.get("figsize", (15, 10))
-                    )
+            fig = plt.figure("maximum_beam", figsize=kwargs.get("figsize", (15, 10)))
             ax = fig.add_subplot(111)
         else:
             fig = ax.get_figure()
 
-        ax.plot(
-                self.data.time, self.maxbeam, rasterized=kwargs.get("rasterized", True)
-                )
+        ax.plot(self.data.time, self.maxbeam, rasterized=kwargs.get("rasterized", True))
         if hasattr(self, "detection_threshold"):
             ax.plot(
                 self.data.time,
@@ -987,8 +1064,10 @@ class Beamformer(object):
         if n_stations is None:
             stations = self.network.stations
         else:
+            detection.set_availability()
+            avail_sta = detection.availability.index[detection.availability]
             stations = (
-                detection.moveouts[detection.moveouts.columns[0]]
+                detection.moveouts.loc[avail_sta, detection.moveouts.columns[0]]
                 .sort_values()[:n_stations]
                 .index
             )
@@ -1003,8 +1082,8 @@ class Beamformer(object):
         ax_maxbeam = fig.add_subplot(grid[:2, :])
         self.plot_maxbeam(ax=ax_maxbeam, detection=detection)
         ax_maxbeam.set_ylim(
-                max(-0.5, ax_maxbeam.get_ylim()[0]), 2.0 * detection.aux_data["maxbeam"]
-                )
+            max(-0.5, ax_maxbeam.get_ylim()[0]), 2.0 * detection.aux_data["maxbeam"]
+        )
         beam = 0.0
         for s, sta in enumerate(stations):
             for c, cp in enumerate(self.network.components):
@@ -1080,7 +1159,7 @@ class Beamformer(object):
             self.source_coordinates["longitude"].iloc[hor_slice],
             self.source_coordinates["latitude"].iloc[hor_slice],
             likelihood[hor_slice],
-            levels=np.linspace(0., 1.0, 10),
+            levels=np.linspace(0.0, 1.0, 10),
             cmap="inferno",
             alpha=0.50,
             transform=data_coords,
@@ -1179,8 +1258,8 @@ class Beamformer(object):
         return selection
 
     def _compute_location_uncertainty(
-            self, event_longitude, event_latitude, event_depth, likelihood, domain
-            ):
+        self, event_longitude, event_latitude, event_depth, likelihood, domain
+    ):
         """
         Compute the horizontal and vertical uncertainties of an event location.
 
@@ -1219,6 +1298,7 @@ class Beamformer(object):
 
         """
         from cartopy.geodesic import Geodesic
+
         # initialize the Geodesic instance
         G = Geodesic()
         epi_distances = G.inverse(
@@ -1236,10 +1316,13 @@ class Beamformer(object):
         hunc = np.sum(likelihood * pointwise_distances) / np.sum(likelihood)
 
         # vertical uncertainty
-        depth_diff = np.abs(event_depth - self.source_coordinates["depth"].values[domain])
+        depth_diff = np.abs(
+            event_depth - self.source_coordinates["depth"].values[domain]
+        )
         vunc = np.sum(likelihood * depth_diff) / np.sum(likelihood)
-        
+
         return hunc, vunc
+
 
 def _detect_peaks(
     x,
@@ -1252,13 +1335,18 @@ def _detect_peaks(
     show=False,
     ax=None,
 ):
-    """see `utils._detect_peaks`.
-
-    """
+    """see `utils._detect_peaks`."""
     return utils._detect_peaks(
-            x, mph=mph, mpd=mpd, threshold=threshold, edge=edge,
-            kpsh=kpsh, valley=valley, show=show, ax=ax
-            )
+        x,
+        mph=mph,
+        mpd=mpd,
+        threshold=threshold,
+        edge=edge,
+        kpsh=kpsh,
+        valley=valley,
+        show=show,
+        ax=ax,
+    )
 
 
 def _plot_peaks(x, mph, mpd, threshold, edge, valley, ax, ind):
