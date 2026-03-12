@@ -770,7 +770,10 @@ class Beamformer(object):
     def _weights_sources_closest(self, num_closest_stations):
         """ """
         weights_sources = np.ones((self.n_sources, self.n_stations), dtype=np.float32)
-        operational_stations = self.data.availability_per_sta.loc[self.stations].values
+        if hasattr(self.data, "availability"):
+            operational_stations = self.data.availability_per_sta.loc[self.stations].values
+        else:
+            operational_stations = np.ones(self.n_stations, dtype=bool)
         # select moveouts from one phase (doesnt matter which one)
         mv = self.moveouts[:, operational_stations, 0]
         num_closest_stations = min(mv.shape[1], num_closest_stations)
