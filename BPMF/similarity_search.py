@@ -148,7 +148,7 @@ class MatchedFilter(object):
 
     @property
     def network(self):
-            return self.template_group.network
+        return self.template_group.network
 
     @property
     def memory_cc_time_series(self):
@@ -287,34 +287,84 @@ class MatchedFilter(object):
 
     def _weights_stations_simple(self):
         # equal weights to all channels
-        weights_arr = np.float32(
-            self.template_group.network_to_template_map
-        )
+        weights_arr = np.float32(self.template_group.network_to_template_map)
         # insufficient data
-        invalid = (
-            np.sum((weights_arr != 0.0), axis=(1, 2)) < self.min_channels
-        ) | (np.sum(np.sum(weights_arr, axis=2) > 0.0, axis=1) < self.min_stations)
+        invalid = (np.sum((weights_arr != 0.0), axis=(1, 2)) < self.min_channels) | (
+            np.sum(np.sum(weights_arr, axis=2) > 0.0, axis=1) < self.min_stations
+        )
         weights_arr[invalid] = 0.0
         return weights_arr
 
-    def _weights_stations_max_moveout(self, max_moveout_sec):
+    def _weights_stations_closest(self, num_closest_stations):
+        """ """
+        weights_arr = np.ones(
+            (
+                self.template_group.n_templates,
+                self.network.n_stations,
+                self.network.n_components,
+            ),
+            dtype=np.float32,
+        )
+
+        operational_channels = self.template_group.availability_arr
+        if hasattr(self.data, "availability_per_cha"):
+            operational_channels = np.logical_and(
+                    operational_channels,
+                    self.data.availability_per_cha.loc[self.template_group.stations]
+                    )
+        operational_stations = np.any(operational_channels, axis=-1)
+
+        # select moveouts from one phase (doesnt matter which one)
+        mv = self.template_group.moveouts_arr[..., 0]
+        original_values = mv[~operational_stations].copy()
+        mv[~operational_stations] = np.iinfo(np.int32).max
+        num_closest_stations = min(mv.shape[1], num_closest_stations)
+        if (num_closest_stations < self.network.n_stations) and (num_closest_stations > 0):
+            cutoff_mv = np.max(
+                np.partition(mv, num_closest_stations - 1)[:, :num_closest_stations],
+                axis=1,
+                keepdims=True,
+            )
+            weights_arr[self.template_group.moveouts_arr[:, :, 0] > cutoff_mv, :] = 0.0
+        mv[~operational_stations] = original_values
+        # zero-out offline channels
+        weights_arr[~operational_channels] = 0.0
+        return weights_arr
+
+    def _weights_stations_max_moveout(
+        self, max_moveout_sec, n_min_stations=0, max_moveout2_sec=None
+    ):
         """ """
         weights_arr = np.zeros(
-                (
-                    self.template_group.n_templates,
-                    self.network.n_stations,
-                    self.network.n_components
-                    ),
-                dtype=np.float32
-                )
+            (
+                self.template_group.n_templates,
+                self.network.n_stations,
+                self.network.n_components,
+            ),
+            dtype=np.float32,
+        )
+
+        operational_channels = self.template_group.availability_arr
+        if hasattr(self.data, "availability_per_cha"):
+            operational_channels = np.logical_and(
+                    operational_channels,
+                    self.data.availability_per_cha.loc[self.template_group.stations]
+                    )
+        operational_stations = np.any(operational_channels, axis=-1)
+
         max_moveout_samp = int(max_moveout_sec * self.template_group.templates[0].sr)
         # select shortest moveout across all phases
         mv = np.min(self.template_group.moveouts_arr, axis=-1)
         # detect stations that are within the imposed max moveout
-        valid_stations = mv < max_moveout_samp
+        valid_stations = (mv < max_moveout_samp) & operational_stations
+        if (np.sum(valid_stations) < n_min_stations) and (max_moveout2_sec is not None):
+            max_moveout_samp = int(
+                max_moveout2_sec * self.template_group.templates[0].sr
+            )
+            valid_stations = mv < max_moveout_samp
         weights_arr[valid_stations, :] = 1.0
+        weights_arr[~operational_channels] = 0.
         return weights_arr
-
 
     def _station_density_weights(
         self, cutoff_dist=None, lower_percentile=0.0, upper_percentile=100.0
@@ -371,33 +421,38 @@ class MatchedFilter(object):
         return weights_sta_density
 
     def set_weights_stations(
-            self,
-            n_min_stations=0,
-            normalize=True,
-            weight_station_density=False,
-            method="simple",
-            **kwargs
-            ):
-        """
-        """
-        possible_methods = {"simple", "max_moveout"}
+        self,
+        n_min_stations=0,
+        normalize=True,
+        weight_station_density=False,
+        method="simple",
+        **kwargs,
+    ):
+        """ """
+        possible_methods = {"simple", "closest_stations", "max_moveout"}
         if method not in possible_methods:
             raise ValueError(
-                    f"Invalid method '{method}'. Must be one of {possible_methods}"
+                f"Invalid method '{method}'. Must be one of {possible_methods}"
             )
 
         if method == "simple":
             weights_stations = self._weights_stations_simple()
+        elif method == "closest_stations":
+            if kwargs.get("num_closest_stations") is None:
+                raise TypeError(
+                    f"When method is '{method}', `num_closest_stations` is required."
+                )
+            weights_stations = self._weights_stations_closest(
+                kwargs.get("num_closest_stations")
+            )
         elif method == "max_moveout":
-            if kwargs.get("max_moveout") is None:
-                raise TypeError(f"When method '{method}', `max_moveout` is required.")
+            if kwargs.get("max_moveout_sec") is None:
+                raise TypeError(f"When method '{method}', `max_moveout_sec` is required.")
             weights_stations = self._weights_stations_max_moveout(
-                    kwargs.get("max_moveout")
-                    )
-
-        if hasattr(self.data, "availability"):
-            # turn weights to zero on unavailable stations
-            weights_stations[:, ~self.data.availability_per_cha.values] = 0.0
+                kwargs.get("max_moveout_sec"),
+                n_min_stations=n_min_stations,
+                max_moveout2_sec=kwargs.get("max_moveout2_sec")
+            )
 
         if n_min_stations > 0:
             n_stations_per_template = np.sum(weights_stations > 0.0, axis=-1)
@@ -417,7 +472,6 @@ class MatchedFilter(object):
             weights_stations /= norm
 
         self.weights_stations = weights_stations
-
 
     def compute_cc_time_series(self, device="cpu", tids=None):
         """Compute the CC time series (step 1 of matched-filter search).
@@ -737,9 +791,7 @@ class MatchedFilter(object):
                 tt2 = self.template_group.n_templates
             tids_chunk = self.template_group.tids[tt1:tt2]
             t1_fmf = give_time()
-            self.compute_cc_time_series(
-                device=device, tids=tids_chunk
-            )
+            self.compute_cc_time_series(device=device, tids=tids_chunk)
             t2_fmf = give_time()
             duration_fmf += t2_fmf - t1_fmf
             t1_det = give_time()
