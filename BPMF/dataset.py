@@ -4435,6 +4435,13 @@ class TemplateGroup(Family):
         return len(self.templates)
 
     @property
+    def availability_arr(self):
+        return np.stack(
+                [tp.availability_per_cha for tp in self.templates],
+                axis=0
+                )
+
+    @property
     def dir_errors(self):
         if not hasattr(self, "_dir_errors"):
             self.compute_dir_errors()
