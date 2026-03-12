@@ -338,12 +338,40 @@ source-receiver distance.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.set_weights_sources">
-<span class="sig-name descname"><span class="pre">set_weights_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_max_stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_min_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_weights_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_weights_sources" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_weights_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_min_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_station_density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'closest_stations'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.set_weights_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.set_weights_sources" title="Link to this definition"></a></dt>
 <dd><p>Set network-geometry-based weights of each source-receiver pair.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>n_max_stations</strong> (<em>scalar</em><em>, </em><em>int</em>) – Maximum number of stations used at each theoretical source. Only
-the <cite>n_max_stations</cite> stations will be set a weight &gt; 0.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_min_stations</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum number of stations required for a source to be considered.
+If a source has fewer than <cite>n_min_stations</cite> with weight &gt; 0,
+all weights for that source are set to 0. Default is 0.</p></li>
+<li><p><strong>normalize</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, normalizes weights such that the sum of weights for each
+source equals 1. Default is False.</p></li>
+<li><p><strong>method</strong> (<em>{&quot;closest_stations&quot;</em><em>, </em><em>&quot;max_moveout&quot;}</em><em>, </em><em>optional</em>) – The strategy used to calculate weights. Default is “closest_stations”.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – <p>Additional method-specific arguments:</p>
+<ul>
+<li><dl class="simple">
+<dt>If method is “closest_stations”:</dt><dd><p>num_closest_stations (int): The number of nearest stations
+to assign weights to. (Required)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>If method is “max_moveout”:</dt><dd><p>max_moveout (float): The maximum allowable moveout
+threshold. (Required)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If <cite>method</cite> is not one of the supported strings.</p></li>
+<li><p><strong>TypeError</strong> – If the required keyword argument for the chosen <cite>method</cite> is missing.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -363,35 +391,6 @@ the <cite>n_max_stations</cite> stations will be set a weight &gt; 0.</p>
 <dt class="sig sig-object py" id="BPMF.template_search.Beamformer.stations">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stations</span></span><a class="headerlink" href="#BPMF.template_search.Beamformer.stations" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="BPMF.template_search.Beamformer.weights_station_density">
-<span class="sig-name descname"><span class="pre">weights_station_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoff_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/template_search.html#Beamformer.weights_station_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.template_search.Beamformer.weights_station_density" title="Link to this definition"></a></dt>
-<dd><p>Compute station weights to balance station density.</p>
-<p>Areas of high station density produce stronger network responses than
-areas with sparse coverage, and thus might prevent detecting earthquakes
-where stations are scarcer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cutoff_dist</strong> (<em>scalar float</em><em>, </em><em>default to None</em>) – All station pairs (i,j) are attributed a number from a gaussian
-distribution with standard deviation <cite>cutoff_dist</cite>, in km. The
-weight of station i is: <cite>w_i = 1/(sum_j(exp(-D_ij**2/cutoff_dist**2)))</cite>.
-If None, <cite>cutoff_dist</cite> is set to the median interstation distance.</p></li>
-<li><p><strong>lower_percentile</strong> (<em>scalar float</em><em>, </em><em>default to 0</em>) – If <cite>lower_percentile &gt; 0</cite>, the weights are clipped above the
-<cite>lower_percentile</cite>-th percentile.</p></li>
-<li><p><strong>upper_percentile</strong> (<em>scalar float</em><em>, </em><em>default to 100</em>) – If <cite>upper_percentile &lt; 100</cite>, the weights are clipped below the
-<cite>upper_percentile</cite>-th percentile.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>weights_sta_density</strong> – The station density weights.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(n_stations,) <cite>numpy.ndarray</cite></p>
-</dd>
-</dl>
-</dd></dl>
 
 </dd></dl>
 
@@ -549,6 +548,11 @@ in which case <cite>components</cite> is taken to be the same as
 <dl class="py property">
 <dt class="sig sig-object py" id="BPMF.template_search.WaveformTransform.time">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#BPMF.template_search.WaveformTransform.time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.template_search.WaveformTransform.transform_arr">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transform_arr</span></span><a class="headerlink" href="#BPMF.template_search.WaveformTransform.transform_arr" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

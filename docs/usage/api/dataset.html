@@ -316,6 +316,11 @@ from <cite>extra_attributes</cite> is not found. Default is <cite>numpy.nan</cit
 <dd><p>Arguments go to <cite>BPMF.utils.get_np_array</cite>.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.dataset.Data.n_samples">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_samples</span></span><a class="headerlink" href="#BPMF.dataset.Data.n_samples" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Data.read_waveforms">
 <span class="sig-name descname"><span class="pre">read_waveforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trim_traces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">reader_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Data.read_waveforms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Data.read_waveforms" title="Link to this definition"></a></dt>
@@ -505,6 +510,18 @@ spans of the confidence ellipsoid in the horizontal directions.
 </ul>
 <p>maximum length of the uncertainty ellipsoid’s semi-axis; the latter
 represents the longest semi-axis of the ellipsoid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.dataset.Event.inherit_location">
+<span class="sig-name descname"><span class="pre">inherit_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template_event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Event.inherit_location"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Event.inherit_location" title="Link to this definition"></a></dt>
+<dd><p>Copy location attributes from <cite>template_event</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>template_event</strong> (<a class="reference internal" href="#BPMF.dataset.Event" title="BPMF.dataset.Event"><em>Event</em></a>) – An instance of <cite>BPMF.dataset.Event</cite> with location, and
+possibly location uncertainties, to inherit.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -1162,7 +1179,7 @@ zeroed out. Default is -1.0.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.EventGroup.SVDWF_stack">
-<span class="sig-name descname"><span class="pre">SVDWF_stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expl_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_singular_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wiener_filter_colsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#EventGroup.SVDWF_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.EventGroup.SVDWF_stack" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SVDWF_stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expl_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_singular_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wiener_filter_colsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#EventGroup.SVDWF_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.EventGroup.SVDWF_stack" title="Link to this definition"></a></dt>
 <dd><p>Apply Singular Value Decomposition Waveform Filtering (SVDWF) and stack the waveforms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1513,6 +1530,12 @@ phases. If False, windows are simply extracted with respect to the origin time.<
 obspy.Stream instances that populate the <cite>self.traces</cite> attribute.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="BPMF.dataset.Stack.set_arrival_times_from_moveouts">
+<span class="sig-name descname"><span class="pre">set_arrival_times_from_moveouts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset_ot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Stack.set_arrival_times_from_moveouts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Stack.set_arrival_times_from_moveouts" title="Link to this definition"></a></dt>
+<dd><p>Build arrival times assuming at = ot + mv.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1642,7 +1665,7 @@ attached. Defaults to True.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.Template.plot_detection">
-<span class="sig-name descname"><span class="pre">plot_detection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx_or_gid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_on_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'1':</span> <span class="pre">'S',</span> <span class="pre">'2':</span> <span class="pre">'S',</span> <span class="pre">'E':</span> <span class="pre">'S',</span> <span class="pre">'N':</span> <span class="pre">'S',</span> <span class="pre">'Z':</span> <span class="pre">'P'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_ot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Template.plot_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Template.plot_detection" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_detection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx_or_gid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_on_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'1':</span> <span class="pre">'S',</span> <span class="pre">'2':</span> <span class="pre">'S',</span> <span class="pre">'E':</span> <span class="pre">'S',</span> <span class="pre">'N':</span> <span class="pre">'S',</span> <span class="pre">'Z':</span> <span class="pre">'P'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_ot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#Template.plot_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.Template.plot_detection" title="Link to this definition"></a></dt>
 <dd><p>Plot the <cite>idx</cite>-th detection made with this template.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1867,6 +1890,11 @@ will be skipped. Defaults to True.</p></li>
 <dd><p>Bases: <a class="reference internal" href="#BPMF.dataset.Family" title="BPMF.dataset.Family"><code class="xref py py-class docutils literal notranslate"><span class="pre">Family</span></code></a></p>
 <p>A class for a group of templates.</p>
 <p>Each template is represented by a <cite>dataset.Template</cite> instance.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="BPMF.dataset.TemplateGroup.availability_arr">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">availability_arr</span></span><a class="headerlink" href="#BPMF.dataset.TemplateGroup.availability_arr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="BPMF.dataset.TemplateGroup.box">
 <span class="sig-name descname"><span class="pre">box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/dataset.html#TemplateGroup.box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.dataset.TemplateGroup.box" title="Link to this definition"></a></dt>

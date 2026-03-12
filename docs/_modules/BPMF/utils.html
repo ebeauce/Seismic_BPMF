@@ -1588,12 +1588,13 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">cartopy.geodesic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geodesic</span>
 
     <span class="c1"># convert types if necessary</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_longitudes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="n">source_longitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">source_longitudes</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_latitudes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="n">source_latitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">source_latitudes</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_depths</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="n">source_depths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">source_depths</span><span class="p">)</span>
+    <span class="n">source_longitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">source_longitudes</span><span class="p">)</span>
+    <span class="n">source_latitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">source_latitudes</span><span class="p">)</span>
+    <span class="n">source_depths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">source_depths</span><span class="p">)</span>
+    <span class="n">receiver_longitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">receiver_longitudes</span><span class="p">)</span>
+    <span class="n">receiver_latitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">receiver_latitudes</span><span class="p">)</span>
+    <span class="n">receiver_depths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">receiver_depths</span><span class="p">)</span>
+
 
     <span class="c1"># initialize distance array</span>
     <span class="n">hypocentral_distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
@@ -2225,6 +2226,10 @@
     <span class="c1"># set the width kwarg to 1 if not defined</span>
     <span class="c1"># so that `properties` has peak width info</span>
     <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># adding condition on prominence helps discard</span>
+    <span class="c1"># the very small &#39;peaks&#39; that are merely noise</span>
+    <span class="c1"># around actual peaks</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;prominence&quot;</span><span class="p">,</span> <span class="mf">0.9</span><span class="o">*</span><span class="n">threshold</span><span class="p">)</span>
     <span class="n">peak_indexes</span><span class="p">,</span> <span class="n">peak_properties</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span>
         <span class="n">phase_probability</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span>

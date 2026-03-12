@@ -87,7 +87,7 @@
 
 <div class="viewcode-block" id="load_pykonal_tts">
 <a class="viewcode-back" href="../../usage/api/NLLoc_utils.html#BPMF.NLLoc_utils.load_pykonal_tts">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load_pykonal_tts</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_pykonal_tts</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">stations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the travel-time grid computed with Pykonal.</span>
 
 <span class="sd">    Load the travel times previously computed with Pykonal and reformat the axes</span>
@@ -95,10 +95,14 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
-<span class="sd">    filename: string</span>
+<span class="sd">    filename : str</span>
 <span class="sd">        Name of the travel-time file. Example: &#39;tts.h5&#39;.</span>
-<span class="sd">    path: string, default to `BPMF.cfg.MOVEOUTS_PATH`</span>
+<span class="sd">    path : str</span>
 <span class="sd">        Name of the directory where the travel-time file is located.</span>
+<span class="sd">    stations : list, optional</span>
+<span class="sd">        List of station names to read. If None, reads all stations.</span>
+<span class="sd">        Defaults to None.</span>
+
 
 <span class="sd">    Returns</span>
 <span class="sd">    ---------</span>
@@ -127,7 +131,8 @@
         <span class="k">for</span> <span class="n">phase</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">]:</span>
             <span class="n">tts</span><span class="p">[</span><span class="n">phase</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;tt_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">tts</span><span class="p">[</span><span class="n">phase</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;tt_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">][()]</span>
+                <span class="k">if</span> <span class="n">stations</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">sta</span> <span class="ow">in</span> <span class="n">stations</span><span class="p">:</span>
+                    <span class="n">tts</span><span class="p">[</span><span class="n">phase</span><span class="p">][</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;tt_</span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="n">sta</span><span class="p">][()]</span>
 
     <span class="c1"># initial axis order is (depth, latitude, longitude) with decreasing depths</span>
 
@@ -393,7 +398,7 @@
         <span class="c1">#    continue</span>
         <span class="k">if</span> <span class="n">st</span> <span class="ow">in</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;P_abs_picks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
             <span class="k">if</span> <span class="s2">&quot;P_unc_sec&quot;</span> <span class="ow">in</span> <span class="n">picks</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                <span class="n">err</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">err_min</span><span class="p">,</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">st</span><span class="p">,</span> <span class="s2">&quot;P_unc_sec&quot;</span><span class="p">])</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">err_min</span><span class="p">,</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">st</span><span class="p">,</span> <span class="s2">&quot;P_unc_sec&quot;</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">err</span> <span class="o">=</span> <span class="n">err_min</span>
             <span class="n">P_arrival_time</span> <span class="o">=</span> <span class="n">udt</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">st</span><span class="p">][</span><span class="s2">&quot;P_abs_picks&quot;</span><span class="p">])</span>
@@ -441,7 +446,7 @@
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">st</span> <span class="ow">in</span> <span class="n">picks</span><span class="p">[</span><span class="s2">&quot;S_abs_picks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
             <span class="k">if</span> <span class="s2">&quot;S_unc_sec&quot;</span> <span class="ow">in</span> <span class="n">picks</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                <span class="n">err</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">err_min</span><span class="p">,</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">st</span><span class="p">,</span> <span class="s2">&quot;S_unc_sec&quot;</span><span class="p">])</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">err_min</span><span class="p">,</span> <span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">st</span><span class="p">,</span> <span class="s2">&quot;S_unc_sec&quot;</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">err</span> <span class="o">=</span> <span class="n">err_min</span>
             <span class="n">S_arrival_time</span> <span class="o">=</span> <span class="n">udt</span><span class="p">(</span><span class="n">picks</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">st</span><span class="p">][</span><span class="s2">&quot;S_abs_picks&quot;</span><span class="p">])</span>

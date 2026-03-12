@@ -419,9 +419,18 @@
         <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">longitudes</span>
         <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">latitudes</span>
         <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">depths</span>
-        <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;origin_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">origin_times</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;datetime64[ms]&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># do this if origin_times have time zone info</span>
+            <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;origin_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">origin_times</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;U&quot;</span><span class="p">),</span>
+                <span class="c1">#utc=True</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;datetime64[ms, UTC]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tz_localize</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="c1"># do this otherwise</span>
+            <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;origin_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">origin_times</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;U&quot;</span><span class="p">),</span>
+                <span class="c1">#utc=True</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;datetime64[ms]&quot;</span><span class="p">)</span>
         <span class="n">catalog</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">event_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;event_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">event_ids</span>
@@ -663,10 +672,7 @@
             <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">path_to_files</span><span class="p">:</span>
                 <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_read</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">return_events</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">n_threads</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">events</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">output</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">events</span> <span class="o">=</span> <span class="n">output</span>
+            <span class="n">events</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">output</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
             <span class="k">return</span> <span class="p">(</span>
                 <span class="bp">cls</span><span class="o">.</span><span class="n">read_from_events</span><span class="p">(</span>
                     <span class="n">events</span><span class="p">,</span> <span class="n">extra_attributes</span><span class="o">=</span><span class="n">extra_attributes</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span>
@@ -1011,7 +1017,13 @@
         <span class="c1"># self._read_metadata()</span>
         <span class="k">if</span> <span class="n">sampling_rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">sampling_rate</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1022,11 +1034,14 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sampling_rate&quot;</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to define the instance&#39;s sampling rate first.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_time&quot;</span><span class="p">):</span>
+        <span class="n">expected_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_time&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_time</span><span class="p">)</span> <span class="o">-</span> <span class="n">expected_length</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_time</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">time_range</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">date</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sr</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;ms&quot;</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time</span>
+
+
 
 <div class="viewcode-block" id="Data.get_np_array">
 <a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Data.get_np_array">[docs]</a>
@@ -1544,6 +1559,27 @@
             <span class="n">n_samples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span>
             <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
+
+<div class="viewcode-block" id="Event.inherit_location">
+<a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Event.inherit_location">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inherit_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Copy location attributes from `template_event`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        template_event : Event</span>
+<span class="sd">            An instance of `BPMF.dataset.Event` with location, and </span>
+<span class="sd">            possibly location uncertainties, to inherit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;depth&quot;</span><span class="p">]:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">template_event</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">template_event</span><span class="p">,</span> <span class="s2">&quot;cov_mat&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cov_mat</span> <span class="o">=</span> <span class="n">template_event</span><span class="o">.</span><span class="n">cov_mat</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_aux_data</span><span class="p">({</span><span class="s2">&quot;cov_mat&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov_mat</span><span class="p">})</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">template_event</span><span class="p">,</span> <span class="s2">&quot;aux_data&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;cov_mat&quot;</span> <span class="ow">in</span> <span class="n">template_event</span><span class="o">.</span><span class="n">aux_data</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_aux_data</span><span class="p">({</span><span class="s2">&quot;cov_mat&quot;</span><span class="p">:</span> <span class="n">template_event</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;cov_mat&quot;</span><span class="p">]})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cov_mat</span> <span class="o">=</span> <span class="n">template_event</span><span class="o">.</span><span class="n">aux_data</span><span class="p">[</span><span class="s2">&quot;cov_mat&quot;</span><span class="p">]</span></div>
+
 
 <div class="viewcode-block" id="Event.compute_snr">
 <a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Event.compute_snr">[docs]</a>
@@ -4103,6 +4139,7 @@
         <span class="n">duration</span><span class="o">=</span><span class="mf">60.0</span><span class="p">,</span>
         <span class="n">phase_on_comp</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="s2">&quot;P&quot;</span><span class="p">},</span>
         <span class="n">offset_ot</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+        <span class="n">stations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -4157,7 +4194,10 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Argument `idx_or_gid` must be int or str&quot;</span><span class="p">)</span>
                 <span class="k">return</span>
             <span class="n">event</span> <span class="o">=</span> <span class="n">Event</span><span class="o">.</span><span class="n">read_from_file</span><span class="p">(</span><span class="n">hdf5_file</span><span class="o">=</span><span class="n">f</span><span class="p">[</span><span class="n">gid</span><span class="p">])</span>
-        <span class="n">event</span><span class="o">.</span><span class="n">stations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">stations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">stations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">stations</span> <span class="o">=</span> <span class="n">stations</span>
+
         <span class="n">event</span><span class="o">.</span><span class="n">read_waveforms</span><span class="p">(</span>
             <span class="n">duration</span><span class="p">,</span>
             <span class="n">offset_ot</span><span class="o">=</span><span class="n">offset_ot</span><span class="p">,</span>
@@ -4166,10 +4206,6 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stations&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">stations</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">stations</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">stations</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stations&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="c1"># stations = event.stations</span>
         <span class="n">axes</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_axes</span><span class="p">()</span>
         <span class="n">cc</span><span class="p">,</span> <span class="n">n_channels</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">0</span>
@@ -4515,6 +4551,7 @@
         <span class="n">expl_var</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
         <span class="n">max_singular_values</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
         <span class="n">wiener_filter_colsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply Singular Value Decomposition Waveform Filtering (SVDWF) and stack the waveforms.</span>
@@ -4556,7 +4593,7 @@
                     <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
                     <span class="n">wiener_filter_colsize</span><span class="o">=</span><span class="n">wiener_filter_colsize</span><span class="p">,</span>
                 <span class="p">)</span>
-                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">[:,</span> <span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="p">:])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">[:,</span> <span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="p">:])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
                     <span class="nb">print</span><span class="p">(</span>
                         <span class="s2">&quot;Problem with station </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{:d}</span><span class="s2">), component </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{:d}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">s</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">c</span>
@@ -4693,6 +4730,13 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">n_templates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">availability_arr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">tp</span><span class="o">.</span><span class="n">availability_per_cha</span> <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="p">],</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+                <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dir_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -5719,6 +5763,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+
+<div class="viewcode-block" id="Stack.set_arrival_times_from_moveouts">
+<a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Stack.set_arrival_times_from_moveouts">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_arrival_times_from_moveouts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset_ot</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">origin_time</span> <span class="o">+=</span> <span class="n">offset_ot</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_arrival_times_from_moveouts</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="Stack.read_waveforms">
 <a class="viewcode-back" href="../../usage/api/dataset.html#BPMF.dataset.Stack.read_waveforms">[docs]</a>

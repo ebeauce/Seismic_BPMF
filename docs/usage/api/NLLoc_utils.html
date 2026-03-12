@@ -103,15 +103,17 @@
 <span id="bpmf-nlloc-utils"></span><h1>BPMF.NLLoc_utils<a class="headerlink" href="#module-BPMF.NLLoc_utils" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.NLLoc_utils.load_pykonal_tts">
-<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">load_pykonal_tts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#load_pykonal_tts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.load_pykonal_tts" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.NLLoc_utils.</span></span><span class="sig-name descname"><span class="pre">load_pykonal_tts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/NLLoc_utils.html#load_pykonal_tts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.NLLoc_utils.load_pykonal_tts" title="Link to this definition"></a></dt>
 <dd><p>Load the travel-time grid computed with Pykonal.</p>
 <p>Load the travel times previously computed with Pykonal and reformat the axes
 to follow NLLoc’s convention.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>string</em>) – Name of the travel-time file. Example: ‘tts.h5’.</p></li>
-<li><p><strong>path</strong> (string, default to <cite>BPMF.cfg.MOVEOUTS_PATH</cite>) – Name of the directory where the travel-time file is located.</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – Name of the travel-time file. Example: ‘tts.h5’.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Name of the directory where the travel-time file is located.</p></li>
+<li><p><strong>stations</strong> (<em>list</em><em>, </em><em>optional</em>) – List of station names to read. If None, reads all stations.
+Defaults to None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

@@ -105,12 +105,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage/api/plotting_utils.html#BPMF.plotting_utils.add_scale_bar">add_scale_bar() (in module BPMF.plotting_utils)</a>
 </li>
+      <li><a href="usage/api/spectrum.html#BPMF.spectrum.approximate_moment_magnitude">approximate_moment_magnitude() (in module BPMF.spectrum)</a>
+</li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Event.availability">availability (BPMF.dataset.Event property)</a>
 </li>
-      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.availability_per_cha">availability_per_cha (BPMF.dataset.Event property)</a>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.TemplateGroup.availability_arr">availability_arr (BPMF.dataset.TemplateGroup property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.availability_per_cha">availability_per_cha (BPMF.dataset.Event property)</a>
+</li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Event.availability_per_sta">availability_per_sta (BPMF.dataset.Event property)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Event.az_hmax_unc">az_hmax_unc (BPMF.dataset.Event property)</a>
@@ -232,10 +236,10 @@
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.TemplateGroup.compute_intertemplate_cc">compute_intertemplate_cc() (BPMF.dataset.TemplateGroup method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage/api/dataset.html#BPMF.dataset.TemplateGroup.compute_intertemplate_dist">compute_intertemplate_dist() (BPMF.dataset.TemplateGroup method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage/api/spectrum.html#BPMF.spectrum.compute_moment_magnitude">compute_moment_magnitude() (in module BPMF.spectrum)</a>
 </li>
       <li><a href="usage/api/spectrum.html#BPMF.spectrum.Spectrum.compute_multi_band_spectrum">compute_multi_band_spectrum() (BPMF.spectrum.Spectrum method)</a>
@@ -251,6 +255,10 @@
       <li><a href="usage/api/dataset.html#BPMF.dataset.Catalog.concatenate">concatenate() (BPMF.dataset.Catalog class method)</a>
 </li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.TravelTimes.convert_to_samples">convert_to_samples() (BPMF.template_search.TravelTimes method)</a>
+</li>
+      <li><a href="usage/api/spectrum.html#BPMF.spectrum.Spectrum.correct_attenuation">correct_attenuation() (BPMF.spectrum.Spectrum method)</a>
+</li>
+      <li><a href="usage/api/spectrum.html#BPMF.spectrum.Spectrum.correct_geometrical_spreading">correct_geometrical_spreading() (BPMF.spectrum.Spectrum method)</a>
 </li>
       <li><a href="usage/api/utils.html#BPMF.utils.cov_mat_intersection">cov_mat_intersection() (in module BPMF.utils)</a>
 </li>
@@ -306,10 +314,10 @@
 </li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.envelope_parallel">envelope_parallel() (in module BPMF.template_search)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Event">Event (class in BPMF.dataset)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage/api/utils.html#BPMF.utils.event_count">event_count() (in module BPMF.utils)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.EventGroup">EventGroup (class in BPMF.dataset)</a>
@@ -317,6 +325,8 @@
       <li><a href="usage/api/dataset.html#BPMF.dataset.EventGroup.events">events (BPMF.dataset.EventGroup attribute)</a>
 </li>
       <li><a href="usage/api/utils.html#BPMF.utils.extract_colors_from_tree">extract_colors_from_tree() (in module BPMF.utils)</a>
+</li>
+      <li><a href="usage/api/spectrum.html#BPMF.spectrum.extract_windows">extract_windows() (in module BPMF.spectrum)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -400,14 +410,16 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.inherit_location">inherit_location() (BPMF.dataset.Event method)</a>
+</li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Template.init_from_event">init_from_event() (BPMF.dataset.Template class method)</a>
 </li>
       <li><a href="usage/api/plotting_utils.html#BPMF.plotting_utils.initialize_map">initialize_map() (in module BPMF.plotting_utils)</a>
 </li>
-      <li><a href="usage/api/spectrum.html#BPMF.spectrum.Spectrum.integrate">integrate() (BPMF.spectrum.Spectrum method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usage/api/spectrum.html#BPMF.spectrum.Spectrum.integrate">integrate() (BPMF.spectrum.Spectrum method)</a>
+</li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Network.interstation_distances">interstation_distances (BPMF.dataset.Network property)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.TemplateGroup.intertemplate_cc">intertemplate_cc (BPMF.dataset.TemplateGroup property)</a>
@@ -438,10 +450,12 @@
 </li>
       <li><a href="usage/api/NLLoc_utils.html#BPMF.NLLoc_utils.load_pykonal_tts">load_pykonal_tts() (in module BPMF.NLLoc_utils)</a>
 </li>
-      <li><a href="usage/api/utils.html#BPMF.utils.load_travel_times">load_travel_times() (in module BPMF.utils)</a>
+      <li><a href="usage/api/plotting_utils.html#BPMF.plotting_utils.load_topography">load_topography() (in module BPMF.plotting_utils)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usage/api/utils.html#BPMF.utils.load_travel_times">load_travel_times() (in module BPMF.utils)</a>
+</li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Event.location">location (BPMF.dataset.Event property)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Catalog.longitude">longitude (BPMF.dataset.Catalog property)</a>
@@ -533,8 +547,12 @@
       </ul></li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.n_phases">n_phases (BPMF.template_search.Beamformer property)</a>
 </li>
-      <li><a href="usage/api/dataset.html#BPMF.dataset.Event.n_samples">n_samples (BPMF.dataset.Event property)</a>
+      <li><a href="usage/api/dataset.html#BPMF.dataset.Data.n_samples">n_samples (BPMF.dataset.Data property)</a>
+
+      <ul>
+        <li><a href="usage/api/dataset.html#BPMF.dataset.Event.n_samples">(BPMF.dataset.Event property)</a>
 </li>
+      </ul></li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.n_sources">n_sources (BPMF.template_search.Beamformer property)</a>
 
       <ul>
@@ -552,7 +570,11 @@
       <li><a href="usage/api/dataset.html#BPMF.dataset.TemplateGroup.n_templates">n_templates (BPMF.dataset.TemplateGroup property)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.EventGroup.network">network (BPMF.dataset.EventGroup attribute)</a>
+
+      <ul>
+        <li><a href="usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.network">(BPMF.similarity_search.MatchedFilter property)</a>
 </li>
+      </ul></li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Network">Network (class in BPMF.dataset)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.TemplateGroup.network_to_template_map">network_to_template_map (BPMF.dataset.TemplateGroup property)</a>
@@ -734,7 +756,11 @@
 </li>
       </ul></li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Event.set_arrival_times_from_moveouts">set_arrival_times_from_moveouts() (BPMF.dataset.Event method)</a>
+
+      <ul>
+        <li><a href="usage/api/dataset.html#BPMF.dataset.Stack.set_arrival_times_from_moveouts">(BPMF.dataset.Stack method)</a>
 </li>
+      </ul></li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Event.set_aux_data">set_aux_data() (BPMF.dataset.Event method)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Data.set_availability">set_availability() (BPMF.dataset.Data method)</a>
@@ -786,6 +812,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.set_weights">set_weights() (BPMF.template_search.Beamformer method)</a>
+</li>
+      <li><a href="usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.set_weights_channels">set_weights_channels() (BPMF.similarity_search.MatchedFilter method)</a>
 </li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.set_weights_sources">set_weights_sources() (BPMF.template_search.Beamformer method)</a>
 </li>
@@ -875,6 +903,8 @@
 </li>
       <li><a href="usage/api/utils.html#BPMF.utils.time_range">time_range() (in module BPMF.utils)</a>
 </li>
+      <li><a href="usage/api/template_search.html#BPMF.template_search.WaveformTransform.transform_arr">transform_arr (BPMF.template_search.WaveformTransform property)</a>
+</li>
       <li><a href="usage/api/template_search.html#BPMF.template_search.TravelTimes">TravelTimes (class in BPMF.template_search)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Data.trim_waveforms">trim_waveforms() (BPMF.dataset.Data method)</a>
@@ -936,8 +966,6 @@
       <li><a href="usage/api/template_search.html#BPMF.template_search.WaveformTransform">WaveformTransform (class in BPMF.template_search)</a>
 </li>
       <li><a href="usage/api/utils.html#BPMF.utils.weighted_linear_regression">weighted_linear_regression() (in module BPMF.utils)</a>
-</li>
-      <li><a href="usage/api/template_search.html#BPMF.template_search.Beamformer.weights_station_density">weights_station_density() (BPMF.template_search.Beamformer method)</a>
 </li>
       <li><a href="usage/api/dataset.html#BPMF.dataset.Event.write">write() (BPMF.dataset.Event method)</a>
 

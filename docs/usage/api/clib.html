@@ -102,17 +102,38 @@
 <span id="bpmf-clib"></span><h1>BPMF.clib<a class="headerlink" href="#module-BPMF.clib" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="BPMF.clib.find_similar_sources">
-<span class="sig-prename descclassname"><span class="pre">BPMF.clib.</span></span><span class="sig-name descname"><span class="pre">find_similar_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">moveouts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_stations_for_diff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/clib.html#find_similar_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.clib.find_similar_sources" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.clib.</span></span><span class="sig-name descname"><span class="pre">find_similar_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">moveouts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_stations_for_diff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'closest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/clib.html#find_similar_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.clib.find_similar_sources" title="Link to this definition"></a></dt>
 <dd><p>Find sources with similar moveouts so that users can discard
-some of them during the computation of the network response,
+some of them during the computation of the network response
 and thus speedup the process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>moveouts</strong> (<em>(</em><em>n_sources</em><em>, </em><em>n_stations</em><em>) </em><em>float numpy.ndarray</em>) – The moveouts in seconds. Note: It makes more sense to input the moveouts
-rather than the absolute travel times here.</p></li>
-<li><p><strong>threshold</strong> (<em>scalar float</em>) – The station average time difference tolerance to consider
+<li><p><strong>moveouts</strong> (<em>numpy.ndarray</em>) – The (n_sources, n_stations) moveout 2-D array, in seconds.
+Note: It makes more sense to give the relative travel times (w.r.t. earliest arrival)
+rather than the absolute travel times.</p></li>
+<li><p><strong>source_longitude</strong> (<em>array_like</em>) – The (n_sources,) list or 1-D array of source longitudes.</p></li>
+<li><p><strong>source_latitude</strong> (<em>array_like</em>) – The (n_sources,) list or 1-D array of source latitudes.</p></li>
+<li><p><strong>cell_longitude</strong> (<em>array_like</em>) – The (n_cells_longitude,) list or 1-D array of the vortex longitudes
+defining the geographic cells used to sub-divide the problem.</p></li>
+<li><p><strong>cell_latitude</strong> (<em>array_like</em>) – The (n_cells_latitude,) list or 1-D array of the vortex latitudes
+defining the geographic cells used to sub-divide the problem.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – The station average time difference tolerance to consider
 two sources as being redundant.</p></li>
+<li><p><strong>num_threads</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The number of threads over which the computation is parallelized. If None or -1,
+spaws one thread per available CPU. Defaults to None.</p></li>
+<li><p><strong>num_stations_for_diff</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The number of stations over which the sum of the squared differences is computed.
+See <cite>method</cite> for more info. If None, uses all of the stations. Defaults to None.</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Either of ‘closest’ or ‘smallest’.
+- ‘closest’: Find the <cite>num_stations_for_diff</cite> closest stations to every source</p>
+<blockquote>
+<div><p>in the grid and restrict the sum to those.</p>
+</div></blockquote>
+<ul>
+<li><p>’smallest’: Compute the differences at every station but use only the
+<cite>num_stations_for_diff</cite> smallest differences in the sum.</p></li>
+</ul>
+</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

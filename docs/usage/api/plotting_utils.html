@@ -56,6 +56,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">BPMF.plotting_utils</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.plotting_utils.add_scale_bar"><code class="docutils literal notranslate"><span class="pre">add_scale_bar()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.plotting_utils.initialize_map"><code class="docutils literal notranslate"><span class="pre">initialize_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BPMF.plotting_utils.load_topography"><code class="docutils literal notranslate"><span class="pre">load_topography()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.plotting_utils.plot_catalog"><code class="docutils literal notranslate"><span class="pre">plot_catalog()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.plotting_utils.plot_detection_matrix"><code class="docutils literal notranslate"><span class="pre">plot_detection_matrix()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#BPMF.plotting_utils.plot_template"><code class="docutils literal notranslate"><span class="pre">plot_template()</span></code></a></li>
@@ -105,19 +106,21 @@
 <h1>BPMF.plotting_utils<a class="headerlink" href="#bpmf-plotting-utils" title="Link to this heading"></a></h1>
 <dl class="py function" id="module-BPMF.plotting_utils">
 <dt class="sig sig-object py" id="BPMF.plotting_utils.add_scale_bar">
-<span class="sig-prename descclassname"><span class="pre">BPMF.plotting_utils.</span></span><span class="sig-name descname"><span class="pre">add_scale_bar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_crs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'longitudinal'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/plotting_utils.html#add_scale_bar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.plotting_utils.add_scale_bar" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">BPMF.plotting_utils.</span></span><span class="sig-name descname"><span class="pre">add_scale_bar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_crs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'longitudinal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertical_text_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/plotting_utils.html#add_scale_bar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.plotting_utils.add_scale_bar" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ax</strong> (<em>GeoAxes instance</em>) – The axis on which we want to add a scale bar.</p></li>
+<li><p><strong>ax</strong> (<em>GeoAxes</em>) – The axis on which we want to add a scale bar.</p></li>
 <li><p><strong>x_start</strong> (<em>float</em>) – The x coordinate of the left end of the scale bar,
 given in the axis coordinate system, i.e. from 0 to 1.</p></li>
 <li><p><strong>y_start</strong> (<em>float</em>) – The y coordinate of the left end of the scale bar,
 given in the axis coordinate system, i.e. from 0 to 1.</p></li>
 <li><p><strong>distance</strong> (<em>float</em>) – The distance covered by the scale bar, in km.</p></li>
 <li><p><strong>source_crs</strong> (<em>cartopy.crs</em>) – The coordinate system in which the data are written.</p></li>
-<li><p><strong>orientation</strong> (<em>string</em><em>, </em><em>default to 'longitudinal'</em>) – Either ‘longitudinal’ or ‘latitudinal’. Determine the orientation
-of the scale bar.</p></li>
+<li><p><strong>vertical_text_offset</strong> (<em>float</em><em>, </em><em>optional</em>) – Vertical offset between scale bar text and scale bar,
+in units of latitudes. Defaults to 0.001.</p></li>
+<li><p><strong>orientation</strong> (<em>str</em><em>, </em><em>optional</em>) – Either ‘longitudinal’ or ‘latitudinal’. Determine the orientation
+of the scale bar. Defaults to ‘longitudinal’.</p></li>
 </ul>
 </dd>
 </dl>
@@ -127,6 +130,30 @@ of the scale bar.</p></li>
 <dt class="sig sig-object py" id="BPMF.plotting_utils.initialize_map">
 <span class="sig-prename descclassname"><span class="pre">BPMF.plotting_utils.</span></span><span class="sig-name descname"><span class="pre">initialize_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_longitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_latitudes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seismic_stations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markersize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topography_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_topo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bottom_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/plotting_utils.html#initialize_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.plotting_utils.initialize_map" title="Link to this definition"></a></dt>
 <dd><p>Initialize map instance with Cartopy.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BPMF.plotting_utils.load_topography">
+<span class="sig-prename descclassname"><span class="pre">BPMF.plotting_utils.</span></span><span class="sig-name descname"><span class="pre">load_topography</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'netcdf4'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/BPMF/plotting_utils.html#load_topography"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#BPMF.plotting_utils.load_topography" title="Link to this definition"></a></dt>
+<dd><p>Load topography from <cite>path</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Path to topography file.</p></li>
+<li><p><strong>decimation_factor</strong> (<em>int</em><em>, </em><em>optional</em>) – If not None, decimate the topography grid by <cite>decimation_factor</cite>.
+Defaults to None.</p></li>
+<li><p><strong>format</strong> (<em>str</em>) – Should only be ‘netcdf4’ for now.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>lon_topo</strong> (<em>numpy.ndarray</em>) – (num_longitudes, num_latitudes) longitude array.</p></li>
+<li><p><strong>lat_topo</strong> (<em>numpy.ndarray</em>) – (num_longitudes, num_latitudes) latitude array.</p></li>
+<li><p><strong>topo</strong> (<em>numpy.ndarray</em>) – (num_longitudes, num_latitudes) topography array.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

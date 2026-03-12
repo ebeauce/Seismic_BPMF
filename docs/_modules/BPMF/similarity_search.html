@@ -225,6 +225,10 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">stations</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">network</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">memory_cc_time_series</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="mf">0.0</span>
@@ -365,15 +369,204 @@
         <span class="k">return</span> <span class="n">cc_idx</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_weights_channels_simple</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># equal weights to all channels</span>
+        <span class="n">weights_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">network_to_template_map</span><span class="p">)</span>
+        <span class="c1"># insufficient data</span>
+        <span class="n">invalid</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">weights_arr</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_channels</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_arr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_stations</span>
+        <span class="p">)</span>
+        <span class="n">weights_arr</span><span class="p">[</span><span class="n">invalid</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">return</span> <span class="n">weights_arr</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_weights_channels_closest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_closest_stations</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="n">weights_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">n_templates</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">n_stations</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">operational_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">availability_arr</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;availability_per_cha&quot;</span><span class="p">):</span>
+            <span class="n">operational_channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+                    <span class="n">operational_channels</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">availability_per_cha</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">stations</span><span class="p">]</span>
+                    <span class="p">)</span>
+        <span class="n">operational_stations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">operational_channels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># select moveouts from one phase (doesnt matter which one)</span>
+        <span class="n">mv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">moveouts_arr</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">original_values</span> <span class="o">=</span> <span class="n">mv</span><span class="p">[</span><span class="o">~</span><span class="n">operational_stations</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">mv</span><span class="p">[</span><span class="o">~</span><span class="n">operational_stations</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+        <span class="n">num_closest_stations</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">mv</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">num_closest_stations</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">num_closest_stations</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">n_stations</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">num_closest_stations</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">cutoff_mv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="n">mv</span><span class="p">,</span> <span class="n">num_closest_stations</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">num_closest_stations</span><span class="p">],</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">weights_arr</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">moveouts_arr</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">cutoff_mv</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">mv</span><span class="p">[</span><span class="o">~</span><span class="n">operational_stations</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_values</span>
+        <span class="c1"># zero-out offline channels</span>
+        <span class="n">weights_arr</span><span class="p">[</span><span class="o">~</span><span class="n">operational_channels</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">return</span> <span class="n">weights_arr</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_weights_channels_max_moveout</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">max_moveout_sec</span><span class="p">,</span> <span class="n">n_min_stations</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_moveout2_sec</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="n">weights_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">n_templates</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">n_stations</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">operational_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">availability_arr</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;availability_per_cha&quot;</span><span class="p">):</span>
+            <span class="n">operational_channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+                    <span class="n">operational_channels</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">availability_per_cha</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">stations</span><span class="p">]</span>
+                    <span class="p">)</span>
+        <span class="n">operational_stations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">operational_channels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">max_moveout_samp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_moveout_sec</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">templates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sr</span><span class="p">)</span>
+        <span class="c1"># select shortest moveout across all phases</span>
+        <span class="n">mv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">moveouts_arr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># detect stations that are within the imposed max moveout</span>
+        <span class="n">valid_stations</span> <span class="o">=</span> <span class="p">(</span><span class="n">mv</span> <span class="o">&lt;</span> <span class="n">max_moveout_samp</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">operational_stations</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">valid_stations</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">n_min_stations</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">max_moveout2_sec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">max_moveout_samp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                <span class="n">max_moveout2_sec</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">templates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sr</span>
+            <span class="p">)</span>
+            <span class="n">valid_stations</span> <span class="o">=</span> <span class="n">mv</span> <span class="o">&lt;</span> <span class="n">max_moveout_samp</span>
+        <span class="n">weights_arr</span><span class="p">[</span><span class="n">valid_stations</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">weights_arr</span><span class="p">[</span><span class="o">~</span><span class="n">operational_channels</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">return</span> <span class="n">weights_arr</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_station_density_weights</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">cutoff_dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lower_percentile</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upper_percentile</span><span class="o">=</span><span class="mf">100.0</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute station weights to balance station density.</span>
+
+<span class="sd">        Areas of high station density produce stronger network responses than</span>
+<span class="sd">        areas with sparse coverage, and thus might prevent detecting earthquakes</span>
+<span class="sd">        where stations are scarcer.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        cutoff_dist: scalar float, default to None</span>
+<span class="sd">            All station pairs (i,j) are attributed a number from a gaussian</span>
+<span class="sd">            distribution with standard deviation `cutoff_dist`, in km. The</span>
+<span class="sd">            weight of station i is: `w_i = 1/(sum_j(exp(-D_ij**2/cutoff_dist**2)))`.</span>
+<span class="sd">            If None, `cutoff_dist` is set to the median interstation distance.</span>
+<span class="sd">        lower_percentile: scalar float, default to 0</span>
+<span class="sd">            If `lower_percentile &gt; 0`, the weights are clipped above the</span>
+<span class="sd">            `lower_percentile`-th percentile.</span>
+<span class="sd">        upper_percentile: scalar float, default to 100</span>
+<span class="sd">            If `upper_percentile &lt; 100`, the weights are clipped below the</span>
+<span class="sd">            `upper_percentile`-th percentile.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        weights_sta_density: (n_stations,) `numpy.ndarray`</span>
+<span class="sd">            The station density weights.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">cutoff_dist</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cutoff_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">interstation_distances</span><span class="o">.</span><span class="n">values</span><span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">interstation_distances</span><span class="o">.</span><span class="n">values</span> <span class="o">!=</span> <span class="mf">0.0</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="n">weights_sta_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">n_stations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">stations</span><span class="p">):</span>
+            <span class="n">dist_sj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">interstation_distances</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">]</span>
+            <span class="n">weights_sta_density</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">dist_sj</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">cutoff_dist</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">lower_percentile</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">weights_sta_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                <span class="n">weights_sta_density</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">weights_sta_density</span><span class="p">,</span> <span class="n">lower_percentile</span><span class="p">),</span>
+                <span class="n">weights_sta_density</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">upper_percentile</span> <span class="o">&lt;</span> <span class="mf">100.0</span><span class="p">:</span>
+            <span class="n">weights_sta_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                <span class="n">weights_sta_density</span><span class="p">,</span>
+                <span class="n">weights_sta_density</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">weights_sta_density</span><span class="p">,</span> <span class="n">upper_percentile</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">weights_sta_density</span>
+
+<div class="viewcode-block" id="MatchedFilter.set_weights_channels">
+<a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.set_weights_channels">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_weights_channels</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n_min_stations</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">weight_station_density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="n">possible_methods</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span> <span class="s2">&quot;closest_stations&quot;</span><span class="p">,</span> <span class="s2">&quot;max_moveout&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">possible_methods</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Invalid method &#39;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&#39;. Must be one of </span><span class="si">{</span><span class="n">possible_methods</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;simple&quot;</span><span class="p">:</span>
+            <span class="n">weights_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights_channels_simple</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;closest_stations&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;num_closest_stations&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;When method is &#39;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&#39;, `num_closest_stations` is required.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">weights_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights_channels_closest</span><span class="p">(</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;num_closest_stations&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;max_moveout&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_moveout_sec&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;When method &#39;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&#39;, `max_moveout_sec` is required.&quot;</span><span class="p">)</span>
+            <span class="n">weights_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights_channels_max_moveout</span><span class="p">(</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_moveout_sec&quot;</span><span class="p">),</span>
+                <span class="n">n_min_stations</span><span class="o">=</span><span class="n">n_min_stations</span><span class="p">,</span>
+                <span class="n">max_moveout2_sec</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_moveout2_sec&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n_min_stations</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">n_stations_per_template</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">weights_channels</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">weights_channels</span><span class="p">[</span><span class="n">n_stations_per_template</span> <span class="o">&lt;</span> <span class="n">n_min_stations</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">if</span> <span class="n">weight_station_density</span><span class="p">:</span>
+            <span class="n">weights_density</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_station_density_weights</span><span class="p">(</span>
+                <span class="n">cutoff_dist</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cutoff_dist&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                <span class="n">lower_percentile</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lower_percentile&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+                <span class="n">upper_percentile</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;upper_percentile&quot;</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">weights_channels</span> <span class="o">*=</span> <span class="n">weights_density</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">normalize</span><span class="p">:</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_channels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">norm</span><span class="p">[</span><span class="n">norm</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="n">weights_channels</span> <span class="o">/=</span> <span class="n">norm</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights_channels</span> <span class="o">=</span> <span class="n">weights_channels</span></div>
+
+
 <div class="viewcode-block" id="MatchedFilter.compute_cc_time_series">
 <a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.MatchedFilter.compute_cc_time_series">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">compute_cc_time_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight_type</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">tids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_cc_time_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">tids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the CC time series (step 1 of matched-filter search).</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        weight_type: string, default to &#39;simple&#39;</span>
-<span class="sd">            &#39;simple&#39; is the only option for now.</span>
 <span class="sd">        device : string, default to &#39;cpu&#39;</span>
 <span class="sd">            Either &#39;cpu&#39; or &#39;gpu&#39;.</span>
 <span class="sd">        tids: list of `tid`, default to None</span>
@@ -394,31 +587,16 @@
         <span class="c1"># of templates selected for this run</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tids_subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">tids</span><span class="p">[</span><span class="n">select_tts</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weights_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_channels</span><span class="p">[</span><span class="n">select_tts</span><span class="p">,</span> <span class="p">:]</span>
+
         <span class="c1"># ----------------------------------------------</span>
         <span class="c1"># parameters</span>
         <span class="n">nt</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">nc</span><span class="p">,</span> <span class="n">Nsamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">waveforms_arr</span><span class="p">[</span><span class="n">select_tts</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">n_stations</span><span class="p">,</span> <span class="n">n_components</span><span class="p">,</span> <span class="n">n_samples_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_arr</span><span class="o">.</span><span class="n">shape</span>
-        <span class="k">if</span> <span class="n">weight_type</span> <span class="o">==</span> <span class="s2">&quot;simple&quot;</span><span class="p">:</span>
-            <span class="c1"># equal weights to all channels</span>
-            <span class="n">weights_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">network_to_template_map</span><span class="p">[</span><span class="n">select_tts</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;availability&quot;</span><span class="p">):</span>
-                <span class="c1"># turn weights to zero on unavailable stations</span>
-                <span class="n">weights_arr</span><span class="p">[:,</span> <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">availability_per_cha</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
-            <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_arr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">norm</span><span class="p">[</span><span class="n">norm</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
-            <span class="n">weights_arr</span> <span class="o">/=</span> <span class="n">norm</span>
-            <span class="c1"># insufficient data</span>
-            <span class="n">invalid</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">weights_arr</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_channels</span>
-            <span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_arr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_stations</span><span class="p">)</span>
-            <span class="n">weights_arr</span><span class="p">[</span><span class="n">invalid</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">weights_arr</span> <span class="o">=</span> <span class="n">weights_arr</span>
         <span class="c1"># ----------------------------------------------</span>
         <span class="c1">#  are there templates with zero-weights only?</span>
         <span class="c1">#  if yes, skip them to gain time</span>
-        <span class="n">invalid_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_arr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="n">invalid_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_weights_arr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
         <span class="n">tindexes_to_skip</span> <span class="o">=</span> <span class="n">select_tts</span><span class="p">[</span><span class="n">invalid_weights</span><span class="p">]</span>
         <span class="n">select_tts</span> <span class="o">=</span> <span class="n">select_tts</span><span class="p">[</span><span class="o">~</span><span class="n">invalid_weights</span><span class="p">]</span>
         <span class="c1"># ----------------------------------------------</span>
@@ -437,7 +615,7 @@
                 <span class="n">cc_sums</span> <span class="o">=</span> <span class="n">fmf</span><span class="o">.</span><span class="n">matched_filter</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">waveforms_arr</span><span class="p">[</span><span class="n">select_tts</span><span class="p">,</span> <span class="n">id1</span><span class="p">:</span><span class="n">id2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">moveouts_arr</span><span class="p">[</span><span class="n">select_tts</span><span class="p">,</span> <span class="n">id1</span><span class="p">:</span><span class="n">id2</span><span class="p">,</span> <span class="p">:],</span>
-                    <span class="n">weights_arr</span><span class="p">[</span><span class="o">~</span><span class="n">invalid_weights</span><span class="p">,</span> <span class="n">id1</span><span class="p">:</span><span class="n">id2</span><span class="p">,</span> <span class="p">:],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_weights_arr</span><span class="p">[</span><span class="o">~</span><span class="n">invalid_weights</span><span class="p">,</span> <span class="n">id1</span><span class="p">:</span><span class="n">id2</span><span class="p">,</span> <span class="p">:],</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data_arr</span><span class="p">[</span><span class="n">id1</span><span class="p">:</span><span class="n">id2</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">,</span>
                     <span class="n">arch</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
@@ -525,7 +703,7 @@
         <span class="p">)</span>
 
         <span class="n">cc_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cc</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span>
-        <span class="n">weights_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_arr</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+        <span class="n">weights_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights_arr</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 
         <span class="n">valid</span> <span class="o">=</span> <span class="n">cc_t</span> <span class="o">!=</span> <span class="mf">0.0</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">valid</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -536,9 +714,9 @@
                 <span class="n">cc_t</span><span class="p">,</span>
                 <span class="n">utils</span><span class="o">.</span><span class="n">sec_to_samp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_window_dur</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sr</span><span class="p">),</span>
                 <span class="n">threshold_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_type</span><span class="p">,</span>
-                <span class="c1">#white_noise=self.white_noise,</span>
+                <span class="c1"># white_noise=self.white_noise,</span>
                 <span class="n">overlap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">overlap</span><span class="p">,</span>
-                <span class="n">num_threads</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_threads_threshold</span>
+                <span class="n">num_threads</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_threads_threshold</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="c1"># saturate threshold as requested by the user</span>
             <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_CC_threshold</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_t</span><span class="p">),</span> <span class="n">threshold</span><span class="p">)</span>
@@ -647,7 +825,6 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">run_matched_filter_search</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">minimum_interevent_time</span><span class="p">,</span>
-        <span class="n">weight_type</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span>
         <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
         <span class="n">threshold_window_dur</span><span class="o">=</span><span class="mf">1800.0</span><span class="p">,</span>
         <span class="n">overlap</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
@@ -709,9 +886,7 @@
                 <span class="n">tt2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">n_templates</span>
             <span class="n">tids_chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_group</span><span class="o">.</span><span class="n">tids</span><span class="p">[</span><span class="n">tt1</span><span class="p">:</span><span class="n">tt2</span><span class="p">]</span>
             <span class="n">t1_fmf</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compute_cc_time_series</span><span class="p">(</span>
-                <span class="n">weight_type</span><span class="o">=</span><span class="n">weight_type</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">tids</span><span class="o">=</span><span class="n">tids_chunk</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compute_cc_time_series</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">tids</span><span class="o">=</span><span class="n">tids_chunk</span><span class="p">)</span>
             <span class="n">t2_fmf</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
             <span class="n">duration_fmf</span> <span class="o">+=</span> <span class="n">t2_fmf</span> <span class="o">-</span> <span class="n">t1_fmf</span>
             <span class="n">t1_det</span> <span class="o">=</span> <span class="n">give_time</span><span class="p">()</span>
@@ -777,7 +952,7 @@
 
         <span class="n">sr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sr</span>
         <span class="n">cc_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cc</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span>
-        <span class="n">weights_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_arr</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tids_subset</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tid</span><span class="p">),</span> <span class="o">...</span><span class="p">]</span>
+        <span class="n">weights_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights_arr</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tids_subset</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tid</span><span class="p">),</span> <span class="o">...</span><span class="p">]</span>
 
         <span class="n">detection_threshold</span> <span class="o">=</span> <span class="n">time_dependent_threshold</span><span class="p">(</span>
             <span class="n">cc_t</span><span class="p">,</span>
@@ -960,95 +1135,15 @@
 
 
 
-<span class="c1"># def time_dependent_threshold(</span>
-<span class="c1">#    time_series, sliding_window, overlap=0.66, threshold_type=&quot;rms&quot;, white_noise=None</span>
-<span class="c1"># ):</span>
-<span class="c1">#    &quot;&quot;&quot;</span>
-<span class="c1">#    Time dependent detection threshold.</span>
-<span class="c1">#</span>
-<span class="c1">#    Parameters</span>
-<span class="c1">#    -----------</span>
-<span class="c1">#    time_series: (n_correlations) array_like</span>
-<span class="c1">#        The array of correlation coefficients calculated by</span>
-<span class="c1">#        FMF (float 32).</span>
-<span class="c1">#    sliding_window: scalar integer</span>
-<span class="c1">#        The size of the sliding window, in samples, used</span>
-<span class="c1">#        to calculate the time dependent central tendency</span>
-<span class="c1">#        and deviation of the time series.</span>
-<span class="c1">#    overlap: scalar float, default to 0.75</span>
-<span class="c1">#    threshold_type: string, default to &#39;rms&#39;</span>
-<span class="c1">#        Either rms or mad, depending on which measure</span>
-<span class="c1">#        of deviation you want to use.</span>
-<span class="c1">#    white_noise: `numpy.ndarray` or None, default to None</span>
-<span class="c1">#        If not None, `white_noise` is a vector of random values sampled from the</span>
-<span class="c1">#        standard normal distribution. It is used to fill zeros in the CC time</span>
-<span class="c1">#        series. If None, a random vector is generated from scratch.</span>
-<span class="c1">#</span>
-<span class="c1">#    Returns</span>
-<span class="c1">#    ----------</span>
-<span class="c1">#    threshold: (n_correlations) array_like</span>
-<span class="c1">#        Returns the time dependent threshold, with same</span>
-<span class="c1">#        size as the input time series.</span>
-<span class="c1">#    &quot;&quot;&quot;</span>
-<span class="c1">#</span>
-<span class="c1">#    time_series = time_series.copy()</span>
-<span class="c1">#    threshold_type = threshold_type.lower()</span>
-<span class="c1">#    n_samples = len(time_series)</span>
-<span class="c1">#    half_window = sliding_window // 2</span>
-<span class="c1">#    shift = int((1.0 - overlap) * sliding_window)</span>
-<span class="c1">#    zeros = time_series == 0.0</span>
-<span class="c1">#    n_zeros = np.sum(zeros)</span>
-<span class="c1">#    if white_noise is None:</span>
-<span class="c1">#        white_noise = np.random.normal(size=n_zeros).astype(&quot;float32&quot;)</span>
-<span class="c1">#    if threshold_type == &quot;rms&quot;:</span>
-<span class="c1">#        default_center = time_series[~zeros].mean()</span>
-<span class="c1">#        default_deviation = np.std(time_series[~zeros])</span>
-<span class="c1">#        # note: white_noise[n_zeros] is necessary in case white_noise</span>
-<span class="c1">#        # was not None</span>
-<span class="c1">#        time_series[zeros] = (</span>
-<span class="c1">#                white_noise[:n_zeros] * default_deviation + default_center</span>
-<span class="c1">#        )</span>
-<span class="c1">#        time_series_win = np.lib.stride_tricks.sliding_window_view(</span>
-<span class="c1">#            time_series, sliding_window</span>
-<span class="c1">#        )[::shift, :]</span>
-<span class="c1">#        center = np.mean(time_series_win, axis=-1)</span>
-<span class="c1">#        deviation = np.std(time_series_win, axis=-1)</span>
-<span class="c1">#    elif threshold_type == &quot;mad&quot;:</span>
-<span class="c1">#        default_center = np.median(time_series[~zeros])</span>
-<span class="c1">#        default_deviation = np.median(np.abs(time_series[~zeros] - default_center))</span>
-<span class="c1">#        time_series[zeros] = (</span>
-<span class="c1">#                white_noise[:n_zeros] * default_deviation + default_center</span>
-<span class="c1">#        )</span>
-<span class="c1">#        time_series_win = np.lib.stride_tricks.sliding_window_view(</span>
-<span class="c1">#            time_series, sliding_window</span>
-<span class="c1">#        )[::shift, :]</span>
-<span class="c1">#        center = np.median(time_series_win, axis=-1)</span>
-<span class="c1">#        deviation = np.median(</span>
-<span class="c1">#            np.abs(time_series_win - center[:, np.newaxis]), axis=-1</span>
-<span class="c1">#        )</span>
-<span class="c1">#    threshold = center + cfg.N_DEV_MF_THRESHOLD * deviation</span>
-<span class="c1">#    threshold[1:] = np.maximum(threshold[:-1], threshold[1:])</span>
-<span class="c1">#    threshold[:-1] = np.maximum(threshold[:-1], threshold[1:])</span>
-<span class="c1">#    time = np.arange(half_window, n_samples - (sliding_window - half_window))</span>
-<span class="c1">#    indexes_l = time // shift</span>
-<span class="c1">#    indexes_l[indexes_l &gt;= len(threshold)] = len(threshold) - 1</span>
-<span class="c1">#    #breakpoint()</span>
-<span class="c1">#    threshold = threshold[indexes_l]</span>
-<span class="c1">#    threshold = np.hstack(</span>
-<span class="c1">#        (</span>
-<span class="c1">#            threshold[0] * np.ones(half_window, dtype=np.float32),</span>
-<span class="c1">#            threshold,</span>
-<span class="c1">#            threshold[-1] * np.ones(sliding_window - half_window, dtype=np.float32),</span>
-<span class="c1">#        )</span>
-<span class="c1">#    )</span>
-<span class="c1">#    return threshold</span>
-
-
 <div class="viewcode-block" id="time_dependent_threshold">
 <a class="viewcode-back" href="../../usage/api/similarity_search.html#BPMF.similarity_search.time_dependent_threshold">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">time_dependent_threshold</span><span class="p">(</span>
-    <span class="n">time_series</span><span class="p">,</span> <span class="n">sliding_window</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.66</span><span class="p">,</span> <span class="n">threshold_type</span><span class="o">=</span><span class="s2">&quot;rms&quot;</span><span class="p">,</span> <span class="n">white_noise</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">num_threads</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">time_series</span><span class="p">,</span>
+    <span class="n">sliding_window</span><span class="p">,</span>
+    <span class="n">overlap</span><span class="o">=</span><span class="mf">0.66</span><span class="p">,</span>
+    <span class="n">threshold_type</span><span class="o">=</span><span class="s2">&quot;rms&quot;</span><span class="p">,</span>
+    <span class="n">white_noise</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Time dependent detection threshold.</span>
@@ -1086,7 +1181,7 @@
             <span class="n">cfg</span><span class="o">.</span><span class="n">N_DEV_MF_THRESHOLD</span><span class="p">,</span>
             <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">,</span>
             <span class="n">white_noise</span><span class="o">=</span><span class="n">white_noise</span><span class="p">,</span>
-            <span class="n">num_threads</span><span class="o">=</span><span class="n">num_threads</span>
+            <span class="n">num_threads</span><span class="o">=</span><span class="n">num_threads</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">threshold</span>
 
