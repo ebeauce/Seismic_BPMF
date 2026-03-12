@@ -34,7 +34,7 @@ class Spectrum:
         self.event = event
         self.correction_flags = {}
 
-    def set_Q_model(self, Q, frequencies):
+    def set_Q_model(self, Q, frequencies, Q_phase_prefactor={}):
         """
         Set the attenuation Q model for P and S phases.
 
@@ -60,6 +60,7 @@ class Spectrum:
             frequencies, Q, kind="linear", fill_value=(Q[0], Q[-1]), bounds_error=False
         )
         self.Q = np.asarray(interpolator(self.frequencies))
+        self.Q_phase_prefactor = Q_phase_prefactor
 
     def update_Q_model(self):
         """
@@ -84,11 +85,13 @@ class Spectrum:
             r_m = 1000.0 * self.event.source_receiver_dist.loc[sta]
             tt_s = self.event.arrival_times.loc[sta, "S_tt_sec"]
             tt_p = self.event.arrival_times.loc[sta, "P_tt_sec"]
+            Q_s = self.Q * self.Q_phase_prefactor.get("s", 1.)
+            Q_p = self.Q * self.Q_phase_prefactor.get("p", 1.)
             self.attenuation_factor.loc[sta, f"attenuation_S"] = np.exp(
-                np.pi * tt_s * np.asarray(self.frequencies) / self.Q
+                np.pi * tt_s * np.asarray(self.frequencies) / Q_p
             )
             self.attenuation_factor.loc[sta, f"attenuation_P"] = np.exp(
-                np.pi * tt_s * np.asarray(self.frequencies) / self.Q
+                np.pi * tt_s * np.asarray(self.frequencies) / Q_s
             )
 
     def compute_correction_factor(
@@ -165,8 +168,9 @@ class Spectrum:
             )
             geometrical_factor.loc[sta, f"geometry_S"] = corr_s
             if hasattr(self, "Q"):
+                Q_s = self.Q * self.Q_phase_prefactor.get("s", 1.)
                 attenuation_factor.loc[sta, f"attenuation_S"] = np.exp(
-                    np.pi * tt_s * np.asarray(self.frequencies) / self.Q
+                    np.pi * tt_s * np.asarray(self.frequencies) / Q_s
                 )
             else:
                 attenuation_factor.loc[sta, f"attenuation_S"] = None
@@ -184,8 +188,9 @@ class Spectrum:
             )
             geometrical_factor.loc[sta, f"geometry_P"] = corr_p
             if hasattr(self, "Q"):
+                Q_p = self.Q * self.Q_phase_prefactor.get("p", 1.)
                 attenuation_factor.loc[sta, f"attenuation_P"] = np.exp(
-                    np.pi * tt_p * np.asarray(self.frequencies) / self.Q
+                    np.pi * tt_p * np.asarray(self.frequencies) / Q_p
                 )
             else:
                 attenuation_factor.loc[sta, f"attenuation_P"] = None
@@ -1541,9 +1546,11 @@ def compute_moment_magnitude(
         "low_snr_freq_min_hz": 2.0,
         "magnitude_log_moment_scaling": 2.0 / 3.0,
     },
+    q_phase_prefactor={"p": 2.25, "s": 1.0},
     qc=True,
     full_output=False,
     spectral_model="brune",
+    min_fraction_valid_points=0.50,
     min_fraction_valid_points_below_fc=0.20,
     num_channel_weighted_fit=True,
     max_rel_m0_err_pct=33.0,
@@ -1691,7 +1698,7 @@ def compute_moment_magnitude(
     Q = medium_properties["Q_1HZ"] * np.power(
         spectrum.frequencies, medium_properties["attenuation_n"]
     )
-    spectrum.set_Q_model(Q, spectrum.frequencies)
+    spectrum.set_Q_model(Q, spectrum.frequencies, Q_phase_prefactor=q_phase_prefactor)
     spectrum.compute_correction_factor(
         medium_properties["rho_source_kgm3"],
         medium_properties["rho_receiver_kgm3"],
@@ -1781,6 +1788,7 @@ def compute_moment_magnitude(
                 ph,
                 model=spectral_model,
                 min_fraction_valid_points_below_fc=min_fraction_valid_points_below_fc,
+                min_fraction_valid_points=min_fraction_valid_points,
                 weighted=num_channel_weighted_fit,
             )
             if spectrum.inversion_success:
