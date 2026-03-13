@@ -70,6 +70,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#Define-the-earthquake-detections">Define the earthquake detections</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Extract-the-detected-events-from-the-continuous-data">Extract the detected events from the continuous data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Store-the-metadata-of-the-detected-earthquakes-in-a-database">Store the metadata of the detected earthquakes in a database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#BONUS:-Phase-picking-using-the-pre-computed-WaveformTransform">BONUS: Phase picking using the pre-computed WaveformTransform</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="6_relocate.html">Relocation</a></li>
@@ -173,8 +174,14 @@
 <span class="c1"># PhaseNet was trained for 100Hz data, however, it shows good performances</span>
 <span class="c1"># for other sampling rates. Using 25Hz data causes PhaseNet to &quot;smooth&quot; in time</span>
 <span class="c1"># its output, which is actually good for the purpose of backprojection.</span>
+<span class="c1"># Also, see Shi et al., 2024: From labquakes to megathrusts: Scaling deep learning based pickers over 15 orders of magnitude</span>
+<span class="c1"># for how to use &quot;time rescaling&quot; to our advantage</span>
 <span class="n">UPSAMPLING_BEFORE_PN_DETECTION</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">DOWNSAMPLING_BEFORE_PN_DETECTION</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="c1"># The PhaseNet model distributed in seisbench returns a 3-component time series: (noise, p-wave, s-wave)</span>
+<span class="n">PHASENET_CHANNEL_INDEXES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="c1"># Component names for the BPMF.template_search.WaveformTransform instance</span>
+<span class="n">TRANSFORM_COMPONENT_NAMES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -235,34 +242,14 @@
   </thead>
   <tbody>
     <tr>
-      <th>DE07</th>
-      <td>YH.DE07</td>
+      <th>DD06</th>
+      <td>YH.DD06</td>
       <td>YH</td>
-      <td>DE07</td>
-      <td>30.411539</td>
-      <td>40.679661</td>
-      <td>40.0</td>
-      <td>-0.040</td>
-    </tr>
-    <tr>
-      <th>DC07</th>
-      <td>YH.DC07</td>
-      <td>YH</td>
-      <td>DC07</td>
-      <td>30.242170</td>
-      <td>40.667080</td>
-      <td>164.0</td>
-      <td>-0.164</td>
-    </tr>
-    <tr>
-      <th>DC08</th>
-      <td>YH.DC08</td>
-      <td>YH</td>
-      <td>DC08</td>
-      <td>30.250130</td>
-      <td>40.744438</td>
-      <td>162.0</td>
-      <td>-0.162</td>
+      <td>DD06</td>
+      <td>30.317770</td>
+      <td>40.623539</td>
+      <td>182.0</td>
+      <td>-0.182</td>
     </tr>
     <tr>
       <th>DE08</th>
@@ -285,6 +272,16 @@
       <td>-0.190</td>
     </tr>
     <tr>
+      <th>DC08</th>
+      <td>YH.DC08</td>
+      <td>YH</td>
+      <td>DC08</td>
+      <td>30.250130</td>
+      <td>40.744438</td>
+      <td>162.0</td>
+      <td>-0.162</td>
+    </tr>
+    <tr>
       <th>DC06</th>
       <td>YH.DC06</td>
       <td>YH</td>
@@ -305,14 +302,24 @@
       <td>-0.170</td>
     </tr>
     <tr>
-      <th>DD06</th>
-      <td>YH.DD06</td>
+      <th>DE07</th>
+      <td>YH.DE07</td>
       <td>YH</td>
-      <td>DD06</td>
-      <td>30.317770</td>
-      <td>40.623539</td>
-      <td>182.0</td>
-      <td>-0.182</td>
+      <td>DE07</td>
+      <td>30.411539</td>
+      <td>40.679661</td>
+      <td>40.0</td>
+      <td>-0.040</td>
+    </tr>
+    <tr>
+      <th>DC07</th>
+      <td>YH.DC07</td>
+      <td>YH</td>
+      <td>DC07</td>
+      <td>30.242170</td>
+      <td>40.667080</td>
+      <td>164.0</td>
+      <td>-0.164</td>
     </tr>
   </tbody>
 </table>
@@ -567,30 +574,30 @@ Days to process:  DatetimeIndex([&#39;2012-07-26 00:00:00+00:00&#39;], dtype=&#3
 <div class="highlight"><pre>
 Reading data for 2012-07-26
 24 Trace(s) in Stream:
-YH.DE07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC08..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DE08..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.SPNC..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC06..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.SAUV..HHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC07..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DE07..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DD06..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DE07..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC07..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DD06..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DE08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.SPNC..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DC06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.SAUV..HHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DD06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DE08..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.SPNC..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DC08..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.DC06..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 YH.SAUV..HHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
-YH.DD06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DE08..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.SPNC..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.SAUV..HHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DE07..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC07..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DD06..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC07..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DE07..BHE | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DD06..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.SAUV..HHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC08..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DE08..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.SPNC..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC06..BHZ | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DE07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
+YH.DC07..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 Hz, 2160001 samples
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -644,7 +651,7 @@ YH.DD06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 
         <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">DEVICE</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
         <span class="n">ps_proba_time_series</span> <span class="o">=</span> <span class="n">_ml_detector</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="c1"># remove channel 0, which is probability of noise</span>
-    <span class="k">return</span> <span class="n">ps_proba_time_series</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ps_proba_time_series</span><span class="p">[:,</span> <span class="n">PHASENET_CHANNEL_INDEXES</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -697,27 +704,59 @@ YH.DD06..BHN | 2012-07-26T00:00:00.000000Z - 2012-07-27T00:00:00.000000Z | 25.0 
 The shape of waveform_features is:  (8, 2, 2160000)
 </pre></div></div>
 </div>
-<div class="nbinput docutils container">
+<p>The <code class="docutils literal notranslate"><span class="pre">BPMF.template_search.WaveformTransform</span></code> class allows us to manipulate ‘waveform_transform’ like an <code class="docutils literal notranslate"><span class="pre">obspy.Stream</span></code></p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">station_idx</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected station is </span><span class="si">{</span><span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">[</span><span class="n">station_idx</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">waveform_transform</span> <span class="o">=</span> <span class="n">BPMF</span><span class="o">.</span><span class="n">template_search</span><span class="o">.</span><span class="n">WaveformTransform</span><span class="p">(</span>
+    <span class="n">waveform_features</span><span class="p">,</span>
+    <span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span>
+    <span class="n">TRANSFORM_COMPONENT_NAMES</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
+    <span class="n">BPMF</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">SAMPLING_RATE_HZ</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">STATION_NAME</span> <span class="o">=</span> <span class="s2">&quot;DC06&quot;</span>
+<span class="n">OT</span> <span class="o">=</span> <span class="n">udt</span><span class="p">(</span><span class="s2">&quot;2012-07-26T08:07:48&quot;</span><span class="p">)</span>
+<span class="n">OFFSET_OT_SEC</span> <span class="o">=</span> <span class="mf">0.</span>
+<span class="n">DURATION_SEC</span> <span class="o">=</span> <span class="mf">100.</span>
+<span class="n">P_COLOR</span> <span class="o">=</span> <span class="s2">&quot;C0&quot;</span>
+<span class="n">S_COLOR</span> <span class="o">=</span> <span class="s2">&quot;C1&quot;</span>
+<span class="n">LW</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">waveform_transform_event</span> <span class="o">=</span> <span class="n">waveform_transform</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span>
+    <span class="n">OT</span> <span class="o">-</span> <span class="n">OFFSET_OT_SEC</span><span class="p">,</span>
+    <span class="n">duration</span><span class="o">=</span><span class="n">DURATION_SEC</span><span class="p">,</span>
+    <span class="n">stations</span><span class="o">=</span><span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">event_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">station</span><span class="o">=</span><span class="n">STATION_NAME</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;Z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span>
+    <span class="n">OT</span> <span class="o">-</span> <span class="n">OFFSET_OT_SEC</span><span class="p">,</span> <span class="n">OT</span> <span class="o">-</span> <span class="n">OFFSET_OT_SEC</span> <span class="o">+</span> <span class="n">DURATION_SEC</span>
+<span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">transformed_data_p</span> <span class="o">=</span> <span class="n">waveform_transform_event</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">station</span><span class="o">=</span><span class="n">STATION_NAME</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;P&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">transformed_data_s</span> <span class="o">=</span> <span class="n">waveform_transform_event</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">station</span><span class="o">=</span><span class="n">STATION_NAME</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected station is </span><span class="si">{</span><span class="n">STATION_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="s2">&quot;waveform_feature&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
-<span class="n">idx1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">8.13</span><span class="o">*</span><span class="mf">3600.</span><span class="o">*</span><span class="mf">25.</span><span class="p">)</span>
-<span class="n">idx2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">8.16</span><span class="o">*</span><span class="mf">3600.</span><span class="o">*</span><span class="mf">25.</span><span class="p">)</span>
+
 <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Waveform + PhaseNet prediction on </span><span class="si">{</span><span class="n">net</span><span class="o">.</span><span class="n">stations</span><span class="p">[</span><span class="n">station_idx</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data_arr</span><span class="p">[</span><span class="n">station_idx</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">idx1</span><span class="p">:</span><span class="n">idx2</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Waveform + PhaseNet prediction on </span><span class="si">{</span><span class="n">STATION_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">event_data</span><span class="o">.</span><span class="n">times</span><span class="p">(),</span> <span class="n">event_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Velocity [m/s]&quot;</span><span class="p">)</span>
 <span class="n">axb</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
-<span class="n">axb</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">waveform_features</span><span class="p">[</span><span class="n">station_idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">idx1</span><span class="p">:</span><span class="n">idx2</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;P-arrival probability&quot;</span><span class="p">)</span>
-<span class="n">axb</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">waveform_features</span><span class="p">[</span><span class="n">station_idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">idx1</span><span class="p">:</span><span class="n">idx2</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;S-arrival probability&quot;</span><span class="p">)</span>
+<span class="n">axb</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">transformed_data_p</span><span class="o">.</span><span class="n">times</span><span class="p">(),</span> <span class="n">transformed_data_p</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">P_COLOR</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;P-arrival probability&quot;</span><span class="p">)</span>
+<span class="n">axb</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">transformed_data_s</span><span class="o">.</span><span class="n">times</span><span class="p">(),</span> <span class="n">transformed_data_s</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">S_COLOR</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;S-arrival probability&quot;</span><span class="p">)</span>
 <span class="n">axb</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Waveform Feature&quot;</span><span class="p">)</span>
 <span class="n">axb</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.0</span><span class="p">)</span>
 <span class="n">axb</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower right&quot;</span><span class="p">)</span>
 
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time (samples)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time (seconds)&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -730,19 +769,19 @@ Selected station is DC06
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Text(0.5, 0, &#39;Time (samples)&#39;)
+Text(0.5, 0, &#39;Time (seconds)&#39;)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_5_backprojection_19_2.png" src="../../_images/tutorial_notebooks_5_backprojection_19_2.png" />
+<img alt="../../_images/tutorial_notebooks_5_backprojection_21_2.png" src="../../_images/tutorial_notebooks_5_backprojection_21_2.png" />
 </div>
 </div>
 <p>See that the number of channels in <code class="docutils literal notranslate"><span class="pre">waveform_features</span></code> is only 2. This is because <code class="docutils literal notranslate"><span class="pre">phasenet</span></code> returned a time series of P-arrival probability <code class="docutils literal notranslate"><span class="pre">waveform_features[:,</span> <span class="pre">0,</span> <span class="pre">:]</span></code> and a time series of S-arrival probability <code class="docutils literal notranslate"><span class="pre">waveform_features[:,</span> <span class="pre">1,</span> <span class="pre">:]</span></code>.</p>
@@ -751,7 +790,7 @@ Text(0.5, 0, &#39;Time (samples)&#39;)
 <h2>Initialize the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance<a class="headerlink" href="#Initialize-the-Beamformer-instance" title="Link to this heading"></a></h2>
 <p>The initialization of the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance only requires the table of travel times and the corresponding source coordinates. The sampling rate is used to convert the travel time table, in seconds, to a <em>moveout</em> table, in samples. Note that the moveouts are all taken relative to the first P-wave arrival for each source.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># initialize the Beamformer instance</span>
@@ -771,7 +810,7 @@ Text(0.5, 0, &#39;Time (samples)&#39;)
 <p>Before using the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance to backproject the wavefield, we need to set a number of important attributes to the instance. First, we attach the <code class="docutils literal notranslate"><span class="pre">Data</span></code> instance to the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance so that <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code>’s methods can read the <code class="docutils literal notranslate"><span class="pre">Data</span></code> instance’s attributes. Second, we attach the <code class="docutils literal notranslate"><span class="pre">Network</span></code> instance corresponding to the set of stations that we are going to use for this backprojection.</p>
 <p><strong>N.B.:</strong> The <code class="docutils literal notranslate"><span class="pre">Network</span></code> instance can be a subset of the total network represented in the travel time table! It means that you can initialize the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> instance once and for all and then process different time periods when the operating stations might be a subset of the total network.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># attach the Data instance</span>
@@ -802,7 +841,7 @@ each source.</p>
 <div class="math notranslate nohighlight">
 \[w_{s, c=0, p=1} = 0;\quad w_{s, c=1, p=1} = 1.\]</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">weights_phases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">waveform_features</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
@@ -821,7 +860,7 @@ The shape of weights_phases is:  (8, 2, 2)
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># attach the phase-specific weights to the NetworkResponse instance</span>
@@ -837,12 +876,18 @@ The shape of weights_phases is:  (8, 2, 2)
 \[b_k(t) = \sum_{s, c, p} \beta_{k, s} \alpha_{s, c, p} \mathcal{U}_{s, c}(t + \tau_{s, p}^{(k)}),\]</div>
 <div class="math notranslate nohighlight">
 \[b_k(t) = \sum_{s, p} \beta_{k, s} U_{s, p}(t + \tau_{s, p}^{(k)}).\]</div>
-<p>The source-specific weights <span class="math notranslate nohighlight">\(\beta_{k, s}\)</span> can be used to restrict the source-receiver distances included in the computation of <span class="math notranslate nohighlight">\(b_k(t)\)</span>, but also to downweight some stations. The default option in <code class="docutils literal notranslate"><span class="pre">BPMF</span></code> is to set to 0 all source-station weights beyond the <code class="docutils literal notranslate"><span class="pre">N_MAX_STATIONS</span></code> closest stations. In this example, we only have 8 stations and are studying a small region so all weights are 1.</p>
+<p>The source-specific weights <span class="math notranslate nohighlight">\(\beta_{k, s}\)</span> can be used to restrict the source-receiver distances included in the computation of <span class="math notranslate nohighlight">\(b_k(t)\)</span>, but also to downweight some stations. The simplest option in <code class="docutils literal notranslate"><span class="pre">BPMF</span></code> is to set to 0 all source-station weights beyond the <code class="docutils literal notranslate"><span class="pre">N_MAX_STATIONS</span></code> closest stations. In this example, we only have 8 stations and are studying a small region so all weights are 1.</p>
+<p>Using <code class="docutils literal notranslate"><span class="pre">normalize=True</span></code> in the following forces: <span class="math notranslate nohighlight">\(\sum_s \beta_{k, s} = 1\)</span>. Given this normalization, the maximum possible beam is 2 (the number of different seismic phases).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bf</span><span class="o">.</span><span class="n">set_weights_sources</span><span class="p">(</span><span class="n">N_MAX_STATIONS</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bf</span><span class="o">.</span><span class="n">set_weights_sources</span><span class="p">(</span><span class="n">num_closest_stations</span><span class="o">=</span><span class="n">N_MAX_STATIONS</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;closest_stations&quot;</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># if, instead, you are interested in a more sophisticated weighting scheme using all stations within a certain distance,</span>
+<span class="c1"># you can use the following, with max_moveout being a proxy for distance</span>
+<span class="c1"># if a grid point has less than n_min_stations stations within the requested max_moveout, all weights are set to 0 and the grid point is ignored</span>
+<span class="c1"># bf.set_weights_sources(max_moveout=100., method=&quot;max_moveout&quot;, n_min_stations=4, weight_station_density=True, normalize=True)</span>
 </pre></div>
 </div>
 </div>
@@ -855,7 +900,7 @@ The shape of weights_phases is:  (8, 2, 2)
 <div class="math notranslate nohighlight">
 \[k^*(t) = \underset{k}{\argmax} \lbrace b_k(t) \rbrace\]</div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#</span>
@@ -866,7 +911,7 @@ The shape of weights_phases is:  (8, 2, 2)
 <p>After calling <code class="docutils literal notranslate"><span class="pre">bf.backproject</span></code> with <code class="docutils literal notranslate"><span class="pre">reduce=&quot;max&quot;</span></code>, we have computed <span class="math notranslate nohighlight">\(b^*(t)\)</span> and <span class="math notranslate nohighlight">\(k^*(t)\)</span>. These can be found at <code class="docutils literal notranslate"><span class="pre">bf.maxbeam</span></code> and <code class="docutils literal notranslate"><span class="pre">bf.maxbeam_sources</span></code>.</p>
 <p>Let’s plot <span class="math notranslate nohighlight">\(b^*(t)\)</span>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">plot_maxbeam</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
@@ -879,9 +924,9 @@ The shape of weights_phases is:  (8, 2, 2)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/ebeauce/software/Seismic_BPMF/BPMF/template_search.py:924: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+/home/ebeauce/software/Seismic_BPMF/BPMF/template_search.py:1008: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
   ax.legend(loc=&#34;upper right&#34;)
-/home/ebeauce/software/Seismic_BPMF/BPMF/template_search.py:932: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+/home/ebeauce/software/Seismic_BPMF/BPMF/template_search.py:1016: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
   ax.legend(loc=&#34;upper right&#34;)
 </pre></div></div>
 </div>
@@ -889,7 +934,7 @@ The shape of weights_phases is:  (8, 2, 2)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_5_backprojection_33_1.png" src="../../_images/tutorial_notebooks_5_backprojection_33_1.png" />
+<img alt="../../_images/tutorial_notebooks_5_backprojection_35_1.png" src="../../_images/tutorial_notebooks_5_backprojection_35_1.png" />
 </div>
 </div>
 </section>
@@ -897,14 +942,14 @@ The shape of weights_phases is:  (8, 2, 2)
 <h2>Define the earthquake detections<a class="headerlink" href="#Define-the-earthquake-detections" title="Link to this heading"></a></h2>
 <p>Detecting earthquakes based on the maximum beam computed above relies on the somewhat arbitrary task of defining a detection threshold. When stacking many time series, we may expect the sum to nearly be normally distributed according to the <a class="reference external" href="https://en.wikipedia.org/wiki/Central_limit_theorem">central limit theorem</a>. However, when using PhaseNet to compute the waveform features, the distribution of the maximum beam is often far from a normal distribution and the definition of a detection
 threshold based on gaussian p-values is not a valid approach.</p>
-<p>The detection threshold used in this example was derived purely empirically by a trial-and-error procedure, manually checking the presence of false positive detections. Here, we use a threshold = 2, <strong>but this threshold depends on the number of operating stations and how PhaseNet performs on the data set</strong>. As you will see in the following cells, this choice is quite conservative; don’t hesitate playing with the threshold and lowering it.</p>
+<p>The detection threshold used in this example was derived purely empirically by a trial-and-error procedure, manually checking the presence of false positive detections. Here, we use a threshold = 0.33, that is, 16.5% of the maximum possible value of 2, given the weight normalization. As you will see in the following cells, this choice is quite conservative; don’t hesitate playing with the threshold and lowering it.</p>
 <p>To avoid declaring multiple detections for a single event, we also define a minimum inter-event time. Backprojection is fundamentally not great at resolving multiple events closely occurring in time because of the important trade-off between location uncertainty vs origin time uncertainty. Thus, we choose a minimum inter-event time of 1 minute. Later, template matching will allow us to improve our inter-event time resolution.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">MINIMUM_INTEREVENT_TIME_SEC</span> <span class="o">=</span> <span class="mf">60.0</span>
-<span class="n">detection_threshold</span> <span class="o">=</span> <span class="mf">2.00</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bf</span><span class="o">.</span><span class="n">maxbeam</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">detection_threshold</span> <span class="o">=</span> <span class="mf">0.33</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bf</span><span class="o">.</span><span class="n">maxbeam</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
 <span class="n">detections</span><span class="p">,</span> <span class="n">peak_indexes</span><span class="p">,</span> <span class="n">source_indexes</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">find_detections</span><span class="p">(</span>
     <span class="n">detection_threshold</span><span class="p">,</span> <span class="n">MINIMUM_INTEREVENT_TIME_SEC</span>
@@ -917,7 +962,7 @@ threshold based on gaussian p-values is not a valid approach.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Extracted 17 events.
+Extracted 15 events.
 </pre></div></div>
 </div>
 <p>Let’s see which peaks resulted in earthquake detections.</p>
@@ -934,7 +979,7 @@ Extracted 17 events.
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_5_backprojection_37_0.png" src="../../_images/tutorial_notebooks_5_backprojection_37_0.png" />
+<img alt="../../_images/tutorial_notebooks_5_backprojection_39_0.png" src="../../_images/tutorial_notebooks_5_backprojection_39_0.png" />
 </div>
 </div>
 <p>At this stage, we could save the metadata of each detected event and go to the next notebook, but we will first look at the waveforms of the detected events.</p>
@@ -943,7 +988,7 @@ Extracted 17 events.
 <h2>Extract the detected events from the continuous data<a class="headerlink" href="#Extract-the-detected-events-from-the-continuous-data" title="Link to this heading"></a></h2>
 <p>Each detected earthquake is returned as an instance of the <code class="docutils literal notranslate"><span class="pre">BPMF.dataset.Event</span></code> class.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># event extraction parameters</span>
@@ -978,47 +1023,15 @@ Extracted 17 events.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2.92sec to read the waveforms for all 17 detections.
+4.11sec to read the waveforms for all 15 detections.
 </pre></div></div>
 </div>
 <p>In the following, we use the <code class="docutils literal notranslate"><span class="pre">Beamformer</span></code> method to plot the detected earthquakes (only works after calling <code class="docutils literal notranslate"><span class="pre">read_waveform</span></code> with each detection, see above cell). Because we declared in <code class="docutils literal notranslate"><span class="pre">PHASE_ON_COMP</span></code> using the S wave on the horizontal components and the P wave on the vertical components, the red vertical lines on the following plots show the predicted S-wave arrival on the horizontal components and the P-wave arrival on the vertical components.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">plot_detection</span><span class="p">(</span><span class="n">detections</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
-<span class="n">fig</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_5_backprojection_42_0.png" src="../../_images/tutorial_notebooks_5_backprojection_42_0.png" />
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">plot_detection</span><span class="p">(</span><span class="n">detections</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
-<span class="n">fig</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorial_notebooks_5_backprojection_43_0.png" src="../../_images/tutorial_notebooks_5_backprojection_43_0.png" />
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">plot_detection</span><span class="p">(</span><span class="n">detections</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">plot_detection</span><span class="p">(</span><span class="n">detections</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
 <span class="n">fig</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1030,12 +1043,44 @@ Extracted 17 events.
 <img alt="../../_images/tutorial_notebooks_5_backprojection_44_0.png" src="../../_images/tutorial_notebooks_5_backprojection_44_0.png" />
 </div>
 </div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">plot_detection</span><span class="p">(</span><span class="n">detections</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_5_backprojection_45_0.png" src="../../_images/tutorial_notebooks_5_backprojection_45_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">plot_detection</span><span class="p">(</span><span class="n">detections</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_5_backprojection_46_0.png" src="../../_images/tutorial_notebooks_5_backprojection_46_0.png" />
+</div>
+</div>
 </section>
 <section id="Store-the-metadata-of-the-detected-earthquakes-in-a-database">
 <h2>Store the metadata of the detected earthquakes in a database<a class="headerlink" href="#Store-the-metadata-of-the-detected-earthquakes-in-a-database" title="Link to this heading"></a></h2>
 <p>By calling the <code class="docutils literal notranslate"><span class="pre">Event.write</span></code> method for each detection, we save their metadata in a hdf5 file located at <code class="docutils literal notranslate"><span class="pre">BPMF.cfg.OUTPUT_PATH/OUTPUT_DB_FILENAME</span></code>. Each event is stored in a separate hdf5 group with name defined as <code class="docutils literal notranslate"><span class="pre">detections[i].id</span></code>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ---------------------------------------------------------</span>
@@ -1048,6 +1093,108 @@ Extracted 17 events.
         <span class="n">gid</span><span class="o">=</span><span class="n">detections</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
         <span class="p">)</span>
 </pre></div>
+</div>
+</div>
+</section>
+<section id="BONUS:-Phase-picking-using-the-pre-computed-WaveformTransform">
+<h2>BONUS: Phase picking using the pre-computed WaveformTransform<a class="headerlink" href="#BONUS:-Phase-picking-using-the-pre-computed-WaveformTransform" title="Link to this heading"></a></h2>
+<p>In this tutorial, precise phase picking is mainly covered in the next notebook, <code class="docutils literal notranslate"><span class="pre">6_relocate.ipynb</span></code>, but in an actual workflow applied to a very long time period, computation must be optimized and running the phase picker twice would waste computation time with redundant information (unless you really want to re-run the phase picker on different pre-processed data). The following shows an example of how to re-use <code class="docutils literal notranslate"><span class="pre">WaveformTransform</span></code> to quickly produce P- and S-wave picks.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">pick_ps_phases</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">net</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Picking P- and S-wave arrivals on </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">stations</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">stations</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">set_arrival_times_from_moveouts</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># attach pre-computed phase probabilities</span>
+    <span class="n">offset_ot</span> <span class="o">=</span> <span class="mf">10.</span>
+    <span class="n">DURATION_SEC</span> <span class="o">=</span> <span class="mf">120.</span>
+    <span class="n">SEARCH_WINDOW_SEC</span> <span class="o">=</span> <span class="mf">3.</span>
+    <span class="n">PHASE_ON_COMP</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span><span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="s2">&quot;P&quot;</span><span class="p">}</span>
+    <span class="n">COMPONENT_ALIASES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">],</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">],</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">]}</span>
+    <span class="n">waveform_transform_event</span> <span class="o">=</span> <span class="n">waveform_transform</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">origin_time</span> <span class="o">-</span> <span class="n">offset_ot</span><span class="p">,</span>
+        <span class="n">duration</span><span class="o">=</span><span class="n">DURATION_SEC</span><span class="p">,</span>
+        <span class="n">stations</span><span class="o">=</span><span class="n">event</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">pick_PS_phases</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="n">DURATION_SEC</span><span class="p">,</span>
+        <span class="n">phase_on_comp</span><span class="o">=</span><span class="n">PHASE_ON_COMP</span><span class="p">,</span>
+        <span class="n">data_folder</span><span class="o">=</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+        <span class="n">component_aliases</span><span class="o">=</span><span class="n">COMPONENT_ALIASES</span><span class="p">,</span>
+        <span class="n">threshold_P</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">threshold_S</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">upsampling</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">downsampling</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">use_apriori_picks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">search_win_sec</span><span class="o">=</span><span class="n">SEARCH_WINDOW_SEC</span><span class="p">,</span>
+        <span class="n">phase_probability_time_series</span><span class="o">=</span><span class="n">waveform_transform_event</span><span class="p">,</span>
+        <span class="n">keep_probability_time_series</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">offset_ot</span><span class="o">=</span><span class="n">offset_ot</span>
+    <span class="p">)</span>
+    <span class="c1"># update moveouts to match the new stations</span>
+    <span class="k">for</span> <span class="n">sta</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">stations</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sta</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">moveouts</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">moveouts</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sta</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">pick_ps_phases</span><span class="p">,</span> <span class="n">detections</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Picking P- and S-wave arrivals on 20120726_011024.280000
+Picking P- and S-wave arrivals on 20120726_011555.880000
+Picking P- and S-wave arrivals on 20120726_023502.160000
+Picking P- and S-wave arrivals on 20120726_030040.880000
+Picking P- and S-wave arrivals on 20120726_044340.160000
+Picking P- and S-wave arrivals on 20120726_080827.360000
+Picking P- and S-wave arrivals on 20120726_100725.640000
+Picking P- and S-wave arrivals on 20120726_115536.760000
+Picking P- and S-wave arrivals on 20120726_133527.760000
+Picking P- and S-wave arrivals on 20120726_134834.840000
+Picking P- and S-wave arrivals on 20120726_135200.480000
+Picking P- and S-wave arrivals on 20120726_135333.600000
+Picking P- and S-wave arrivals on 20120726_135656.000000
+Picking P- and S-wave arrivals on 20120726_150621.480000
+Picking P- and S-wave arrivals on 20120726_172821.680000
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">detections</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_probabilities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_198354/2915024177.py:2: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+  detections[idx].plot(plot_probabilities=True, figsize=(13, 10)).show()
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorial_notebooks_5_backprojection_52_1.png" src="../../_images/tutorial_notebooks_5_backprojection_52_1.png" />
 </div>
 </div>
 </section>

@@ -248,28 +248,12 @@ DatetimeIndex([&#39;2012-07-26&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
   </thead>
   <tbody>
     <tr>
-      <th>YH.DE07</th>
+      <th>YH.DD06</th>
       <td>YH</td>
-      <td>DE07</td>
-      <td>30.411539</td>
-      <td>40.679661</td>
-      <td>40.0</td>
-    </tr>
-    <tr>
-      <th>YH.DC07</th>
-      <td>YH</td>
-      <td>DC07</td>
-      <td>30.24217</td>
-      <td>40.66708</td>
-      <td>164.0</td>
-    </tr>
-    <tr>
-      <th>YH.DC08</th>
-      <td>YH</td>
-      <td>DC08</td>
-      <td>30.25013</td>
-      <td>40.744438</td>
-      <td>162.0</td>
+      <td>DD06</td>
+      <td>30.31777</td>
+      <td>40.623539</td>
+      <td>182.0</td>
     </tr>
     <tr>
       <th>YH.DE08</th>
@@ -288,6 +272,14 @@ DatetimeIndex([&#39;2012-07-26&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
       <td>190.0</td>
     </tr>
     <tr>
+      <th>YH.DC08</th>
+      <td>YH</td>
+      <td>DC08</td>
+      <td>30.25013</td>
+      <td>40.744438</td>
+      <td>162.0</td>
+    </tr>
+    <tr>
       <th>YH.DC06</th>
       <td>YH</td>
       <td>DC06</td>
@@ -304,12 +296,20 @@ DatetimeIndex([&#39;2012-07-26&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
       <td>170.0</td>
     </tr>
     <tr>
-      <th>YH.DD06</th>
+      <th>YH.DE07</th>
       <td>YH</td>
-      <td>DD06</td>
-      <td>30.31777</td>
-      <td>40.623539</td>
-      <td>182.0</td>
+      <td>DE07</td>
+      <td>30.411539</td>
+      <td>40.679661</td>
+      <td>40.0</td>
+    </tr>
+    <tr>
+      <th>YH.DC07</th>
+      <td>YH</td>
+      <td>DC07</td>
+      <td>30.24217</td>
+      <td>40.66708</td>
+      <td>164.0</td>
     </tr>
   </tbody>
 </table>
@@ -346,14 +346,14 @@ DatetimeIndex([&#39;2012-07-26&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>YH.DE07</th>
-      <th>YH.DC07</th>
-      <th>YH.DC08</th>
+      <th>YH.DD06</th>
       <th>YH.DE08</th>
       <th>YH.SPNC</th>
+      <th>YH.DC08</th>
       <th>YH.DC06</th>
       <th>YH.SAUV</th>
-      <th>YH.DD06</th>
+      <th>YH.DE07</th>
+      <th>YH.DC07</th>
     </tr>
   </thead>
   <tbody>
@@ -436,7 +436,7 @@ DatetimeIndex([&#39;2012-07-26&#39;], dtype=&#39;datetime64[ns]&#39;, freq=&#39;
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-array([&#39;DE07&#39;, &#39;DC07&#39;, &#39;DC08&#39;, &#39;DE08&#39;, &#39;SPNC&#39;, &#39;DC06&#39;, &#39;SAUV&#39;, &#39;DD06&#39;],
+array([&#39;DD06&#39;, &#39;DE08&#39;, &#39;SPNC&#39;, &#39;DC08&#39;, &#39;DC06&#39;, &#39;SAUV&#39;, &#39;DE07&#39;, &#39;DC07&#39;],
       dtype=&#39;&lt;U4&#39;)
 </pre></div></div>
 </div>
@@ -472,103 +472,103 @@ array([&#39;DE07&#39;, &#39;DC07&#39;, &#39;DC08&#39;, &#39;DE08&#39;, &#39;SPNC
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>DE07</th>
-      <th>DC07</th>
-      <th>DC08</th>
+      <th>DD06</th>
       <th>DE08</th>
       <th>SPNC</th>
+      <th>DC08</th>
       <th>DC06</th>
       <th>SAUV</th>
-      <th>DD06</th>
+      <th>DE07</th>
+      <th>DC07</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>DE07</th>
+      <th>DD06</th>
       <td>0.000000</td>
-      <td>14.388528</td>
-      <td>15.420268</td>
-      <td>7.663334</td>
-      <td>8.757172</td>
-      <td>14.183476</td>
-      <td>9.798210</td>
-      <td>10.087409</td>
-    </tr>
-    <tr>
-      <th>DC07</th>
-      <td>14.388528</td>
-      <td>0.000000</td>
-      <td>8.616766</td>
-      <td>16.572942</td>
-      <td>5.972804</td>
-      <td>5.950485</td>
-      <td>10.842966</td>
-      <td>8.016817</td>
-    </tr>
-    <tr>
-      <th>DC08</th>
-      <td>15.420268</td>
-      <td>8.616766</td>
-      <td>0.000000</td>
-      <td>13.212465</td>
-      <td>8.140696</td>
-      <td>14.249786</td>
-      <td>6.526482</td>
+      <td>15.779586</td>
+      <td>6.982323</td>
       <td>14.592524</td>
+      <td>4.481904</td>
+      <td>12.979454</td>
+      <td>10.087409</td>
+      <td>8.016817</td>
     </tr>
     <tr>
       <th>DE08</th>
-      <td>7.663334</td>
-      <td>16.572942</td>
-      <td>13.212465</td>
+      <td>15.779586</td>
       <td>0.000000</td>
       <td>10.820888</td>
+      <td>13.212465</td>
       <td>18.871834</td>
       <td>6.760531</td>
-      <td>15.779586</td>
+      <td>7.663334</td>
+      <td>16.572942</td>
     </tr>
     <tr>
       <th>SPNC</th>
-      <td>8.757172</td>
-      <td>5.972804</td>
-      <td>8.140696</td>
+      <td>6.982323</td>
       <td>10.820888</td>
       <td>0.000000</td>
+      <td>8.140696</td>
       <td>8.501549</td>
       <td>6.227020</td>
-      <td>6.982323</td>
+      <td>8.757172</td>
+      <td>5.972804</td>
+    </tr>
+    <tr>
+      <th>DC08</th>
+      <td>14.592524</td>
+      <td>13.212465</td>
+      <td>8.140696</td>
+      <td>0.000000</td>
+      <td>14.249786</td>
+      <td>6.526482</td>
+      <td>15.420268</td>
+      <td>8.616766</td>
     </tr>
     <tr>
       <th>DC06</th>
-      <td>14.183476</td>
-      <td>5.950485</td>
-      <td>14.249786</td>
+      <td>4.481904</td>
       <td>18.871834</td>
       <td>8.501549</td>
+      <td>14.249786</td>
       <td>0.000000</td>
       <td>14.668558</td>
-      <td>4.481904</td>
+      <td>14.183476</td>
+      <td>5.950485</td>
     </tr>
     <tr>
       <th>SAUV</th>
-      <td>9.798210</td>
-      <td>10.842966</td>
-      <td>6.526482</td>
+      <td>12.979454</td>
       <td>6.760531</td>
       <td>6.227020</td>
+      <td>6.526482</td>
       <td>14.668558</td>
       <td>0.000000</td>
-      <td>12.979454</td>
+      <td>9.798210</td>
+      <td>10.842966</td>
     </tr>
     <tr>
-      <th>DD06</th>
+      <th>DE07</th>
       <td>10.087409</td>
+      <td>7.663334</td>
+      <td>8.757172</td>
+      <td>15.420268</td>
+      <td>14.183476</td>
+      <td>9.798210</td>
+      <td>0.000000</td>
+      <td>14.388528</td>
+    </tr>
+    <tr>
+      <th>DC07</th>
       <td>8.016817</td>
-      <td>14.592524</td>
-      <td>15.779586</td>
-      <td>6.982323</td>
-      <td>4.481904</td>
-      <td>12.979454</td>
+      <td>16.572942</td>
+      <td>5.972804</td>
+      <td>8.616766</td>
+      <td>5.950485</td>
+      <td>10.842966</td>
+      <td>14.388528</td>
       <td>0.000000</td>
     </tr>
   </tbody>
