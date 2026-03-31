@@ -2272,6 +2272,7 @@ class Event(object):
         stations=None,
         method="EDT",
         max_epicentral_dist_km_S=None,
+        max_epicentral_dist_km_P=None,
         default_to_gaussian=False,
         verbose=0,
         cleanup_out_dir=True,
@@ -2327,7 +2328,7 @@ class Event(object):
         out_basename = os.path.join(self.id, self.id + "_out")
         obs_fn = os.path.join(self.id, self.id + ".obs")
         # exclude S picks on remote stations if requested
-        excluded_obs = {}
+        excluded_obs = []
         if hasattr(self, "_source_receiver_epicentral_dist") and (
             max_epicentral_dist_km_S is not None
         ):
@@ -2336,7 +2337,16 @@ class Event(object):
                     self.source_receiver_epicentral_dist.loc[sta]
                     > max_epicentral_dist_km_S
                 ):
-                    excluded_obs[sta] = "S"
+                    excluded_obs.append(f"{sta}-S")
+        if hasattr(self, "_source_receiver_epicentral_dist") and (
+            max_epicentral_dist_km_P is not None
+        ):
+            for sta in self.source_receiver_epicentral_dist.index:
+                if (
+                    self.source_receiver_epicentral_dist.loc[sta]
+                    > max_epicentral_dist_km_P
+                ):
+                    excluded_obs.append(f"{sta}-P")
         # write obs file
         if os.path.isfile(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn)):
             os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn))
@@ -2450,7 +2460,7 @@ class Event(object):
                 # external change
                 pathlib.Path(output_dir).rmdir()
 
-    def remove_outlier_picks(self, max_diff_percent=25.0):
+    def remove_outlier_picks(self, max_diff_percent=25.0, min_tt=2.0):
         """
         Remove picks that are too far from the predicted arrival times.
 
@@ -2464,6 +2474,8 @@ class Event(object):
             Maximum allowable difference, in percentage, between the picked and
             predicted arrival times. Picks with a difference greater than this
             threshold will be considered outliers and removed. Default is 25.0.
+        min_tt : float, optional
+            If the predicted travel-time is less than `min_tt`, keep the pick.
         """
         stations_outlier = []
         for sta in self.stations:
@@ -2476,6 +2488,8 @@ class Event(object):
                     str(self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"])
                 )
                 predicted_tt = self.arrival_times.loc[sta, f"{ph}_tt_sec"]
+                if predicted_tt < min_tt:
+                    continue
                 # use a minimum value for predicted_tt of a few samples
                 # to avoid issues arising when using self.set_arrival_times_to_moveouts
                 # because, by definition of a moveout, the min moveout is 0
