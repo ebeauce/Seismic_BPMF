@@ -402,14 +402,14 @@ def initialize_map(
 
         source_extent = map_longitudes + map_latitudes
         target_extent = map_axis.get_xlim() + map_axis.get_ylim()
-        reproj_topo, extent = warp_array(
-            topo,
-            source_proj=data_coords,
-            target_proj=map_axis.projection,
-            source_extent=source_extent,
-            target_extent=target_extent,
-            target_res=topo.shape
-        )
+        #reproj_topo, extent = warp_array(
+        #    topo,
+        #    source_proj=data_coords,
+        #    target_proj=map_axis.projection,
+        #    source_extent=source_extent,
+        #    target_extent=target_extent,
+        #    target_res=topo.shape
+        #)
         map_axis.imshow(
             topo,
             extent=extent,
@@ -451,7 +451,8 @@ def initialize_map(
                 levels=kwargs.get("coastline_levels", [1, 2]),
                 lw=kwargs.get("coastline_lw", 0.75),
                 zorder=0.49
-            )
+            ),
+            rasterized=kwargs.get("rasterize_coastlines", False)
         )  # , rasterized=True))
     # comment this to save time on plotting high-resolution oceans
     if kwargs.get("oceans", False):
@@ -462,7 +463,8 @@ def initialize_map(
                 name=oceans.name,
                 scale="10m",
                 facecolor="#0076b482",
-            )
+            ),
+            rasterized=kwargs.get("rasterize_oceans", False)
         )
 
     if faults is not None:
