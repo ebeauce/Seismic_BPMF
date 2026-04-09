@@ -402,16 +402,16 @@ def initialize_map(
 
         source_extent = map_longitudes + map_latitudes
         target_extent = map_axis.get_xlim() + map_axis.get_ylim()
-        #reproj_topo, extent = warp_array(
-        #    topo,
-        #    source_proj=data_coords,
-        #    target_proj=map_axis.projection,
-        #    source_extent=source_extent,
-        #    target_extent=target_extent,
-        #    target_res=topo.shape
-        #)
-        map_axis.imshow(
+        reproj_topo, extent = warp_array(
             topo,
+            source_proj=data_coords,
+            target_proj=map_axis.projection,
+            source_extent=source_extent,
+            target_extent=target_extent,
+            target_res=topo.shape
+        )
+        map_axis.imshow(
+            reproj_topo,
             extent=extent,
             origin="lower",
             cmap=kwargs["topo_cmap"],
