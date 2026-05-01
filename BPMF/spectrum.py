@@ -28,7 +28,7 @@ class Spectrum:
         event : BPMF.dataset.Event or None
             The associated event data.
         correction_flags : dict
-            A dictionary tracking applied corrections (e.g., geometrical 
+            A dictionary tracking applied corrections (e.g., geometrical
             spreading or attenuation). Initialized as empty.
         """
         self.event = event
@@ -85,8 +85,8 @@ class Spectrum:
             r_m = 1000.0 * self.event.source_receiver_dist.loc[sta]
             tt_s = self.event.arrival_times.loc[sta, "S_tt_sec"]
             tt_p = self.event.arrival_times.loc[sta, "P_tt_sec"]
-            Q_s = self.Q * self.Q_phase_prefactor.get("s", 1.)
-            Q_p = self.Q * self.Q_phase_prefactor.get("p", 1.)
+            Q_s = self.Q * self.Q_phase_prefactor.get("s", 1.0)
+            Q_p = self.Q * self.Q_phase_prefactor.get("p", 1.0)
             self.attenuation_factor.loc[sta, f"attenuation_S"] = np.exp(
                 np.pi * tt_s * np.asarray(self.frequencies) / Q_p
             )
@@ -168,7 +168,7 @@ class Spectrum:
             )
             geometrical_factor.loc[sta, f"geometry_S"] = corr_s
             if hasattr(self, "Q"):
-                Q_s = self.Q * self.Q_phase_prefactor.get("s", 1.)
+                Q_s = self.Q * self.Q_phase_prefactor.get("s", 1.0)
                 attenuation_factor.loc[sta, f"attenuation_S"] = np.exp(
                     np.pi * tt_s * np.asarray(self.frequencies) / Q_s
                 )
@@ -188,7 +188,7 @@ class Spectrum:
             )
             geometrical_factor.loc[sta, f"geometry_P"] = corr_p
             if hasattr(self, "Q"):
-                Q_p = self.Q * self.Q_phase_prefactor.get("p", 1.)
+                Q_p = self.Q * self.Q_phase_prefactor.get("p", 1.0)
                 attenuation_factor.loc[sta, f"attenuation_P"] = np.exp(
                     np.pi * tt_p * np.asarray(self.frequencies) / Q_p
                 )
@@ -215,7 +215,10 @@ class Spectrum:
                 )
                 continue
             for trid in getattr(self, f"{phase}_spectrum"):
-                sta = trid.split(".")[1]
+                if self.multi_component_spectrum:
+                    sta = trid
+                else:
+                    sta = trid.split(".")[1]
                 _geom_corr = self.geometrical_factor.loc[
                     sta, f"geometry_{phase.upper()}"
                 ]
@@ -241,7 +244,10 @@ class Spectrum:
                 print(f"Attenuation was already corrected for for {phase} spectrum")
                 continue
             for trid in getattr(self, f"{phase}_spectrum"):
-                sta = trid.split(".")[1]
+                if self.multi_component_spectrum:
+                    sta = trid
+                else:
+                    sta = trid.split(".")[1]
                 _att_corr = self.attenuation_factor.loc[
                     sta, f"attenuation_{phase.upper()}"
                 ]
@@ -378,7 +384,9 @@ class Spectrum:
             self.average_spectra.append(phase)
             self.average_spectra = list(set(self.average_spectra))
 
-    def compute_multi_band_spectrum(self, traces, phase, buffer_seconds, **kwargs):
+    def compute_multi_band_spectrum(
+        self, traces, phase, buffer_seconds, multi_component_spectrum=False, **kwargs
+    ):
         """
         Compute spectrum from the maximum amplitude in multiple 1-octave frequency bands.
 
@@ -418,14 +426,32 @@ class Spectrum:
         num_freqs = len(self.frequency_bands)
         spectrum = {}
         dev_mode = kwargs.get("dev_mode", False)
+
         for tr in traces:
             nyq = tr.stats.sampling_rate / 2.0
             buffer_samples = int(buffer_seconds * tr.stats.sampling_rate)
-            spectrum[tr.id] = {}
-            spectrum[tr.id]["spectrum"] = np.zeros(num_freqs, dtype=np.float64)
-            spectrum[tr.id]["freq"] = np.zeros(num_freqs, dtype=np.float32)
+            if multi_component_spectrum:
+                specid = tr.stats.station
+                if specid not in spectrum:
+                    spectrum[specid] = {}
+                    spectrum[specid]["spectrum"] = np.zeros(num_freqs, dtype=np.float64)
+                    spectrum[specid]["freq"] = np.zeros(num_freqs, dtype=np.float32)
+                    max_err = np.sqrt(self.event.hmax_unc**2 + self.event.vmax_unc**2)
+                    spectrum[specid]["relative_distance_err_pct"] = 100.0 * (
+                        max_err / self.event.source_receiver_dist.loc[tr.stats.station]
+                    )
+            else:
+                specid = tr.id
+                spectrum[specid] = {}
+                spectrum[specid]["spectrum"] = np.zeros(num_freqs, dtype=np.float64)
+                spectrum[specid]["freq"] = np.zeros(num_freqs, dtype=np.float32)
+                max_err = np.sqrt(self.event.hmax_unc**2 + self.event.vmax_unc**2)
+                spectrum[specid]["relative_distance_err_pct"] = 100.0 * (
+                    max_err / self.event.source_receiver_dist.loc[tr.stats.station]
+                )
+
             if dev_mode:
-                spectrum[tr.id]["filtered_traces"] = {}
+                spectrum[specid]["filtered_traces"] = {}
             for i, band in enumerate(self.frequency_bands):
                 bandwidth = (
                     self.frequency_bands[band][1] - self.frequency_bands[band][0]
@@ -433,7 +459,7 @@ class Spectrum:
                 center_freq = 0.5 * (
                     self.frequency_bands[band][0] + self.frequency_bands[band][1]
                 )
-                spectrum[tr.id]["freq"][i] = center_freq
+                spectrum[specid]["freq"][i] = center_freq
                 if self.frequency_bands[band][1] >= nyq:
                     # cannot use this frequency band on this channel
                     continue
@@ -456,24 +482,31 @@ class Spectrum:
                         starttime=tr_band.stats.starttime + buffer_seconds,
                         endtime=tr_band.stats.endtime - buffer_seconds,
                     )
-                    spectrum[tr.id]["filtered_traces"][str(band)] = tr_band
+                    spectrum[specid]["filtered_traces"][str(band)] = tr_band
                 if len(trimmed_tr) == 0:
                     # gap in data?
                     continue
                 max_amp = np.max(np.abs(trimmed_tr)) / bandwidth
-                spectrum[tr.id]["spectrum"][i] = max_amp
-            # print(spectrum[tr.id]["spectrum"])
-            max_err = np.sqrt(self.event.hmax_unc**2 + self.event.vmax_unc**2)
-            spectrum[tr.id]["relative_distance_err_pct"] = 100.0 * (
-                max_err / self.event.source_receiver_dist.loc[tr.stats.station]
-            )
+                if multi_component_spectrum:
+                    spectrum[specid]["spectrum"][i] += max_amp**2
+                else:
+                    spectrum[specid]["spectrum"][i] = max_amp
+
+        if multi_component_spectrum:
+            # now that all components were stacked, take square root
+            for sta in spectrum:
+                spectrum[sta]["spectrum"] = np.sqrt(spectrum[sta]["spectrum"])
+        self.multi_component_spectrum = multi_component_spectrum
+
         setattr(self, f"{phase.lower()}_spectrum", spectrum)
         if hasattr(self, "phases"):
             self.phases.append(phase)
         else:
             self.phases = [phase]
 
-    def compute_spectrum(self, traces, phase, taper=None, **taper_kwargs):
+    def compute_spectrum(
+        self, traces, phase, multi_component_spectrum=False, spectrum_func=None, taper=None, **taper_kwargs
+    ):
         """
         Compute spectrum using the Fast Fourier Transform (FFT) on the input traces.
 
@@ -514,16 +547,51 @@ class Spectrum:
             taper_kwargs.setdefault("alpha", 0.05)
         spectrum = {}
         for tr in traces:
-            spectrum[tr.id] = {}
-            spectrum[tr.id]["spectrum"] = (
-                np.fft.rfft(tr.data * taper(tr.stats.npts, **taper_kwargs))
-                * tr.stats.delta
-            )
-            spectrum[tr.id]["freq"] = np.fft.rfftfreq(tr.stats.npts, d=tr.stats.delta)
-            max_err = np.sqrt(self.event.hmax_unc**2 + self.event.vmax_unc**2)
-            spectrum[tr.id]["relative_distance_err_pct"] = 100.0 * (
-                max_err / self.event.source_receiver_dist.loc[tr.stats.station]
-            )
+            if multi_component_spectrum:
+                # all components of a same station will be stacked together
+                specid = tr.stats.station
+                npts = int(self.event.duration * tr.stats.sampling_rate)
+                if tr.stats.npts < npts:
+                    # gap
+                    continue
+                if specid not in spectrum:
+                    spectrum[specid] = {}
+                    max_err = np.sqrt(self.event.hmax_unc**2 + self.event.vmax_unc**2)
+                    spectrum[specid]["relative_distance_err_pct"] = 100.0 * (
+                        max_err / self.event.source_receiver_dist.loc[tr.stats.station]
+                    )
+            else:
+                # each component will have its own spectrum
+                specid = tr.id
+                npts = tr.stats.npts
+                spectrum[specid] = {}
+                max_err = np.sqrt(self.event.hmax_unc**2 + self.event.vmax_unc**2)
+                spectrum[specid]["relative_distance_err_pct"] = 100.0 * (
+                    max_err / self.event.source_receiver_dist.loc[tr.stats.station]
+                )
+            # compute amplitude spectrum
+            if spectrum_func is None:
+                _freq = np.fft.rfftfreq(npts, d=tr.stats.delta)
+                _spec = (
+                        np.fft.rfft(tr.data[:npts] * taper(npts, **taper_kwargs))
+                        * tr.stats.delta
+                        )
+            else:
+                _freq, _spec = spectrum_func(tr.data[:npts], tr.stats.delta)
+            spectrum[specid]["freq"] = _freq
+            if multi_component_spectrum:
+                if "spectrum" not in spectrum[specid]:
+                    spectrum[specid]["spectrum"] = np.zeros(
+                            len(_freq), dtype=np.float64
+                            )
+                spectrum[specid]["spectrum"] += np.abs(_spec)**2
+            else:
+                spectrum[specid]["spectrum"] = _spec
+        if multi_component_spectrum:
+            # now that all components were stacked, take square root
+            for sta in spectrum:
+                spectrum[sta]["spectrum"] = np.sqrt(spectrum[sta]["spectrum"])
+        self.multi_component_spectrum = multi_component_spectrum
         setattr(self, f"{phase.lower()}_spectrum", spectrum)
         if hasattr(self, "phases"):
             self.phases.append(phase)
@@ -1059,8 +1127,11 @@ class Spectrum:
                 station = "*"
             if component is None:
                 component = "*"
-            target_tr_id = f"*.{station}.*.*{component}"
-            selected_ids = fnmatch.filter(trace_ids, target_tr_id)
+            if self.multi_component_spectrum:
+                target_id = f"{station}"
+            else:
+                target_id = f"*.{station}.*.*{component}"
+            selected_ids = fnmatch.filter(trace_ids, target_id)
             for trid in selected_ids:
                 fft = spectrum[trid]["spectrum"]
                 freq = spectrum[trid]["freq"]
@@ -1216,10 +1287,10 @@ def _snr_based_weights(snr, snr_threshold, weight_max=3.0, max_num_bad_measureme
 
     The weighting logic follows a three-step process:
     1. Weights are initially set equal to the SNR, clipped at `weight_max`.
-    2. If enough "good" measurements (SNR >= `snr_threshold`) exist, all 
+    2. If enough "good" measurements (SNR >= `snr_threshold`) exist, all
        "bad" measurements are assigned a weight of 0.
-    3. If most measurements are "bad," the function preserves up to the 
-       `max_num_bad_measurements` best available signals to allow for an 
+    3. If most measurements are "bad," the function preserves up to the
+       `max_num_bad_measurements` best available signals to allow for an
        approximate estimation.
 
     Parameters
@@ -1229,10 +1300,10 @@ def _snr_based_weights(snr, snr_threshold, weight_max=3.0, max_num_bad_measureme
     snr_threshold : float
         The minimum SNR value considered "good" data.
     weight_max : float, optional
-        The maximum allowable weight for any single measurement. 
+        The maximum allowable weight for any single measurement.
         Default is 3.0.
     max_num_bad_measurements : int, optional
-        The maximum number of measurements to keep if the number of 
+        The maximum number of measurements to keep if the number of
         valid measurements is low. Default is 6.
 
     Returns
@@ -1242,7 +1313,7 @@ def _snr_based_weights(snr, snr_threshold, weight_max=3.0, max_num_bad_measureme
 
     Notes
     -----
-    This is a protected helper function (denoted by the underscore) 
+    This is a protected helper function (denoted by the underscore)
     intended for use within the magnitude estimation pipeline of BPMF.
     """
     # allow some numerical noise (?)
@@ -1273,9 +1344,9 @@ def approximate_moment_magnitude(
     """
     Estimate the approximate moment magnitude (Mw*) from displacement spectra.
 
-    This function calculates Mw* by identifying valid frequency bands that satisfy 
-    a minimum SNR threshold. For high-quality signals, it prioritizes low-frequency 
-    bands to reflect the physical seismic moment. For low-quality signals, it 
+    This function calculates Mw* by identifying valid frequency bands that satisfy
+    a minimum SNR threshold. For high-quality signals, it prioritizes low-frequency
+    bands to reflect the physical seismic moment. For low-quality signals, it
     applies a weighted average across available frequencies.
 
     The magnitude is calculated using the relation:
@@ -1286,35 +1357,35 @@ def approximate_moment_magnitude(
     spectrum : BPMF.spectrum.Spectrum
         The spectrum object containing multi-band displacement and SNR data.
     snr_threshold : float, optional
-        The minimum signal-to-noise ratio required to consider a frequency 
+        The minimum signal-to-noise ratio required to consider a frequency
         band "valid". Default is 10.0.
     num_averaging_bands : int, optional
-        The number of low-frequency valid bands to average when calculating 
+        The number of low-frequency valid bands to average when calculating
         the plateau. Default is 1.
     low_snr_freq_min_hz : float, optional
-        The minimum frequency (in Hz) to consider when the SNR is below 
+        The minimum frequency (in Hz) to consider when the SNR is below
         the threshold. Default is 2.0.
     magnitude_log_moment_scaling : float, optional
-        The scaling factor for the moment-to-magnitude conversion. 
+        The scaling factor for the moment-to-magnitude conversion.
         Default is 2/3 (standard Kanamori scale).
     phases : list of str or None, optional
-        Seismic phases to process (e.g., ['p', 's']). If None, retrieves 
+        Seismic phases to process (e.g., ['p', 's']). If None, retrieves
         phases from the `spectrum` object. Default is None.
     snr_based_weights : callable, optional
-        A function used to calculate station weights based on peak SNR. 
+        A function used to calculate station weights based on peak SNR.
         Default is `_snr_based_weights`.
 
     Returns
     -------
     approx_moment : dict
-        A dictionary where keys are phase names and values are the 
+        A dictionary where keys are phase names and values are the
         calculated approximate moment magnitudes (Mw).
 
     Notes
     -----
-    The function performs a station-by-station analysis. If no bands meet 
-    the `snr_threshold`, it falls back to a weighted mean of bands above 
-    `low_snr_freq_min_hz` to provide a best-effort estimate, though this 
+    The function performs a station-by-station analysis. If no bands meet
+    the `snr_threshold`, it falls back to a weighted mean of bands above
+    `low_snr_freq_min_hz` to provide a best-effort estimate, though this
     may introduce significant error.
     """
     if phases is None:
@@ -1333,20 +1404,25 @@ def approximate_moment_magnitude(
         snr_spectra[ph] = spectrum._snr_spectra_pd(ph)
         # 3) select peaks from best lowest frequency band
         #    to calculate the approximate moment magnitude
-        geo_corrected_peaks = pd.Series(
+        measured_disp = pd.Series(
             index=list(corr_disp_spectra[ph].columns), dtype=np.float64
         )
         num_cha = len(corr_disp_spectra[ph].columns)
-        _peak_snr = np.zeros(num_cha, dtype=np.float32)
+        measurement_frequency = np.zeros(num_cha, dtype=np.float32)
+        measurement_snr = np.zeros(num_cha, dtype=np.float32)
 
-        for j, idx in enumerate(geo_corrected_peaks.index):
+        for j, idx in enumerate(measured_disp.index):
             # process station by station
-            station = idx.split(".")[1]
+            if spectrum.multi_component_spectrum:
+                station = idx
+            else:
+                station = idx.split(".")[1]
             # fetch relevant disp spectra and snr
-            multi_band_peaks = corr_disp_spectra[ph].loc[:, idx]
-            multi_band_snr = snr_spectra[ph].loc[:, idx]
+            displacement_spectrum = corr_disp_spectra[ph].loc[:, idx]
+            displacement_snr = snr_spectra[ph].loc[:, idx]
+            frequencies = displacement_snr.index
             # find frequency bands that satisfy snr criterion
-            valid_bands = multi_band_snr.loc[multi_band_snr > snr_threshold].index
+            valid_bands = displacement_snr.loc[displacement_snr > snr_threshold].index
             if len(valid_bands) > 0:
                 # peak amplitude is taken from the lowest-frequency,
                 # valid frequency band (reflect physical seismic moment)
@@ -1355,37 +1431,54 @@ def approximate_moment_magnitude(
                     : min(len(valid_bands), num_averaging_bands)
                 ]
                 if len(selected_bands) > 1:
-                    geo_corrected_peaks.loc[idx] = np.median(
-                        multi_band_peaks.loc[selected_bands].values
+                    measured_disp.loc[idx] = np.median(
+                        displacement_spectrum.loc[selected_bands].values
+                    )
+                    measurement_frequency[j] = np.median(
+                        displacement_spectrum.loc[selected_bands].index
                     )
                 else:
-                    geo_corrected_peaks.loc[idx] = multi_band_peaks.loc[
+                    measured_disp.loc[idx] = displacement_spectrum.loc[
                         selected_bands
                     ].values[0]
-                if np.isnan(geo_corrected_peaks.loc[idx]):
-                    breakpoint()
-                _peak_snr[j] = snr_threshold
+                    measurement_frequency[j] = displacement_spectrum.loc[
+                        selected_bands
+                    ].index[0]
+                measurement_snr[j] = snr_threshold
             else:
                 # peak amplitude is taken from the highest snr frequency
                 # band (implies error on magnitude estimation)
-                high_freq = multi_band_snr.index > low_snr_freq_min_hz
-                freq_idx = multi_band_snr[high_freq].index[
-                    multi_band_snr[high_freq].argmax()
+                high_freq = frequencies > low_snr_freq_min_hz
+                freq_idx = displacement_snr[high_freq].index[
+                    displacement_snr[high_freq].argmax()
                 ]
 
-                w_ = multi_band_snr.loc[high_freq]
-                p_ = multi_band_peaks.loc[high_freq]
+                w_ = displacement_snr.loc[high_freq]
+                p_ = displacement_spectrum.loc[high_freq]
                 sum_ = w_.sum()
                 sum_ = 1.0 if sum_ == 0.0 else sum_
-                geo_corrected_peaks.loc[idx] = (w_ * p_).sum() / sum_
-                _peak_snr[j] = (w_ * multi_band_snr.loc[high_freq]).sum() / sum_
+                measured_disp.loc[idx] = 10.**((w_ * np.log10(p_)).sum() / sum_)
+                measurement_snr[j] = (w_ * displacement_snr.loc[high_freq]).sum() / sum_
+                measurement_frequency[j] = low_snr_freq_min_hz
 
-        _peak_snr[geo_corrected_peaks == 0.0] = 0.0
-        weights = snr_based_weights(_peak_snr, snr_threshold)
+        measurement_snr[measured_disp == 0.0] = 0.0
+        weights = snr_based_weights(measurement_snr, snr_threshold)
+        # give more weight to low frequency measurements
+        #weights /= measurement_frequency
+        if hasattr(spectrum.event, "source_receiver_epicentral_dist"):
+            weights_dist = spectrum.event.source_receiver_epicentral_dist.copy()
+            weights_dist = np.clip(
+                    weights_dist, a_min=np.percentile(weights_dist, 25.),
+                    a_max=np.percentile(weights_dist, 75.)
+                    )
+            weights_dist = 1. / weights_dist
+            weights_dist = weights_dist.loc[measured_disp.index].values
+        weights *= weights_dist
 
+        # mean of logs
         weighted_log_peaks = np.zeros(len(weights), dtype=np.float64)
         weighted_log_peaks[weights > 0.0] = (
-            np.log10(geo_corrected_peaks[weights > 0.0]) * weights[weights > 0.0]
+            np.log10(measured_disp[weights > 0.0]) * weights[weights > 0.0]
         )
         estimated_log10_M0 = weighted_log_peaks.sum() / weights.sum()
         Mw_approx = magnitude_log_moment_scaling * (estimated_log10_M0 - 9.1)
@@ -1415,7 +1508,7 @@ def extract_windows(
     This function performs a three-stage extraction process from raw seismic data:
     1. Extracts a noise window relative to the origin time (OT).
     2. Extracts P-wave and S-wave windows based on phase arrival picks.
-    3. Applies detrending, tapering, and instrument response removal to 
+    3. Applies detrending, tapering, and instrument response removal to
        output displacement (m) seismograms.
 
     Parameters
@@ -1429,17 +1522,17 @@ def extract_windows(
     data_folder : str
         Path to the directory containing the raw waveform files.
     attach_response : bool, optional
-        If True, attaches instrument response metadata during reading. 
+        If True, attaches instrument response metadata during reading.
         Default is True.
     phase_on_comp_p : dict, optional
         Mapping of component labels to the P-phase for windowing.
     phase_on_comp_s : dict, optional
         Mapping of component labels to the S-phase for windowing.
     offset_phase : dict, optional
-        Offset in seconds relative to the phase arrival to start the 
+        Offset in seconds relative to the phase arrival to start the
         signal window. Default is {"P": 0.5, "S": 0.5}.
     cleanup_stream : callable, optional
-        A custom function or object (e.g., a filter) applied to the 
+        A custom function or object (e.g., a filter) applied to the
         `obspy.Stream` after each read. Default is None.
 
     Returns
@@ -1452,9 +1545,9 @@ def extract_windows(
 
     Notes
     -----
-    Instrument response removal uses a pre-filter defined by the 
-    `duration_sec` and the Nyquist frequency to avoid numerical 
-    instability at very low or high frequencies. All outputs are 
+    Instrument response removal uses a pre-filter defined by the
+    `duration_sec` and the Nyquist frequency to avoid numerical
+    instability at very low or high frequencies. All outputs are
     returned as displacement (DISP).
     """
     #                 extract waveforms
@@ -1524,6 +1617,7 @@ def compute_moment_magnitude(
     event,
     windows,
     method="regular",
+    multi_component_spectrum=False,
     phases=None,
     freq_min_hz=None,
     freq_max_hz=None,
@@ -1563,6 +1657,7 @@ def compute_moment_magnitude(
     plot_above_random=1.0,
     plot_spectrum=False,
     figsize=(8, 8),
+    spectrum_args={}
 ):
     """Apply workflow to estimate moment magnitude and approximate moment magnitude.
 
@@ -1627,10 +1722,10 @@ def compute_moment_magnitude(
         If True, fitting the spectral models gives more weight to the frequency bins
         at which the displacement spectra was observed across more stations.
     max_rel_m0_err_pct : float, optional
-        Trust fit only if the relative error on seismic moment is less than 
+        Trust fit only if the relative error on seismic moment is less than
         `max_rel_m0_err_pct`. Defaults to 33%.
     max_rel_fc_err_pct : float, optional
-        Trust fit only if the relative error on corner frequency is less than 
+        Trust fit only if the relative error on corner frequency is less than
         `max_rel_fc_err_pct`. Defaults to 33%.
     stress_drop_mpa_min : float, optional
         Trust fit only if the inferred stress drop is higher than `stress_drop_mpa_min`.
@@ -1673,20 +1768,28 @@ def compute_moment_magnitude(
     #           Compute displacement spectra
     # -----------------------------------------------------------
     if method == "regular":
+        spectrum_args.setdefault("alpha", 0.15)
         for ph in phases:
-            spectrum.compute_spectrum(windows[ph], ph, alpha=0.15)
+            spectrum.compute_spectrum(
+                windows[ph],
+                ph,
+                **spectrum_args
+            )
         spectrum.set_target_frequencies(freq_min_hz, freq_max_hz, num_freqs)
         spectrum.resample(spectrum.frequencies, spectrum.phases)
     elif method == "multiband":
         spectrum.set_frequency_bands(frequency_bands)
         for ph in phases:
-            spectrum.compute_multi_band_spectrum(windows[ph], ph, window_buffer_sec)
+            spectrum.compute_multi_band_spectrum(
+                windows[ph],
+                ph,
+                window_buffer_sec,
+                **spectrum_args
+            )
         # does the following resampling even make sense?
         spectrum.set_target_frequencies(
-                spectrum.frequencies.min(),
-                spectrum.frequencies.max(),
-                num_freqs
-                )
+            spectrum.frequencies.min(), spectrum.frequencies.max(), num_freqs
+        )
         spectrum.resample(spectrum.frequencies, spectrum.phases)
 
     for ph in phases:
