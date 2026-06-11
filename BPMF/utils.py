@@ -287,7 +287,7 @@ def preprocess_stream(
             # we need to group traces from same channels, therefore,
             # we use merge to fill gaps with masked arrays
             stream.merge()
-            preprocessed_stream = list(executor.map(data_preprocessor, stream))
+            preprocessed_stream = list(executor.map(data_preprocessor, stream, chunksize=1))
             try:
                 preprocessed_stream = [
                     tr[0] for tr in preprocessed_stream if len(tr) > 0
@@ -340,6 +340,7 @@ def _premerge(stream, verbose=False):
             for tr in st:
                 if tr.stats.sampling_rate != ref_sampling_rate:
                     if verbose:
+                        print(st)
                         print(
                             f"Removing {tr.id} because not desired sampling rate "
                             f"({tr.stats.sampling_rate} vs {ref_sampling_rate})"
@@ -455,6 +456,7 @@ def _preprocess_stream(
         tr.merge(fill_value=0.0)[0]
         tr.trim(starttime=T1, endtime=T2, pad=True, fill_value=0.0)
         preprocessed_stream += tr
+
     # if the trace came as separated segments without masked
     # elements, it is necessary to merge the stream
     preprocessed_stream = preprocessed_stream.merge(fill_value=0.0)
