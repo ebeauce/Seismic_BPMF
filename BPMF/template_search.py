@@ -293,7 +293,6 @@ class WaveformTransform(object):
         df = pd.DataFrame(index=self.stations, columns=self.components)
         for s, sta in enumerate(df.index):
             for p, ph in enumerate(df.columns):
-                df.loc[sta, ph] = self.transform_arr[s, p, :]
                 df.loc[sta, ph] = self.transform.select(station=sta, component=ph)[
                     0
                 ].data

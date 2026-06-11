@@ -1045,7 +1045,8 @@ class Data(object):
         if endtime is None:
             endtime = self.date + self.duration
         for tr in self.traces:
-            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=0.0)
+            fill_value = np.array([0], dtype=tr.data.dtype)[0]
+            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=fill_value)
 
 
 class Event(object):
@@ -1785,7 +1786,6 @@ class Event(object):
         - PhaseNet must be used with 3-component data.
         - Results are stored in the object's attribute `self.picks`.
         """
-
         if phase_probability_time_series is None:
             if kwargs.get("read_waveforms", True):
                 # read waveforms in picking mode, i.e. with `time_shifted`=False
@@ -1837,7 +1837,6 @@ class Event(object):
                 # momentarily update samping_rate
                 sampling_rate0 = float(self.sampling_rate)
                 self.sampling_rate = self.sr * upsampling / downsampling
-
             phase_probabilities_event = phase_probability_time_series.slice(
                 self.origin_time - offset_ot,
                 duration=duration,
@@ -1851,6 +1850,7 @@ class Event(object):
                 )
             # define traces variable for later
             traces = phase_probabilities_event.transform
+
         # find candidate picks and store them in pandas.DataFrame
         picks = pd.DataFrame(
             index=self.stations,
@@ -1863,6 +1863,7 @@ class Event(object):
             picks.loc[sta, ["S_probas", "S_picks", "S_unc"]] = utils.find_picks(
                 phase_proba[s, 1, :], threshold_S
             )
+
         # now, only keep the best P and S picks
         if use_apriori_picks and hasattr(self, "arrival_times"):
             columns = []
