@@ -972,6 +972,7 @@ class Spectrum:
         plot_fit=False,
         plot_std=False,
         plot_num_valid_channels=False,
+        ax=None,
     ):
         """
         Plot the average spectrum for a given phase.
@@ -1009,7 +1010,10 @@ class Spectrum:
 
         if isinstance(phase, str):
             phase = [phase]
-        fig, ax = plt.subplots(num=figname, figsize=figsize)
+        if ax is None:
+            fig, ax = plt.subplots(num=figname, figsize=figsize)
+        else:
+            fig = ax.get_figure()
         ax.set_title(figtitle)
         for ph in phase:
             ph = ph.lower()
