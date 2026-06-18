@@ -654,15 +654,18 @@ void time_dependent_threshold(float *time_series,
     #pragma omp parallel for\
     shared(time_series, threshold_win)
     for (i=0; i<num_samples; i++){
-        if (i < half_window_samp){
+        if (i < shift_samp){
+            // left edge
             threshold[i] = threshold_win[0];
         }
-        if (i >= num_sliding_windows * shift_samp){
+        else if (i >= num_samples - shift_samp){
+            // right edge
             threshold[i] = threshold_win[num_sliding_windows - 1];
         }
         else{
             threshold[i] = threshold_win[i / shift_samp];
         }
+
     }
 
     free(threshold_win);

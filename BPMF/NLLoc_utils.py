@@ -634,5 +634,6 @@ def write_NLLoc_control(
     useStationsDensity = int(kwargs.setdefault("useStationsDensity", 1))
     fc.write(f"LOCSTAWT {useStationsDensity} {cutoffDist}\n")
     # --------------------------------------------------------------
-    for sta, ph in excluded_obs.items():
+    for sta_ph in excluded_obs:
+        sta, ph = sta_ph.split("-")
         fc.write(f"LOCEXCLUDE {sta} {ph}\n")

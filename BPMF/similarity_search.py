@@ -675,9 +675,6 @@ class MatchedFilter(object):
         template = self.template_group.templates[tt]
         # make sure stations and mv are consistent
         stations = self.stations
-        latitude = template.latitude
-        longitude = template.longitude
-        depth = template.depth
         mv = template.moveouts.loc[self.stations].values
         phases = template.phases
         for i in range(len(detection_indexes)):
@@ -690,12 +687,11 @@ class MatchedFilter(object):
                 phases,
                 data_filename,
                 data_path,
-                latitude=latitude,
-                longitude=longitude,
-                depth=depth,
                 sampling_rate=self.data.sr,
                 data_reader=self.data.data_reader,
             )
+            # inherit location and location uncertainties from template
+            event.inherit_location(template)
             if self.extract_peak_amplitudes:
                 peak_amplitudes = np.zeros(
                     (len(self.stations), len(self.components)), dtype=np.float32

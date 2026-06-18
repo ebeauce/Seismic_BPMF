@@ -411,7 +411,7 @@ def initialize_map(
             target_res=topo.shape
         )
         map_axis.imshow(
-            topo,
+            reproj_topo,
             extent=extent,
             origin="lower",
             cmap=kwargs["topo_cmap"],
@@ -423,11 +423,9 @@ def initialize_map(
     # ------------ DRAW MERIDIANS AND PARALLELS --------------
     LON0 = (int(map_longitudes[0] / 0.5) + 1.0) * 0.5
     LON1 = (int(map_longitudes[1] / 0.5) + 1.0) * 0.5
-    # lon_ticks = np.arange(map_longitudes[0], map_longitudes[1]+0.5, 0.5)
     lon_ticks = np.arange(LON0 - 0.5, LON1 + 0.5, 0.5)
     LAT0 = (int(map_latitudes[0] / 0.5) + 1.0) * 0.5
     LAT1 = (int(map_latitudes[1] / 0.5) + 1.0) * 0.5
-    # lat_ticks = np.arange(map_latitudes[0], map_latitudes[1]+0.5, 0.5)
     lat_ticks = np.arange(LAT0 - 0.5, LAT1 + 0.5, 0.5)
     # --------------------------------------------------------
 
@@ -442,16 +440,19 @@ def initialize_map(
     gl.left_labels = left_labels
     gl.top_labels = top_labels
     gl.bottom_labels = bottom_labels
+    gl.xlocator = plt.FixedLocator(lon_ticks)
+    gl.ylocator = plt.FixedLocator(lat_ticks)
 
     if kwargs.get("coastlines", True):
         # print('Add coast lines.')
         map_axis.add_feature(
             ctp.feature.GSHHSFeature(
-                scale="full",
+                scale=kwargs.get("coastline_resolution", "intermediate"),
                 levels=kwargs.get("coastline_levels", [1, 2]),
                 lw=kwargs.get("coastline_lw", 0.75),
                 zorder=0.49
-            )
+            ),
+            rasterized=kwargs.get("rasterize_coastlines", False)
         )  # , rasterized=True))
     # comment this to save time on plotting high-resolution oceans
     if kwargs.get("oceans", False):
@@ -462,7 +463,8 @@ def initialize_map(
                 name=oceans.name,
                 scale="10m",
                 facecolor="#0076b482",
-            )
+            ),
+            rasterized=kwargs.get("rasterize_oceans", False)
         )
 
     if faults is not None:

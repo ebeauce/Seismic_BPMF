@@ -163,6 +163,7 @@ class TravelTimes(object):
                     sr=sampling_rate,
                 )
         self.travel_times_samp = pd.DataFrame(travel_times_samp)
+        self.sampling_rate = sampling_rate
         if remove_tt_seconds:
             del self.travel_times
 
@@ -209,7 +210,13 @@ class TravelTimes(object):
             for p, ph in enumerate(phases):
                 tts[:, s, p] = attr.loc[sta, ph]
         if relative_to_first:
-            tts = tts - np.min(tts, axis=(1, 2), keepdims=True)
+            self.moveout_to_tt = np.min(tts, axis=(1, 2), keepdims=True)
+            tts = tts - self.moveout_to_tt
+            self.moveout_to_tt = self.moveout_to_tt.squeeze()
+            if units == "seconds":
+                pass
+            elif units == "samples":
+                self.moveout_to_tt = self.moveout_to_tt / self.sampling_rate
         return tts
 
 
@@ -293,7 +300,6 @@ class WaveformTransform(object):
         df = pd.DataFrame(index=self.stations, columns=self.components)
         for s, sta in enumerate(df.index):
             for p, ph in enumerate(df.columns):
-                df.loc[sta, ph] = self.transform_arr[s, p, :]
                 df.loc[sta, ph] = self.transform.select(station=sta, component=ph)[
                     0
                 ].data
@@ -628,6 +634,9 @@ class Beamformer(object):
             event = Stream()
             ot_i = self.data.date + peak_indexes[i] / sr
             mv = self.moveouts[source_indexes[i], ...] / sr
+            if hasattr(self.travel_times, "moveout_to_tt"):
+                ot_i = ot_i - self.travel_times.moveout_to_tt[source_indexes[i]]
+                mv = mv + self.travel_times.moveout_to_tt[source_indexes[i]]
             if n_max_stations is not None:
                 # use moveouts as a proxy for distance
                 # keep only the n_max_stations closest stations

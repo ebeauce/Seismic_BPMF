@@ -1045,7 +1045,8 @@ class Data(object):
         if endtime is None:
             endtime = self.date + self.duration
         for tr in self.traces:
-            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=0.0)
+            fill_value = np.array([0], dtype=tr.data.dtype)[0]
+            tr.trim(starttime=starttime, endtime=endtime, pad=True, fill_value=fill_value)
 
 
 class Event(object):
@@ -1785,7 +1786,6 @@ class Event(object):
         - PhaseNet must be used with 3-component data.
         - Results are stored in the object's attribute `self.picks`.
         """
-
         if phase_probability_time_series is None:
             if kwargs.get("read_waveforms", True):
                 # read waveforms in picking mode, i.e. with `time_shifted`=False
@@ -1837,7 +1837,6 @@ class Event(object):
                 # momentarily update samping_rate
                 sampling_rate0 = float(self.sampling_rate)
                 self.sampling_rate = self.sr * upsampling / downsampling
-
             phase_probabilities_event = phase_probability_time_series.slice(
                 self.origin_time - offset_ot,
                 duration=duration,
@@ -1851,6 +1850,7 @@ class Event(object):
                 )
             # define traces variable for later
             traces = phase_probabilities_event.transform
+
         # find candidate picks and store them in pandas.DataFrame
         picks = pd.DataFrame(
             index=self.stations,
@@ -1863,6 +1863,7 @@ class Event(object):
             picks.loc[sta, ["S_probas", "S_picks", "S_unc"]] = utils.find_picks(
                 phase_proba[s, 1, :], threshold_S
             )
+
         # now, only keep the best P and S picks
         if use_apriori_picks and hasattr(self, "arrival_times"):
             columns = []
@@ -2272,6 +2273,7 @@ class Event(object):
         stations=None,
         method="EDT",
         max_epicentral_dist_km_S=None,
+        max_epicentral_dist_km_P=None,
         default_to_gaussian=False,
         verbose=0,
         cleanup_out_dir=True,
@@ -2327,7 +2329,7 @@ class Event(object):
         out_basename = os.path.join(self.id, self.id + "_out")
         obs_fn = os.path.join(self.id, self.id + ".obs")
         # exclude S picks on remote stations if requested
-        excluded_obs = {}
+        excluded_obs = []
         if hasattr(self, "_source_receiver_epicentral_dist") and (
             max_epicentral_dist_km_S is not None
         ):
@@ -2336,7 +2338,16 @@ class Event(object):
                     self.source_receiver_epicentral_dist.loc[sta]
                     > max_epicentral_dist_km_S
                 ):
-                    excluded_obs[sta] = "S"
+                    excluded_obs.append(f"{sta}-S")
+        if hasattr(self, "_source_receiver_epicentral_dist") and (
+            max_epicentral_dist_km_P is not None
+        ):
+            for sta in self.source_receiver_epicentral_dist.index:
+                if (
+                    self.source_receiver_epicentral_dist.loc[sta]
+                    > max_epicentral_dist_km_P
+                ):
+                    excluded_obs.append(f"{sta}-P")
         # write obs file
         if os.path.isfile(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn)):
             os.remove(os.path.join(cfg.NLLOC_INPUT_PATH, obs_fn))
@@ -2450,7 +2461,7 @@ class Event(object):
                 # external change
                 pathlib.Path(output_dir).rmdir()
 
-    def remove_outlier_picks(self, max_diff_percent=25.0):
+    def remove_outlier_picks(self, max_diff_percent=25.0, min_tt=2.0):
         """
         Remove picks that are too far from the predicted arrival times.
 
@@ -2464,6 +2475,8 @@ class Event(object):
             Maximum allowable difference, in percentage, between the picked and
             predicted arrival times. Picks with a difference greater than this
             threshold will be considered outliers and removed. Default is 25.0.
+        min_tt : float, optional
+            If the predicted travel-time is less than `min_tt`, keep the pick.
         """
         stations_outlier = []
         for sta in self.stations:
@@ -2476,6 +2489,8 @@ class Event(object):
                     str(self.arrival_times.loc[sta, f"{ph}_abs_arrival_times"])
                 )
                 predicted_tt = self.arrival_times.loc[sta, f"{ph}_tt_sec"]
+                if predicted_tt < min_tt:
+                    continue
                 # use a minimum value for predicted_tt of a few samples
                 # to avoid issues arising when using self.set_arrival_times_to_moveouts
                 # because, by definition of a moveout, the min moveout is 0
