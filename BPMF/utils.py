@@ -281,6 +281,12 @@ def preprocess_stream(
     if n_threads != 1:
         from concurrent.futures import ProcessPoolExecutor
 
+        # first, round sampling rates that may be
+        # misrepresented in floating point numbers
+        for tr in stream:
+            tr.stats.sampling_rate = np.round(
+                    tr.stats.sampling_rate, decimals=SR_decimals
+                    )
         stream, _ = _premerge(stream, verbose=verbose)
 
         with ProcessPoolExecutor(max_workers=n_threads) as executor:
