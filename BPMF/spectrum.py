@@ -1031,7 +1031,7 @@ class Spectrum:
                 ls=linestyle[ph],
                 label=f"Average {ph} spectrum",
             )
-            if plot_std:
+            if plot_std and (np.sum(~amplitude_spec.mask) > 0):
                 lower_amp = 10.0 ** (np.log10(amplitude_spec) - spectrum["std"])
                 upper_amp = 10.0 ** (np.log10(amplitude_spec) + spectrum["std"])
                 ax.fill_between(
@@ -1071,7 +1071,9 @@ class Spectrum:
         ax.legend(loc="lower left")
         ax.set_xlabel("Frequency (Hz)")
         ax.set_ylabel("Amplitude spectrum ([input units/Hz])")
-        ax.loglog()
+        ax.set_xscale("log")
+        if np.sum(~amplitude_spec.mask) > 0:
+            ax.set_yscale("log")
         return fig
 
     def plot_spectrum(
