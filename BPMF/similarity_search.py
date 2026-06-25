@@ -181,7 +181,7 @@ class MatchedFilter(object):
         if self.normalize:
             norm = np.std(self.data_arr, axis=-1, keepdims=True)
             norm[norm == 0.0] = 1.0
-            self.data_norm = norm
+            self.data_norm = norm.squeeze()
             self.data_arr /= norm
 
     def select_cc_indexes(

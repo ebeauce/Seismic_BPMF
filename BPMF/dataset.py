@@ -2936,6 +2936,10 @@ class Event(object):
             hdf5_file.create_group(gid)
             f = hdf5_file[gid]
         else:
+            if "origin_time" in hdf5_file:
+                print(f"Found event data in {output_where}. Overwrite it.")
+                hdf5_file.close()
+                hdf5_file = h5.File(output_where, mode="w")
             f = hdf5_file
         for attr in attributes:
             if not hasattr(self, attr):
