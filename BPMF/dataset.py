@@ -582,16 +582,16 @@ class Catalog(object):
     # ---------------------------------------------------------
     #                  Plotting methods
     # ---------------------------------------------------------
-    def plot_time_statistics(self, UTC_local_corr=0.0, figsize=(16, 7), **kwargs):
+    def plot_time_statistics(self, time_zone=None, figsize=(16, 7), **kwargs):
         """Plot the histograms of time of the day and day of the week.
 
         Parameters
         ----------
         figsize : tuple of floats, optional
             Size, in inches, of the figure (width, height). Default is (16, 7).
-        UTC_local_corr : float, optional
-            Apply UTC to local time correction such that:
-                `local_hour = UTC_hour + UTC_local_corr`
+        time_zone : str, optional
+            Time zone string for pandas tz_convert method. Default to None,
+            in which case the UTC time is used.
 
         Returns
         -------
@@ -600,16 +600,25 @@ class Catalog(object):
         """
         import matplotlib.pyplot as plt
 
+        if time_zone is None:
+            ot = self.catalog["origin_time"]
+        else:
+            ot = pd.Series(
+                    pd.to_datetime(
+                        self.catalog["origin_time"].values
+                        ).tz_localize("utc").tz_convert(time_zone)
+                    )
+
         fig, axes = plt.subplots(
             num="time_statistics", ncols=2, nrows=1, figsize=figsize
         )
-        self.catalog["origin_time"].dt.dayofweek.hist(bins=np.arange(8), ax=axes[0])
+        ot.dt.dayofweek.hist(bins=np.arange(8), ax=axes[0])
         axes[0].set_xticks(0.5 + np.arange(7))
         axes[0].set_xticklabels(["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"])
         axes[0].set_xlabel("Day of the Week")
         axes[0].set_ylabel("Event Count")
 
-        ((self.catalog["origin_time"].dt.hour + UTC_local_corr) % 24).hist(
+        ot.dt.hour.hist(
             bins=np.arange(25), ax=axes[1]
         )
         axes[1].set_xlabel("Hour of the Day")
