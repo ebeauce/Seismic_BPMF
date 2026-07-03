@@ -505,7 +505,13 @@ class Spectrum:
             self.phases = [phase]
 
     def compute_spectrum(
-        self, traces, phase, multi_component_spectrum=False, spectrum_func=None, taper=None, **taper_kwargs
+        self,
+        traces,
+        phase,
+        multi_component_spectrum=False,
+        spectrum_func=None,
+        taper=None,
+        **taper_kwargs,
     ):
         """
         Compute spectrum using the Fast Fourier Transform (FFT) on the input traces.
@@ -573,18 +579,18 @@ class Spectrum:
             if spectrum_func is None:
                 _freq = np.fft.rfftfreq(npts, d=tr.stats.delta)
                 _spec = (
-                        np.fft.rfft(tr.data[:npts] * taper(npts, **taper_kwargs))
-                        * tr.stats.delta
-                        )
+                    np.fft.rfft(tr.data[:npts] * taper(npts, **taper_kwargs))
+                    * tr.stats.delta
+                )
             else:
                 _freq, _spec = spectrum_func(tr.data[:npts], tr.stats.delta)
             spectrum[specid]["freq"] = _freq
             if multi_component_spectrum:
                 if "spectrum" not in spectrum[specid]:
                     spectrum[specid]["spectrum"] = np.zeros(
-                            len(_freq), dtype=np.float64
-                            )
-                spectrum[specid]["spectrum"] += np.abs(_spec)**2
+                        len(_freq), dtype=np.float64
+                    )
+                spectrum[specid]["spectrum"] += np.abs(_spec) ** 2
             else:
                 spectrum[specid]["spectrum"] = _spec
         if multi_component_spectrum:
@@ -1463,21 +1469,22 @@ def approximate_moment_magnitude(
                 p_ = displacement_spectrum.loc[high_freq]
                 sum_ = w_.sum()
                 sum_ = 1.0 if sum_ == 0.0 else sum_
-                measured_disp.loc[idx] = 10.**((w_ * np.log10(p_)).sum() / sum_)
+                measured_disp.loc[idx] = 10.0 ** ((w_ * np.log10(p_)).sum() / sum_)
                 measurement_snr[j] = (w_ * displacement_snr.loc[high_freq]).sum() / sum_
                 measurement_frequency[j] = low_snr_freq_min_hz
 
         measurement_snr[measured_disp == 0.0] = 0.0
         weights = snr_based_weights(measurement_snr, snr_threshold)
         # give more weight to low frequency measurements
-        #weights /= measurement_frequency
+        # weights /= measurement_frequency
         if hasattr(spectrum.event, "source_receiver_epicentral_dist"):
             weights_dist = spectrum.event.source_receiver_epicentral_dist.copy()
             weights_dist = np.clip(
-                    weights_dist, a_min=np.percentile(weights_dist, 25.),
-                    a_max=np.percentile(weights_dist, 75.)
-                    )
-            weights_dist = 1. / weights_dist
+                weights_dist,
+                a_min=np.percentile(weights_dist, 25.0),
+                a_max=np.percentile(weights_dist, 75.0),
+            )
+            weights_dist = 1.0 / weights_dist
             weights_dist = weights_dist.loc[measured_disp.index].values
         weights *= weights_dist
 
@@ -1663,7 +1670,7 @@ def compute_moment_magnitude(
     plot_above_random=1.0,
     plot_spectrum=False,
     figsize=(8, 8),
-    spectrum_args={}
+    spectrum_args={},
 ):
     """Apply workflow to estimate moment magnitude and approximate moment magnitude.
 
@@ -1776,21 +1783,14 @@ def compute_moment_magnitude(
     if method == "regular":
         spectrum_args.setdefault("alpha", 0.15)
         for ph in phases:
-            spectrum.compute_spectrum(
-                windows[ph],
-                ph,
-                **spectrum_args
-            )
+            spectrum.compute_spectrum(windows[ph], ph, **spectrum_args)
         spectrum.set_target_frequencies(freq_min_hz, freq_max_hz, num_freqs)
         spectrum.resample(spectrum.frequencies, spectrum.phases)
     elif method == "multiband":
         spectrum.set_frequency_bands(frequency_bands)
         for ph in phases:
             spectrum.compute_multi_band_spectrum(
-                windows[ph],
-                ph,
-                window_buffer_sec,
-                **spectrum_args
+                windows[ph], ph, window_buffer_sec, **spectrum_args
             )
         # does the following resampling even make sense?
         spectrum.set_target_frequencies(
@@ -1944,9 +1944,8 @@ def compute_moment_magnitude(
                         source_parameters[ph]["fc"] = spectrum.fc
                         source_parameters[ph]["M0_err"] = spectrum.M0_err
                         source_parameters[ph]["fc_err"] = spectrum.fc_err
-                        if (
-                            plot_spectrum
-                            and (spectrum.Mw > plot_above_mw)
+                        if plot_spectrum and (
+                            (spectrum.Mw > plot_above_mw)
                             or np.random.random() > plot_above_random
                         ):
                             fig = spectrum.plot_average_spectrum(
