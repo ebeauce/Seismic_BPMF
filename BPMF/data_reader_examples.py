@@ -205,8 +205,11 @@ def data_reader_mseed(
         traces += tr
         network, sta = tr[0].stats.network, tr[0].stats.station
         if attach_response:
+            _resp_file = glob.glob(os.path.join(where, "resp", f"{network}.{sta}.xml"))
+            if len(_resp_file) == 0:
+                print(f"Could not find resp file for {tr[0].id}")
             resp_files.update(
-                set(glob.glob(os.path.join(where, "resp", f"{network}.{sta}.xml")))
+                set(_resp_file)
             )
     if attach_response:
         invs = list(map(read_inventory, resp_files))
