@@ -1021,6 +1021,7 @@ class Spectrum:
         else:
             fig = ax.get_figure()
         ax.set_title(figtitle)
+        valid_freqs = 0
         for ph in phase:
             ph = ph.lower()
             if not hasattr(self, f"average_{ph}_spectrum"):
@@ -1030,6 +1031,7 @@ class Spectrum:
             fft = spectrum["spectrum"]
             freq = spectrum["freq"]
             amplitude_spec = np.abs(fft)
+            valid_freqs = max(valid_freqs, np.sum(~amplitude_spec.mask))
             ax.plot(
                 freq,
                 amplitude_spec,
@@ -1078,7 +1080,7 @@ class Spectrum:
         ax.set_xlabel("Frequency (Hz)")
         ax.set_ylabel("Amplitude spectrum ([input units/Hz])")
         ax.set_xscale("log")
-        if np.sum(~amplitude_spec.mask) > 0:
+        if valid_freqs > 0:
             ax.set_yscale("log")
         return fig
 
