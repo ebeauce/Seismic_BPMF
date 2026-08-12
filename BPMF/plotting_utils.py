@@ -440,8 +440,8 @@ def initialize_map(
     gl.left_labels = left_labels
     gl.top_labels = top_labels
     gl.bottom_labels = bottom_labels
-    gl.xlocator = plt.FixedLocator(lon_ticks)
-    gl.ylocator = plt.FixedLocator(lat_ticks)
+    #gl.xlocator = plt.FixedLocator(lon_ticks)
+    #gl.ylocator = plt.FixedLocator(lat_ticks)
 
     if kwargs.get("coastlines", True):
         # print('Add coast lines.')
