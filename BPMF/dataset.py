@@ -3353,7 +3353,7 @@ class Template(Event):
         db_path, db_filename = os.path.split(event.where)
         template = cls(
             event.origin_time,
-            event.moveouts.values,
+            event.moveouts.loc[event.stations].values,
             event.stations,
             event.phases,
             db_filename,
