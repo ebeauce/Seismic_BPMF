@@ -360,6 +360,7 @@ def _preprocess_stream(
     freqmin=None,
     freqmax=None,
     target_SR=None,
+    #target_sr=None,
     remove_response=False,
     remove_sensitivity=False,
     plot_resp=False,
@@ -379,6 +380,14 @@ def _preprocess_stream(
     """
     See `preprocess_stream`.
     """
+    #if "target_SR" in kwargs:
+    #    warnings.warn(
+    #            "'target_SR' is deprecated and will be removed; use 'target_sr' instead",
+    #            DeprecationWarning,
+    #            stacklevel=2,
+    #            )
+    #    target_sr = kwargs["target_SR"]
+
     if isinstance(stream, obs.Trace):
         # user gave a single trace instead of a stream
         stream = obs.Stream(stream)
@@ -402,6 +411,10 @@ def _preprocess_stream(
         if t2 - t1 < minimum_chunk_duration:
             # don't include this chunk
             stream.remove(tr)
+            print(
+            f"Removing the following trace because it's too short! ({t2-t1:.2f} vs {minimum_chunk_duration:.2f})"
+            )
+            print(tr)
     if len(stream) == 0:
         if verbose:
             print("Removed all traces because they were too short.")
