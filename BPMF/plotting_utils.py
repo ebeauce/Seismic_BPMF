@@ -340,10 +340,15 @@ def initialize_map(
     topography_file=None,
     path_topo="",
     faults=None,
-    right_labels=False,
-    left_labels=True,
-    bottom_labels=True,
-    top_labels=False,
+    gridlines_kwargs={
+        "right_labels": False,
+        "left_labels": True,
+        "bottom_labels": True,
+        "top_labels": False,
+        "lat_spacing": 0.5,
+        "lon_spacing": 0.5,
+        "linestyle": "--"
+        },
     **kwargs,
 ):
     """Initialize map instance with Cartopy."""
@@ -420,28 +425,38 @@ def initialize_map(
             zorder=-1,
             )
 
-    # ------------ DRAW MERIDIANS AND PARALLELS --------------
-    LON0 = (int(map_longitudes[0] / 0.5) + 1.0) * 0.5
-    LON1 = (int(map_longitudes[1] / 0.5) + 1.0) * 0.5
-    lon_ticks = np.arange(LON0 - 0.5, LON1 + 0.5, 0.5)
-    LAT0 = (int(map_latitudes[0] / 0.5) + 1.0) * 0.5
-    LAT1 = (int(map_latitudes[1] / 0.5) + 1.0) * 0.5
-    lat_ticks = np.arange(LAT0 - 0.5, LAT1 + 0.5, 0.5)
-    # --------------------------------------------------------
 
     # ----------- DRAW BORDERS -------------
     brds = ctp.feature.BORDERS
     # --------------------------------------
 
-    gl = map_axis.gridlines(
-        draw_labels=True, linewidth=1, alpha=0.5, color="k", linestyle="--"
-    )
-    gl.right_labels = right_labels
-    gl.left_labels = left_labels
-    gl.top_labels = top_labels
-    gl.bottom_labels = bottom_labels
-    #gl.xlocator = plt.FixedLocator(lon_ticks)
-    #gl.ylocator = plt.FixedLocator(lat_ticks)
+    # ------------ DRAW MERIDIANS AND PARALLELS --------------
+    if gridlines_kwargs is not None:
+        gl = map_axis.gridlines(
+            draw_labels=True,
+            linewidth=gridlines_kwargs.get("linewidth", 1),
+            alpha=gridlines_kwargs.get("alpha", 0.5),
+            color=gridlines_kwargs.get("color", "k"),
+            linestyle=gridlines_kwargs.get("linestyle", "--")
+        )
+        gl.right_labels = gridlines_kwargs.get("right_labels", False)
+        gl.left_labels = gridlines_kwargs.get("left_labels", True)
+        gl.top_labels = gridlines_kwargs.get("top_labels", False)
+        gl.bottom_labels = gridlines_kwargs.get("bottom_labels", True)
+
+        lon_sp = gridlines_kwargs.get("lon_spacing", 0.5)
+        if lon_sp is not None:
+            LON0 = (int(map_longitudes[0] / lon_sp) + 1.0) * lon_sp
+            LON1 = (int(map_longitudes[1] / lon_sp) + 1.0) * lon_sp
+            lon_ticks = np.arange(LON0 - lon_sp, LON1 + lon_sp, lon_sp)
+            gl.xlocator = plt.FixedLocator(lon_ticks)
+        lat_sp = gridlines_kwargs.get("lat_spacing", 0.5)
+        if lat_sp is not None:
+            LAT0 = (int(map_latitudes[0] / lat_sp) + 1.0) * lat_sp
+            LAT1 = (int(map_latitudes[1] / lat_sp) + 1.0) * lat_sp
+            lat_ticks = np.arange(LAT0 - lat_sp, LAT1 + lat_sp, lat_sp)
+            gl.ylocator = plt.FixedLocator(lat_ticks)
+    # --------------------------------------------------------
 
     if kwargs.get("coastlines", True):
         # print('Add coast lines.')
